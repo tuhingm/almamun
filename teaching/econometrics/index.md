@@ -64,3 +64,21 @@ Wooldridge, Introductory Econometrics and Econometric Analysis of Cross Section 
 The course is delivered as a sequence of research-oriented lectures. Each lecture is designed around a motivating question, formal derivation, worked example, interpretation, research practice, problem session, and selected readings.
 
 1. [Lecture 01 — From Probability to the Linear Regression Model](lectures/01-probability-regression.md)
+2. [Lecture 02 — OLS Inference: Sampling Distributions, Hypothesis Tests, and Confidence Intervals](lectures/02-ols-inference.md)
+
+## Semester sequence
+
+| Unit | Lecture block | Main analytical output |
+|---|---|---|
+| I | Probability, sampling, and asymptotics | LLN, CLT, Slutsky, delta method |
+| II | Linear regression and OLS geometry | Projection matrices, FWL, Gauss–Markov |
+| III | OLS inference and specification | t/F/Wald tests, robust covariance, functional form |
+| IV | Endogeneity and identification | OVB, IV/2SLS, weak instruments, control functions |
+| V | Simultaneous equations | Structural form, reduced form, order and rank conditions |
+| VI | Cross-sectional and panel methods | FE, RE, Mundlak, clustered inference, dynamic panels |
+| VII | Time-series foundations | Stationarity, unit roots, ARMA, forecasting |
+| VIII | Multivariate time series | VAR/SVAR, cointegration, VECM, ARDL |
+| IX | Causal designs | DiD, event studies, synthetic control, RD |
+| X | Research implementation | Replication, Monte Carlo, empirical paper |
+
+The sequence will be expanded lecture by lecture. A topic is marked as available only when its dedicated lecture file has been published.
