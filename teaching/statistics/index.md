@@ -50,3 +50,9 @@ R: stats, MASS, car, emmeans, lme4, boot. Python: numpy, scipy.stats, pandas, st
 
 ## Assessment and references
 Problem sets 25%; design/power report 20%; computational labs 20%; midterm 15%; final project 20%. References: Casella and Berger, Statistical Inference; Rice, Mathematical Statistics and Data Analysis; Wasserman, All of Statistics; Lehmann and Romano, Testing Statistical Hypotheses; Montgomery, Design and Analysis of Experiments; Gelman et al., Bayesian Data Analysis.
+
+## Lecture series
+
+Each lecture combines mathematical foundations, derivations, statistical interpretation, worked examples, problem sessions, and selected readings.
+
+1. [Lecture 01 — Probability Spaces, Random Variables, and Expectation](lectures/01-probability-foundations.md)
