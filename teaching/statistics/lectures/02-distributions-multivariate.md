@@ -1,32 +1,66 @@
 # Lecture 02 — Probability Distributions and Multivariate Models
 
-## Learning objectives
-Derive moments of standard distributions; use transformations and Jacobians; characterize joint and conditional distributions; understand covariance matrices and multivariate normality.
+## Core question
+How do distributional assumptions determine moments, dependence, transformations, and the sampling models used in statistical inference?
 
-## 1. Discrete distributions
-For Bernoulli \(X\sim Bernoulli(p)\), \(E(X)=p\), \(Var(X)=p(1-p)\). If \(X=\sum_{i=1}^nX_i\) for independent Bernoulli indicators, then \(X\sim Binomial(n,p)\), with mean \(np\) and variance \(np(1-p)\). The Poisson distribution with rate \(\lambda\) has mean and variance \(\lambda\).
+## Learning objectives
+Work with standard discrete and continuous distributions; derive moments; transform random variables; obtain joint and conditional distributions; interpret covariance matrices and the multivariate normal model.
+
+## 1. Discrete probability models
+For \(X\sim Bernoulli(p)\), \(P(X=1)=p\), \(E(X)=p\), and \(\operatorname{Var}(X)=p(1-p)\). A sum of independent Bernoulli indicators has a binomial distribution:
+\[
+X=\sum_{i=1}^nX_i\sim Binomial(n,p),\quad E(X)=np,\quad Var(X)=np(1-p).
+\]
+The Poisson model has mass function \(P(X=x)=e^{-\lambda}\lambda^x/x!\), for non-negative integers, with mean and variance \(\lambda\). It is often used for event counts over a fixed exposure period.
 
 ## 2. Continuous distributions
-Uniform, exponential, gamma, beta, normal, lognormal, chi-square, t, and F distributions arise in probability modeling and inference. For each distribution, specify support, density, parameters, and moments. For example, if \(Z\sim N(0,1)\), then \(Z^2\sim\chi_1^2\); sums of independent squared standard normals produce chi-square distributions.
+The uniform distribution models constant density over a bounded interval. The exponential distribution has density \(\lambda e^{-\lambda x}\) for \(x\ge0\), mean \(1/\lambda\), and the memoryless property. The gamma family generalizes waiting-time models. The beta distribution is supported on \([0,1]\) and is useful for probabilities. The normal distribution is central to Gaussian models; chi-square, Student-t, and F distributions arise in exact inference under normal sampling. For every distribution, identify support, parameters, density or mass function, and moments.
 
-## 3. Joint distributions
-A joint density \(f_{X,Y}(x,y)\) integrates to one. Marginal densities are obtained by integration, and conditional densities satisfy \(f_{Y|X}(y|x)=f_{X,Y}(x,y)/f_X(x)\) when the denominator is positive.
+## 3. Transformations and Jacobians
+For a monotone differentiable transformation \(Y=g(X)\),
+\[
+f_Y(y)=f_X(g^{-1}(y))\left|\frac{d}{dy}g^{-1}(y)\right|.
+\]
+For a one-to-one vector transformation \(Y=g(X)\), the density is
+\[
+f_Y(y)=f_X(g^{-1}(y))\left|\det J_{g^{-1}}(y)\right|.
+\]
+The absolute determinant accounts for local changes in volume. For non-monotone scalar transformations, sum contributions over all inverse branches.
 
-## 4. Transformations
-For a differentiable one-to-one transformation \(Y=g(X)\), the density includes the absolute Jacobian determinant. In multiple dimensions, if \(Y=g(X)\) is invertible, \(f_Y(y)=f_X(g^{-1}(y))|J_{g^{-1}}(y)|\). The Jacobian is essential; omitting it generally produces a non-normalized density.
+## 4. Joint, marginal, and conditional distributions
+A joint density integrates to one over its support. Marginal densities integrate out unwanted coordinates; conditional densities satisfy
+\[
+f_{X\mid Y}(x\mid y)=\frac{f_{X,Y}(x,y)}{f_Y(y)}
+\]
+where \(f_Y(y)>0\). Independence is equivalent to factorization of the joint density into marginal densities. Conditional independence is a distinct property and is central to graphical models and hierarchical probability structures.
 
 ## 5. Covariance matrices
-For random vector \(X\in\mathbb R^p\), \(\Sigma=E[(X-\mu)(X-\mu)']\). It is positive semidefinite because \(a'\Sigma a=Var(a'X)\ge0\). Its eigenvalues are nonnegative. Correlation matrices rescale covariance but do not eliminate dependence beyond linear association.
+For a random vector \(X\in\mathbb R^p\), define \(\mu=E(X)\) and
+\[
+\Sigma=E[(X-\mu)(X-\mu)'].
+\]
+The matrix is symmetric and positive semidefinite. For any vector \(a\), \(Var(a'X)=a'\Sigma a\ge0\). Off-diagonal elements encode pairwise covariance; the correlation matrix rescales these entries to unit marginal variances.
 
-## 6. Multivariate normal
-If \(X\sim N_p(\mu,\Sigma)\), linear transformations remain normal. Partitioned multivariate normal distributions yield linear conditional expectations and conditional covariance matrices. Under joint normality, zero cross-covariance implies independence.
+## 6. Multivariate normal distribution
+If \(X\sim N_p(\mu,\Sigma)\), every linear combination \(a'X\) is normally distributed. When \(\Sigma\) is positive definite, the density is
+\[
+f(x)=(2\pi)^{-p/2}|\Sigma|^{-1/2}
+\exp\{-\tfrac12(x-\mu)'\Sigma^{-1}(x-\mu)\}.
+\]
+For a jointly normal vector, zero covariance implies independence. This equivalence is special to the joint normal family and does not hold generally.
 
-## Problem session
-1. Derive the binomial mean and variance using indicator variables.
-2. Find the density of \(Y=\log X\) for positive continuous \(X\).
-3. Explain why a covariance matrix is positive semidefinite.
-4. Derive a conditional normal distribution from a partitioned covariance matrix.
-5. Distinguish zero correlation from independence.
+## Worked example
+If \(X\sim N(\mu,\sigma^2)\) and \(Z=(X-\mu)/\sigma\), then the transformation formula gives \(Z\sim N(0,1)\). For independent standard normals \(Z_1,\ldots,Z_k\), the sum of squares follows \(\chi_k^2\), which provides the basis for variance inference.
+
+## Problem set
+1. Derive the mean and variance of a binomial variable using indicator sums.
+2. Transform an exponential variable using \(Y=\log X\) and derive its density.
+3. Obtain the marginal density from a specified bivariate joint density.
+4. Prove that a covariance matrix is positive semidefinite.
+5. Explain why uncorrelated jointly normal variables are independent.
+
+## Computational lab
+Generate binomial, Poisson, gamma, and multivariate normal samples. Compare theoretical and empirical moments; visualize bivariate normal samples under different covariance matrices; verify the Jacobian formula numerically for a monotone transformation.
 
 ## Reading
-Casella and Berger; Johnson, Kotz and Balakrishnan, *Continuous Univariate Distributions*; Anderson, *An Introduction to Multivariate Statistical Analysis*.
+Casella and Berger, *Statistical Inference*; Johnson, Kotz, and Balakrishnan, *Continuous Univariate Distributions*; Anderson, *An Introduction to Multivariate Statistical Analysis*.
