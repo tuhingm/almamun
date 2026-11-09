@@ -56,3 +56,24 @@ Problem sets 25%; design/power report 20%; computational labs 20%; midterm 15%; 
 Each lecture combines mathematical foundations, derivations, statistical interpretation, worked examples, problem sessions, and selected readings.
 
 1. [Lecture 01 — Probability Spaces, Random Variables, and Expectation](lectures/01-probability-foundations.md)
+2. [Lecture 02 — Probability Distributions and Multivariate Models](lectures/02-distributions-multivariate.md)
+3. [Lecture 03 — Sampling Distributions and Asymptotic Theory](lectures/03-sampling-asymptotics.md)
+4. [Lecture 04 — Point Estimation: Moments, Likelihood, and Optimality](lectures/04-point-estimation.md)
+5. [Lecture 05 — Confidence Intervals and Hypothesis Testing](lectures/05-interval-testing.md)
+6. [Lecture 06 — Bayesian Inference, Conjugacy, and Posterior Computation](lectures/06-bayesian-inference.md)
+7. [Lecture 07 — Experimental Design, Randomization, and Blocking](lectures/07-experimental-design.md)
+8. [Lecture 08 — ANOVA, Linear Contrasts, and Multiple Comparisons](lectures/08-anova-multiple-comparisons.md)
+9. [Lecture 09 — Linear Regression and Generalized Linear Models](lectures/09-regression-glm.md)
+10. [Lecture 10 — Nonparametric Inference, Rank Tests, and Resampling](lectures/10-nonparametric.md)
+11. [Lecture 11 — Statistical Power, Sample Size, and Equivalence](lectures/11-power-sample-size.md)
+12. [Lecture 12 — Linear Mixed Models and Hierarchical Data](lectures/12-mixed-models.md)
+13. [Lecture 13 — Multivariate Analysis: PCA, Covariance, and Dimension Reduction](lectures/13-multivariate.md)
+14. [Lecture 14 — Statistical Modeling Workflow, Simulation, and Reproducibility](lectures/14-reproducible-statistics.md)
+
+## Course resources
+
+- [Graduate course syllabus and 14-week teaching plan](syllabus.md)
+- [Graduate problem sets and selected solution guidance](problem-sets-solutions.md)
+- [Midterm and final examination specifications](examinations.md)
+
+The full 14-lecture sequence and supporting course documents are published. Topic-specific datasets, slide decks, and standalone software labs can be added as separate reproducible resources.
