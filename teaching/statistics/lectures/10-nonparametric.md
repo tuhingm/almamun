@@ -1,32 +1,42 @@
 # Lecture 10 — Nonparametric Inference, Rank Tests, and Resampling
 
 ## Learning objectives
-Understand empirical distributions and quantiles; derive rank procedures; use permutation and bootstrap methods; state what rank tests actually test.
+Use empirical distributions and quantiles; derive rank procedures; state the hypotheses actually tested; conduct permutation tests and bootstrap inference.
 
 ## 1. Empirical distribution
+The empirical CDF is
 \[
 \widehat F_n(x)=n^{-1}\sum_{i=1}^n1(X_i\le x).
 \]
-The empirical CDF estimates the population distribution and underlies quantile estimation, goodness-of-fit procedures, and resampling.
+It estimates the population distribution and supports quantile estimation, goodness-of-fit procedures, and resampling. Quantile conventions should be stated when finite-sample results depend on interpolation.
 
-## 2. Rank-based procedures
-Ranks reduce sensitivity to the numerical scale and can provide robust alternatives under particular assumptions. The Wilcoxon signed-rank procedure concerns paired differences under symmetry conditions; Mann–Whitney is related to stochastic ordering and probability-of-superiority interpretations. Neither universally tests equality of means.
+## 2. Sign and signed-rank tests
+For paired data define \(D_i=X_i-Y_i\). The sign test uses signs of nonzero differences and targets a median-zero condition under its assumptions. The Wilcoxon signed-rank test ranks absolute differences and uses their signs. Its conventional location interpretation requires a symmetric distribution of paired differences; ties and zero differences need explicit treatment.
 
-## 3. Kruskal–Wallis
-The Kruskal–Wallis test compares rank distributions across independent groups. Interpreting it as a test of medians requires additional assumptions about distributional shape.
+## 3. Mann–Whitney and Kruskal–Wallis
+The Mann–Whitney statistic compares ranks in two independent groups and is related to \(P(X>Y)+\tfrac12P(X=Y)\). It is not universally a test of equal means or medians; a location-shift interpretation needs additional assumptions. Kruskal–Wallis extends rank comparisons to multiple independent groups.
 
 ## 4. Permutation inference
-Under a sharp null and a valid exchangeability/randomization scheme, recompute a test statistic over allowable assignments. The reference distribution is design-based. Arbitrary permutation of observational data is not automatically valid.
+A permutation test constructs a reference distribution by reassigning labels according to exchangeability or the actual randomization design. Under a sharp null and valid assignment mechanism, randomization inference can be exact. Arbitrary permutation is not justified for dependent or selected observational data.
 
 ## 5. Bootstrap
-Resampling approximates estimator sampling distributions. Choose resampling units to preserve the design: individuals, clusters, blocks, or time-series dependence structure as appropriate.
+The nonparametric bootstrap resamples with replacement from the empirical distribution and recomputes a statistic. Percentile, basic, and studentized intervals differ. Clustered or serially dependent data require resampling schemes that preserve the dependence structure.
 
-## Problem session
-1. Define the empirical CDF and sample quantile.
-2. State assumptions for a paired signed-rank procedure.
-3. Explain the Mann–Whitney estimand.
-4. Explain when permutation tests are exact.
-5. Design a cluster bootstrap.
+## 6. Robustness and assumptions
+Nonparametric methods still require assumptions such as independence, exchangeability, or symmetry, depending on the procedure. Robustness to outliers does not imply robustness to dependence or selection.
+
+## Worked example
+For paired before-after data, calculate differences, rank absolute nonzero differences, and sum positive ranks. The signed-rank statistic uses both direction and rank magnitude; it is not simply a test of the arithmetic mean difference.
+
+## Problem set
+1. Define the empirical CDF and prove monotonicity.
+2. State the symmetry condition used by the signed-rank test.
+3. Interpret the Mann–Whitney probability-of-superiority parameter.
+4. Explain exchangeability in permutation inference.
+5. Specify a bootstrap scheme for clustered observations.
+
+## Computational lab
+Compare t, sign, and signed-rank tests under normal, skewed, and contaminated distributions. Implement a randomization test and a cluster bootstrap.
 
 ## Reading
-Hollander, Wolfe and Chicken, *Nonparametric Statistical Methods*; Efron and Tibshirani, *An Introduction to the Bootstrap*; van der Vaart, *Asymptotic Statistics*.
+Hollander, Wolfe, and Chicken, *Nonparametric Statistical Methods*; Wasserman, *All of Nonparametric Statistics*; Efron and Tibshirani, *An Introduction to the Bootstrap*.
