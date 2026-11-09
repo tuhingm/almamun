@@ -16,6 +16,20 @@ section{padding:82px 0}.white{background:white}.head{display:flex;justify-conten
 .projects{display:grid;gap:14px}.project{background:white;border:1px solid var(--line);border-radius:12px;overflow:hidden}.project-head{padding:19px 23px;display:flex;align-items:center;justify-content:space-between;gap:15px;cursor:pointer}.project-head small{display:block;color:var(--teal);font:800 9px Manrope;letter-spacing:.15em}.project-head h3{font-size:15px;margin:4px 0 0}.plus{width:27px;height:27px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;color:var(--teal);flex:none}.project-body{display:none;padding:4px 23px 17px;border-top:1px solid var(--line)}.project.open .project-body{display:block}.pub{padding:13px 0;border-bottom:1px solid #edf0ef}.pub:last-child{border:0}.pub small{display:block;color:#89949d;font-size:9px;font-weight:800;letter-spacing:.09em;text-transform:uppercase}.pub p{font-size:12px;color:#526170;margin:5px 0 0;line-height:1.7}.pub strong{color:#1b2b3a}.pub a,.book a{color:var(--teal);font-weight:800;white-space:nowrap}.book{background:#eaf3f0;border:1px solid #dbe9e4;border-radius:12px;padding:22px 24px;margin-top:15px}.book h3{font-size:15px;margin:5px 0}.book p{font-size:12px;color:#53636e;margin:0}.contact{display:grid;grid-template-columns:1fr 1fr;gap:45px;align-items:center}.contactbox{padding:25px;border:1px solid #ffffff22;background:#ffffff0a;border-radius:12px}.contactbox small{color:#91a6b4;letter-spacing:.15em;text-transform:uppercase;font-size:9px;font-weight:800}.contactbox a{display:block;color:var(--mint);font-size:18px;font-weight:700;margin-top:8px}footer{background:#0b1520;color:#9babb7;padding:22px 0;font-size:10px}.foot{display:flex;justify-content:space-between}.foot b{color:#e4ebef}.top{color:var(--mint)}
 @media(max-width:850px){.hero-grid,.about{grid-template-columns:1fr;gap:35px}.profilebox{max-width:520px}.toolkit{grid-template-columns:repeat(2,1fr)}nav{gap:13px;font-size:9px}}
 @media(max-width:650px){.wrap{width:calc(100% - 34px)}.nav{height:65px}#menu{display:block}nav{display:none;position:absolute;top:65px;left:0;right:0;background:var(--navy);padding:18px 25px;flex-direction:column;align-items:flex-start}nav.show{display:flex}.hero{padding:68px 0}.head{display:block}.intro{margin-top:12px}section{padding:62px 0}.edu article{grid-template-columns:1fr;gap:7px;padding:20px}.cards{grid-template-columns:1fr}.toolkit{grid-template-columns:1fr 1fr}.tool{padding:16px}.contact{grid-template-columns:1fr;gap:22px}.foot{flex-direction:column;gap:7px}}
+
+/* Deeper, more solid visual treatment for the lower sections */
+:root{--navy:#0b1725;--navy2:#142d42;--ink:#142638;--muted:#526575;--paper:#e9eff2;--teal:#176f6a;--mint:#91d2c6;--line:#d2dde2}
+body{background:#e9eff2}
+section{background-color:#e9eff2}
+section.white{background-color:#dfe8ed}
+#research,#outputs{background-color:#e4ebef}
+.card,.project,.edu article{background-color:#fff;border-color:#cbd8df;box-shadow:0 5px 18px rgba(15,35,52,.055)}
+.book{background:#dcebe7;border-color:#c5ddd6}
+.project-head:hover{background:#f3f7f8}
+.profilebox{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.28)}
+.toolkit{border-color:#31495c;background:#31495c}
+.tool{background:#13283b}
+header{background:rgba(9,22,36,.99);border-bottom-color:#314454}
 </style></head><body>
 <header><div class="wrap nav"><a class="brand" href="#home">TGM <b>AL MAMUN</b></a><button id="menu" aria-label="Open menu">Menu</button><nav id="nav"><a href="teaching/index.html">Teaching Courses</a><a href="working-papers/index.html">Working Papers</a><a href="Tuhin_CV.pdf" target="_blank" rel="noopener">CV</a></nav></div></header>
 <main id="home">
