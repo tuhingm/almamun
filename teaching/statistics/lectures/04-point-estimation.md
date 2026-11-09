@@ -1,45 +1,59 @@
 # Lecture 04 — Point Estimation: Moments, Likelihood, and Optimality
 
-## Learning objectives
-Construct estimators by moments and likelihood; distinguish unbiasedness, consistency, and efficiency; derive score and information; understand invariance and finite-sample limitations.
+## Core question
+How should unknown parameters be estimated, and which properties determine whether an estimator is useful?
 
-## 1. Estimands and estimators
-A parameter \(\theta\) indexes a statistical model. An estimand is the target functional; an estimator \(\widehat\theta\) is a data-dependent rule; an estimate is its realized value. These terms are not interchangeable.
+## Learning objectives
+Construct method-of-moments and maximum-likelihood estimators; derive score and information; distinguish unbiasedness, consistency, and efficiency; apply invariance; understand likelihood-based asymptotics.
+
+## 1. Estimands, estimators, and identification
+A parameter \(\theta\in\Theta\) indexes a statistical model. The estimand is the target functional; an estimator \(\widehat\theta\) is a data-dependent rule; an estimate is its realized value. Identification requires distinct parameter values to imply distinct distributions (or distinct population moments used by the estimator).
 
 ## 2. Method of moments
-Choose sample moments to match population moments. If \(E(X)=\theta\), then \(\widehat\theta=\bar X\). With multiple parameters, solve a system of moment equations. Identification requires that the population moment equations uniquely determine the parameter.
+If \(E_\theta[m(X)]=g(\theta)\), equate the population moment to its sample counterpart:
+\[
+\frac1n\sum_{i=1}^n m(X_i)=g(\widehat\theta).
+\]
+With multiple parameters, solve a system of moment equations. The solution may fail to be unique or may lie outside the parameter space; these are substantive estimator-construction issues, not merely computational inconveniences.
 
 ## 3. Maximum likelihood
-For independent observations with density \(f(x_i;\theta)\),
+For independent observations with density or mass function \(f(x_i;\theta)\), the likelihood and log-likelihood are
 \[
-L(\theta)=\prod_{i=1}^nf(x_i;\theta),\qquad
-\ell(\theta)=\sum_i\log f(x_i;\theta).
+L_n(\theta)=\prod_{i=1}^nf(x_i;\theta),\qquad
+\ell_n(\theta)=\sum_{i=1}^n\log f(x_i;\theta).
 \]
-The MLE maximizes the likelihood over the parameter space. Interior first-order conditions set the score \(U(\theta)=\partial\ell/\partial\theta\) equal to zero; boundary maxima require separate consideration.
+An MLE maximizes \(\ell_n(\theta)\) over \(\Theta\). Interior differentiable solutions satisfy the score equation \(U_n(\theta)=\partial\ell_n(\theta)/\partial\theta=0\), but boundary maxima must also be considered.
 
-## 4. Bernoulli example
-For \(X_i\sim Bernoulli(p)\),
+## 4. Score and Fisher information
+Under regularity conditions, the score has mean zero and Fisher information can be written
 \[
-\ell(p)=\sum_i[X_i\log p+(1-X_i)\log(1-p)].
+I(\theta)=E_\theta[U_i(\theta)^2]
+=-E_\theta\left[\frac{\partial^2\ell_i(\theta)}{\partial\theta\partial\theta'}\right].
 \]
-The score is \(\sum_iX_i/p-(n-\sum_iX_i)/(1-p)\). Setting it to zero gives \(\widehat p=\bar X\).
+For a scalar parameter, the Cramér–Rao lower bound for unbiased estimators is \(1/[nI(\theta)]\) under its regularity conditions. It is a bound, not a guarantee that an estimator attains it.
 
-## 5. Properties
-Unbiasedness means \(E(\widehat\theta)=\theta\); consistency means convergence in probability; efficiency compares variance among an explicitly defined estimator class. MSE decomposes as variance plus squared bias. An unbiased estimator need not have low MSE.
-
-## 6. Fisher information and asymptotics
-Under regularity, the MLE is asymptotically normal:
+## 5. Large-sample properties
+Consistency means \(\widehat\theta\xrightarrow{p}\theta_0\). Asymptotic normality commonly takes the form
 \[
-\sqrt n(\widehat\theta-\theta_0)\to_dN(0,I(\theta_0)^{-1}),
+\sqrt n(\widehat\theta-\theta_0)\xrightarrow{d}N(0,V).
 \]
-where per-observation Fisher information is \(I(\theta)=E[s_i(\theta)s_i(\theta)']\). Misspecification, boundaries, and weak identification can invalidate standard approximations.
+For a regular correctly specified MLE, \(V=I(\theta_0)^{-1}\). Under misspecification, the sandwich covariance generally replaces inverse information.
 
-## Problem session
-1. Derive the Bernoulli MLE.
-2. Compare method-of-moments and MLE for an exponential distribution.
-3. Define bias, variance, MSE, and consistency.
-4. Explain the invariance property of MLE.
-5. Identify a setting where a parameter lies on the boundary.
+## 6. Invariance and estimator comparison
+If \(\widehat\theta\) is an MLE, then \(g(\widehat\theta)\) is an MLE of \(g(\theta)\) when the transformed parameter is well-defined. Compare estimators using bias, variance, MSE, consistency, robustness, and computational stability. Finite-sample and asymptotic rankings need not coincide.
+
+## Worked example: Bernoulli likelihood
+For \(X_i\sim Bernoulli(p)\), \(\ell(p)=\sum_i[X_i\log p+(1-X_i)\log(1-p)]\). Setting the score to zero gives \(\widehat p=\bar X\). Its variance is \(p(1-p)/n\), and it is unbiased and consistent.
+
+## Problem set
+1. Derive the method-of-moments estimator of the rate of an exponential distribution.
+2. Derive the Bernoulli MLE and its Fisher information.
+3. Show that the MLE of \(\sigma^2\) in a normal model with known mean uses divisor \(n\).
+4. Distinguish identification from estimator consistency.
+5. Explain why the inverse-information covariance can fail under model misspecification.
+
+## Computational lab
+Implement numerical maximization for Bernoulli and normal likelihoods. Compare analytic and numerical estimates; inspect convergence from different starting values; use simulation to compare bias and MSE.
 
 ## Reading
-Lehmann and Casella, *Theory of Point Estimation*; Casella and Berger; van der Vaart, *Asymptotic Statistics*.
+Casella and Berger, *Statistical Inference*; Lehmann and Casella, *Theory of Point Estimation*; van der Vaart, *Asymptotic Statistics*.
