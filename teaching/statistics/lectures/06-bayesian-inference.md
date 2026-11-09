@@ -1,48 +1,64 @@
 # Lecture 06 — Bayesian Inference, Conjugacy, and Posterior Computation
 
+## Core question
+How does prior information combine with a likelihood to produce posterior uncertainty and predictions?
+
 ## Learning objectives
-Derive posterior distributions; understand conjugacy; distinguish credible and confidence intervals; explain posterior prediction, prior sensitivity, and MCMC diagnostics.
+Derive posterior distributions; work with conjugate models; distinguish credible and confidence intervals; derive posterior predictions; assess prior sensitivity and MCMC computation.
 
 ## 1. Bayes' theorem
-For parameter \(\theta\) and data \(y\),
+For parameter \(\theta\) and observed data \(y\),
 \[
-p(\theta|y)=\frac{p(y|\theta)p(\theta)}{p(y)}\propto p(y|\theta)p(\theta).
+p(\theta\mid y)=\frac{p(y\mid\theta)p(\theta)}{p(y)}
+\propto p(y\mid\theta)p(\theta).
 \]
-The posterior combines the likelihood with the prior. Its interpretation is conditional on the model and prior specification.
+The likelihood describes the data conditional on the parameter; the prior describes uncertainty about the parameter before observing the data; the posterior is the updated distribution. The prior and likelihood must be defined on compatible parameter spaces.
 
-## 2. Beta-Binomial conjugacy
-Let \(Y|p\sim Binomial(n,p)\) and \(p\sim Beta(a,b)\). Then
+## 2. Beta-binomial conjugacy
+Let \(Y\mid p\sim Binomial(n,p)\) and \(p\sim Beta(a,b)\). Then
 \[
-p|Y=y\sim Beta(a+y,b+n-y).
+p\mid Y=y\sim Beta(a+y,b+n-y),\quad
+E(p\mid y)=\frac{a+y}{a+b+n}.
 \]
-The posterior mean is \((a+y)/(a+b+n)\), a weighted combination of prior information and sample evidence.
+The posterior mean combines prior pseudo-counts and observed successes. The posterior variance follows from the beta variance formula.
 
-## 3. Normal-Normal conjugacy
-For \(Y_i|\mu\sim N(\mu,\sigma^2)\) with known variance and prior \(\mu\sim N(m_0,s_0^2)\), posterior variance and mean are
+## 3. Normal-normal conjugacy
+Suppose \(Y_i\mid\mu\sim N(\mu,\sigma^2)\), with known \(\sigma^2\), and \(\mu\sim N(m_0,s_0^2)\). The posterior is normal with precision
 \[
-s_n^2=(s_0^{-2}+n\sigma^{-2})^{-1},\quad
-m_n=s_n^2(m_0s_0^{-2}+n\bar y\sigma^{-2}).
+s_n^{-2}=s_0^{-2}+n\sigma^{-2},\qquad
+m_n=s_n^2\left(s_0^{-2}m_0+n\sigma^{-2}\bar Y\right).
 \]
+Precision weighting makes the influence of prior and sample information explicit.
 
 ## 4. Credible intervals and prediction
-A Bayesian credible interval contains a specified posterior probability mass. Posterior predictive distributions integrate uncertainty in parameters:
+A posterior credible set \(C(y)\) satisfies \(P(\theta\in C(y)\mid y)=1-\alpha\). Unlike a frequentist confidence interval, this is a probability statement conditional on the observed data and the model. Posterior prediction integrates parameter uncertainty:
 \[
-p(y_{new}|y)=\int p(y_{new}|\theta)p(\theta|y)d\theta.
+p(y_{new}\mid y)=\int p(y_{new}\mid\theta)p(\theta\mid y)d\theta.
 \]
-Prediction therefore includes both sampling variation and posterior parameter uncertainty.
 
-## 5. MCMC
-When posterior integrals cannot be evaluated analytically, simulation methods such as Metropolis-Hastings and Hamiltonian Monte Carlo approximate posterior expectations. Assess trace behavior, effective sample size, autocorrelation, chain mixing, and convergence diagnostics. A single diagnostic does not prove convergence.
+## 5. Prior specification and sensitivity
+Priors may encode substantive information, regularize weakly identified parameters, or stabilize high-dimensional estimation. Examine prior predictive implications before fitting and posterior sensitivity across plausible specifications. Improper priors require care: the resulting posterior must be proper for standard posterior inference.
 
-## 6. Prior sensitivity
-Report prior distributions and scales, explain substantive rationale, and examine whether conclusions change under plausible alternatives. Prior predictive checks can reveal implausible implications before fitting the model.
+## 6. MCMC computation
+When the posterior cannot be normalized or sampled directly, MCMC constructs a Markov chain with the posterior as its invariant distribution. For Metropolis–Hastings, propose \(\theta'\sim q(\theta'\mid\theta)\) and accept with probability
+\[
+\alpha=\min\left\{1,\frac{p(y\mid\theta')p(\theta')q(\theta\mid\theta')}
+{p(y\mid\theta)p(\theta)q(\theta'\mid\theta)}\right\}.
+\]
+Assess trace behavior, mixing, effective sample size, autocorrelation, and convergence diagnostics; diagnostics do not prove convergence.
 
-## Problem session
-1. Derive the Beta-Binomial posterior.
-2. Derive the Normal-Normal posterior.
+## Worked example
+With a beta prior \(Beta(2,2)\), observing 8 successes in 10 Bernoulli trials gives posterior \(Beta(10,4)\), posterior mean \(10/14\), and a posterior distribution that can be summarized by quantiles or a highest-posterior-density interval.
+
+## Problem set
+1. Derive the beta-binomial posterior from Bayes' theorem.
+2. Derive the normal-normal posterior mean and variance by completing the square.
 3. Distinguish credible and confidence intervals.
-4. Explain effective sample size in MCMC.
-5. Design a prior sensitivity analysis.
+4. Derive the posterior predictive distribution for a Bernoulli outcome.
+5. Explain why multiple chains and effective sample size are useful in MCMC assessment.
+
+## Computational lab
+Compute conjugate posteriors analytically and numerically. Implement a Metropolis–Hastings sampler for a non-conjugate one-parameter posterior and report acceptance rate, trace plots, autocorrelation, and effective sample size.
 
 ## Reading
-Gelman et al., *Bayesian Data Analysis*; Robert and Casella, *Monte Carlo Statistical Methods*; McElreath, *Statistical Rethinking*.
+Gelman et al., *Bayesian Data Analysis*; Robert, *The Bayesian Choice*; McElreath, *Statistical Rethinking*.
