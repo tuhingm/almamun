@@ -1,29 +1,42 @@
 # Lecture 11 — Statistical Power, Sample Size, and Equivalence
 
 ## Learning objectives
-Define power; plan sample size; understand effect sizes and design effects; distinguish non-significance from equivalence.
+Define power and minimum detectable effects; calculate sample sizes; account for clustering and attrition; distinguish non-significance from evidence of equivalence.
 
 ## 1. Power
-Power is \(P_{\theta_1}(\text{reject }H_0)=1-\beta\) under a specified alternative \(\theta_1\). It depends on effect size, variance, sample size, significance level, design, and test.
+For rejection region \(R\), power at parameter \(\theta\) is \(\pi(\theta)=P_\theta(T\in R)\). At a specified alternative it equals \(1-\beta\). Power depends on effect size, variance, sample size, significance level, design, and test. It is a design property under an assumed model, not a post hoc explanation for a non-significant finding.
 
-## 2. Two-sample mean illustration
-For equal group sizes, common variance \(\sigma^2\), and difference \(\delta\), the standard error of the difference is approximately \(\sigma\sqrt{2/n}\). The noncentrality parameter is approximately \(\delta\sqrt{n/(2\sigma^2)}\). Exact planning uses the relevant sampling distribution and target power.
+## 2. Two independent means
+For equal group sizes \(n\), common variance \(\sigma^2\), and difference \(\delta\), the standard error is approximately \(\sigma\sqrt{2/n}\). The standardized effect is \(d=\delta/\sigma\), and the normal-approximation noncentrality parameter is \(d\sqrt{n/2}\). Exact planning uses the noncentral t distribution and the planned sidedness.
 
-## 3. Design effects
-Clustered sampling reduces effective information when within-cluster outcomes are correlated. A common approximation is \(DE=1+(m-1)\rho\), where \(m\) is average cluster size and \(\rho\) is intraclass correlation. Effective sample size is roughly total sample size divided by this design effect under simplifying assumptions.
+## 3. Regression and proportions
+Regression power depends on residual variance, the variance of the focal regressor after partialling out controls, and the design matrix. Collinearity reduces information even when total sample size is fixed. Proportion comparisons depend on null and alternative proportions and the selected test.
 
-## 4. Equivalence and non-inferiority
-Failure to reject a zero-effect null does not establish equivalence. Equivalence testing defines a substantively acceptable interval and tests whether the effect lies within it, commonly using two one-sided tests.
+## 4. Clustered designs
+For equal cluster size \(m\) and intraclass correlation \(\rho\), the approximate design effect is
+\[
+DE=1+(m-1)\rho.
+\]
+Effective sample size is approximately total sample size divided by this factor. Unequal cluster sizes and few clusters require more careful planning and small-sample corrections.
 
-## 5. Planning discipline
-Specify primary outcome, minimum relevant effect, variance source, alpha, target power, allocation, clustering, attrition, and multiplicity before data collection. Avoid using observed post-hoc power as a substitute for confidence intervals.
+## 5. Attrition
+If the required analyzable sample is \(n_a\) and expected attrition is \(r\), recruit approximately \(n_a/(1-r)\). This inflation does not remove bias from informative attrition; the missing-data mechanism must be considered separately.
 
-## Problem session
-1. Define power and explain its dependence on effect size.
-2. Calculate a two-group standard error.
-3. Explain the cluster design effect.
-4. Distinguish equivalence from failure to reject a zero null.
-5. Prepare a sample-size analysis plan.
+## 6. Equivalence and non-inferiority
+For equivalence margin \(\Delta>0\), test \(H_0:\theta\le-\Delta\text{ or }\theta\ge\Delta\) against \(H_1:-\Delta<\theta<\Delta\). The two-one-sided-tests procedure assesses whether the confidence interval lies inside the equivalence bounds. Failure to reject a zero-effect null is not evidence of equivalence.
+
+## Worked example
+If \(\sigma=10\) and the target difference is 5, then \(d=0.5\). Use the noncentral t distribution to find the group size achieving target power at the chosen alpha, then verify sensitivity to variance and attrition assumptions.
+
+## Problem set
+1. Define power as a function of the parameter.
+2. Derive the two-group mean standard error.
+3. Calculate a design effect for given cluster size and ICC.
+4. Inflate an analyzable sample for attrition.
+5. Formulate equivalence hypotheses for a chosen margin.
+
+## Computational lab
+Calculate sample sizes over a grid of effect sizes and variances. Plot power curves and compare individual versus cluster randomization.
 
 ## Reading
-Cohen, *Statistical Power Analysis for the Behavioral Sciences*; Chow et al., *Sample Size Calculations in Clinical Research*; Lakens (2017), equivalence testing.
+Cohen, *Statistical Power Analysis for the Behavioral Sciences*; Chow et al., *Sample Size Calculations in Clinical Research*; Lakens, *Equivalence Tests*.
