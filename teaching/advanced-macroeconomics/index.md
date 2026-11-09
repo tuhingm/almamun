@@ -66,3 +66,9 @@ Theory problem sets 25%; DSGE replication 25%; policy analysis 15%; midterm 15%;
 
 ## Core references
 Ljungqvist and Sargent, Recursive Macroeconomic Theory; Galí, Monetary Policy, Inflation, and the Business Cycle; Woodford, Interest and Prices; Heer and Maussner, Dynamic General Equilibrium Modeling; Acemoglu, Introduction to Modern Economic Growth.
+
+## Graduate lecture series
+
+Lectures emphasize model construction, analytical derivations, equilibrium conditions, economic intuition, quantitative examples, problem sessions, and research readings.
+
+1. [Lecture 01 — The Dynamic Household: Intertemporal Choice and Euler Equations](lectures/01-dynamic-household.md)
