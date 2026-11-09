@@ -68,3 +68,9 @@ Problem sets 25%; portfolio and risk assignment 20%; corporate finance case 15%;
 
 ## Core references
 Bodie, Kane and Marcus, Investments; Berk and DeMarzo, Corporate Finance; Cochrane, Asset Pricing; Hull, Options, Futures, and Other Derivatives; Campbell, Lo and MacKinlay, The Econometrics of Financial Markets; Tuckman and Serrat, Fixed Income Securities.
+
+## Lecture series
+
+Lectures combine financial theory, mathematical derivations, numerical illustrations, empirical implementation, problem sessions, and selected readings.
+
+1. [Lecture 01 — Returns, Risk, and the Foundations of Asset Pricing](lectures/01-returns-risk.md)
