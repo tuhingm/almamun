@@ -51,3 +51,9 @@ Use SymPy for symbolic derivations, NumPy for numerical approximation, and plots
 
 ## Assessment and references
 Problem sets 30%; computational assignments 15%; midterm 20%; final 25%; applied modeling project 10%. References: Apostol, Calculus; Spivak, Calculus; Chiang and Wainwright, Fundamental Methods of Mathematical Economics; Simon and Blume, Mathematics for Economists.
+
+## Lecture series
+
+Each lecture develops the mathematical argument from definitions through proofs, worked applications, problem sessions, and selected readings.
+
+1. [Lecture 01 — Limits, Continuity, and the Logic of Analysis](lectures/01-limits-continuity.md)
