@@ -3,44 +3,65 @@
 **Course:** Statistics: Probability, Mathematical Inference and Experimental Design  
 **Level:** Graduate foundation
 
+## Core question
+How does a probability model translate uncertainty about outcomes into quantities that can be estimated and tested?
+
 ## Learning objectives
-Define probability spaces and random variables; derive expectations and moments; use conditional expectation; distinguish independence from uncorrelatedness; apply total expectation and total variance.
+Define probability spaces and random variables; derive expectations and moments; work with conditional distributions; distinguish independence from zero correlation; apply iterated expectations and the law of total variance.
 
-## 1. Probability space
-A probability model is \((\Omega,\mathcal F,P)\), where \(\Omega\) is the outcome space, \(\mathcal F\) is a sigma-algebra, and \(P\) is a probability measure. For disjoint events \(A_j\), countable additivity gives \(P(\cup_jA_j)=\sum_jP(A_j)\). The model formalizes uncertainty before observations are collected.
+## 1. Probability spaces and events
+A probability space is ((\Omega,\mathcal F,P)). The sample space \(\Omega\) contains possible outcomes, \(\mathcal F\) is a sigma-algebra of measurable events, and \(P\) is a probability measure satisfying non-negativity, normalization, and countable additivity. For pairwise disjoint events \(A_j\),
+\[
+P\left(\bigcup_{j=1}^{\infty}A_j\right)=\sum_{j=1}^{\infty}P(A_j).
+\]
+The axioms imply monotonicity, complements, and the addition rule. Conditional probability is defined by \(P(A\mid B)=P(A\cap B)/P(B)\) when \(P(B)>0\). Bayes' rule follows by expressing the joint probability in two ways.
 
-## 2. Random variables and distribution functions
-A random variable \(X\) is a measurable mapping from outcomes to the real line. Its CDF is \(F_X(x)=P(X\le x)\). For a discrete variable use a probability mass function; for an absolutely continuous variable use a density \(f_X\) with \(F_X(x)=\int_{-\infty}^xf_X(t)dt\). A density is not a point probability.
+## 2. Random variables and distributions
+A random variable is a measurable function \(X:\Omega\to\mathbb R\). Its cumulative distribution function is \(F_X(x)=P(X\le x)\). For a discrete variable, probabilities are represented by a probability mass function; for an absolutely continuous variable, by a density \(f_X\), with
+\[
+F_X(x)=\int_{-\infty}^{x}f_X(t)dt,\qquad P(a<X\le b)=\int_a^b f_X(t)dt.
+\]
+A density is not itself a probability at a point. The support and normalization condition must always be stated.
 
 ## 3. Expectation and moments
-\[
-E[g(X)]=\sum_xg(x)p_X(x)
-\quad\text{or}\quad
-E[g(X)]=\int g(x)f_X(x)dx.
-\]
-Linearity of expectation does not require independence. Variance is \(Var(X)=E[X^2]-E[X]^2\); covariance is \(Cov(X,Y)=E[(X-EX)(Y-EY)]\).
+For discrete \(X\), \(E[X]=\sum_x xf_X(x)\); for continuous \(X\), \(E[X]=\int xf_X(x)dx\), when the expectation exists. For a measurable transformation \(g\), the law of the unconscious statistician gives \(E[g(X)]=\int g(x)f_X(x)dx\). The variance is \(\operatorname{Var}(X)=E[(X-\mu)^2]=E[X^2]-\mu^2\). Higher central moments describe skewness and kurtosis.
+
+Linearity, \(E[aX+bY]=aE[X]+bE[Y]\), does not require independence. In contrast, \(E[XY]=E[X]E[Y]\) generally requires independence (or a suitable weaker condition).
 
 ## 4. Conditional expectation
-\(E[Y|X]\) is the conditional mean given information in \(X\). It is a random variable, not merely a number. The tower property is \(E[E(Y|X)]=E(Y)\). In regression, the conditional expectation function is the population prediction target.
-
-## 5. Total variance
+For a discrete conditioning variable,
 \[
-Var(Y)=E[Var(Y|X)]+Var(E[Y|X]).
+E[Y\mid X=x]=\sum_y yP(Y=y\mid X=x).
 \]
-The first component is average within-condition variation; the second is variation in conditional means. This identity underlies ANOVA and hierarchical variance decomposition.
+The conditional expectation \(E[Y\mid X]\) is a random variable and the best mean-square predictor of \(Y\) among functions measurable with respect to \(X\). It satisfies the tower property:
+\[
+E\{E(Y\mid X)\}=E(Y).
+\]
+The law of total variance is
+\[
+\operatorname{Var}(Y)=E[\operatorname{Var}(Y\mid X)]+\operatorname{Var}(E[Y\mid X]).
+\]
+The first term is average within-condition uncertainty; the second is variation explained by differences in conditional means.
 
-## 6. Independence
-Independence implies zero covariance when moments exist, but zero covariance does not generally imply independence. Joint Gaussian variables are a special case in which zero covariance implies independence.
+## 5. Independence, covariance, and correlation
+Independence means the joint distribution factors into marginal distributions. Zero covariance is weaker: it rules out linear association but not nonlinear dependence. For example, if \(X\) is symmetric around zero and \(Y=X^2\), covariance may be zero although \(Y\) is completely determined by \(X\). Correlation is covariance standardized by marginal standard deviations and is defined only when both variances are finite and positive.
 
 ## Worked example
-Let a two-state economy have \(P(H)=0.4\), \(P(L)=0.6\), conditional means \(E(R|H)=0.12\), \(E(R|L)=0.04\), and conditional variances 0.09 and 0.01. Then \(E(R)=0.072\). Total variance is \(0.4(0.09)+0.6(0.01)+0.4(0.6)(0.08)^2=0.045536\).
+Let \(X\sim Bernoulli(p)\), and let \(Y=a+bX+\varepsilon\), where \(E(\varepsilon\mid X)=0\). Then \(E(Y\mid X)=a+bX\), \(E(Y)=a+bp\), and
+\[
+\operatorname{Var}(Y)=b^2p(1-p)+E[\operatorname{Var}(\varepsilon\mid X)].
+\]
+This separates explained variation due to the binary regressor from average conditional residual variation.
 
-## Problem session
-1. Derive the mean and variance of a Bernoulli variable.
-2. Prove total expectation.
-3. Derive total variance by expanding squared deviations.
-4. Give dependent variables with zero covariance.
-5. Explain why a density value is not a probability.
+## Problem set
+1. Prove the complement and addition rules from the probability axioms.
+2. Show that \(E[aX+b]=aE[X]+b\) and derive the variance transformation.
+3. Construct dependent variables with zero covariance.
+4. Derive the law of total variance using the tower property.
+5. Explain why \(E[Y\mid X]\) is generally not equal to \(E[Y]\).
+
+## Computational lab
+Simulate Bernoulli and normal variables; compare empirical means, variances, and conditional means with their population values. Simulate \(Y=X^2\) for symmetric \(X\) and verify that sample correlation can be near zero despite dependence.
 
 ## Reading
-Casella and Berger, *Statistical Inference*; Rice, *Mathematical Statistics and Data Analysis*; Wasserman, *All of Statistics*.
+Casella and Berger, *Statistical Inference*; DeGroot and Schervish, *Probability and Statistics*; Wasserman, *All of Statistics*.
