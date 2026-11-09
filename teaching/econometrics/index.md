@@ -58,3 +58,9 @@ Problem sets 30%; replication project 25%; midterm 20%; final applied paper 25%.
 
 ## References
 Wooldridge, Introductory Econometrics and Econometric Analysis of Cross Section and Panel Data; Hayashi, Econometrics; Greene, Econometric Analysis; Angrist and Pischke, Mostly Harmless Econometrics; Hamilton, Time Series Analysis; Lütkepohl, New Introduction to Multiple Time Series Analysis.
+
+## Lecture series
+
+The course is delivered as a sequence of research-oriented lectures. Each lecture is designed around a motivating question, formal derivation, worked example, interpretation, research practice, problem session, and selected readings.
+
+1. [Lecture 01 — From Probability to the Linear Regression Model](lectures/01-probability-regression.md)
