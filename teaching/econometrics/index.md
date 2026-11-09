@@ -82,3 +82,23 @@ The course is delivered as a sequence of research-oriented lectures. Each lectur
 | X | Research implementation | Replication, Monte Carlo, empirical paper |
 
 The sequence will be expanded lecture by lecture. A topic is marked as available only when its dedicated lecture file has been published.
+3. [Lecture 03 — Functional Form, Partial Effects, and Omitted-Variable Bias](lectures/03-functional-form-ovb.md)
+4. [Lecture 04 — Heteroskedasticity, Dependence, and Robust Inference](lectures/04-heteroskedasticity-robust-inference.md)
+5. [Lecture 05 — Endogeneity, Instrumental Variables, and Two-Stage Least Squares](lectures/05-endogeneity-iv.md)
+6. [Lecture 06 — Simultaneous Equations and Structural Identification](lectures/06-simultaneous-equations.md)
+7. [Lecture 07 — Panel Data: Fixed Effects, Random Effects, and Correlated Effects](lectures/07-panel-data.md)
+8. [Lecture 08 — Dynamic Panels, Difference GMM, and System GMM](lectures/08-dynamic-panels.md)
+9. [Lecture 09 — Time-Series Foundations: Stationarity, ARMA, and Forecasting](lectures/09-time-series.md)
+10. [Lecture 10 — Unit Roots, Structural Breaks, and Persistence](lectures/10-unit-roots-breaks.md)
+11. [Lecture 11 — VAR and Structural VAR: Dynamic Interactions and Shock Identification](lectures/11-var-svar.md)
+12. [Lecture 12 — Cointegration, VECM, and ARDL Models](lectures/12-cointegration-ardl.md)
+13. [Lecture 13 — Causal Inference: Potential Outcomes, DiD, and Regression Discontinuity](lectures/13-causal-inference.md)
+14. [Lecture 14 — Research Design, Monte Carlo, Replication, and Reporting](lectures/14-research-replication.md)
+
+## Course resources
+
+- [Course syllabus and weekly teaching plan](syllabus.md)
+- [Graduate problem sets and selected solution guidance](problem-sets-solutions.md)
+- [Midterm and final examination specifications](examinations.md)
+
+The lecture sequence is now published as a complete 14-lecture framework. Additional datasets and software-specific lab scripts will be added as separate reproducible files rather than embedded as unverified links.
