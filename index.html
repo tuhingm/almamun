@@ -30,6 +30,26 @@ section.white{background-color:#dfe8ed}
 .toolkit{border-color:#31495c;background:#31495c}
 .tool{background:#13283b}
 header{background:rgba(9,22,36,.99);border-bottom-color:#314454}
+
+.contact-links{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.contact-card{padding:22px 24px;border:1px solid var(--line);border-radius:9px;background:#fff;min-height:120px}
+.contact-card.shaded{background:#f4f7f8}
+.contact-card h3{font-size:15px;margin:0 0 12px}
+.contact-card a{display:block;color:#426276;font-size:11px;margin:7px 0}
+.identifier-block{border-top:1px solid var(--line);margin-top:28px;padding-top:27px}
+.identifier-block h2{font-size:23px;margin:5px 0 16px}
+.identifier-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.identifier{border:1px solid var(--line);border-radius:8px;background:#fff;padding:14px 12px;min-width:0}
+.identifier small{display:block;color:#84919a;font-size:8px;letter-spacing:.08em;margin-bottom:8px}
+.identifier a,.identifier strong{font-size:10px;font-weight:700;color:#365a70;overflow-wrap:anywhere}
+footer{background:#102b3e;color:#c3d0d8;padding:27px 0 15px;font-size:10px}
+.footer-grid{display:grid;grid-template-columns:1.35fr 1fr 1fr;gap:35px}
+.footer-grid b{display:block;color:#fff;font:700 12px Manrope;margin-bottom:8px}
+.footer-grid p{margin:5px 0;color:#c3d0d8}
+.footer-grid a{display:block;color:#c3d0d8;margin:4px 0}
+.footer-grid a:hover{color:var(--mint)}
+.copyright{grid-column:1/-1;border-top:1px solid #ffffff25;padding-top:12px;margin-top:4px;color:#aebdc7;font-size:9px}
+@media(max-width:650px){.contact-links{grid-template-columns:1fr}.identifier-grid{grid-template-columns:repeat(2,1fr)}.footer-grid{grid-template-columns:1fr;gap:18px}.copyright{grid-column:1}}
 </style></head><body>
 <header><div class="wrap nav"><a class="brand" href="#home">TGM <b>AL MAMUN</b></a><button id="menu" aria-label="Open menu">Menu</button><nav id="nav"><a href="teaching/index.html">Teaching Courses</a><a href="working-papers/index.html">Working Papers</a><a href="Tuhin_CV.pdf" target="_blank" rel="noopener">CV</a></nav></div></header>
 <main id="home">
@@ -51,8 +71,25 @@ header{background:rgba(9,22,36,.99);border-bottom-color:#314454}
 <article><div class="date">2025</div><div><h3>Aging-Induced Transfer Shocks, Public Debt, and Sovereign Risk</h3><div class="place">First Author · EEEU 2025 Conference · Springer Proceedings in Business and Economics</div></div></article>
 <article><div class="date">2025</div><div><h3>Projecting Korea’s Fiscal Outlook Under Demographic Aging: A DSGE-Based Evaluation</h3><div class="place">Sole Author · Departmental Research Seminar, Department of Economics, Hannam University</div></div></article>
 </div></div></section>
-<section class="dark" id="contact"><div class="wrap contact"><div><div class="kicker">05 / CONTACT</div><h2>Research, collaboration<br>and academic exchange.</h2><p class="intro" style="margin-top:15px">For research collaboration, academic correspondence, and questions about my work, please get in touch by email.</p></div><div class="contactbox"><small>Email</small><a href="mailto:tuhin.hnu@gmail.com">tuhin.hnu@gmail.com</a><p style="font-size:12px;color:#b9c6cf;margin:12px 0 0">Tuhin G. M. Al Mamun, PhD</p></div></div></section>
-</main><footer><div class="wrap foot"><div>© <span id="year"></span> <b>Tuhin G. M. Al Mamun</b>. All rights reserved.</div><a class="top" href="#home">Back to top ↑</a></div></footer>
+<section class="white" id="contact"><div class="wrap">
+<div class="head"><div><div class="kicker">CORRESPONDENCE</div><h2>Contact</h2></div></div>
+<div class="contact-links">
+<article class="contact-card"><h3>Academic correspondence</h3><a href="mailto:tuhin.hnu@gmail.com">tuhin.hnu@gmail.com</a><a href="https://scholar.google.com/citations?user=CMV8R_0AAAAJ&amp;hl=en" target="_blank" rel="noopener">Google Scholar profile ↗</a></article>
+<article class="contact-card shaded"><h3>Research and scholarly identity</h3><a href="https://orcid.org/0009-0005-0275-6922" target="_blank" rel="noopener">ORCID profile ↗</a><a href="https://www.scopus.com/authid/detail.uri?authorId=59544050900" target="_blank" rel="noopener">Scopus author record ↗</a></article>
+</div>
+<div class="identifier-block"><div class="kicker">RESEARCH IDENTITY</div><h2>Academic Identifiers and Links</h2>
+<div class="identifier-grid">
+<div class="identifier"><small>SCOPUS AUTHOR ID</small><a href="https://www.scopus.com/authid/detail.uri?authorId=59544050900" target="_blank" rel="noopener">59544050900 ↗</a></div>
+<div class="identifier"><small>WEB OF SCIENCE RESEARCHER ID</small><strong>KWU-2726-2024</strong></div>
+<div class="identifier"><small>ORCID</small><a href="https://orcid.org/0009-0005-0275-6922" target="_blank" rel="noopener">View ORCID profile ↗</a></div>
+<div class="identifier"><small>GOOGLE SCHOLAR</small><a href="https://scholar.google.com/citations?user=CMV8R_0AAAAJ&amp;hl=en" target="_blank" rel="noopener">View Google Scholar ↗</a></div>
+</div></div></div></section>
+</main><footer><div class="wrap footer-grid">
+<div><b>Dr. Tuhin G. M. Al Mamun</b><p>Economist | Quantitative Researcher | Macroeconomic Modeler</p><p>Statistical Modeling. Bayesian Inference. Macroeconomics.</p></div>
+<div><b>Academic profile</b><a href="#profile">Research profile</a><a href="#research">Research interests</a><a href="#outputs">Projects and publications</a><a href="#contact">Academic identifiers</a></div>
+<div><b>Research and learning</b><a href="teaching/index.html">Teaching resources</a><a href="working-papers/index.html">Working papers</a><a href="mailto:tuhin.hnu@gmail.com">Email</a></div>
+<div class="copyright">© <span id="year"></span> Tuhin G. M. Al Mamun · Academic profile</div>
+</div></footer>
 <script>
 const projects=[
 ["Doctoral Dissertation",[
