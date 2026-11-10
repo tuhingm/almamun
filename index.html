@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0033A0">
-<meta name="description" content="Official academic portfolio of Tuhin G. M. Al Mamun (Tuhin Al Mamun). Research in macroeconomic policy, applied econometrics, and quantitative methods.">
-<title>Tuhin G. M. Al Mamun | Academic Portfolio &amp; Research</title>
+<meta name="description" content="Tuhin Al Mamun (Tuhin G. M. Al Mamun) is an economist and quantitative researcher. Explore his academic portfolio, research, publications, teaching, and scholarly profiles.">
+<title>Tuhin Al Mamun | Academic Portfolio &amp; Research</title>
 <link rel="canonical" href="https://tuhingm.github.io/almamun/">
 <script type="application/ld+json">
 {
@@ -47,7 +47,7 @@ footer{background:var(--deep);color:#c5d2e7;padding:27px 0 15px}.footer-grid{dis
 <main id="top">
 <section class="hero"><div class="wrap">
 <div class="switchline"><label for="view-econ">Academic portfolio</label><div class="switch" role="group" aria-label="Choose academic portfolio"><button id="view-econ" type="button" data-view="econ" aria-pressed="true">Economics</button><button type="button" data-view="stat" aria-pressed="false">Statistics</button></div></div>
-<div class="hero-grid"><div><div class="eyebrow" id="hero-eyebrow">Economist · Quantitative Researcher</div><h1 class="name-line">Tuhin G. M. Al Mamun</h1><p class="subtitle" id="hero-subtitle">Fiscal Policy · Monetary Policy · Environmental Economics</p><p class="focus" id="hero-focus">MACROECONOMIC POLICY · CAUSAL EVALUATION · CLIMATE ECONOMICS</p><p class="hero-copy" id="hero-copy">I study fiscal and monetary policy transmission, environmental and climate policy, and macroeconomic outcomes using structural macroeconomic models and applied econometric analysis.</p><div class="actions"><a class="btn btn-light" href="#research">Explore research</a><a class="btn btn-outline" href="mailto:tuhin.hnu@gmail.com">Contact</a></div></div>
+<div class="hero-grid"><div><div class="eyebrow" id="hero-eyebrow">Economist · Quantitative Researcher</div><h1 class="name-line">Tuhin Al Mamun</h1><p class="subtitle" id="hero-subtitle">Fiscal Policy · Monetary Policy · Environmental Economics</p><p class="focus" id="hero-focus">MACROECONOMIC POLICY · CAUSAL EVALUATION · CLIMATE ECONOMICS</p><p class="hero-copy" id="hero-copy">I study fiscal and monetary policy transmission, environmental and climate policy, and macroeconomic outcomes using structural macroeconomic models and applied econometric analysis.</p><div class="actions"><a class="btn btn-light" href="#research">Explore research</a><a class="btn btn-outline" href="mailto:tuhin.hnu@gmail.com">Contact</a></div></div>
 <aside class="profile-panel"><small>RESEARCH PROFILE</small><h3 id="panel-title">Economic policy questions and macroeconomic evidence.</h3><div class="profile-item"><strong id="panel-a-title">Monetary and Fiscal Policy</strong><span id="panel-a-copy">Policy transmission, fiscal multipliers, public debt, and inflation.</span></div><div class="profile-item"><strong id="panel-b-title">Environmental Economics</strong><span id="panel-b-copy">Climate policy, decarbonization, green finance, and distributional effects.</span></div><div class="profile-item"><strong id="panel-c-title">Causal Policy Evaluation</strong><span id="panel-c-copy">Counterfactual analysis and heterogeneous policy effects.</span></div></aside></div></div></section>
 
 
@@ -131,7 +131,7 @@ function setView(v, remember=true){
   const d=content[v];
   const fields=[['hero-eyebrow','eyebrow'],['hero-subtitle','subtitle'],['hero-focus','focus'],['hero-copy','copy'],['panel-title','panel'],['panel-a-title','a'],['panel-a-copy','ac'],['panel-b-title','b'],['panel-b-copy','bc'],['panel-c-title','c'],['panel-c-copy','cc'],['footer-line','footer']];
   fields.forEach(([id,key])=>{const el=document.getElementById(id);if(el)el.textContent=d[key];});
-  document.title='Tuhin G. M. Al Mamun | '+(v==='econ'?'Economics':'Statistics')+' Portfolio';
+  document.title='Tuhin Al Mamun | '+(v==='econ'?'Economics':'Statistics')+' Portfolio';
   const destinations=v==='econ'?{profile:'#profile',research:'#research',outputs:'#outputs'}:{profile:'#profile-stat',research:'#research-stat',outputs:'#outputs-stat'};
   document.querySelectorAll('#nav a[data-section]').forEach(a=>a.href=destinations[a.dataset.section]);
   if(remember){try{localStorage.setItem('tgm-portfolio-view',v)}catch(e){}}
