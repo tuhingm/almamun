@@ -9,5 +9,27 @@
 "Real output",
 "How to write it"
 ]
+},
+{
+"out": "assets/og/research-guide-var.jpg",
+"kicker": "Empirical Research Guide · Model guide",
+"title": "VAR in First Differences",
+"sub": "All variables I(1), no cointegration. U.S. stock prices and industrial production, monthly, 1985–2019",
+"tags": [
+"Python code",
+"Real output",
+"How to write it"
+]
+},
+{
+"out": "assets/og/research-guide-vecm.jpg",
+"kicker": "Empirical Research Guide · Model guide",
+"title": "Vector Error-Correction Model",
+"sub": "All variables I(1), cointegrated. U.S. 10-year and 1-year Treasury yields, quarterly, 1960–2019",
+"tags": [
+"Python code",
+"Real output",
+"How to write it"
+]
 }
 ]
