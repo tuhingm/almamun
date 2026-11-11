@@ -36,6 +36,10 @@ e = pd.DataFrame({"date": Q.date, "log_price": np.log(Q.gdpdef), "log_m2": np.lo
 ex["money"] = (e, "Money, prices and output", "Quarterly, 1960–2019 · U.S.",
                "Log GDP deflator, log M2 money stock and log real GDP.")
 
+# extra data file used by the NARDL guide (not one of the selector examples)
+M2 = m[(m.year >= 1970) & (m.year <= 2019)]
+pd.DataFrame({"date": M2.date, "baa_yield": M2.baa, "fedfunds": M2.ffr}).to_csv(OUT / "examples" / "passthrough.csv", index=False)
+
 examples = []
 for key, (df, title, meta, desc) in ex.items():
     df = df.round(5); path = OUT / "examples" / f"{key}.csv"; df.to_csv(path, index=False)

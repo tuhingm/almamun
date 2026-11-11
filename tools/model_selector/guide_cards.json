@@ -31,5 +31,27 @@
 "Real output",
 "How to write it"
 ]
+},
+{
+"out": "assets/og/research-guide-ardl.jpg",
+"kicker": "Empirical Research Guide · Model guide",
+"title": "ARDL Bounds-Testing Model",
+"sub": "A mix of I(0) and I(1) variables. U.S. 10-year Treasury yield, inflation, GDP growth and unemployment, quarterly, 1960–2019",
+"tags": [
+"Python code",
+"Real output",
+"How to write it"
+]
+},
+{
+"out": "assets/og/research-guide-nardl.jpg",
+"kicker": "Empirical Research Guide · Model guide",
+"title": "Nonlinear ARDL (NARDL)",
+"sub": "I(0) and I(1) variables, with asymmetric effects. U.S. Baa corporate bond yield and federal funds rate, monthly, 1985–2019",
+"tags": [
+"Python code",
+"Real output",
+"How to write it"
+]
 }
 ]
