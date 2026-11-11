@@ -32,6 +32,10 @@ d = pd.DataFrame({"date": Q.date, "yield_10y": Q.gs10, "inflation": 400 * np.log
 ex["yield"] = (d, "What moves the 10-year yield?", "Quarterly, 1960–2019 · U.S.",
                "10-year Treasury yield, GDP-deflator inflation, real GDP growth and the unemployment rate.")
 
+e = pd.DataFrame({"date": Q.date, "log_price": np.log(Q.gdpdef), "log_m2": np.log(Q.m2), "log_gdp": np.log(Q.rgdp)})[Q.t >= 1960]
+ex["money"] = (e, "Money, prices and output", "Quarterly, 1960–2019 · U.S.",
+               "Log GDP deflator, log M2 money stock and log real GDP.")
+
 examples = []
 for key, (df, title, meta, desc) in ex.items():
     df = df.round(5); path = OUT / "examples" / f"{key}.csv"; df.to_csv(path, index=False)

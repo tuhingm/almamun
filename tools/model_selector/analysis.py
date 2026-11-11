@@ -57,15 +57,19 @@ def analyze(csv_text, max_vars=8):
             ks, kp = kpss(x, regression="c", nlags="auto")[:2]
         except Exception:
             ks, kp = np.nan, np.nan
-        order = 0 if a0[1] < 0.05 else (1 if a1[1] < 0.05 else 2)
+        d2p = d2s = None
+        if a0[1] >= 0.05 and a1[1] >= 0.05:          # still a unit root after one difference: test the second difference
+            a2 = adfuller(x.diff().diff().dropna(), autolag="AIC")
+            d2s, d2p = a2[0], a2[1]
+        order = 0 if a0[1] < 0.05 else (1 if a1[1] < 0.05 else (2 if d2p is not None and d2p < 0.05 else 3))
         conflict = bool(order == 0 and np.isfinite(kp) and kp < 0.05)
         orders.append(order)
         ur.append(dict(var=c, adf_stat=_f(a0[0], 3), adf_p=_f(a0[1], 3), adf_lags=int(a0[2]), dadf_stat=_f(a1[0], 3),
-                       dadf_p=_f(a1[1], 3), kpss_stat=_f(ks, 3), kpss_p=_f(kp, 3), order=order, conflict=conflict))
+                       dadf_p=_f(a1[1], 3), d2adf_stat=None if d2s is None else _f(d2s, 3), d2adf_p=None if d2p is None else _f(d2p, 3), kpss_stat=_f(ks, 3), kpss_p=_f(kp, 3), order=order, conflict=conflict))
     out["unitroot"] = ur
     out["conflicts"] = [u["var"] for u in ur if u["conflict"]]
 
-    if 2 in orders:
+    if max(orders) >= 2:
         out["model"] = "I2"
     elif all(o == 0 for o in orders):
         out["model"] = "OLS"

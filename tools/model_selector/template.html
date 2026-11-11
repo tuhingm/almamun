@@ -53,7 +53,7 @@ main{padding:34px 0 80px}
 details.code{margin:10px 0 0}details.code summary{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--navy);cursor:pointer}pre{background:#111c36;color:#e3ebfa;border-radius:9px;padding:13px 15px;font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow-x:auto;margin:8px 0 0}
 .side{position:sticky;top:18px}
 .tree svg{display:block;width:100%;height:auto}.tree .n rect{fill:#fff;stroke:#c3d0e6;stroke-width:1.2;transition:fill .35s,stroke .35s}.tree .n text{font:600 13px "DM Sans",sans-serif;fill:#41506a;text-anchor:middle;dominant-baseline:central;transition:fill .35s}
-.tree .n.leaf rect{fill:#f3f6fc}.tree .n.leaf text{font:800 14px Manrope,sans-serif}
+.tree .n.leaf rect{fill:#f3f6fc}.tree .n.leaf text{font:800 14px Manrope,sans-serif}.tree #n-I2 text{font-size:12px}
 .tree .e{fill:none;stroke:#c9d4e8;stroke-width:1.4}.tree .e{transition:stroke .45s ease,stroke-width .45s ease}.tree .e.hl{stroke:var(--navy);stroke-width:2.8}
 .tree .el{font:700 11px "DM Sans",sans-serif;fill:#8793ab;text-anchor:middle}
 .tree .n.on rect{fill:var(--tint);stroke:var(--navy)}.tree .n.on text{fill:var(--navy)}.tree .n.leaf.on rect{fill:var(--navy);stroke:var(--navy);animation:pop .5s ease}.tree .n.leaf.on text{fill:#fff}.tree .n.alt rect{stroke:var(--navy);stroke-dasharray:4 3}
@@ -74,11 +74,12 @@ footer{background:var(--navy2);color:#c3d0e4;padding:22px 0;font-size:10px}.foot
 @media(max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}.side{position:static}.tree svg{display:none}.tree .sub2{display:none}.gcards{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:650px){.wrap{width:calc(100% - 34px)}.nav{height:65px}nav{gap:11px;font-size:8.5px}.hero{padding:44px 0 38px}.ex{grid-template-columns:1fr}.gcards{grid-template-columns:1fr}.panel{padding:17px}.guides-head{display:block}.result{padding:20px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+@media(max-width:650px){.brand{white-space:nowrap;margin-right:12px}header nav{gap:9px;font-size:8px;letter-spacing:.06em;line-height:1.35;text-align:left}}
 </style>
 </head>
 <body>
 <header><div class="wrap nav"><a class="brand" href="../index.html">TGM <b>AL MAMUN</b></a><nav><a href="../teaching/index.html">Teaching Courses</a><a href="../working-papers/index.html">Working Papers</a><a class="current" href="index.html">Research Guide</a><a href="../Tuhin%20Al%20Mamun_CV.pdf" target="_blank" rel="noopener">CV</a></nav></div></header>
-<section class="hero"><div class="wrap"><div class="kicker">Empirical Research Guide · Economics and Finance</div><h1>Which model fits your data?</h1><p class="lead">The right econometric model depends on the properties of your data, not on preference. Test a real dataset, upload your own, or enter your test results, and follow the path to the model your paper needs.</p><div class="meta"><span><strong>6</strong> model guides</span><span><strong>4</strong> real example datasets</span><span>Python · statsmodels</span></div></div></section>
+<section class="hero"><div class="wrap"><div class="kicker">Empirical Research Guide · Economics and Finance</div><h1>Which model fits your data?</h1><p class="lead">The right econometric model depends on the properties of your data, not on preference. Test a real dataset, upload your own, or enter your test results, and follow the path to the model your paper needs.</p><div class="meta"><span><strong>6</strong> model guides</span><span><strong>5</strong> real example datasets</span><span>Python · statsmodels</span></div></div></section>
 <main class="wrap">
 <div class="modes" role="group" aria-label="Choose how to start">
 <button type="button" data-mode="example" aria-pressed="true"><b>Try a real example</b><span>See the full sequence on real data</span></button>
@@ -88,7 +89,7 @@ footer{background:var(--navy2);color:#c3d0e4;padding:22px 0;font-size:10px}.foot
 <div class="grid">
 <section class="panel" id="work" aria-live="polite">
  <div id="m-example">
-  <h2>Choose a dataset</h2><p class="sub">Four real U.S. datasets. Each one leads to a different model.</p>
+  <h2>Choose a dataset</h2><p class="sub">Five real U.S. datasets. Each one leads to a different outcome.</p>
   <div class="ex" id="ex"></div>
  </div>
  <div id="m-upload" hidden>
@@ -136,14 +137,14 @@ const fmt=(v,d=3)=>v==null?'–':Number(v).toFixed(d), pf=p=>p==null?'–':(p<0.
 let run=0;
 
 /* ---------- decision tree ---------- */
-const N={start:[300,28,116,'Your data'],q1:[300,98,196,'Panel or endogenous?'],GMM:[530,98,112,'2SLS / GMM',1],ur:[300,172,150,'Unit-root tests'],
- i0:[70,250,104,'All I(0)'],i1:[275,250,104,'All I(1)'],mix:[500,250,160,'Mixed I(0) / I(1)'],co:[275,328,146,'Cointegration?'],as:[500,328,176,'Asymmetric effects?'],
- OLS:[70,412,86,'OLS',1],VAR:[215,412,86,'VAR',1],VECM:[335,412,86,'VECM',1],ARDL:[440,412,86,'ARDL',1],NARDL:[548,412,86,'NARDL',1]};
-const E=[['start','q1'],['q1','GMM','yes'],['q1','ur','no'],['ur','i0'],['ur','i1'],['ur','mix'],['i0','OLS'],['i1','co'],['co','VAR','no'],['co','VECM','yes'],['mix','as'],['as','ARDL','no'],['as','NARDL','yes']];
-const PATHS={OLS:['start','q1','ur','i0','OLS'],VAR:['start','q1','ur','i1','co','VAR'],VECM:['start','q1','ur','i1','co','VECM'],ARDL:['start','q1','ur','mix','as','ARDL'],NARDL:['start','q1','ur','mix','as','NARDL'],GMM:['start','q1','GMM']};
-const TL={start:'Your data',q1:'Time series',ur:'Unit-root tests',i0:'All I(0)',i1:'All I(1)',mix:'Mixed I(0)/I(1)',co:'Cointegration test',as:'Asymmetry?'};
+const N={start:[330,28,116,'Your data'],q1:[330,98,196,'Panel or endogenous?'],GMM:[596,98,112,'2SLS / GMM',1],ur:[330,172,150,'Unit-root tests'],
+ i0:[60,250,100,'All I(0)'],i1:[250,250,100,'All I(1)'],mix:[455,250,156,'Mixed I(0) / I(1)'],i2:[650,250,116,'Some I(2)'],co:[250,328,146,'Cointegration?'],as:[455,328,176,'Asymmetric effects?'],
+ OLS:[60,412,84,'OLS',1],VAR:[195,412,84,'VAR',1],VECM:[305,412,84,'VECM',1],ARDL:[400,412,84,'ARDL',1],NARDL:[510,412,86,'NARDL',1],I2:[650,412,128,'Transform, re-test',1]};
+const E=[['start','q1'],['q1','GMM','yes'],['q1','ur','no'],['ur','i0'],['ur','i1'],['ur','mix'],['ur','i2'],['i0','OLS'],['i1','co'],['co','VAR','no'],['co','VECM','yes'],['mix','as'],['as','ARDL','no'],['as','NARDL','yes'],['i2','I2']];
+const PATHS={OLS:['start','q1','ur','i0','OLS'],VAR:['start','q1','ur','i1','co','VAR'],VECM:['start','q1','ur','i1','co','VECM'],ARDL:['start','q1','ur','mix','as','ARDL'],NARDL:['start','q1','ur','mix','as','NARDL'],GMM:['start','q1','GMM'],I2:['start','q1','ur','i2','I2']};
+const TL={start:'Your data',q1:'Time series',ur:'Unit-root tests',i0:'All I(0)',i1:'All I(1)',mix:'Mixed I(0)/I(1)',i2:'Some I(2)',I2:'Transform and re-test',co:'Cointegration test',as:'Asymmetry?'};
 function drawTree(){
- const H=16;let s='<svg viewBox="0 0 600 444" role="img" aria-label="Decision tree from data to model">';
+ const H=16;let s='<svg viewBox="0 0 724 444" role="img" aria-label="Decision tree from data to model">';
  for(const [a,b,lab] of E){const A=N[a],B=N[b];let d,lx,ly;
   if(A[1]===B[1]){d=`M${A[0]+A[2]/2} ${A[1]}H${B[0]-B[2]/2}`;lx=(A[0]+A[2]/2+B[0]-B[2]/2)/2;ly=A[1]-5}
   else{const my=(A[1]+B[1])/2;d=`M${A[0]} ${A[1]+H}V${my}H${B[0]}V${B[1]-H}`;lx=B[0]+(B[0]<A[0]?-15:15);ly=my+15}
@@ -151,13 +152,14 @@ function drawTree(){
  for(const k in N){const [x,y,w,t,leaf]=N[k];s+=`<g class="n${leaf?' leaf':''}" id="n-${k}"><rect x="${x-w/2}" y="${y-H}" width="${w}" height="${2*H}" rx="${leaf?16:8}"/><text x="${x}" y="${y}">${t}</text></g>`}
  $('#tree').innerHTML=s+'</svg>';
 }
-function resetTree(){document.querySelectorAll('.tree .on,.tree .hl,.tree .alt').forEach(e=>e.classList.remove('on','hl','alt'));$('#trail').innerHTML=''}
-function light(path,labels={},final=true){ // animate along a list of node ids
- const my=run;let shown=[...document.querySelectorAll('.tree .n.on')].map(e=>e.id.slice(2));
- path.forEach((id,i)=>{if(shown.includes(id))return;const k=path.slice(0,i+1).filter(x=>!shown.includes(x)).length-1;
+let lit=new Set(),tEnd=0;
+function resetTree(){lit=new Set();tEnd=0;document.querySelectorAll('.tree .on,.tree .hl,.tree .alt').forEach(e=>e.classList.remove('on','hl','alt'));$('#trail').innerHTML=''}
+function light(path,labels={},final=true){ // animate along a list of node ids; returns the time until the animation ends
+ const my=run,now=performance.now();let at=Math.max(now,tEnd);
+ path.forEach((id,i)=>{if(lit.has(id))return;lit.add(id);const wait=at-now;at+=380*D;
   setTimeout(()=>{if(my!==run)return;const n=$('#n-'+id);n&&n.classList.add('on');if(i>0){const e=document.getElementById(`e-${path[i-1]}-${id}`);e&&e.classList.add('hl')}
-   const t=$('#trail');if(t.children.length)t.appendChild(el('i','','→'));const isLeaf=!!MODELS[id];t.appendChild(el('span',isLeaf&&final?'final':'',esc(labels[id]||(isLeaf?id:TL[id]))))},k*380*D)});
- return path.filter(x=>!shown.includes(x)).length*380*D;
+   const t=$('#trail');if(t.children.length)t.appendChild(el('i','','→'));const isLeaf=!!MODELS[id]||id==='I2';t.appendChild(el('span',isLeaf&&final?'final':'',esc(labels[id]||TL[id]||id)))},wait)});
+ tEnd=at;return at-now;
 }
 
 /* ---------- results ---------- */
@@ -171,34 +173,35 @@ function show(R,label){
  addStep(k++,'Summary statistics',`<div class="tw"><table><tr><th>Variable</th><th>Mean</th><th>Std. dev.</th><th>Min</th><th>Max</th><th>Skewness</th><th>Kurtosis</th></tr>${R.summary.map(s=>`<tr><td>${esc(s.var)}</td><td>${fmt(s.mean)}</td><td>${fmt(s.sd)}</td><td>${fmt(s.min)}</td><td>${fmt(s.max)}</td><td>${fmt(s.skew,2)}</td><td>${fmt(s.kurt,2)}</td></tr>`).join('')}</table></div>`+code(`stats = df.describe().T[["mean", "std", "min", "max"]]\nstats["skew"] = df.skew()\nstats["kurt"] = df.kurt() + 3\nprint(stats.round(3))`),t);t+=gap;
  const cc=v=>{const a=Math.min(1,Math.abs(v))*.55;return v>=0?`rgba(0,51,160,${a})`:`rgba(196,96,0,${a})`};
  addStep(k++,'Correlation matrix',`<div class="tw"><table><tr><th></th>${R.vars.map(v=>`<th>${esc(v)}</th>`).join('')}</tr>${R.corr.map((r,i)=>`<tr><td>${esc(R.vars[i])}</td>${r.map(v=>`<td style="background:${cc(v)};color:${Math.abs(v)>.6?'#fff':'inherit'}">${fmt(v,2)}</td>`).join('')}</tr>`).join('')}</table></div><p>Correlations above about 0.8 between regressors are a warning of multicollinearity. Between trending series, a high correlation may be spurious until the unit-root tests are done.</p>`+code(`print(df.corr().round(2))`),t);t+=gap;
- const tg=o=>o===0?'<span class="tag ok">I(0)</span>':o===1?'<span class="tag i1">I(1)</span>':'<span class="tag i2">I(2)?</span>';
+ const tg=o=>o===0?'<span class="tag ok">I(0)</span>':o===1?'<span class="tag i1">I(1)</span>':o===2?'<span class="tag i2">I(2)</span>':'<span class="tag i2">above I(2)</span>';
  const sp2=v=>{const a=v.filter(x=>x!=null),mn=Math.min(...a),mx=Math.max(...a),r=mx-mn||1,mean=a.reduce((p,c)=>p+c,0)/a.length,ym=(46-(mean-mn)/r*40).toFixed(1);return '<svg viewBox="0 0 200 52" preserveAspectRatio="none"><line x1="0" x2="200" y1="'+ym+'" y2="'+ym+'"/><path d="'+v.map((y,i)=>(i?'L':'M')+(i/(v.length-1)*200).toFixed(1)+' '+(46-(y-mn)/r*40).toFixed(1)).join('')+'"/></svg>'};
  const kp=p=>p==null?'–':p<=0.01?'≤ 0.01':p>=0.1?'≥ 0.10':p.toFixed(3);
  const urCard=u=>{const r0=u.adf_p<0.05,r1=u.dadf_p<0.05,ks=u.kpss_p!=null&&u.kpss_p<0.05;
-  const verdict=u.order===0?`<b>${esc(u.var)}</b> is stationary in levels: it is I(0) and can be used as it is.`:u.order===1?`<b>${esc(u.var)}</b> has a unit root in levels but is stationary after one difference: it is I(1).`:`<b>${esc(u.var)}</b> is still non-stationary after one difference: it may be I(2).`;
+  const verdict=u.order===0?`<b>${esc(u.var)}</b> is stationary in levels: it is I(0) and can be used as it is.`:u.order===1?`<b>${esc(u.var)}</b> has a unit root in levels but is stationary after one difference: it is I(1).`:u.order===2?`<b>${esc(u.var)}</b> becomes stationary only after two differences: it is I(2).`:`<b>${esc(u.var)}</b> is not stationary even after two differences. Check the data and the transformation.`;
   return `<div class="urv"><div class="urv-head"><b>${esc(u.var)}</b>${tg(u.order)}</div>
   <div class="pair"><div><small>Level</small>${sp2(R.series[u.var])}</div><div><small>First difference</small>${R.dseries?sp2(R.dseries[u.var]):''}</div></div>
   <ol><li><b>ADF test on the level.</b> Statistic ${fmt(u.adf_stat,2)}, p-value ${pf(u.adf_p)}. ${r0?'<span class="yes">p &lt; 0.05: reject the unit root.</span> The series is stationary.':'<span class="no">p ≥ 0.05: cannot reject the unit root.</span> The level is not stationary, so test the first difference.'}</li>
-  ${r0?'':`<li><b>ADF test on the first difference.</b> Statistic ${fmt(u.dadf_stat,2)}, p-value ${pf(u.dadf_p)}. ${r1?'<span class="yes">p &lt; 0.05: reject the unit root.</span> One difference makes it stationary.':'<span class="no">p ≥ 0.05: still cannot reject.</span> One difference is not enough.'}</li>`}
+  ${r0?'':`<li><b>ADF test on the first difference.</b> Statistic ${fmt(u.dadf_stat,2)}, p-value ${pf(u.dadf_p)}. ${r1?'<span class="yes">p &lt; 0.05: reject the unit root.</span> One difference makes it stationary.':'<span class="no">p ≥ 0.05: still cannot reject.</span> One difference is not enough, so test the second difference.'}</li>`}
+  ${u.d2adf_p==null?'':`<li><b>ADF test on the second difference.</b> Statistic ${fmt(u.d2adf_stat,2)}, p-value ${pf(u.d2adf_p)}. ${u.d2adf_p<0.05?'<span class="yes">p &lt; 0.05: reject the unit root.</span> Two differences make it stationary.':'<span class="no">p ≥ 0.05: still cannot reject.</span>'}</li>`}
   <li><b>KPSS test on the level (cross-check).</b> Statistic ${fmt(u.kpss_stat,2)}, p-value ${kp(u.kpss_p)}. ${ks?'p &lt; 0.05: KPSS rejects stationarity.':'p ≥ 0.05: KPSS does not reject stationarity.'} ${u.conflict?'<span class="no">⚠ This disagrees with the ADF result.</span>':(ks===!r0?'<span class="yes">This agrees with the ADF result.</span>':'')}</li></ol>
   <div class="v">→ ${verdict}</div></div>`};
  addStep(k++,'Unit-root tests',`<details class="explain" open><summary>What is a unit-root test, and why does it come first?</summary>
   <p>A <b>stationary</b> series keeps returning to a constant mean, like the first-difference charts below. A series with a <b>unit root</b> wanders without returning, like a stock-price index. Regressing one wandering series on another can give a high R² and significant t-statistics even when the two are unrelated (a <b>spurious regression</b>), so you must know which kind each variable is before choosing a model.</p>
   <ul><li><b>ADF test.</b> Null hypothesis: the series has a unit root. A p-value below 0.05 rejects the null, so the series is stationary.</li>
   <li><b>KPSS test.</b> The null is the opposite: the series is stationary. A p-value below 0.05 means it is <em>not</em> stationary. It is used to cross-check the ADF result.</li>
-  <li><b>Order of integration.</b> Stationary in levels is written I(0). Stationary only after taking the first difference (this period minus the last) is I(1).</li></ul>
+  <li><b>Order of integration.</b> Stationary in levels is written I(0). Stationary only after taking the first difference (this period minus the last) is I(1). If it takes two differences, the series is I(2); this is common for price levels and money stocks in logs, whose growth rates are themselves persistent.</li></ul>
   <p>In each chart the dashed line is the mean. A stationary series crosses it often; a unit-root series stays on one side for long stretches.</p></details>
   ${R.unitroot.map(urCard).join('')}
   <div class="label" style="margin-top:16px">Summary table for your paper</div>
   <div class="tw"><table><tr><th>Variable</th><th>ADF, level (p)</th><th>ADF, 1st diff. (p)</th><th>KPSS, level (p)</th><th>Order</th></tr>${R.unitroot.map(u=>`<tr><td>${esc(u.var)}</td><td>${fmt(u.adf_stat,2)} (${pf(u.adf_p)})</td><td>${fmt(u.dadf_stat,2)} (${pf(u.dadf_p)})</td><td>${fmt(u.kpss_stat,2)} (${kp(u.kpss_p)})</td><td>${tg(u.order)}${u.conflict?' ⚠':''}</td></tr>`).join('')}</table></div>
-  <p><b>Result:</b> ${R.model==='OLS'?'every variable is I(0), so a regression in levels is valid.':R.model==='I2'?'at least one variable may be I(2). Check the transformations before going further.':R.model==='ARDL'?'the variables are a mix of I(0) and I(1). A model that allows mixed orders is needed.':'every variable is I(1). The next question is whether they move together in the long run (cointegration).'}${R.conflicts.length?' <b>⚠ ADF and KPSS disagree for '+R.conflicts.map(esc).join(', ')+'</b>, which often points to a structural break or a shift in the mean.':''}</p>`+code(`from statsmodels.tsa.stattools import adfuller, kpss\n\nfor col in df:\n    adf_level = adfuller(df[col], autolag="AIC")                 # H0: unit root\n    adf_diff = adfuller(df[col].diff().dropna(), autolag="AIC")  # H0: unit root in the first difference\n    kpss_level = kpss(df[col], regression="c", nlags="auto")     # H0: stationary\n    print(col, round(adf_level[0], 2), round(adf_level[1], 3),\n          round(adf_diff[1], 3), round(kpss_level[1], 3))`),t);
- const branch=R.model==='OLS'?'i0':(R.model==='VAR'||R.model==='VECM')?'i1':R.model==='ARDL'?'mix':null;
+  <p><b>Result:</b> ${R.model==='OLS'?'every variable is I(0), so a regression in levels is valid.':R.model==='I2'?'at least one variable is I(2). None of the standard models is valid until that variable is transformed.':R.model==='ARDL'?'the variables are a mix of I(0) and I(1). A model that allows mixed orders is needed.':'every variable is I(1). The next question is whether they move together in the long run (cointegration).'}${R.conflicts.length?' <b>⚠ ADF and KPSS disagree for '+R.conflicts.map(esc).join(', ')+'</b>, which often points to a structural break or a shift in the mean.':''}</p>`+code(`from statsmodels.tsa.stattools import adfuller, kpss\n\nfor col in df:\n    adf_level = adfuller(df[col], autolag="AIC")                 # H0: unit root\n    adf_diff = adfuller(df[col].diff().dropna(), autolag="AIC")  # H0: unit root in the first difference\n    kpss_level = kpss(df[col], regression="c", nlags="auto")     # H0: stationary\n    print(col, round(adf_level[0], 2), round(adf_level[1], 3),\n          round(adf_diff[1], 3), round(kpss_level[1], 3))`),t);
+ const branch=R.model==='OLS'?'i0':(R.model==='VAR'||R.model==='VECM')?'i1':R.model==='ARDL'?'mix':'i2';
  setTimeout(()=>{if(my!==run)return;light(['start','q1','ur'].concat(branch?[branch]:[]))},t+300*D);t+=gap+400*D;
  if(R.johansen){const J=R.johansen;
-  addStep(k++,'Cointegration: Johansen trace test',`<div class="tw"><table><tr><th>Null hypothesis</th><th>Trace statistic</th><th>5% critical value</th><th>Decision</th></tr>${J.rows.map(r=>`<tr><td>At most ${r.h0} cointegrating relation${r.h0===1?'':'s'}</td><td>${fmt(r.trace,2)}</td><td>${fmt(r.cv,2)}</td><td>${r.reject?'Reject':'Do not reject'}</td></tr>`).join('')}</table></div><p>VAR lag order chosen by AIC: ${J.lags}. Estimated cointegrating rank: <b>${J.rank}</b>.${R.fullrank?' The rank equals the number of variables, which suggests the series may be stationary after all; check the unit-root results again.':''}</p>`+code(`from statsmodels.tsa.api import VAR\nfrom statsmodels.tsa.vector_ar.vecm import coint_johansen\n\np = VAR(df).select_order(8).aic              # lag order in levels\njoh = coint_johansen(df, det_order=0, k_ar_diff=p - 1)\nprint(joh.lr1)       # trace statistics\nprint(joh.cvt[:, 1]) # 5% critical values`),t);
+  addStep(k++,'Cointegration: Johansen trace test',`<details class="explain" open><summary>What is cointegration?</summary><p>Two I(1) series each wander, but they are <b>cointegrated</b> if they wander together, so that some combination of them is stationary. Short and long interest rates are the classic case: each drifts, but the gap between them keeps returning to a stable level. If such a long-run relationship exists, a model in differences alone throws it away, and a VECM is needed. If it does not exist, a VAR in first differences is correct.</p><p>The Johansen trace test is read from the top row down. Each row tests “at most <em>r</em> cointegrating relations”. Stop at the first row that is <em>not</em> rejected (trace statistic below the critical value): that <em>r</em> is the rank.</p></details><div class="tw"><table><tr><th>Null hypothesis</th><th>Trace statistic</th><th>5% critical value</th><th>Decision</th></tr>${J.rows.map(r=>`<tr><td>At most ${r.h0} cointegrating relation${r.h0===1?'':'s'}</td><td>${fmt(r.trace,2)}</td><td>${fmt(r.cv,2)}</td><td>${r.reject?'Reject':'Do not reject'}</td></tr>`).join('')}</table></div><p>VAR lag order chosen by AIC: ${J.lags}. Estimated cointegrating rank: <b>${J.rank}</b>.${R.fullrank?' The rank equals the number of variables, which suggests the series may be stationary after all; check the unit-root results again.':''}</p>`+code(`from statsmodels.tsa.api import VAR\nfrom statsmodels.tsa.vector_ar.vecm import coint_johansen\n\np = VAR(df).select_order(8).aic              # lag order in levels\njoh = coint_johansen(df, det_order=0, k_ar_diff=p - 1)\nprint(joh.lr1)       # trace statistics\nprint(joh.cvt[:, 1]) # 5% critical values`),t);
   setTimeout(()=>{if(my!==run)return;light(['start','q1','ur','i1','co'])},t+300*D);t+=gap+400*D}
  setTimeout(()=>{if(my!==run)return;
-  if(R.model==='I2')return i2card();
+  if(R.model==='I2')return i2card(R);
   if(R.model==='ARDL'){light(PATHS.ARDL.slice(0,5));return askAsym(R)}
   finish(R.model,R)},t);
 }
@@ -217,7 +220,10 @@ function finish(m,R,alt){const my=run,M=MODELS[m];const d=light(PATHS[m]);if(alt
 function askAsym(R){const s=el('div','step',`<div class="label">One question</div><h3>Do you expect increases and decreases in a regressor to affect ${esc(R.dep)} differently?</h3><p>Your variables are a mix of I(0) and I(1), so the ARDL family applies. The answer decides between the linear and the nonlinear version.</p><div class="opts"><button type="button" data-a="ARDL">No, or I have no reason to expect it<small>Linear ARDL</small></button><button type="button" data-a="NARDL">Yes, for example oil-price rises and falls, or depreciation and appreciation<small>Nonlinear ARDL</small></button></div>`);
  $('#steps').appendChild(s);requestAnimationFrame(()=>s.classList.add('in'));if(!reduce)s.scrollIntoView({behavior:'smooth',block:'nearest'});
  s.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{s.querySelectorAll('button').forEach(x=>x.disabled=true);b.style.borderColor='var(--navy)';b.style.background='var(--tint)';finish(b.dataset.a,R,b.dataset.a==='ARDL'?'NARDL':'ARDL')}))}
-function i2card(){$('#result').innerHTML=`<div class="result"><div class="label">Check before modelling</div><h2>A variable may be I(2)</h2><p>At least one series still has a unit root after first differencing. None of the six models here is valid with I(2) variables, and the ARDL bounds test in particular breaks down.</p><ul><li>Check the transformation: use logs, or growth rates instead of levels</li><li>Use real instead of nominal values</li><li>Test for a structural break (Zivot–Andrews)</li><li>Try a shorter or different sample</li></ul><div class="acts"><a class="btn" href="${L}10-unit-roots-breaks.html">Lecture: Unit roots and breaks →</a></div></div>`;$('#result').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'})}
+function i2card(R){const my=run,d=light(PATHS.I2);const bad=R?R.unitroot.filter(u=>u.order>=2).map(u=>u.var):[];
+ setTimeout(()=>{if(my!==run)return;
+ $('#result').innerHTML=`<div class="result"><div class="label">Transform, then test again</div><h2>${bad.length===1?'One variable is I(2)':bad.length?bad.length+' variables are I(2)':'A variable is I(2)'}</h2><p>${bad.length?'<b>In this data:</b> '+bad.map(esc).join(', ')+(bad.length===1?' is':' are')+' still non-stationary after one difference. ':''}OLS, VAR, VECM, ARDL and NARDL all assume that no variable is integrated of order two. The ARDL bounds test in particular has no valid critical values with an I(2) variable, so the model must not be estimated on the data as it stands.</p><div class="label" style="margin-bottom:6px">What to do</div><ul><li>Replace the I(2) variable by its first difference, for example inflation instead of the log price level, or money growth instead of log money. The new variable is I(1)</li><li>Use real instead of nominal values</li><li>Test for a structural break (Zivot–Andrews): a break can make an I(1) series look I(2)</li><li>Check a different or shorter sample</li><li>Then run this tool again on the transformed data</li></ul><div class="acts"><a class="btn" href="${L}10-unit-roots-breaks.html">Lecture: Unit roots and breaks →</a>${R?'':'<button class="btn ghost" type="button" id="again">Start over</button>'}</div></div>`;
+ $('#result').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});const ag=$('#again');ag&&ag.addEventListener('click',()=>setMode('ask'))},d+250*D)}
 
 /* ---------- mode: examples ---------- */
 function initExamples(){EXAMPLES.forEach(x=>{const b=el('button','',`<small>${esc(x.meta)}</small><b>${esc(x.title)}</b><span>${esc(x.desc)}</span>`);b.type='button';
@@ -241,12 +247,12 @@ function initUpload(){const d=$('#drop');$('#file').addEventListener('change',e=
 
 /* ---------- mode: questions ---------- */
 const QS={q1:{t:'Is your data a panel (many units over time), or do you have endogenous regressors that need instruments?',o:[['No. A single time series for each variable','','q2',['start','q1','ur']],['Yes','Panel data, or instruments needed','GMM']]},
- q2:{t:'What did your unit-root tests show?',o:[['All variables are stationary in levels','All I(0): ADF rejects a unit root for every variable','OLS'],['All variables are stationary only after first differencing','All I(1)','q3',['start','q1','ur','i1','co']],['A mix: some I(0), some I(1)','None is I(2)','q4',['start','q1','ur','mix','as']],['At least one needs differencing twice','I(2)','I2']]},
+ q2:{t:'What did your unit-root tests show?',o:[['All variables are stationary in levels','All I(0): ADF rejects a unit root for every variable','OLS'],['All variables are stationary only after first differencing','All I(1)','q3',['start','q1','ur','i1','co']],['A mix: some I(0), some I(1)','None is I(2)','q4',['start','q1','ur','mix','as']],['At least one variable needs differencing twice','Some I(2)','I2']]},
  q3:{t:'Does a cointegration test (Johansen or Engle–Granger) find a long-run relationship?',o:[['Yes, the variables are cointegrated','','VECM'],['No cointegration','','VAR']]},
  q4:{t:'Do you expect increases and decreases in a regressor to have different effects?',o:[['No, or I have no reason to expect it','','ARDL'],['Yes','For example oil-price rises and falls','NARDL']]}};
 function ask(id,n=1){const Q=QS[id];$('#q').innerHTML=`<div class="label">Question ${n}</div><h3>${Q.t}</h3><div class="opts">${Q.o.map((o,i)=>`<button type="button" data-i="${i}">${o[0]}${o[1]?`<small>${o[1]}</small>`:''}</button>`).join('')}</div>`;
  $('#q').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const o=Q.o[+b.dataset.i],to=o[2];
-  if(QS[to]){light(o[3]);ask(to,n+1)}else{$('#q').innerHTML='<p class="sub" style="margin:0">Your answers lead to the model shown below.</p>';to==='I2'?(light(['start','q1','ur']),i2card()):finish(to,null,to==='ARDL'?'NARDL':to==='NARDL'?'ARDL':null)}}))}
+  if(QS[to]){light(o[3]);ask(to,n+1)}else{$('#q').innerHTML='<p class="sub" style="margin:0">Your answers lead to the model shown below.</p>';to==='I2'?i2card():finish(to,null,to==='ARDL'?'NARDL':to==='NARDL'?'ARDL':null)}}))}
 
 /* ---------- guides, modes, init ---------- */
 function initGuides(){Object.entries(MODELS).forEach(([k,M])=>{$('#gcards').appendChild(el('article','gcard',`<span class="tag">In preparation</span><h3>${k==='GMM'?'2SLS / GMM':k}</h3><p class="when">${M.when}</p><p>${M.steps.slice(0,5).join(' · ')} …</p>${M.lec.map(l=>`<a href="${L+l[0]}">${l[1]} →</a>`).join('')}`)).id='g-'+k})}
