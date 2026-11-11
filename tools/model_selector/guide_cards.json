@@ -53,5 +53,16 @@
 "Real output",
 "How to write it"
 ]
+},
+{
+"out": "assets/og/research-guide-gmm.jpg",
+"kicker": "Empirical Research Guide · Model guide",
+"title": "2SLS and GMM",
+"sub": "Endogenous regressors that need instruments. U.S. federal funds rate, inflation and the output gap, quarterly, 1979–2007",
+"tags": [
+"Python code",
+"Real output",
+"How to write it"
+]
 }
 ]
