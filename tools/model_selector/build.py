@@ -59,3 +59,6 @@ guides = [p.stem for p in (HERE / "guides").glob("*.md")]
 page = tpl.replace("/*GUIDES*/[]", json.dumps(guides)).replace("/*EXAMPLES*/", json.dumps(examples, ensure_ascii=False)).replace("#PYSRC#", (HERE / "analysis.py").read_text())
 (OUT / "index.html").write_text(page)
 print("wrote research-guide/index.html", len(page) // 1024, "KB")
+
+import subprocess as _sp, sys as _sys, pathlib as _pl
+_sp.run([_sys.executable, str(_pl.Path(__file__).resolve().parents[2] / "tools" / "og_tags.py")], check=True)  # complete preview tags

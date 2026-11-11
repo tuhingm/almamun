@@ -102,3 +102,6 @@ if __name__ == "__main__":
         [dict(out=f"assets/og/research-guide-{s}.jpg", kicker="Empirical Research Guide · Model guide", title=m["title"],
               sub=m["when"] + ". " + m["data"], tags=["Python code", "Real output", "How to write it"]) for s, m in metas.items()],
         ensure_ascii=False, indent=0))
+
+import subprocess as _sp, sys as _sys, pathlib as _pl
+_sp.run([_sys.executable, str(_pl.Path(__file__).resolve().parents[2] / "tools" / "og_tags.py")], check=True)  # complete preview tags
