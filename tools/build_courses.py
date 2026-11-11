@@ -343,4 +343,7 @@ def build() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(build())
+    rc = build()
+    import subprocess
+    subprocess.run([sys.executable, str(TOOLS / "og_tags.py")], check=True)  # complete link-preview tags
+    sys.exit(rc)
