@@ -42,7 +42,7 @@ BOX_RULES = [
     ("objectives", re.compile(r"^(learning )?objectives|^core question|^motivation", re.I)),
     ("example", re.compile(r"^worked (example|illustration|problem)", re.I)),
     ("problems", re.compile(r"^(problem set|problems|exercises)", re.I)),
-    ("lab", re.compile(r"^(computational )?lab\b|^computational lab", re.I)),
+    ("lab", re.compile(r"^(computational )?lab\b|^computational lab|^coding exercises", re.I)),
     ("reading", re.compile(r"^(further |suggested |required )?readings?\b|^references", re.I)),
 ]
 READING_RE = re.compile(r"^(further |suggested |required )?readings?\b", re.I)

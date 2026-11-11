@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Econometrics · Lecture 3</h3>
       <div class="profile-item"><strong>Part</strong><span>Part I · Linear regression and inference</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 13 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 19 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="02-ols-inference.html">Lecture 2: OLS Inference: Sampling Distributions, Hypothesis Tests, and Confidence Intervals</a></span></div>
       
     </aside>
@@ -246,6 +246,100 @@ lam = S.var() / S_obs.var()
 print(ols(logw, S_obs, A)[1], &quot;reliability ratio&quot;, round(lam, 3))
 </code></pre>
 <p>Tasks: (i) verify the identity to machine precision; (ii) compute the theoretical attenuation factor with ability controlled, using the residual variance of <span class="arithmatex">\(S\)</span> after projecting on <span class="arithmatex">\(A\)</span>, and compare with the simulation; (iii) add a "bad control", such as occupation generated from <span class="arithmatex">\(S\)</span> and <span class="arithmatex">\(A\)</span>, and document how <span class="arithmatex">\(\widehat\beta_S\)</span> moves. In R, <code>lm()</code> with <code>margins</code> or <code>marginaleffects</code> computes APEs and delta-method standard errors.</p>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises use <strong>real data</strong> and run in Python. Install the packages once with
+<code>pip install wooldridge statsmodels linearmodels scipy</code>. The <code>wooldridge</code> package contains the datasets
+from Wooldridge's <em>Introductory Econometrics</em>; <code>statsmodels</code> ships U.S. and Danish macroeconomic series.
+Try the starter code first, then open the solution. Every printed result below was produced by running the solution code exactly as shown.</p>
+<h3 id="exercise-31-ability-bias-in-the-return-to-schooling-with-iq-as-a-proxy">Exercise 3.1 — Ability bias in the return to schooling, with IQ as a proxy</h3>
+<p><em>Data:</em> <code>wage2</code> — 935 men, NLS 1980; <code>IQ</code> is an IQ test score.</p>
+<ol>
+<li>Estimate the short regression of <code>log(wage)</code> on <code>educ</code>, <code>exper</code>, <code>tenure</code>, <code>married</code>, <code>south</code>, <code>urban</code>, <code>black</code>.</li>
+<li>Add <code>IQ</code> (the long regression). How much does the return to schooling fall?</li>
+<li>Verify the omitted-variable bias identity <span class="arithmatex">\(\widehat\beta^S_{educ}=\widehat\beta_{educ}+\widehat\gamma\,\widehat\beta_{IQ}\)</span> exactly, where <span class="arithmatex">\(\widehat\gamma\)</span> is the coefficient on <code>educ</code> in the auxiliary regression of <code>IQ</code> on all the short-regression regressors.</li>
+<li>Express the bias as a percentage of the short-regression estimate.</li>
+</ol>
+<pre><code class="language-python">import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+df = wd.data(&quot;wage2&quot;)
+ctrl = &quot;exper + tenure + married + south + urban + black&quot;
+short = smf.ols(f&quot;np.log(wage) ~ educ + {ctrl}&quot;, data=df).fit()
+# TODO: long regression adds IQ; auxiliary regression IQ ~ educ + ctrl
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+df = wd.data(&quot;wage2&quot;)
+ctrl = &quot;exper + tenure + married + south + urban + black&quot;
+short = smf.ols(f&quot;np.log(wage) ~ educ + {ctrl}&quot;, data=df).fit()
+long_ = smf.ols(f&quot;np.log(wage) ~ educ + IQ + {ctrl}&quot;, data=df).fit()
+aux = smf.ols(f&quot;IQ ~ educ + {ctrl}&quot;, data=df).fit()
+bS, bL, bIQ, gam = short.params[&quot;educ&quot;], long_.params[&quot;educ&quot;], long_.params[&quot;IQ&quot;], aux.params[&quot;educ&quot;]
+print(f&quot;short-regression return to educ: {bS:.5f}&quot;)
+print(f&quot;long-regression return to educ:  {bL:.5f}&quot;)
+print(f&quot;IQ coefficient {bIQ:.5f};  auxiliary slope of IQ on educ {gam:.4f}&quot;)
+print(f&quot;bL + gamma * bIQ = {bL + gam * bIQ:.5f}   (identity holds: {abs(bL + gam*bIQ - bS) &lt; 1e-10})&quot;)
+print(f&quot;omitted-variable bias = {gam * bIQ:.5f}, i.e. {100 * gam * bIQ / bS:.1f}% of the short estimate&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">short-regression return to educ: 0.06543
+long-regression return to educ:  0.05441
+IQ coefficient 0.00356;  auxiliary slope of IQ on educ 3.0963
+bL + gamma * bIQ = 0.06543   (identity holds: True)
+omitted-variable bias = 0.01102, i.e. 16.8% of the short estimate
+</code></pre>
+<p>Each year of schooling is associated with a few more IQ points, and IQ raises wages, so omitting IQ biases the return
+to schooling <strong>upward</strong>. The identity holds to machine precision, as Theorem 3.1 says it must. Controlling for IQ lowers
+the return from about 6.5% to 5.4% per year — the bias is about one sixth of the short estimate. IQ is only a proxy for ability: if it measures ability with error, part of the bias
+remains, and the true ability-adjusted return could be lower still. Remember the offsetting attenuation bias from
+measurement error in schooling (Lecture 3, worked example).</p>
+</details>
+<h3 id="exercise-32-exact-percentage-effects-interactions-and-reset">Exercise 3.2 — Exact percentage effects, interactions and RESET</h3>
+<p><em>Data:</em> <code>wage1</code> — 526 workers, CPS 1976.</p>
+<ol>
+<li>Estimate <code>log(wage)</code> on <code>female</code>, <code>educ</code>, <code>exper</code>, <code>exper²</code>, <code>tenure</code>. Report the <strong>exact</strong> percentage gender gap <span class="arithmatex">\(100(e^{\delta}-1)\)</span> with a delta-method standard error.</li>
+<li>Add <code>female × educ</code>. Does the return to education differ by gender? What is the gender gap at 12 and at 16 years of schooling?</li>
+<li>Run a RESET test (add <span class="arithmatex">\(\widehat y^2\)</span> and <span class="arithmatex">\(\widehat y^3\)</span>) for the model of part 1, using robust inference.</li>
+</ol>
+<pre><code class="language-python">import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+df = wd.data(&quot;wage1&quot;)
+base = &quot;np.log(wage) ~ female + educ + exper + I(exper**2) + tenure&quot;
+r1 = smf.ols(base, data=df).fit(cov_type=&quot;HC1&quot;)
+# TODO: exact gap 100*(exp(d)-1); interaction model; RESET with fitted values squared and cubed
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+df = wd.data(&quot;wage1&quot;)
+base = &quot;np.log(wage) ~ female + educ + exper + I(exper**2) + tenure&quot;
+r1 = smf.ols(base, data=df).fit(cov_type=&quot;HC1&quot;)
+d, sd = r1.params[&quot;female&quot;], r1.bse[&quot;female&quot;]
+print(f&quot;female coefficient {d:.4f}: approx gap {100*d:.1f}%, exact gap {100*(np.exp(d)-1):.1f}% (se {100*np.exp(d)*sd:.1f} pp)&quot;)
+
+r2 = smf.ols(base + &quot; + female:educ&quot;, data=df).fit(cov_type=&quot;HC1&quot;)
+print(f&quot;female:educ = {r2.params['female:educ']:.4f} (robust se {r2.bse['female:educ']:.4f}, p = {r2.pvalues['female:educ']:.3f})&quot;)
+for e in (12, 16):
+    t = r2.t_test(f&quot;female + {e}*female:educ = 0&quot;)
+    print(f&quot;  log gap at educ = {e}: {float(np.squeeze(t.effect)):.4f} (se {float(np.squeeze(t.sd)):.4f})&quot;)
+
+df[&quot;yh&quot;] = smf.ols(base, data=df).fit().fittedvalues
+r3 = smf.ols(base + &quot; + I(yh**2) + I(yh**3)&quot;, data=df).fit(cov_type=&quot;HC1&quot;)
+w = r3.wald_test(&quot;I(yh ** 2) = 0, I(yh ** 3) = 0&quot;, scalar=True)
+print(f&quot;RESET (robust): chi2(2) = {w.statistic:.3f}, p = {w.pvalue:.3f}&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">female coefficient -0.2979: approx gap -29.8%, exact gap -25.8% (se 2.7 pp)
+female:educ = -0.0040 (robust se 0.0148, p = 0.787)
+  log gap at educ = 12: -0.2958 (se 0.0367)
+  log gap at educ = 16: -0.3118 (se 0.0662)
+RESET (robust): chi2(2) = 25.470, p = 0.000
+</code></pre>
+<p>The exact gap is a few points smaller in absolute value than the approximate one, because <span class="arithmatex">\(e^{\delta}-1&gt;\delta\)</span> for
+negative <span class="arithmatex">\(\delta\)</span>. The interaction is small and statistically insignificant: in 1976 the return to education was
+similar for women and men, so the gender gap is roughly constant across schooling levels. The <span class="arithmatex">\(t\)</span>-test on <code>female</code>
+alone in the interaction model would be the gap at <strong>zero</strong> years of education — not a meaningful quantity. RESET <strong>rejects</strong> strongly
+(p &lt; 0.001): the specification misses some nonlinearity — candidates include a quadratic in tenure or interactions of
+experience with education. RESET signals that the conditional mean is misspecified; it does not say how.</p>
+</details>
 </section><section class="box reading"><h2 id="reading">Reading</h2>
 <p><strong>Required:</strong> Wooldridge, <em>Introductory Econometrics</em>, chapters 3.3, 6 and 7; Angrist and Pischke, <em>Mostly Harmless Econometrics</em>, chapter 3.2.
 <strong>Further:</strong> Card (1999), "The causal effect of education on earnings", <em>Handbook of Labor Economics</em> vol. 3A; Santos Silva and Tenreyro (2006), "The log of gravity", <em>Review of Economics and Statistics</em> 88(4); Oster (2019), "Unobservable selection and coefficient stability", <em>Journal of Business &amp; Economic Statistics</em> 37(2); Ramsey (1969), "Tests for specification errors in classical linear least-squares regression analysis", <em>JRSS-B</em> 31(2).</p></section></article>

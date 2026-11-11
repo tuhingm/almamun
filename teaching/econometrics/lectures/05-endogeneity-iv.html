@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Econometrics · Lecture 5</h3>
       <div class="profile-item"><strong>Part</strong><span>Part II · Endogeneity and identification</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 14 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 21 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="04-heteroskedasticity-robust-inference.html">Lecture 4: Heteroskedasticity, Dependence, and Robust Inference</a></span></div>
       
     </aside>
@@ -208,6 +208,107 @@ for pi in (0.05, 0.15, 0.5):
           f&quot;median IV={np.median(R[:,1]):.2f}  Wald size={R[:,2].mean():.3f}  AR size={R[:,3].mean():.3f}&quot;)
 </code></pre>
 <p>Tasks: (i) explain why the median IV estimate moves toward the OLS limit as <span class="arithmatex">\(F\)</span> falls; (ii) confirm that AR has correct size for every <span class="arithmatex">\(\pi\)</span> while the Wald test does not; (iii) invert AR over a grid of <span class="arithmatex">\(\beta_0\)</span> to build a confidence set. In R, <code>ivreg::ivreg()</code> or <code>fixest::feols(y ~ 1 | x ~ z)</code> with <code>fitstat(~ivwald)</code>; <code>ivmodel</code> for AR and CLR. In Stata, <code>ivreg2</code> (with <code>ffirst</code>) and <code>weakiv</code>.</p>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises use <strong>real data</strong> and run in Python. Install the packages once with
+<code>pip install wooldridge statsmodels linearmodels scipy</code>. The <code>wooldridge</code> package contains the datasets
+from Wooldridge's <em>Introductory Econometrics</em>; <code>statsmodels</code> ships U.S. and Danish macroeconomic series.
+Try the starter code first, then open the solution. Every printed result below was produced by running the solution code exactly as shown.</p>
+<h3 id="exercise-51-card-1995-college-proximity-as-an-instrument-for-schooling">Exercise 5.1 — Card (1995): college proximity as an instrument for schooling</h3>
+<p><em>Data:</em> <code>card</code> — 3,010 men from the NLS Young Men cohort, earnings in 1976; <code>nearc4</code> = grew up near a four-year college.</p>
+<ol>
+<li>Estimate OLS of <code>lwage</code> on <code>educ</code>, <code>exper</code>, <code>expersq</code>, <code>black</code>, <code>smsa</code>, <code>south</code>, <code>smsa66</code> and regional dummies <code>reg662</code>–<code>reg669</code>.</li>
+<li>Estimate the first stage (<code>educ</code> on <code>nearc4</code> and the controls). Report the robust first-stage <span class="arithmatex">\(F\)</span>.</li>
+<li>Estimate 2SLS with <code>linearmodels</code> (robust standard errors), treating <code>exper</code> and <code>expersq</code> as exogenous as in Card's simplest specification.</li>
+<li>Compute the <strong>Anderson–Rubin</strong> 95% confidence set by inverting the AR test over a grid of <span class="arithmatex">\(\beta_0\)</span>.</li>
+</ol>
+<pre><code class="language-python">import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+from linearmodels.iv import IV2SLS
+df = wd.data(&quot;card&quot;)
+ctrl = &quot;exper + expersq + black + smsa + south + smsa66 + &quot; + &quot; + &quot;.join(f&quot;reg66{i}&quot; for i in range(2, 10))
+iv = IV2SLS.from_formula(f&quot;lwage ~ 1 + {ctrl} + [educ ~ nearc4]&quot;, data=df).fit(cov_type=&quot;robust&quot;)
+# TODO: OLS, first stage F, AR test: regress (lwage - b0*educ) on nearc4 + controls for a grid of b0
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+from linearmodels.iv import IV2SLS
+df = wd.data(&quot;card&quot;)
+ctrl = &quot;exper + expersq + black + smsa + south + smsa66 + &quot; + &quot; + &quot;.join(f&quot;reg66{i}&quot; for i in range(2, 10))
+ols = smf.ols(f&quot;lwage ~ educ + {ctrl}&quot;, data=df).fit(cov_type=&quot;HC1&quot;)
+fs = smf.ols(f&quot;educ ~ nearc4 + {ctrl}&quot;, data=df).fit(cov_type=&quot;HC1&quot;)
+iv = IV2SLS.from_formula(f&quot;lwage ~ 1 + {ctrl} + [educ ~ nearc4]&quot;, data=df).fit(cov_type=&quot;robust&quot;)
+print(f&quot;OLS  return to educ: {ols.params['educ']:.4f} (se {ols.bse['educ']:.4f})&quot;)
+print(f&quot;first stage: nearc4 -&gt; educ = {fs.params['nearc4']:.4f}, robust F = {fs.tvalues['nearc4']**2:.1f}&quot;)
+print(f&quot;2SLS return to educ: {iv.params['educ']:.4f} (se {iv.std_errors['educ']:.4f})&quot;)
+
+acc = []
+for b0 in np.arange(-0.10, 0.60, 0.0025):
+    df[&quot;ytil&quot;] = df[&quot;lwage&quot;] - b0 * df[&quot;educ&quot;]
+    t = smf.ols(f&quot;ytil ~ nearc4 + {ctrl}&quot;, data=df).fit(cov_type=&quot;HC1&quot;).tvalues[&quot;nearc4&quot;]
+    if abs(t) &lt; 1.96:
+        acc.append(b0)
+print(f&quot;Anderson-Rubin 95% set: [{min(acc):.3f}, {max(acc):.3f}]  vs Wald: [{iv.params['educ']-1.96*iv.std_errors['educ']:.3f}, {iv.params['educ']+1.96*iv.std_errors['educ']:.3f}]&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">OLS  return to educ: 0.0747 (se 0.0036)
+first stage: nearc4 -&gt; educ = 0.3199, robust F = 14.1
+2SLS return to educ: 0.1315 (se 0.0540)
+Anderson-Rubin 95% set: [0.030, 0.280]  vs Wald: [0.026, 0.237]
+</code></pre>
+<p>The 2SLS return (about 13%) is close to double the OLS estimate (7.5%), with a standard error about fifteen times larger. The first-stage
+<span class="arithmatex">\(F\)</span> is above 10 but well below the ~105 needed for the usual <span class="arithmatex">\(t\)</span>-test to have exactly correct size (Lee et al., 2022).
+The Anderson–Rubin set is therefore wider than the Wald interval and <strong>asymmetric</strong>, extending further to the right.
+It is valid regardless of instrument strength. Interpretation: a LATE for men whose schooling responded to living near
+a college, who plausibly face higher marginal returns. The exclusion restriction is open to challenge — proximity to a
+college correlates with urban labor markets and family background, which the controls only partly capture.</p>
+</details>
+<h3 id="exercise-52-returns-to-education-for-married-women-over-identification-and-endogeneity-tests">Exercise 5.2 — Returns to education for married women: over-identification and endogeneity tests</h3>
+<p><em>Data:</em> <code>mroz</code> — 753 married women, PSID 1975 (428 in the labor force); <code>fatheduc</code>, <code>motheduc</code> = parents' education.</p>
+<ol>
+<li>For women in the labor force (<code>inlf == 1</code>), estimate <code>lwage</code> on <code>educ</code>, <code>exper</code>, <code>expersq</code> by OLS and by 2SLS using <code>fatheduc</code> and <code>motheduc</code> as instruments for <code>educ</code>.</li>
+<li>Report the first-stage <span class="arithmatex">\(F\)</span> for the two excluded instruments.</li>
+<li>Test the over-identifying restriction (robust Hansen <span class="arithmatex">\(J\)</span> / Wooldridge score test).</li>
+<li>Test the endogeneity of <code>educ</code> with the control-function regression.</li>
+</ol>
+<pre><code class="language-python">import wooldridge as wd, statsmodels.formula.api as smf
+from linearmodels.iv import IV2SLS
+df = wd.data(&quot;mroz&quot;).query(&quot;inlf == 1&quot;).copy()
+iv = IV2SLS.from_formula(&quot;lwage ~ 1 + exper + expersq + [educ ~ fatheduc + motheduc]&quot;, data=df).fit(cov_type=&quot;robust&quot;)
+# TODO: iv.first_stage, iv.wooldridge_overid, control function: add first-stage residual to OLS
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import wooldridge as wd, statsmodels.formula.api as smf
+from linearmodels.iv import IV2SLS
+df = wd.data(&quot;mroz&quot;).query(&quot;inlf == 1&quot;).copy()
+ols = smf.ols(&quot;lwage ~ educ + exper + expersq&quot;, data=df).fit(cov_type=&quot;HC1&quot;)
+iv = IV2SLS.from_formula(&quot;lwage ~ 1 + exper + expersq + [educ ~ fatheduc + motheduc]&quot;, data=df).fit(cov_type=&quot;robust&quot;)
+print(f&quot;OLS  educ: {ols.params['educ']:.4f} (se {ols.bse['educ']:.4f})&quot;)
+print(f&quot;2SLS educ: {iv.params['educ']:.4f} (se {iv.std_errors['educ']:.4f})&quot;)
+
+fs = smf.ols(&quot;educ ~ fatheduc + motheduc + exper + expersq&quot;, data=df).fit(cov_type=&quot;HC1&quot;)
+print(f&quot;first-stage robust F (2 instruments): {fs.wald_test('fatheduc = 0, motheduc = 0', scalar=True).statistic/2:.1f}&quot;)
+o = iv.wooldridge_overid
+print(f&quot;over-identification (Wooldridge score): stat = {o.stat:.3f}, p = {o.pval:.3f}&quot;)
+
+df[&quot;vhat&quot;] = smf.ols(&quot;educ ~ fatheduc + motheduc + exper + expersq&quot;, data=df).fit().resid
+cf = smf.ols(&quot;lwage ~ educ + exper + expersq + vhat&quot;, data=df).fit(cov_type=&quot;HC1&quot;)
+print(f&quot;control function: educ = {cf.params['educ']:.4f} (equals 2SLS), vhat t = {cf.tvalues['vhat']:.2f}, p = {cf.pvalues['vhat']:.3f}&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">OLS  educ: 0.1075 (se 0.0132)
+2SLS educ: 0.0614 (se 0.0332)
+first-stage robust F (2 instruments): 49.5
+over-identification (Wooldridge score): stat = 0.443, p = 0.505
+control function: educ = 0.0614 (equals 2SLS), vhat t = 1.60, p = 0.110
+</code></pre>
+<p>The 2SLS estimate is smaller than OLS and much less precise. The instruments are strong, and the over-identification
+test does not reject, so the two parental-education instruments give mutually consistent answers. That does <strong>not</strong>
+prove both are valid: if both are correlated with unobserved ability in the same direction, the test has no power. The
+control-function coefficient on <code>educ</code> equals 2SLS exactly, and the endogeneity test is not significant at 10% (p ≈ 0.11), so
+the data cannot sharply distinguish OLS from 2SLS here. Note also the sample selection: wages are observed only for
+women who work, so these regressions condition on participation (Heckman, 1979).</p>
+</details>
 </section><section class="box reading"><h2 id="reading">Reading</h2>
 <p><strong>Required:</strong> Angrist and Pischke, <em>Mostly Harmless Econometrics</em>, chapter 4; Hansen, <em>Econometrics</em>, chapter 12.
 <strong>Further:</strong> Imbens and Angrist (1994), "Identification and estimation of local average treatment effects", <em>Econometrica</em> 62(2); Angrist (1990), "Lifetime earnings and the Vietnam era draft lottery", <em>AER</em> 80(3); Bound, Jaeger and Baker (1995), <em>JASA</em> 90(430); Staiger and Stock (1997), <em>Econometrica</em> 65(3); Stock and Yogo (2005), in <em>Identification and Inference for Econometric Models</em>; Montiel Olea and Pflueger (2013), <em>JBES</em> 31(3); Andrews, Stock and Sun (2019), "Weak instruments in IV regression: theory and practice", <em>Annual Review of Economics</em> 11; Lee, McCrary, Moreira and Porter (2022), "Valid t-ratio inference for IV", <em>AER</em> 112(10).</p></section></article>

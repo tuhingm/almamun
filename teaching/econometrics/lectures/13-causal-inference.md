@@ -176,6 +176,135 @@ print("imputation estimator:", round(tau_hat, 3))
 
 Tasks: (i) explain why the static TWFE estimate is well below the true ATT; (ii) make the effects constant over time and show that TWFE becomes approximately unbiased; (iii) estimate group-time ATTs with the `csdid` package (Python), `did` (R) or `csdid` (Stata), and plot the event study; (iv) simulate a sharp RD and estimate it with `rdrobust`, comparing conventional and robust bias-corrected intervals.
 
+## Coding exercises
+
+These exercises use **real data** and run in Python. Install the packages once with
+`pip install wooldridge statsmodels linearmodels scipy`. The `wooldridge` package contains the datasets
+from Wooldridge's *Introductory Econometrics*; `statsmodels` ships U.S. and Danish macroeconomic series.
+Try the starter code first, then open the solution. Every printed result below was produced by running the solution code exactly as shown.
+
+### Exercise 13.1 — LaLonde's job training data: can observational methods recover an experimental benchmark?
+
+*Data:* `jtrain2` — the NSW randomized experiment (185 treated, 260 controls); `jtrain3` — the same treated men with 2,490 non-experimental controls from the PSID. Outcome: 1978 earnings `re78` (thousands of dollars).
+
+1. Estimate the experimental effect of training on `re78` (difference in means and with covariates).
+2. Using `jtrain3`, estimate the effect by (a) a naive difference, (b) regression adjustment, and (c) a doubly robust AIPW estimator with a logit propensity score. Covariates: `age`, `agesq`, `educ`, `black`, `hisp`, `married`, `re74`, `re75`, `unem74`, `unem75`.
+3. Check overlap: what share of PSID controls have propensity scores below 0.01? Trim to \(0.01\le\widehat e\le0.99\) and re-estimate.
+
+```python
+import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+exp_, obs = wd.data("jtrain2"), wd.data("jtrain3")
+X = "age + agesq + educ + black + hisp + married + re74 + re75 + unem74 + unem75"
+# TODO: experimental ATE; then on obs: ps = smf.logit(f"train ~ {X}", obs).fit().predict()
+```
+
+<details class="solution" markdown="1"><summary>Solution, output and discussion</summary>
+
+```python
+import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+exp_, obs = wd.data("jtrain2"), wd.data("jtrain3")
+exp_["agesq"] = exp_["age"]**2
+X = "age + agesq + educ + black + hisp + married + re74 + re75 + unem74 + unem75"
+e1 = smf.ols("re78 ~ train", data=exp_).fit(cov_type="HC1"); e2 = smf.ols(f"re78 ~ train + {X}", data=exp_).fit(cov_type="HC1")
+print(f"EXPERIMENT   diff in means {e1.params['train']:.3f} (se {e1.bse['train']:.3f});  with covariates {e2.params['train']:.3f}")
+
+def aipw(d):
+    ps = smf.logit(f"train ~ {X}", data=d).fit(disp=0).predict(d)
+    m1 = smf.ols(f"re78 ~ {X}", data=d[d.train == 1]).fit().predict(d)
+    m0 = smf.ols(f"re78 ~ {X}", data=d[d.train == 0]).fit().predict(d)
+    D, Y = d["train"], d["re78"]
+    ra_att = (Y - m0)[D == 1].mean()                                     # regression adjustment, ATT
+    w = ps / (1 - ps)                                                    # doubly robust ATT
+    dr_att = ((D * (Y - m0)).sum() - ((1 - D) * w * (Y - m0)).sum()) / D.sum()
+    return ps, ra_att, dr_att
+
+naive = obs.loc[obs.train == 1, "re78"].mean() - obs.loc[obs.train == 0, "re78"].mean()
+ps, ra, dr = aipw(obs)
+print(f"PSID CONTROLS naive {naive:.3f};  regression adjustment ATT {ra:.3f};  doubly robust ATT {dr:.3f}")
+print(f"share of PSID controls with propensity < 0.01: {(ps[obs.train == 0] < 0.01).mean():.3f}")
+trim = obs[(ps >= 0.01) & (ps <= 0.99)].copy()
+_, ra_t, dr_t = aipw(trim)
+print(f"TRIMMED (n = {len(trim)}, treated {int(trim.train.sum())}): regression adjustment {ra_t:.3f}; doubly robust {dr_t:.3f}")
+```
+
+Output:
+
+```text
+EXPERIMENT   diff in means 1.794 (se 0.671);  with covariates 1.670
+PSID CONTROLS naive -15.205;  regression adjustment ATT 0.894;  doubly robust ATT 3.654
+share of PSID controls with propensity < 0.01: 0.814
+TRIMMED (n = 646, treated 182): regression adjustment 1.785; doubly robust 2.497
+```
+
+The experiment gives an effect of about \$1,800 on 1978 earnings. With PSID controls, the naive comparison is hugely
+**negative**: trainees were far poorer than the average PSID household — classic selection bias. Regression adjustment and
+the doubly robust estimator move a long way toward the benchmark, but the answer depends on modeling choices, and most
+PSID controls have propensity scores near zero: there is almost no overlap. Trimming to the region of common support
+changes the estimates noticeably. This is LaLonde's (1986) lesson, refined by Dehejia and Wahba (1999): observational
+methods can work only when comparable controls exist, and overlap diagnostics must come first.
+
+</details>
+
+### Exercise 13.2 — Difference-in-differences: an incinerator and house prices
+
+*Data:* `kielmc` — 321 house sales in North Andover, Massachusetts, in 1978 (before rumors of an incinerator) and 1981 (during construction); `nearinc` = within 3 miles of the site.
+
+1. Compute the 2×2 DiD estimate of the incinerator's effect on real house prices `rprice` from the four group means.
+2. Estimate it by regression, `rprice ~ nearinc * y81`, with robust standard errors.
+3. Add house characteristics (`age`, `agesq`, `intst`, `land`, `area`, `rooms`, `baths`). How does the estimate change, and why?
+4. Use `log(rprice)` to express the effect in percent. Which scale makes parallel trends more plausible?
+
+```python
+import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+df = wd.data("kielmc")
+means = df.groupby(["nearinc", "y81"])["rprice"].mean().unstack()
+# TODO: DiD from means; regression with interaction; add controls
+```
+
+<details class="solution" markdown="1"><summary>Solution, output and discussion</summary>
+
+```python
+import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+df = wd.data("kielmc")
+mu = df.groupby(["nearinc", "y81"])["rprice"].mean().unstack()
+print(mu.round(0).rename(index={0: "far", 1: "near"}, columns={0: "1978", 1: "1981"}))
+did = (mu.loc[1, 1] - mu.loc[1, 0]) - (mu.loc[0, 1] - mu.loc[0, 0])
+print(f"\nDiD from means: {did:,.0f} dollars")
+r1 = smf.ols("rprice ~ nearinc * y81", data=df).fit(cov_type="HC1")
+print(f"regression:       {r1.params['nearinc:y81']:,.0f} (robust se {r1.bse['nearinc:y81']:,.0f})")
+ctrl = "age + I(age**2) + intst + land + area + rooms + baths"
+r2 = smf.ols(f"rprice ~ nearinc * y81 + {ctrl}", data=df).fit(cov_type="HC1")
+print(f"with controls:    {r2.params['nearinc:y81']:,.0f} (robust se {r2.bse['nearinc:y81']:,.0f})")
+r3 = smf.ols(f"np.log(rprice) ~ nearinc * y81 + {ctrl}", data=df).fit(cov_type="HC1")
+b = r3.params["nearinc:y81"]
+print(f"log specification with controls: {b:.3f} -> {100*(np.exp(b)-1):.1f}% (robust se {r3.bse['nearinc:y81']:.3f})")
+```
+
+Output:
+
+```text
+y81         1978      1981
+nearinc                   
+far      82517.0  101308.0
+near     63693.0   70619.0
+
+DiD from means: -11,864 dollars
+regression:       -11,864 (robust se 8,636)
+with controls:    -14,178 (robust se 6,512)
+log specification with controls: -0.093 -> -8.8% (robust se 0.061)
+```
+
+Houses near the site were already cheaper in 1978. The DiD removes that level difference and attributes the change in
+the gap — a fall of roughly \$12,000 in real (1978) dollars — to the incinerator. Without controls the estimate is
+imprecise. Adding house characteristics makes it larger and more precise, because the mix of houses sold near the site
+changed between the two years. In logs with controls, the effect is about \(-9\%\), but with a standard error of 0.06 it is not statistically
+significant: the evidence is suggestive rather than conclusive with 321 sales.
+Parallel trends is an assumption about counterfactual price paths; the log scale is often more plausible for prices,
+because it allows near and far houses to share common *percentage* appreciation. With only two periods, pre-trends cannot
+be checked — a key limitation (Kiel and McClain, 1995; Wooldridge, Example 13.3).
+
+</details>
+
 ## Reading
 **Required:** Angrist and Pischke, *Mostly Harmless Econometrics*, chapters 2, 3.2–3.3, 5 and 6; Cunningham, *Causal Inference: The Mixtape* (2021), chapters 4–6 and 9–10.
 **Further:** Imbens and Rubin, *Causal Inference for Statistics, Social, and Biomedical Sciences* (2015); Card and Krueger (1994), *AER* 84(4); Goodman-Bacon (2021), *Journal of Econometrics* 225(2); Callaway and Sant'Anna (2021), *Journal of Econometrics* 225(2); de Chaisemartin and D'Haultfœuille (2020), *AER* 110(9); Roth, Sant'Anna, Bilinski and Poe (2023), "What's trending in difference-in-differences?", *Journal of Econometrics* 235(2); Abadie, Diamond and Hainmueller (2010), *JASA* 105(490); Calonico, Cattaneo and Titiunik (2014), *Econometrica* 82(6); Lee and Lemieux (2010), "Regression discontinuity designs in economics", *Journal of Economic Literature* 48(2); Chernozhukov et al. (2018), "Double/debiased machine learning", *Econometrics Journal* 21(1).

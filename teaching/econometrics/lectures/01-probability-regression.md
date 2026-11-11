@@ -268,6 +268,131 @@ print(np.trace(H), np.allclose(H @ H, H))            # k = 3, idempotent
 
 Tasks: (i) confirm that the residuals from the long regression and the FWL regression coincide; (ii) note that the true CEF is quadratic in experience, so the regression above estimates a projection — compare \(\widehat\beta\) with the BLP coefficients computed from a very large simulated sample; (iii) repeat in R with `lm()` and verify with `model.matrix()` and `hatvalues()`.
 
+## Coding exercises
+
+These exercises use **real data** and run in Python. Install the packages once with
+`pip install wooldridge statsmodels linearmodels scipy`. The `wooldridge` package contains the datasets
+from Wooldridge's *Introductory Econometrics*; `statsmodels` ships U.S. and Danish macroeconomic series.
+Try the starter code first, then open the solution. Every printed result below was produced by running the solution code exactly as shown.
+
+### Exercise 1.1 — The CEF of wages given schooling, and its best linear approximation
+
+*Data:* `wage1` — 526 U.S. workers, Current Population Survey 1976 (hourly wage, years of education).
+
+1. Estimate the **conditional expectation function** \(E[wage\mid educ]\) nonparametrically, as the mean wage in each education cell.
+2. Estimate the **linear projection** of `wage` on `(1, educ)` by OLS.
+3. Show numerically that OLS on the individual data equals weighted least squares of the **cell means** on `educ`, with cell sizes as weights. This is the "regression approximates the CEF" result.
+4. Where does the linear approximation fit worst? What does that say about the true shape of the CEF?
+
+```python
+import wooldridge as wd, statsmodels.formula.api as smf
+df = wd.data("wage1")
+cef = df.groupby("educ")["wage"].agg(["mean", "size"])
+ols = smf.ols("wage ~ educ", data=df).fit()
+# TODO: weighted regression of cef['mean'] on educ with weights cef['size']; compare slopes
+```
+
+<details class="solution" markdown="1"><summary>Solution, output and discussion</summary>
+
+```python
+import wooldridge as wd, statsmodels.formula.api as smf
+df = wd.data("wage1")
+
+cef = df.groupby("educ")["wage"].agg(mean="mean", n="size").reset_index()
+ols = smf.ols("wage ~ educ", data=df).fit()
+wls = smf.wls("mean ~ educ", data=cef, weights=cef["n"]).fit()
+print(f"OLS on individuals:   intercept {ols.params['Intercept']:.4f}, slope {ols.params['educ']:.4f}")
+print(f"WLS on cell means:    intercept {wls.params['Intercept']:.4f}, slope {wls.params['educ']:.4f}")
+
+cef["blp"] = ols.params["Intercept"] + ols.params["educ"] * cef["educ"]
+cef["gap"] = cef["mean"] - cef["blp"]
+print(cef[cef["n"] >= 10].round(2).to_string(index=False))
+```
+
+Output:
+
+```text
+OLS on individuals:   intercept -0.9049, slope 0.5414
+WLS on cell means:    intercept -0.9049, slope 0.5414
+ educ  mean   n  blp   gap
+    8  5.04  22 3.43  1.61
+    9  3.28  17 3.97 -0.69
+   10  3.84  30 4.51 -0.67
+   11  4.19  29 5.05 -0.86
+   12  5.37 198 5.59 -0.22
+   13  5.60  39 6.13 -0.53
+   14  6.23  53 6.67 -0.44
+   15  6.32  21 7.22 -0.89
+   16  8.04  68 7.76  0.28
+   17 11.34  12 8.30  3.05
+   18 10.68  19 8.84  1.84
+```
+
+The two slopes are identical: OLS on the micro data is exactly a weighted regression of the CEF on `educ`
+(Angrist and Pischke, 2009, §3.1). The gaps are **positive at the extremes and negative in the middle** (for example,
+the CEF is below the line around 9–11 years and above it at 16–18 years). The CEF is **convex** in schooling. The linear
+projection is still well defined, but it understates returns at high education. That is one motivation for the log
+specification in Lecture 3.
+
+</details>
+
+### Exercise 1.2 — Frisch–Waugh–Lovell and leverage, by hand
+
+*Data:* `wage2` — 935 men from the National Longitudinal Survey, 1980 (monthly earnings, education, experience, tenure, IQ).
+
+1. Estimate \(\log(wage)=\beta_0+\beta_1 educ+\beta_2 exper+\beta_3 tenure+u\) with matrix algebra (`numpy`, no regression package).
+2. Verify FWL: partial `exper` and `tenure` (and the constant) out of both `educ` and `log(wage)`, and regress residual on residual.
+3. Compute the leverage values \(h_{ii}\), check that they sum to \(k\), and list the three highest-leverage workers. Why are they unusual?
+
+```python
+import numpy as np, wooldridge as wd
+df = wd.data("wage2")
+y = np.log(df["wage"].to_numpy())
+X = np.column_stack([np.ones(len(df)), df[["educ", "exper", "tenure"]].to_numpy()])
+# TODO: beta = solve(X'X, X'y); FWL with X1 = [1, exper, tenure]; leverage h = diag(X (X'X)^-1 X')
+```
+
+<details class="solution" markdown="1"><summary>Solution, output and discussion</summary>
+
+```python
+import numpy as np, wooldridge as wd
+df = wd.data("wage2")
+y = np.log(df["wage"].to_numpy())
+X = np.column_stack([np.ones(len(df)), df[["educ", "exper", "tenure"]].to_numpy()])
+beta = np.linalg.solve(X.T @ X, X.T @ y)
+print("full regression beta:", beta.round(5))
+
+X1 = X[:, [0, 2, 3]]                                     # constant, exper, tenure
+resid = lambda z: z - X1 @ np.linalg.lstsq(X1, z, rcond=None)[0]
+r_educ, r_y = resid(X[:, 1]), resid(y)
+print("FWL slope on educ:   ", round(r_educ @ r_y / (r_educ @ r_educ), 5))
+
+h = np.einsum("ij,ji->i", X, np.linalg.solve(X.T @ X, X.T))   # diag of the hat matrix, without forming n x n
+print("sum of leverages:", round(h.sum(), 6), " mean:", round(h.mean(), 5), " max:", round(h.max(), 5))
+top = np.argsort(h)[-3:][::-1]
+print(df.iloc[top][["wage", "educ", "exper", "tenure"]].assign(leverage=h[top].round(4)).to_string())
+```
+
+Output:
+
+```text
+full regression beta: [5.4967 0.0749 0.0153 0.0134]
+FWL slope on educ:    0.07486
+sum of leverages: 4.0  mean: 0.00428  max: 0.01421
+     wage  educ  exper  tenure  leverage
+754   625    11      1       1    0.0142
+442  1026    12      4      16    0.0131
+317  1001    12     20      22    0.0118
+```
+
+The FWL slope matches the full-regression coefficient on `educ` to every printed digit. The leverages sum to
+\(k=4\), as \(\operatorname{tr}(P_X)=k\) requires. The highest-leverage workers have unusual **combinations** of regressors, not extreme wages.
+Two of the three report **tenure longer than total experience** (16 years with the employer but 4 years of experience),
+which is logically impossible: leverage diagnostics are a quick way to find data errors. Leverage depends on \(X\) only,
+which is why it enters the HC2/HC3 corrections of Lecture 4.
+
+</details>
+
 ## Reading
 **Required:** Hansen, *Econometrics* (2022), chapters 2–4; Hayashi, *Econometrics*, chapter 1.
 **Further:** Angrist and Pischke, *Mostly Harmless Econometrics*, chapter 3.1 (regression and the CEF); Davidson and MacKinnon, *Econometric Theory and Methods*, chapter 2 (geometry of least squares); Frisch and Waugh (1933), "Partial time regressions as compared with individual trends", *Econometrica* 1(4); Lovell (1963), "Seasonal adjustment of economic time series and multiple regression analysis", *JASA* 58(304).

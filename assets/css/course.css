@@ -187,3 +187,7 @@ footer{background:var(--deep);color:#c5d2e7;padding:27px 0 15px}
 .course-tile:hover .tile-link{background:var(--deep)}
 .tools-strip{margin-top:18px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;box-shadow:none;background:#f3f6fb}
 .tools-strip .tags{margin:0}
+.notes pre{position:relative}
+.copy-btn{position:absolute;top:8px;right:8px;font:800 9px 'DM Sans';letter-spacing:.12em;text-transform:uppercase;background:#ffffff1a;color:#cfe0ff;border:1px solid #ffffff33;border-radius:6px;padding:5px 9px;cursor:pointer;opacity:.75}
+.copy-btn:hover{opacity:1;background:#ffffff2e}
+@media print{.copy-btn{display:none}}

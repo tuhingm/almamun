@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Econometrics · Lecture 4</h3>
       <div class="profile-item"><strong>Part</strong><span>Part I · Linear regression and inference</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 13 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 19 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="03-functional-form-ovb.html">Lecture 3: Functional Form, Partial Effects, and Omitted-Variable Bias</a></span></div>
       
     </aside>
@@ -255,6 +255,113 @@ rej = np.array([sim() for _ in range(2000)]).mean(axis=0)
 print(&quot;rejection rate under H0: HC =&quot;, rej[0], &quot; cluster =&quot;, rej[1])
 </code></pre>
 <p>Tasks: (i) compare the HC rejection rate with the Moulton prediction <span class="arithmatex">\(1+(m-1)\rho_u\)</span>; (ii) reduce <span class="arithmatex">\(G\)</span> to 10 and observe the cluster-robust size; (iii) implement a wild cluster bootstrap with Rademacher weights and the null imposed. In R, use <code>fixest::feols(y ~ d, cluster = ~g)</code> and <code>fwildclusterboot::boottest()</code>. In Stata, use <code>reg y d, vce(cluster g)</code> and <code>boottest</code>.</p>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises use <strong>real data</strong> and run in Python. Install the packages once with
+<code>pip install wooldridge statsmodels linearmodels scipy</code>. The <code>wooldridge</code> package contains the datasets
+from Wooldridge's <em>Introductory Econometrics</em>; <code>statsmodels</code> ships U.S. and Danish macroeconomic series.
+Try the starter code first, then open the solution. Every printed result below was produced by running the solution code exactly as shown.</p>
+<h3 id="exercise-41-heteroskedasticity-in-house-prices-tests-hc0hc3-and-wls">Exercise 4.1 — Heteroskedasticity in house prices: tests, HC0–HC3 and WLS</h3>
+<p><em>Data:</em> <code>hprice1</code> — 88 house sales.</p>
+<ol>
+<li>Estimate <code>price</code> (in levels) on <code>lotsize</code>, <code>sqrft</code>, <code>bdrms</code>. Run the Breusch–Pagan and White tests.</li>
+<li>Compare classical, HC0, HC1, HC2 and HC3 standard errors.</li>
+<li>Re-estimate in logs. Does heteroskedasticity remain? What does this suggest about functional form?</li>
+<li>Estimate by WLS with weights <span class="arithmatex">\(1/sqrft\)</span> and report <strong>robust</strong> standard errors.</li>
+</ol>
+<pre><code class="language-python">import numpy as np, pandas as pd, wooldridge as wd, statsmodels.formula.api as smf
+from statsmodels.stats.diagnostic import het_breuschpagan, het_white
+df = wd.data(&quot;hprice1&quot;)
+lev = smf.ols(&quot;price ~ lotsize + sqrft + bdrms&quot;, data=df).fit()
+# TODO: het_breuschpagan(lev.resid, lev.model.exog); compare lev.get_robustcov_results(cov_type=...)
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, pandas as pd, wooldridge as wd, statsmodels.formula.api as smf
+from statsmodels.stats.diagnostic import het_breuschpagan, het_white
+df = wd.data(&quot;hprice1&quot;)
+lev = smf.ols(&quot;price ~ lotsize + sqrft + bdrms&quot;, data=df).fit()
+bp, wh = het_breuschpagan(lev.resid, lev.model.exog), het_white(lev.resid, lev.model.exog)
+print(f&quot;levels: Breusch-Pagan LM = {bp[0]:.2f} (p = {bp[1]:.4f});  White LM = {wh[0]:.2f} (p = {wh[1]:.4f})&quot;)
+
+ses = {&quot;classical&quot;: lev.bse}
+for c in (&quot;HC0&quot;, &quot;HC1&quot;, &quot;HC2&quot;, &quot;HC3&quot;):
+    ses[c] = pd.Series(lev.get_robustcov_results(cov_type=c).bse, index=lev.params.index)
+print(pd.DataFrame(ses).round(4))
+
+lg = smf.ols(&quot;np.log(price) ~ np.log(lotsize) + np.log(sqrft) + bdrms&quot;, data=df).fit()
+bp2 = het_breuschpagan(lg.resid, lg.model.exog)
+print(f&quot;\nlogs:   Breusch-Pagan LM = {bp2[0]:.2f} (p = {bp2[1]:.4f})&quot;)
+
+w = smf.wls(&quot;price ~ lotsize + sqrft + bdrms&quot;, data=df, weights=1 / df[&quot;sqrft&quot;]).fit(cov_type=&quot;HC1&quot;)
+print(&quot;\nWLS (weights 1/sqrft), robust se:&quot;)
+print(pd.DataFrame({&quot;coef&quot;: w.params, &quot;robust se&quot;: w.bse}).round(4))
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">levels: Breusch-Pagan LM = 14.09 (p = 0.0028);  White LM = 33.73 (p = 0.0001)
+           classical      HC0      HC1      HC2      HC3
+Intercept    29.4750  36.2843  37.1382  38.3813  41.0327
+lotsize       0.0006   0.0012   0.0013   0.0029   0.0071
+sqrft         0.0132   0.0173   0.0177   0.0226   0.0407
+bdrms         9.0101   8.2837   8.4786   9.1866  11.5618
+
+logs:   Breusch-Pagan LM = 4.22 (p = 0.2383)
+
+WLS (weights 1/sqrft), robust se:
+              coef  robust se
+Intercept   4.1989    35.1199
+lotsize     0.0016     0.0008
+sqrft       0.1178     0.0173
+bdrms      10.6073     9.1660
+</code></pre>
+<p>In levels, both tests reject homoskedasticity: the spread of prices grows with house size. Robust standard errors are
+larger than classical ones, and the HC3 standard error on <code>lotsize</code> is far larger than the classical one, because a few
+very large lots have high leverage. In logs, the Breusch–Pagan test no longer rejects: the log model is the more natural
+specification for prices, and it also fixes most of the heteroskedasticity. WLS changes the point estimates, which is a
+sign that the CEF is not exactly linear in levels (Problem 5): WLS and OLS then estimate different weighted projections.</p>
+</details>
+<h3 id="exercise-42-clustering-in-a-worker-panel">Exercise 4.2 — Clustering in a worker panel</h3>
+<p><em>Data:</em> <code>wagepan</code> — 545 young men followed annually 1980–1987 (NLSY), 4,360 person-years.</p>
+<ol>
+<li>Estimate pooled OLS of <code>lwage</code> on <code>union</code>, <code>educ</code>, <code>black</code>, <code>hisp</code>, <code>exper</code>, <code>expersq</code>, <code>married</code> and year dummies.</li>
+<li>Compare the standard error on <code>union</code> under (a) classical, (b) HC1 and (c) clustering by worker (<code>nr</code>).</li>
+<li>Estimate the within-worker correlation of the residuals and of <code>union</code>, and compare the ratio of the clustered to the HC1 variance with the Moulton approximation <span class="arithmatex">\(1+(m-1)\rho_x\rho_u\)</span>, with <span class="arithmatex">\(m=8\)</span>.</li>
+</ol>
+<pre><code class="language-python">import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+df = wd.data(&quot;wagepan&quot;)
+f = &quot;lwage ~ union + educ + black + hisp + exper + expersq + married + C(year)&quot;
+# TODO: fit(cov_type=&quot;cluster&quot;, cov_kwds={&quot;groups&quot;: df[&quot;nr&quot;]})
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+df = wd.data(&quot;wagepan&quot;)
+f = &quot;lwage ~ union + educ + black + hisp + exper + expersq + married + C(year)&quot;
+m = smf.ols(f, data=df)
+se = {&quot;classical&quot;: m.fit().bse[&quot;union&quot;], &quot;HC1&quot;: m.fit(cov_type=&quot;HC1&quot;).bse[&quot;union&quot;],
+      &quot;cluster(nr)&quot;: m.fit(cov_type=&quot;cluster&quot;, cov_kwds={&quot;groups&quot;: df[&quot;nr&quot;]}).bse[&quot;union&quot;]}
+print({k: round(v, 4) for k, v in se.items()}, &quot; coef:&quot;, round(m.fit().params[&quot;union&quot;], 4))
+
+def within_corr(v):
+    w = v.to_numpy().reshape(-1, 8)                 # 545 workers x 8 years (sorted by nr, year)
+    w = w - w.mean()
+    num = sum(np.sum(np.outer(r, r)) - np.sum(r**2) for r in w)
+    return num / (7 * np.sum(w**2))
+df[&quot;res&quot;] = m.fit().resid
+rho_u, rho_x = within_corr(df[&quot;res&quot;]), within_corr(df[&quot;union&quot;].astype(float))
+print(f&quot;within-worker correlation: residual {rho_u:.3f}, union {rho_x:.3f}&quot;)
+print(f&quot;variance ratio cluster/HC1 = {(se['cluster(nr)']/se['HC1'])**2:.2f};  Moulton 1+(m-1)rho_x rho_u = {1 + 7*rho_x*rho_u:.2f}&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">{'classical': np.float64(0.0172), 'HC1': np.float64(0.0163), 'cluster(nr)': np.float64(0.0274)}  coef: 0.1825
+within-worker correlation: residual 0.458, union 0.528
+variance ratio cluster/HC1 = 2.84;  Moulton 1+(m-1)rho_x rho_u = 2.69
+</code></pre>
+<p>Both union status and the wage residual are highly persistent within workers (within-worker correlations of about
+0.5), so clustering raises the standard error on <code>union</code> by about 70% — the variance by a factor of 2.8. The simple
+Moulton formula, 2.7, approximates the ratio well. The HC1 standard error treats 4,360 strongly
+correlated observations as independent. Inference here rests on 545 worker clusters — the level of the sampling design —
+and on the remaining issue that pooled OLS ignores the unobserved worker effect, which Exercise 7.1 addresses.</p>
+</details>
 </section><section class="box reading"><h2 id="reading">Reading</h2>
 <p><strong>Required:</strong> Cameron and Miller (2015), "A practitioner's guide to cluster-robust inference", <em>Journal of Human Resources</em> 50(2); Hansen, <em>Econometrics</em>, chapters 4.14–4.23 and 7.
 <strong>Further:</strong> White (1980), <em>Econometrica</em> 48(4); Long and Ervin (2000), "Using heteroscedasticity consistent standard errors in the linear regression model", <em>The American Statistician</em> 54(3); Moulton (1990), "An illustration of a pitfall in estimating the effects of aggregate variables on micro units", <em>REStat</em> 72(2); Bertrand, Duflo and Mullainathan (2004), "How much should we trust differences-in-differences estimates?", <em>QJE</em> 119(1); Newey and West (1987), <em>Econometrica</em> 55(3); Lazarus, Lewis, Stock and Watson (2018), "HAR inference: recommendations for practice", <em>JBES</em> 36(4); Abadie, Athey, Imbens and Wooldridge (2023), "When should you adjust standard errors for clustering?", <em>QJE</em> 138(1).</p></section></article>

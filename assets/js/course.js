@@ -39,3 +39,16 @@
     heads.forEach(function (h) { obs.observe(h); });
   }
 })();
+
+// Copy buttons on code blocks
+document.querySelectorAll('.notes pre').forEach(function (pre) {
+  var b = document.createElement('button');
+  b.className = 'copy-btn'; b.type = 'button'; b.textContent = 'Copy';
+  b.addEventListener('click', function () {
+    var code = pre.querySelector('code') || pre;
+    navigator.clipboard.writeText(code.innerText).then(function () {
+      b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy'; }, 1500);
+    });
+  });
+  pre.appendChild(b);
+});
