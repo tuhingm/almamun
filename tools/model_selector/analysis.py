@@ -43,6 +43,7 @@ def analyze(csv_text, max_vars=8):
     out = {"n": int(n), "vars": list(df.columns), "skipped": skipped, "dep": df.columns[0]}
     step = max(1, n // 120)
     out["series"] = {c: [_f(v, 5) for v in df[c].values[::step]] for c in df}
+    out["dseries"] = {c: [_f(v, 5) for v in df[c].diff().dropna().values[::step]] for c in df}
     out["summary"] = [dict(var=c, mean=_f(df[c].mean()), sd=_f(df[c].std()), min=_f(df[c].min()), max=_f(df[c].max()),
                            skew=_f(df[c].skew(), 3), kurt=_f(df[c].kurt() + 3, 3)) for c in df]
     out["corr"] = [[_f(v, 3) for v in row] for row in df.corr().values]
