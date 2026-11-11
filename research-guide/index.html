@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0033A0">
+<meta name="description" content="An interactive model-selection tool for empirical papers in economics and finance: test your data and find out whether OLS, VAR, VECM, ARDL, NARDL or GMM fits.">
+<title>Empirical Research Guide | Tuhin G. M. Al Mamun</title>
+<link rel="canonical" href="https://tuhingm.github.io/almamun/research-guide/">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Tuhin Al Mamun, Ph.D.">
+<meta property="og:title" content="Empirical Research Guide | Which model fits your data?"><meta property="og:description" content="Test your data and find out whether OLS, VAR, VECM, ARDL, NARDL or GMM fits. With real examples and Python code.">
+<meta property="og:url" content="https://tuhingm.github.io/almamun/research-guide/"><meta property="og:image" content="https://tuhingm.github.io/almamun/assets/og/research-guide.jpg">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml"><link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0033a0;--navy2:#00205b;--ink:#1b2437;--muted:#55617a;--paper:#f3f5fa;--white:#fff;--line:#d5dcea;--sky:#9fd3f0;--sky2:#6ec1e4;--tint:#e3eaf7;--ok:#0f7a4f;--warn:#a05a00}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:25px}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.7 "DM Sans",sans-serif}a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer}.wrap{width:min(1120px,calc(100% - 44px));margin:auto}
+header{background:rgba(0,51,160,.98);color:white;border-bottom:1px solid #ffffff22}.nav{height:72px;display:flex;align-items:center;justify-content:space-between}.brand{font:800 15px Manrope}.brand b{color:var(--sky)}nav{display:flex;gap:25px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#e3ecf8}nav a:hover,nav a.current{color:var(--sky)}
+.hero{background:radial-gradient(circle at 85% 12%,#6ec1e445,transparent 29%),linear-gradient(120deg,#0033a0,#00205b);color:white;padding:60px 0 52px}.kicker{font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--sky)}h1{font:800 clamp(34px,5vw,50px)/1.12 Manrope;letter-spacing:-1.7px;margin:12px 0 14px}.lead{max-width:760px;color:#d0dcf0;margin:0;font-size:15px}.meta{display:flex;gap:22px;flex-wrap:wrap;margin-top:22px;color:#c5d4ea;font-size:11px}.meta strong{color:white}
+main{padding:34px 0 80px}
+.modes{display:flex;gap:8px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:14px;padding:7px;box-shadow:0 5px 18px rgba(0,32,91,.06)}
+.modes button{flex:1 1 180px;border:0;background:transparent;border-radius:10px;padding:13px 14px;text-align:left;color:var(--ink);transition:background .2s,color .2s,transform .2s}
+.modes button b{display:block;font:800 14px Manrope}.modes button span{font-size:11px;color:var(--muted)}
+.modes button:hover{background:#f3f6fc}.modes button[aria-pressed=true]{background:var(--navy);color:#fff;transform:translateY(-1px);box-shadow:0 6px 16px #0033a040}.modes button[aria-pressed=true] span{color:#cfe0fa}
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:22px;margin-top:22px;align-items:start}
+.panel{min-width:0;background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:0 5px 18px rgba(0,32,91,.06)}
+.panel h2{font:800 18px Manrope;margin:0 0 4px;letter-spacing:-.3px}.panel>p.sub{font-size:12px;color:var(--muted);margin:0 0 16px}
+.label{font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#7f8aa1}
+.ex{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.ex button{border:1px solid var(--line);background:#fff;border-radius:11px;padding:14px;text-align:left;transition:transform .2s,box-shadow .2s,border-color .2s}
+.ex button:hover{transform:translateY(-3px);box-shadow:0 12px 26px rgba(0,32,91,.12);border-color:#b9c9e6}.ex button.sel{border-color:var(--navy);box-shadow:0 0 0 2px #0033a030}
+.ex b{display:block;font:700 13.5px/1.35 Manrope;margin:5px 0 4px}.ex small{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--navy)}.ex span{font-size:11px;color:var(--muted);line-height:1.5;display:block}
+.drop{border:2px dashed #b9c9e6;border-radius:12px;padding:26px;text-align:center;background:#f8fafe;transition:background .2s,border-color .2s}.drop.over{background:var(--tint);border-color:var(--navy)}
+.btn{display:inline-flex;align-items:center;gap:6px;background:var(--navy);color:#fff;border:0;border-radius:8px;padding:11px 16px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;transition:transform .2s,box-shadow .2s}.btn:hover{transform:translateY(-2px);box-shadow:0 8px 18px #0033a040}
+.btn.ghost{background:#fff;color:var(--navy);border:1px solid #b9c9e6}.btn[disabled]{opacity:.55;cursor:default;transform:none;box-shadow:none}
+.hint{font-size:11.5px;color:var(--muted);margin:12px 0 0}.hint a{color:var(--navy);font-weight:700}
+.status{display:none;align-items:center;gap:10px;font-size:12px;color:var(--navy);font-weight:600;margin-top:14px}.status.on{display:flex}.spin{width:16px;height:16px;border:2px solid #b9c9e6;border-top-color:var(--navy);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.err{background:#fdf0ee;border:1px solid #f0c5bd;color:#8a2a17;border-radius:9px;padding:11px 14px;font-size:12px;margin-top:14px}
+.q{margin-top:6px}.q h3{font:700 15.5px/1.45 Manrope;margin:6px 0 12px}.opts{display:grid;gap:8px}.opts button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:12px 14px;text-align:left;font-size:13px;transition:background .2s,border-color .2s,transform .2s}.opts button:hover{background:#f3f6fc;border-color:var(--navy);transform:translateX(4px)}.opts small{display:block;color:var(--muted);font-size:11px}
+.step{border-top:1px solid #e6ebf4;padding:18px 0 4px;margin-top:18px;opacity:0;transform:translateY(16px);transition:opacity .55s ease,transform .55s cubic-bezier(.2,.7,.2,1)}.step.in{opacity:1;transform:none}
+.step h3{font:800 14.5px Manrope;margin:3px 0 10px}.step p{font-size:12.5px;color:#434f66;margin:8px 0}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:11.5px}th{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#7f8aa1;text-align:right;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}td{padding:7px 8px;border-bottom:1px solid #edf1f7;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}th:first-child,td:first-child{text-align:left;font-weight:600}
+.tag{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.06em;padding:3px 8px;border-radius:30px;background:var(--tint);color:var(--navy)}.tag.i1{background:#fff1d6;color:var(--warn)}.tag.i2{background:#fde3df;color:#8a2a17}.tag.ok{background:#dcf3e8;color:var(--ok)}
+.sparks{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.spark{border:1px solid #e6ebf4;border-radius:9px;padding:9px 10px}.spark b{font-size:11px}.spark svg{display:block;width:100%;height:44px;margin-top:4px}.spark path{fill:none;stroke:var(--navy);stroke-width:1.4;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.4s ease}.step.in .spark path{stroke-dashoffset:0}
+details.code{margin:10px 0 0}details.code summary{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--navy);cursor:pointer}pre{background:#111c36;color:#e3ebfa;border-radius:9px;padding:13px 15px;font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow-x:auto;margin:8px 0 0}
+.side{position:sticky;top:18px}
+.tree svg{display:block;width:100%;height:auto}.tree .n rect{fill:#fff;stroke:#c3d0e6;stroke-width:1.2;transition:fill .35s,stroke .35s}.tree .n text{font:600 13px "DM Sans",sans-serif;fill:#41506a;text-anchor:middle;dominant-baseline:central;transition:fill .35s}
+.tree .n.leaf rect{fill:#f3f6fc}.tree .n.leaf text{font:800 14px Manrope,sans-serif}
+.tree .e{fill:none;stroke:#c9d4e8;stroke-width:1.4}.tree .e{transition:stroke .45s ease,stroke-width .45s ease}.tree .e.hl{stroke:var(--navy);stroke-width:2.8}
+.tree .el{font:700 11px "DM Sans",sans-serif;fill:#8793ab;text-anchor:middle}
+.tree .n.on rect{fill:var(--tint);stroke:var(--navy)}.tree .n.on text{fill:var(--navy)}.tree .n.leaf.on rect{fill:var(--navy);stroke:var(--navy);animation:pop .5s ease}.tree .n.leaf.on text{fill:#fff}.tree .n.alt rect{stroke:var(--navy);stroke-dasharray:4 3}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.12)}100%{transform:scale(1)}}.tree .n{transform-box:fill-box;transform-origin:center}
+.trail{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:14px;min-height:28px}.trail span{font-size:10.5px;font-weight:700;padding:5px 10px;border-radius:30px;background:var(--tint);color:var(--navy);animation:rise .4s ease both}.trail span.final{background:var(--navy);color:#fff}.trail i{color:#9aa6bd;font-style:normal;font-size:11px}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.result{margin-top:22px;border-radius:16px;padding:26px;color:#fff;background:radial-gradient(circle at 88% 10%,#6ec1e455,transparent 34%),linear-gradient(120deg,#0033a0,#00205b);box-shadow:0 18px 40px rgba(0,32,91,.25);animation:rise .6s cubic-bezier(.2,.7,.2,1) both}
+.result .label{color:var(--sky)}.result h2{font:800 clamp(30px,5vw,44px)/1.1 Manrope;letter-spacing:-1.2px;margin:8px 0 10px}.result p{color:#d6e2f6;font-size:13.5px;margin:0 0 12px;max-width:820px}
+.result ul{margin:6px 0 16px;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:7px}.result li{font-size:11px;font-weight:600;padding:6px 11px;border:1px solid #ffffff44;border-radius:30px;background:#ffffff14}
+.result .acts{display:flex;gap:10px;flex-wrap:wrap}.result .btn{background:#fff;color:var(--navy)}.result .btn.ghost{background:transparent;color:#fff;border:1px solid #ffffff77}
+.result .caution{background:#ffffff18;border:1px solid #ffffff33;border-radius:10px;padding:11px 14px;font-size:12px;color:#eef4ff;margin:0 0 14px}
+.guides{margin-top:46px}.guides-head{display:flex;justify-content:space-between;align-items:end;gap:20px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:16px}.guides h2{font:800 22px Manrope;margin:4px 0 0;letter-spacing:-.4px}.guides-head p{font-size:12px;color:var(--muted);margin:0;max-width:430px}
+.gcards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.gcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;box-shadow:0 5px 18px rgba(0,32,91,.06);transition:transform .25s,box-shadow .25s,border-color .25s;scroll-margin-top:20px}.gcard:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(0,32,91,.13);border-color:#b9c9e6}.gcard.flash{animation:flash 1.6s ease}@keyframes flash{0%,60%{box-shadow:0 0 0 3px #0033a055}100%{box-shadow:0 5px 18px rgba(0,32,91,.06)}}
+.gcard h3{font:800 17px Manrope;margin:6px 0 4px}.gcard .when{font-size:11.5px;color:var(--navy);font-weight:700;margin:0 0 8px}.gcard p{font-size:11.5px;color:var(--muted);margin:0 0 12px;line-height:1.6}.gcard a{display:block;font-size:11.5px;font-weight:700;color:var(--navy);margin-top:5px}.gcard a:hover{text-decoration:underline}
+.note{font-size:11.5px;color:#4a586f;background:var(--tint);border:1px solid #cfdaf0;border-radius:9px;padding:14px 18px;margin-top:26px}
+footer{background:var(--navy2);color:#c3d0e4;padding:22px 0;font-size:10px}.foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.foot b{color:#fff}
+[hidden]{display:none!important}
+@media(max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}.side{position:static}.tree svg{display:none}.tree .sub2{display:none}.gcards{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.wrap{width:calc(100% - 34px)}.nav{height:65px}nav{gap:11px;font-size:8.5px}.hero{padding:44px 0 38px}.ex{grid-template-columns:1fr}.gcards{grid-template-columns:1fr}.panel{padding:17px}.guides-head{display:block}.result{padding:20px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav"><a class="brand" href="../index.html">TGM <b>AL MAMUN</b></a><nav><a href="../teaching/index.html">Teaching Courses</a><a href="../working-papers/index.html">Working Papers</a><a class="current" href="index.html">Research Guide</a><a href="../Tuhin%20Al%20Mamun_CV.pdf" target="_blank" rel="noopener">CV</a></nav></div></header>
+<section class="hero"><div class="wrap"><div class="kicker">Empirical Research Guide · Economics and Finance</div><h1>Which model fits your data?</h1><p class="lead">The right econometric model depends on the properties of your data, not on preference. Test a real dataset, upload your own, or enter your test results, and follow the path to the model your paper needs.</p><div class="meta"><span><strong>6</strong> model guides</span><span><strong>4</strong> real example datasets</span><span>Python · statsmodels</span></div></div></section>
+<main class="wrap">
+<div class="modes" role="group" aria-label="Choose how to start">
+<button type="button" data-mode="example" aria-pressed="true"><b>Try a real example</b><span>See the full sequence on real data</span></button>
+<button type="button" data-mode="upload" aria-pressed="false"><b>Use my own data</b><span>Upload a CSV; tests run in your browser</span></button>
+<button type="button" data-mode="ask" aria-pressed="false"><b>I have my test results</b><span>Answer a few questions</span></button>
+</div>
+<div class="grid">
+<section class="panel" id="work" aria-live="polite">
+ <div id="m-example">
+  <h2>Choose a dataset</h2><p class="sub">Four real U.S. datasets. Each one leads to a different model.</p>
+  <div class="ex" id="ex"></div>
+ </div>
+ <div id="m-upload" hidden>
+  <h2>Upload your data</h2><p class="sub">A CSV file with one column per variable. Put the dependent variable first; a date column is optional.</p>
+  <div class="drop" id="drop"><p style="margin:0 0 12px;font-size:13px">Drop a CSV file here, or</p><label class="btn">Choose file<input type="file" id="file" accept=".csv,text/csv,text/plain" hidden></label></div>
+  <p class="hint">Your file is analysed on your own device and is not uploaded anywhere. Transform your variables first (logs, growth rates) as your paper requires. Up to 8 variables, at least 30 rows. Format examples: <a href="examples/returns.csv" download>returns.csv</a>, <a href="examples/rates.csv" download>rates.csv</a>.</p>
+  <div class="status" id="status"><span class="spin"></span><span id="status-text"></span></div>
+  <div id="upload-err"></div>
+ </div>
+ <div id="m-ask" hidden>
+  <h2>Answer from your own results</h2><p class="sub">Use this if you have already run unit-root and cointegration tests.</p>
+  <div class="q" id="q"></div>
+ </div>
+ <div id="steps"></div>
+</section>
+<aside class="side">
+ <div class="panel tree"><div class="label">Decision path</div><p class="sub sub2" style="font-size:12px;color:var(--muted);margin:2px 0 8px">The path lights up as the evidence comes in.</p><div id="tree"></div><div class="trail" id="trail"></div></div>
+</aside>
+</div>
+<div id="result"></div>
+
+<section class="guides" id="guides"><div class="guides-head"><div><div class="label">Model guides</div><h2>Six routes to a finished paper</h2></div><p>Each guide will take one real dataset through estimation, diagnostic tests and writing. The step-by-step guides are in preparation; the linked lectures cover the same methods now.</p></div>
+<div class="gcards" id="gcards"></div></section>
+<div class="note"><b>How the tool decides.</b> A series is treated as stationary, I(0), if the ADF test rejects a unit root in levels at 5%; as I(1) if it rejects only after first differencing. The KPSS test is reported as a cross-check, and the tool warns you when the two disagree. When every series is I(1), the Johansen trace test decides between VAR and VECM. These are standard rules, but tests have low power in short samples and can be distorted by structural breaks, so treat the result as a starting point and justify the choice in your paper.</div>
+</main>
+<footer><div class="wrap foot"><span><b>Tuhin G. M. Al Mamun, Ph.D.</b> · Empirical Research Guide</span><span>© <span id="year"></span></span></div></footer>
+
+<script type="text/plain" id="py-src">"""Model-selection analysis for the Empirical Research Guide.
+
+analyze(csv_text) reads a CSV (one column per variable, optional date column first), then reports summary statistics,
+correlations, unit-root tests (ADF on levels and first differences, KPSS on levels), and, when every series is I(1),
+the Johansen trace test. The first numeric column is treated as the dependent variable. Returns a JSON string.
+The same file runs in the browser (Pyodide) for uploaded data and offline to prepare the built-in examples.
+"""
+import io, json, warnings
+import numpy as np
+import pandas as pd
+
+
+def _f(x, nd=4):
+    x = float(x)
+    return None if not np.isfinite(x) else round(x, nd)
+
+
+def analyze(csv_text, max_vars=8):
+    from statsmodels.tsa.stattools import adfuller, kpss
+    from statsmodels.tsa.api import VAR
+    from statsmodels.tsa.vector_ar.vecm import coint_johansen
+    warnings.simplefilter("ignore")
+    try:
+        raw = pd.read_csv(io.StringIO(csv_text), sep=None, engine="python")
+    except Exception as e:
+        return json.dumps({"error": f"Could not read the file as CSV ({e})."})
+    num = raw.apply(pd.to_numeric, errors="coerce")
+    keep = [c for c in num.columns if num[c].notna().mean() > 0.9 and num[c].nunique() > 2]
+    # drop an index-like first column (year, t, obs) if it increases by a constant step
+    if keep and len(keep) > 2:
+        d0 = num[keep[0]].dropna().diff().dropna()
+        if len(d0) and d0.nunique() <= 2 and str(keep[0]).strip().lower() in ("year", "t", "time", "obs", "date", "month", "quarter", "index", "unnamed: 0"):
+            keep = keep[1:]
+    skipped = [str(c) for c in raw.columns if c not in keep]
+    df = num[keep[:max_vars]].dropna().reset_index(drop=True)
+    df.columns = [str(c).strip() for c in df.columns]
+    n, k = df.shape
+    if k < 2:
+        return json.dumps({"error": "The file needs at least two numeric columns (one per variable)."})
+    if n < 30:
+        return json.dumps({"error": f"Only {n} complete rows were found. These tests need at least 30 observations."})
+
+    out = {"n": int(n), "vars": list(df.columns), "skipped": skipped, "dep": df.columns[0]}
+    step = max(1, n // 120)
+    out["series"] = {c: [_f(v, 5) for v in df[c].values[::step]] for c in df}
+    out["summary"] = [dict(var=c, mean=_f(df[c].mean()), sd=_f(df[c].std()), min=_f(df[c].min()), max=_f(df[c].max()),
+                           skew=_f(df[c].skew(), 3), kurt=_f(df[c].kurt() + 3, 3)) for c in df]
+    out["corr"] = [[_f(v, 3) for v in row] for row in df.corr().values]
+
+    ur, orders = [], []
+    for c in df:
+        x = df[c]
+        a0 = adfuller(x, autolag="AIC")
+        a1 = adfuller(x.diff().dropna(), autolag="AIC")
+        try:
+            ks, kp = kpss(x, regression="c", nlags="auto")[:2]
+        except Exception:
+            ks, kp = np.nan, np.nan
+        order = 0 if a0[1] < 0.05 else (1 if a1[1] < 0.05 else 2)
+        conflict = bool(order == 0 and np.isfinite(kp) and kp < 0.05)
+        orders.append(order)
+        ur.append(dict(var=c, adf_stat=_f(a0[0], 3), adf_p=_f(a0[1], 3), adf_lags=int(a0[2]), dadf_stat=_f(a1[0], 3),
+                       dadf_p=_f(a1[1], 3), kpss_stat=_f(ks, 3), kpss_p=_f(kp, 3), order=order, conflict=conflict))
+    out["unitroot"] = ur
+    out["conflicts"] = [u["var"] for u in ur if u["conflict"]]
+
+    if 2 in orders:
+        out["model"] = "I2"
+    elif all(o == 0 for o in orders):
+        out["model"] = "OLS"
+    elif all(o == 1 for o in orders):
+        try:
+            maxl = max(1, min(8, (n // (k + 1)) // 4))
+            p = max(1, int(VAR(df).select_order(maxl).aic))
+        except Exception:
+            p = 2
+        j = coint_johansen(df, 0, p - 1)
+        rows, rank, stop = [], 0, False
+        for i in range(k):
+            rej = bool(j.lr1[i] > j.cvt[i, 1])
+            rows.append(dict(h0=i, trace=_f(j.lr1[i], 2), cv=_f(j.cvt[i, 1], 2), reject=rej))
+            if rej and not stop:
+                rank = i + 1
+            else:
+                stop = True
+        out["johansen"] = dict(lags=p, rows=rows, rank=rank)
+        out["model"] = "VAR" if rank == 0 else "VECM"
+        out["fullrank"] = bool(rank == k)
+    else:
+        out["model"] = "ARDL"
+    out["orders"] = orders
+    return json.dumps(out)
+</script>
+<script>
+const EXAMPLES=[{"key": "returns", "title": "Stock returns and the economy", "meta": "Monthly, 1985–2019 · U.S.", "desc": "S&P 500 return, industrial production growth, change in the federal funds rate, change in the Baa–Treasury credit spread.", "file": "examples/returns.csv", "result": {"n": 420, "vars": ["sp500_return", "ip_growth", "d_fedfunds", "d_credit_spread"], "skipped": ["date"], "dep": "sp500_return", "series": {"sp500_return": [4.22556, 0.66667, 1.88784, 1.13423, 0.43321, 2.4241, -2.101, -0.37839, 6.19961, -1.10005, 2.84565, -12.87466, 3.8662, -1.17359, -0.59281, 3.44735, 3.16809, 3.22717, 2.50166, 0.02879, -2.50678, -0.08276, -0.09994, -2.66348, -0.99658, 1.96825, 0.51152, -0.08268, 6.85586, 0.01227, 1.64703, -1.43929, -0.09416, -1.58527, -0.172, 1.00961, 1.49959, -3.6402, -0.75699, -0.67686, 2.186, 2.94909, 3.28646, 0.71448, -0.02441, 0.01545, -3.7229, 3.8629, 3.04369, -3.62872, 5.44101, 1.49777, 0.10282, 3.23185, 4.25589, 1.15241, 4.81637, 4.05954, 4.32389, -1.38725, -0.21652, 1.31908, 0.75231, -5.45305, 0.35251, 0.3359, -2.80475, 3.01263, -0.4131, -3.69549, -11.53022, -1.53042, -0.37214, 4.99914, 0.45846, 1.87454, 4.68918, 0.83107, -2.40429, -0.04027, -1.49544, -2.58308, 1.64904, -2.80926, 1.31142, 0.64949, 0.56258, 3.40488, 0.54496, 3.95022, 0.42967, 2.80184, -7.03304, 3.98429, -6.46116, -22.80448, -1.37455, 11.35225, 1.04193, 2.18832, 1.18177, 3.85428, -0.32915, 4.31692, 3.25604, 2.05015, 2.90166, 2.80057, 4.50251, -0.20247, 2.70583, -0.38872, 4.00441, 1.27311, 3.03663, 1.92892, 0.80328, 0.0397, 1.327, -2.84767, -1.27817, 0.71236, -0.24562, 6.26457, -6.82323, 2.6159, 3.07197, -0.68222, 1.26015, 0.56745, 0.82282, 2.54121, 4.60135, -1.83487, 1.41639, -4.08148, 1.54911, 3.49804, 3.59995, -0.15034], "ip_growth": [-0.05244, -0.22045, -0.50299, -0.3507, 0.52252, 0.11329, 0.62004, 0.425, -0.38628, 0.65159, 0.67516, 1.33549, -0.02586, 0.59547, 0.01553, 0.44013, 0.29415, -0.0353, -0.97105, -0.12695, -0.52365, -0.22508, -0.16652, -0.61668, -0.3339, 0.2569, 0.2737, -0.10466, -0.52511, 0.76516, 0.90215, 0.68087, 0.39326, 0.27651, 0.25619, 0.74384, 0.30905, 0.59154, 0.12622, 0.80961, 0.1913, -0.17664, -0.41812, -0.16627, -0.53953, 0.99484, 0.00159, -0.01902, 0.176, 0.08245, 0.8355, 0.88946, 0.44349, 0.34549, -0.39805, 0.68218, 0.41245, 0.22236, 0.58469, 1.27147, -0.07567, 0.63102, -0.17703, -0.36924, -0.49382, -0.35215, -0.60989, -0.30472, 0.69376, 0.47482, -0.03309, -0.26348, 0.82225, -0.62779, 0.51491, 0.13451, 0.1665, 0.3871, 0.73503, 0.88602, 0.35211, 0.20739, -0.31816, 1.21503, 0.15778, 0.29563, -0.06535, -0.10255, -0.35764, 0.66875, -0.15752, -0.29275, -0.12425, -0.68841, -0.45501, 1.00067, -2.52016, -0.78789, 1.18656, 0.22725, 1.07007, 0.36003, 0.38185, -0.26961, -0.21681, -0.33183, 0.47363, 0.69707, 0.59977, 0.71214, 0.19944, 0.31774, -0.01507, -0.10354, -0.32647, -0.11734, -0.3834, 0.08253, 0.2123, 0.01846, -0.79746, -0.55366, 0.62516, -0.47513, 0.496, 0.31936, 0.11509, 0.06941, -0.22724, 0.99734, -0.24947, 1.23626, -0.00197, 1.12967, 0.12586, -0.16728, -0.66055, -0.54702, -0.52506, -0.85471], "d_fedfunds": [-0.03, -0.31, 0.35, 0.07, -0.13, -0.49, -0.36, -0.04, -0.48, 0.24, -0.15, 0.07, 0.06, 0.29, 0.24, 0.11, 0.36, -0.01, -0.29, -0.18, -0.22, -0.02, -0.14, -0.09, -0.4, -0.21, -0.08, -0.24, -0.4, -0.25, -0.51, -0.12, 0.1, -0.11, 0.02, -0.1, 0.09, 0.22, 0.01, 0.03, 0.08, 0.07, -0.15, -0.04, -0.04, -0.09, 0.13, -0.06, -0.04, 0.12, -0.04, -0.04, 0.06, -0.04, -0.02, -0.44, -0.05, -0.07, 0.23, -0.02, 0.15, 0.17, 0.01, -0.01, -0.42, -0.51, -0.2, -0.58, -0.09, 0.02, -0.02, 0.0, 0.0, 0.01, -0.21, 0.0, 0.02, 0.0, 0.23, 0.15, 0.12, 0.16, 0.22, 0.16, 0.13, 0.2, 0.25, 0.0, 0.01, -0.01, 0.01, -0.18, -0.3, -0.33, 0.01, -0.84, -0.01, -0.03, -0.05, -0.03, -0.01, 0.04, 0.0, 0.0, -0.01, -0.04, -0.02, -0.01, 0.01, 0.01, 0.0, 0.02, -0.02, 0.01, 0.0, 0.01, -0.02, 0.01, -0.01, 0.0, -0.01, 0.01, 0.0, -0.02, 0.1, 0.01, 0.01, 0.0, 0.11, 0.11, 0.11, 0.0, 0.11, 0.18, 0.09, 0.24, 0.13, 0.01, 0.02, -0.21], "d_credit_spread": [-0.02, 0.25, -0.12, 0.01, -0.07, 0.17, 0.32, 0.06, -0.22, -0.34, 0.04, 0.21, 0.1, -0.02, -0.03, -0.31, 0.02, 0.12, 0.1, 0.08, -0.25, -0.11, -0.01, 0.27, 0.01, -0.08, -0.06, 0.1, -0.07, 0.02, 0.21, 0.05, 0.03, 0.0, 0.01, 0.0, -0.02, -0.1, -0.05, -0.06, 0.01, 0.04, 0.03, -0.02, 0.04, -0.08, -0.01, 0.02, -0.08, -0.04, 0.0, 0.05, 0.14, 0.02, 0.06, 0.37, -0.01, 0.0, 0.04, -0.01, -0.24, 0.3, -0.08, 0.05, -0.01, -0.02, 0.04, 0.04, -0.13, -0.01, 0.23, 0.26, -0.12, -0.25, -0.22, -0.08, -0.04, -0.17, 0.07, -0.03, -0.12, 0.15, -0.09, 0.01, -0.03, -0.0, 0.0, -0.02, -0.08, -0.01, 0.05, -0.12, 0.25, -0.09, 0.18, 1.45, -0.39, -0.14, -0.25, -0.01, -0.26, -0.14, -0.03, 0.17, -0.11, -0.06, 0.01, -0.07, -0.01, 0.08, -0.06, -0.29, -0.09, -0.06, -0.15, 0.03, -0.15, -0.15, -0.01, 0.12, 0.04, 0.04, 0.11, 0.1, 0.14, -0.26, -0.17, -0.06, -0.11, 0.07, -0.11, -0.14, -0.14, 0.0, -0.02, 0.04, 0.11, -0.1, -0.17, 0.0]}, "summary": [{"var": "sp500_return", "mean": 0.7049, "sd": 3.5366, "min": -22.8045, "max": 11.3522, "skew": -1.362, "kurt": 9.075}, {"var": "ip_growth", "mean": 0.1489, "sd": 0.608, "min": -4.4849, "max": 2.0386, "skew": -1.626, "kurt": 12.615}, {"var": "d_fedfunds", "mean": -0.0163, "sd": 0.1922, "min": -0.96, "max": 0.87, "skew": -0.764, "kurt": 6.951}, {"var": "d_credit_spread", "mean": 0.0003, "sd": 0.1688, "min": -0.99, "max": 1.45, "skew": 1.07, "kurt": 19.011}], "corr": [[1.0, -0.009, 0.06, -0.447], [-0.009, 1.0, 0.206, -0.07], [0.06, 0.206, 1.0, -0.268], [-0.447, -0.07, -0.268, 1.0]], "unitroot": [{"var": "sp500_return", "adf_stat": -15.731, "adf_p": 0.0, "adf_lags": 0, "dadf_stat": -8.352, "dadf_p": 0.0, "kpss_stat": 0.168, "kpss_p": 0.1, "order": 0, "conflict": false}, {"var": "ip_growth", "adf_stat": -5.419, "adf_p": 0.0, "adf_lags": 6, "dadf_stat": -9.884, "dadf_p": 0.0, "kpss_stat": 0.333, "kpss_p": 0.1, "order": 0, "conflict": false}, {"var": "d_fedfunds", "adf_stat": -4.194, "adf_p": 0.001, "adf_lags": 9, "dadf_stat": -11.406, "dadf_p": 0.0, "kpss_stat": 0.07, "kpss_p": 0.1, "order": 0, "conflict": false}, {"var": "d_credit_spread", "adf_stat": -5.199, "adf_p": 0.0, "adf_lags": 17, "dadf_stat": -8.777, "dadf_p": 0.0, "kpss_stat": 0.029, "kpss_p": 0.1, "order": 0, "conflict": false}], "conflicts": [], "model": "OLS", "orders": [0, 0, 0, 0]}}, {"key": "prices", "title": "Stock prices and industrial production", "meta": "Monthly, 1985–2019 · U.S.", "desc": "Log S&P 500 index and log industrial production.", "file": "examples/prices.csv", "result": {"n": 420, "vars": ["log_sp500", "log_indpro"], "skipped": ["date"], "dep": "log_sp500", "series": {"log_sp500": [5.14517, 5.19628, 5.2601, 5.22682, 5.3385, 5.47227, 5.48147, 5.46975, 5.57784, 5.66746, 5.73689, 5.6355, 5.52346, 5.57063, 5.59508, 5.62546, 5.65389, 5.71142, 5.80483, 5.85048, 5.82886, 5.82358, 5.88619, 5.72724, 5.78533, 5.93933, 5.94078, 5.95811, 6.03088, 6.00982, 6.0284, 6.02224, 6.07587, 6.09375, 6.10321, 6.13967, 6.15907, 6.10307, 6.11235, 6.13947, 6.14257, 6.2303, 6.32323, 6.36805, 6.42068, 6.47261, 6.46781, 6.55316, 6.64147, 6.63848, 6.83011, 6.85768, 6.87043, 7.0141, 7.05322, 6.93971, 7.12991, 7.19651, 7.23056, 7.17013, 7.26234, 7.28712, 7.29506, 7.23716, 7.19716, 7.08157, 7.09378, 6.98155, 7.03897, 7.01385, 6.80638, 6.75067, 6.79776, 6.79126, 6.90027, 6.94575, 7.0322, 7.03294, 7.00837, 7.01859, 7.07446, 7.05999, 7.10844, 7.08335, 7.15362, 7.17179, 7.13906, 7.21772, 7.26134, 7.28868, 7.32693, 7.33932, 7.22894, 7.22291, 7.13675, 6.87606, 6.7634, 6.74306, 6.84142, 6.97322, 7.02428, 7.08784, 6.98453, 7.06611, 7.15666, 7.19407, 7.18931, 7.09608, 7.17057, 7.23449, 7.21508, 7.27088, 7.30007, 7.35928, 7.41979, 7.4501, 7.50789, 7.53062, 7.58736, 7.56904, 7.61489, 7.64724, 7.6469, 7.63587, 7.55935, 7.63798, 7.67271, 7.66997, 7.72979, 7.76612, 7.80552, 7.84659, 7.93373, 7.88368, 7.9351, 7.93217, 7.8661, 7.97378, 8.00507, 7.9989], "log_indpro": [3.9987, 4.00089, 3.99703, 4.00045, 4.019, 4.00615, 4.01036, 4.01564, 4.02519, 4.04629, 4.06461, 4.08935, 4.09948, 4.11264, 4.11367, 4.11983, 4.12984, 4.1276, 4.11234, 4.11743, 4.12123, 4.13278, 4.13746, 4.13512, 4.11225, 4.10186, 4.12261, 4.1299, 4.11875, 4.14186, 4.15473, 4.15916, 4.16842, 4.17504, 4.17614, 4.18758, 4.20109, 4.2176, 4.23021, 4.24789, 4.26638, 4.26484, 4.26877, 4.28405, 4.28457, 4.30743, 4.32246, 4.33357, 4.35045, 4.36926, 4.38784, 4.41601, 4.43268, 4.43833, 4.43491, 4.4612, 4.46844, 4.47857, 4.48987, 4.50282, 4.51535, 4.529, 4.53085, 4.52872, 4.5206, 4.50798, 4.49128, 4.48193, 4.48259, 4.4948, 4.50694, 4.50423, 4.51236, 4.50459, 4.51072, 4.51639, 4.52533, 4.53148, 4.5385, 4.54934, 4.56308, 4.57094, 4.57306, 4.56893, 4.58626, 4.59191, 4.59487, 4.59636, 4.60271, 4.62077, 4.62001, 4.62149, 4.62643, 4.61269, 4.59935, 4.54858, 4.48155, 4.45191, 4.45068, 4.47256, 4.49077, 4.50492, 4.52456, 4.52832, 4.53677, 4.53964, 4.54856, 4.5611, 4.57223, 4.5773, 4.58161, 4.58017, 4.58674, 4.59456, 4.5941, 4.60421, 4.60507, 4.62328, 4.63274, 4.63435, 4.63271, 4.61735, 4.616, 4.60673, 4.59955, 4.58983, 4.59355, 4.59233, 4.59326, 4.60559, 4.60604, 4.61501, 4.61991, 4.63817, 4.63818, 4.64372, 4.63822, 4.62767, 4.62503, 4.62093]}, "summary": [{"var": "log_sp500", "mean": 6.7846, "sd": 0.7431, "min": 5.1452, "max": 8.0636, "skew": -0.435, "kurt": 2.144}, {"var": "log_indpro", "mean": 4.4112, "sd": 0.2087, "min": 3.997, "max": 4.6454, "skew": -0.671, "kurt": 1.903}], "corr": [[1.0, 0.967], [0.967, 1.0]], "unitroot": [{"var": "log_sp500", "adf_stat": -1.244, "adf_p": 0.654, "adf_lags": 1, "dadf_stat": -15.768, "dadf_p": 0.0, "kpss_stat": 2.946, "kpss_p": 0.01, "order": 1, "conflict": false}, {"var": "log_indpro", "adf_stat": -1.964, "adf_p": 0.303, "adf_lags": 7, "dadf_stat": -5.399, "dadf_p": 0.0, "kpss_stat": 2.949, "kpss_p": 0.01, "order": 1, "conflict": false}], "conflicts": [], "johansen": {"lags": 5, "rows": [{"h0": 0, "trace": 4.74, "cv": 15.49, "reject": false}, {"h0": 1, "trace": 0.76, "cv": 3.84, "reject": false}], "rank": 0}, "model": "VAR", "fullrank": false, "orders": [1, 1]}}, {"key": "rates", "title": "Short and long interest rates", "meta": "Quarterly, 1960–2019 · U.S.", "desc": "10-year and 1-year Treasury yields.", "file": "examples/rates.csv", "result": {"n": 240, "vars": ["yield_10y", "yield_1y"], "skipped": ["date"], "dep": "yield_10y", "series": {"yield_10y": [4.4867, 3.8333, 3.7867, 3.98, 4.0167, 3.99, 3.8933, 4.0333, 4.18, 4.1933, 4.2033, 4.2467, 4.77, 5.14, 4.5833, 5.2467, 5.61, 5.46, 6.1767, 6.8567, 7.3667, 7.46, 6.0167, 6.4833, 6.0333, 6.29, 6.6033, 7.2067, 7.0533, 7.9633, 7.54, 8.2967, 7.7533, 7.73, 7.3533, 7.3567, 8.01, 8.49, 9.1067, 9.1033, 11.9867, 10.9533, 12.96, 14.8467, 14.2933, 13.1167, 10.5633, 11.6267, 11.9433, 12.8667, 11.5833, 10.3367, 8.5567, 7.3067, 7.1933, 8.8767, 8.4167, 9.1, 9.2067, 8.1067, 8.4233, 8.7033, 8.0167, 7.94, 7.3033, 6.6167, 6.28, 5.6167, 6.0667, 7.3333, 7.4833, 6.3233, 5.91, 6.78, 6.5633, 6.2433, 5.5867, 5.2033, 4.9833, 5.8833, 6.48, 5.8933, 5.05, 4.98, 5.0767, 4.26, 3.92, 4.2333, 4.02, 4.3033, 4.2967, 4.2133, 4.57, 4.8967, 4.68, 4.73, 3.6633, 3.8633, 2.7367, 3.5167, 3.7167, 2.7867, 3.46, 2.4267, 2.0367, 1.6433, 1.95, 2.71, 2.7633, 2.4967, 1.9667, 2.22, 1.92, 1.5633, 2.4433, 2.2433, 2.76, 2.9267, 2.6533, 1.7967], "yield_1y": [4.57, 3.0733, 2.8733, 3.0133, 3.2067, 3.1833, 3.0267, 3.5267, 3.8267, 3.7667, 4.01, 4.0833, 4.93, 5.51, 4.6033, 5.1267, 5.4733, 5.51, 6.3633, 7.6533, 7.5533, 6.9367, 4.05, 5.75, 4.4067, 5.1533, 6.31, 8.5067, 7.3533, 9.01, 6.3067, 7.52, 5.9767, 6.0133, 5.42, 6.28, 7.31, 8.4467, 10.3, 10.1533, 13.9333, 10.1367, 14.12, 16.32, 14.3333, 11.84, 8.86, 10.2967, 10.1767, 11.81, 9.39, 7.9933, 7.4567, 5.99, 5.9233, 7.1267, 6.78, 8.0033, 9.29, 8.0967, 8.1267, 7.8267, 6.4367, 5.8867, 4.3567, 3.4167, 3.4067, 3.4233, 3.91, 5.6, 6.7267, 5.6533, 5.1233, 5.7833, 5.6467, 5.54, 5.3133, 5.0933, 4.6633, 5.16, 6.1867, 6.13, 4.5967, 3.3033, 2.32, 1.8133, 1.3, 1.2233, 1.2233, 2.08, 3.0633, 3.7867, 4.6333, 5.09, 5.01, 4.5233, 2.1, 2.1233, 0.5667, 0.4467, 0.3667, 0.27, 0.2733, 0.1333, 0.1567, 0.1833, 0.1533, 0.1233, 0.1233, 0.11, 0.2233, 0.35, 0.5767, 0.5567, 0.8867, 1.2433, 1.94, 2.4667, 2.54, 1.8433]}, "summary": [{"var": "yield_10y", "mean": 6.0491, "sd": 2.8724, "min": 1.5633, "max": 14.8467, "skew": 0.768, "kurt": 3.355}, {"var": "yield_1y", "mean": 5.0408, "sd": 3.3476, "min": 0.1033, "max": 16.32, "skew": 0.653, "kurt": 3.512}], "corr": [[1.0, 0.948], [0.948, 1.0]], "unitroot": [{"var": "yield_10y", "adf_stat": -0.825, "adf_p": 0.812, "adf_lags": 7, "dadf_stat": -7.052, "dadf_p": 0.0, "kpss_stat": 0.861, "kpss_p": 0.01, "order": 1, "conflict": false}, {"var": "yield_1y", "adf_stat": -1.506, "adf_p": 0.531, "adf_lags": 7, "dadf_stat": -6.676, "dadf_p": 0.0, "kpss_stat": 0.976, "kpss_p": 0.01, "order": 1, "conflict": false}], "conflicts": [], "johansen": {"lags": 8, "rows": [{"h0": 0, "trace": 29.39, "cv": 15.49, "reject": true}, {"h0": 1, "trace": 1.07, "cv": 3.84, "reject": false}], "rank": 1}, "model": "VECM", "fullrank": false, "orders": [1, 1]}}, {"key": "yield", "title": "What moves the 10-year yield?", "meta": "Quarterly, 1960–2019 · U.S.", "desc": "10-year Treasury yield, GDP-deflator inflation, real GDP growth and the unemployment rate.", "file": "examples/yield.csv", "result": {"n": 240, "vars": ["yield_10y", "inflation", "gdp_growth", "unemployment"], "skipped": ["date"], "dep": "yield_10y", "series": {"yield_10y": [4.4867, 3.8333, 3.7867, 3.98, 4.0167, 3.99, 3.8933, 4.0333, 4.18, 4.1933, 4.2033, 4.2467, 4.77, 5.14, 4.5833, 5.2467, 5.61, 5.46, 6.1767, 6.8567, 7.3667, 7.46, 6.0167, 6.4833, 6.0333, 6.29, 6.6033, 7.2067, 7.0533, 7.9633, 7.54, 8.2967, 7.7533, 7.73, 7.3533, 7.3567, 8.01, 8.49, 9.1067, 9.1033, 11.9867, 10.9533, 12.96, 14.8467, 14.2933, 13.1167, 10.5633, 11.6267, 11.9433, 12.8667, 11.5833, 10.3367, 8.5567, 7.3067, 7.1933, 8.8767, 8.4167, 9.1, 9.2067, 8.1067, 8.4233, 8.7033, 8.0167, 7.94, 7.3033, 6.6167, 6.28, 5.6167, 6.0667, 7.3333, 7.4833, 6.3233, 5.91, 6.78, 6.5633, 6.2433, 5.5867, 5.2033, 4.9833, 5.8833, 6.48, 5.8933, 5.05, 4.98, 5.0767, 4.26, 3.92, 4.2333, 4.02, 4.3033, 4.2967, 4.2133, 4.57, 4.8967, 4.68, 4.73, 3.6633, 3.8633, 2.7367, 3.5167, 3.7167, 2.7867, 3.46, 2.4267, 2.0367, 1.6433, 1.95, 2.71, 2.7633, 2.4967, 1.9667, 2.22, 1.92, 1.5633, 2.4433, 2.2433, 2.76, 2.9267, 2.6533, 1.7967], "inflation": [0.75386, 1.7301, 0.46151, 0.84305, 1.98108, 0.95899, 1.95661, 0.4248, 1.5107, 1.96693, 1.7546, 1.81111, 2.43408, 3.49778, 1.66571, 3.58685, 4.34057, 3.8108, 3.97864, 5.65285, 5.4652, 3.26872, 6.01137, 4.01199, 6.36178, 3.60208, 5.04599, 7.5778, 8.01564, 12.13934, 8.94192, 7.01305, 4.34294, 5.0695, 6.39717, 5.4725, 6.49753, 6.99593, 7.3967, 8.2662, 8.65054, 8.8166, 10.4633, 7.70165, 5.6913, 5.51239, 3.18243, 4.23204, 3.92658, 3.59548, 4.07927, 2.65207, 1.96932, 1.89896, 2.32053, 3.0801, 3.07822, 4.86459, 3.83446, 2.95736, 4.335, 3.44362, 3.87021, 3.05925, 1.59256, 1.9144, 2.37618, 2.00661, 2.0403, 2.1238, 2.27549, 1.78682, 1.84142, 1.93682, 1.79172, 1.18799, 0.40145, 1.54638, 1.08339, 1.5365, 2.65667, 2.49733, 2.72857, 1.20891, 1.05208, 1.79159, 2.14481, 2.28155, 2.86478, 2.51917, 3.06072, 3.76838, 2.79073, 2.92237, 3.98452, 1.69938, 1.72995, 3.10387, 0.11296, 0.25326, 0.98979, 1.44654, 1.94497, 2.08294, 2.35951, 2.48149, 1.42498, 2.17457, 1.5179, 1.73585, -0.23974, 0.9608, -0.24206, 1.07492, 2.0376, 2.07377, 2.56371, 1.74282, 1.26783, 1.31122], "gdp_growth": [8.89499, 1.95505, 2.69043, 7.60853, 7.07198, 4.88859, 4.34458, 8.70082, 8.34657, 6.20245, 9.5639, 8.79505, 9.61875, 3.3724, 3.52741, 3.76611, 8.07455, 3.08645, 6.20966, 2.63151, -0.59646, 3.66952, 10.71989, 3.27611, 7.28239, 3.75837, 9.77898, -2.10923, -3.45349, -3.7989, -4.9005, 6.79048, 8.89822, 2.18429, 4.71664, 7.14834, 1.27745, 4.00262, 0.7179, 2.9604, 1.25675, -0.47592, 7.76162, 4.76156, -6.26352, -1.53167, 5.23678, 7.91695, 7.74407, 3.83781, 3.85721, 6.06276, 3.71771, 3.80862, 2.9567, 3.45341, 2.06221, 2.33737, 4.04506, 2.95223, 4.34825, 0.26568, -1.87583, 2.01694, 4.76035, 3.9352, 0.66998, 1.90562, 3.86168, 2.33098, 1.41948, 3.3889, 2.98327, 3.57473, 2.57357, 4.96372, 3.99351, 5.00702, 3.73937, 5.27096, 1.44661, 0.40741, -1.3149, -1.60639, 3.33121, 1.62317, 2.09937, 6.59767, 2.25968, 3.7747, 4.41183, 3.1229, 5.34564, 0.59725, 1.20096, 2.29814, -1.71099, -2.10666, -4.56331, 1.40388, 1.93197, 3.07241, -0.95155, -0.08924, 3.33975, 0.57742, 3.92581, 3.39162, -1.38115, 4.83161, 3.58604, 1.59832, 2.31172, 2.82694, 1.94095, 3.14342, 3.23997, 2.48747, 2.48819, 4.65193], "unemployment": [5.1333, 5.5333, 6.8, 6.7667, 5.6333, 5.5667, 5.7667, 5.5, 5.4667, 5.0, 4.9, 4.3667, 3.8667, 3.7667, 3.8333, 3.8, 3.7333, 3.5333, 3.4, 3.5667, 4.1667, 5.1667, 5.9333, 6.0333, 5.7667, 5.5667, 4.9333, 4.8, 5.1333, 5.6333, 8.2667, 8.4667, 7.7333, 7.7333, 7.5, 6.9, 6.3333, 6.0333, 5.8667, 5.8667, 6.3, 7.6667, 7.4333, 7.4, 8.8333, 9.9, 10.3667, 9.3667, 7.8667, 7.4333, 7.2333, 7.2, 7.0333, 6.9667, 6.6, 6.0, 5.7, 5.4667, 5.2, 5.2333, 5.3, 5.7, 6.6, 6.8667, 7.3667, 7.6333, 7.1333, 6.8, 6.5667, 6.0, 5.4667, 5.6667, 5.5333, 5.2667, 5.2333, 4.8667, 4.6333, 4.5333, 4.3, 4.2333, 4.0333, 4.0, 4.2333, 4.8333, 5.7, 5.7333, 5.8667, 6.1333, 5.7, 5.4333, 5.3, 4.9667, 4.7333, 4.6333, 4.5, 4.6667, 5.0, 6.0, 8.2667, 9.6333, 9.8333, 9.4667, 9.0333, 9.0, 8.2667, 8.0333, 7.7333, 7.2333, 6.6667, 6.0667, 5.5333, 5.1, 4.9, 4.9, 4.5667, 4.3333, 4.0333, 3.7667, 3.8667, 3.6]}, "summary": [{"var": "yield_10y", "mean": 6.0491, "sd": 2.8724, "min": 1.5633, "max": 14.8467, "skew": 0.768, "kurt": 3.355}, {"var": "inflation", "mean": 3.195, "sd": 2.3087, "min": -0.5335, "max": 12.1393, "skew": 1.405, "kurt": 4.935}, {"var": "gdp_growth", "mean": 3.014, "sd": 3.251, "min": -8.8547, "max": 15.1678, "skew": -0.283, "kurt": 4.775}, {"var": "unemployment", "mean": 5.9657, "sd": 1.6066, "min": 3.4, "max": 10.6667, "skew": 0.696, "kurt": 3.02}], "corr": [[1.0, 0.617, 0.004, 0.317], [0.617, 1.0, -0.125, 0.106], [0.004, -0.125, 1.0, -0.084], [0.317, 0.106, -0.084, 1.0]], "unitroot": [{"var": "yield_10y", "adf_stat": -0.825, "adf_p": 0.812, "adf_lags": 7, "dadf_stat": -7.052, "dadf_p": 0.0, "kpss_stat": 0.861, "kpss_p": 0.01, "order": 1, "conflict": false}, {"var": "inflation", "adf_stat": -2.245, "adf_p": 0.19, "adf_lags": 2, "dadf_stat": -14.886, "dadf_p": 0.0, "kpss_stat": 0.811, "kpss_p": 0.01, "order": 1, "conflict": false}, {"var": "gdp_growth", "adf_stat": -7.36, "adf_p": 0.0, "adf_lags": 1, "dadf_stat": -6.737, "dadf_p": 0.0, "kpss_stat": 0.441, "kpss_p": 0.059, "order": 0, "conflict": false}, {"var": "unemployment", "adf_stat": -2.906, "adf_p": 0.045, "adf_lags": 9, "dadf_stat": -5.149, "dadf_p": 0.0, "kpss_stat": 0.14, "kpss_p": 0.1, "order": 0, "conflict": false}], "conflicts": [], "model": "ARDL", "orders": [1, 1, 0, 0]}}];
+const PYO='https://cdn.jsdelivr.net/pyodide/v0.27.2/full/';
+const L='../teaching/econometrics/lectures/';
+const MODELS={
+ OLS:{name:'OLS regression',when:'All variables stationary in levels',why:'Every series is stationary in levels, so a regression in levels is valid and standard inference applies.',steps:['Specify the regression','HAC (Newey–West) standard errors','Serial correlation: Breusch–Godfrey','Heteroskedasticity: White','Normality: Jarque–Bera','Functional form: RESET','Multicollinearity: VIF','Stability: CUSUM, break tests'],lec:[['02-ols-inference.html','Lecture: OLS inference'],['04-heteroskedasticity-robust-inference.html','Lecture: Robust inference']]},
+ VAR:{name:'VAR in first differences',when:'All variables I(1), no cointegration',why:'Every series has a unit root and no long-run relationship ties them together, so the model is estimated on first differences.',steps:['Difference the data','Lag-order selection (AIC, BIC)','Stability: roots inside the unit circle','Residual autocorrelation: LM test','Granger causality','Impulse responses','Variance decomposition'],lec:[['11-var-svar.html','Lecture: VAR and SVAR']]},
+ VECM:{name:'Vector error-correction model',when:'All variables I(1), cointegrated',why:'Every series has a unit root, but they share a long-run relationship. A VECM estimates that relationship and the speed of adjustment back to it.',steps:['Lag order and deterministic terms','Johansen trace and max-eigenvalue tests','Long-run vector (normalised)','Adjustment coefficients','Weak exogeneity','Short-run causality','Residual diagnostics','FMOLS / DOLS as robustness'],lec:[['12-cointegration-ardl.html','Lecture: Cointegration and ARDL']]},
+ ARDL:{name:'ARDL bounds-testing model',when:'A mix of I(0) and I(1) variables',why:'The series have different orders of integration and none is I(2). The ARDL bounds test is valid in exactly this case.',steps:['Lag selection','Bounds test for a long-run relationship','Long-run coefficients','Error-correction form','Serial correlation and heteroskedasticity','Stability: CUSUM and CUSUMSQ'],lec:[['12-cointegration-ardl.html','Lecture: Cointegration and ARDL']]},
+ NARDL:{name:'Nonlinear ARDL',when:'Mixed orders, asymmetric effects',why:'The series have mixed orders of integration and you expect increases and decreases to act differently. NARDL splits each regressor into positive and negative partial sums.',steps:['Positive and negative partial sums','Lag selection','Bounds test','Wald tests of long-run symmetry','Wald tests of short-run symmetry','Dynamic multipliers','Diagnostics and stability'],lec:[['12-cointegration-ardl.html','Lecture: Cointegration and ARDL']]},
+ GMM:{name:'2SLS and GMM',when:'Endogenous regressors or dynamic panels',why:'With endogenous regressors or a lagged dependent variable in a panel, OLS is inconsistent. Instrumental-variable and GMM estimators deal with this.',steps:['Choose and justify instruments','First-stage F statistic','Overidentification: Hansen J','Endogeneity test','Panels: difference and system GMM','AR(1) and AR(2) tests','Instrument count'],lec:[['05-endogeneity-iv.html','Lecture: Endogeneity and IV'],['08-dynamic-panels.html','Lecture: Dynamic panels']]}
+};
+const $=s=>document.querySelector(s), el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches, D=reduce?0:1;
+const fmt=(v,d=3)=>v==null?'–':Number(v).toFixed(d), pf=p=>p==null?'–':(p<0.001?'<0.001':p.toFixed(3));
+let run=0;
+
+/* ---------- decision tree ---------- */
+const N={start:[300,28,116,'Your data'],q1:[300,98,196,'Panel or endogenous?'],GMM:[530,98,112,'2SLS / GMM',1],ur:[300,172,150,'Unit-root tests'],
+ i0:[70,250,104,'All I(0)'],i1:[275,250,104,'All I(1)'],mix:[500,250,160,'Mixed I(0) / I(1)'],co:[275,328,146,'Cointegration?'],as:[500,328,176,'Asymmetric effects?'],
+ OLS:[70,412,86,'OLS',1],VAR:[215,412,86,'VAR',1],VECM:[335,412,86,'VECM',1],ARDL:[440,412,86,'ARDL',1],NARDL:[548,412,86,'NARDL',1]};
+const E=[['start','q1'],['q1','GMM','yes'],['q1','ur','no'],['ur','i0'],['ur','i1'],['ur','mix'],['i0','OLS'],['i1','co'],['co','VAR','no'],['co','VECM','yes'],['mix','as'],['as','ARDL','no'],['as','NARDL','yes']];
+const PATHS={OLS:['start','q1','ur','i0','OLS'],VAR:['start','q1','ur','i1','co','VAR'],VECM:['start','q1','ur','i1','co','VECM'],ARDL:['start','q1','ur','mix','as','ARDL'],NARDL:['start','q1','ur','mix','as','NARDL'],GMM:['start','q1','GMM']};
+const TL={start:'Your data',q1:'Time series',ur:'Unit-root tests',i0:'All I(0)',i1:'All I(1)',mix:'Mixed I(0)/I(1)',co:'Cointegration test',as:'Asymmetry?'};
+function drawTree(){
+ const H=16;let s='<svg viewBox="0 0 600 444" role="img" aria-label="Decision tree from data to model">';
+ for(const [a,b,lab] of E){const A=N[a],B=N[b];let d,lx,ly;
+  if(A[1]===B[1]){d=`M${A[0]+A[2]/2} ${A[1]}H${B[0]-B[2]/2}`;lx=(A[0]+A[2]/2+B[0]-B[2]/2)/2;ly=A[1]-5}
+  else{const my=(A[1]+B[1])/2;d=`M${A[0]} ${A[1]+H}V${my}H${B[0]}V${B[1]-H}`;lx=B[0]+(B[0]<A[0]?-15:15);ly=my+15}
+  s+=`<path class="e" id="e-${a}-${b}" pathLength="1" d="${d}"/>`;if(lab)s+=`<text class="el" x="${lx}" y="${ly}">${lab}</text>`}
+ for(const k in N){const [x,y,w,t,leaf]=N[k];s+=`<g class="n${leaf?' leaf':''}" id="n-${k}"><rect x="${x-w/2}" y="${y-H}" width="${w}" height="${2*H}" rx="${leaf?16:8}"/><text x="${x}" y="${y}">${t}</text></g>`}
+ $('#tree').innerHTML=s+'</svg>';
+}
+function resetTree(){document.querySelectorAll('.tree .on,.tree .hl,.tree .alt').forEach(e=>e.classList.remove('on','hl','alt'));$('#trail').innerHTML=''}
+function light(path,labels={},final=true){ // animate along a list of node ids
+ const my=run;let shown=[...document.querySelectorAll('.tree .n.on')].map(e=>e.id.slice(2));
+ path.forEach((id,i)=>{if(shown.includes(id))return;const k=path.slice(0,i+1).filter(x=>!shown.includes(x)).length-1;
+  setTimeout(()=>{if(my!==run)return;const n=$('#n-'+id);n&&n.classList.add('on');if(i>0){const e=document.getElementById(`e-${path[i-1]}-${id}`);e&&e.classList.add('hl')}
+   const t=$('#trail');if(t.children.length)t.appendChild(el('i','','→'));const isLeaf=!!MODELS[id];t.appendChild(el('span',isLeaf&&final?'final':'',esc(labels[id]||(isLeaf?id:TL[id]))))},k*380*D)});
+ return path.filter(x=>!shown.includes(x)).length*380*D;
+}
+
+/* ---------- results ---------- */
+function spark(v){const a=v.filter(x=>x!=null),mn=Math.min(...a),mx=Math.max(...a),r=mx-mn||1;return '<svg viewBox="0 0 200 44" preserveAspectRatio="none"><path pathLength="1" d="'+v.map((y,i)=>(i?'L':'M')+(i/(v.length-1)*200).toFixed(1)+' '+(40-(y-mn)/r*36).toFixed(1)).join('')+'"/></svg>'}
+const code=c=>`<details class="code"><summary>Python code for this step</summary><pre>${esc(c)}</pre></details>`;
+function addStep(n,title,html,delay){const s=el('div','step',`<div class="label">Step ${n}</div><h3>${title}</h3>${html}`);$('#steps').appendChild(s);const my=run;setTimeout(()=>{if(my!==run)return;s.classList.add('in');if(n>1&&!reduce)s.scrollIntoView({behavior:'smooth',block:'nearest'})},delay);return s}
+function show(R,label){
+ const my=++run;$('#steps').innerHTML='';$('#result').innerHTML='';resetTree();let t=150,gap=900*D,k=1;
+ light(['start','q1'],{q1:'Time series'});
+ addStep(k++,'The data',`<p><b>${R.n}</b> observations, <b>${R.vars.length}</b> variables${label?' · '+esc(label):''}. Dependent variable: <b>${esc(R.dep)}</b>.${R.skipped&&R.skipped.length?' Ignored columns: '+R.skipped.map(esc).join(', ')+'.':''}</p><div class="sparks">${R.vars.map(v=>`<div class="spark"><b>${esc(v)}</b>${spark(R.series[v])}</div>`).join('')}</div>`+code(`import pandas as pd\n\ndf = pd.read_csv("data.csv")\ndf = df.select_dtypes("number").dropna()\ndf.plot(subplots=True, figsize=(8, 6))`),t);t+=gap;
+ addStep(k++,'Summary statistics',`<div class="tw"><table><tr><th>Variable</th><th>Mean</th><th>Std. dev.</th><th>Min</th><th>Max</th><th>Skewness</th><th>Kurtosis</th></tr>${R.summary.map(s=>`<tr><td>${esc(s.var)}</td><td>${fmt(s.mean)}</td><td>${fmt(s.sd)}</td><td>${fmt(s.min)}</td><td>${fmt(s.max)}</td><td>${fmt(s.skew,2)}</td><td>${fmt(s.kurt,2)}</td></tr>`).join('')}</table></div>`+code(`stats = df.describe().T[["mean", "std", "min", "max"]]\nstats["skew"] = df.skew()\nstats["kurt"] = df.kurt() + 3\nprint(stats.round(3))`),t);t+=gap;
+ const cc=v=>{const a=Math.min(1,Math.abs(v))*.55;return v>=0?`rgba(0,51,160,${a})`:`rgba(196,96,0,${a})`};
+ addStep(k++,'Correlation matrix',`<div class="tw"><table><tr><th></th>${R.vars.map(v=>`<th>${esc(v)}</th>`).join('')}</tr>${R.corr.map((r,i)=>`<tr><td>${esc(R.vars[i])}</td>${r.map(v=>`<td style="background:${cc(v)};color:${Math.abs(v)>.6?'#fff':'inherit'}">${fmt(v,2)}</td>`).join('')}</tr>`).join('')}</table></div><p>Correlations above about 0.8 between regressors are a warning of multicollinearity. Between trending series, a high correlation may be spurious until the unit-root tests are done.</p>`+code(`print(df.corr().round(2))`),t);t+=gap;
+ const tg=o=>o===0?'<span class="tag ok">I(0)</span>':o===1?'<span class="tag i1">I(1)</span>':'<span class="tag i2">I(2)?</span>';
+ addStep(k++,'Unit-root tests',`<div class="tw"><table><tr><th>Variable</th><th>ADF, level (p)</th><th>ADF, 1st diff. (p)</th><th>KPSS, level (p)</th><th>Order</th></tr>${R.unitroot.map(u=>`<tr><td>${esc(u.var)}</td><td>${fmt(u.adf_stat,2)} (${pf(u.adf_p)})</td><td>${fmt(u.dadf_stat,2)} (${pf(u.dadf_p)})</td><td>${fmt(u.kpss_stat,2)} (${u.kpss_p==null?'–':u.kpss_p<=0.01?'≤0.01':u.kpss_p>=0.1?'≥0.10':u.kpss_p.toFixed(3)})</td><td>${tg(u.order)}${u.conflict?' ⚠':''}</td></tr>`).join('')}</table></div><p>ADF tests the null of a unit root; KPSS tests the null of stationarity. ${R.conflicts.length?'<b>⚠ The two tests disagree for '+R.conflicts.map(esc).join(', ')+'</b>: ADF rejects a unit root but KPSS rejects stationarity, which often points to a structural break or a shift in the mean.':'A small ADF p-value with a large KPSS p-value is consistent evidence of stationarity.'}</p>`+code(`from statsmodels.tsa.stattools import adfuller, kpss\n\nfor col in df:\n    adf_level = adfuller(df[col], autolag="AIC")\n    adf_diff = adfuller(df[col].diff().dropna(), autolag="AIC")\n    kpss_level = kpss(df[col], regression="c", nlags="auto")\n    print(col, round(adf_level[1], 3), round(adf_diff[1], 3), round(kpss_level[1], 3))`),t);
+ const branch=R.model==='OLS'?'i0':(R.model==='VAR'||R.model==='VECM')?'i1':R.model==='ARDL'?'mix':null;
+ setTimeout(()=>{if(my!==run)return;light(['start','q1','ur'].concat(branch?[branch]:[]))},t+300*D);t+=gap+400*D;
+ if(R.johansen){const J=R.johansen;
+  addStep(k++,'Cointegration: Johansen trace test',`<div class="tw"><table><tr><th>Null hypothesis</th><th>Trace statistic</th><th>5% critical value</th><th>Decision</th></tr>${J.rows.map(r=>`<tr><td>At most ${r.h0} cointegrating relation${r.h0===1?'':'s'}</td><td>${fmt(r.trace,2)}</td><td>${fmt(r.cv,2)}</td><td>${r.reject?'Reject':'Do not reject'}</td></tr>`).join('')}</table></div><p>VAR lag order chosen by AIC: ${J.lags}. Estimated cointegrating rank: <b>${J.rank}</b>.${R.fullrank?' The rank equals the number of variables, which suggests the series may be stationary after all; check the unit-root results again.':''}</p>`+code(`from statsmodels.tsa.api import VAR\nfrom statsmodels.tsa.vector_ar.vecm import coint_johansen\n\np = VAR(df).select_order(8).aic              # lag order in levels\njoh = coint_johansen(df, det_order=0, k_ar_diff=p - 1)\nprint(joh.lr1)       # trace statistics\nprint(joh.cvt[:, 1]) # 5% critical values`),t);
+  setTimeout(()=>{if(my!==run)return;light(['start','q1','ur','i1','co'])},t+300*D);t+=gap+400*D}
+ setTimeout(()=>{if(my!==run)return;
+  if(R.model==='I2')return i2card();
+  if(R.model==='ARDL'){light(PATHS.ARDL.slice(0,5));return askAsym(R)}
+  finish(R.model,R)},t);
+}
+function evidence(R,m){if(!R)return '';const u=R.unitroot,nm=o=>u.filter(x=>x.order===o).map(x=>esc(x.var)).join(', ');
+ if(m==='OLS')return `ADF rejects a unit root in levels for all ${u.length} variables.`;
+ if(m==='VAR')return `All ${u.length} variables are I(1), and the Johansen trace test finds no cointegrating relation (trace ${fmt(R.johansen.rows[0].trace,2)} against a 5% critical value of ${fmt(R.johansen.rows[0].cv,2)}).`;
+ if(m==='VECM')return `All ${u.length} variables are I(1), and the Johansen trace test finds ${R.johansen.rank} cointegrating relation${R.johansen.rank===1?'':'s'}.`;
+ return `Stationary in levels: ${nm(0)}. Stationary only after differencing: ${nm(1)}.`}
+function finish(m,R,alt){const my=run,M=MODELS[m];const d=light(PATHS[m]);if(alt){const a=$('#n-'+alt);a&&a.classList.add('alt')}
+ setTimeout(()=>{if(my!==run)return;
+  const ev=evidence(R,m),caution=R&&R.conflicts&&R.conflicts.length?`<div class="caution"><b>Mixed evidence.</b> ADF and KPSS disagree for ${R.conflicts.map(esc).join(', ')}. Report both tests, check for a structural break, and consider ARDL as a robustness check, since it is valid whether a variable is I(0) or I(1).</div>`:'';
+  $('#result').innerHTML=`<div class="result"><div class="label">Recommended model</div><h2>${M.name}</h2><p>${M.why}${ev?' <b>In this data:</b> '+ev:''}</p>${caution}<div class="label" style="margin-bottom:6px">What the paper needs</div><ul>${M.steps.map(s=>`<li>${s}</li>`).join('')}</ul><div class="acts"><a class="btn" href="#g-${m}" data-go="${m}">Go to the ${m==='GMM'?'2SLS / GMM':m} guide →</a>${alt?`<a class="btn ghost" href="#g-${alt}" data-go="${alt}">Alternative: ${alt}</a>`:''}${R?'':'<button class="btn ghost" type="button" id="again">Start over</button>'}</div>${R?'<p style="font-size:11.5px;margin:14px 0 0;color:#c5d4ea">Panel data, or regressors that are endogenous? Then see the 2SLS / GMM guide instead.</p>':''}</div>`;
+  $('#result').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});
+  const ag=$('#again');ag&&ag.addEventListener('click',()=>setMode('ask'));
+ },d+250*D)}
+function askAsym(R){const s=el('div','step',`<div class="label">One question</div><h3>Do you expect increases and decreases in a regressor to affect ${esc(R.dep)} differently?</h3><p>Your variables are a mix of I(0) and I(1), so the ARDL family applies. The answer decides between the linear and the nonlinear version.</p><div class="opts"><button type="button" data-a="ARDL">No, or I have no reason to expect it<small>Linear ARDL</small></button><button type="button" data-a="NARDL">Yes, for example oil-price rises and falls, or depreciation and appreciation<small>Nonlinear ARDL</small></button></div>`);
+ $('#steps').appendChild(s);requestAnimationFrame(()=>s.classList.add('in'));if(!reduce)s.scrollIntoView({behavior:'smooth',block:'nearest'});
+ s.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{s.querySelectorAll('button').forEach(x=>x.disabled=true);b.style.borderColor='var(--navy)';b.style.background='var(--tint)';finish(b.dataset.a,R,b.dataset.a==='ARDL'?'NARDL':'ARDL')}))}
+function i2card(){$('#result').innerHTML=`<div class="result"><div class="label">Check before modelling</div><h2>A variable may be I(2)</h2><p>At least one series still has a unit root after first differencing. None of the six models here is valid with I(2) variables, and the ARDL bounds test in particular breaks down.</p><ul><li>Check the transformation: use logs, or growth rates instead of levels</li><li>Use real instead of nominal values</li><li>Test for a structural break (Zivot–Andrews)</li><li>Try a shorter or different sample</li></ul><div class="acts"><a class="btn" href="${L}10-unit-roots-breaks.html">Lecture: Unit roots and breaks →</a></div></div>`;$('#result').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'})}
+
+/* ---------- mode: examples ---------- */
+function initExamples(){EXAMPLES.forEach(x=>{const b=el('button','',`<small>${esc(x.meta)}</small><b>${esc(x.title)}</b><span>${esc(x.desc)}</span>`);b.type='button';
+ b.addEventListener('click',()=>{document.querySelectorAll('.ex button').forEach(e=>e.classList.remove('sel'));b.classList.add('sel');show(x.result,x.title)});$('#ex').appendChild(b)})}
+
+/* ---------- mode: upload (Python in the browser) ---------- */
+let pyReady=null;
+function status(t){$('#status').classList.toggle('on',!!t);$('#status-text').textContent=t||''}
+function loadPy(){if(pyReady)return pyReady;pyReady=(async()=>{status('Loading Python. The first time takes about 15 seconds…');
+  await new Promise((res,rej)=>{const s=document.createElement('script');s.src=PYO+'pyodide.js';s.onload=res;s.onerror=()=>rej(new Error('Could not load Python. Check your internet connection and try again.'));document.head.appendChild(s)});
+  const py=await loadPyodide({indexURL:PYO});status('Loading pandas and statsmodels…');await py.loadPackage(['pandas','statsmodels']);py.runPython($('#py-src').textContent);return py})();
+ pyReady.catch(()=>{pyReady=null});return pyReady}
+async function handleFile(f){$('#upload-err').innerHTML='';$('#steps').innerHTML='';$('#result').innerHTML='';++run;resetTree();
+ try{if(f.size>5e6)throw new Error('The file is larger than 5 MB. Please upload a smaller CSV.');
+  const text=await f.text();const py=await loadPy();status('Running the tests on your data…');await new Promise(r=>setTimeout(r,30));
+  const R=JSON.parse(py.globals.get('analyze')(text));status('');if(R.error)throw new Error(R.error);show(R,f.name)}
+ catch(e){status('');$('#upload-err').innerHTML=`<div class="err">${esc(e.message||e)}</div>`}}
+function initUpload(){const d=$('#drop');$('#file').addEventListener('change',e=>{e.target.files[0]&&handleFile(e.target.files[0]);e.target.value=''});
+ ['dragenter','dragover'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.add('over')}));['dragleave','drop'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove('over')}));
+ d.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];f&&handleFile(f)})}
+
+/* ---------- mode: questions ---------- */
+const QS={q1:{t:'Is your data a panel (many units over time), or do you have endogenous regressors that need instruments?',o:[['No. A single time series for each variable','','q2',['start','q1','ur']],['Yes','Panel data, or instruments needed','GMM']]},
+ q2:{t:'What did your unit-root tests show?',o:[['All variables are stationary in levels','All I(0)','OLS'],['All variables are stationary only after first differencing','All I(1)','q3',['start','q1','ur','i1','co']],['A mix: some I(0), some I(1)','None is I(2)','q4',['start','q1','ur','mix','as']],['At least one needs differencing twice','I(2)','I2']]},
+ q3:{t:'Does a cointegration test (Johansen or Engle–Granger) find a long-run relationship?',o:[['Yes, the variables are cointegrated','','VECM'],['No cointegration','','VAR']]},
+ q4:{t:'Do you expect increases and decreases in a regressor to have different effects?',o:[['No, or I have no reason to expect it','','ARDL'],['Yes','For example oil-price rises and falls','NARDL']]}};
+function ask(id,n=1){const Q=QS[id];$('#q').innerHTML=`<div class="label">Question ${n}</div><h3>${Q.t}</h3><div class="opts">${Q.o.map((o,i)=>`<button type="button" data-i="${i}">${o[0]}${o[1]?`<small>${o[1]}</small>`:''}</button>`).join('')}</div>`;
+ $('#q').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const o=Q.o[+b.dataset.i],to=o[2];
+  if(QS[to]){light(o[3]);ask(to,n+1)}else{$('#q').innerHTML='<p class="sub" style="margin:0">Your answers lead to the model shown below.</p>';to==='I2'?(light(['start','q1','ur']),i2card()):finish(to,null,to==='ARDL'?'NARDL':to==='NARDL'?'ARDL':null)}}))}
+
+/* ---------- guides, modes, init ---------- */
+function initGuides(){Object.entries(MODELS).forEach(([k,M])=>{$('#gcards').appendChild(el('article','gcard',`<span class="tag">In preparation</span><h3>${k==='GMM'?'2SLS / GMM':k}</h3><p class="when">${M.when}</p><p>${M.steps.slice(0,5).join(' · ')} …</p>${M.lec.map(l=>`<a href="${L+l[0]}">${l[1]} →</a>`).join('')}`)).id='g-'+k})}
+document.addEventListener('click',e=>{const a=e.target.closest('[data-go]');if(!a)return;const c=$('#g-'+a.dataset.go);if(c){c.classList.remove('flash');void c.offsetWidth;c.classList.add('flash')}});
+function setMode(m){++run;document.querySelectorAll('.modes button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));['example','upload','ask'].forEach(x=>$('#m-'+x).hidden=x!==m);
+ $('#steps').innerHTML='';$('#result').innerHTML='';$('#upload-err').innerHTML='';status('');resetTree();document.querySelectorAll('.ex button').forEach(e=>e.classList.remove('sel'));if(m==='ask'){light(['start']);ask('q1')}}
+document.querySelectorAll('.modes button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+drawTree();initExamples();initUpload();initGuides();$('#year').textContent=new Date().getFullYear();
+</script>
+</body>
+</html>
