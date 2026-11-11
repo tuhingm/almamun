@@ -1,0 +1,334 @@
+WEBVTT
+
+00:00:00.350 --> 00:00:01.953
+Welcome to Econometrics.
+
+00:00:01.953 --> 00:00:06.560
+This is lecture one: from probability to the linear regression model.
+
+00:00:06.560 --> 00:00:12.838
+Before we ask whether a regression coefficient is causal, we need to know what it actually is.
+
+00:00:12.838 --> 00:00:20.117
+So in this lecture we build regression from probability alone, and we add assumptions only when we need them.
+
+00:00:20.917 --> 00:00:22.250
+Here is the plan.
+
+00:00:23.050 --> 00:00:28.650
+First, the conditional expectation function, and why it is the best possible predictor.
+
+00:00:29.450 --> 00:00:33.517
+Second, the best linear predictor, also called the linear projection.
+
+00:00:34.317 --> 00:00:40.150
+Third, ordinary least squares as the sample version of that projection, and its geometry.
+
+00:00:40.950 --> 00:00:47.317
+Fourth, the Frisch Waugh Lovell theorem, which tells us what it means to hold other variables constant.
+
+00:00:48.117 --> 00:00:55.250
+And fifth, unbiasedness and the Gauss Markov theorem, with a careful list of what each result assumes.
+
+00:00:56.050 --> 00:01:00.628
+Start with any outcome Y and any vector of variables X.
+
+00:01:00.628 --> 00:01:08.537
+The conditional expectation function, m of x, is the expected value of Y given that X equals x.
+
+00:01:08.537 --> 00:01:11.617
+Define the error e as Y minus m of X.
+
+00:01:12.417 --> 00:01:14.711
+Then Y equals m of X plus e.
+
+00:01:14.711 --> 00:01:16.350
+Notice what this is.
+
+00:01:17.150 --> 00:01:19.786
+It is a decomposition, not a model.
+
+00:01:19.786 --> 00:01:24.755
+It holds for every joint distribution with a finite second moment.
+
+00:01:24.755 --> 00:01:29.650
+We have assumed nothing about linearity, normality, or causality.
+
+00:01:30.450 --> 00:01:32.950
+The CEF error has three properties.
+
+00:01:33.750 --> 00:01:36.820
+First, its conditional mean given X is zero.
+
+00:01:36.820 --> 00:01:39.750
+That follows directly from the definition.
+
+00:01:40.550 --> 00:01:46.083
+Second, its unconditional mean is zero, by the law of iterated expectations.
+
+00:01:46.883 --> 00:01:54.317
+Third, and most important: e is uncorrelated with any function of X at all, not just with X itself.
+
+00:01:55.117 --> 00:01:56.886
+The proof is one line.
+
+00:01:56.886 --> 00:01:58.092
+Condition on X.
+
+00:01:58.092 --> 00:02:06.617
+Then h of X is known, so it comes outside the inner expectation, and the expectation of e given X is zero.
+
+00:02:07.417 --> 00:02:09.451
+Why do we care about the CEF?
+
+00:02:09.451 --> 00:02:13.729
+Because it is the best predictor of Y given X in mean square.
+
+00:02:13.729 --> 00:02:16.183
+No other function of X does better.
+
+00:02:16.983 --> 00:02:18.384
+Here is the proof.
+
+00:02:18.384 --> 00:02:22.975
+Write Y minus g as e plus m minus g, and expand the square.
+
+00:02:22.975 --> 00:02:29.123
+The cross term is zero by property three, because m minus g is a function of X.
+
+00:02:29.123 --> 00:02:33.014
+The last term is a square, so it is at least zero.
+
+00:02:33.014 --> 00:02:37.917
+So the mean squared error is minimized exactly when g equals m.
+
+00:02:38.717 --> 00:02:48.117
+A corollary is the law of total variance: total variation splits into explained variation plus average conditional variance.
+
+00:02:48.917 --> 00:02:52.962
+In practice we approximate the CEF with a linear function.
+
+00:02:52.962 --> 00:03:00.217
+The best linear predictor chooses b to minimize the mean squared error over linear functions, X prime b.
+
+00:03:01.017 --> 00:03:08.845
+Setting the derivative to zero gives beta equals the inverse of E of X X prime, times E of X Y.
+
+00:03:08.845 --> 00:03:15.850
+The projection error u is then orthogonal to X: the expectation of X times u is zero.
+
+00:03:16.650 --> 00:03:22.750
+This always exists, as long as the moments are finite and E of X X prime is invertible.
+
+00:03:23.550 --> 00:03:24.749
+But be careful.
+
+00:03:24.749 --> 00:03:32.582
+Orthogonality, E of X u equals zero, is weaker than mean independence, E of u given X equals zero.
+
+00:03:32.582 --> 00:03:39.217
+The two coincide only when the conditional expectation function is actually linear.
+
+00:03:40.017 --> 00:03:42.188
+Let's see this in a picture.
+
+00:03:42.188 --> 00:03:46.840
+X is uniform on zero one, and Y equals X squared plus noise.
+
+00:03:46.840 --> 00:03:50.717
+The true conditional mean, in blue, is a parabola.
+
+00:03:51.517 --> 00:03:58.561
+The slope of the best linear predictor is the covariance of X and X squared over the variance of X.
+
+00:03:58.561 --> 00:04:01.550
+Both are one twelfth, so the slope is one.
+
+00:04:02.350 --> 00:04:06.717
+The intercept works out to minus one sixth, giving the dashed line.
+
+00:04:07.517 --> 00:04:11.827
+The projection error is uncorrelated with X by construction.
+
+00:04:11.827 --> 00:04:18.508
+But its conditional mean is not zero: it is positive at the edges and negative in the middle.
+
+00:04:18.508 --> 00:04:27.417
+So regression still estimates something well defined, the best linear approximation to the CEF, even when the CEF is curved.
+
+00:04:28.217 --> 00:04:32.178
+People say 'the linear regression model' as if there were only one.
+
+00:04:32.178 --> 00:04:34.483
+There are several, and they are nested.
+
+00:04:35.283 --> 00:04:40.728
+The weakest is the linear projection, where orthogonality holds by construction.
+
+00:04:40.728 --> 00:04:43.450
+That is enough for OLS to be consistent.
+
+00:04:44.250 --> 00:04:50.850
+If the CEF is linear, so the error is mean independent of X, OLS is also unbiased.
+
+00:04:51.650 --> 00:04:57.550
+Add homoskedasticity, and OLS is efficient among linear unbiased estimators.
+
+00:04:58.350 --> 00:05:03.650
+Add normality, and we get exact t and F distributions in finite samples.
+
+00:05:04.450 --> 00:05:06.857
+The last row is different in kind.
+
+00:05:06.857 --> 00:05:13.015
+A structural or causal interpretation says beta measures the effect of an intervention.
+
+00:05:13.015 --> 00:05:17.758
+No amount of statistical structure in the rows above delivers that.
+
+00:05:17.758 --> 00:05:23.350
+It requires an identification argument, which is the subject of later lectures.
+
+00:05:24.150 --> 00:05:30.535
+Ordinary least squares simply replaces population moments with sample averages.
+
+00:05:30.535 --> 00:05:35.950
+In matrix form, beta hat equals X prime X inverse, times X prime y.
+
+00:05:36.750 --> 00:05:43.835
+The first order conditions are the normal equations: X prime times the residual vector equals zero.
+
+00:05:43.835 --> 00:05:46.983
+That is the sample version of orthogonality.
+
+00:05:47.783 --> 00:05:57.083
+The estimator exists and is unique exactly when X has full column rank, so no regressor is a perfect linear combination of the others.
+
+00:05:57.883 --> 00:06:02.156
+And notice that OLS is a method of moments estimator.
+
+00:06:02.156 --> 00:06:09.250
+That view generalizes directly to instrumental variables and to GMM later in the course.
+
+00:06:10.050 --> 00:06:11.442
+Now the geometry.
+
+00:06:11.442 --> 00:06:21.352
+P X projects any vector onto the column space of X, and M X, the residual maker, projects onto its orthogonal complement.
+
+00:06:21.352 --> 00:06:29.050
+Fitted values are P X times y, and residuals are M X times y, and the two are at right angles.
+
+00:06:29.850 --> 00:06:36.683
+Both matrices are symmetric and idempotent: projecting twice is the same as projecting once.
+
+00:06:37.483 --> 00:06:45.083
+P X leaves X unchanged, M X annihilates X, and the two projections are orthogonal to each other.
+
+00:06:45.883 --> 00:06:51.068
+Finally, the trace of P X is k and the trace of M X is n minus k.
+
+00:06:51.068 --> 00:06:57.450
+That trace fact is where the n minus k degrees of freedom correction comes from.
+
+00:06:58.250 --> 00:07:12.150
+The Frisch Waugh Lovell theorem says: the coefficient on X two in the long regression equals the coefficient from regressing the residualized y on the residualized X two, after partialling out X one.
+
+00:07:12.950 --> 00:07:17.079
+The proof: multiply the fitted regression by M one.
+
+00:07:17.079 --> 00:07:25.579
+M one kills X one, and leaves the residual unchanged because the residual is already orthogonal to X one.
+
+00:07:25.579 --> 00:07:29.950
+What's left is a regression of M one y on M one X two.
+
+00:07:30.750 --> 00:07:34.752
+This makes 'holding other variables constant' precise.
+
+00:07:34.752 --> 00:07:42.311
+A multiple regression coefficient uses only the variation in X two that X one cannot explain linearly.
+
+00:07:42.311 --> 00:07:48.017
+Demeaning, detrending, and the fixed effects estimator are all special cases.
+
+00:07:48.817 --> 00:07:50.708
+Here is a worked example.
+
+00:07:50.708 --> 00:07:53.583
+Log wages on education and experience.
+
+00:07:54.383 --> 00:07:59.987
+Step one: regress education on a constant and experience, and keep the residual.
+
+00:07:59.987 --> 00:08:04.050
+That is the part of schooling not predicted by experience.
+
+00:08:04.850 --> 00:08:08.201
+Step two: regress log wages on that residual.
+
+00:08:08.201 --> 00:08:13.117
+The slope is exactly the long regression coefficient on education.
+
+00:08:13.917 --> 00:08:18.867
+In the lab you will verify that the two routes match to machine precision.
+
+00:08:18.867 --> 00:08:26.426
+But whether this number is the return to schooling depends on whether the error is mean independent of schooling.
+
+00:08:26.426 --> 00:08:33.250
+Unobserved ability is the classic reason to doubt it, and lecture three derives the size of that bias.
+
+00:08:34.050 --> 00:08:44.083
+Every finite sample property of OLS comes from this one expression: beta hat minus beta equals X prime X inverse, X prime u.
+
+00:08:44.883 --> 00:08:52.059
+If the error is mean independent of X, take conditional expectations, and OLS is unbiased.
+
+00:08:52.059 --> 00:09:00.750
+If the errors are also homoskedastic and uncorrelated, the variance is sigma squared times X prime X inverse.
+
+00:09:01.550 --> 00:09:10.817
+The Gauss Markov theorem says that, under these assumptions, OLS has the smallest variance among all linear unbiased estimators.
+
+00:09:11.617 --> 00:09:12.793
+Three warnings.
+
+00:09:12.793 --> 00:09:15.694
+Gauss Markov does not need normality.
+
+00:09:15.694 --> 00:09:18.047
+It does need homoskedasticity.
+
+00:09:18.047 --> 00:09:21.810
+And it only compares linear unbiased estimators.
+
+00:09:21.810 --> 00:09:28.083
+A biased estimator, such as ridge regression, can have lower mean squared error.
+
+00:09:28.883 --> 00:09:29.935
+Let's summarize.
+
+00:09:29.935 --> 00:09:38.083
+A regression always estimates something well defined: the best linear approximation to the conditional expectation function.
+
+00:09:38.883 --> 00:09:41.717
+Consistency needs only orthogonality.
+
+00:09:41.717 --> 00:09:44.550
+Unbiasedness needs mean independence.
+
+00:09:45.350 --> 00:09:51.717
+By Frisch Waugh Lovell, each coefficient uses only the residual variation in its own regressor.
+
+00:09:52.517 --> 00:09:59.783
+And a causal interpretation comes from an identification argument, not from adding more statistical assumptions.
+
+00:10:00.583 --> 00:10:08.194
+Next time, in lecture two, we turn to inference: asymptotic theory, hypothesis tests, and confidence intervals.
+
+00:10:08.194 --> 00:10:13.679
+The full notes, problem set, and lab for this lecture are on the course website.
+
+00:10:13.679 --> 00:10:15.050
+Thanks for watching.

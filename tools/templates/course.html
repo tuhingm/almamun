@@ -27,7 +27,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <div class="eyebrow">{{ c.title }} · Lecture {{ lec.num }} of {{ c.lectures|length }}</div>
       <h1 class="lec-title">{{ lec.title }}</h1>
       <p class="subtitle">{{ lec.unit }}</p>
-      <div class="actions"><a class="btn btn-light" href="{{ base }}lecture-notes.html">All lecture notes</a>{% if next %}<a class="btn btn-outline" href="{{ next.html }}">Next: Lecture {{ next.num }} →</a>{% endif %}<button class="btn btn-outline" type="button" onclick="window.print()">Print / PDF</button></div>
+      <div class="actions">{% if lec.video %}<a class="btn btn-light" href="#video">▶ Watch video</a>{% endif %}<a class="btn {{ 'btn-outline' if lec.video else 'btn-light' }}" href="{{ base }}lecture-notes.html">All lecture notes</a>{% if next %}<a class="btn btn-outline" href="{{ next.html }}">Next: Lecture {{ next.num }} →</a>{% endif %}<button class="btn btn-outline" type="button" onclick="window.print()">Print / PDF</button></div>
       {% elif section == 'home' %}
       <div class="eyebrow">{{ c.code }} · {{ c.level }}</div>
       <h1>{{ c.title }}</h1>
@@ -45,7 +45,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>{{ c.title }} · Lecture {{ lec.num }}</h3>
       <div class="profile-item"><strong>Part</strong><span>{{ lec.unit or c.title }}</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · {{ lec.minutes }} min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>{% if lec.video %}{{ lec.video.minutes }} min video · {% endif %}Notes, worked example, problem set, lab and readings · {{ lec.minutes }} min read</span></div>
       {% if prev %}<div class="profile-item"><strong>Previous</strong><span><a href="{{ prev.html }}">Lecture {{ prev.num }}: {{ prev.title }}</a></span></div>{% endif %}
       {% else %}
       <small>COURSE INFO</small>
@@ -76,6 +76,16 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
 
   <main id="content" class="course-main">
   {% if lec %}
+    {% if lec.video %}
+    <div class="card video-box" id="video">
+      <div class="video-head"><div class="kicker">Video lecture</div><span>{{ lec.video.minutes }} min · narrated tutorial · captions available</span></div>
+      <video controls preload="metadata" playsinline{% if lec.video.poster %} poster="{{ lec.video.poster }}"{% endif %}>
+        <source src="{{ lec.video.src }}" type="video/mp4">
+        {% if lec.video.vtt %}<track kind="captions" src="{{ lec.video.vtt }}" srclang="en" label="English">{% endif %}
+        Your browser does not support HTML video. <a href="{{ lec.video.src }}">Download the video</a>.
+      </video>
+    </div>
+    {% endif %}
     <article class="notes">{{ body }}</article>
     <nav class="pager">
       {% if prev %}<a class="card prev" href="{{ prev.html }}"><small>← Lecture {{ prev.num }}</small>{{ prev.title }}</a>{% else %}<span></span>{% endif %}

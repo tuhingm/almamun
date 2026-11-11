@@ -187,7 +187,19 @@ def build() -> int:
             unit = next((u[2] for u in units if u[0] <= int(num) <= u[1]), "")
             words = len(re.findall(r"\w+", rest))
             obj = h2_section(rest, lambda h: re.match(r"(learning )?objectives", h, re.I))
-            lectures.append(dict(num=num, title=title, file=f.name, unit=unit, md=rest,
+            vid = d / "videos" / (f.stem + ".mp4")
+            video = None
+            if vid.exists():
+                import subprocess
+                try:
+                    secs = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(vid)],
+                                                capture_output=True, text=True).stdout.strip())
+                except Exception:
+                    secs = 0
+                video = dict(src=f"../videos/{f.stem}.mp4", vtt=f"../videos/{f.stem}.vtt" if (d / "videos" / (f.stem + ".vtt")).exists() else None,
+                             poster=f"../videos/{f.stem}.jpg" if (d / "videos" / (f.stem + ".jpg")).exists() else None,
+                             minutes=max(1, round(secs / 60)))
+            lectures.append(dict(num=num, title=title, file=f.name, unit=unit, md=rest, video=video,
                                  html=f.stem + ".html", minutes=max(1, round(words / 180)),
                                  summary=re.sub(r"\s+", " ", obj).strip()))
         c["lectures"] = lectures
@@ -258,7 +270,7 @@ def build() -> int:
                 rows.append(f'<tr class="unit-row"><td colspan="3">{esc(cur)}</td></tr>')
             summ = f'<div class="sum">{inline_md(l["summary"])}</div>' if l["summary"] else ""
             rows.append(f'<tr><td class="num">{l["num"]}</td><td><a href="lectures/{l["html"]}">{esc(l["title"])}</a>{summ}</td>'
-                        f'<td class="fmt">{l["minutes"]} min read</td></tr>')
+                        f'<td class="fmt">{l["minutes"]} min read' + (f'<br><a class="vid-tag" href="lectures/{l["html"]}#video">▶ {l["video"]["minutes"]} min video</a>' if l["video"] else '') + '</td></tr>')
         body = ('<p>Complete written notes for each session. Every set of notes opens with learning objectives and '
                 'closes with a problem set, a computational lab and readings. Use <em>Print / save as PDF</em> on any '
                 'lecture page for an offline copy.</p>'

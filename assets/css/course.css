@@ -187,3 +187,10 @@ footer{background:var(--deep);color:#c5d2e7;padding:27px 0 15px}
 .course-tile:hover .tile-link{background:var(--deep)}
 .tools-strip{margin-top:18px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;box-shadow:none;background:#f3f6fb}
 .tools-strip .tags{margin:0}
+
+/* video lectures */
+.video-box{padding:18px 18px 14px;margin:0 0 36px}
+.video-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:0 4px 12px}
+.video-head span{font-size:11px;color:var(--muted)}
+.video-box video{display:block;width:100%;aspect-ratio:16/9;border-radius:9px;background:#00205B}
+.vid-tag{display:inline-block;margin-top:4px;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
