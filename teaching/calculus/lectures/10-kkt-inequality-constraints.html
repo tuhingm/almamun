@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Calculus · Lecture 10</h3>
       <div class="profile-item"><strong>Part</strong><span>Part III · Optimization and implicit functions</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 2 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 8 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="09-lagrange-multipliers.html">Lecture 9: Equality Constraints and Lagrange Multipliers</a></span></div>
       
     </aside>
@@ -90,6 +90,101 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
 </ol>
 </section><section class="box lab"><h2 id="computational-lab">Computational lab</h2>
 <p>Solve quadratic programs with binding and slack constraints. Compare analytical KKT solutions with numerical optimizers and verify complementary slackness.</p>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises apply the calculus of this lecture to <strong>real economic data</strong> in Python, mixing symbolic (<code>sympy</code>),
+numerical (<code>scipy</code>) and statistical (<code>statsmodels</code>) tools. Install once with
+<code>pip install sympy scipy numpy pandas statsmodels wooldridge</code>. Try the starter code first, then open the solution.
+Every printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-101-stocks-or-bills-a-portfolio-choice-with-no-borrowing-and-no-short-sales">Exercise 10.1 — Stocks or bills? A portfolio choice with no borrowing and no short sales</h3>
+<p><em>Data:</em> <code>volat</code> — monthly S&amp;P 500 returns and 3-month T-bill yields, 1947–1993.</p>
+<p>A mean–variance investor chooses the share <span class="arithmatex">\(w\)</span> in stocks (the rest in T-bills) to maximize <span class="arithmatex">\(w\mu_e-\tfrac{\gamma}{2}w^2\sigma^2\)</span>, where <span class="arithmatex">\(\mu_e\)</span> and <span class="arithmatex">\(\sigma^2\)</span> are the mean and variance of the monthly <strong>excess</strong> return, subject to <span class="arithmatex">\(0\le w\le1\)</span>.</p>
+<ol>
+<li>Write the KKT conditions with multipliers for both bounds.</li>
+<li>Estimate <span class="arithmatex">\(\mu_e\)</span> and <span class="arithmatex">\(\sigma\)</span> from the data. Solve for <span class="arithmatex">\(w^*\)</span> and the multipliers for <span class="arithmatex">\(\gamma=1,2,5,10\)</span>.</li>
+<li>For which <span class="arithmatex">\(\gamma\)</span> is the borrowing constraint <span class="arithmatex">\(w\le1\)</span> binding, and what is its shadow value? Check complementary slackness.</li>
+</ol>
+<pre><code class="language-python">import numpy as np, wooldridge as wd
+v = wd.data(&quot;volat&quot;).dropna(subset=[&quot;rsp500&quot;])
+ex = (v[&quot;rsp500&quot;] - v[&quot;i3&quot;]).to_numpy() / 1200          # monthly excess return
+mu, s2 = ex.mean(), ex.var()
+# TODO: interior solution w = mu/(gamma s2); clip to [0,1]; multipliers from the FOC
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, wooldridge as wd
+v = wd.data(&quot;volat&quot;).dropna(subset=[&quot;rsp500&quot;])
+ex = (v[&quot;rsp500&quot;] - v[&quot;i3&quot;]).to_numpy() / 1200
+mu, s2 = ex.mean(), ex.var()
+print(f&quot;monthly excess return: mean {100*mu:.3f}%, sd {100*np.sqrt(s2):.3f}%  (annualized Sharpe ratio {mu/np.sqrt(s2)*np.sqrt(12):.2f})&quot;)
+for g in (1, 2, 5, 10):
+    w_int = mu / (g * s2); w = min(max(w_int, 0.0), 1.0)
+    foc = mu - g * w * s2                       # = lam_upper - lam_lower at the optimum
+    lam_up, lam_lo = max(foc, 0.0), max(-foc, 0.0)
+    cs = lam_up * (1 - w) + lam_lo * w
+    print(f&quot;gamma = {g:2d}: unconstrained w = {w_int:5.2f}, optimal w = {w:.3f}, multiplier on w&lt;=1 = {lam_up:.6f}, on w&gt;=0 = {lam_lo:.6f}, complementary slackness {cs:.1e}&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">monthly excess return: mean 0.594%, sd 3.394%  (annualized Sharpe ratio 0.61)
+gamma =  1: unconstrained w =  5.16, optimal w = 1.000, multiplier on w&lt;=1 = 0.004791, on w&gt;=0 = 0.000000, complementary slackness 0.0e+00
+gamma =  2: unconstrained w =  2.58, optimal w = 1.000, multiplier on w&lt;=1 = 0.003639, on w&gt;=0 = 0.000000, complementary slackness 0.0e+00
+gamma =  5: unconstrained w =  1.03, optimal w = 1.000, multiplier on w&lt;=1 = 0.000183, on w&gt;=0 = 0.000000, complementary slackness 0.0e+00
+gamma = 10: unconstrained w =  0.52, optimal w = 0.516, multiplier on w&lt;=1 = 0.000000, on w&gt;=0 = 0.000000, complementary slackness 4.5e-19
+</code></pre>
+<p>Over 1947–1993, stocks earned about 0.6% a month over T-bills, with a Sharpe ratio of about 0.6 a year. That premium is
+so large relative to the risk that a mean–variance investor with <span class="arithmatex">\(\gamma\le5\)</span> would like to <strong>borrow</strong> to hold more than
+100% in stocks; with borrowing ruled out, the constraint <span class="arithmatex">\(w\le1\)</span> binds. Its multiplier is the marginal gain from relaxing
+it and falls as risk aversion rises. At <span class="arithmatex">\(\gamma=10\)</span>, the interior solution of about 52% is feasible, and both multipliers
+are zero. Complementary slackness holds in every case. (The large equity premium relative to risk is the "equity premium
+puzzle" of Mehra and Prescott, 1985.)</p>
+</details>
+<h3 id="exercise-102-synthetic-weights-as-a-kkt-problem">Exercise 10.2 — Synthetic weights as a KKT problem</h3>
+<p><em>Data:</em> <code>statecrime</code> (statsmodels) — U.S. states: % high-school graduates, % in poverty, % single-parent households, % urban.</p>
+<p>A synthetic-control-style problem: find non-negative weights summing to one so that a weighted average of other states matches California's characteristics as closely as possible:
+<span class="arithmatex">\(\min_w\|x_{CA}-X_0w\|^2\)</span> s.t. <span class="arithmatex">\(w\ge0\)</span>, <span class="arithmatex">\(\sum w=1\)</span>.</p>
+<ol>
+<li>Solve it with <code>scipy.optimize.minimize</code> (SLSQP), using standardized characteristics.</li>
+<li>Report the states with positive weight, and the fit.</li>
+<li>Check the KKT conditions: for states with <span class="arithmatex">\(w_j=0\)</span>, the gradient component must be at least as large as for states with <span class="arithmatex">\(w_j&gt;0\)</span> (whose gradient components are all equal, to the multiplier on the adding-up constraint).</li>
+</ol>
+<pre><code class="language-python">import numpy as np, statsmodels.api as sm
+from scipy import optimize
+d = sm.datasets.statecrime.load_pandas().data
+cols = [&quot;hs_grad&quot;, &quot;poverty&quot;, &quot;single&quot;, &quot;urban&quot;]
+Z = (d[cols] - d[cols].mean()) / d[cols].std()
+x1 = Z.loc[&quot;California&quot;].to_numpy(); X0 = Z.drop(&quot;California&quot;).to_numpy().T
+# TODO: minimize ||x1 - X0 w||^2 with bounds (0,1) and constraint sum(w) = 1
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, statsmodels.api as sm
+from scipy import optimize
+d = sm.datasets.statecrime.load_pandas().data
+cols = [&quot;hs_grad&quot;, &quot;poverty&quot;, &quot;single&quot;, &quot;urban&quot;]
+Z = (d[cols] - d[cols].mean()) / d[cols].std()
+x1 = Z.loc[&quot;California&quot;].to_numpy(); donors = Z.drop(&quot;California&quot;); X0 = donors.to_numpy().T; J = X0.shape[1]
+obj = lambda w: np.sum((x1 - X0 @ w)**2); grad = lambda w: -2 * X0.T @ (x1 - X0 @ w)
+res = optimize.minimize(obj, np.full(J, 1 / J), jac=grad, method=&quot;SLSQP&quot;, bounds=[(0, 1)] * J,
+                        constraints=[{&quot;type&quot;: &quot;eq&quot;, &quot;fun&quot;: lambda w: w.sum() - 1}], options={&quot;ftol&quot;: 1e-14, &quot;maxiter&quot;: 500})
+w = res.x; pos = w &gt; 1e-6
+print(&quot;positive weights:&quot;, {s: round(x, 3) for s, x in zip(donors.index[pos], w[pos])})
+print(&quot;California (std units):&quot;, x1.round(3), &quot;  synthetic:&quot;, (X0 @ w).round(3), f&quot;  loss {obj(w):.4f}&quot;)
+gr = grad(w)
+print(f&quot;gradient on positive-weight states: {gr[pos].round(4)}  (equal -&gt; common multiplier {gr[pos].mean():.4f})&quot;)
+print(f&quot;min gradient on zero-weight states: {gr[~pos].min():.4f}  (KKT requires &gt;= {gr[pos].mean():.4f})&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">positive weights: {'Rhode Island': np.float64(0.433), 'Texas': np.float64(0.567)}
+California (std units): [-1.859  0.111  0.546  1.397]   synthetic: [-1.45   0.281  0.477  1.021]   loss 0.3425
+gradient on positive-weight states: [-1.9238 -1.9238]  (equal -&gt; common multiplier -1.9238)
+min gradient on zero-weight states: -1.9106  (KKT requires &gt;= -1.9238)
+</code></pre>
+<p>Only two states get positive weight — Texas (57%) and Rhode Island (43%). Corner solutions with most weights at zero are
+typical of synthetic control. The synthetic unit matches California's poverty and single-parent shares well but not its
+very high urban share or low high-school graduation, because no convex combination of other states reaches those
+extremes. The KKT conditions hold: the gradient components of the two active states are equal (the common multiplier on
+the adding-up constraint), and every inactive state's gradient component is at least as large, so moving weight to it
+would not lower the loss.</p>
+</details>
 </section><section class="box reading"><h2 id="reading">Reading</h2>
 <p>Sundaram, <em>A First Course in Optimization Theory</em>; Nocedal and Wright, <em>Numerical Optimization</em>; Chiang and Wainwright, <em>Fundamental Methods of Mathematical Economics</em>.</p></section></article>
     <nav class="pager">

@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Calculus · Lecture 1</h3>
       <div class="profile-item"><strong>Part</strong><span>Part I · Single-variable analysis</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 2 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 9 min read</span></div>
       
       
     </aside>
@@ -91,6 +91,102 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
 </ol>
 </section><section class="box lab"><h2 id="computational-lab">Computational lab</h2>
 <p>Plot functions with removable and jump discontinuities. Compare numerical limits at decreasing step sizes with analytic limits; explain why numerical evidence is not a proof.</p>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises apply the calculus of this lecture to <strong>real economic data</strong> in Python, mixing symbolic (<code>sympy</code>),
+numerical (<code>scipy</code>) and statistical (<code>statsmodels</code>) tools. Install once with
+<code>pip install sympy scipy numpy pandas statsmodels wooldridge</code>. Try the starter code first, then open the solution.
+Every printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-11-from-discrete-to-continuous-compounding-with-real-interest-rates">Exercise 1.1 — From discrete to continuous compounding with real interest rates</h3>
+<p><em>Data:</em> <code>intqrt</code> — U.S. 3-month Treasury bill yields (<code>r3</code>, % per year), quarterly.</p>
+<ol>
+<li>Take the average T-bill yield <span class="arithmatex">\(r\)</span> in the sample. Compute the growth factor of $1 after one year, <span class="arithmatex">\((1+r/n)^n\)</span>, for <span class="arithmatex">\(n=1,2,4,12,365,10^6\)</span>.</li>
+<li>Show numerically that the sequence converges to <span class="arithmatex">\(e^r\)</span>, and that the error behaves like <span class="arithmatex">\(r^2e^r/(2n)\)</span>.</li>
+<li>Use <code>sympy</code> to prove the limit symbolically.</li>
+<li>Why does the choice between annual and continuous compounding matter more when rates are high (as in 1981)?</li>
+</ol>
+<pre><code class="language-python">import numpy as np, sympy as sp, wooldridge as wd
+r = wd.data(&quot;intqrt&quot;)[&quot;r3&quot;].mean() / 100
+for n in (1, 2, 4, 12, 365, 10**6):
+    pass  # TODO: (1 + r/n)**n and the gap to np.exp(r)
+x, n = sp.symbols(&quot;x n&quot;, positive=True)
+# TODO: sp.limit((1 + x/n)**n, n, sp.oo)
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, sympy as sp, wooldridge as wd
+d = wd.data(&quot;intqrt&quot;); r = d[&quot;r3&quot;].mean() / 100
+print(f&quot;average 3-month T-bill yield: {100*r:.3f}% per year&quot;)
+for n in (1, 2, 4, 12, 365, 10**6):
+    g = (1 + r / n)**n
+    print(f&quot;n = {n:&gt;7}: (1+r/n)^n = {g:.8f}   gap to e^r = {np.exp(r) - g:.2e}   approx r^2 e^r/(2n) = {r**2*np.exp(r)/(2*n):.2e}&quot;)
+x, n = sp.symbols(&quot;x n&quot;, positive=True)
+print(&quot;sympy limit:&quot;, sp.limit((1 + x / n)**n, n, sp.oo))
+rmax = d[&quot;r3&quot;].max() / 100
+print(f&quot;at the sample's peak yield {100*rmax:.2f}%: annual {1+rmax:.5f} vs continuous {np.exp(rmax):.5f} (gap {100*(np.exp(rmax)-1-rmax):.2f} pp)&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">average 3-month T-bill yield: 6.450% per year
+n =       1: (1+r/n)^n = 1.06449839   gap to e^r = 2.13e-03   approx r^2 e^r/(2n) = 2.22e-03
+n =       2: (1+r/n)^n = 1.06553840   gap to e^r = 1.09e-03   approx r^2 e^r/(2n) = 1.11e-03
+n =       4: (1+r/n)^n = 1.06607524   gap to e^r = 5.49e-04   approx r^2 e^r/(2n) = 5.55e-04
+n =      12: (1+r/n)^n = 1.06643965   gap to e^r = 1.84e-04   approx r^2 e^r/(2n) = 1.85e-04
+n =     365: (1+r/n)^n = 1.06661778   gap to e^r = 6.08e-06   approx r^2 e^r/(2n) = 6.08e-06
+n = 1000000: (1+r/n)^n = 1.06662386   gap to e^r = 2.28e-09   approx r^2 e^r/(2n) = 2.22e-09
+sympy limit: exp(x)
+at the sample's peak yield 16.46%: annual 1.16460 vs continuous 1.17892 (gap 1.43 pp)
+</code></pre>
+<p>At the sample's average yield of 6.45%, the growth factor rises from 1.0645 (annual compounding) toward <span class="arithmatex">\(e^{0.0645}=1.0666\)</span>.
+The gap shrinks in proportion to <span class="arithmatex">\(1/n\)</span>, exactly as the second-order expansion <span class="arithmatex">\(r^2e^r/(2n)\)</span> predicts: doubling <span class="arithmatex">\(n\)</span>
+halves the error. <code>sympy</code> confirms <span class="arithmatex">\(\lim_{n\to\infty}(1+x/n)^n=e^x\)</span>. The difference between annual and continuous
+compounding is of order <span class="arithmatex">\(r^2/2\)</span>, so it grows quadratically with the rate: at the 16.5% peak of 1981 it was 1.4 percentage
+points a year — enough to matter when quoting or comparing yields.</p>
+</details>
+<h3 id="exercise-12-arc-elasticity-converges-to-point-elasticity-demand-for-eco-labeled-apples">Exercise 1.2 — Arc elasticity converges to point elasticity: demand for eco-labeled apples</h3>
+<p><em>Data:</em> <code>apple</code> — 660 households in a 1990s survey that randomly assigned prices of eco-labeled (<code>ecoprc</code>) and regular (<code>regprc</code>) apples and recorded pounds demanded (<code>ecolbs</code>).</p>
+<ol>
+<li>Estimate an exponential demand curve <span class="arithmatex">\(E[q\mid p]=\exp(\beta_0+\beta_1p_{eco}+\beta_2p_{reg})\)</span> by Poisson regression (which handles the many zero purchases).</li>
+<li>At the mean prices, compute the <strong>arc elasticity</strong> <span class="arithmatex">\(\frac{\Delta q/q}{\Delta p/p}\)</span> for price changes of 20, 10, 1 and 0.1 cents. Show that it converges to the point elasticity <span class="arithmatex">\(\beta_1p\)</span> as <span class="arithmatex">\(\Delta p\to0\)</span>, and that the error is roughly proportional to <span class="arithmatex">\(\Delta p\)</span>.</li>
+<li>Why would the same exercise with a <strong>linear</strong> demand curve show no convergence at all?</li>
+</ol>
+<pre><code class="language-python">import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+a = wd.data(&quot;apple&quot;)
+r = smf.poisson(&quot;ecolbs ~ ecoprc + regprc&quot;, data=a).fit()
+q = lambda p: np.exp(r.params[&quot;Intercept&quot;] + r.params[&quot;ecoprc&quot;] * p + r.params[&quot;regprc&quot;] * a[&quot;regprc&quot;].mean())
+# TODO: arc elasticities at p0 = a.ecoprc.mean() for dp in (0.2, 0.1, 0.01, 0.001); point elasticity b1 * p0
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+a = wd.data(&quot;apple&quot;)
+r = smf.poisson(&quot;ecolbs ~ ecoprc + regprc&quot;, data=a).fit(disp=0, cov_type=&quot;HC0&quot;)
+b0, b1, b2 = r.params; p0, preg = a[&quot;ecoprc&quot;].mean(), a[&quot;regprc&quot;].mean()
+q = lambda p: np.exp(b0 + b1 * p + b2 * preg)
+print(f&quot;E[q|p] = exp({b0:.3f} {b1:+.3f} p_eco {b2:+.3f} p_reg)   (robust se on p_eco {r.bse['ecoprc']:.3f})&quot;)
+point = b1 * p0
+for dp in (0.20, 0.10, 0.01, 0.001):
+    arc = ((q(p0 + dp) - q(p0)) / q(p0)) / (dp / p0)
+    print(f&quot;  dp = {dp:5.3f}: arc elasticity {arc:.5f}   error {arc - point:+.5f}   error/dp {(arc - point)/dp:+.3f}&quot;)
+print(f&quot;point elasticity b1 * p = {point:.5f}&quot;)
+lin = smf.ols(&quot;ecolbs ~ ecoprc + regprc&quot;, data=a).fit()
+ql = lambda p: lin.params[&quot;Intercept&quot;] + lin.params[&quot;ecoprc&quot;] * p + lin.params[&quot;regprc&quot;] * preg
+print(&quot;linear demand, arc elasticity for dp = 0.2 and 0.001:&quot;, round(((ql(p0+.2)-ql(p0))/ql(p0))/(.2/p0), 5), round(((ql(p0+.001)-ql(p0))/ql(p0))/(.001/p0), 5))
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">E[q|p] = exp(0.683 -2.045 p_eco +2.108 p_reg)   (robust se on p_eco 0.355)
+  dp = 0.200: arc elasticity -1.81493   error +0.39629   error/dp +1.981
+  dp = 0.100: arc elasticity -1.99983   error +0.21140   error/dp +2.114
+  dp = 0.010: arc elasticity -2.18877   error +0.02245   error/dp +2.245
+  dp = 0.001: arc elasticity -2.20897   error +0.00226   error/dp +2.259
+point elasticity b1 * p = -2.21123
+linear demand, arc elasticity for dp = 0.2 and 0.001: -2.14725 -2.14725
+</code></pre>
+<p>At mean prices, the point elasticity of demand for eco-labeled apples is about <span class="arithmatex">\(-2.2\)</span>: demand is elastic. The arc
+elasticity approaches it as the price step shrinks, and the error divided by <span class="arithmatex">\(\Delta p\)</span> settles near a constant: the error
+is first order in <span class="arithmatex">\(\Delta p\)</span>, as a Taylor expansion of <span class="arithmatex">\(e^{\beta_1\Delta p}\)</span> predicts. For a linear demand curve, the
+one-sided arc elasticity <span class="arithmatex">\((\Delta q/q)/(\Delta p/p)=\beta_1p/q\)</span> is exact for every step size, so there is nothing to
+converge — the last line shows the same number for 20 cents and 0.1 cent. Prices were randomized in this survey, so the
+slope can be read as a causal demand response for stated purchases.</p>
+</details>
 </section><section class="box reading"><h2 id="reading">Reading</h2>
 <p>Apostol, <em>Calculus</em>, Vol. 1; Spivak, <em>Calculus</em>; Rudin, <em>Principles of Mathematical Analysis</em>.</p></section></article>
     <nav class="pager">

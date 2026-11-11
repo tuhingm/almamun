@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Calculus · Lecture 7</h3>
       <div class="profile-item"><strong>Part</strong><span>Part II · Multivariable calculus</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 2 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 7 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="06-multivariable-functions-limits.html">Lecture 6: Multivariable Functions, Limits, and Continuity</a></span></div>
       
     </aside>
@@ -94,6 +94,88 @@ f(x+h)=f(x)+\nabla f(x)'h+o(\|h\|).
 </ol>
 </section><section class="box lab"><h2 id="computational-lab">Computational lab</h2>
 <p>Use SymPy to derive gradients and Jacobians; verify with finite differences and plot gradient fields over contour maps.</p>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises apply the calculus of this lecture to <strong>real economic data</strong> in Python, mixing symbolic (<code>sympy</code>),
+numerical (<code>scipy</code>) and statistical (<code>statsmodels</code>) tools. Install once with
+<code>pip install sympy scipy numpy pandas statsmodels wooldridge</code>. Try the starter code first, then open the solution.
+Every printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-71-growth-accounting-with-the-chain-rule">Exercise 7.1 — Growth accounting with the chain rule</h3>
+<p><em>Data:</em> <code>macrodata</code> — U.S. quarterly real GDP, population and CPI.</p>
+<ol>
+<li>Use the chain rule on <span class="arithmatex">\(\log Y=\log(Y/N)+\log N\)</span> to decompose real GDP growth into per-capita growth and population growth, decade by decade.</li>
+<li>Similarly decompose <strong>nominal</strong> GDP growth into real growth and inflation (CPI-based), using <span class="arithmatex">\(\log(PY)=\log P+\log Y\)</span>.</li>
+<li>Verify that the decompositions add up exactly in logs, and show the small error when using percent changes instead.</li>
+</ol>
+<pre><code class="language-python">import numpy as np, pandas as pd, statsmodels.api as sm
+m = sm.datasets.macrodata.load_pandas().data
+# TODO: annual averages; log differences of Y, Y/N, N, P; group by decade
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, pandas as pd, statsmodels.api as sm
+m = sm.datasets.macrodata.load_pandas().data
+a = m.groupby(&quot;year&quot;)[[&quot;realgdp&quot;, &quot;pop&quot;, &quot;cpi&quot;]].mean().loc[1960:2008]
+lg = np.log(a).diff().dropna() * 100
+lg[&quot;percap&quot;] = lg[&quot;realgdp&quot;] - lg[&quot;pop&quot;]; lg[&quot;nominal&quot;] = lg[&quot;realgdp&quot;] + lg[&quot;cpi&quot;]
+lg[&quot;decade&quot;] = (lg.index // 10) * 10
+t = lg.groupby(&quot;decade&quot;)[[&quot;realgdp&quot;, &quot;percap&quot;, &quot;pop&quot;, &quot;cpi&quot;, &quot;nominal&quot;]].mean().round(2)
+print(&quot;average annual log growth (%), by decade:&quot;); print(t.to_string())
+pc = a.pct_change().dropna() * 100
+err = (pc[&quot;realgdp&quot;] - ((1 + pc[&quot;realgdp&quot;]/100) / (1 + pc[&quot;pop&quot;]/100) - 1) * 100 - pc[&quot;pop&quot;]).abs().max()
+print(f&quot;\nmax error if percent changes are simply added (per-capita + population = total): {err:.3f} pp&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">average annual log growth (%), by decade:
+        realgdp  percap   pop   cpi  nominal
+decade                                      
+1960.0     4.55    3.28  1.27  2.48     7.02
+1970.0     3.18    2.13  1.05  6.94    10.11
+1980.0     2.98    2.04  0.94  5.23     8.20
+1990.0     3.13    1.91  1.22  2.92     6.04
+2000.0     2.34    1.39  0.96  2.80     5.14
+
+max error if percent changes are simply added (per-capita + population = total): 0.068 pp
+</code></pre>
+<p>In logs, the decomposition is exact: real GDP growth equals per-capita growth plus population growth, and nominal growth
+equals real growth plus inflation. The table tells a familiar story: the 1960s had the fastest real growth; the 1970s had
+nominal growth above 10% driven by inflation of almost 7%; and per-capita growth slowed steadily to about 1.4% in the
+2000s. Adding percent changes instead of log changes introduces a small error (up to 0.07 percentage points a year), from
+the cross term in <span class="arithmatex">\((1+a)(1+b)=1+a+b+ab\)</span>.</p>
+</details>
+<h3 id="exercise-72-partial-elasticities-and-a-total-derivative-in-a-hedonic-price-function">Exercise 7.2 — Partial elasticities and a total derivative in a hedonic price function</h3>
+<p><em>Data:</em> <code>hprice1</code> — 88 house sales.</p>
+<ol>
+<li>Fit <span class="arithmatex">\(\log(price)=\beta_0+\beta_1\log(sqrft)+\beta_2 bdrms+\beta_3\log(lotsize)\)</span>.</li>
+<li>Compute the partial effect of one more bedroom, holding square footage fixed. Why can it be small or even negative?</li>
+<li>In the data, bigger houses have more bedrooms: estimate the auxiliary relation <span class="arithmatex">\(bdrms=\gamma_0+\gamma_1\log(sqrft)\)</span>. Use the chain rule to compute the <strong>total</strong> derivative <span class="arithmatex">\(\frac{d\log price}{d\log sqrft}=\beta_1+\beta_2\gamma_1\)</span> and compare it with the slope from regressing <span class="arithmatex">\(\log price\)</span> on <span class="arithmatex">\(\log sqrft\)</span> and <span class="arithmatex">\(\log lotsize\)</span> only.</li>
+</ol>
+<pre><code class="language-python">import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+h = wd.data(&quot;hprice1&quot;)
+full = smf.ols(&quot;np.log(price) ~ np.log(sqrft) + bdrms + np.log(lotsize)&quot;, data=h).fit()
+# TODO: aux = bdrms ~ log(sqrft) + log(lotsize); total = b1 + b2 * g1
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+h = wd.data(&quot;hprice1&quot;)
+full = smf.ols(&quot;np.log(price) ~ np.log(sqrft) + bdrms + np.log(lotsize)&quot;, data=h).fit()
+aux = smf.ols(&quot;bdrms ~ np.log(sqrft) + np.log(lotsize)&quot;, data=h).fit()
+short = smf.ols(&quot;np.log(price) ~ np.log(sqrft) + np.log(lotsize)&quot;, data=h).fit()
+b1, b2, g1 = full.params[&quot;np.log(sqrft)&quot;], full.params[&quot;bdrms&quot;], aux.params[&quot;np.log(sqrft)&quot;]
+print(f&quot;partial effects: d log price / d log sqrft = {b1:.4f};  one more bedroom (same size) = {b2:.4f} ({100*(np.exp(b2)-1):.1f}%)&quot;)
+print(f&quot;auxiliary: d bdrms / d log sqrft = {g1:.4f}&quot;)
+print(f&quot;total derivative b1 + b2*g1 = {b1 + b2*g1:.4f};  short-regression slope = {short.params['np.log(sqrft)']:.4f}&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">partial effects: d log price / d log sqrft = 0.7002;  one more bedroom (same size) = 0.0370 (3.8%)
+auxiliary: d bdrms / d log sqrft = 1.6813
+total derivative b1 + b2*g1 = 0.7624;  short-regression slope = 0.7624
+</code></pre>
+<p>Holding size fixed, one more bedroom raises price by only about 4% (and insignificantly): at a fixed floor area, an extra
+bedroom means smaller rooms. But bigger houses have more bedrooms, so the <strong>total</strong> derivative of log price with respect to
+log size, <span class="arithmatex">\(\beta_1+\beta_2\gamma_1\approx0.76\)</span>, exceeds the partial effect of 0.70. It equals the short-regression slope
+exactly — the chain rule here is the omitted-variable bias formula of Econometrics Lecture 3, read the other way round.</p>
+</details>
 </section><section class="box reading"><h2 id="reading">Reading</h2>
 <p>Apostol, <em>Calculus</em>, Vol. 2; Simon and Blume, <em>Mathematics for Economists</em>; Chiang and Wainwright, <em>Fundamental Methods of Mathematical Economics</em>.</p></section></article>
     <nav class="pager">

@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Calculus · Lecture 3</h3>
       <div class="profile-item"><strong>Part</strong><span>Part I · Single-variable analysis</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 2 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 8 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="02-sequences-series.html">Lecture 2: Sequences, Convergence, and Infinite Series</a></span></div>
       
     </aside>
@@ -93,6 +93,104 @@ f'(c)=\frac{f(b)-f(a)}{b-a}.
 </ol>
 </section><section class="box lab"><h2 id="computational-lab">Computational lab</h2>
 <p>Use symbolic differentiation and finite differences. Plot approximation error as step size changes and discuss round-off versus truncation error.</p>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises apply the calculus of this lecture to <strong>real economic data</strong> in Python, mixing symbolic (<code>sympy</code>),
+numerical (<code>scipy</code>) and statistical (<code>statsmodels</code>) tools. Install once with
+<code>pip install sympy scipy numpy pandas statsmodels wooldridge</code>. Try the starter code first, then open the solution.
+Every printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-31-marginal-effects-and-elasticities-from-a-fitted-rd-model">Exercise 3.1 — Marginal effects and elasticities from a fitted R&amp;D model</h3>
+<p><em>Data:</em> <code>rdchem</code> — 32 U.S. chemical firms: R&amp;D spending <code>rd</code> and <code>sales</code> (millions of dollars).</p>
+<ol>
+<li>Fit <span class="arithmatex">\(rd=\beta_0+\beta_1 sales+\beta_2 sales^2+u\)</span>.</li>
+<li>Differentiate the fitted function symbolically with <code>sympy</code> to get the marginal effect <span class="arithmatex">\(d\,rd/d\,sales\)</span> and the elasticity <span class="arithmatex">\(\frac{d\,rd}{d\,sales}\frac{sales}{rd}\)</span>.</li>
+<li>Evaluate both at the median firm and at the largest firm. Where does the marginal effect turn negative, and is that inside the data?</li>
+<li>Check the symbolic derivative against a central finite difference.</li>
+</ol>
+<pre><code class="language-python">import sympy as sp, wooldridge as wd, statsmodels.formula.api as smf
+d = wd.data(&quot;rdchem&quot;)
+r = smf.ols(&quot;rd ~ sales + I(sales**2)&quot;, data=d).fit()
+S = sp.symbols(&quot;S&quot;)
+f = r.params[&quot;Intercept&quot;] + r.params[&quot;sales&quot;] * S + r.params[&quot;I(sales ** 2)&quot;] * S**2
+# TODO: sp.diff(f, S); elasticity; solve df/dS = 0
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, sympy as sp, wooldridge as wd, statsmodels.formula.api as smf
+d = wd.data(&quot;rdchem&quot;)
+r = smf.ols(&quot;rd ~ sales + I(sales**2)&quot;, data=d).fit()
+S = sp.symbols(&quot;S&quot;, positive=True)
+f = r.params[&quot;Intercept&quot;] + r.params[&quot;sales&quot;] * S + r.params[&quot;I(sales ** 2)&quot;] * S**2
+fp = sp.diff(f, S); el = sp.simplify(fp * S / f)
+print(&quot;fitted rd(S) =&quot;, sp.N(f, 4)); print(&quot;rd'(S) =&quot;, sp.N(fp, 4))
+for lab, s in ((&quot;median firm&quot;, d[&quot;sales&quot;].median()), (&quot;largest firm&quot;, d[&quot;sales&quot;].max())):
+    print(f&quot;  {lab:12s} (sales {s:,.0f}): marginal effect {float(fp.subs(S, s)):.4f}, elasticity {float(el.subs(S, s)):.3f}&quot;)
+peak = float(sp.solve(sp.Eq(fp, 0), S)[0])
+print(f&quot;marginal effect turns negative at sales = {peak:,.0f}; firms above it: {(d['sales'] &gt; peak).sum()} of {len(d)}&quot;)
+fn = sp.lambdify(S, f); h = 1e-3; s0 = d[&quot;sales&quot;].median()
+print(f&quot;finite difference at median: {(fn(s0 + h) - fn(s0 - h)) / (2*h):.6f}  vs symbolic {float(fp.subs(S, s0)):.6f}&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">fitted rd(S) = -6.538e-7*S**2 + 0.06391*S - 43.1
+rd'(S) = 0.06391 - 1.308e-6*S
+  median firm  (sales 1,332): marginal effect 0.0622, elasticity 2.025
+  largest firm (sales 39,709): marginal effect 0.0120, elasticity 0.325
+marginal effect turns negative at sales = 48,879; firms above it: 0 of 32
+finite difference at median: 0.062169  vs symbolic 0.062169
+</code></pre>
+<p>The fitted R&amp;D function is slightly concave. The marginal effect of $1 of sales on R&amp;D falls from about 6 cents at the
+median firm to about 1 cent at the largest firm, and the elasticity falls from about 2 to 0.3. The marginal effect would
+turn negative only at sales of about $49 billion, beyond every firm in the data — so the "turning point" is an artefact of
+the quadratic, not a finding. The symbolic derivative agrees with the finite difference to six decimals. The elasticity
+above 1 at the median is driven by the negative intercept and should not be over-interpreted with 32 firms.</p>
+</details>
+<h3 id="exercise-32-newtons-method-for-an-internal-rate-of-return">Exercise 3.2 — Newton's method for an internal rate of return</h3>
+<p><em>Data:</em> <code>macrodata</code> — annual averages of U.S. real GDP, 2000–2008, used to give a stylized project realistic cash flows that grow with the economy.</p>
+<p>A project costs $1,000 today and returns cash flows <span class="arithmatex">\(C_1,\dots,C_9\)</span> proportional to annual U.S. real GDP growth paths. The IRR solves <span class="arithmatex">\(NPV(r)=-1000+\sum_t C_t/(1+r)^t=0\)</span>.</p>
+<ol>
+<li>Derive <span class="arithmatex">\(NPV'(r)\)</span> analytically.</li>
+<li>Implement Newton's method <span class="arithmatex">\(r_{k+1}=r_k-NPV(r_k)/NPV'(r_k)\)</span> from <span class="arithmatex">\(r_0=0\)</span>. Print each iteration and show quadratic convergence (the number of correct digits roughly doubles).</li>
+<li>Check with <code>scipy.optimize.brentq</code>.</li>
+</ol>
+<pre><code class="language-python">import numpy as np, statsmodels.api as sm
+m = sm.datasets.macrodata.load_pandas().data
+y = m.groupby(&quot;year&quot;)[&quot;realgdp&quot;].mean().loc[2000:2008].to_numpy()
+C = 150 * y / y[0]                       # cash flows that grow with GDP
+npv = lambda r: -1000 + sum(c / (1 + r)**t for t, c in enumerate(C, 1))
+# TODO: dnpv = lambda r: -sum(t * c / (1 + r)**(t+1) ...); Newton loop
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, statsmodels.api as sm
+from scipy import optimize
+m = sm.datasets.macrodata.load_pandas().data
+y = m.groupby(&quot;year&quot;)[&quot;realgdp&quot;].mean().loc[2000:2008].to_numpy()
+C = 150 * y / y[0]
+npv = lambda r: -1000 + sum(c / (1 + r)**t for t, c in enumerate(C, 1))
+dnpv = lambda r: -sum(t * c / (1 + r)**(t + 1) for t, c in enumerate(C, 1))
+print(&quot;cash flows:&quot;, C.round(1))
+root = optimize.brentq(npv, -0.5, 1.0, xtol=1e-15)
+rk = 0.0
+for k in range(6):
+    print(f&quot;iteration {k}: r = {rk:.15f}   error = {abs(rk - root):.2e}&quot;)
+    rk = rk - npv(rk) / dnpv(rk)
+print(f&quot;brentq IRR = {root:.15f}&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">cash flows: [150.  151.6 154.4 158.2 163.9 168.9 173.4 177.1 177.9]
+iteration 0: r = 0.000000000000000   error = 8.27e-02
+iteration 1: r = 0.062431867426432   error = 2.02e-02
+iteration 2: r = 0.081358309440441   error = 1.30e-03
+iteration 3: r = 0.082656305240854   error = 5.53e-06
+iteration 4: r = 0.082661833017955   error = 9.96e-11
+iteration 5: r = 0.082661833117509   error = 8.33e-17
+brentq IRR = 0.082661833117509
+</code></pre>
+<p>Newton's method converges to the IRR of about 8.27% in five iterations. The errors fall from <span class="arithmatex">\(10^{-2}\)</span> to <span class="arithmatex">\(10^{-3}\)</span>,
+<span class="arithmatex">\(10^{-6}\)</span>, <span class="arithmatex">\(10^{-11}\)</span> and machine precision: the number of correct digits roughly doubles each step, which is
+quadratic convergence. It works so well here because <span class="arithmatex">\(NPV(r)\)</span> is smooth, decreasing and convex. With cash flows that
+change sign more than once, NPV can have several roots and Newton's method can converge to any of them, or fail;
+bracketing methods such as Brent's are safer.</p>
+</details>
 </section><section class="box reading"><h2 id="reading">Reading</h2>
 <p>Apostol, <em>Calculus</em>, Vol. 1; Chiang and Wainwright, <em>Fundamental Methods of Mathematical Economics</em>; Simon and Blume, <em>Mathematics for Economists</em>.</p></section></article>
     <nav class="pager">
