@@ -1,0 +1,1410 @@
+[
+{
+"out": "assets/og/econometrics/index.jpg",
+"kicker": "Course 01 · Graduate",
+"title": "Econometrics",
+"sub": "Theory, estimation, identification and applications — from projection geometry to causal research design.",
+"tags": [
+"Least squares",
+"Asymptotic theory",
+"Instrumental variables",
+"GMM"
+]
+},
+{
+"out": "assets/og/econometrics/syllabus.jpg",
+"kicker": "Econometrics · Course 01",
+"title": "Syllabus",
+"sub": "Theory, estimation, identification and applications — from projection geometry to causal research design.",
+"tags": [
+"14 lectures",
+"Graduate"
+]
+},
+{
+"out": "assets/og/econometrics/problem-sets-solutions.jpg",
+"kicker": "Econometrics · Course 01",
+"title": "Assignments: Problem Sets and Solutions",
+"sub": "Theory, estimation, identification and applications — from projection geometry to causal research design.",
+"tags": [
+"14 lectures",
+"Graduate"
+]
+},
+{
+"out": "assets/og/econometrics/examinations.jpg",
+"kicker": "Econometrics · Course 01",
+"title": "Exams",
+"sub": "Theory, estimation, identification and applications — from projection geometry to causal research design.",
+"tags": [
+"14 lectures",
+"Graduate"
+]
+},
+{
+"out": "assets/og/econometrics/outline.jpg",
+"kicker": "Econometrics · Course 01",
+"title": "Topic Outline",
+"sub": "Theory, estimation, identification and applications — from projection geometry to causal research design.",
+"tags": [
+"14 lectures",
+"Graduate"
+]
+},
+{
+"out": "assets/og/econometrics/lectures/01-probability-regression.jpg",
+"kicker": "Econometrics · Lecture 1 of 14",
+"title": "From Probability to the Linear Regression Model",
+"sub": "Part I — Linear regression and inference",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/econometrics/lectures/02-ols-inference.jpg",
+"kicker": "Econometrics · Lecture 2 of 14",
+"title": "OLS Inference: Sampling Distributions, Hypothesis Tests, and Confidence Intervals",
+"sub": "Part I — Linear regression and inference",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/econometrics/lectures/03-functional-form-ovb.jpg",
+"kicker": "Econometrics · Lecture 3 of 14",
+"title": "Functional Form, Partial Effects, and Omitted-Variable Bias",
+"sub": "Part I — Linear regression and inference",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/econometrics/lectures/04-heteroskedasticity-robust-inference.jpg",
+"kicker": "Econometrics · Lecture 4 of 14",
+"title": "Heteroskedasticity, Dependence, and Robust Inference",
+"sub": "Part I — Linear regression and inference",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/econometrics/lectures/05-endogeneity-iv.jpg",
+"kicker": "Econometrics · Lecture 5 of 14",
+"title": "Endogeneity, Instrumental Variables, and Two-Stage Least Squares",
+"sub": "Part II — Endogeneity and identification",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/econometrics/lectures/06-simultaneous-equations.jpg",
+"kicker": "Econometrics · Lecture 6 of 14",
+"title": "Simultaneous Equations and Structural Identification",
+"sub": "Part II — Endogeneity and identification",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/econometrics/lectures/07-panel-data.jpg",
+"kicker": "Econometrics · Lecture 7 of 14",
+"title": "Panel Data: Fixed Effects, Random Effects, and Correlated Effects",
+"sub": "Part III — Panel data",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/econometrics/lectures/08-dynamic-panels.jpg",
+"kicker": "Econometrics · Lecture 8 of 14",
+"title": "Dynamic Panels, Difference GMM, and System GMM",
+"sub": "Part III — Panel data",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/econometrics/lectures/09-time-series.jpg",
+"kicker": "Econometrics · Lecture 9 of 14",
+"title": "Time-Series Foundations: Stationarity, ARMA, and Forecasting",
+"sub": "Part IV — Time-series econometrics",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/econometrics/lectures/10-unit-roots-breaks.jpg",
+"kicker": "Econometrics · Lecture 10 of 14",
+"title": "Unit Roots, Structural Breaks, and Persistence",
+"sub": "Part IV — Time-series econometrics",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/econometrics/lectures/11-var-svar.jpg",
+"kicker": "Econometrics · Lecture 11 of 14",
+"title": "VAR and Structural VAR: Dynamic Interactions and Shock Identification",
+"sub": "Part IV — Time-series econometrics",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/econometrics/lectures/12-cointegration-ardl.jpg",
+"kicker": "Econometrics · Lecture 12 of 14",
+"title": "Cointegration, VECM, and ARDL Models",
+"sub": "Part IV — Time-series econometrics",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/econometrics/lectures/13-causal-inference.jpg",
+"kicker": "Econometrics · Lecture 13 of 14",
+"title": "Causal Inference: Potential Outcomes, DiD, and Regression Discontinuity",
+"sub": "Part V — Causal inference and research practice",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/econometrics/lectures/14-research-replication.jpg",
+"kicker": "Econometrics · Lecture 14 of 14",
+"title": "Research Design, Monte Carlo, Replication, and Reporting",
+"sub": "Part V — Causal inference and research practice",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/econometrics/lecture-notes.jpg",
+"kicker": "Econometrics · Course 01",
+"title": "Lecture Notes",
+"sub": "Theory, estimation, identification and applications — from projection geometry to causal research design.",
+"tags": [
+"14 lectures",
+"Graduate"
+]
+},
+{
+"out": "assets/og/econometrics/calendar.jpg",
+"kicker": "Econometrics · Course 01",
+"title": "Calendar",
+"sub": "Theory, estimation, identification and applications — from projection geometry to causal research design.",
+"tags": [
+"14 lectures",
+"Graduate"
+]
+},
+{
+"out": "assets/og/econometrics/readings.jpg",
+"kicker": "Econometrics · Course 01",
+"title": "Readings",
+"sub": "Theory, estimation, identification and applications — from projection geometry to causal research design.",
+"tags": [
+"14 lectures",
+"Graduate"
+]
+},
+{
+"out": "assets/og/statistics/index.jpg",
+"kicker": "Course 02 · Advanced undergraduate / Graduate",
+"title": "Statistics",
+"sub": "Probability, mathematical inference and experimental design.",
+"tags": [
+"Probability",
+"Asymptotics",
+"Likelihood",
+"Hypothesis testing"
+]
+},
+{
+"out": "assets/og/statistics/syllabus.jpg",
+"kicker": "Statistics · Course 02",
+"title": "Syllabus",
+"sub": "Probability, mathematical inference and experimental design.",
+"tags": [
+"14 lectures",
+"Advanced undergraduate / Graduate"
+]
+},
+{
+"out": "assets/og/statistics/problem-sets-solutions.jpg",
+"kicker": "Statistics · Course 02",
+"title": "Assignments: Problem Sets and Solutions",
+"sub": "Probability, mathematical inference and experimental design.",
+"tags": [
+"14 lectures",
+"Advanced undergraduate / Graduate"
+]
+},
+{
+"out": "assets/og/statistics/examinations.jpg",
+"kicker": "Statistics · Course 02",
+"title": "Exams",
+"sub": "Probability, mathematical inference and experimental design.",
+"tags": [
+"14 lectures",
+"Advanced undergraduate / Graduate"
+]
+},
+{
+"out": "assets/og/statistics/outline.jpg",
+"kicker": "Statistics · Course 02",
+"title": "Topic Outline",
+"sub": "Probability, mathematical inference and experimental design.",
+"tags": [
+"14 lectures",
+"Advanced undergraduate / Graduate"
+]
+},
+{
+"out": "assets/og/statistics/lectures/01-probability-models.jpg",
+"kicker": "Statistics · Lecture 1 of 14",
+"title": "Probability Models, Random Variables, and Expectation",
+"sub": "Part I — Probability and asymptotics",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/statistics/lectures/02-distributions-multivariate.jpg",
+"kicker": "Statistics · Lecture 2 of 14",
+"title": "Probability Distributions and Multivariate Models",
+"sub": "Part I — Probability and asymptotics",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/statistics/lectures/03-sampling-asymptotics.jpg",
+"kicker": "Statistics · Lecture 3 of 14",
+"title": "Sampling Distributions and Asymptotic Theory",
+"sub": "Part I — Probability and asymptotics",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/statistics/lectures/04-point-estimation.jpg",
+"kicker": "Statistics · Lecture 4 of 14",
+"title": "Point Estimation: Moments, Likelihood, and Optimality",
+"sub": "Part II — Estimation and inference",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/statistics/lectures/05-interval-testing.jpg",
+"kicker": "Statistics · Lecture 5 of 14",
+"title": "Confidence Intervals and Hypothesis Testing",
+"sub": "Part II — Estimation and inference",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/statistics/lectures/06-bayesian-inference.jpg",
+"kicker": "Statistics · Lecture 6 of 14",
+"title": "Bayesian Inference, Conjugacy, and Posterior Computation",
+"sub": "Part II — Estimation and inference",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/statistics/lectures/07-experimental-design.jpg",
+"kicker": "Statistics · Lecture 7 of 14",
+"title": "Experimental Design, Randomization, and Blocking",
+"sub": "Part III — Experimental design and ANOVA",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/statistics/lectures/08-anova-multiple-comparisons.jpg",
+"kicker": "Statistics · Lecture 8 of 14",
+"title": "ANOVA, Linear Contrasts, and Multiple Comparisons",
+"sub": "Part III — Experimental design and ANOVA",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/statistics/lectures/09-regression-glm.jpg",
+"kicker": "Statistics · Lecture 9 of 14",
+"title": "Linear Regression and Generalized Linear Models",
+"sub": "Part IV — Statistical modeling",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/statistics/lectures/10-nonparametric.jpg",
+"kicker": "Statistics · Lecture 10 of 14",
+"title": "Nonparametric Inference, Rank Tests, and Resampling",
+"sub": "Part IV — Statistical modeling",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/statistics/lectures/11-power-sample-size.jpg",
+"kicker": "Statistics · Lecture 11 of 14",
+"title": "Statistical Power, Sample Size, and Equivalence",
+"sub": "Part IV — Statistical modeling",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/statistics/lectures/12-mixed-models.jpg",
+"kicker": "Statistics · Lecture 12 of 14",
+"title": "Linear Mixed Models and Hierarchical Data",
+"sub": "Part IV — Statistical modeling",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/statistics/lectures/13-multivariate.jpg",
+"kicker": "Statistics · Lecture 13 of 14",
+"title": "Multivariate Analysis: PCA, Covariance, and Dimension Reduction",
+"sub": "Part IV — Statistical modeling",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/statistics/lectures/14-reproducible-statistics.jpg",
+"kicker": "Statistics · Lecture 14 of 14",
+"title": "Statistical Modeling Workflow, Simulation, and Reproducibility",
+"sub": "Part V — Statistical workflow",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/statistics/lecture-notes.jpg",
+"kicker": "Statistics · Course 02",
+"title": "Lecture Notes",
+"sub": "Probability, mathematical inference and experimental design.",
+"tags": [
+"14 lectures",
+"Advanced undergraduate / Graduate"
+]
+},
+{
+"out": "assets/og/statistics/calendar.jpg",
+"kicker": "Statistics · Course 02",
+"title": "Calendar",
+"sub": "Probability, mathematical inference and experimental design.",
+"tags": [
+"14 lectures",
+"Advanced undergraduate / Graduate"
+]
+},
+{
+"out": "assets/og/statistics/readings.jpg",
+"kicker": "Statistics · Course 02",
+"title": "Readings",
+"sub": "Probability, mathematical inference and experimental design.",
+"tags": [
+"14 lectures",
+"Advanced undergraduate / Graduate"
+]
+},
+{
+"out": "assets/og/calculus/index.jpg",
+"kicker": "Course 03 · Undergraduate, with graduate extensions",
+"title": "Calculus",
+"sub": "Single- and multivariable calculus with rigorous foundations, optimization and dynamics for economics and statistics.",
+"tags": [
+"Limits",
+"Series",
+"Differentiation",
+"Integration"
+]
+},
+{
+"out": "assets/og/calculus/syllabus.jpg",
+"kicker": "Calculus · Course 03",
+"title": "Syllabus",
+"sub": "Single- and multivariable calculus with rigorous foundations, optimization and dynamics for economics and statistics.",
+"tags": [
+"14 lectures",
+"Undergraduate, with graduate extensions"
+]
+},
+{
+"out": "assets/og/calculus/problem-sets-solutions.jpg",
+"kicker": "Calculus · Course 03",
+"title": "Assignments: Problem Sets and Solutions",
+"sub": "Single- and multivariable calculus with rigorous foundations, optimization and dynamics for economics and statistics.",
+"tags": [
+"14 lectures",
+"Undergraduate, with graduate extensions"
+]
+},
+{
+"out": "assets/og/calculus/examinations.jpg",
+"kicker": "Calculus · Course 03",
+"title": "Exams",
+"sub": "Single- and multivariable calculus with rigorous foundations, optimization and dynamics for economics and statistics.",
+"tags": [
+"14 lectures",
+"Undergraduate, with graduate extensions"
+]
+},
+{
+"out": "assets/og/calculus/lectures/01-limits-continuity.jpg",
+"kicker": "Calculus · Lecture 1 of 14",
+"title": "Limits, Continuity, and the Logic of Analysis",
+"sub": "Part I — Single-variable analysis",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/calculus/lectures/02-sequences-series.jpg",
+"kicker": "Calculus · Lecture 2 of 14",
+"title": "Sequences, Convergence, and Infinite Series",
+"sub": "Part I — Single-variable analysis",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/calculus/lectures/03-differentiation.jpg",
+"kicker": "Calculus · Lecture 3 of 14",
+"title": "Differentiation, Mean Value Theorems, and Comparative Rates",
+"sub": "Part I — Single-variable analysis",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/calculus/lectures/04-taylor-convexity-optimization.jpg",
+"kicker": "Calculus · Lecture 4 of 14",
+"title": "Taylor Approximation, Convexity, and Single-Variable Optimization",
+"sub": "Part I — Single-variable analysis",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/calculus/lectures/05-integration-fundamental-theorem.jpg",
+"kicker": "Calculus · Lecture 5 of 14",
+"title": "Integration, Riemann Sums, and the Fundamental Theorem",
+"sub": "Part I — Single-variable analysis",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/calculus/lectures/06-multivariable-functions-limits.jpg",
+"kicker": "Calculus · Lecture 6 of 14",
+"title": "Multivariable Functions, Limits, and Continuity",
+"sub": "Part II — Multivariable calculus",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/calculus/lectures/07-partial-derivatives-chain-rule.jpg",
+"kicker": "Calculus · Lecture 7 of 14",
+"title": "Partial Derivatives, Total Differentials, and the Chain Rule",
+"sub": "Part II — Multivariable calculus",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/calculus/lectures/08-hessian-multivariate-optimization.jpg",
+"kicker": "Calculus · Lecture 8 of 14",
+"title": "Hessians and Unconstrained Multivariable Optimization",
+"sub": "Part II — Multivariable calculus",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/calculus/lectures/09-lagrange-multipliers.jpg",
+"kicker": "Calculus · Lecture 9 of 14",
+"title": "Equality Constraints and Lagrange Multipliers",
+"sub": "Part III — Optimization and implicit functions",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/calculus/lectures/10-kkt-inequality-constraints.jpg",
+"kicker": "Calculus · Lecture 10 of 14",
+"title": "Inequality Constraints and Karush–Kuhn–Tucker Conditions",
+"sub": "Part III — Optimization and implicit functions",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/calculus/lectures/11-implicit-inverse-function-theorems.jpg",
+"kicker": "Calculus · Lecture 11 of 14",
+"title": "Implicit and Inverse Function Theorems",
+"sub": "Part III — Optimization and implicit functions",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/calculus/lectures/12-multiple-integrals-jacobians.jpg",
+"kicker": "Calculus · Lecture 12 of 14",
+"title": "Multiple Integrals, Change of Variables, and Probability",
+"sub": "Part IV — Multiple integration",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/calculus/lectures/13-differential-equations-dynamics.jpg",
+"kicker": "Calculus · Lecture 13 of 14",
+"title": "Differential Equations and Continuous-Time Dynamics",
+"sub": "Part V — Dynamic systems",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/calculus/lectures/14-difference-equations-discrete-dynamics.jpg",
+"kicker": "Calculus · Lecture 14 of 14",
+"title": "Difference Equations and Discrete-Time Dynamics",
+"sub": "Part V — Dynamic systems",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/calculus/lecture-notes.jpg",
+"kicker": "Calculus · Course 03",
+"title": "Lecture Notes",
+"sub": "Single- and multivariable calculus with rigorous foundations, optimization and dynamics for economics and statistics.",
+"tags": [
+"14 lectures",
+"Undergraduate, with graduate extensions"
+]
+},
+{
+"out": "assets/og/calculus/calendar.jpg",
+"kicker": "Calculus · Course 03",
+"title": "Calendar",
+"sub": "Single- and multivariable calculus with rigorous foundations, optimization and dynamics for economics and statistics.",
+"tags": [
+"14 lectures",
+"Undergraduate, with graduate extensions"
+]
+},
+{
+"out": "assets/og/calculus/readings.jpg",
+"kicker": "Calculus · Course 03",
+"title": "Readings",
+"sub": "Single- and multivariable calculus with rigorous foundations, optimization and dynamics for economics and statistics.",
+"tags": [
+"14 lectures",
+"Undergraduate, with graduate extensions"
+]
+},
+{
+"out": "assets/og/advanced-macroeconomics/index.jpg",
+"kicker": "Course 04 · Graduate",
+"title": "Advanced Macroeconomics",
+"sub": "Dynamic macroeconomic theory and quantitative policy analysis — from the Euler equation to HANK.",
+"tags": [
+"Dynamic optimization",
+"Growth",
+"RBC",
+"New Keynesian"
+]
+},
+{
+"out": "assets/og/advanced-macroeconomics/syllabus.jpg",
+"kicker": "Advanced Macroeconomics · Course 04",
+"title": "Syllabus",
+"sub": "Dynamic macroeconomic theory and quantitative policy analysis — from the Euler equation to HANK.",
+"tags": [
+"14 lectures",
+"Graduate"
+]
+},
+{
+"out": "assets/og/advanced-macroeconomics/problem-sets-solutions.jpg",
+"kicker": "Advanced Macroeconomics · Course 04",
+"title": "Assignments: Problem Sets and Solutions",
+"sub": "Dynamic macroeconomic theory and quantitative policy analysis — from the Euler equation to HANK.",
+"tags": [
+"14 lectures",
+"Graduate"
+]
+},
+{
+"out": "assets/og/advanced-macroeconomics/examinations.jpg",
+"kicker": "Advanced Macroeconomics · Course 04",
+"title": "Exams",
+"sub": "Dynamic macroeconomic theory and quantitative policy analysis — from the Euler equation to HANK.",
+"tags": [
+"14 lectures",
+"Graduate"
+]
+},
+{
+"out": "assets/og/advanced-macroeconomics/lectures/01-dynamic-household.jpg",
+"kicker": "Advanced Macroeconomics · Lecture 1 of 14",
+"title": "The Dynamic Household: Intertemporal Choice and Euler Equations",
+"sub": "Part I — Neoclassical foundations",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/advanced-macroeconomics/lectures/02-production-investment.jpg",
+"kicker": "Advanced Macroeconomics · Lecture 2 of 14",
+"title": "Firms, Capital Accumulation, and Investment",
+"sub": "Part I — Neoclassical foundations",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/advanced-macroeconomics/lectures/03-solow-ramsey.jpg",
+"kicker": "Advanced Macroeconomics · Lecture 3 of 14",
+"title": "Solow and Ramsey Growth: Steady States and Transitional Dynamics",
+"sub": "Part I — Neoclassical foundations",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/advanced-macroeconomics/lectures/04-rbc.jpg",
+"kicker": "Advanced Macroeconomics · Lecture 4 of 14",
+"title": "Real Business Cycle Models and Competitive Equilibrium",
+"sub": "Part I — Neoclassical foundations",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/advanced-macroeconomics/lectures/05-nominal-rigidities.jpg",
+"kicker": "Advanced Macroeconomics · Lecture 5 of 14",
+"title": "Nominal Rigidities, Calvo Pricing, and the New Keynesian Phillips Curve",
+"sub": "Part II — Nominal rigidities and policy",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/advanced-macroeconomics/lectures/06-three-equation-nk.jpg",
+"kicker": "Advanced Macroeconomics · Lecture 6 of 14",
+"title": "The Three-Equation New Keynesian Model",
+"sub": "Part II — Nominal rigidities and policy",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/advanced-macroeconomics/lectures/07-monetary-policy.jpg",
+"kicker": "Advanced Macroeconomics · Lecture 7 of 14",
+"title": "Monetary Policy: Rules, Commitment, and the Effective Lower Bound",
+"sub": "Part II — Nominal rigidities and policy",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/advanced-macroeconomics/lectures/08-fiscal-debt.jpg",
+"kicker": "Advanced Macroeconomics · Lecture 8 of 14",
+"title": "Fiscal Policy, Public Debt, and Monetary-Fiscal Interactions",
+"sub": "Part II — Nominal rigidities and policy",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/advanced-macroeconomics/lectures/09-open-economy.jpg",
+"kicker": "Advanced Macroeconomics · Lecture 9 of 14",
+"title": "Open-Economy Macroeconomics and Exchange-Rate Dynamics",
+"sub": "Part II — Nominal rigidities and policy",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/advanced-macroeconomics/lectures/10-dsge-solution-methods.jpg",
+"kicker": "Advanced Macroeconomics · Lecture 10 of 14",
+"title": "DSGE Solution Methods: Linearization, Perturbation, and QZ",
+"sub": "Part III — Solution and estimation",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/advanced-macroeconomics/lectures/11-dsge-estimation.jpg",
+"kicker": "Advanced Macroeconomics · Lecture 11 of 14",
+"title": "DSGE Estimation: Likelihood, Bayesian Inference, and Model Evaluation",
+"sub": "Part III — Solution and estimation",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/advanced-macroeconomics/lectures/12-heterogeneous-agents.jpg",
+"kicker": "Advanced Macroeconomics · Lecture 12 of 14",
+"title": "Heterogeneous-Agent Macroeconomics and Incomplete Markets",
+"sub": "Part IV — Heterogeneous agents",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/advanced-macroeconomics/lectures/13-hank-distribution.jpg",
+"kicker": "Advanced Macroeconomics · Lecture 13 of 14",
+"title": "HANK Models: Distribution Dynamics and Aggregate Transmission",
+"sub": "Part IV — Heterogeneous agents",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/advanced-macroeconomics/lectures/14-empirical-policy.jpg",
+"kicker": "Advanced Macroeconomics · Lecture 14 of 14",
+"title": "Quantitative Macro Policy Analysis, Validation, and Replication",
+"sub": "Part V — Quantitative policy analysis",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/advanced-macroeconomics/lecture-notes.jpg",
+"kicker": "Advanced Macroeconomics · Course 04",
+"title": "Lecture Notes",
+"sub": "Dynamic macroeconomic theory and quantitative policy analysis — from the Euler equation to HANK.",
+"tags": [
+"14 lectures",
+"Graduate"
+]
+},
+{
+"out": "assets/og/advanced-macroeconomics/calendar.jpg",
+"kicker": "Advanced Macroeconomics · Course 04",
+"title": "Calendar",
+"sub": "Dynamic macroeconomic theory and quantitative policy analysis — from the Euler equation to HANK.",
+"tags": [
+"14 lectures",
+"Graduate"
+]
+},
+{
+"out": "assets/og/advanced-macroeconomics/readings.jpg",
+"kicker": "Advanced Macroeconomics · Course 04",
+"title": "Readings",
+"sub": "Dynamic macroeconomic theory and quantitative policy analysis — from the Euler equation to HANK.",
+"tags": [
+"14 lectures",
+"Graduate"
+]
+},
+{
+"out": "assets/og/finance/index.jpg",
+"kicker": "Course 05 · Advanced undergraduate / Graduate",
+"title": "Finance",
+"sub": "Financial theory, asset pricing, corporate finance and financial econometrics.",
+"tags": [
+"Portfolio theory",
+"CAPM",
+"SDF",
+"Fixed income"
+]
+},
+{
+"out": "assets/og/finance/syllabus.jpg",
+"kicker": "Finance · Course 05",
+"title": "Syllabus",
+"sub": "Financial theory, asset pricing, corporate finance and financial econometrics.",
+"tags": [
+"15 lectures",
+"Advanced undergraduate / Graduate"
+]
+},
+{
+"out": "assets/og/finance/problem-sets-solutions.jpg",
+"kicker": "Finance · Course 05",
+"title": "Assignments: Problem Sets and Solutions",
+"sub": "Financial theory, asset pricing, corporate finance and financial econometrics.",
+"tags": [
+"15 lectures",
+"Advanced undergraduate / Graduate"
+]
+},
+{
+"out": "assets/og/finance/examinations.jpg",
+"kicker": "Finance · Course 05",
+"title": "Exams",
+"sub": "Financial theory, asset pricing, corporate finance and financial econometrics.",
+"tags": [
+"15 lectures",
+"Advanced undergraduate / Graduate"
+]
+},
+{
+"out": "assets/og/finance/lectures/01-returns-risk.jpg",
+"kicker": "Finance · Lecture 1 of 15",
+"title": "Returns, Risk, and the Foundations of Asset Pricing",
+"sub": "Part I — Risk, return and asset pricing",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/finance/lectures/02-expected-utility.jpg",
+"kicker": "Finance · Lecture 2 of 15",
+"title": "Risk, Probability, and Expected Utility",
+"sub": "Part I — Risk, return and asset pricing",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/finance/lectures/03-portfolio-theory.jpg",
+"kicker": "Finance · Lecture 3 of 15",
+"title": "Mean-Variance Portfolio Theory and the Efficient Frontier",
+"sub": "Part I — Risk, return and asset pricing",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/finance/lectures/04-capm-factors.jpg",
+"kicker": "Finance · Lecture 4 of 15",
+"title": "CAPM, Beta, and Empirical Factor Models",
+"sub": "Part I — Risk, return and asset pricing",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/finance/lectures/05-arbitrage-sdf.jpg",
+"kicker": "Finance · Lecture 5 of 15",
+"title": "Arbitrage Pricing, Stochastic Discount Factors, and No-Arbitrage",
+"sub": "Part I — Risk, return and asset pricing",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/finance/lectures/06-fixed-income.jpg",
+"kicker": "Finance · Lecture 6 of 15",
+"title": "Fixed-Income Securities, Bond Pricing, and Yield Curves",
+"sub": "Part II — Fixed income and derivatives",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/finance/lectures/07-duration-term-structure.jpg",
+"kicker": "Finance · Lecture 7 of 15",
+"title": "Duration, Convexity, Immunization, and Term Structure",
+"sub": "Part II — Fixed income and derivatives",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/finance/lectures/08-derivatives.jpg",
+"kicker": "Finance · Lecture 8 of 15",
+"title": "Forwards, Futures, Options, and Swaps",
+"sub": "Part II — Fixed income and derivatives",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/finance/lectures/09-capital-budgeting.jpg",
+"kicker": "Finance · Lecture 9 of 15",
+"title": "Corporate Finance: Capital Budgeting and Project Valuation",
+"sub": "Part III — Corporate finance and markets",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/finance/lectures/10-capital-structure.jpg",
+"kicker": "Finance · Lecture 10 of 15",
+"title": "Capital Structure, Leverage, and Payout Policy",
+"sub": "Part III — Corporate finance and markets",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/finance/lectures/11-market-efficiency.jpg",
+"kicker": "Finance · Lecture 11 of 15",
+"title": "Market Efficiency, Information, Governance, and Event Studies",
+"sub": "Part III — Corporate finance and markets",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/finance/lectures/12-banking.jpg",
+"kicker": "Finance · Lecture 12 of 15",
+"title": "Banking, Financial Intermediation, and Systemic Risk",
+"sub": "Part IV — Banking and risk",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/finance/lectures/13-risk-management.jpg",
+"kicker": "Finance · Lecture 13 of 15",
+"title": "Financial Risk Management: VaR, Expected Shortfall, and Stress Testing",
+"sub": "Part IV — Banking and risk",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/finance/lectures/14-behavioral-finance.jpg",
+"kicker": "Finance · Lecture 14 of 15",
+"title": "Behavioral Finance: Beliefs, Preferences, and Market Outcomes",
+"sub": "Part V — Behavioral and empirical finance",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/finance/lectures/15-financial-econometrics.jpg",
+"kicker": "Finance · Lecture 15 of 15",
+"title": "Empirical Finance and Financial Econometrics",
+"sub": "Part V — Behavioral and empirical finance",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/finance/lecture-notes.jpg",
+"kicker": "Finance · Course 05",
+"title": "Lecture Notes",
+"sub": "Financial theory, asset pricing, corporate finance and financial econometrics.",
+"tags": [
+"15 lectures",
+"Advanced undergraduate / Graduate"
+]
+},
+{
+"out": "assets/og/finance/calendar.jpg",
+"kicker": "Finance · Course 05",
+"title": "Calendar",
+"sub": "Financial theory, asset pricing, corporate finance and financial econometrics.",
+"tags": [
+"15 lectures",
+"Advanced undergraduate / Graduate"
+]
+},
+{
+"out": "assets/og/finance/readings.jpg",
+"kicker": "Finance · Course 05",
+"title": "Readings",
+"sub": "Financial theory, asset pricing, corporate finance and financial econometrics.",
+"tags": [
+"15 lectures",
+"Advanced undergraduate / Graduate"
+]
+},
+{
+"out": "assets/og/monetary-economics/index.jpg",
+"kicker": "Course 06 · Graduate",
+"title": "Monetary Economics",
+"sub": "Monetary theory, New Keynesian DSGE models and the evidence on policy transmission.",
+"tags": [
+"Money demand",
+"Classical model",
+"New Keynesian DSGE",
+"Optimal policy"
+]
+},
+{
+"out": "assets/og/monetary-economics/syllabus.jpg",
+"kicker": "Monetary Economics · Course 06",
+"title": "Syllabus",
+"sub": "Monetary theory, New Keynesian DSGE models and the evidence on policy transmission.",
+"tags": [
+"15 lectures",
+"Graduate"
+]
+},
+{
+"out": "assets/og/monetary-economics/problem-sets-solutions.jpg",
+"kicker": "Monetary Economics · Course 06",
+"title": "Assignments: Problem Sets and Solutions",
+"sub": "Monetary theory, New Keynesian DSGE models and the evidence on policy transmission.",
+"tags": [
+"15 lectures",
+"Graduate"
+]
+},
+{
+"out": "assets/og/monetary-economics/examinations.jpg",
+"kicker": "Monetary Economics · Course 06",
+"title": "Exams",
+"sub": "Monetary theory, New Keynesian DSGE models and the evidence on policy transmission.",
+"tags": [
+"15 lectures",
+"Graduate"
+]
+},
+{
+"out": "assets/og/monetary-economics/outline.jpg",
+"kicker": "Monetary Economics · Course 06",
+"title": "Topic Outline",
+"sub": "Monetary theory, New Keynesian DSGE models and the evidence on policy transmission.",
+"tags": [
+"15 lectures",
+"Graduate"
+]
+},
+{
+"out": "assets/og/monetary-economics/lectures/01-money-inflation-facts.jpg",
+"kicker": "Monetary Economics · Lecture 1 of 15",
+"title": "Money, Inflation and Transmission: The Facts",
+"sub": "Part I — Money and prices",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/monetary-economics/lectures/02-money-general-equilibrium.jpg",
+"kicker": "Monetary Economics · Lecture 2 of 15",
+"title": "Money in General Equilibrium",
+"sub": "Part I — Money and prices",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/monetary-economics/lectures/03-classical-monetary-model.jpg",
+"kicker": "Monetary Economics · Lecture 3 of 15",
+"title": "The Classical Monetary Model",
+"sub": "Part I — Money and prices",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/monetary-economics/lectures/04-price-wage-setting.jpg",
+"kicker": "Monetary Economics · Lecture 4 of 15",
+"title": "Price and Wage Setting",
+"sub": "Part II — The New Keynesian core",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/monetary-economics/lectures/05-basic-new-keynesian.jpg",
+"kicker": "Monetary Economics · Lecture 5 of 15",
+"title": "The Basic New Keynesian Model",
+"sub": "Part II — The New Keynesian core",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/monetary-economics/lectures/06-optimal-monetary-policy.jpg",
+"kicker": "Monetary Economics · Lecture 6 of 15",
+"title": "Optimal Monetary Policy",
+"sub": "Part II — The New Keynesian core",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/monetary-economics/lectures/07-policy-rules-frameworks.jpg",
+"kicker": "Monetary Economics · Lecture 7 of 15",
+"title": "Policy Rules and Frameworks",
+"sub": "Part II — The New Keynesian core",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/monetary-economics/lectures/08-small-open-economy.jpg",
+"kicker": "Monetary Economics · Lecture 8 of 15",
+"title": "Monetary Policy in Small Open Economies",
+"sub": "Part III — Extensions",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/monetary-economics/lectures/09-financial-frictions.jpg",
+"kicker": "Monetary Economics · Lecture 9 of 15",
+"title": "Financial Frictions and the Credit Channel",
+"sub": "Part III — Extensions",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/monetary-economics/lectures/10-zlb-unconventional-policy.jpg",
+"kicker": "Monetary Economics · Lecture 10 of 15",
+"title": "The Zero Lower Bound and Unconventional Policy",
+"sub": "Part III — Extensions",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/monetary-economics/lectures/11-monetary-fiscal-interactions.jpg",
+"kicker": "Monetary Economics · Lecture 11 of 15",
+"title": "Monetary–Fiscal Interactions",
+"sub": "Part III — Extensions",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/monetary-economics/lectures/12-hank-monetary-transmission.jpg",
+"kicker": "Monetary Economics · Lecture 12 of 15",
+"title": "HANK and Monetary Transmission",
+"sub": "Part IV — Heterogeneity and estimation",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/monetary-economics/lectures/13-bayesian-estimation.jpg",
+"kicker": "Monetary Economics · Lecture 13 of 15",
+"title": "Bayesian Estimation of Monetary DSGE Models",
+"sub": "Part IV — Heterogeneity and estimation",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/monetary-economics/lectures/14-identifying-monetary-shocks.jpg",
+"kicker": "Monetary Economics · Lecture 14 of 15",
+"title": "Identifying Monetary Policy Shocks",
+"sub": "Part V — Evidence and practice",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/monetary-economics/lectures/15-central-banking-practice.jpg",
+"kicker": "Monetary Economics · Lecture 15 of 15",
+"title": "Central Banking in Practice",
+"sub": "Part V — Evidence and practice",
+"tags": [
+"Lecture notes",
+"Problem set",
+"Coding exercises"
+]
+},
+{
+"out": "assets/og/monetary-economics/lecture-notes.jpg",
+"kicker": "Monetary Economics · Course 06",
+"title": "Lecture Notes",
+"sub": "Monetary theory, New Keynesian DSGE models and the evidence on policy transmission.",
+"tags": [
+"15 lectures",
+"Graduate"
+]
+},
+{
+"out": "assets/og/monetary-economics/calendar.jpg",
+"kicker": "Monetary Economics · Course 06",
+"title": "Calendar",
+"sub": "Monetary theory, New Keynesian DSGE models and the evidence on policy transmission.",
+"tags": [
+"15 lectures",
+"Graduate"
+]
+},
+{
+"out": "assets/og/monetary-economics/readings.jpg",
+"kicker": "Monetary Economics · Course 06",
+"title": "Readings",
+"sub": "Monetary theory, New Keynesian DSGE models and the evidence on policy transmission.",
+"tags": [
+"15 lectures",
+"Graduate"
+]
+}
+]

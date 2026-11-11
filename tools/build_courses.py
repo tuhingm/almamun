@@ -166,6 +166,7 @@ def build() -> int:
     tpl = env.get_template("course.html")
     year = datetime.date.today().year
     written = 0
+    og_cards = []
 
     for key, meta in cfg["courses"].items():
         d = TEACH / key
@@ -211,6 +212,18 @@ def build() -> int:
                 url = url[:-len("index.html")]
             desc = (f"Lecture {lec['num']} of {c['title']} ({lec['unit']}): full notes, problem set and coding exercises."
                     if lec else c["summary"])
+            rel = out_path.relative_to(ROOT / "teaching").with_suffix(".jpg").as_posix()
+            og_image = f"assets/og/{rel}"
+            if lec:
+                card = dict(kicker=f"{c['title']} · Lecture {lec['num']} of {len(c['lectures'])}", title=lec["title"],
+                            sub=(lec["unit"] or "").replace("·", "—", 1) if lec["unit"] else c["subtitle"],
+                            tags=["Lecture notes", "Problem set", "Coding exercises"])
+            elif section == "home":
+                card = dict(kicker=f"{c['code']} · {c['level']}", title=c["title"], sub=c["subtitle"], tags=c["topics"][:4])
+            else:
+                card = dict(kicker=f"{c['title']} · {c['code']}", title=page_title, sub=c["subtitle"],
+                            tags=[f"{len(c['lectures'])} lectures", c["level"]])
+            og_cards.append(dict(out=og_image, **card))
             jsonld = ""
             if section == "home":
                 jsonld = json.dumps({
@@ -225,7 +238,7 @@ def build() -> int:
                 }, ensure_ascii=False, indent=1)
             page = tpl.render(c=c, sections=sections, section=section, body=body, page_title=esc(page_title),
                               doc_title=esc(doc_title), lec=lec, prev=prev, next=nxt, root=root, base=base,
-                              year=year, url=url, desc=esc(desc), jsonld=jsonld, site=SITE)
+                              year=year, url=url, desc=esc(desc), jsonld=jsonld, site=SITE, og_image=og_image)
             out_path.write_text(page)
             written += 1
 
@@ -324,6 +337,7 @@ def build() -> int:
         render(d / "readings.html", section="readings", body="".join(parts), page_title="Readings")
         print(f"{key}: {len(lectures)} lectures")
 
+    (TOOLS / "og_cards.json").write_text(json.dumps(og_cards, ensure_ascii=False, indent=0))
     print(f"wrote {written} pages")
     return 0
 
