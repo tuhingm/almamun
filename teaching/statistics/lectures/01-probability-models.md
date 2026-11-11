@@ -10,7 +10,7 @@ How does a probability model translate uncertainty about outcomes into quantitie
 Define probability spaces and random variables; derive expectations and moments; work with conditional distributions; distinguish independence from zero correlation; apply iterated expectations and the law of total variance.
 
 ## 1. Probability spaces and events
-A probability space is ((\Omega,\mathcal F,P)). The sample space \(\Omega\) contains possible outcomes, \(\mathcal F\) is a sigma-algebra of measurable events, and \(P\) is a probability measure satisfying non-negativity, normalization, and countable additivity. For pairwise disjoint events \(A_j\),
+A probability space is \((\Omega,\mathcal F,P)\). The sample space \(\Omega\) contains possible outcomes, \(\mathcal F\) is a sigma-algebra of measurable events, and \(P\) is a probability measure satisfying non-negativity, normalization, and countable additivity. For pairwise disjoint events \(A_j\),
 \[
 P\left(\bigcup_{j=1}^{\infty}A_j\right)=\sum_{j=1}^{\infty}P(A_j).
 \]

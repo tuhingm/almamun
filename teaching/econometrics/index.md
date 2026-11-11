@@ -1,104 +1,32 @@
-# Econometrics: Theory, Estimation, Identification and Applications
+# Econometrics
 
-**Level:** Advanced undergraduate and graduate. **Scope:** Probability foundations, regression, inference, endogeneity, IV, panel data, time series, causal inference, and reproducible computation.
+<p class="lead">A graduate course in econometric theory and applied methods. The sequence develops probability and asymptotic foundations, linear estimation and inference, identification, cross-sectional and panel methods, time-series models, cointegration, and causal research design.</p>
 
-## Learning objectives
-Students will formulate estimands, derive estimators, state identification assumptions, distinguish finite-sample from asymptotic results, diagnose model failures, and implement reproducible analyses in R, Python, or Stata.
+## What you will learn
 
-## 1. Probability and asymptotic foundations
-Let (Y,X) be random variables. Conditional expectation E(Y|X) is the minimum mean-square predictor among functions of X. Use iterated expectations, total variance, covariance decompositions, LLN, CLT, Slutsky's theorem, continuous mapping, and the delta method. Distinguish convergence in probability from convergence in distribution.
+Students completing the course should be able to:
+1. derive OLS and IV estimators and characterize their statistical properties;
+2. distinguish identification from estimation and inference;
+3. select covariance estimators consistent with the data dependence structure;
+4. formulate and estimate panel and time-series models;
+5. evaluate cointegration, dynamic systems, and causal designs;
+6. conduct Monte Carlo experiments and produce reproducible empirical research.
 
-## 2. Linear regression and projection geometry
-For y = Xβ + u, OLS minimizes (y-Xb)'(y-Xb), yielding βhat=(X'X)^(-1)X'y when X has full column rank. Define projection P_X=X(X'X)^(-1)X' and residual maker M_X=I-P_X. Then fitted values are P_Xy, residuals are M_Xy, and X'u_hat=0. Under correct linear conditional mean, full rank, E(u|X)=0, and Var(u|X)=σ²I, OLS is BLUE. Normality is not required for Gauss-Markov.
+## How the course is organized
 
-Variance: Var(βhat|X)=σ²(X'X)^(-1); estimate σ² by RSS/(n-k). Derive t and F tests under normality. Explain partial regression and the Frisch–Waugh–Lovell theorem.
+Each lecture session has a full set of written notes: learning objectives, formal development with derivations, worked examples, a problem set, a computational lab and readings. Problem sets with solution guidance and examination specifications are under Assignments and Exams.
 
-## 3. Functional form and interpretation
-Levels, log-level, level-log, log-log, polynomials, interactions, dummy variables, elasticities, marginal effects, and nonlinear transformations. For log(y)=β0+β1log(x)+u, β1 is an elasticity. Interpret coefficients conditionally; a regression coefficient is not automatically causal. Cover RESET, residual plots, leverage, studentized residuals, and Cook's distance.
-
-## 4. Inference and robust covariance
-Test H0:Rβ=r using Wald, likelihood-ratio, or score procedures. Explain size, power, confidence coverage, p-values, multiple testing, and economic significance. Under heteroskedasticity, use sandwich covariance (X'X)^(-1)[Σ x_i x_i' uhat_i²](X'X)^(-1). HC0-HC3 differ in finite-sample leverage corrections. Robust standard errors do not fix endogeneity or wrong functional form.
-
-## 5. Endogeneity and instrumental variables
-Endogeneity arises from omitted variables, simultaneity, measurement error, or selection. Instrument z must satisfy relevance and exclusion/exogeneity. With instrument matrix Z, P_Z=Z(Z'Z)^(-1)Z' and βhat_2SLS=(X'P_ZX)^(-1)X'P_Zy. Explain first-stage partial R², weak-instrument diagnostics, weak-IV robust inference, overidentification tests, and local average treatment effects. Relevance is empirically assessable; exclusion needs institutional and economic justification.
-
-## 6. Simultaneous equations
-Structural system By_t+Γx_t=ε_t and reduced form y_t=Πx_t+v_t. Explain order and rank conditions, exclusion restrictions, structural versus reduced-form parameters, 2SLS and 3SLS. A reduced-form residual does not automatically identify a structural shock.
-
-## 7. Panel data
-Model y_it=x_it'β+α_i+λ_t+u_it. Derive within transformation and first differences. Compare pooled OLS, fixed effects, random effects, correlated random effects/Mundlak, two-way effects, and clustered inference. Fixed effects remove time-invariant α_i but not time-varying confounding. Discuss serial correlation, unbalanced panels, and few-cluster inference.
-
-## 8. Dynamic panels
-For y_it=ρy_i,t-1+x_it'β+α_i+u_it, explain Nickell bias for fixed T, difference GMM, system GMM, timing-based moment restrictions, instrument proliferation, AR(1)/AR(2), Hansen/Sargan tests, instrument collapsing, and sensitivity to instrument count. Students must state the exact moment conditions used.
-
-## 9. Time-series econometrics
-Stationarity, weak dependence, ACF/PACF, white noise, deterministic trends, stochastic trends, unit roots, spurious regression, ARMA, lag selection, residual diagnostics, and forecast evaluation. For AR(1), y_t=ρy_t-1+ε_t, covariance stationarity requires |ρ|<1.
-
-## 10. VAR and structural VAR
-VAR(p): y_t=c+Σ A_j y_t-j+ε_t. Cover stability, companion form, lag selection, Granger predictability, impulse responses, forecast-error variance decomposition, and structural identification through contemporaneous restrictions, long-run restrictions, sign restrictions, or external instruments. Reduced-form innovations alone do not identify economic shocks.
-
-## 11. Cointegration, VECM and ARDL
-Cointegration is a stationary linear combination of nonstationary I(1) variables. VECM: Δy_t=Πy_t-1+ΣΓ_jΔy_t-j+ε_t, with Π=αβ'. Explain rank, adjustment coefficients, Johansen trace and maximum-eigenvalue tests, Engle-Granger, deterministic components, ARDL bounds testing, and integration-order restrictions.
-
-## 12. Causal inference
-Potential outcomes Y(1),Y(0), ATE=E[Y(1)-Y(0)], ignorability, overlap, matching, weighting, regression adjustment, DiD, event studies, synthetic control, and regression discontinuity. DiD estimator: (treated post-treated pre)-(control post-control pre). State parallel trends, inspect pre-trends, and account for staggered adoption and heterogeneous effects.
-
-## Worked problem set
-1. Differentiate the OLS objective and derive βhat=(X'X)^(-1)X'y.
-2. In y=β1x1+β2x2+u, derive omitted-variable bias when x2 is excluded: β1 probability limit shifts by β2 Cov(x1,x2)/Var(x1).
-3. Explain relevance versus exclusion for an instrument and provide a plausible exclusion violation.
-4. Show within-demeaning removes α_i and explain why time-invariant regressors are unidentified under individual fixed effects.
-5. Explain spurious regression and how cointegration changes the interpretation.
-
-## Computational labs
-Python: statsmodels OLS, HC3 covariance, IV/2SLS, panel models, VAR and ARDL. R: lm, sandwich, lmtest, fixest, plm, vars, urca. Stata: regress, ivregress, xtreg, xtabond2, var, ardl. Each lab must report sample construction, estimand, assumptions, covariance estimator, diagnostics, and replication steps.
+<!-- units -->
 
 ## Assessment
+
 Problem sets 30%; replication project 25%; midterm 20%; final applied paper 25%. Graduate extension requires asymptotic derivations, identification defense, and Monte Carlo comparison.
 
-## References
-Wooldridge, Introductory Econometrics and Econometric Analysis of Cross Section and Panel Data; Hayashi, Econometrics; Greene, Econometric Analysis; Angrist and Pischke, Mostly Harmless Econometrics; Hamilton, Time Series Analysis; Lütkepohl, New Introduction to Multiple Time Series Analysis.
+## Core references
 
-## Lecture series
-
-The course is delivered as a sequence of research-oriented lectures. Each lecture is designed around a motivating question, formal derivation, worked example, interpretation, research practice, problem session, and selected readings.
-
-1. [Lecture 01 — From Probability to the Linear Regression Model](lectures/01-probability-regression.md)
-2. [Lecture 02 — OLS Inference: Sampling Distributions, Hypothesis Tests, and Confidence Intervals](lectures/02-ols-inference.md)
-
-## Semester sequence
-
-| Unit | Lecture block | Main analytical output |
-|---|---|---|
-| I | Probability, sampling, and asymptotics | LLN, CLT, Slutsky, delta method |
-| II | Linear regression and OLS geometry | Projection matrices, FWL, Gauss–Markov |
-| III | OLS inference and specification | t/F/Wald tests, robust covariance, functional form |
-| IV | Endogeneity and identification | OVB, IV/2SLS, weak instruments, control functions |
-| V | Simultaneous equations | Structural form, reduced form, order and rank conditions |
-| VI | Cross-sectional and panel methods | FE, RE, Mundlak, clustered inference, dynamic panels |
-| VII | Time-series foundations | Stationarity, unit roots, ARMA, forecasting |
-| VIII | Multivariate time series | VAR/SVAR, cointegration, VECM, ARDL |
-| IX | Causal designs | DiD, event studies, synthetic control, RD |
-| X | Research implementation | Replication, Monte Carlo, empirical paper |
-
-The sequence will be expanded lecture by lecture. A topic is marked as available only when its dedicated lecture file has been published.
-3. [Lecture 03 — Functional Form, Partial Effects, and Omitted-Variable Bias](lectures/03-functional-form-ovb.md)
-4. [Lecture 04 — Heteroskedasticity, Dependence, and Robust Inference](lectures/04-heteroskedasticity-robust-inference.md)
-5. [Lecture 05 — Endogeneity, Instrumental Variables, and Two-Stage Least Squares](lectures/05-endogeneity-iv.md)
-6. [Lecture 06 — Simultaneous Equations and Structural Identification](lectures/06-simultaneous-equations.md)
-7. [Lecture 07 — Panel Data: Fixed Effects, Random Effects, and Correlated Effects](lectures/07-panel-data.md)
-8. [Lecture 08 — Dynamic Panels, Difference GMM, and System GMM](lectures/08-dynamic-panels.md)
-9. [Lecture 09 — Time-Series Foundations: Stationarity, ARMA, and Forecasting](lectures/09-time-series.md)
-10. [Lecture 10 — Unit Roots, Structural Breaks, and Persistence](lectures/10-unit-roots-breaks.md)
-11. [Lecture 11 — VAR and Structural VAR: Dynamic Interactions and Shock Identification](lectures/11-var-svar.md)
-12. [Lecture 12 — Cointegration, VECM, and ARDL Models](lectures/12-cointegration-ardl.md)
-13. [Lecture 13 — Causal Inference: Potential Outcomes, DiD, and Regression Discontinuity](lectures/13-causal-inference.md)
-14. [Lecture 14 — Research Design, Monte Carlo, Replication, and Reporting](lectures/14-research-replication.md)
-
-## Course resources
-
-- [Course syllabus and weekly teaching plan](syllabus.md)
-- [Graduate problem sets and selected solution guidance](problem-sets-solutions.md)
-- [Midterm and final examination specifications](examinations.md)
-
-The lecture sequence is now published as a complete 14-lecture framework. Additional datasets and software-specific lab scripts will be added as separate reproducible files rather than embedded as unverified links.
+- Hayashi, *Econometrics*.
+- Wooldridge, *Econometric Analysis of Cross Section and Panel Data*.
+- Greene, *Econometric Analysis*.
+- Hamilton, *Time Series Analysis*.
+- Lütkepohl, *New Introduction to Multiple Time Series Analysis*.
+- Angrist and Pischke, *Mostly Harmless Econometrics*.

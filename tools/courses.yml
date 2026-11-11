@@ -1,0 +1,101 @@
+# Course metadata for tools/build_courses.py.
+# Lecture titles are read from the first heading of each file in teaching/<key>/lectures/.
+# "units" groups lectures into parts: [first lecture, last lecture, label].
+
+instructor: Tuhin G. M. Al Mamun, Ph.D.
+
+courses:
+  econometrics:
+    code: Course 01
+    title: Econometrics
+    subtitle: Theory, estimation, identification and applications — from projection geometry to causal research design.
+    level: Graduate
+    format: problem sets, computational labs, replication project
+    prerequisites: Calculus, linear algebra, probability and statistics, introductory regression
+    software: R, Python, Stata
+    summary: Graduate econometrics course notes covering OLS, inference, IV, panel data, time series, cointegration and causal inference.
+    topics: [Least squares, Asymptotic theory, Instrumental variables, GMM, Panel data, Time series, VAR / SVAR, Cointegration, Causal inference]
+    units:
+      - [1, 4, "Part I · Linear regression and inference"]
+      - [5, 6, "Part II · Endogeneity and identification"]
+      - [7, 8, "Part III · Panel data"]
+      - [9, 12, "Part IV · Time-series econometrics"]
+      - [13, 14, "Part V · Causal inference and research practice"]
+
+  statistics:
+    code: Course 02
+    title: Statistics
+    subtitle: Probability, mathematical inference and experimental design.
+    level: Advanced undergraduate / Graduate
+    format: problem sets, computational labs, design report
+    prerequisites: Calculus, linear algebra, introductory statistics
+    software: R, Python
+    summary: Course notes in probability, estimation, testing, Bayesian inference, experimental design, ANOVA, GLMs and mixed models.
+    topics: [Probability, Asymptotics, Likelihood, Hypothesis testing, Bayesian inference, Experimental design, ANOVA, GLMs, Mixed models]
+    units:
+      - [1, 3, "Part I · Probability and asymptotics"]
+      - [4, 6, "Part II · Estimation and inference"]
+      - [7, 8, "Part III · Experimental design and ANOVA"]
+      - [9, 13, "Part IV · Statistical modeling"]
+      - [14, 14, "Part V · Statistical workflow"]
+
+  calculus:
+    code: Course 03
+    title: Calculus
+    subtitle: Single- and multivariable calculus with rigorous foundations, optimization and dynamics for economics and statistics.
+    level: Undergraduate, with graduate extensions
+    format: problem sets, proofs, computational checks
+    prerequisites: Algebra, functions, elementary trigonometry
+    software: Python, R, MATLAB
+    summary: Course notes in limits, differentiation, integration, multivariable calculus, constrained optimization and differential equations.
+    topics: [Limits, Series, Differentiation, Integration, Multivariable calculus, Lagrange multipliers, KKT, Differential equations]
+    units:
+      - [1, 5, "Part I · Single-variable analysis"]
+      - [6, 8, "Part II · Multivariable calculus"]
+      - [9, 11, "Part III · Optimization and implicit functions"]
+      - [12, 12, "Part IV · Multiple integration"]
+      - [13, 14, "Part V · Dynamic systems"]
+
+  advanced-macroeconomics:
+    code: Course 04
+    title: Advanced Macroeconomics
+    subtitle: Dynamic macroeconomic theory and quantitative policy analysis — from the Euler equation to HANK.
+    level: Graduate
+    format: problem sets, model replications, research proposal
+    prerequisites: Intermediate macroeconomics, calculus, linear algebra, probability, introductory econometrics
+    software: MATLAB, Dynare, Julia, Python
+    summary: Graduate macroeconomics course notes covering growth, RBC, New Keynesian DSGE, monetary and fiscal policy, and heterogeneous-agent models.
+    topics: [Dynamic optimization, Growth, RBC, New Keynesian, Monetary policy, Fiscal policy, Open economy, DSGE estimation, HANK]
+    units:
+      - [1, 4, "Part I · Neoclassical foundations"]
+      - [5, 9, "Part II · Nominal rigidities and policy"]
+      - [10, 11, "Part III · Solution and estimation"]
+      - [12, 13, "Part IV · Heterogeneous agents"]
+      - [14, 14, "Part V · Quantitative policy analysis"]
+
+  finance:
+    code: Course 05
+    title: Finance
+    subtitle: Financial theory, asset pricing, corporate finance and financial econometrics.
+    level: Advanced undergraduate / Graduate
+    format: problem sets, empirical labs, valuation case
+    prerequisites: Calculus, linear algebra, probability, statistics, introductory economics
+    software: Python, R
+    summary: Course notes covering portfolio theory, asset pricing, fixed income, derivatives, corporate finance, banking, risk and empirical finance.
+    topics: [Portfolio theory, CAPM, SDF, Fixed income, Derivatives, Capital structure, Banking, Risk management, Empirical finance]
+    units:
+      - [1, 5, "Part I · Risk, return and asset pricing"]
+      - [6, 8, "Part II · Fixed income and derivatives"]
+      - [9, 11, "Part III · Corporate finance and markets"]
+      - [12, 13, "Part IV · Banking and risk"]
+      - [14, 15, "Part V · Behavioral and empirical finance"]
+
+sections:
+  - {key: home, href: index.html, label: Course Home, file: index.md}
+  - {key: syllabus, href: syllabus.html, label: Syllabus, file: syllabus.md, blurb: "Description, prerequisites, outcomes, assessment and policies."}
+  - {key: calendar, href: calendar.html, label: Calendar, generated: true, blurb: "Session-by-session schedule with key activities."}
+  - {key: lecture-notes, href: lecture-notes.html, label: Lecture Notes, generated: true, blurb: "Full written notes for every lecture session."}
+  - {key: readings, href: readings.html, label: Readings, generated: true, blurb: "Required and further readings, organized by session."}
+  - {key: assignments, href: problem-sets-solutions.html, label: Assignments, file: problem-sets-solutions.md, blurb: "Problem sets with solution guidance."}
+  - {key: exams, href: examinations.html, label: Exams, file: examinations.md, blurb: "Midterm and final examination specifications."}
+  - {key: outline, href: outline.html, label: Topic Outline, file: outline.md, optional: true, blurb: "Condensed overview of the core results in the course."}
