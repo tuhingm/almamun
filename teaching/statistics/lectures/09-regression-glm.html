@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Statistics · Lecture 9</h3>
       <div class="profile-item"><strong>Part</strong><span>Part IV · Statistical modeling</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 2 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 8 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="08-anova-multiple-comparisons.html">Lecture 8: ANOVA, Linear Contrasts, and Multiple Comparisons</a></span></div>
       
     </aside>
@@ -93,6 +93,103 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
 </ol>
 </section><section class="box lab"><h2 id="computational-lab">Computational lab</h2>
 <p>Fit OLS, logistic, and Poisson models. Report coefficient scales and marginal effects; compare model-based and sandwich standard errors; assess calibration and residual diagnostics.</p>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises use <strong>real data</strong> in Python. Install once with
+<code>pip install wooldridge statsmodels scipy numpy pandas</code>. The <code>wooldridge</code> package holds survey, experimental and
+administrative datasets; <code>scipy.stats</code> and <code>statsmodels</code> provide the inference tools. Try the starter code first, then
+open the solution. Every printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-91-logistic-regression-married-womens-labor-force-participation">Exercise 9.1 — Logistic regression: married women's labor force participation</h3>
+<p><em>Data:</em> <code>mroz</code> — 753 married women, PSID 1975; <code>inlf</code> = in the labor force.</p>
+<ol>
+<li>Fit a logit of <code>inlf</code> on <code>nwifeinc</code>, <code>educ</code>, <code>exper</code>, <code>expersq</code>, <code>age</code>, <code>kidslt6</code>, <code>kidsge6</code>.</li>
+<li>Report odds ratios with 95% intervals.</li>
+<li>Compute average marginal effects, and compare with a linear probability model.</li>
+<li>What is the predicted probability of participation for a 30-year-old woman with 12 years of education, 10 years of experience, no young children, one older child and non-wife income of 20?</li>
+</ol>
+<pre><code class="language-python">import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+d = wd.data(&quot;mroz&quot;)
+f = &quot;inlf ~ nwifeinc + educ + exper + expersq + age + kidslt6 + kidsge6&quot;
+lg = smf.logit(f, data=d).fit()
+# TODO: np.exp(lg.conf_int()); lg.get_margeff().summary(); smf.ols(f, d).fit(cov_type=&quot;HC1&quot;)
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, pandas as pd, wooldridge as wd, statsmodels.formula.api as smf
+d = wd.data(&quot;mroz&quot;)
+f = &quot;inlf ~ nwifeinc + educ + exper + expersq + age + kidslt6 + kidsge6&quot;
+lg = smf.logit(f, data=d).fit(disp=0); lpm = smf.ols(f, data=d).fit(cov_type=&quot;HC1&quot;)
+ci = np.exp(lg.conf_int())
+me = lg.get_margeff().summary_frame()
+print(pd.DataFrame({&quot;odds ratio&quot;: np.exp(lg.params), &quot;OR 2.5%&quot;: ci[0], &quot;OR 97.5%&quot;: ci[1],
+                    &quot;logit AME&quot;: me[&quot;dy/dx&quot;], &quot;LPM coef&quot;: lpm.params}).drop(&quot;Intercept&quot;).round(4).to_string())
+new = pd.DataFrame({&quot;nwifeinc&quot;: [20], &quot;educ&quot;: [12], &quot;exper&quot;: [10], &quot;expersq&quot;: [100], &quot;age&quot;: [30], &quot;kidslt6&quot;: [0], &quot;kidsge6&quot;: [1]})
+print(f&quot;\npredicted participation: logit {lg.predict(new).iloc[0]:.3f}, LPM {lpm.predict(new).iloc[0]:.3f}&quot;)
+print(f&quot;LPM predictions outside [0,1]: {np.mean((lpm.fittedvalues &lt; 0) | (lpm.fittedvalues &gt; 1)):.3f};  pseudo R2 (McFadden) {lg.prsquared:.3f}&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">odds ratio  OR 2.5%  OR 97.5%  logit AME  LPM coef
+age           0.9157   0.8900    0.9423    -0.0157   -0.0161
+educ          1.2475   1.1457    1.3584     0.0395    0.0380
+exper         1.2286   1.1538    1.3083     0.0368    0.0395
+expersq       0.9969   0.9949    0.9988    -0.0006   -0.0006
+kidsge6       1.0620   0.9172    1.2296     0.0107    0.0130
+kidslt6       0.2361   0.1584    0.3519    -0.2578   -0.2618
+nwifeinc      0.9789   0.9629    0.9952    -0.0038   -0.0034
+
+predicted participation: logit 0.860, LPM 0.839
+LPM predictions outside [0,1]: 0.044;  pseudo R2 (McFadden) 0.220
+</code></pre>
+<p>A child under six reduces the odds of participation by about 76% (odds ratio 0.24) and the probability by about 26
+percentage points on average. Logit average marginal effects and LPM coefficients are very close — typical when
+probabilities are not near 0 or 1. The LPM predicts probabilities outside <span class="arithmatex">\([0,1]\)</span> for 4% of women, which the logit avoids.
+The predicted participation probability for the described woman is about 0.86.</p>
+</details>
+<h3 id="exercise-92-count-data-poisson-overdispersion-and-negative-binomial-for-arrests">Exercise 9.2 — Count data: Poisson, overdispersion and negative binomial for arrests</h3>
+<p><em>Data:</em> <code>crime1</code> — 2,725 young men; <code>narr86</code> = arrests in 1986.</p>
+<ol>
+<li>Fit a Poisson regression of <code>narr86</code> on <code>pcnv</code> (proportion of prior arrests leading to conviction), <code>avgsen</code>, <code>tottime</code>, <code>ptime86</code>, <code>qemp86</code>, <code>inc86</code>, <code>black</code>, <code>hispan</code>, <code>born60</code>.</li>
+<li>Test for overdispersion (Cameron–Trivedi auxiliary regression).</li>
+<li>Fit a negative binomial model and compare coefficients and standard errors. Report Poisson standard errors that are robust to overdispersion as well.</li>
+<li>Interpret the coefficient on <code>black</code> as an incidence-rate ratio.</li>
+</ol>
+<pre><code class="language-python">import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+d = wd.data(&quot;crime1&quot;)
+f = &quot;narr86 ~ pcnv + avgsen + tottime + ptime86 + qemp86 + inc86 + black + hispan + born60&quot;
+po = smf.poisson(f, data=d).fit()
+# TODO: overdispersion test: regress ((y-mu)^2 - y)/mu on mu without constant; smf.negativebinomial(f, d)
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, pandas as pd, wooldridge as wd, statsmodels.formula.api as smf
+d = wd.data(&quot;crime1&quot;)
+f = &quot;narr86 ~ pcnv + avgsen + tottime + ptime86 + qemp86 + inc86 + black + hispan + born60&quot;
+po = smf.poisson(f, data=d).fit(disp=0); por = smf.poisson(f, data=d).fit(disp=0, cov_type=&quot;HC0&quot;)
+mu = po.predict(); y = d[&quot;narr86&quot;]
+ct = smf.ols(&quot;aux ~ mu - 1&quot;, data=pd.DataFrame({&quot;aux&quot;: ((y - mu)**2 - y) / mu, &quot;mu&quot;: mu})).fit()
+print(f&quot;overdispersion test: alpha = {ct.params['mu']:.3f} (t = {ct.tvalues['mu']:.2f});  var/mean of y = {y.var()/y.mean():.2f}&quot;)
+nb = smf.negativebinomial(f, data=d).fit(disp=0)
+cols = [&quot;pcnv&quot;, &quot;ptime86&quot;, &quot;qemp86&quot;, &quot;inc86&quot;, &quot;black&quot;, &quot;hispan&quot;]
+print(pd.DataFrame({&quot;Poisson&quot;: po.params[cols], &quot;se&quot;: po.bse[cols], &quot;robust se&quot;: por.bse[cols],
+                    &quot;NegBin&quot;: nb.params[cols], &quot;NB se&quot;: nb.bse[cols]}).round(4).to_string())
+print(f&quot;NB dispersion alpha = {nb.params['alpha']:.3f};  IRR for black (Poisson) = {np.exp(po.params['black']):.3f}&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">overdispersion test: alpha = 1.246 (t = 4.82);  var/mean of y = 1.82
+         Poisson      se  robust se  NegBin   NB se
+pcnv     -0.4016  0.0850     0.1011 -0.4771  0.1033
+ptime86  -0.0986  0.0207     0.0223 -0.1074  0.0251
+qemp86   -0.0380  0.0290     0.0341 -0.0505  0.0352
+inc86    -0.0081  0.0010     0.0012 -0.0077  0.0011
+black     0.6608  0.0738     0.0994  0.6560  0.0924
+hispan    0.4998  0.0739     0.0924  0.5049  0.0896
+NB dispersion alpha = 0.929;  IRR for black (Poisson) = 1.936
+</code></pre>
+<p>The overdispersion test rejects strongly. The Poisson point estimates remain consistent if the conditional mean is
+correctly specified, but the conventional Poisson standard errors are too small; the robust (sandwich) standard errors are
+15–35% larger and close to the negative binomial ones. NB coefficients are similar to Poisson. The incidence-rate ratio
+for <code>black</code> is about 1.9: black men in this sample had nearly twice the expected number of arrests, other covariates
+held fixed — a descriptive association that reflects policing as well as behavior.</p>
+</details>
 </section><section class="box reading"><h2 id="reading">Reading</h2>
 <p>McCullagh and Nelder, <em>Generalized Linear Models</em>; Agresti, <em>Foundations of Linear and Generalized Linear Models</em>; Dobson and Barnett, <em>An Introduction to Generalized Linear Models</em>.</p></section></article>
     <nav class="pager">

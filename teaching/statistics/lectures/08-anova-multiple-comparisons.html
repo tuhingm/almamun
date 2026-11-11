@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Statistics · Lecture 8</h3>
       <div class="profile-item"><strong>Part</strong><span>Part III · Experimental design and ANOVA</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 2 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 8 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="07-experimental-design.html">Lecture 7: Experimental Design, Randomization, and Blocking</a></span></div>
       
     </aside>
@@ -104,6 +104,121 @@ Var(\widehat\psi)=\sigma^2\sum_i c_i^2/n_i.
 </ol>
 </section><section class="box lab"><h2 id="computational-lab">Computational lab</h2>
 <p>Fit one-way ANOVA, compute planned contrasts, and compare Tukey and Holm-adjusted pairwise inference. Simulate unequal variances and compare classical and Welch procedures.</p>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises use <strong>real data</strong> in Python. Install once with
+<code>pip install wooldridge statsmodels scipy numpy pandas</code>. The <code>wooldridge</code> package holds survey, experimental and
+administrative datasets; <code>scipy.stats</code> and <code>statsmodels</code> provide the inference tools. Try the starter code first, then
+open the solution. Every printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-81-one-way-anova-and-tukey-comparisons-wages-by-occupation">Exercise 8.1 — One-way ANOVA and Tukey comparisons: wages by occupation</h3>
+<p><em>Data:</em> <code>wage1</code> — CPS 1976, with indicators <code>profocc</code> (professional), <code>clerocc</code> (clerical), <code>servocc</code> (service); the rest are grouped as "other".</p>
+<ol>
+<li>Build an <code>occ</code> factor with four levels and compute group means and SDs of <code>lwage</code>.</li>
+<li>Run a one-way ANOVA (<span class="arithmatex">\(F\)</span> test). Report the ANOVA table and <span class="arithmatex">\(\eta^2\)</span>.</li>
+<li>Check equal variances (Levene). Run Welch's ANOVA as a robust alternative.</li>
+<li>Run Tukey's HSD to see which pairs differ, controlling the family-wise error rate.</li>
+</ol>
+<pre><code class="language-python">import numpy as np, wooldridge as wd, statsmodels.formula.api as smf, statsmodels.api as sm
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
+d = wd.data(&quot;wage1&quot;)
+d[&quot;occ&quot;] = np.select([d.profocc == 1, d.clerocc == 1, d.servocc == 1], [&quot;professional&quot;, &quot;clerical&quot;, &quot;service&quot;], &quot;other&quot;)
+# TODO: sm.stats.anova_lm(smf.ols(&quot;lwage ~ C(occ)&quot;, d).fit()); scipy.stats.levene; pairwise_tukeyhsd
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, wooldridge as wd, statsmodels.formula.api as smf, statsmodels.api as sm
+from scipy import stats
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
+from statsmodels.stats.oneway import anova_oneway
+d = wd.data(&quot;wage1&quot;)
+d[&quot;occ&quot;] = np.select([d.profocc == 1, d.clerocc == 1, d.servocc == 1], [&quot;professional&quot;, &quot;clerical&quot;, &quot;service&quot;], &quot;other&quot;)
+print(d.groupby(&quot;occ&quot;)[&quot;lwage&quot;].agg([&quot;size&quot;, &quot;mean&quot;, &quot;std&quot;]).round(3).to_string())
+a = sm.stats.anova_lm(smf.ols(&quot;lwage ~ C(occ)&quot;, data=d).fit())
+print(a.round(4).to_string()); print(f&quot;eta-squared = {a['sum_sq'].iloc[0] / a['sum_sq'].sum():.3f}&quot;)
+lev = stats.levene(*[g[&quot;lwage&quot;] for _, g in d.groupby(&quot;occ&quot;)])
+wel = anova_oneway(d[&quot;lwage&quot;], d[&quot;occ&quot;], use_var=&quot;unequal&quot;)
+print(f&quot;Levene: W = {lev.statistic:.2f}, p = {lev.pvalue:.4f};  Welch ANOVA: F = {wel.statistic:.2f}, p = {wel.pvalue:.2e}&quot;)
+print(pairwise_tukeyhsd(d[&quot;lwage&quot;], d[&quot;occ&quot;]).summary())
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">size   mean    std
+occ                             
+clerical        88  1.482  0.364
+other          171  1.526  0.437
+professional   193  1.934  0.548
+service         74  1.206  0.404
+             df    sum_sq  mean_sq        F  PR(&gt;F)
+C(occ)      3.0   34.8837  11.6279  53.5035     0.0
+Residual  522.0  113.4460   0.2173      NaN     NaN
+eta-squared = 0.235
+Levene: W = 9.88, p = 0.0000;  Welch ANOVA: F = 50.38, p = 3.90e-25
+      Multiple Comparison of Means - Tukey HSD, FWER=0.05       
+================================================================
+   group1       group2    meandiff p-adj   lower   upper  reject
+----------------------------------------------------------------
+    clerical        other   0.0439 0.8897 -0.1137  0.2016  False
+    clerical professional   0.4515    0.0   0.297  0.6061   True
+    clerical      service  -0.2767 0.0011 -0.4662 -0.0872   True
+       other professional   0.4076    0.0  0.2814  0.5338   True
+       other      service  -0.3207    0.0 -0.4878 -0.1535   True
+professional      service  -0.7283    0.0 -0.8925  -0.564   True
+----------------------------------------------------------------
+</code></pre>
+<p>Occupation explains about 24% of the variance of log wages (<span class="arithmatex">\(\eta^2\)</span>), and the <span class="arithmatex">\(F\)</span> test rejects equal means
+overwhelmingly. Levene's test rejects equal variances — professional wages are more dispersed — so the Welch ANOVA is the
+safer test; it gives the same conclusion. Tukey's HSD shows that every pair differs except clerical versus "other". The
+professional premium over service work is about 0.73 log points, roughly double.</p>
+</details>
+<h3 id="exercise-82-two-way-anova-with-interaction-gender-marriage-and-wages">Exercise 8.2 — Two-way ANOVA with interaction: gender, marriage and wages</h3>
+<p><em>Data:</em> <code>wage1</code>.</p>
+<ol>
+<li>Fit the two-way model <code>lwage ~ female * married</code> and produce a type-II ANOVA table.</li>
+<li>Interpret the interaction: compute the four cell means and the "marriage premium" for men and for women.</li>
+<li>Because the design is unbalanced, explain why type-I (sequential) and type-II sums of squares differ.</li>
+</ol>
+<pre><code class="language-python">import wooldridge as wd, statsmodels.formula.api as smf, statsmodels.api as sm
+d = wd.data(&quot;wage1&quot;)
+m = smf.ols(&quot;lwage ~ C(female) * C(married)&quot;, data=d).fit()
+# TODO: sm.stats.anova_lm(m, typ=2) and typ=1; cell means with groupby
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import wooldridge as wd, statsmodels.formula.api as smf, statsmodels.api as sm
+d = wd.data(&quot;wage1&quot;)
+m = smf.ols(&quot;lwage ~ C(female) * C(married)&quot;, data=d).fit()
+print(&quot;type II:\n&quot;, sm.stats.anova_lm(m, typ=2).round(4).to_string())
+print(&quot;type I (female first):\n&quot;, sm.stats.anova_lm(m, typ=1).round(4).to_string())
+cm = d.groupby([&quot;female&quot;, &quot;married&quot;])[&quot;lwage&quot;].agg([&quot;mean&quot;, &quot;size&quot;]).round(3)
+print(cm.to_string())
+mu = d.groupby([&quot;female&quot;, &quot;married&quot;])[&quot;lwage&quot;].mean()
+print(f&quot;marriage premium (log points): men {mu[(0,1)] - mu[(0,0)]:.3f}, women {mu[(1,1)] - mu[(1,0)]:.3f}&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">type II:
+                         sum_sq     df        F  PR(&gt;F)
+C(female)              16.4821    1.0  73.7211     0.0
+C(married)              6.6370    1.0  29.6860     0.0
+C(female):C(married)    4.2752    1.0  19.1219     0.0
+Residual              116.7056  522.0      NaN     NaN
+type I (female first):
+                          df    sum_sq  mean_sq        F  PR(&gt;F)
+C(female)               1.0   20.7120  20.7120  92.6405     0.0
+C(married)              1.0    6.6370   6.6370  29.6860     0.0
+C(female):C(married)    1.0    4.2752   4.2752  19.1219     0.0
+Residual              522.0  116.7056   0.2236      NaN     NaN
+                 mean  size
+female married             
+0      0        1.521    86
+       1        1.947   188
+1      0        1.389   120
+       1        1.441   132
+marriage premium (log points): men 0.427, women 0.052
+</code></pre>
+<p>The interaction is highly significant: marriage is associated with a 0.43 log-point (about 53%) wage premium for men but
+almost none for women (0.05). Because the cells are unbalanced (86 to 188 observations), type-I sums of squares depend on
+the order of terms: the sum of squares for <code>female</code> is larger when it enters first, because it absorbs variation shared
+with <code>married</code>. Type-II sums of squares test each main effect adjusted for the other. These are associations — the male
+marriage premium partly reflects selection of higher earners into marriage.</p>
+</details>
 </section><section class="box reading"><h2 id="reading">Reading</h2>
 <p>Montgomery, <em>Design and Analysis of Experiments</em>; Hsu, <em>Multiple Comparisons</em>; Kutner et al., <em>Applied Linear Statistical Models</em>.</p></section></article>
     <nav class="pager">

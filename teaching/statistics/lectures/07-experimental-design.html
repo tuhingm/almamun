@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Statistics · Lecture 7</h3>
       <div class="profile-item"><strong>Part</strong><span>Part III · Experimental design and ANOVA</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 2 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 8 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="06-bayesian-inference.html">Lecture 6: Bayesian Inference, Conjugacy, and Posterior Computation</a></span></div>
       
     </aside>
@@ -97,6 +97,107 @@ Y_{ijk}=\mu+\alpha_i+\beta_j+(\alpha\beta)_{ij}+\varepsilon_{ijk}.
 </ol>
 </section><section class="box lab"><h2 id="computational-lab">Computational lab</h2>
 <p>Simulate complete and blocked randomization under strong block-level outcome heterogeneity. Compare estimator variance and conduct a randomization test under the sharp null.</p>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises use <strong>real data</strong> in Python. Install once with
+<code>pip install wooldridge statsmodels scipy numpy pandas</code>. The <code>wooldridge</code> package holds survey, experimental and
+administrative datasets; <code>scipy.stats</code> and <code>statsmodels</code> provide the inference tools. Try the starter code first, then
+open the solution. Every printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-71-checking-a-randomized-experiment-balance-and-randomization-inference">Exercise 7.1 — Checking a randomized experiment: balance and randomization inference</h3>
+<p><em>Data:</em> <code>jtrain2</code> — NSW experiment.</p>
+<ol>
+<li>Build a balance table of pre-treatment covariates (<code>age</code>, <code>educ</code>, <code>black</code>, <code>hisp</code>, <code>married</code>, <code>nodegree</code>, <code>re74</code>, <code>re75</code>) by treatment arm, with standardized differences.</li>
+<li>Run an omnibus test of balance: regress treatment on all covariates and test that all slopes are zero.</li>
+<li>Compute a <strong>randomization-inference</strong> p-value for the effect on <code>re78</code> using the difference in means as the statistic (5,000 re-randomizations that keep 185 treated).</li>
+</ol>
+<pre><code class="language-python">import numpy as np, pandas as pd, wooldridge as wd, statsmodels.formula.api as smf
+d = wd.data(&quot;jtrain2&quot;)
+X = [&quot;age&quot;, &quot;educ&quot;, &quot;black&quot;, &quot;hisp&quot;, &quot;married&quot;, &quot;nodegree&quot;, &quot;re74&quot;, &quot;re75&quot;]
+# TODO: means by arm, standardized difference (m1 - m0) / sqrt((v1 + v0)/2); smf.ols(&quot;train ~ ...&quot;).f_test
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, pandas as pd, wooldridge as wd, statsmodels.formula.api as smf
+d = wd.data(&quot;jtrain2&quot;)
+X = [&quot;age&quot;, &quot;educ&quot;, &quot;black&quot;, &quot;hisp&quot;, &quot;married&quot;, &quot;nodegree&quot;, &quot;re74&quot;, &quot;re75&quot;]
+g = d.groupby(&quot;train&quot;)[X]
+tab = pd.DataFrame({&quot;control&quot;: g.mean().loc[0], &quot;treated&quot;: g.mean().loc[1]})
+tab[&quot;std diff&quot;] = (tab[&quot;treated&quot;] - tab[&quot;control&quot;]) / np.sqrt((g.var().loc[0] + g.var().loc[1]) / 2)
+print(tab.round(3).to_string())
+r = smf.ols(&quot;train ~ &quot; + &quot; + &quot;.join(X), data=d).fit(cov_type=&quot;HC1&quot;)
+w = r.wald_test(&quot;, &quot;.join(f&quot;{x} = 0&quot; for x in X), scalar=True)
+print(f&quot;\nomnibus balance test: chi2({len(X)}) = {w.statistic:.2f}, p = {w.pvalue:.3f}&quot;)
+y, t = d[&quot;re78&quot;].to_numpy(), d[&quot;train&quot;].to_numpy().astype(bool)
+obs = y[t].mean() - y[~t].mean(); rng = np.random.default_rng(11); n1 = t.sum(); hits = 0
+for _ in range(5000):
+    s = np.zeros(len(y), bool); s[rng.choice(len(y), n1, replace=False)] = True
+    hits += abs(y[s].mean() - y[~s].mean()) &gt;= abs(obs)
+print(f&quot;randomization-inference p-value for re78: {hits/5000:.4f}  (observed difference {obs:.3f})&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">control  treated  std diff
+age        25.054   25.816     0.107
+educ       10.088   10.346     0.141
+black       0.827    0.843     0.044
+hisp        0.108    0.059    -0.175
+married     0.154    0.189     0.094
+nodegree    0.835    0.708    -0.304
+re74        2.107    2.096    -0.002
+re75        1.267    1.532     0.084
+
+omnibus balance test: chi2(8) = 17.99, p = 0.021
+randomization-inference p-value for re78: 0.0042  (observed difference 1.794)
+</code></pre>
+<p>Most standardized differences are small, but <code>nodegree</code> differs by 0.30 SD and <code>hisp</code> by 0.18, and the omnibus test
+rejects balance at 5% (p ≈ 0.02). In a genuinely randomized experiment, imbalance on some covariate happens by chance;
+it is a reason to adjust for these covariates for precision, not evidence that randomization failed. The randomization
+inference p-value (0.004) is valid by design, with no distributional assumptions.</p>
+</details>
+<h3 id="exercise-72-does-blocking-help-a-design-simulation-using-real-outcomes">Exercise 7.2 — Does blocking help? A design simulation using real outcomes</h3>
+<p><em>Data:</em> <code>jtrain2</code> controls (260 men) — their actual 1978 earnings serve as untreated potential outcomes.</p>
+<p>Use the 260 control men as a "population" with known <span class="arithmatex">\(Y(0)\)</span>. Add a constant treatment effect of 1 (thousand dollars) to get <span class="arithmatex">\(Y(1)\)</span>.</p>
+<ol>
+<li>Simulate 5,000 <strong>completely randomized</strong> experiments (130 treated) and record the difference-in-means estimate.</li>
+<li>Simulate 5,000 <strong>blocked</strong> experiments, randomizing within blocks defined by 1975 earnings (zero vs positive) and <code>nodegree</code>, and estimate the effect as the block-size-weighted average of within-block differences.</li>
+<li>Compare the bias and standard deviation of the two designs. Why does blocking help only if the blocking variables predict the outcome?</li>
+</ol>
+<pre><code class="language-python">import numpy as np, wooldridge as wd
+c = wd.data(&quot;jtrain2&quot;).query(&quot;train == 0&quot;).reset_index(drop=True)
+y0 = c[&quot;re78&quot;].to_numpy(); y1 = y0 + 1.0
+block = (c[&quot;re75&quot;] &gt; 0).astype(int) * 2 + c[&quot;nodegree&quot;]
+# TODO: simulate complete and blocked randomization
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, wooldridge as wd
+c = wd.data(&quot;jtrain2&quot;).query(&quot;train == 0&quot;).reset_index(drop=True)
+y0 = c[&quot;re78&quot;].to_numpy(); y1 = y0 + 1.0; n = len(y0)
+block = ((c[&quot;re75&quot;] &gt; 0).astype(int) * 2 + c[&quot;nodegree&quot;]).to_numpy()
+rng = np.random.default_rng(5); cr, bl = [], []
+for _ in range(5000):
+    t = np.zeros(n, bool); t[rng.choice(n, n // 2, replace=False)] = True
+    cr.append(y1[t].mean() - y0[~t].mean())
+    est = 0.0
+    for b in np.unique(block):
+        idx = np.where(block == b)[0]; tb = np.zeros(len(idx), bool); tb[rng.choice(len(idx), len(idx) // 2, replace=False)] = True
+        est += len(idx) / n * (y1[idx][tb].mean() - y0[idx][~tb].mean())
+    bl.append(est)
+for lab, v in ((&quot;complete randomization&quot;, cr), (&quot;blocked randomization&quot;, bl)):
+    print(f&quot;{lab:23s}: mean estimate {np.mean(v):.3f} (true 1.000), SD {np.std(v):.3f}&quot;)
+print(f&quot;variance reduction from blocking: {1 - np.var(bl)/np.var(cr):.1%}&quot;)
+print(&quot;block sizes:&quot;, np.bincount(block), &quot; block means of Y(0):&quot;, [round(y0[block == b].mean(), 2) for b in range(4)])
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">complete randomization : mean estimate 0.993 (true 1.000), SD 0.675
+blocked randomization  : mean estimate 0.984 (true 1.000), SD 0.683
+variance reduction from blocking: -2.2%
+block sizes: [ 25 153  18  64]  block means of Y(0): [np.float64(4.62), np.float64(4.15), np.float64(5.19), np.float64(5.32)]
+</code></pre>
+<p>Both designs are unbiased. Here blocking does <strong>not</strong> reduce variance — in this simulation it is even slightly worse —
+because the blocking variables barely predict 1978 earnings (block means range from 4.2 to 5.3, while the within-block SD
+is about 5.5). Blocking pays off only when blocks are homogeneous in the outcome; blocking on weak predictors costs a
+little precision through smaller within-block samples. In a real design, choose blocks by their predictive power for the
+outcome, for example from pilot data.</p>
+</details>
 </section><section class="box reading"><h2 id="reading">Reading</h2>
 <p>Montgomery, <em>Design and Analysis of Experiments</em>; Fisher, <em>The Design of Experiments</em>; Imbens and Rubin, <em>Causal Inference for Statistics, Social, and Biomedical Sciences</em>.</p></section></article>
     <nav class="pager">

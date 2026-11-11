@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Statistics · Lecture 14</h3>
       <div class="profile-item"><strong>Part</strong><span>Part V · Statistical workflow</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 2 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 8 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="13-multivariate.html">Lecture 13: Multivariate Analysis: PCA, Covariance, and Dimension Reduction</a></span></div>
       
     </aside>
@@ -98,6 +98,117 @@ MCSE(\widehat p)=\sqrt{\widehat p(1-\widehat p)/R}.
 </ol>
 </section><section class="box lab"><h2 id="computational-lab">Computational lab</h2>
 <p>Build a configurable simulation script. Save replication-level estimates, summarize bias/RMSE/coverage/size, and create an archive with README and dependency record.</p>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises use <strong>real data</strong> in Python. Install once with
+<code>pip install wooldridge statsmodels scipy numpy pandas</code>. The <code>wooldridge</code> package holds survey, experimental and
+administrative datasets; <code>scipy.stats</code> and <code>statsmodels</code> provide the inference tools. Try the starter code first, then
+open the solution. Every printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-141-a-reproducible-analysis-function-with-data-validation">Exercise 14.1 — A reproducible analysis function with data validation</h3>
+<p><em>Data:</em> <code>wage1</code> and <code>wage2</code>.</p>
+<p>Good statistical code fails loudly on bad data and gives identical results on every run.</p>
+<ol>
+<li>Write a function <code>analyze(df)</code> that (a) validates the input — required columns present, no missing values, wages positive, education between 0 and 20 — and raises an informative error otherwise; (b) fits <code>log(wage) ~ educ + exper + expersq</code> with HC1 standard errors; and (c) returns a tidy table.</li>
+<li>Run it on <code>wage1</code>. Then run it on <code>wage2</code> (after constructing <code>expersq</code>) and compare.</li>
+<li>Deliberately corrupt one value and show that validation catches it.</li>
+</ol>
+<pre><code class="language-python">import numpy as np, pandas as pd, wooldridge as wd, statsmodels.formula.api as smf
+REQUIRED = [&quot;wage&quot;, &quot;educ&quot;, &quot;exper&quot;]
+def analyze(df):
+    # TODO: assertions, then fit and return a DataFrame of estimates
+    ...
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, pandas as pd, wooldridge as wd, statsmodels.formula.api as smf
+REQUIRED = [&quot;wage&quot;, &quot;educ&quot;, &quot;exper&quot;]
+def validate(df):
+    missing = [c for c in REQUIRED if c not in df]
+    if missing: raise ValueError(f&quot;missing columns: {missing}&quot;)
+    if df[REQUIRED].isna().any().any(): raise ValueError(&quot;missing values in required columns&quot;)
+    if (df[&quot;wage&quot;] &lt;= 0).any(): raise ValueError(f&quot;{(df['wage'] &lt;= 0).sum()} non-positive wages&quot;)
+    if not df[&quot;educ&quot;].between(0, 20).all(): raise ValueError(&quot;education outside [0, 20]&quot;)
+def analyze(df, name):
+    validate(df)
+    d = df.assign(expersq=df[&quot;exper&quot;]**2)
+    r = smf.ols(&quot;np.log(wage) ~ educ + exper + expersq&quot;, data=d).fit(cov_type=&quot;HC1&quot;)
+    return pd.DataFrame({&quot;data&quot;: name, &quot;n&quot;: int(r.nobs), &quot;coef&quot;: r.params, &quot;robust se&quot;: r.bse}).drop(&quot;Intercept&quot;)
+print(pd.concat([analyze(wd.data(&quot;wage1&quot;), &quot;wage1&quot;), analyze(wd.data(&quot;wage2&quot;), &quot;wage2&quot;)]).round(4).to_string())
+bad = wd.data(&quot;wage1&quot;).copy(); bad.loc[10, &quot;wage&quot;] = -3.0
+try:
+    analyze(bad, &quot;corrupted&quot;)
+except ValueError as e:
+    print(&quot;\nvalidation caught a problem:&quot;, e)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">data    n    coef  robust se
+educ     wage1  526  0.0904     0.0078
+exper    wage1  526  0.0410     0.0050
+expersq  wage1  526 -0.0007     0.0001
+educ     wage2  935  0.0780     0.0068
+exper    wage2  935  0.0163     0.0140
+expersq  wage2  935  0.0002     0.0006
+
+validation caught a problem: 1 non-positive wages
+</code></pre>
+<p>The function produces the same tidy table on both datasets, and it stops with an informative message when a single wage is
+corrupted, instead of silently producing a missing log or a wrong estimate. The return to education is 9.0% in the 1976
+CPS and 7.8% in the 1980 NLS men; the experience profile is much flatter in <code>wage2</code>, which covers men of a narrow age range.
+Validation checks are cheap, and they turn data errors into loud failures rather than wrong results.</p>
+</details>
+<h3 id="exercise-142-a-simulation-study-with-a-fixed-seed-which-interval-covers-the-mean-of-skewed-data">Exercise 14.2 — A simulation study with a fixed seed: which interval covers the mean of skewed data?</h3>
+<p><em>Data:</em> <code>ceosal1</code> CEO salaries, treated as a population.</p>
+<p>Design a small, reproducible simulation study.</p>
+<ol>
+<li>Using <code>numpy.random.SeedSequence</code>, create independent random streams for each sample size <span class="arithmatex">\(n\in\{10,30,100\}\)</span>.</li>
+<li>For each <span class="arithmatex">\(n\)</span>, draw 2,000 samples and compute three 95% intervals for the population mean: the <span class="arithmatex">\(t\)</span>-interval, the bootstrap percentile interval and the bootstrap-<span class="arithmatex">\(t\)</span> interval (199 resamples each).</li>
+<li>Report coverage with Monte Carlo standard errors, and the average interval width. Run the script twice to confirm identical output.</li>
+</ol>
+<pre><code class="language-python">import numpy as np, wooldridge as wd
+pop = wd.data(&quot;ceosal1&quot;)[&quot;salary&quot;].to_numpy(float); mu = pop.mean()
+streams = [np.random.default_rng(s) for s in np.random.SeedSequence(2026).spawn(3)]
+# TODO: loop over n and stream; compute the three intervals; tabulate coverage and width
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, pandas as pd, wooldridge as wd
+from scipy import stats
+pop = wd.data(&quot;ceosal1&quot;)[&quot;salary&quot;].to_numpy(float); mu = pop.mean()
+streams = [np.random.default_rng(s) for s in np.random.SeedSequence(2026).spawn(3)]
+rows = []
+for n, rng in zip((10, 30, 100), streams):
+    hit = np.zeros(3); width = np.zeros(3); R, B = 2000, 199
+    for _ in range(R):
+        x = rng.choice(pop, n); m, s = x.mean(), x.std(ddof=1); se = s / np.sqrt(n)
+        q = stats.t.ppf(0.975, n - 1); ints = [(m - q * se, m + q * se)]
+        bs = x[rng.integers(0, n, (B, n))]; bm = bs.mean(1); bse = bs.std(1, ddof=1) / np.sqrt(n)
+        ints.append(tuple(np.percentile(bm, [2.5, 97.5])))
+        tstar = (bm - m) / bse; lo, hi = np.percentile(tstar, [97.5, 2.5])
+        ints.append((m - lo * se, m - hi * se))
+        for j, (a, b) in enumerate(ints):
+            hit[j] += a &lt;= mu &lt;= b; width[j] += b - a
+    for j, lab in enumerate((&quot;t-interval&quot;, &quot;percentile&quot;, &quot;bootstrap-t&quot;)):
+        p = hit[j] / R
+        rows.append((n, lab, round(p, 3), round(np.sqrt(p * (1 - p) / R), 3), round(width[j] / R, 1)))
+print(pd.DataFrame(rows, columns=[&quot;n&quot;, &quot;interval&quot;, &quot;coverage&quot;, &quot;MC se&quot;, &quot;avg width&quot;]).to_string(index=False))
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">n    interval  coverage  MC se  avg width
+ 10  t-interval     0.821  0.009     1322.2
+ 10  percentile     0.748  0.010     1007.1
+ 10 bootstrap-t     0.856  0.008     3161.2
+ 30  t-interval     0.781  0.009      826.4
+ 30  percentile     0.769  0.009      737.4
+ 30 bootstrap-t     0.811  0.009     1451.3
+100  t-interval     0.839  0.008      503.7
+100  percentile     0.836  0.008      477.5
+100 bootstrap-t     0.855  0.008      707.2
+</code></pre>
+<p>Because each sample size has its own seeded stream, the table is reproduced exactly on every run, and adding a new design
+would not change the existing results. With such a skewed population, <strong>all</strong> three intervals undercover. The percentile
+bootstrap is worst at small <span class="arithmatex">\(n\)</span>, and the bootstrap-<span class="arithmatex">\(t\)</span> is best, at the cost of much wider intervals. Even at
+<span class="arithmatex">\(n=100\)</span>, none reaches 90%. The Monte Carlo standard errors (about 0.01) show that differences of 3–4 points are real,
+not simulation noise.</p>
+</details>
 </section><section class="box reading"><h2 id="reading">Reading</h2>
 <p>Gentle, <em>Elements of Computational Statistics</em>; Boos and Stefanski, <em>Essential Statistical Inference</em>; Peng, “Reproducible Research in Computational Science”; National Academies, <em>Reproducibility and Replicability in Science</em>.</p></section></article>
     <nav class="pager">

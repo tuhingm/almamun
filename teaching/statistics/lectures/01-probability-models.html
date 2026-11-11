@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Statistics · Lecture 1</h3>
       <div class="profile-item"><strong>Part</strong><span>Part I · Probability and asymptotics</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 4 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 9 min read</span></div>
       
       
     </aside>
@@ -116,6 +116,91 @@ E\{E(Y\mid X)\}=E(Y).
 </ol>
 </section><section class="box lab"><h2 id="computational-lab">Computational lab</h2>
 <p>Simulate Bernoulli and normal variables; compare empirical means, variances, and conditional means with their population values. Simulate <span class="arithmatex">\(Y=X^2\)</span> for symmetric <span class="arithmatex">\(X\)</span> and verify that sample correlation can be near zero despite dependence.</p>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises use <strong>real data</strong> in Python. Install once with
+<code>pip install wooldridge statsmodels scipy numpy pandas</code>. The <code>wooldridge</code> package holds survey, experimental and
+administrative datasets; <code>scipy.stats</code> and <code>statsmodels</code> provide the inference tools. Try the starter code first, then
+open the solution. Every printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-11-bayes-rule-with-real-data-smoking-and-low-birth-weight">Exercise 1.1 — Bayes' rule with real data: smoking and low birth weight</h3>
+<p><em>Data:</em> <code>bwght</code> — 1,388 U.S. births, 1988 National Health Interview Survey (<code>bwght</code> in ounces, <code>cigs</code> = cigarettes per day during pregnancy).</p>
+<p>Define the events <span class="arithmatex">\(S\)</span> = "mother smoked during pregnancy" (<code>cigs &gt; 0</code>) and <span class="arithmatex">\(L\)</span> = "low birth weight" (below 88 ounces, about 2.5 kg).</p>
+<ol>
+<li>Estimate <span class="arithmatex">\(P(S)\)</span>, <span class="arithmatex">\(P(L)\)</span>, <span class="arithmatex">\(P(L\mid S)\)</span> and <span class="arithmatex">\(P(L\mid S^c)\)</span>.</li>
+<li>Use Bayes' rule to compute <span class="arithmatex">\(P(S\mid L)\)</span>, and check it against the direct sample frequency.</li>
+<li>Compute the relative risk <span class="arithmatex">\(P(L\mid S)/P(L\mid S^c)\)</span> and its 95% confidence interval on the log scale.</li>
+<li>Are <span class="arithmatex">\(S\)</span> and <span class="arithmatex">\(L\)</span> independent? Test with a <span class="arithmatex">\(\chi^2\)</span> test of independence.</li>
+</ol>
+<pre><code class="language-python">import numpy as np, pandas as pd, wooldridge as wd
+from scipy import stats
+d = wd.data(&quot;bwght&quot;)
+S, L = d[&quot;cigs&quot;] &gt; 0, d[&quot;bwght&quot;] &lt; 88
+# TODO: probabilities, Bayes' rule, relative risk, stats.chi2_contingency(pd.crosstab(S, L))
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, pandas as pd, wooldridge as wd
+from scipy import stats
+d = wd.data(&quot;bwght&quot;)
+S, L = d[&quot;cigs&quot;] &gt; 0, d[&quot;bwght&quot;] &lt; 88
+pS, pL = S.mean(), L.mean()
+pL_S, pL_nS = L[S].mean(), L[~S].mean()
+print(f&quot;P(S) = {pS:.4f}   P(L) = {pL:.4f}   P(L|S) = {pL_S:.4f}   P(L|not S) = {pL_nS:.4f}&quot;)
+bayes = pL_S * pS / (pL_S * pS + pL_nS * (1 - pS))
+print(f&quot;P(S|L) by Bayes' rule = {bayes:.4f};  directly = {S[L].mean():.4f}&quot;)
+a, b, c, e = (S &amp; L).sum(), (S &amp; ~L).sum(), (~S &amp; L).sum(), (~S &amp; ~L).sum()
+rr = (a / (a + b)) / (c / (c + e)); se = np.sqrt(1/a - 1/(a+b) + 1/c - 1/(c+e))
+print(f&quot;relative risk = {rr:.2f}, 95% CI [{rr*np.exp(-1.96*se):.2f}, {rr*np.exp(1.96*se):.2f}]  (counts: {a} smokers with low weight)&quot;)
+chi2, p, dof, _ = stats.chi2_contingency(pd.crosstab(S, L))
+print(f&quot;chi-square test of independence: chi2({dof}) = {chi2:.2f}, p = {p:.4f}&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">P(S) = 0.1527   P(L) = 0.0598   P(L|S) = 0.0943   P(L|not S) = 0.0536
+P(S|L) by Bayes' rule = 0.2410;  directly = 0.2410
+relative risk = 1.76, 95% CI [1.09, 2.85]  (counts: 20 smokers with low weight)
+chi-square test of independence: chi2(1) = 4.61, p = 0.0318
+</code></pre>
+<p>About 15% of mothers smoked, and 6% of babies had low birth weight. Bayes' rule and the direct frequency agree exactly,
+as they must: <span class="arithmatex">\(P(S\mid L)\approx0.24\)</span>, so a quarter of low-weight babies had smoking mothers, against 15% of all babies.
+The relative risk is about 1.8, with an interval from about 1.1 to 2.9, and the <span class="arithmatex">\(\chi^2\)</span> test rejects independence at 5%.
+Only 20 smokers had low-weight babies, so the interval is wide. This is an association: smoking mothers differ in income,
+education and other risk factors, so a causal claim needs the tools of Econometrics Lecture 13.</p>
+</details>
+<h3 id="exercise-12-the-law-of-total-variance-in-a-wage-distribution">Exercise 1.2 — The law of total variance in a wage distribution</h3>
+<p><em>Data:</em> <code>wage1</code> — 526 workers, CPS 1976.</p>
+<ol>
+<li>Verify numerically that <span class="arithmatex">\(\operatorname{Var}(wage)=E[\operatorname{Var}(wage\mid educ)]+\operatorname{Var}(E[wage\mid educ])\)</span>, using sample moments with divisor <span class="arithmatex">\(n\)</span>.</li>
+<li>What share of wage variance is "explained" by education cells? Compare with the <span class="arithmatex">\(R^2\)</span> of a linear regression on <code>educ</code>, and explain why the cell-based share is larger.</li>
+<li>Repeat with <code>lwage</code>. Why does the share change?</li>
+</ol>
+<pre><code class="language-python">import wooldridge as wd
+d = wd.data(&quot;wage1&quot;)
+g = d.groupby(&quot;educ&quot;)[&quot;wage&quot;]
+# TODO: within = (g.var(ddof=0) * g.size()).sum() / n ;  between = ((g.mean() - mean)**2 * g.size()).sum() / n
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+d = wd.data(&quot;wage1&quot;); n = len(d)
+for y in (&quot;wage&quot;, &quot;lwage&quot;):
+    g = d.groupby(&quot;educ&quot;)[y]
+    total = d[y].var(ddof=0)
+    within = (g.var(ddof=0) * g.size()).sum() / n
+    between = ((g.mean() - d[y].mean())**2 * g.size()).sum() / n
+    r2 = smf.ols(f&quot;{y} ~ educ&quot;, data=d).fit().rsquared
+    print(f&quot;{y:6s}: total {total:8.4f} = within {within:8.4f} + between {between:7.4f}  (check {within + between:8.4f})&quot;)
+    print(f&quot;        share explained by education cells {between/total:.3f}   vs linear R^2 {r2:.3f}&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">wage  : total  13.6130 = within  10.5644 + between  3.0485  (check  13.6130)
+        share explained by education cells 0.224   vs linear R^2 0.165
+lwage : total   0.2820 = within   0.2142 + between  0.0678  (check   0.2820)
+        share explained by education cells 0.240   vs linear R^2 0.186
+</code></pre>
+<p>The decomposition holds exactly (the "check" column reproduces the total). Education cells account for about 22% of the
+variance of wages, more than the linear <span class="arithmatex">\(R^2\)</span> of 16.5%, because cell means capture the <strong>nonlinear</strong> CEF, while the
+regression line can capture only its linear part. Logs raise both shares a little, because the log transformation makes
+the CEF closer to linear and dampens the influence of very high wages on the total variance.</p>
+</details>
 </section><section class="box reading"><h2 id="reading">Reading</h2>
 <p>Casella and Berger, <em>Statistical Inference</em>; DeGroot and Schervish, <em>Probability and Statistics</em>; Wasserman, <em>All of Statistics</em>.</p></section></article>
     <nav class="pager">

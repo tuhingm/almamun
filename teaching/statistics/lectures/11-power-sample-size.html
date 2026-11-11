@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Statistics · Lecture 11</h3>
       <div class="profile-item"><strong>Part</strong><span>Part IV · Statistical modeling</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 2 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 8 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="10-nonparametric.html">Lecture 10: Nonparametric Inference, Rank Tests, and Resampling</a></span></div>
       
     </aside>
@@ -93,6 +93,91 @@ DE=1+(m-1)\rho.
 </ol>
 </section><section class="box lab"><h2 id="computational-lab">Computational lab</h2>
 <p>Calculate sample sizes over a grid of effect sizes and variances. Plot power curves and compare individual versus cluster randomization.</p>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises use <strong>real data</strong> in Python. Install once with
+<code>pip install wooldridge statsmodels scipy numpy pandas</code>. The <code>wooldridge</code> package holds survey, experimental and
+administrative datasets; <code>scipy.stats</code> and <code>statsmodels</code> provide the inference tools. Try the starter code first, then
+open the solution. Every printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-111-planning-a-job-training-trial-from-pilot-data">Exercise 11.1 — Planning a job-training trial from pilot data</h3>
+<p><em>Data:</em> <code>jtrain2</code> — use the NSW control group as pilot data on the outcome's variability.</p>
+<ol>
+<li>Using the control-group SD of <code>re78</code>, compute the sample size per arm needed to detect an effect of $1,000 with 80% power at <span class="arithmatex">\(\alpha=0.05\)</span> (two-sided), analytically with <code>statsmodels</code>.</li>
+<li>Compute the minimum detectable effect (MDE) for the actual NSW design (185 treated, 260 controls).</li>
+<li>Simulate the power of the Welch <span class="arithmatex">\(t\)</span>-test for a $1,800 effect in the actual design by resampling control outcomes (2,000 replications). Compare with the analytic power. Why might they differ?</li>
+</ol>
+<pre><code class="language-python">import numpy as np, wooldridge as wd
+from statsmodels.stats.power import TTestIndPower
+c = wd.data(&quot;jtrain2&quot;).query(&quot;train == 0&quot;)[&quot;re78&quot;].to_numpy(); sd = c.std(ddof=1)
+pw = TTestIndPower()
+# TODO: pw.solve_power(effect_size=1/sd, power=0.8, alpha=0.05); MDE with nobs1=185, ratio=260/185
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, wooldridge as wd
+from scipy import stats
+from statsmodels.stats.power import TTestIndPower
+c = wd.data(&quot;jtrain2&quot;).query(&quot;train == 0&quot;)[&quot;re78&quot;].to_numpy(); sd = c.std(ddof=1)
+pw = TTestIndPower()
+n = pw.solve_power(effect_size=1.0 / sd, power=0.8, alpha=0.05)
+print(f&quot;control SD of re78 = {sd:.3f} thousand;  n per arm for a $1,000 effect at 80% power: {np.ceil(n):.0f}&quot;)
+es = pw.solve_power(nobs1=185, ratio=260/185, power=0.8, alpha=0.05)
+print(f&quot;MDE for the NSW design (185 vs 260): {es*sd:.3f} thousand dollars ({es:.3f} SD)&quot;)
+print(f&quot;analytic power for a $1,800 effect: {pw.power(effect_size=1.8/sd, nobs1=185, ratio=260/185, alpha=0.05):.3f}&quot;)
+rng = np.random.default_rng(9); rej = 0
+for _ in range(2000):
+    y0 = rng.choice(c, 260); y1 = rng.choice(c, 185) + 1.8
+    rej += stats.ttest_ind(y1, y0, equal_var=False).pvalue &lt; 0.05
+print(f&quot;simulated power for a $1,800 effect: {rej/2000:.3f} (MC se {np.sqrt(rej/2000*(1-rej/2000)/2000):.3f})&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">control SD of re78 = 5.484 thousand;  n per arm for a $1,000 effect at 80% power: 474
+MDE for the NSW design (185 vs 260): 1.481 thousand dollars (0.270 SD)
+analytic power for a $1,800 effect: 0.926
+simulated power for a $1,800 effect: 0.929 (MC se 0.006)
+</code></pre>
+<p>Earnings are very noisy (SD of about $5,500), so detecting a $1,000 effect needs about 474 men per arm. The actual NSW
+design could detect effects of about $1,500 (0.27 SD) with 80% power, and had about 93% power for the $1,800 effect it
+found. The simulation reproduces the analytic power closely here. Simulated power is more trustworthy in general, because
+it uses the real, skewed, zero-inflated outcome distribution instead of a normal approximation.</p>
+</details>
+<h3 id="exercise-112-power-under-clustering-the-design-effect">Exercise 11.2 — Power under clustering: the design effect</h3>
+<p><em>Data:</em> <code>wagepan</code> — 545 workers observed for 8 years; outcome <code>lwage</code>.</p>
+<p>Suppose a wage subsidy is randomized <strong>by worker</strong> and wages are measured in all 8 years.</p>
+<ol>
+<li>Estimate the intra-class correlation (ICC) of <code>lwage</code> within workers using a one-way random-effects ANOVA.</li>
+<li>Compute the design effect <span class="arithmatex">\(1+(m-1)\rho\)</span> with <span class="arithmatex">\(m=8\)</span> and the effective sample size.</li>
+<li>How many workers are needed to detect a 5% wage effect with 80% power, accounting for clustering? Compare with the naive calculation that treats person-years as independent.</li>
+</ol>
+<pre><code class="language-python">import numpy as np, wooldridge as wd
+d = wd.data(&quot;wagepan&quot;)
+g = d.groupby(&quot;nr&quot;)[&quot;lwage&quot;]; m = 8; k = d[&quot;nr&quot;].nunique()
+# TODO: MSB = m * var(group means) ; MSW = pooled within variance; ICC = (MSB - MSW) / (MSB + (m-1) MSW)
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, wooldridge as wd
+from statsmodels.stats.power import TTestIndPower
+d = wd.data(&quot;wagepan&quot;); m = 8; k = d[&quot;nr&quot;].nunique()
+gm = d.groupby(&quot;nr&quot;)[&quot;lwage&quot;].mean()
+msb = m * ((gm - d[&quot;lwage&quot;].mean())**2).sum() / (k - 1)
+msw = ((d[&quot;lwage&quot;] - d.groupby(&quot;nr&quot;)[&quot;lwage&quot;].transform(&quot;mean&quot;))**2).sum() / (k * (m - 1))
+icc = (msb - msw) / (msb + (m - 1) * msw)
+deff = 1 + (m - 1) * icc; sd = d[&quot;lwage&quot;].std()
+print(f&quot;ICC of log wages within workers = {icc:.3f};  design effect = {deff:.2f};  effective n = {len(d)/deff:.0f} of {len(d)} person-years&quot;)
+n_naive = TTestIndPower().solve_power(effect_size=0.05 / sd, power=0.8, alpha=0.05)
+print(f&quot;naive: {np.ceil(n_naive):.0f} person-years per arm = {np.ceil(n_naive/m):.0f} workers per arm&quot;)
+print(f&quot;with clustering: {np.ceil(n_naive*deff/m):.0f} workers per arm&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">ICC of log wages within workers = 0.472;  design effect = 4.30;  effective n = 1013 of 4360 person-years
+naive: 1783 person-years per arm = 223 workers per arm
+with clustering: 959 workers per arm
+</code></pre>
+<p>Almost half of the variance in log wages is between workers (ICC 0.47), so 8 observations per worker carry the information
+of only about 2.3 independent ones: the design effect is 4.3. Ignoring clustering would suggest 223 workers per arm;
+accounting for it requires about 959 per arm — more than four times as many. When treatment is assigned at the worker level,
+repeated measurements of the same worker add much less information than new workers.</p>
+</details>
 </section><section class="box reading"><h2 id="reading">Reading</h2>
 <p>Cohen, <em>Statistical Power Analysis for the Behavioral Sciences</em>; Chow et al., <em>Sample Size Calculations in Clinical Research</em>; Lakens, <em>Equivalence Tests</em>.</p></section></article>
     <nav class="pager">

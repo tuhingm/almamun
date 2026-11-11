@@ -43,5 +43,113 @@ For \(X_i\sim Bernoulli(p)\), the log-likelihood is \(\ell(p)=\sum_i[X_i\log p+(
 ## Computational lab
 Implement numerical likelihood maximization for Bernoulli and normal models. Compare numerical and analytic estimates and simulate bias and MSE.
 
+## Coding exercises
+
+These exercises use **real data** in Python. Install once with
+`pip install wooldridge statsmodels scipy numpy pandas`. The `wooldridge` package holds survey, experimental and
+administrative datasets; `scipy.stats` and `statsmodels` provide the inference tools. Try the starter code first, then
+open the solution. Every printed result below comes from running the solution code exactly as shown.
+
+### Exercise 4.1 — Poisson maximum likelihood for arrest counts, by hand
+
+*Data:* `crime1` — 2,725 young men in California; `narr86` = number of arrests in 1986.
+
+1. Write the Poisson log-likelihood for \(\lambda\) and maximize it numerically with `scipy.optimize`. Confirm \(\widehat\lambda=\bar X\).
+2. Compute the standard error from (a) the observed information (numerical second derivative) and (b) the sandwich formula.
+3. Compare the sample variance with the mean. What does over-dispersion imply for the two standard errors?
+4. Compare observed and Poisson-predicted frequencies of 0, 1, 2 and 3+ arrests.
+
+```python
+import numpy as np, wooldridge as wd
+from scipy import optimize, stats
+x = wd.data("crime1")["narr86"].to_numpy()
+negll = lambda lam: -np.sum(stats.poisson.logpmf(x, lam))
+# TODO: optimize.minimize_scalar(negll, bounds=(1e-6, 5), method="bounded")
+```
+
+<details class="solution" markdown="1"><summary>Solution, output and discussion</summary>
+
+```python
+import numpy as np, wooldridge as wd
+from scipy import optimize, stats
+x = wd.data("crime1")["narr86"].to_numpy(); n = len(x)
+negll = lambda lam: -np.sum(stats.poisson.logpmf(x, lam))
+lam = optimize.minimize_scalar(negll, bounds=(1e-6, 5), method="bounded", options={"xatol": 1e-10}).x
+print(f"MLE lambda = {lam:.5f};  sample mean = {x.mean():.5f}")
+h = 1e-4; info = (negll(lam + h) - 2 * negll(lam) + negll(lam - h)) / h**2
+score_var = np.sum((x / lam - 1)**2)
+print(f"se from observed information = {np.sqrt(1/info):.5f};  sandwich se = {np.sqrt(score_var)/info:.5f}")
+print(f"sample variance {x.var(ddof=1):.4f} vs mean {x.mean():.4f}  (ratio {x.var(ddof=1)/x.mean():.2f})")
+obs = [np.mean(x == k) for k in (0, 1, 2)] + [np.mean(x >= 3)]
+fit = [stats.poisson.pmf(k, lam) for k in (0, 1, 2)] + [stats.poisson.sf(2, lam)]
+print("P(0,1,2,3+) observed:", np.round(obs, 4), " Poisson:", np.round(fit, 4))
+```
+
+Output:
+
+```text
+MLE lambda = 0.40440;  sample mean = 0.40440
+se from observed information = 0.01218;  sandwich se = 0.01645
+sample variance 0.7380 vs mean 0.4044  (ratio 1.82)
+P(0,1,2,3+) observed: [0.7229 0.2051 0.0444 0.0275]  Poisson: [0.6674 0.2699 0.0546 0.0082]
+```
+
+The numerical MLE equals the sample mean, as theory says. The variance is 1.8 times the mean, so the Poisson assumption
+\(\operatorname{Var}=E\) fails. The sandwich standard error is about 35% larger than the information-based one, because
+the information equality no longer holds. The Poisson model underpredicts zeros and, especially, three or more arrests
+(2.8% observed against 0.8% predicted): the classic signature of overdispersion, typically from unobserved heterogeneity
+in arrest risk. Lecture 9's negative binomial model addresses this.
+
+</details>
+
+### Exercise 4.2 — Method of moments versus maximum likelihood for a gamma model
+
+*Data:* `wage1` — hourly wages.
+
+For a gamma distribution with shape \(k\) and scale \(\theta\), \(E[X]=k\theta\) and \(\operatorname{Var}(X)=k\theta^2\).
+
+1. Derive and compute the method-of-moments estimators \(\widehat\theta=s^2/\bar x\), \(\widehat k=\bar x^2/s^2\).
+2. Compute the MLE with `scipy.stats.gamma.fit`.
+3. Bootstrap both estimators (1,000 draws) and compare their standard deviations. Which is more efficient, and is that what theory predicts?
+
+```python
+import numpy as np, wooldridge as wd
+from scipy import stats
+w = wd.data("wage1")["wage"].to_numpy()
+# TODO: MoM, MLE, bootstrap both
+```
+
+<details class="solution" markdown="1"><summary>Solution, output and discussion</summary>
+
+```python
+import numpy as np, wooldridge as wd
+from scipy import stats
+w = wd.data("wage1")["wage"].to_numpy(); n = len(w)
+mom = lambda x: (x.mean()**2 / x.var(ddof=1), x.var(ddof=1) / x.mean())
+mle = lambda x: stats.gamma.fit(x, floc=0)[::2]
+print("MoM  (shape, scale):", np.round(mom(w), 4))
+print("MLE  (shape, scale):", np.round(mle(w), 4))
+rng = np.random.default_rng(3); B = np.array([[*mom(s), *mle(s)] for s in (w[rng.integers(0, n, n)] for _ in range(1000))])
+print(f"bootstrap SD of shape:  MoM {B[:,0].std():.4f}   MLE {B[:,2].std():.4f}")
+print(f"bootstrap SD of scale:  MoM {B[:,1].std():.4f}   MLE {B[:,3].std():.4f}")
+```
+
+Output:
+
+```text
+MoM  (shape, scale): [2.5489 2.3132]
+MLE  (shape, scale): [3.4686 1.6999]
+bootstrap SD of shape:  MoM 0.2104   MLE 0.2187
+bootstrap SD of scale:  MoM 0.2154   MLE 0.1351
+```
+
+The two estimators give quite different parameters (shape 2.5 against 3.5), which is itself a sign that the gamma model
+fits poorly: under correct specification both would be consistent for the same values. MLE is noticeably more precise for
+the scale parameter, but not for the shape. Theory says the MLE is asymptotically efficient **if the model is correct**;
+when the model is misspecified, the two estimators target different pseudo-true values and the efficiency ranking need not
+hold. Compare with the previous exercise, where the gamma lost clearly to the lognormal.
+
+</details>
+
 ## Reading
 Casella and Berger, *Statistical Inference*; Lehmann and Casella, *Theory of Point Estimation*; van der Vaart, *Asymptotic Statistics*.
