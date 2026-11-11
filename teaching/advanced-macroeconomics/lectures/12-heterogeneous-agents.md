@@ -164,7 +164,8 @@ Q5 (highest)  77.607      0.212         26.299
 ```
 
 In these 1991 data, 35% of households have non-positive financial assets, and 46% hold less than half a month of income in
-financial assets — very close to Kaplan, Violante and Weidner's (2014) estimates of about one third using liquid wealth. Financial
+financial assets — somewhat above Kaplan, Violante and Weidner's (2014) estimate of about one third, which uses a broader
+liquid-wealth measure and later survey years. Financial
 wealth is extremely concentrated (Gini 0.98, top 10% share 72%; the mean is ten times the median). The hand-to-mouth share
 falls with income but remains above 20% even in the top income quintile. Those are the "wealthy hand-to-mouth" — households
 with illiquid wealth (housing, pensions) but little cash — which is why transfers raise spending even among middle-income

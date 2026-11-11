@@ -1008,7 +1008,8 @@ d["quintile"] = pd.qcut(d["inc"], 5, labels=["Q1 (lowest)", "Q2", "Q3", "Q4", "Q
 print(d.groupby("quintile", observed=True).agg(income=("inc", "mean"), htm_share=("htm", "mean"), median_nettfa=("nettfa", "median")).round(3).to_string())
 """,
 notes="""In these 1991 data, 35% of households have non-positive financial assets, and 46% hold less than half a month of income in
-financial assets — very close to Kaplan, Violante and Weidner's (2014) estimates of about one third using liquid wealth. Financial
+financial assets — somewhat above Kaplan, Violante and Weidner's (2014) estimate of about one third, which uses a broader
+liquid-wealth measure and later survey years. Financial
 wealth is extremely concentrated (Gini 0.98, top 10% share 72%; the mean is ten times the median). The hand-to-mouth share
 falls with income but remains above 20% even in the top income quintile. Those are the "wealthy hand-to-mouth" — households
 with illiquid wealth (housing, pensions) but little cash — which is why transfers raise spending even among middle-income
