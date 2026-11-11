@@ -41,6 +41,8 @@ Estimating the policy rule by OLS would be inconsistent because inflation and th
 
 ## Load the data and build the instruments
 
+This guide uses the `linearmodels` package for instrumental-variable estimation. Install it once with `pip install linearmodels`.
+
 ```python
 import pandas as pd
 import numpy as np
