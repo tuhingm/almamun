@@ -111,7 +111,7 @@ footer{background:var(--navy2);color:#c3d0e4;padding:22px 0;font-size:10px}.foot
 </div>
 <div id="result"></div>
 
-<section class="guides" id="guides"><div class="guides-head"><div><div class="label">Model guides</div><h2>Six routes to a finished paper</h2></div><p>Each guide will take one real dataset through estimation, diagnostic tests and writing. The step-by-step guides are in preparation; the linked lectures cover the same methods now.</p></div>
+<section class="guides" id="guides"><div class="guides-head"><div><div class="label">Model guides</div><h2>Six routes to a finished paper</h2></div><p>Each guide takes one real dataset through estimation, diagnostic tests and writing, with Python code, real output and sample text for the paper.</p></div>
 <div class="gcards" id="gcards"></div></section>
 <div class="note"><b>How the tool decides.</b> A series is treated as stationary, I(0), if the ADF test rejects a unit root in levels at 5%; as I(1) if it rejects only after first differencing. The KPSS test is reported as a cross-check, and the tool warns you when the two disagree. When every series is I(1), the Johansen trace test decides between VAR and VECM. These are standard rules, but tests have low power in short samples and can be distorted by structural breaks, so treat the result as a starting point and justify the choice in your paper.</div>
 </main>
@@ -120,6 +120,7 @@ footer{background:var(--navy2);color:#c3d0e4;padding:22px 0;font-size:10px}.foot
 <script type="text/plain" id="py-src">#PYSRC#</script>
 <script>
 const EXAMPLES=/*EXAMPLES*/;
+const GUIDES=/*GUIDES*/[]; // model guides that have been published
 const PYO='https://cdn.jsdelivr.net/pyodide/v0.27.2/full/';
 const L='../teaching/econometrics/lectures/';
 const MODELS={
@@ -205,6 +206,7 @@ function show(R,label){
   if(R.model==='ARDL'){light(PATHS.ARDL.slice(0,5));return askAsym(R)}
   finish(R.model,R)},t);
 }
+const has=m=>GUIDES.includes(m.toLowerCase()),glink=m=>has(m)?`href="${m.toLowerCase()}.html"`:`href="#g-${m}" data-go="${m}"`;
 function evidence(R,m){if(!R)return '';const u=R.unitroot,nm=o=>u.filter(x=>x.order===o).map(x=>esc(x.var)).join(', ');
  if(m==='OLS')return `ADF rejects a unit root in levels for all ${u.length} variables.`;
  if(m==='VAR')return `All ${u.length} variables are I(1), and the Johansen trace test finds no cointegrating relation (trace ${fmt(R.johansen.rows[0].trace,2)} against a 5% critical value of ${fmt(R.johansen.rows[0].cv,2)}).`;
@@ -213,7 +215,7 @@ function evidence(R,m){if(!R)return '';const u=R.unitroot,nm=o=>u.filter(x=>x.or
 function finish(m,R,alt){const my=run,M=MODELS[m];const d=light(PATHS[m]);if(alt){const a=$('#n-'+alt);a&&a.classList.add('alt')}
  setTimeout(()=>{if(my!==run)return;
   const ev=evidence(R,m),caution=R&&R.conflicts&&R.conflicts.length?`<div class="caution"><b>Mixed evidence.</b> ADF and KPSS disagree for ${R.conflicts.map(esc).join(', ')}. Report both tests, check for a structural break, and consider ARDL as a robustness check, since it is valid whether a variable is I(0) or I(1).</div>`:'';
-  $('#result').innerHTML=`<div class="result"><div class="label">Recommended model</div><h2>${M.name}</h2><p>${M.why}${ev?' <b>In this data:</b> '+ev:''}</p>${caution}<div class="label" style="margin-bottom:6px">What the paper needs</div><ul>${M.steps.map(s=>`<li>${s}</li>`).join('')}</ul><div class="acts"><a class="btn" href="#g-${m}" data-go="${m}">Go to the ${m==='GMM'?'2SLS / GMM':m} guide →</a>${alt?`<a class="btn ghost" href="#g-${alt}" data-go="${alt}">Alternative: ${alt}</a>`:''}${R?'':'<button class="btn ghost" type="button" id="again">Start over</button>'}</div>${R?'<p style="font-size:11.5px;margin:14px 0 0;color:#c5d4ea">Panel data, or regressors that are endogenous? Then see the 2SLS / GMM guide instead.</p>':''}</div>`;
+  $('#result').innerHTML=`<div class="result"><div class="label">Recommended model</div><h2>${M.name}</h2><p>${M.why}${ev?' <b>In this data:</b> '+ev:''}</p>${caution}<div class="label" style="margin-bottom:6px">What the paper needs</div><ul>${M.steps.map(s=>`<li>${s}</li>`).join('')}</ul><div class="acts"><a class="btn" ${glink(m)}>Go to the ${m==='GMM'?'2SLS / GMM':m} guide →</a>${alt?`<a class="btn ghost" ${glink(alt)}>Alternative: ${alt}</a>`:''}${R?'':'<button class="btn ghost" type="button" id="again">Start over</button>'}</div>${R?'<p style="font-size:11.5px;margin:14px 0 0;color:#c5d4ea">Panel data, or regressors that are endogenous? Then see the 2SLS / GMM guide instead.</p>':''}</div>`;
   $('#result').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});
   const ag=$('#again');ag&&ag.addEventListener('click',()=>setMode('ask'));
  },d+250*D)}
@@ -255,7 +257,7 @@ function ask(id,n=1){const Q=QS[id];$('#q').innerHTML=`<div class="label">Questi
   if(QS[to]){light(o[3]);ask(to,n+1)}else{$('#q').innerHTML='<p class="sub" style="margin:0">Your answers lead to the model shown below.</p>';to==='I2'?i2card():finish(to,null,to==='ARDL'?'NARDL':to==='NARDL'?'ARDL':null)}}))}
 
 /* ---------- guides, modes, init ---------- */
-function initGuides(){Object.entries(MODELS).forEach(([k,M])=>{$('#gcards').appendChild(el('article','gcard',`<span class="tag">In preparation</span><h3>${k==='GMM'?'2SLS / GMM':k}</h3><p class="when">${M.when}</p><p>${M.steps.slice(0,5).join(' · ')} …</p>${M.lec.map(l=>`<a href="${L+l[0]}">${l[1]} →</a>`).join('')}`)).id='g-'+k})}
+function initGuides(){Object.entries(MODELS).forEach(([k,M])=>{$('#gcards').appendChild(el('article','gcard',`<span class="tag${has(k)?' ok':''}">${has(k)?'Step-by-step guide':'In preparation'}</span><h3>${k==='GMM'?'2SLS / GMM':k}</h3><p class="when">${M.when}</p><p>${M.steps.slice(0,5).join(' · ')} …</p>${has(k)?`<a href="${k.toLowerCase()}.html" style="font-size:12.5px">Open the ${k==='GMM'?'2SLS / GMM':k} guide →</a>`:''}${M.lec.map(l=>`<a href="${L+l[0]}">${l[1]} →</a>`).join('')}`)).id='g-'+k})}
 document.addEventListener('click',e=>{const a=e.target.closest('[data-go]');if(!a)return;const c=$('#g-'+a.dataset.go);if(c){c.classList.remove('flash');void c.offsetWidth;c.classList.add('flash')}});
 function setMode(m){++run;document.querySelectorAll('.modes button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));['example','upload','ask'].forEach(x=>$('#m-'+x).hidden=x!==m);
  $('#steps').innerHTML='';$('#result').innerHTML='';$('#upload-err').innerHTML='';status('');resetTree();document.querySelectorAll('.ex button').forEach(e=>e.classList.remove('sel'));if(m==='ask'){light(['start']);ask('q1')}}

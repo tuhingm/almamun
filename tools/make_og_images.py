@@ -20,6 +20,9 @@ cards += [
          sub="Six full course sites with lecture notes, coding exercises, problem sets and exams.",
          tags=["Econometrics", "Statistics", "Calculus", "Macroeconomics", "Finance", "Monetary"]),
 ]
+_g = ROOT / "tools" / "model_selector" / "guide_cards.json"
+if _g.exists():
+    cards += json.loads(_g.read_text())
 FONTS = os.environ.get("OG_FONT_CSS")
 HTML = """<html><head>{HEAD}<style>
 body{margin:0;width:1200px;height:630px;overflow:hidden;font-family:'DM Sans',sans-serif;color:#fff;

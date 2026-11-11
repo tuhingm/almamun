@@ -21,6 +21,7 @@ def lastmod(p):
 def priority(rel):
     if rel in ("index.html",): return "1.0"
     if rel in ("working-papers/index.html", "teaching/index.html", "research-guide/index.html"): return "0.9"
+    if rel.startswith("research-guide/"): return "0.8"
     if rel.count("/") == 2 and rel.endswith("index.html"): return "0.8"
     return "0.6" if "/lectures/" in rel else "0.5"
 
