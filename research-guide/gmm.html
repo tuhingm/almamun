@@ -81,6 +81,7 @@ i_t = c + \beta\,\pi_t + \gamma\,x_t + \rho\, i_{t-1} + \varepsilon_t
 <p>Estimating the policy rule by OLS would be inconsistent because inflation and the output gap respond contemporaneously to the interest rate and are therefore correlated with the policy shock <span class="arithmatex">\(\varepsilon_t\)</span>. Following Clarida, Galí and Gertler (2000), we treat current inflation and the output gap as endogenous and instrument them with their own first four lags and the second lag of the federal funds rate. These variables are predetermined with respect to the period-<span class="arithmatex">\(t\)</span> policy shock and, given the persistence of inflation and output, are strongly correlated with the endogenous regressors.</p>
 </div>
 <h2 id="s2"><span class="stepno">Step 2</span>Load the data and build the instruments</h2>
+<p>This guide uses the <code>linearmodels</code> package for instrumental-variable estimation. Install it once with <code>pip install linearmodels</code>.</p>
 <div class="cell"><div class="cell-label">Python</div><pre class="code"><code>import pandas as pd
 import numpy as np
 import statsmodels.api as sm
