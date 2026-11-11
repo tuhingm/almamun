@@ -58,7 +58,7 @@
 "out": "assets/og/research-guide-gmm.jpg",
 "kicker": "Empirical Research Guide · Model guide",
 "title": "2SLS and GMM",
-"sub": "Endogenous regressors that need instruments. U.S. federal funds rate, inflation and the output gap, quarterly, 1979–2007",
+"sub": "Endogenous regressors that need instruments. U.S. policy rule, quarterly, 1979–2007; UK firm employment panel, 1976–1984",
 "tags": [
 "Python code",
 "Real output",
