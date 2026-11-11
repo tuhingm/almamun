@@ -15,6 +15,7 @@ Writing math in the Markdown: inline \\( ... \\), display \\[ ... \\] or
 """
 from __future__ import annotations
 
+import json
 import datetime
 import html
 import pathlib
@@ -26,6 +27,7 @@ import markdown
 import yaml
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
+SITE = "https://tuhingm.github.io/almamun/"
 TEACH = ROOT / "teaching"
 TOOLS = ROOT / "tools"
 
@@ -204,9 +206,26 @@ def build() -> int:
             root = "../" * depth
             base = "../" * (depth - 2) if depth > 2 else ""
             doc_title = f"Lecture {lec['num']}: {lec['title']}" if lec else page_title
+            url = SITE + out_path.relative_to(ROOT).as_posix()
+            if url.endswith("/index.html"):
+                url = url[:-len("index.html")]
+            desc = (f"Lecture {lec['num']} of {c['title']} ({lec['unit']}): full notes, problem set and coding exercises."
+                    if lec else c["summary"])
+            jsonld = ""
+            if section == "home":
+                jsonld = json.dumps({
+                    "@context": "https://schema.org", "@type": "Course", "name": c["title"],
+                    "description": c["summary"], "url": url, "courseCode": c["code"],
+                    "educationalLevel": c["level"], "inLanguage": "en", "isAccessibleForFree": True,
+                    "teaches": c["topics"],
+                    "provider": {"@type": "Person", "name": "Tuhin G. M. Al Mamun", "url": SITE},
+                    "author": {"@type": "Person", "name": "Tuhin G. M. Al Mamun", "url": SITE},
+                    "hasPart": [{"@type": "LearningResource", "name": f"Lecture {l['num']}: {l['title']}",
+                                 "url": url + "lectures/" + l["html"]} for l in c["lectures"]],
+                }, ensure_ascii=False, indent=1)
             page = tpl.render(c=c, sections=sections, section=section, body=body, page_title=esc(page_title),
                               doc_title=esc(doc_title), lec=lec, prev=prev, next=nxt, root=root, base=base,
-                              year=year)
+                              year=year, url=url, desc=esc(desc), jsonld=jsonld, site=SITE)
             out_path.write_text(page)
             written += 1
 
