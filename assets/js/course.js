@@ -1,5 +1,12 @@
 // Course pages: mobile course menu and "On this page" table of contents.
 (function () {
+  var menu = document.getElementById('menu'), nav = document.getElementById('nav');
+  if (menu && nav) {
+    menu.addEventListener('click', function () {
+      var open = nav.classList.toggle('show');
+      menu.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  }
   var side = document.querySelector('.course-side');
   var btn = document.querySelector('.side-toggle');
   if (side && btn) {
