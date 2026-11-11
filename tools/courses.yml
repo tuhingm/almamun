@@ -90,6 +90,23 @@ courses:
       - [12, 13, "Part IV · Banking and risk"]
       - [14, 15, "Part V · Behavioral and empirical finance"]
 
+  monetary-economics:
+    code: Course 06
+    title: Monetary Economics
+    subtitle: Monetary theory, New Keynesian DSGE models and the evidence on policy transmission.
+    level: Graduate
+    format: problem sets, Dynare model labs, replication project
+    prerequisites: Graduate macroeconomics, calculus, linear algebra, probability, introductory econometrics
+    software: MATLAB, Dynare
+    summary: Graduate course notes in monetary economics covering money demand, the classical and New Keynesian models, optimal policy and rules, open economies, financial frictions, the zero lower bound, monetary-fiscal interactions, HANK, Bayesian estimation and shock identification.
+    topics: [Money demand, Classical model, New Keynesian DSGE, Optimal policy, Policy rules, Open economy, Financial frictions, ZLB, Fiscal theory, HANK, Bayesian estimation, Monetary shocks]
+    units:
+      - [1, 3, "Part I · Money and prices"]
+      - [4, 7, "Part II · The New Keynesian core"]
+      - [8, 11, "Part III · Extensions"]
+      - [12, 13, "Part IV · Heterogeneity and estimation"]
+      - [14, 15, "Part V · Evidence and practice"]
+
 sections:
   - {key: home, href: index.html, label: Course Home, file: index.md}
   - {key: syllabus, href: syllabus.html, label: Syllabus, file: syllabus.md, blurb: "Description, prerequisites, outcomes, assessment and policies."}
