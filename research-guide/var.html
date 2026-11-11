@@ -33,7 +33,7 @@ article{min-width:0;font-size:14.5px;line-height:1.8;color:#2c3a55}
 article h2{font:800 23px/1.25 Manrope;letter-spacing:-.5px;color:var(--ink);margin:46px 0 12px;padding-top:26px;border-top:1px solid var(--line);scroll-margin-top:14px}article h2:first-child{margin-top:0;padding-top:0;border-top:0}
 .stepno{display:block;font:800 10px "DM Sans";letter-spacing:.16em;text-transform:uppercase;color:var(--navy);margin-bottom:6px}
 article h3{font:800 16px Manrope;color:var(--ink);margin:26px 0 8px}article p{margin:0 0 13px}article ul,article ol{padding-left:20px;margin:0 0 13px}article li{margin:5px 0}article a{color:var(--navy);font-weight:600;text-decoration:underline;text-decoration-color:#b9c9e6}
-article code{background:#e9eef8;border-radius:4px;padding:1px 5px;font:12.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+article .arithmatex{max-width:100%;overflow-x:auto;overflow-y:hidden}article span.arithmatex{display:inline-block;vertical-align:middle}article code{background:#e9eef8;border-radius:4px;padding:1px 5px;font:12.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 .cell{margin:16px 0 18px;border-radius:11px;overflow:hidden;border:1px solid #1d2a4a;background:#111c36}.cell-label{font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#8fa3cf;padding:9px 15px 0}
 .cell pre{margin:0;padding:8px 15px 13px;overflow-x:auto;font:12.5px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#e3ebfa}.cell pre code{background:none;padding:0;font:inherit;color:inherit}
 .cell .out-l{background:#f6f8fd;color:#7f8aa1;border-top:1px solid #1d2a4a}.cell pre.out{background:#f6f8fd;color:#1b2437;font-size:12px}.cell .fig{display:block;width:100%;background:#fff;border-top:1px solid #dfe6f3;padding:8px}
@@ -139,7 +139,7 @@ print(var.summary())</code></pre><div class="cell-label out-l">Output</div><pre 
 Model:                         VAR
 Method:                        OLS
 Date:           Thu, 12, Nov, 2026
-Time:                     08:11:06
+Time:                     08:19:06
 --------------------------------------------------------------------
 No. of Equations:         2.00000    BIC:                    1.36962
 Nobs:                     415.000    HQIC:                   1.26399
@@ -371,7 +371,7 @@ Sample 2010-2019                       0.2128         0.7586          0.09      
 <li><strong>Only two variables?</strong> Omitted variables, such as interest rates, can create or hide Granger causality. Say so, or add them.</li>
 </ul>
 </div>
-<div class="others"><span class="label">All model guides</span><div><a class="back" href="index.html">← Model selection tool</a><a class="" href="ols.html">OLS</a><a class="cur" href="var.html">VAR</a></div></div>
+<div class="others"><span class="label">All model guides</span><div><a class="back" href="index.html">← Model selection tool</a><a class="" href="ols.html">OLS</a><a class="cur" href="var.html">VAR</a><a class="" href="vecm.html">VECM</a><a class="" href="ardl.html">ARDL</a><a class="" href="nardl.html">NARDL</a></div></div>
 </article></div></main>
 <footer><div class="wrap foot"><span><b>Tuhin G. M. Al Mamun, Ph.D.</b> · Empirical Research Guide</span><span>© <span id="year"></span></span></div></footer>
 <script>
