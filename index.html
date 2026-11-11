@@ -43,6 +43,37 @@ footer{background:var(--deep);color:#c5d2e7;padding:27px 0 15px}.footer-grid{dis
 @media(max-width:650px){.wrap{width:calc(100% - 34px)}.nav{height:64px}#menu{display:block}nav{display:none;position:absolute;top:64px;left:0;right:0;background:var(--blue);padding:17px 22px;flex-direction:column;align-items:flex-start;gap:15px}nav.show{display:flex}.hero{padding:28px 0 55px}.switchline{margin-bottom:27px;gap:12px}.switch{width:100%;max-width:390px}.switch button{flex:1;min-width:0;min-height:50px;padding:12px 14px;font-size:14px}.hero-grid{gap:27px}h1{font-size:45px}.name-line{font-size:clamp(25px,7vw,34px);letter-spacing:-.055em}.subtitle{font-size:15px}.section-head{display:block}.section-intro{margin-top:10px}section{padding:57px 0}.about-grid{grid-template-columns:1fr;gap:24px}.cards{grid-template-columns:1fr}.timeline article{grid-template-columns:1fr;gap:4px}.contact-grid{grid-template-columns:1fr}.identifier-grid{grid-template-columns:repeat(2,1fr)}.footer-grid{grid-template-columns:1fr;gap:16px}.copyright{grid-column:1}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
+<style id="motion">
+/* ---- motion layer: additive only, design unchanged ---- */
+.progress{position:fixed;top:0;left:0;height:3px;width:100%;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,var(--sky),#fff);z-index:40;pointer-events:none}
+.hero-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.hero>.wrap{position:relative;z-index:1}
+.hero:before{content:"";position:absolute;width:520px;height:520px;right:-120px;top:-160px;border-radius:50%;background:radial-gradient(circle,#6ec1e430,transparent 65%);animation:orb 14s ease-in-out infinite alternate;pointer-events:none}
+.hero:after{animation:ring 26s linear infinite}
+@keyframes orb{to{transform:translate(-90px,70px) scale(1.12)}}
+@keyframes ring{to{transform:rotate(360deg) translateX(18px)}}
+.js-motion .hero .eyebrow,.js-motion .hero h1,.js-motion .hero .subtitle,.js-motion .hero .focus,.js-motion .hero .hero-copy,.js-motion .hero .actions,.js-motion .hero .switchline,.js-motion .profile-panel{animation:rise .8s cubic-bezier(.2,.7,.2,1) both}
+.js-motion .hero .switchline{animation-delay:.05s}.js-motion .hero .eyebrow{animation-delay:.15s}.js-motion .hero h1{animation-delay:.25s}.js-motion .hero .subtitle{animation-delay:.35s}.js-motion .hero .focus{animation-delay:.42s}.js-motion .hero .hero-copy{animation-delay:.5s}.js-motion .hero .actions{animation-delay:.6s}.js-motion .profile-panel{animation-delay:.45s}
+@keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+.swap{animation:swap .5s cubic-bezier(.2,.7,.2,1) both!important}
+@keyframes swap{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.eyebrow:before{animation:grow 1s .3s cubic-bezier(.2,.7,.2,1) both}@keyframes grow{from{width:0}}
+.profile-panel{transition:transform .25s ease,box-shadow .25s ease;transform-style:preserve-3d}
+.profile-item{transition:padding-left .2s ease}.profile-item:hover{padding-left:8px}
+.btn{position:relative;overflow:hidden;transition:transform .2s ease,box-shadow .2s ease}.btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px #00143d40}
+.btn:after{content:"";position:absolute;top:0;left:-75%;width:50%;height:100%;background:linear-gradient(100deg,transparent,#ffffff70,transparent);transform:skewX(-20deg);transition:left .6s ease}.btn:hover:after{left:130%}
+nav a{position:relative}nav a:after{content:"";position:absolute;left:0;right:0;bottom:-5px;height:2px;background:var(--sky);transform:scaleX(0);transform-origin:left;transition:transform .25s ease}nav a:hover:after{transform:scaleX(1)}
+.card,.project,.timeline article,.contact-card,.identifier{transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
+.card:hover,.contact-card:hover,.identifier:hover,.timeline article:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(0,32,91,.13);border-color:#b9c9e6}
+.project:hover{box-shadow:0 10px 26px rgba(0,32,91,.1);border-color:#b9c9e6}
+.plus{transition:transform .3s ease,background .2s ease,color .2s ease}.project.open .plus{transform:rotate(180deg);background:var(--blue);color:#fff;border-color:var(--blue)}
+.tag{transition:background .2s ease,color .2s ease}.tag:hover{background:var(--blue);color:#fff}
+.js-motion .rv{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+.js-motion .rv.in{opacity:1;transform:none}
+.to-top{position:fixed;right:22px;bottom:22px;width:44px;height:44px;border-radius:50%;border:0;background:var(--blue);color:#fff;font-size:18px;cursor:pointer;box-shadow:0 8px 22px #00205b55;opacity:0;transform:translateY(14px);pointer-events:none;transition:opacity .3s ease,transform .3s ease;z-index:30}
+.to-top.show{opacity:1;transform:none;pointer-events:auto}.to-top:hover{background:var(--deep)}
+@media(prefers-reduced-motion:reduce){.hero-canvas,.progress{display:none}.js-motion .rv{opacity:1;transform:none}.hero:before,.hero:after{animation:none}}
+</style>
 </head>
 <body>
 <header><div class="wrap nav"><a class="brand" href="#top">TGM <span>AL MAMUN</span></a><button id="menu" aria-expanded="false" aria-controls="nav">Menu</button><nav id="nav"><a href="teaching/index.html">Teaching Courses</a><a href="working-papers/index.html">Working Papers</a><a href="Tuhin%20Al%20Mamun_CV.pdf" target="_blank" rel="noopener">CV</a></nav></div></header>
@@ -150,5 +181,52 @@ const menu=document.getElementById('menu');
 const nav=document.getElementById('nav');
 if(menu&&nav){menu.addEventListener('click',()=>{const open=nav.classList.toggle('show');menu.setAttribute('aria-expanded',String(open))});nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('show');menu.setAttribute('aria-expanded','false')}));}
 document.getElementById('year').textContent=new Date().getFullYear();
+</script>
+<button class="to-top" type="button" aria-label="Back to top">↑</button><div class="progress" aria-hidden="true"></div>
+<script>
+(()=>{
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+document.documentElement.classList.add('js-motion');
+const bar=document.querySelector('.progress'),top=document.querySelector('.to-top');
+const onScroll=()=>{const h=document.documentElement,max=h.scrollHeight-h.clientHeight;bar.style.transform='scaleX('+(max>0?h.scrollTop/max:0)+')';top.classList.toggle('show',h.scrollTop>600)};
+addEventListener('scroll',onScroll,{passive:true});onScroll();
+top.addEventListener('click',()=>scrollTo({top:0,behavior:reduce?'auto':'smooth'}));
+/* scroll reveal */
+const targets=document.querySelectorAll('.section-head,.card,.project,.timeline article,.contact-card,.identifier,.about-copy,.method-panel,.note,.identifiers h3');
+targets.forEach(el=>el.classList.add('rv'));
+if(reduce||!('IntersectionObserver' in window)){targets.forEach(el=>el.classList.add('in'))}else{
+ const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){const sib=[...e.target.parentElement.children].filter(c=>c.classList.contains('rv'));e.target.style.transitionDelay=Math.min(sib.indexOf(e.target),6)*70+'ms';e.target.classList.add('in');io.unobserve(e.target)}}),{rootMargin:'0px 0px -8% 0px'});
+ targets.forEach(el=>io.observe(el));}
+/* smooth crossfade when switching Economics / Statistics */
+document.querySelectorAll('button[data-view]').forEach(b=>b.addEventListener('click',()=>{
+ document.querySelectorAll('#hero-eyebrow,#hero-subtitle,#hero-focus,#hero-copy,.profile-panel h3,.profile-item').forEach((el,i)=>{el.classList.remove('swap');void el.offsetWidth;el.style.animationDelay=i*40+'ms';el.classList.add('swap')});
+}));
+/* smooth accordion */
+document.querySelectorAll('.project-toggle').forEach(btn=>btn.addEventListener('click',()=>{
+ if(reduce)return;const body=btn.closest('.project').querySelector('.project-body');if(!body)return;
+ const open=btn.closest('.project').classList.contains('open');body.style.display='block';body.style.overflow='hidden';const h=body.scrollHeight;
+ const a=body.animate(open?[{height:'0px',opacity:0},{height:h+'px',opacity:1}]:[{height:h+'px',opacity:1},{height:'0px',opacity:0}],{duration:320,easing:'cubic-bezier(.2,.7,.2,1)'});
+ a.onfinish=()=>{body.style.display='';body.style.overflow=''};
+}));
+if(reduce)return;
+/* profile panel tilt */
+const panel=document.querySelector('.profile-panel');
+if(panel&&matchMedia('(hover:hover)').matches){panel.addEventListener('mousemove',e=>{const r=panel.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;panel.style.transform='perspective(800px) rotateY('+x*6+'deg) rotateX('+(-y*6)+'deg) translateY(-3px)';panel.style.boxShadow='0 22px 48px #00143d55'});panel.addEventListener('mouseleave',()=>{panel.style.transform='';panel.style.boxShadow=''})}
+/* hero network: drifting data points linked like a correlation graph */
+const hero=document.querySelector('.hero');const cv=document.createElement('canvas');cv.className='hero-canvas';hero.prepend(cv);const ctx=cv.getContext('2d');
+let W,H,dpr,pts=[],mouse={x:-999,y:-999},run=true;
+const size=()=>{dpr=Math.min(devicePixelRatio||1,2);W=hero.clientWidth;H=hero.clientHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);const n=Math.round(Math.min(70,W*H/16000));pts=Array.from({length:n},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.6+.6}))};
+size();addEventListener('resize',size);
+hero.addEventListener('mousemove',e=>{const r=hero.getBoundingClientRect();mouse.x=e.clientX-r.left;mouse.y=e.clientY-r.top});hero.addEventListener('mouseleave',()=>{mouse.x=mouse.y=-999});
+new IntersectionObserver(es=>{run=es[0].isIntersecting;if(run)requestAnimationFrame(draw)}).observe(hero);
+document.addEventListener('visibilitychange',()=>{run=!document.hidden;if(run)requestAnimationFrame(draw)});
+function draw(){if(!run)return;ctx.clearRect(0,0,W,H);
+ for(const p of pts){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;
+  const dx=p.x-mouse.x,dy=p.y-mouse.y,d=Math.hypot(dx,dy);if(d<140){p.x+=dx/d*.6;p.y+=dy/d*.6}}
+ for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const a=pts[i],b=pts[j],d=Math.hypot(a.x-b.x,a.y-b.y);if(d<130){ctx.strokeStyle='rgba(160,218,242,'+(.16*(1-d/130))+')';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke()}}
+ for(const p of pts){const near=Math.hypot(p.x-mouse.x,p.y-mouse.y)<160;ctx.fillStyle=near?'rgba(110,193,228,.9)':'rgba(255,255,255,.35)';ctx.beginPath();ctx.arc(p.x,p.y,near?p.r+1:p.r,0,7);ctx.fill()}
+ requestAnimationFrame(draw)}
+requestAnimationFrame(draw);
+})();
 </script>
 </body></html>
