@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Finance · Lecture 10</h3>
       <div class="profile-item"><strong>Part</strong><span>Part III · Corporate finance and markets</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 2 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 8 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="09-capital-budgeting.html">Lecture 9: Corporate Finance: Capital Budgeting and Project Valuation</a></span></div>
       
     </aside>
@@ -86,6 +86,116 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
 <li>Compare trade-off and pecking-order predictions.</li>
 <li>Explain why payout irrelevance requires restrictive assumptions.</li>
 </ol>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises use <strong>real market data</strong> in Python: monthly Fama–French factor returns (1926–2018), daily S&amp;P 500 and
+NASDAQ prices (1999–2018), the VIX, Moody's AAA and BAA corporate bond yields (1919–2018), all bundled with the <code>arch</code>
+package, plus U.S. Treasury yields and household data from the <code>wooldridge</code> package. Install once with
+<code>pip install arch wooldridge statsmodels scipy numpy pandas</code>. Try the starter code first, then open the solution. Every
+printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-101-leverage-risk-and-return-across-firms">Exercise 10.1 — Leverage, risk and return across firms</h3>
+<p><em>Data:</em> <code>return</code> — 142 U.S. firms: stock return 1990–1994 <code>return</code> (%), return on equity <code>roe</code>, debt-to-capital ratio <code>dkr</code>, earnings per share <code>eps</code>.</p>
+<p>Modigliani–Miller (Proposition II) says that the expected return on equity rises with leverage, <span class="arithmatex">\(r_E=r_A+(r_A-r_D)D/E\)</span>.</p>
+<ol>
+<li>Describe leverage across firms. Regress the 1990–94 stock return on <code>dkr</code> and on <code>roe</code>, with robust standard errors.</li>
+<li>Is there evidence that higher-leverage firms earned higher returns? How much variation do the regressors explain?</li>
+<li>Discuss why a single five-year return per firm is a very noisy measure of <strong>expected</strong> returns, and what MM II would predict about the <strong>riskiness</strong> of returns.</li>
+</ol>
+<pre><code class="language-python">import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+d = wd.data(&quot;return&quot;)
+# TODO: describe dkr; return ~ dkr + roe
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+d = wd.data(&quot;return&quot;)
+print(d[[&quot;return&quot;, &quot;dkr&quot;, &quot;roe&quot;, &quot;eps&quot;]].describe().round(2).loc[[&quot;mean&quot;, &quot;std&quot;, &quot;min&quot;, &quot;50%&quot;, &quot;max&quot;]].to_string())
+r = smf.ols(&quot;Q('return') ~ dkr + roe&quot;, data=d).fit(cov_type=&quot;HC1&quot;)
+print(r.params.round(3).to_dict(), &quot;robust t:&quot;, r.tvalues.round(2).to_dict(), f&quot;R2 = {r.rsquared:.3f}, n = {int(r.nobs)}&quot;)
+d[&quot;lev_group&quot;] = np.where(d[&quot;dkr&quot;] &gt; d[&quot;dkr&quot;].median(), &quot;high leverage&quot;, &quot;low leverage&quot;)
+print(d.groupby(&quot;lev_group&quot;)[&quot;return&quot;].agg([&quot;mean&quot;, &quot;std&quot;, &quot;size&quot;]).round(2).to_string())
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">return    dkr    roe     eps
+mean   -4.04  25.65  17.73    2.02
+std    39.42  16.67   9.88   43.15
+min   -84.89   0.00   1.10  -89.30
+50%    -8.67  26.40  15.80    6.70
+max   131.84  79.50  61.10  266.60
+{'Intercept': -0.862, 'dkr': 0.208, 'roe': -0.48} robust t: {'Intercept': -0.09, 'dkr': 0.9, 'roe': -1.5} R2 = 0.028, n = 142
+               mean    std  size
+lev_group                       
+high leverage -1.05  43.17    71
+low leverage  -7.04  35.33    71
+</code></pre>
+<p>Leverage varies widely across firms (debt-to-capital from 0 to 80%). The regression finds no significant relation between
+leverage and 1990–94 returns, and the regressors explain about 3% of the variation. Higher-leverage firms did earn more on
+average (about −1% against −7%), with more dispersion, but a single five-year realized return per firm is an extremely noisy
+proxy for expected returns: the cross-sectional SD of returns is about 40 points. MM II predicts that leverage raises the
+<strong>riskiness</strong> and the expected return of equity; the higher dispersion in the high-leverage group is consistent with the
+first part.</p>
+</details>
+<h3 id="exercise-102-the-wacc-curve-mm-with-taxes-and-costly-distress">Exercise 10.2 — The WACC curve: MM with taxes and costly distress</h3>
+<p><em>Data:</em> Market risk premium from the Fama–French data (1963–2018); risk-free rate and the BAA–AAA spread (December 2018) to calibrate distress costs.</p>
+<p>An all-equity firm has asset beta 0.9. Debt is risk-free up to 20% debt-to-value; beyond that, the cost of debt rises with the BAA–AAA spread scaled by leverage, and expected distress costs grow quadratically.</p>
+<ol>
+<li>For debt-to-value ratios from 0 to 70%, compute the levered equity beta (Hamada with taxes), the cost of equity, the cost of debt, the WACC and firm value for a perpetual pre-tax cash flow of $100m (tax rate 21%).</li>
+<li>Find the value-maximizing leverage.</li>
+<li>Explain which ingredient makes the WACC curve U-shaped. What would MM without taxes predict?</li>
+</ol>
+<pre><code class="language-python">import numpy as np, pandas as pd
+from arch.data import default
+from arch.data import frenchdata
+ff = frenchdata.load() / 100
+ff.index = pd.period_range(&quot;1926-07&quot;, periods=len(ff), freq=&quot;M&quot;)   # monthly, decimal returns
+
+# TODO: grid over L = D/V; beta_E = beta_A (1 + (1-t) D/E); r_D = rf + spread * f(L); V = EBIT(1-t)/WACC - distress
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, pandas as pd
+from arch.data import default
+from arch.data import frenchdata
+ff = frenchdata.load() / 100
+ff.index = pd.period_range(&quot;1926-07&quot;, periods=len(ff), freq=&quot;M&quot;)   # monthly, decimal returns
+
+mrp = 12 * ff.loc[&quot;1963-07&quot;:, &quot;Mkt-RF&quot;].mean(); rf = 12 * ff[&quot;RF&quot;].iloc[-1]
+dd = default.load(); spread = (dd[&quot;BAA&quot;] - dd[&quot;AAA&quot;]).iloc[-1] / 100
+tax, bA, ebit = 0.21, 0.9, 100.0
+rows = []
+for L in np.arange(0, 0.71, 0.05):
+    DE = L / (1 - L) if L &lt; 1 else np.inf
+    bE = bA * (1 + (1 - tax) * DE)
+    rE = rf + bE * mrp
+    rD = rf + (0 if L &lt;= 0.2 else spread * ((L - 0.2) / 0.1)**1.5)
+    wacc = (1 - L) * rE + L * rD * (1 - tax)
+    distress = 400 * max(L - 0.3, 0)**2                  # PV of expected distress costs, $m
+    V = ebit * (1 - tax) / wacc - distress
+    rows.append((L, bE, rE, rD, wacc, V))
+t = pd.DataFrame(rows, columns=[&quot;D/V&quot;, &quot;equity beta&quot;, &quot;r_E&quot;, &quot;r_D&quot;, &quot;WACC&quot;, &quot;value $m&quot;])
+print(f&quot;MRP {100*mrp:.2f}%, rf {100*rf:.2f}%, BAA-AAA spread {100*spread:.2f}%&quot;)
+print(t.iloc[::2].round(4).to_string(index=False))
+best = t.loc[t[&quot;value $m&quot;].idxmax()]
+print(f&quot;value-maximizing leverage: D/V = {best['D/V']:.2f}, WACC {100*best['WACC']:.2f}%, value ${best['value $m']:.0f}m&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">MRP 6.33%, rf 2.16%, BAA-AAA spread 1.11%
+ D/V  equity beta    r_E    r_D   WACC  value $m
+ 0.0       0.9000 0.0786 0.0216 0.0786 1005.1144
+ 0.1       0.9790 0.0836 0.0216 0.0769 1026.6746
+ 0.2       1.0778 0.0899 0.0216 0.0753 1049.1800
+ 0.3       1.2047 0.0979 0.0327 0.0763 1035.6983
+ 0.4       1.3740 0.1086 0.0530 0.0819  960.3935
+ 0.5       1.6110 0.1236 0.0793 0.0931  832.2971
+ 0.6       1.9665 0.1461 0.1104 0.1108  677.0874
+ 0.7       2.5590 0.1837 0.1457 0.1357  518.2850
+value-maximizing leverage: D/V = 0.25, WACC 7.52%, value $1050m
+</code></pre>
+<p>As leverage rises, the equity beta rises (MM II), but cheap tax-deductible debt lowers the WACC up to about 25% debt, where
+firm value peaks at about $1.05 billion, 4% above the all-equity value. Beyond that, the rising cost of risky debt and
+expected distress costs push the WACC up steeply. Without taxes and distress costs, MM Proposition I says the WACC and firm
+value are independent of leverage: the curve would be flat. The U-shape comes from trading off the tax shield against
+distress costs — the trade-off theory. The specific optimum depends entirely on the assumed distress-cost function.</p>
+</details>
 </section><section class="box reading"><h2 id="further-reading">Further reading</h2>
 <p>Modigliani and Miller (1958, 1963); Myers (1984); Berk and DeMarzo, <em>Corporate Finance</em>.</p></section></article>
     <nav class="pager">
