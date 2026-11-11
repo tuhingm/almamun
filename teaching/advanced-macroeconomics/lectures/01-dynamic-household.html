@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Advanced Macroeconomics · Lecture 1</h3>
       <div class="profile-item"><strong>Part</strong><span>Part I · Neoclassical foundations</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 2 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 9 min read</span></div>
       
       
     </aside>
@@ -109,6 +109,104 @@ u'(c_t)=\beta E_t[(1+r_{t+1})u'(c_{t+1})]+\mu_t,\quad
 <li>State the transversality condition and explain its economic role.</li>
 <li>Show how a binding borrowing constraint modifies the Euler condition.</li>
 </ol>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises combine <strong>real U.S. macroeconomic data</strong> (the quarterly <code>macrodata</code> series in <code>statsmodels</code>, 1959–2009,
+and annual series from the <code>wooldridge</code> package) with <strong>numerical solutions of the models</strong> in this lecture. Install once
+with <code>pip install numpy scipy pandas statsmodels wooldridge</code>. Try the starter code first, then open the solution. Every
+printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-11-estimating-the-elasticity-of-intertemporal-substitution-from-the-euler-equation">Exercise 1.1 — Estimating the elasticity of intertemporal substitution from the Euler equation</h3>
+<p><em>Data:</em> <code>macrodata</code> — U.S. quarterly real consumption <code>realcons</code> and ex-post real interest rate <code>realint</code>, 1959–2009.</p>
+<p>The log-linearized Euler equation is <span class="arithmatex">\(\Delta\log c_{t+1}=\text{const}+\psi\,r_t+\varepsilon_{t+1}\)</span>, where <span class="arithmatex">\(\psi\)</span> is the
+elasticity of intertemporal substitution (EIS). The realized real rate is measured with error and correlated with the
+expectational error, so use instrumental variables (Hall, 1988).</p>
+<ol>
+<li>Estimate <span class="arithmatex">\(\psi\)</span> by OLS.</li>
+<li>Estimate it by 2SLS, instrumenting <span class="arithmatex">\(r_t\)</span> with variables dated <span class="arithmatex">\(t-2\)</span> and <span class="arithmatex">\(t-3\)</span> (lagged real rate, inflation and consumption growth). Report the first-stage <span class="arithmatex">\(F\)</span>.</li>
+<li>What does the estimate imply for the coefficient of relative risk aversion if preferences are CRRA (<span class="arithmatex">\(\gamma=1/\psi\)</span>)?</li>
+</ol>
+<pre><code class="language-python">import numpy as np, pandas as pd, statsmodels.api as sm
+from linearmodels.iv import IV2SLS
+m = sm.datasets.macrodata.load_pandas().data
+d = pd.DataFrame({&quot;dc&quot;: 400 * np.log(m[&quot;realcons&quot;]).diff().shift(-1), &quot;r&quot;: m[&quot;realint&quot;], &quot;infl&quot;: m[&quot;infl&quot;]})
+# TODO: lags dated t-2, t-3; IV2SLS.from_formula(&quot;dc ~ 1 + [r ~ r_l2 + r_l3 + infl_l2 + dc_l2]&quot;, d)
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, pandas as pd, statsmodels.api as sm, statsmodels.formula.api as smf
+from linearmodels.iv import IV2SLS
+m = sm.datasets.macrodata.load_pandas().data
+d = pd.DataFrame({&quot;dc&quot;: 400 * np.log(m[&quot;realcons&quot;]).diff().shift(-1), &quot;r&quot;: m[&quot;realint&quot;], &quot;infl&quot;: m[&quot;infl&quot;]})
+d[&quot;dc0&quot;] = 400 * np.log(m[&quot;realcons&quot;]).diff()
+for v in (&quot;r&quot;, &quot;infl&quot;, &quot;dc0&quot;):
+    for k in (2, 3):
+        d[f&quot;{v}_l{k}&quot;] = d[v].shift(k)
+d = d.dropna()
+ols = smf.ols(&quot;dc ~ r&quot;, data=d).fit(cov_type=&quot;HAC&quot;, cov_kwds={&quot;maxlags&quot;: 4})
+iv = IV2SLS.from_formula(&quot;dc ~ 1 + [r ~ r_l2 + r_l3 + infl_l2 + infl_l3 + dc0_l2 + dc0_l3]&quot;, data=d).fit(cov_type=&quot;kernel&quot;)
+fs = smf.ols(&quot;r ~ r_l2 + r_l3 + infl_l2 + infl_l3 + dc0_l2 + dc0_l3&quot;, data=d).fit(cov_type=&quot;HAC&quot;, cov_kwds={&quot;maxlags&quot;: 4})
+F = fs.wald_test(&quot;r_l2 = 0, r_l3 = 0, infl_l2 = 0, infl_l3 = 0, dc0_l2 = 0, dc0_l3 = 0&quot;, scalar=True).statistic / 6
+print(f&quot;OLS  EIS = {ols.params['r']:.3f} (HAC se {ols.bse['r']:.3f})&quot;)
+print(f&quot;2SLS EIS = {iv.params['r']:.3f} (HAC se {iv.std_errors['r']:.3f});  first-stage F = {F:.1f}&quot;)
+lo, hi = iv.params[&quot;r&quot;] - 1.96 * iv.std_errors[&quot;r&quot;], iv.params[&quot;r&quot;] + 1.96 * iv.std_errors[&quot;r&quot;]
+print(f&quot;95% CI for the EIS: [{lo:.3f}, {hi:.3f}]&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">OLS  EIS = 0.225 (HAC se 0.102)
+2SLS EIS = 0.261 (HAC se 0.179);  first-stage F = 13.1
+95% CI for the EIS: [-0.089, 0.611]
+</code></pre>
+<p>OLS and 2SLS both give an EIS of about 0.2–0.3, and the 2SLS confidence interval includes zero. This is Hall's (1988)
+classic finding: aggregate consumption growth responds little to the real interest rate, so the EIS is small (and, under
+CRRA, risk aversion <span class="arithmatex">\(1/\psi\)</span> would be large, around 4 or more). The first-stage <span class="arithmatex">\(F\)</span> of about 13 is only moderately
+strong. Instruments dated <span class="arithmatex">\(t-2\)</span> and earlier are used because time aggregation of quarterly consumption makes <span class="arithmatex">\(t-1\)</span>
+instruments invalid. Many macro models assume an EIS near 0.5–1, which is hard to reconcile with this evidence.</p>
+</details>
+<h3 id="exercise-12-is-consumption-a-random-walk-the-campbellmankiw-test">Exercise 1.2 — Is consumption a random walk? The Campbell–Mankiw test</h3>
+<p><em>Data:</em> <code>macrodata</code> — U.S. quarterly real consumption and real disposable income.</p>
+<p>Hall's (1978) permanent-income hypothesis implies that consumption growth is unpredictable. Campbell and Mankiw (1989)
+nest it in <span class="arithmatex">\(\Delta\log c_t=\mu+\lambda\,\Delta\log y_t+\varepsilon_t\)</span>, where <span class="arithmatex">\(\lambda\)</span> is the share of income going to
+"rule-of-thumb" (hand-to-mouth) consumers.</p>
+<ol>
+<li>Estimate <span class="arithmatex">\(\lambda\)</span> by OLS and by 2SLS, using lags 2–4 of income growth, consumption growth and the change in the T-bill rate as instruments.</li>
+<li>Test <span class="arithmatex">\(\lambda=0\)</span>. What does the estimate say about the importance of hand-to-mouth households — a central ingredient of TANK and HANK models (Lectures 12–13)?</li>
+</ol>
+<pre><code class="language-python">import numpy as np, pandas as pd, statsmodels.api as sm
+from linearmodels.iv import IV2SLS
+m = sm.datasets.macrodata.load_pandas().data
+d = pd.DataFrame({&quot;dc&quot;: 100 * np.log(m[&quot;realcons&quot;]).diff(), &quot;dy&quot;: 100 * np.log(m[&quot;realdpi&quot;]).diff(), &quot;di&quot;: m[&quot;tbilrate&quot;].diff()})
+# TODO: lags 2-4 as instruments; IV2SLS
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, pandas as pd, statsmodels.api as sm, statsmodels.formula.api as smf
+from linearmodels.iv import IV2SLS
+m = sm.datasets.macrodata.load_pandas().data
+d = pd.DataFrame({&quot;dc&quot;: 100 * np.log(m[&quot;realcons&quot;]).diff(), &quot;dy&quot;: 100 * np.log(m[&quot;realdpi&quot;]).diff(), &quot;di&quot;: m[&quot;tbilrate&quot;].diff()})
+z = []
+for v in (&quot;dy&quot;, &quot;dc&quot;, &quot;di&quot;):
+    for k in (2, 3, 4):
+        d[f&quot;{v}_l{k}&quot;] = d[v].shift(k); z.append(f&quot;{v}_l{k}&quot;)
+d = d.dropna()
+ols = smf.ols(&quot;dc ~ dy&quot;, data=d).fit(cov_type=&quot;HAC&quot;, cov_kwds={&quot;maxlags&quot;: 4})
+iv = IV2SLS.from_formula(f&quot;dc ~ 1 + [dy ~ {' + '.join(z)}]&quot;, data=d).fit(cov_type=&quot;kernel&quot;)
+fs = smf.ols(f&quot;dy ~ {' + '.join(z)}&quot;, data=d).fit(cov_type=&quot;HAC&quot;, cov_kwds={&quot;maxlags&quot;: 4})
+F = fs.wald_test(&quot;, &quot;.join(f&quot;{v} = 0&quot; for v in z), scalar=True).statistic / len(z)
+print(f&quot;OLS  lambda = {ols.params['dy']:.3f} (se {ols.bse['dy']:.3f})&quot;)
+print(f&quot;2SLS lambda = {iv.params['dy']:.3f} (se {iv.std_errors['dy']:.3f}), t = {iv.tstats['dy']:.2f};  first-stage F = {F:.1f}&quot;)
+print(f&quot;overidentification (Sargan) p-value: {iv.sargan.pval:.3f}&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">OLS  lambda = 0.342 (se 0.075)
+2SLS lambda = 0.648 (se 0.154), t = 4.21;  first-stage F = 4.2
+overidentification (Sargan) p-value: 0.004
+</code></pre>
+<p>The 2SLS estimate of <span class="arithmatex">\(\lambda\)</span> is about 0.65 and strongly significant, so consumption growth is far from unpredictable:
+predictable income growth passes into consumption. Taken at face value, around half or more of income goes to
+rule-of-thumb consumers — Campbell and Mankiw (1989) found about 0.5. Two warnings: the first-stage <span class="arithmatex">\(F\)</span> of about 4 signals
+<strong>weak instruments</strong> (Lecture 5 of Econometrics), so the 2SLS point estimate is unreliable and weak-IV-robust inference is
+needed; and the over-identification test rejects, so the instruments disagree. The qualitative conclusion — a sizable
+hand-to-mouth share — is what motivates TANK and HANK models.</p>
+</details>
 </section><section class="box reading"><h2 id="further-reading">Further reading</h2>
 <p>Ljungqvist and Sargent, <em>Recursive Macroeconomic Theory</em>; Deaton, <em>Understanding Consumption</em>.</p></section></article>
     <nav class="pager">

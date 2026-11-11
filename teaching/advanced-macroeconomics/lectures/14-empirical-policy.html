@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Advanced Macroeconomics · Lecture 14</h3>
       <div class="profile-item"><strong>Part</strong><span>Part V · Quantitative policy analysis</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 2 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 8 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="13-hank-distribution.html">Lecture 13: HANK Models: Distribution Dynamics and Aggregate Transmission</a></span></div>
       
     </aside>
@@ -91,6 +91,108 @@ E_0\sum_t\beta^tu(c_t^{policy}),
 <li>Define a consumption-equivalent welfare comparison.</li>
 <li>Specify a reproducibility checklist for a quantitative macro paper.</li>
 </ol>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises combine <strong>real U.S. macroeconomic data</strong> (the quarterly <code>macrodata</code> series in <code>statsmodels</code>, 1959–2009,
+and annual series from the <code>wooldridge</code> package) with <strong>numerical solutions of the models</strong> in this lecture. Install once
+with <code>pip install numpy scipy pandas statsmodels wooldridge</code>. Try the starter code first, then open the solution. Every
+printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-141-local-projections-of-a-monetary-shock-measured-as-a-taylor-rule-residual">Exercise 14.1 — Local projections of a monetary shock measured as a Taylor-rule residual</h3>
+<p><em>Data:</em> <code>macrodata</code> — U.S. quarterly data, 1960–2007.</p>
+<ol>
+<li>Estimate a Taylor rule with smoothing on 1960–2007 (as in Lecture 7) including two lags of inflation and the output gap, and treat its residual as a monetary policy shock (a Romer–Romer-style shortcut).</li>
+<li>Estimate local projections of the unemployment rate and inflation on the shock for <span class="arithmatex">\(h=0,\dots,12\)</span> quarters, controlling for four lags of unemployment, inflation and the T-bill rate. Use HAC standard errors.</li>
+<li>Report the responses to a 100 bp shock. Do you find a price puzzle? What identification assumption is doing the work?</li>
+</ol>
+<pre><code class="language-python">import numpy as np, pandas as pd, statsmodels.api as sm, statsmodels.formula.api as smf
+from statsmodels.tsa.filters.hp_filter import hpfilter
+m = sm.datasets.macrodata.load_pandas().data
+# TODO: rule regression -&gt; shock = residual; for h: y_{t+h} - y_{t-1} on shock_t + controls
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, pandas as pd, statsmodels.api as sm, statsmodels.formula.api as smf
+from statsmodels.tsa.filters.hp_filter import hpfilter
+m = sm.datasets.macrodata.load_pandas().data
+d = pd.DataFrame({&quot;year&quot;: m[&quot;year&quot;], &quot;i&quot;: m[&quot;tbilrate&quot;], &quot;pi&quot;: m[&quot;infl&quot;].rolling(4).mean(), &quot;u&quot;: m[&quot;unemp&quot;],
+                  &quot;x&quot;: 100 * hpfilter(np.log(m[&quot;realgdp&quot;]), 1600)[0]})
+for v in (&quot;i&quot;, &quot;pi&quot;, &quot;x&quot;, &quot;u&quot;):
+    for k in (1, 2, 3, 4): d[f&quot;{v}{k}&quot;] = d[v].shift(k)
+s = d[(d.year &gt;= 1960) &amp; (d.year &lt;= 2007)].dropna().copy()
+rule = smf.ols(&quot;i ~ pi + x + pi1 + x1 + i1 + i2&quot;, data=s).fit()
+s[&quot;shock&quot;] = rule.resid
+print(f&quot;policy-rule R2 {rule.rsquared:.3f}; shock sd {s['shock'].std():.3f} pp&quot;)
+ctrl = &quot; + &quot;.join(f&quot;{v}{k}&quot; for v in (&quot;u&quot;, &quot;pi&quot;, &quot;i&quot;) for k in (1, 2, 3, 4))
+rows = []
+for h in range(0, 13):
+    for v in (&quot;u&quot;, &quot;pi&quot;):
+        s[f&quot;lead&quot;] = s[v].shift(-h) - s[f&quot;{v}1&quot;]
+        r = smf.ols(f&quot;lead ~ shock + {ctrl}&quot;, data=s.dropna(subset=[&quot;lead&quot;])).fit(cov_type=&quot;HAC&quot;, cov_kwds={&quot;maxlags&quot;: h + 1})
+        rows.append((h, v, r.params[&quot;shock&quot;], r.bse[&quot;shock&quot;]))
+out = pd.DataFrame(rows, columns=[&quot;h&quot;, &quot;var&quot;, &quot;coef&quot;, &quot;se&quot;]).pivot(index=&quot;h&quot;, columns=&quot;var&quot;, values=[&quot;coef&quot;, &quot;se&quot;])
+print(out.loc[[0, 2, 4, 6, 8, 10, 12]].round(3).to_string())
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">policy-rule R2 0.921; shock sd 0.764 pp
+      coef            se       
+var     pi      u     pi      u
+h                              
+0   -0.037 -0.079  0.104  0.024
+2    0.091 -0.142  0.113  0.058
+4    0.026 -0.099  0.127  0.080
+6   -0.152  0.028  0.166  0.096
+8   -0.387  0.119  0.181  0.105
+10  -0.537  0.116  0.182  0.075
+12  -0.606  0.042  0.211  0.072
+</code></pre>
+<p>The Taylor-rule residual is a crude shock: the rule explains 92% of the T-bill rate, and the residual still contains the Fed's
+reaction to information not in the rule. The responses show it. Unemployment <strong>falls</strong> for the first year after a "tightening"
+and rises only after about two years, peaking near 0.12 points; inflation is flat at first and then falls by about 0.6 points after
+three years. The early unemployment response has the wrong sign, a symptom of residual endogeneity — the same problem as the
+price puzzle. Narrative (Romer and Romer, 2004) or high-frequency shocks (Gertler and Karadi, 2015) give cleaner identification.
+The identification assumption here is that the residual is uncorrelated with all other shocks affecting the outcomes.</p>
+</details>
+<h3 id="exercise-142-okuns-law-estimation-and-parameter-stability">Exercise 14.2 — Okun's law: estimation and parameter stability</h3>
+<p><em>Data:</em> <code>okun</code> — U.S. annual real GDP growth <code>pcrgdp</code> and the change in the unemployment rate <code>cunem</code>, 1959–2005.</p>
+<ol>
+<li>Estimate Okun's law <span class="arithmatex">\(\Delta u_t=a+b\,g_t+e_t\)</span>. Compute the implied "normal" growth rate <span class="arithmatex">\(-a/b\)</span> at which unemployment is stable, with a delta-method standard error.</li>
+<li>Test whether <span class="arithmatex">\(b=-0.5\)</span> (the textbook rule of thumb).</li>
+<li>Test for a break in 1983 with a Chow test, and estimate the two subsamples. Has the relationship changed?</li>
+</ol>
+<pre><code class="language-python">import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+o = wd.data(&quot;okun&quot;)
+r = smf.ols(&quot;cunem ~ pcrgdp&quot;, data=o).fit()
+# TODO: -a/b with delta method; t_test(&quot;pcrgdp = -0.5&quot;); Chow with post-1983 interactions
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+o = wd.data(&quot;okun&quot;)
+r = smf.ols(&quot;cunem ~ pcrgdp&quot;, data=o).fit(cov_type=&quot;HC1&quot;)
+a, b = r.params[&quot;Intercept&quot;], r.params[&quot;pcrgdp&quot;]; V = r.cov_params().to_numpy()
+g = np.array([-1 / b, a / b**2]); se = np.sqrt(g @ V @ g)
+print(f&quot;Okun: d(unemployment) = {a:.3f} {b:+.3f} * growth;  normal growth -a/b = {-a/b:.2f}% (se {se:.2f})&quot;)
+t = r.t_test(&quot;pcrgdp = -0.5&quot;)
+print(f&quot;test b = -0.5: t = {float(np.squeeze(t.tvalue)):.2f}, p = {float(t.pvalue):.3f}&quot;)
+o[&quot;post&quot;] = (o[&quot;year&quot;] &gt;= 1983).astype(int)
+c = smf.ols(&quot;cunem ~ pcrgdp * post&quot;, data=o).fit(cov_type=&quot;HC1&quot;)
+w = c.wald_test(&quot;post = 0, pcrgdp:post = 0&quot;, scalar=True)
+print(f&quot;Chow test for a break in 1983: chi2(2) = {w.statistic:.2f}, p = {w.pvalue:.3f}&quot;)
+for lab, sub in ((&quot;1959-1982&quot;, o[o.post == 0]), (&quot;1983-2005&quot;, o[o.post == 1])):
+    rs = smf.ols(&quot;cunem ~ pcrgdp&quot;, data=sub).fit()
+    print(f&quot;  {lab}: b = {rs.params['pcrgdp']:.3f}, normal growth {-rs.params['Intercept']/rs.params['pcrgdp']:.2f}%&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">Okun: d(unemployment) = 1.254 -0.376 * growth;  normal growth -a/b = 3.34% (se 0.19)
+test b = -0.5: t = 2.98, p = 0.003
+Chow test for a break in 1983: chi2(2) = 10.73, p = 0.005
+  1959-1982: b = -0.368, normal growth 3.87%
+  1983-2005: b = -0.398, normal growth 2.85%
+</code></pre>
+<p>Each extra point of GDP growth lowers unemployment by about 0.38 points, and unemployment is stable when growth is about 3.3%.
+The textbook coefficient of −0.5 is rejected. The Chow test detects a break in 1983: the slope is similar across subperiods, but
+the growth rate needed to keep unemployment stable fell from about 3.9% to 2.9%, reflecting slower labor-force and productivity
+growth. The break is in the <strong>intercept</strong>, which is why rule-of-thumb versions of Okun's law need periodic updating.</p>
+</details>
 </section><section class="box reading"><h2 id="further-reading">Further reading</h2>
 <p>Smets and Wouters (2007); Fernández-Villaverde (2010); Del Negro and Schorfheide, <em>DSGE Models in Macroeconomics</em>.</p></section></article>
     <nav class="pager">

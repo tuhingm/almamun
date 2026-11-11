@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Advanced Macroeconomics · Lecture 10</h3>
       <div class="profile-item"><strong>Part</strong><span>Part III · Solution and estimation</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 2 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 8 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="09-open-economy.html">Lecture 9: Open-Economy Macroeconomics and Exchange-Rate Dynamics</a></span></div>
       
     </aside>
@@ -94,6 +94,102 @@ A E_t s_{t+1}=B s_t+C\varepsilon_t.
 <li>State the Blanchard–Kahn root-count condition.</li>
 <li>Explain why a steady-state residual check is necessary.</li>
 </ol>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises combine <strong>real U.S. macroeconomic data</strong> (the quarterly <code>macrodata</code> series in <code>statsmodels</code>, 1959–2009,
+and annual series from the <code>wooldridge</code> package) with <strong>numerical solutions of the models</strong> in this lecture. Install once
+with <code>pip install numpy scipy pandas statsmodels wooldridge</code>. Try the starter code first, then open the solution. Every
+printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-101-linearize-the-ramsey-model-and-solve-it-with-the-qz-decomposition">Exercise 10.1 — Linearize the Ramsey model and solve it with the QZ decomposition</h3>
+<p><em>Data:</em> Calibration as in Lecture 3: <span class="arithmatex">\(\alpha=1/3\)</span>, <span class="arithmatex">\(\beta=0.96\)</span>, <span class="arithmatex">\(\delta=0.08\)</span>, <span class="arithmatex">\(\sigma=2\)</span>.</p>
+<ol>
+<li>Write the two equilibrium conditions <span class="arithmatex">\(f(k_{t+1},c_{t+1},k_t,c_t)=0\)</span> and linearize them <strong>numerically</strong> (finite differences) around the steady state into <span class="arithmatex">\(A\,E_ty_{t+1}=B\,y_t\)</span>, with <span class="arithmatex">\(y=(\hat k,\hat c)\)</span>.</li>
+<li>Use <code>scipy.linalg.ordqz</code> to compute the generalized eigenvalues. Check the Blanchard–Kahn condition: one unstable root for one jump variable (<span class="arithmatex">\(c\)</span>).</li>
+<li>Recover the policy function <span class="arithmatex">\(\hat c_t=h\,\hat k_t\)</span> and the law of motion <span class="arithmatex">\(\hat k_{t+1}=g\,\hat k_t\)</span>. Compare the linear transition with the nonlinear shooting solution of Lecture 3 after 10 years.</li>
+</ol>
+<pre><code class="language-python">import numpy as np
+from scipy.linalg import ordqz
+a, b, d, s = 1/3, 0.96, 0.08, 2.0
+kss = (a / (1/b - 1 + d))**(1 / (1 - a)); css = kss**a - d * kss
+def f(k1, c1, k0, c0):
+    return np.array([k1 - (k0**a + (1 - d) * k0 - c0), c0**(-s) - b * c1**(-s) * (a * k1**(a - 1) + 1 - d)])
+# TODO: Jacobians by finite differences; A = df/d(k1,c1) * ss, B = -df/d(k0,c0) * ss (log-deviations)
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np
+from scipy.linalg import ordqz
+a, b, d, s = 1/3, 0.96, 0.08, 2.0
+kss = (a / (1/b - 1 + d))**(1 / (1 - a)); css = kss**a - d * kss
+def f(x):                                     # x = (k1, c1, k0, c0) in levels
+    k1, c1, k0, c0 = x
+    return np.array([k1 - (k0**a + (1 - d) * k0 - c0), c0**(-s) - b * c1**(-s) * (a * k1**(a - 1) + 1 - d)])
+x0 = np.array([kss, css, kss, css]); h = 1e-7; J = np.zeros((2, 4))
+for j in range(4):
+    e = np.zeros(4); e[j] = h * x0[j]; J[:, j] = (f(x0 + e) - f(x0 - e)) / (2 * h)      # derivative w.r.t. log deviations
+A, B = J[:, :2], -J[:, 2:]                     # A E[y_{t+1}] = B y_t
+AA, BB, alpha, beta_, Q, Z = ordqz(B, A, sort=&quot;iuc&quot;, output=&quot;real&quot;)    # stable generalized eigenvalues first
+lam = alpha / beta_
+print(&quot;generalized eigenvalues:&quot;, np.round(lam, 4), &quot; -&gt; unstable roots:&quot;, int(np.sum(np.abs(lam) &gt; 1)), &quot;(Blanchard-Kahn needs 1)&quot;)
+Z11, Z21 = Z[0, 0], Z[1, 0]
+hc = Z21 / Z11                                 # c_hat = h k_hat on the stable subspace
+g = float(np.real(lam[np.abs(lam) &lt; 1][0]))
+print(f&quot;policy: c_hat = {hc:.4f} k_hat;  law of motion: k_hat' = {g:.4f} k_hat  (half-life {np.log(0.5)/np.log(g):.1f} years)&quot;)
+k0 = np.log(0.5)
+print(f&quot;linear solution from k0 = 0.5 k*: k/k* after 10 years = {np.exp(g**10 * k0):.3f}, initial c/c* = {np.exp(hc * k0):.3f}&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">generalized eigenvalues: [0.9178+0.j 1.135 +0.j]  -&gt; unstable roots: 1 (Blanchard-Kahn needs 1)
+policy: c_hat = 0.4347 k_hat;  law of motion: k_hat' = 0.9178 k_hat  (half-life 8.1 years)
+linear solution from k0 = 0.5 k*: k/k* after 10 years = 0.745, initial c/c* = 0.740
+</code></pre>
+<p>The linearized system has one stable and one unstable generalized eigenvalue, matching one predetermined variable (capital)
+and one jump variable (consumption): the Blanchard–Kahn condition holds and the saddle path is unique. The stable root, 0.918,
+implies a half-life of about 8 years, and the policy function sets consumption 0.43% above steady state for each 1% of extra
+capital. Started at half the steady-state capital, the linear solution gives <span class="arithmatex">\(k/k^*=0.745\)</span> after 10 years against 0.775 in the
+nonlinear shooting solution: linearization is accurate near the steady state but less so far from it.</p>
+</details>
+<h3 id="exercise-102-value-function-iteration-versus-the-exact-solution">Exercise 10.2 — Value function iteration versus the exact solution</h3>
+<p><em>Data:</em> Brock–Mirman model: log utility, full depreciation, <span class="arithmatex">\(\alpha=1/3\)</span>, <span class="arithmatex">\(\beta=0.96\)</span> — the exact policy <span class="arithmatex">\(k'=\alpha\beta k^{\alpha}\)</span> is known.</p>
+<ol>
+<li>Solve the deterministic model <span class="arithmatex">\(V(k)=\max_{k'}\{\log(k^{\alpha}-k')+\beta V(k')\}\)</span> by value function iteration on grids of 100, 300 and 1,000 points (vectorized).</li>
+<li>Report the number of iterations, computing time, and the maximum error of the policy function relative to the exact <span class="arithmatex">\(k'=\alpha\beta k^{\alpha}\)</span>.</li>
+<li>Why does the error fall only slowly with the number of grid points, and what methods (interpolation, endogenous grids — Lecture 12) do better?</li>
+</ol>
+<pre><code class="language-python">import numpy as np, time
+a, b = 1/3, 0.96
+kss = (a * b)**(1 / (1 - a))
+# TODO: grid around kss; utility matrix U[i, j] = log(k_i^a - k_j); iterate V = max_j (U + b V_j)
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, time
+a, b = 1/3, 0.96
+kss = (a * b)**(1 / (1 - a))
+for n in (100, 300, 1000):
+    k = np.linspace(0.2 * kss, 2.0 * kss, n)
+    c = k[:, None]**a - k[None, :]
+    U = np.where(c &gt; 0, np.log(np.maximum(c, 1e-300)), -1e10)
+    V = np.zeros(n); t0 = time.time()
+    for it in range(2000):
+        W = U + b * V[None, :]; V1 = W.max(1)
+        if np.max(np.abs(V1 - V)) &lt; 1e-8: break
+        V = V1
+    pol = k[W.argmax(1)]
+    inner = (k &gt; 0.3 * kss) &amp; (k &lt; 1.8 * kss)
+    err = np.max(np.abs(pol - a * b * k**a)[inner])
+    print(f&quot;grid {n:5d}: {it:4d} iterations, {time.time() - t0:6.2f} s, max policy error {err:.2e} (grid spacing {k[1]-k[0]:.2e})&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">grid   100:  451 iterations,   0.01 s, max policy error 1.87e-03 (grid spacing 3.29e-03)
+grid   300:  451 iterations,   0.06 s, max policy error 6.70e-04 (grid spacing 1.09e-03)
+grid  1000:  451 iterations,   0.69 s, max policy error 1.96e-04 (grid spacing 3.26e-04)
+</code></pre>
+<p>VFI converges in about 450 iterations regardless of the grid, because the contraction rate is <span class="arithmatex">\(\beta\)</span>. The policy error falls
+roughly in proportion to the grid spacing (first order), because the maximization is restricted to grid points: a 10 times
+finer grid gives about 10 times smaller errors, at about 100 times the computing time, since the vectorized search is
+<span class="arithmatex">\(O(n^2)\)</span>. Interpolating the value function, using first-order conditions (policy-function iteration), or the endogenous grid
+method (Lecture 12) reach much higher accuracy at a fraction of the cost.</p>
+</details>
 </section><section class="box reading"><h2 id="further-reading">Further reading</h2>
 <p>Klein (2000); Sims (2002); Heer and Maussner, <em>Dynamic General Equilibrium Modeling</em>.</p></section></article>
     <nav class="pager">

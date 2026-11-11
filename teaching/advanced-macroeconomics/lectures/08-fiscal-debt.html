@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Advanced Macroeconomics · Lecture 8</h3>
       <div class="profile-item"><strong>Part</strong><span>Part II · Nominal rigidities and policy</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 2 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 9 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="07-monetary-policy.html">Lecture 7: Monetary Policy: Rules, Commitment, and the Effective Lower Bound</a></span></div>
       
     </aside>
@@ -92,8 +92,104 @@ b_t\approx\frac{1+r_t}{1+g_t}b_{t-1}+d_t,
 <li>State the assumptions behind Ricardian equivalence.</li>
 <li>Compare spending and tax multipliers in a specified model.</li>
 </ol>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises combine <strong>real U.S. macroeconomic data</strong> (the quarterly <code>macrodata</code> series in <code>statsmodels</code>, 1959–2009,
+and annual series from the <code>wooldridge</code> package) with <strong>numerical solutions of the models</strong> in this lecture. Install once
+with <code>pip install numpy scipy pandas statsmodels wooldridge</code>. Try the starter code first, then open the solution. Every
+printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-81-debt-dynamics-and-the-debt-stabilizing-primary-surplus">Exercise 8.1 — Debt dynamics and the debt-stabilizing primary surplus</h3>
+<p><em>Data:</em> <code>intdef</code> — U.S. federal receipts and outlays (% of GDP), 3-month T-bill rate and inflation, 1948–2003; <code>macrodata</code> for real GDP growth.</p>
+<p>Government debt evolves as <span class="arithmatex">\(b_{t+1}=\frac{1+r}{1+g}b_t-s_t\)</span>, where <span class="arithmatex">\(b\)</span> is debt/GDP, <span class="arithmatex">\(r\)</span> the real interest rate, <span class="arithmatex">\(g\)</span> real growth and <span class="arithmatex">\(s\)</span> the primary surplus/GDP.</p>
+<ol>
+<li>Compute the average real T-bill rate <span class="arithmatex">\(r\)</span> and average real GDP growth <span class="arithmatex">\(g\)</span>. What is <span class="arithmatex">\(r-g\)</span>, and why does its sign matter?</li>
+<li>Compute the debt-stabilizing primary surplus <span class="arithmatex">\(s^*=\frac{r-g}{1+g}b\)</span> at debt ratios of 60% and 100%.</li>
+<li>Simulate debt for 30 years from <span class="arithmatex">\(b_0=60\%\)</span> under (a) <span class="arithmatex">\(s=0\)</span>, (b) <span class="arithmatex">\(s=-2\%\)</span> (a primary deficit), for <span class="arithmatex">\(r-g\)</span> equal to its historical value and to <span class="arithmatex">\(+2\)</span> percentage points.</li>
+</ol>
+<pre><code class="language-python">import numpy as np, wooldridge as wd, statsmodels.api as sm
+d = wd.data(&quot;intdef&quot;)
+r = (d[&quot;i3&quot;] - d[&quot;inf&quot;]).mean() / 100
+m = sm.datasets.macrodata.load_pandas().data; g = 4 * np.mean(np.diff(np.log(m[&quot;realgdp&quot;])))
+# TODO: s* = (r-g)/(1+g) b; simulate b' = (1+r)/(1+g) b - s
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, wooldridge as wd, statsmodels.api as sm
+d = wd.data(&quot;intdef&quot;)
+r = (d[&quot;i3&quot;] - d[&quot;inf&quot;]).mean() / 100
+m = sm.datasets.macrodata.load_pandas().data; g = 4 * np.mean(np.diff(np.log(m[&quot;realgdp&quot;])))
+print(f&quot;average real T-bill rate r = {100*r:.2f}%, average real growth g = {100*g:.2f}%, r - g = {100*(r-g):.2f} pp&quot;)
+print(f&quot;average federal deficit (outlays - receipts, including interest) = {(d['out'] - d['rec']).mean():.2f}% of GDP&quot;)
+for b in (0.6, 1.0):
+    print(f&quot;debt-stabilizing primary surplus at b = {b:.0%}: {100*(r-g)/(1+g)*b:+.2f}% of GDP&quot;)
+for rg_label, rr in ((&quot;historical r-g&quot;, r), (&quot;r-g = +2 pp&quot;, g + 0.02)):
+    for s in (0.0, -0.02):
+        b = 0.6
+        for _ in range(30): b = (1 + rr) / (1 + g) * b - s
+        print(f&quot;  {rg_label:15s}, primary surplus {100*s:+.0f}%: debt after 30 years = {100*b:.1f}% of GDP&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">average real T-bill rate r = 1.02%, average real growth g = 3.10%, r - g = -2.08 pp
+average federal deficit (outlays - receipts, including interest) = 1.60% of GDP
+debt-stabilizing primary surplus at b = 60%: -1.21% of GDP
+debt-stabilizing primary surplus at b = 100%: -2.02% of GDP
+  historical r-g , primary surplus +0%: debt after 30 years = 32.6% of GDP
+  historical r-g , primary surplus -2%: debt after 30 years = 77.9% of GDP
+  r-g = +2 pp    , primary surplus +0%: debt after 30 years = 106.8% of GDP
+  r-g = +2 pp    , primary surplus -2%: debt after 30 years = 187.1% of GDP
+</code></pre>
+<p>Over this sample, the average real T-bill rate (about 1%) was well below real growth (about 3%), so <span class="arithmatex">\(r-g\approx-2\)</span> points.
+With <span class="arithmatex">\(r&lt;g\)</span>, debt stabilizes even with a primary <strong>deficit</strong>: about 1.2% of GDP at a 60% debt ratio. With a balanced primary
+budget, debt falls from 60% to about 33% in 30 years. If <span class="arithmatex">\(r-g\)</span> rises to +2 points, the same policies make debt explode — a
+2% primary deficit takes it to almost 190%. The sign of <span class="arithmatex">\(r-g\)</span> is central to the debate on fiscal space (Blanchard, 2019).
+(The T-bill rate understates the average cost of federal debt, which has longer maturities.)</p>
+</details>
+<h3 id="exercise-82-a-government-spending-multiplier-from-a-recursive-var">Exercise 8.2 — A government-spending multiplier from a recursive VAR</h3>
+<p><em>Data:</em> <code>macrodata</code> — U.S. quarterly real government spending, real GDP and real consumption, per capita, 1959–2009.</p>
+<p>Following Blanchard and Perotti (2002), assume government spending does not respond to output within the quarter, so
+spending is ordered first in a Cholesky VAR.</p>
+<ol>
+<li>Estimate a VAR(4) in log real per-capita government spending, GDP and consumption, with a linear trend.</li>
+<li>Compute the impulse responses to a spending shock, and convert them into <strong>dollar multipliers</strong> using the sample average ratios <span class="arithmatex">\(Y/G\)</span> and <span class="arithmatex">\(C/G\)</span>.</li>
+<li>Report the impact and cumulative 8-quarter multipliers <span class="arithmatex">\(\sum\Delta Y/\sum\Delta G\)</span>. Does consumption rise or fall?</li>
+</ol>
+<pre><code class="language-python">import numpy as np, pandas as pd, statsmodels.api as sm
+from statsmodels.tsa.api import VAR
+m = sm.datasets.macrodata.load_pandas().data
+d = pd.DataFrame({&quot;g&quot;: np.log(m[&quot;realgovt&quot;] / m[&quot;pop&quot;]), &quot;y&quot;: np.log(m[&quot;realgdp&quot;] / m[&quot;pop&quot;]), &quot;c&quot;: np.log(m[&quot;realcons&quot;] / m[&quot;pop&quot;])})
+# TODO: VAR(d).fit(4, trend=&quot;ct&quot;); irf(12).orth_irfs; multipliers = response_y / response_g * (Y/G)
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, pandas as pd, statsmodels.api as sm
+from statsmodels.tsa.api import VAR
+m = sm.datasets.macrodata.load_pandas().data
+d = pd.DataFrame({&quot;g&quot;: np.log(m[&quot;realgovt&quot;] / m[&quot;pop&quot;]), &quot;y&quot;: np.log(m[&quot;realgdp&quot;] / m[&quot;pop&quot;]), &quot;c&quot;: np.log(m[&quot;realcons&quot;] / m[&quot;pop&quot;])})
+res = VAR(d).fit(4, trend=&quot;ct&quot;); ir = res.irf(12).orth_irfs[:, :, 0]          # responses to the spending shock
+YG, CG = (m[&quot;realgdp&quot;] / m[&quot;realgovt&quot;]).mean(), (m[&quot;realcons&quot;] / m[&quot;realgovt&quot;]).mean()
+dG, dY, dC = ir[:, 0], ir[:, 1] * YG, ir[:, 2] * CG                             # in units of G
+print(f&quot;average Y/G = {YG:.2f}, C/G = {CG:.2f}&quot;)
+for h in (0, 1, 2, 4, 8):
+    print(f&quot;  h = {h}: dG {dG[h]:.4f}, dY/dG(0) = {dY[h]/dG[0]:.2f}, dC/dG(0) = {dC[h]/dG[0]:.2f}&quot;)
+print(f&quot;impact multiplier dY/dG = {dY[0]/dG[0]:.2f};  cumulative 8-quarter multiplier = {dY[:9].sum()/dG[:9].sum():.2f};  consumption: {dC[:9].sum()/dG[:9].sum():.2f}&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">average Y/G = 10.49, C/G = 6.97
+  h = 0: dG 0.0193, dY/dG(0) = 0.49, dC/dG(0) = -0.17
+  h = 1: dG 0.0199, dY/dG(0) = 0.02, dC/dG(0) = -0.25
+  h = 2: dG 0.0210, dY/dG(0) = -0.13, dC/dG(0) = -0.40
+  h = 4: dG 0.0253, dY/dG(0) = -0.57, dC/dG(0) = -0.50
+  h = 8: dG 0.0254, dY/dG(0) = -0.76, dC/dG(0) = -0.58
+impact multiplier dY/dG = 0.49;  cumulative 8-quarter multiplier = -0.31;  consumption: -0.37
+</code></pre>
+<p>On impact, output rises by about $0.50 per dollar of spending, but the effect turns negative within a few quarters, and the
+cumulative 8-quarter multiplier is slightly negative, with consumption falling. That is lower than Blanchard and Perotti's
+(2002) estimates (around 1), which use tax data, quarterly fiscal series and a different trend specification. Ramey (2011)
+argues that recursive VARs mismeasure the timing of spending shocks, because spending is anticipated (military buildups are
+announced in advance), and that narrative shocks give multipliers between 0.6 and 1.2. Multiplier estimates are fragile.</p>
+</details>
 </section><section class="box reading"><h2 id="further-reading">Further reading</h2>
-<p>Leeper (1991); Woodford, <em>Interest and Prices</em>; Blanchard, <em>Macroeconomics</em>.</p></section></article>
+<p>Leeper (1991); Woodford, <em>Interest and Prices</em>; Blanchard, <em>Macroeconomics</em>.</p>
+</details></section></article>
     <nav class="pager">
       <a class="card prev" href="07-monetary-policy.html"><small>← Lecture 7</small>Monetary Policy: Rules, Commitment, and the Effective Lower Bound</a>
       <a class="card next" href="09-open-economy.html"><small>Lecture 9 →</small>Open-Economy Macroeconomics and Exchange-Rate Dynamics</a>
