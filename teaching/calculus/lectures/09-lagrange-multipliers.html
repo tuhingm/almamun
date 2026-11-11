@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Calculus · Lecture 9</h3>
       <div class="profile-item"><strong>Part</strong><span>Part III · Optimization and implicit functions</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 2 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 8 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="08-hessian-multivariate-optimization.html">Lecture 8: Hessians and Unconstrained Multivariable Optimization</a></span></div>
       
     </aside>
@@ -88,6 +88,99 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
 </ol>
 </section><section class="box lab"><h2 id="computational-lab">Computational lab</h2>
 <p>Solve constrained quadratic and Cobb–Douglas problems symbolically and numerically. Compare the multiplier with a finite-difference approximation to the optimized value function.</p>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises apply the calculus of this lecture to <strong>real economic data</strong> in Python, mixing symbolic (<code>sympy</code>),
+numerical (<code>scipy</code>) and statistical (<code>statsmodels</code>) tools. Install once with
+<code>pip install sympy scipy numpy pandas statsmodels wooldridge</code>. Try the starter code first, then open the solution.
+Every printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-91-cobbdouglas-demand-and-the-multiplier-as-marginal-utility-of-income">Exercise 9.1 — Cobb–Douglas demand and the multiplier as marginal utility of income</h3>
+<p><em>Data:</em> <code>engel</code> (statsmodels) — 235 Belgian working-class households (Engel's 19th-century data): annual income and food expenditure.</p>
+<p>A household maximizes <span class="arithmatex">\(u(f,o)=\alpha\log f+(1-\alpha)\log o\)</span> subject to <span class="arithmatex">\(f+o=m\)</span> (prices normalized to 1).</p>
+<ol>
+<li>Solve the Lagrangian with <code>sympy</code> for the demands and the multiplier <span class="arithmatex">\(\lambda\)</span>.</li>
+<li>Calibrate <span class="arithmatex">\(\alpha\)</span> to the average food budget share in Engel's data and compute the demands for the median household.</li>
+<li>Verify the envelope theorem numerically: <span class="arithmatex">\(dV/dm=\lambda\)</span>, where <span class="arithmatex">\(V(m)\)</span> is maximized utility.</li>
+<li>Cobb–Douglas implies a constant budget share. Check this against the data by regressing the food share on log income. What does Engel's law say?</li>
+</ol>
+<pre><code class="language-python">import numpy as np, sympy as sp, statsmodels.api as sm
+e = sm.datasets.engel.load_pandas().data
+f, o, lam, a, m = sp.symbols(&quot;f o lambda alpha m&quot;, positive=True)
+Lag = a * sp.log(f) + (1 - a) * sp.log(o) + lam * (m - f - o)
+# TODO: sp.solve([diff(Lag, f), diff(Lag, o), diff(Lag, lam)], [f, o, lam])
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, sympy as sp, statsmodels.api as sm, statsmodels.formula.api as smf
+e = sm.datasets.engel.load_pandas().data
+f, o, lam, a, m = sp.symbols(&quot;f o lambda alpha m&quot;, positive=True)
+Lag = a * sp.log(f) + (1 - a) * sp.log(o) + lam * (m - f - o)
+sol = sp.solve([sp.diff(Lag, v) for v in (f, o, lam)], [f, o, lam], dict=True)[0]
+print(&quot;demands and multiplier:&quot;, sol)
+alpha = (e[&quot;foodexp&quot;] / e[&quot;income&quot;]).mean(); mmed = e[&quot;income&quot;].median()
+vals = {a: alpha, m: mmed}
+print(f&quot;alpha = mean food share = {alpha:.4f};  median income {mmed:.1f}: food {float(sol[f].subs(vals)):.1f}, other {float(sol[o].subs(vals)):.1f}, lambda = {float(sol[lam].subs(vals)):.6f}&quot;)
+V = sp.lambdify(m, (a * sp.log(sol[f]) + (1 - a) * sp.log(sol[o])).subs(a, alpha))
+h = 1e-3
+print(f&quot;envelope check: dV/dm numerically = {(V(mmed + h) - V(mmed - h)) / (2*h):.6f}  vs lambda = {1/mmed:.6f}&quot;)
+r = smf.ols(&quot;I(foodexp/income) ~ np.log(income)&quot;, data=e).fit(cov_type=&quot;HC1&quot;)
+print(f&quot;food share on log income: slope {r.params.iloc[1]:.4f} (robust se {r.bse.iloc[1]:.4f})&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">demands and multiplier: {f: alpha*m, lambda: 1/m, o: m*(1 - alpha)}
+alpha = mean food share = 0.6558;  median income 884.0: food 579.7, other 304.3, lambda = 0.001131
+envelope check: dV/dm numerically = 0.001131  vs lambda = 0.001131
+food share on log income: slope -0.0863 (robust se 0.0144)
+</code></pre>
+<p>The Lagrangian gives the familiar Cobb–Douglas demands <span class="arithmatex">\(f=\alpha m\)</span> and <span class="arithmatex">\(o=(1-\alpha)m\)</span>, with <span class="arithmatex">\(\lambda=1/m\)</span>. The
+envelope theorem holds to six decimals: the multiplier is the marginal utility of income. Calibrated to Engel's data, the
+average household spends 66% of income on food. But Cobb–Douglas implies a <strong>constant</strong> budget share, and the data reject
+it: the food share falls by about 8.6 percentage points for each log point of income. That is Engel's law — food is a
+necessity — and it calls for non-homothetic preferences such as Stone–Geary.</p>
+</details>
+<h3 id="exercise-92-restricted-least-squares-via-a-lagrangian-constant-returns-in-investment">Exercise 9.2 — Restricted least squares via a Lagrangian: constant returns in investment</h3>
+<p><em>Data:</em> <code>grunfeld</code> (statsmodels) — 11 U.S. firms, 1935–1954.</p>
+<p>In <span class="arithmatex">\(\log I=\beta_0+\beta_1\log V+\beta_2\log K+u\)</span>, impose <span class="arithmatex">\(\beta_1+\beta_2=1\)</span>.</p>
+<ol>
+<li>Write the Lagrangian for minimizing SSR subject to <span class="arithmatex">\(R\beta=r\)</span> and derive <span class="arithmatex">\(\tilde\beta=\widehat\beta-(X'X)^{-1}R'[R(X'X)^{-1}R']^{-1}(R\widehat\beta-r)\)</span>.</li>
+<li>Compute <span class="arithmatex">\(\tilde\beta\)</span> and the multiplier, and check the result by substituting the constraint into the regression.</li>
+<li>Compute the <span class="arithmatex">\(F\)</span> statistic from the restricted and unrestricted SSRs. Interpret the size of the multiplier.</li>
+</ol>
+<pre><code class="language-python">import numpy as np, statsmodels.api as sm
+g = sm.datasets.grunfeld.load_pandas().data.query(&quot;invest &gt; 0 and capital &gt; 0&quot;)
+y = np.log(g[&quot;invest&quot;].to_numpy()); X = np.column_stack([np.ones(len(g)), np.log(g[&quot;value&quot;]), np.log(g[&quot;capital&quot;])])
+R = np.array([[0, 1, 1]]); r = np.array([1.0])
+# TODO: restricted estimator, multiplier = 2 [R (X'X)^-1 R']^-1 (R b - r)
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, statsmodels.api as sm
+from scipy import stats
+g = sm.datasets.grunfeld.load_pandas().data.query(&quot;invest &gt; 0 and capital &gt; 0&quot;)
+y = np.log(g[&quot;invest&quot;].to_numpy()); X = np.column_stack([np.ones(len(g)), np.log(g[&quot;value&quot;]), np.log(g[&quot;capital&quot;])])
+R = np.array([[0.0, 1.0, 1.0]]); r = np.array([1.0]); n, k = X.shape
+XtXi = np.linalg.inv(X.T @ X); b = XtXi @ X.T @ y
+mult = 2 * np.linalg.solve(R @ XtXi @ R.T, R @ b - r)
+bt = b - XtXi @ R.T @ np.linalg.solve(R @ XtXi @ R.T, R @ b - r)
+print(f&quot;unrestricted: {b.round(4)}  (b1 + b2 = {b[1] + b[2]:.4f})&quot;)
+print(f&quot;restricted:   {bt.round(4)}  (b1 + b2 = {bt[1] + bt[2]:.4f});  Lagrange multiplier = {mult[0]:.3f}&quot;)
+ys = y - X[:, 2]; Xs = np.column_stack([np.ones(n), X[:, 1] - X[:, 2]])          # substitute b2 = 1 - b1
+c = np.linalg.lstsq(Xs, ys, rcond=None)[0]
+print(f&quot;substitution method: b0 = {c[0]:.4f}, b1 = {c[1]:.4f}, b2 = {1 - c[1]:.4f}&quot;)
+ssr_u, ssr_r = np.sum((y - X @ b)**2), np.sum((y - X @ bt)**2)
+F = (ssr_r - ssr_u) / (ssr_u / (n - k))
+print(f&quot;F(1, {n-k}) = {F:.2f}, p = {stats.f.sf(F, 1, n - k):.2e}&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">unrestricted: [-2.7772  0.8032  0.3755]  (b1 + b2 = 1.1786)
+restricted:   [-1.7826  0.6967  0.3033]  (b1 + b2 = 1.0000);  Lagrange multiplier = 115.227
+substitution method: b0 = -1.7826, b1 = 0.6967, b2 = 0.3033
+F(1, 217) = 36.03, p = 8.05e-09
+</code></pre>
+<p>The unrestricted elasticities sum to 1.18. Imposing <span class="arithmatex">\(\beta_1+\beta_2=1\)</span> through the Lagrangian reproduces the
+substitution method exactly. The large multiplier says the constraint is costly in terms of fit, and the <span class="arithmatex">\(F\)</span> test rejects
+it decisively (<span class="arithmatex">\(F\approx36\)</span>): investment rises more than proportionally with the scale of the firm. The Lagrange
+multiplier and the <span class="arithmatex">\(F\)</span> statistic carry the same information, which is the logic of the LM test.</p>
+</details>
 </section><section class="box reading"><h2 id="reading">Reading</h2>
 <p>Sundaram, <em>A First Course in Optimization Theory</em>; Chiang and Wainwright, <em>Fundamental Methods of Mathematical Economics</em>; Simon and Blume, <em>Mathematics for Economists</em>.</p></section></article>
     <nav class="pager">

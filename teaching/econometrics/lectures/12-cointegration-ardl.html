@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Econometrics · Lecture 12</h3>
       <div class="profile-item"><strong>Part</strong><span>Part IV · Time-series econometrics</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 13 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 20 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="11-var-svar.html">Lecture 11: VAR and Structural VAR: Dynamic Interactions and Shock Identification</a></span></div>
       
     </aside>
@@ -189,6 +189,115 @@ m = VECM(np.column_stack([y, x]), k_ar_diff=1, coint_rank=1, deterministic=&quot
 print(&quot;alpha (loadings):&quot;, m.alpha.ravel().round(3))
 </code></pre>
 <p>Tasks: (i) explain why the estimated <span class="arithmatex">\(\beta\)</span> differs from <span class="arithmatex">\(-1.5\)</span> (measurement noise in <span class="arithmatex">\(x\)</span> relative to the trend); (ii) estimate DOLS with 2 leads and lags and HAC errors, and compare with static OLS; (iii) re-run with other seeds and note how often the <span class="arithmatex">\(r\le1\)</span> hypothesis is (wrongly) rejected: the trace test over-rejects in small samples and is sensitive to the deterministic specification; (iv) simulate two <em>independent</em> random walks and confirm that EG and Johansen rarely find cointegration; (v) implement the ARDL bounds test with <code>statsmodels.tsa.ardl.UECM</code> and its <code>bounds_test</code> method. In R, use <code>urca::ca.jo</code>, <code>cointReg</code> (DOLS/FMOLS) and <code>ARDL::bounds_f_test</code>.</p>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises use <strong>real data</strong> and run in Python. Install the packages once with
+<code>pip install wooldridge statsmodels linearmodels scipy</code>. The <code>wooldridge</code> package contains the datasets
+from Wooldridge's <em>Introductory Econometrics</em>; <code>statsmodels</code> ships U.S. and Danish macroeconomic series.
+Try the starter code first, then open the solution. Every printed result below was produced by running the solution code exactly as shown.</p>
+<h3 id="exercise-121-danish-money-demand-johansens-classic-dataset">Exercise 12.1 — Danish money demand: Johansen's classic dataset</h3>
+<p><em>Data:</em> <code>danish_data</code> (statsmodels) — Danish quarterly data, 1974Q1–1987Q3 (Johansen and Juselius, 1990): log real money <code>lrm</code>, log real income <code>lry</code>, bond rate <code>ibo</code>, deposit rate <code>ide</code>.</p>
+<ol>
+<li>Run the Johansen trace test on <code>(lrm, lry, ibo, ide)</code> with a constant and one lagged difference.</li>
+<li>Assuming rank 1, estimate the VECM and normalize the cointegrating vector on money.</li>
+<li>Interpret the income elasticity and the interest-rate coefficients, and the adjustment coefficients.</li>
+</ol>
+<pre><code class="language-python">import statsmodels.api as sm
+from statsmodels.tsa.vector_ar.vecm import coint_johansen, VECM
+d = sm.datasets.danish_data.load_pandas().data[[&quot;lrm&quot;, &quot;lry&quot;, &quot;ibo&quot;, &quot;ide&quot;]]
+j = coint_johansen(d, det_order=0, k_ar_diff=1)
+# TODO: print j.lr1 against j.cvt[:,1]; VECM(d, k_ar_diff=1, coint_rank=1, deterministic=&quot;ci&quot;).fit()
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, pandas as pd, statsmodels.api as sm
+from statsmodels.tsa.vector_ar.vecm import coint_johansen, VECM
+d = sm.datasets.danish_data.load_pandas().data[[&quot;lrm&quot;, &quot;lry&quot;, &quot;ibo&quot;, &quot;ide&quot;]]
+j = coint_johansen(d, det_order=0, k_ar_diff=1)
+print(pd.DataFrame({&quot;H0: r &lt;=&quot;: range(4), &quot;trace&quot;: j.lr1.round(2), &quot;5% cv&quot;: j.cvt[:, 1]}).to_string(index=False))
+v = VECM(d, k_ar_diff=1, coint_rank=1, deterministic=&quot;ci&quot;).fit()
+beta = v.beta[:, 0] / v.beta[0, 0]
+print(&quot;\ncointegrating vector (normalized on lrm):&quot;, dict(zip(d.columns, beta.round(3))))
+print(&quot;long run: lrm =&quot;, &quot; + &quot;.join(f&quot;{-b:.3f}*{c}&quot; for b, c in zip(beta[1:], d.columns[1:])), &quot;+ const&quot;)
+print(&quot;adjustment coefficients alpha:&quot;, dict(zip(d.columns, v.alpha[:, 0].round(3))))
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">H0: r &lt;=  trace   5% cv
+        0  48.80 47.8545
+        1  17.29 29.7961
+        2   7.14 15.4943
+        3   0.56  3.8415
+
+cointegrating vector (normalized on lrm): {'lrm': np.float64(1.0), 'lry': np.float64(-0.969), 'ibo': np.float64(5.403), 'ide': np.float64(-4.14)}
+long run: lrm = 0.969*lry + -5.403*ibo + 4.140*ide + const
+adjustment coefficients alpha: {'lrm': np.float64(-0.3), 'lry': np.float64(0.027), 'ibo': np.float64(0.004), 'ide': np.float64(0.02)}
+</code></pre>
+<p>The trace test rejects <span class="arithmatex">\(r=0\)</span> only narrowly (48.8 against a critical value of 47.9) and does not reject <span class="arithmatex">\(r\le1\)</span> in this
+short sample of 55 quarters, so one cointegrating relation — as Johansen and Juselius (1990) found with seasonal dummies
+and a restricted constant. Under
+rank one, the long-run income elasticity of money demand is close to one, and the coefficients on the two interest rates
+have opposite signs: the bond rate (the opportunity cost of holding money) lowers money demand, and the deposit rate (the
+own rate on money) raises it — with similar magnitudes, so the spread matters. Money is the variable that adjusts to
+disequilibrium, which supports reading the relation as <strong>money demand</strong>. The sensitivity of the rank test to the
+deterministic terms is part of the lesson.</p>
+</details>
+<h3 id="exercise-122-the-consumptionincome-relation-englegranger-dols-and-the-error-correction-model">Exercise 12.2 — The consumption–income relation: Engle–Granger, DOLS and the error-correction model</h3>
+<p><em>Data:</em> <code>macrodata</code> — U.S. quarterly real consumption <code>realcons</code> and real disposable income <code>realdpi</code>, 1959–2009.</p>
+<ol>
+<li>Test both logs for a unit root (ADF with trend).</li>
+<li>Run the Engle–Granger cointegration test of <code>log(realcons)</code> on <code>log(realdpi)</code>.</li>
+<li>Estimate the cointegrating slope by static OLS and by DOLS with 2 leads and lags (HAC standard errors).</li>
+<li>Estimate the error-correction model <span class="arithmatex">\(\Delta c_t=\alpha+\gamma\,\widehat z_{t-1}+\delta\,\Delta y_t+\varepsilon_t\)</span>. How fast does consumption close the gap?</li>
+</ol>
+<pre><code class="language-python">import numpy as np, pandas as pd, statsmodels.api as sm, statsmodels.formula.api as smf
+from statsmodels.tsa.stattools import coint, adfuller
+m = sm.datasets.macrodata.load_pandas().data
+d = pd.DataFrame({&quot;c&quot;: np.log(m[&quot;realcons&quot;]), &quot;y&quot;: np.log(m[&quot;realdpi&quot;])})
+# TODO: coint(d.c, d.y); DOLS: add dy leads/lags; ECM with lagged residual
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, pandas as pd, statsmodels.api as sm, statsmodels.formula.api as smf
+from statsmodels.tsa.stattools import coint, adfuller
+m = sm.datasets.macrodata.load_pandas().data
+d = pd.DataFrame({&quot;c&quot;: np.log(m[&quot;realcons&quot;]), &quot;y&quot;: np.log(m[&quot;realdpi&quot;])})
+for v in (&quot;c&quot;, &quot;y&quot;):
+    a = adfuller(d[v], regression=&quot;ct&quot;, autolag=&quot;AIC&quot;); print(f&quot;ADF(ct) {v}: t = {a[0]:.2f}, p = {a[1]:.3f}&quot;)
+t, p, cv = coint(d[&quot;c&quot;], d[&quot;y&quot;])
+print(f&quot;Engle-Granger: t = {t:.2f}, p = {p:.4f}, 5% cv = {cv[1]:.2f}&quot;)
+
+static = smf.ols(&quot;c ~ y&quot;, data=d).fit()
+d[&quot;dy&quot;] = d[&quot;y&quot;].diff()
+for k in (-2, -1, 1, 2):
+    d[f&quot;dy_{k}&quot;] = d[&quot;dy&quot;].shift(k)
+d = d.rename(columns={&quot;dy_-1&quot;: &quot;dy_m1&quot;, &quot;dy_-2&quot;: &quot;dy_m2&quot;})         # leads of dy (k = -1, -2)
+dols = smf.ols(&quot;c ~ y + dy + dy_1 + dy_2 + dy_m1 + dy_m2&quot;, data=d.dropna()).fit(cov_type=&quot;HAC&quot;, cov_kwds={&quot;maxlags&quot;: 4})
+print(f&quot;static OLS slope {static.params['y']:.4f};  DOLS slope {dols.params['y']:.4f} (HAC se {dols.bse['y']:.4f})&quot;)
+w = dols.t_test(&quot;y = 1&quot;)
+print(f&quot;DOLS test of slope = 1: t = {float(np.squeeze(w.tvalue)):.2f}&quot;)
+
+d[&quot;z&quot;] = static.resid; d[&quot;dc&quot;] = d[&quot;c&quot;].diff(); d[&quot;z1&quot;] = d[&quot;z&quot;].shift(1)
+ecm = smf.ols(&quot;dc ~ z1 + dy&quot;, data=d.dropna(subset=[&quot;dc&quot;, &quot;z1&quot;, &quot;dy&quot;])).fit(cov_type=&quot;HAC&quot;, cov_kwds={&quot;maxlags&quot;: 4})
+g = ecm.params[&quot;z1&quot;]
+print(f&quot;ECM: adjustment {g:.4f} (t = {ecm.tvalues['z1']:.2f}), short-run income effect {ecm.params['dy']:.3f}&quot;)
+print(f&quot;half-life of a deviation from equilibrium: {np.log(0.5)/np.log(1+g):.1f} quarters&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">ADF(ct) c: t = -2.54, p = 0.309
+ADF(ct) y: t = -1.62, p = 0.785
+Engle-Granger: t = -2.54, p = 0.2620, 5% cv = -3.37
+static OLS slope 1.0320;  DOLS slope 1.0359 (HAC se 0.0077)
+DOLS test of slope = 1: t = 4.65
+ECM: adjustment -0.0473 (t = -1.74), short-run income effect 0.360
+half-life of a deviation from equilibrium: 14.3 quarters
+</code></pre>
+<p>Both series are I(1). The Engle–Granger test, with its special critical values, does <strong>not</strong> reject the null of no
+cointegration (p ≈ 0.26). That is a common finding for consumption and income in levels: the consumption–income ratio
+drifted upward from the 1980s as the saving rate fell, so the gap looks persistent. The remaining steps are therefore
+conditional on cointegration — exactly the situation where a researcher must say so explicitly. The long-run elasticity is close to but significantly above one in the DOLS regression, which uses
+valid HAC inference unlike the static regression. The error-correction coefficient is negative, as theory requires, but
+small: consumption closes only a few percent of the gap each quarter. Short-run consumption responds much less than
+one-for-one to income growth — the consumption smoothing that permanent-income theory predicts.</p>
+</details>
 </section><section class="box reading"><h2 id="reading">Reading</h2>
 <p><strong>Required:</strong> Hamilton, <em>Time Series Analysis</em>, chapters 19–20; Juselius, <em>The Cointegrated VAR Model</em> (2006), chapters 1–7.
 <strong>Further:</strong> Engle and Granger (1987), "Co-integration and error correction: representation, estimation, and testing", <em>Econometrica</em> 55(2); Johansen (1991), <em>Econometrica</em> 59(6); Stock and Watson (1993), "A simple estimator of cointegrating vectors in higher order integrated systems", <em>Econometrica</em> 61(4); Phillips and Hansen (1990), <em>Review of Economic Studies</em> 57(1); Pesaran, Shin and Smith (2001), "Bounds testing approaches to the analysis of level relationships", <em>Journal of Applied Econometrics</em> 16(3); Sims, Stock and Watson (1990), <em>Econometrica</em> 58(1); Toda and Yamamoto (1995), <em>Journal of Econometrics</em> 66(1–2).</p></section></article>

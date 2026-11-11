@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Statistics · Lecture 13</h3>
       <div class="profile-item"><strong>Part</strong><span>Part IV · Statistical modeling</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 2 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 8 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="12-mixed-models.html">Lecture 12: Linear Mixed Models and Hierarchical Data</a></span></div>
       
     </aside>
@@ -93,6 +93,103 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
 </ol>
 </section><section class="box lab"><h2 id="computational-lab">Computational lab</h2>
 <p>Compare covariance- and correlation-based PCA. Report eigenvalues, loadings, scores, scree plot, and reconstruction error; evaluate component stability by bootstrap.</p>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises use <strong>real data</strong> in Python. Install once with
+<code>pip install wooldridge statsmodels scipy numpy pandas</code>. The <code>wooldridge</code> package holds survey, experimental and
+administrative datasets; <code>scipy.stats</code> and <code>statsmodels</code> provide the inference tools. Try the starter code first, then
+open the solution. Every printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-131-principal-components-of-the-us-yield-curve">Exercise 13.1 — Principal components of the U.S. yield curve</h3>
+<p><em>Data:</em> <code>intqrt</code> — U.S. quarterly Treasury bill yields at 3, 6 and 12 months (<code>r3</code>, <code>r6</code>, <code>r12</code>).</p>
+<ol>
+<li>Compute the correlation matrix of the three yields.</li>
+<li>Run PCA on the standardized yields. Report the eigenvalues, the share of variance explained, and the loadings.</li>
+<li>Interpret the first two components (the "level" and "slope" factors of the term structure).</li>
+<li>How well does the first component alone reconstruct the 12-month yield?</li>
+</ol>
+<pre><code class="language-python">import numpy as np, wooldridge as wd
+d = wd.data(&quot;intqrt&quot;)[[&quot;r3&quot;, &quot;r6&quot;, &quot;r12&quot;]].dropna()
+Z = (d - d.mean()) / d.std()
+# TODO: eigenvalues/eigenvectors of the correlation matrix (np.linalg.eigh), sorted descending
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, pandas as pd, wooldridge as wd
+d = wd.data(&quot;intqrt&quot;)[[&quot;r3&quot;, &quot;r6&quot;, &quot;r12&quot;]].dropna()
+print(d.corr().round(4).to_string())
+Z = ((d - d.mean()) / d.std()).to_numpy()
+val, vec = np.linalg.eigh(np.corrcoef(Z, rowvar=False)); o = val.argsort()[::-1]; val, vec = val[o], vec[:, o]
+vec = vec * np.sign(vec[0])                               # sign convention: first loading positive
+print(&quot;\neigenvalues:&quot;, val.round(4), &quot; share explained:&quot;, (val / val.sum()).round(4))
+print(pd.DataFrame(vec, index=d.columns, columns=[&quot;PC1&quot;, &quot;PC2&quot;, &quot;PC3&quot;]).round(3).to_string())
+pc1 = Z @ vec[:, 0]
+r12_hat = np.outer(pc1, vec[:, 0])[:, 2] * d[&quot;r12&quot;].std() + d[&quot;r12&quot;].mean()
+print(f&quot;\nRMSE of 12-month yield reconstructed from PC1 alone: {np.sqrt(np.mean((r12_hat - d['r12'])**2)):.3f} percentage points (yield sd {d['r12'].std():.2f})&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">r3      r6     r12
+r3   1.0000  0.9966  0.9893
+r6   0.9966  1.0000  0.9970
+r12  0.9893  0.9970  1.0000
+
+eigenvalues: [2.9886 0.0107 0.0007]  share explained: [0.9962 0.0036 0.0002]
+       PC1    PC2    PC3
+r3   0.577  0.716  0.393
+r6   0.578 -0.018 -0.816
+r12  0.577 -0.698  0.424
+
+RMSE of 12-month yield reconstructed from PC1 alone: 0.224 percentage points (yield sd 3.07)
+</code></pre>
+<p>The three yields are almost perfectly correlated, and the first component explains 99.6% of their variance. Its loadings
+are equal across maturities: it is the <strong>level</strong> factor. The second component has opposite signs at short and long
+maturities: the <strong>slope</strong> factor. The third, with a hump-shaped loading, is curvature. Reconstructing the 12-month yield from
+the level factor alone leaves an error of only 0.22 percentage points against a standard deviation of 3.07. This is
+Litterman and Scheinkman's (1991) finding in miniature.</p>
+</details>
+<h3 id="exercise-132-pca-and-a-crime-index-across-us-states">Exercise 13.2 — PCA and a crime index across U.S. states</h3>
+<p><em>Data:</em> <code>statecrime</code> (statsmodels) — 51 U.S. states and DC: violent crime and murder rates, % high-school graduates, % below poverty, % single-parent households, % white, % urban.</p>
+<ol>
+<li>Run PCA on the seven standardized variables. How many components have eigenvalue above one (Kaiser rule)?</li>
+<li>Interpret PC1 using the loadings.</li>
+<li>Regress the violent crime rate on the scores of the first two components of the five <strong>non-crime</strong> variables only (principal-components regression). Compare its <span class="arithmatex">\(R^2\)</span> with the regression on all five covariates, and check how collinear the covariates actually are. What does the comparison teach about PCR?</li>
+</ol>
+<pre><code class="language-python">import numpy as np, statsmodels.api as sm
+d = sm.datasets.statecrime.load_pandas().data
+# TODO: standardize, eigen-decompose the correlation matrix; principal-components regression
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, pandas as pd, statsmodels.api as sm
+d = sm.datasets.statecrime.load_pandas().data
+def pca(X):
+    Z = (X - X.mean()) / X.std(); val, vec = np.linalg.eigh(Z.corr()); o = val.argsort()[::-1]
+    vec = vec[:, o] * np.sign(vec[:, o].sum(0))           # sign convention for readability
+    return val[o], pd.DataFrame(vec, index=X.columns), Z.to_numpy() @ vec
+val, load, _ = pca(d)
+print(&quot;eigenvalues:&quot;, val.round(3), &quot; -&gt; components with eigenvalue &gt; 1:&quot;, int((val &gt; 1).sum()))
+print(&quot;PC1 loadings:&quot;, load[0].round(3).to_dict())
+X = d[[&quot;hs_grad&quot;, &quot;poverty&quot;, &quot;single&quot;, &quot;white&quot;, &quot;urban&quot;]]
+v2, l2, S = pca(X)
+pcr = sm.OLS(d[&quot;violent&quot;], sm.add_constant(S[:, :2])).fit()
+full = sm.OLS(d[&quot;violent&quot;], sm.add_constant(X)).fit()
+print(f&quot;\nPC regression (2 components of 5 covariates): R2 = {pcr.rsquared:.3f};  full regression on 5 covariates: R2 = {full.rsquared:.3f}&quot;)
+print(f&quot;condition number of the 5 standardized covariates: {np.sqrt(v2.max()/v2.min()):.1f}&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">eigenvalues: [4.062 1.456 0.666 0.472 0.156 0.122 0.065]  -&gt; components with eigenvalue &gt; 1: 2
+PC1 loadings: {'violent': 0.431, 'murder': 0.451, 'hs_grad': -0.334, 'poverty': 0.297, 'single': 0.474, 'white': -0.37, 'urban': 0.223}
+
+PC regression (2 components of 5 covariates): R2 = 0.546;  full regression on 5 covariates: R2 = 0.681
+condition number of the 5 standardized covariates: 4.5
+</code></pre>
+<p>Two components have eigenvalues above one. PC1 loads positively on violence, murder, single-parent households and poverty
+and negatively on high-school graduation and the white share: a social-disadvantage index. Two components of the five covariates explain about 55% of the variation in violent crime,
+against 68% for the regression on all five. The covariates are only mildly collinear (condition number 4.5), so reducing
+dimension buys little stability here and costs some fit. More fundamentally, the leading components summarize the
+<strong>covariates</strong>, not the <strong>outcome</strong>: PCR can discard a low-variance direction that matters for prediction. Partial least
+squares and penalized regression (ridge, lasso) use the outcome when choosing directions. PCR earns its keep when the
+number of covariates is large relative to <span class="arithmatex">\(n\)</span> or the covariates are nearly collinear, as with the yields in the previous
+exercise.</p>
+</details>
 </section><section class="box reading"><h2 id="reading">Reading</h2>
 <p>Jolliffe and Cadima, “Principal Component Analysis: A Review and Recent Developments”; Johnson and Wichern, <em>Applied Multivariate Statistical Analysis</em>; Anderson, <em>An Introduction to Multivariate Statistical Analysis</em>.</p></section></article>
     <nav class="pager">

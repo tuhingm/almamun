@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Advanced Macroeconomics · Lecture 5</h3>
       <div class="profile-item"><strong>Part</strong><span>Part II · Nominal rigidities and policy</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 2 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 8 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="04-rbc.html">Lecture 4: Real Business Cycle Models and Competitive Equilibrium</a></span></div>
       
     </aside>
@@ -92,6 +92,105 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
 <li>Compare Calvo and Rotemberg pricing.</li>
 <li>Explain why marginal cost is central to price-setting.</li>
 </ol>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises combine <strong>real U.S. macroeconomic data</strong> (the quarterly <code>macrodata</code> series in <code>statsmodels</code>, 1959–2009,
+and annual series from the <code>wooldridge</code> package) with <strong>numerical solutions of the models</strong> in this lecture. Install once
+with <code>pip install numpy scipy pandas statsmodels wooldridge</code>. Try the starter code first, then open the solution. Every
+printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-51-from-price-stickiness-to-the-slope-of-the-phillips-curve">Exercise 5.1 — From price stickiness to the slope of the Phillips curve</h3>
+<p><em>Data:</em> Calibration: <span class="arithmatex">\(\beta=0.99\)</span>, <span class="arithmatex">\(\sigma=1\)</span>, <span class="arithmatex">\(\varphi=1\)</span> (Galí, 2015, ch. 3, without strategic complementarities).</p>
+<p>In the Calvo model, a share <span class="arithmatex">\(\theta\)</span> of firms cannot reset prices each quarter, so the average price duration is <span class="arithmatex">\(1/(1-\theta)\)</span>, and the NKPC slope on the output gap is
+<span class="arithmatex">\(\kappa=\frac{(1-\theta)(1-\beta\theta)}{\theta}(\sigma+\varphi)\)</span>.</p>
+<ol>
+<li>Compute <span class="arithmatex">\(\kappa\)</span> for average durations of 2, 3, 4, 6 and 8 quarters.</li>
+<li>Micro evidence (Bils and Klenow, 2004; Nakamura and Steinsson, 2008) suggests durations of 4–11 months for regular prices. What range of <span class="arithmatex">\(\kappa\)</span> does that imply?</li>
+<li>Invert the mapping numerically: what duration is implied by a slope of <span class="arithmatex">\(\kappa=0.01\)</span>, roughly what many macro estimates find?</li>
+</ol>
+<pre><code class="language-python">import numpy as np
+from scipy import optimize
+b, s, phi = 0.99, 1.0, 1.0
+kappa = lambda th: (1 - th) * (1 - b * th) / th * (s + phi)
+# TODO: durations D -&gt; theta = 1 - 1/D; invert kappa(theta) = 0.01 with brentq
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np
+from scipy import optimize
+b, s, phi = 0.99, 1.0, 1.0
+kappa = lambda th: (1 - th) * (1 - b * th) / th * (s + phi)
+for D in (2, 3, 4, 6, 8):
+    th = 1 - 1 / D
+    print(f&quot;duration {D} quarters: theta = {th:.3f}, kappa = {kappa(th):.4f}&quot;)
+lo, hi = kappa(1 - 1 / (4 / 3)), kappa(1 - 1 / (11 / 3))
+print(f&quot;durations of 4-11 months (1.33-3.67 quarters): kappa between {hi:.3f} and {lo:.3f}&quot;)
+th = optimize.brentq(lambda t: kappa(t) - 0.01, 0.5, 0.9999)
+print(f&quot;kappa = 0.01 requires theta = {th:.4f}, i.e. an average price duration of {1/(1-th):.1f} quarters ({1/(1-th)/4:.1f} years)&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">duration 2 quarters: theta = 0.500, kappa = 1.0100
+duration 3 quarters: theta = 0.667, kappa = 0.3400
+duration 4 quarters: theta = 0.750, kappa = 0.1717
+duration 6 quarters: theta = 0.833, kappa = 0.0700
+duration 8 quarters: theta = 0.875, kappa = 0.0382
+durations of 4-11 months (1.33-3.67 quarters): kappa between 0.210 and 4.515
+kappa = 0.01 requires theta = 0.9361, i.e. an average price duration of 15.7 quarters (3.9 years)
+</code></pre>
+<p>The slope <span class="arithmatex">\(\kappa\)</span> falls steeply with price duration: from 1.0 at 2 quarters to 0.17 at one year and 0.04 at two years.
+Micro evidence on regular price durations of 4–11 months implies <span class="arithmatex">\(\kappa\)</span> of 0.2 or more. Yet a slope of 0.01, typical of
+aggregate estimates, would require prices to stay fixed for almost four years on average. This micro–macro gap is why
+models add strategic complementarities (real rigidities), which flatten the Phillips curve for a given frequency of price
+changes.</p>
+</details>
+<h3 id="exercise-52-estimating-a-new-keynesian-phillips-curve-by-gmm">Exercise 5.2 — Estimating a New Keynesian Phillips curve by GMM</h3>
+<p><em>Data:</em> <code>macrodata</code> — U.S. quarterly CPI inflation and unemployment, 1960–2007.</p>
+<p>Estimate the hybrid NKPC <span class="arithmatex">\(\pi_t=\gamma_f E_t\pi_{t+1}+\gamma_b\pi_{t-1}+\kappa\,x_t+\varepsilon_t\)</span>, with the output gap proxied by the negative unemployment gap <span class="arithmatex">\(x_t=-(u_t-\bar u_t)\)</span>, <span class="arithmatex">\(\bar u_t\)</span> the HP trend of unemployment.</p>
+<ol>
+<li>Replace <span class="arithmatex">\(E_t\pi_{t+1}\)</span> with realized <span class="arithmatex">\(\pi_{t+1}\)</span> and estimate by 2SLS with instruments dated <span class="arithmatex">\(t-1\)</span> and earlier (lags 1–4 of inflation, lags 1–2 of the gap and of the T-bill rate).</li>
+<li>Report <span class="arithmatex">\(\gamma_f\)</span>, <span class="arithmatex">\(\gamma_b\)</span> and <span class="arithmatex">\(\kappa\)</span>. Is the curve flat? Is inflation mostly forward- or backward-looking?</li>
+<li>Discuss why weak instruments plague NKPC estimation (Mavroeidis, Plagborg-Møller and Stock, 2014).</li>
+</ol>
+<pre><code class="language-python">import numpy as np, pandas as pd, statsmodels.api as sm
+from statsmodels.tsa.filters.hp_filter import hpfilter
+from linearmodels.iv import IV2SLS
+m = sm.datasets.macrodata.load_pandas().data
+# TODO: x = -(u - HP trend of u); pi_lead = pi.shift(-1); instruments: lags
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, pandas as pd, statsmodels.api as sm, statsmodels.formula.api as smf
+from statsmodels.tsa.filters.hp_filter import hpfilter
+from linearmodels.iv import IV2SLS
+m = sm.datasets.macrodata.load_pandas().data
+d = pd.DataFrame({&quot;year&quot;: m[&quot;year&quot;], &quot;pi&quot;: m[&quot;infl&quot;], &quot;x&quot;: -hpfilter(m[&quot;unemp&quot;], 1600)[0], &quot;i&quot;: m[&quot;tbilrate&quot;]})
+d[&quot;pi_f&quot;], d[&quot;pi_b&quot;] = d[&quot;pi&quot;].shift(-1), d[&quot;pi&quot;].shift(1)
+Z = []
+for k in (2, 3, 4):
+    d[f&quot;pi_l{k}&quot;] = d[&quot;pi&quot;].shift(k); Z.append(f&quot;pi_l{k}&quot;)
+for v in (&quot;x&quot;, &quot;i&quot;):
+    for k in (1, 2):
+        d[f&quot;{v}_l{k}&quot;] = d[v].shift(k); Z.append(f&quot;{v}_l{k}&quot;)
+d = d[(d.year &gt;= 1960) &amp; (d.year &lt;= 2007)].dropna()
+iv = IV2SLS.from_formula(f&quot;pi ~ 1 + pi_b + x + [pi_f ~ {' + '.join(Z)}]&quot;, data=d).fit(cov_type=&quot;kernel&quot;)
+print(iv.params[[&quot;pi_f&quot;, &quot;pi_b&quot;, &quot;x&quot;]].round(3).to_string())
+print(&quot;HAC se:&quot;, iv.std_errors[[&quot;pi_f&quot;, &quot;pi_b&quot;, &quot;x&quot;]].round(3).to_dict())
+fs = smf.ols(f&quot;pi_f ~ pi_b + x + {' + '.join(Z)}&quot;, data=d).fit(cov_type=&quot;HAC&quot;, cov_kwds={&quot;maxlags&quot;: 4})
+F = fs.wald_test(&quot;, &quot;.join(f&quot;{z} = 0&quot; for z in Z), scalar=True).statistic / len(Z)
+print(f&quot;first-stage F for pi_(t+1) on excluded instruments: {F:.1f};  gamma_f + gamma_b = {iv.params['pi_f'] + iv.params['pi_b']:.3f}&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">pi_f    0.854
+pi_b    0.090
+x       0.152
+HAC se: {'pi_f': 0.119, 'pi_b': 0.109, 'x': 0.145}
+first-stage F for pi_(t+1) on excluded instruments: 12.9;  gamma_f + gamma_b = 0.944
+</code></pre>
+<p>The estimates put most weight on expected future inflation (<span class="arithmatex">\(\gamma_f\approx0.85\)</span>) and little on lagged inflation, with the
+two summing to slightly below one. The slope on the unemployment gap is positive but imprecise — not significantly
+different from zero: the Phillips curve is flat and poorly identified. The first-stage <span class="arithmatex">\(F\)</span> of about 13 looks acceptable,
+but NKPC estimates are notoriously sensitive to the instrument set, the gap measure and the sample, because lagged variables
+predict future inflation only weakly once current inflation is controlled for (Mavroeidis, Plagborg-Møller and Stock, 2014).
+Use weak-instrument-robust methods before drawing strong conclusions.</p>
+</details>
 </section><section class="box reading"><h2 id="further-reading">Further reading</h2>
 <p>Galí, <em>Monetary Policy, Inflation, and the Business Cycle</em>; Woodford, <em>Interest and Prices</em>.</p></section></article>
     <nav class="pager">

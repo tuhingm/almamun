@@ -172,6 +172,129 @@ for pi in (0.05, 0.15, 0.5):
 
 Tasks: (i) explain why the median IV estimate moves toward the OLS limit as \(F\) falls; (ii) confirm that AR has correct size for every \(\pi\) while the Wald test does not; (iii) invert AR over a grid of \(\beta_0\) to build a confidence set. In R, `ivreg::ivreg()` or `fixest::feols(y ~ 1 | x ~ z)` with `fitstat(~ivwald)`; `ivmodel` for AR and CLR. In Stata, `ivreg2` (with `ffirst`) and `weakiv`.
 
+## Coding exercises
+
+These exercises use **real data** and run in Python. Install the packages once with
+`pip install wooldridge statsmodels linearmodels scipy`. The `wooldridge` package contains the datasets
+from Wooldridge's *Introductory Econometrics*; `statsmodels` ships U.S. and Danish macroeconomic series.
+Try the starter code first, then open the solution. Every printed result below was produced by running the solution code exactly as shown.
+
+### Exercise 5.1 — Card (1995): college proximity as an instrument for schooling
+
+*Data:* `card` — 3,010 men from the NLS Young Men cohort, earnings in 1976; `nearc4` = grew up near a four-year college.
+
+1. Estimate OLS of `lwage` on `educ`, `exper`, `expersq`, `black`, `smsa`, `south`, `smsa66` and regional dummies `reg662`–`reg669`.
+2. Estimate the first stage (`educ` on `nearc4` and the controls). Report the robust first-stage \(F\).
+3. Estimate 2SLS with `linearmodels` (robust standard errors), treating `exper` and `expersq` as exogenous as in Card's simplest specification.
+4. Compute the **Anderson–Rubin** 95% confidence set by inverting the AR test over a grid of \(\beta_0\).
+
+```python
+import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+from linearmodels.iv import IV2SLS
+df = wd.data("card")
+ctrl = "exper + expersq + black + smsa + south + smsa66 + " + " + ".join(f"reg66{i}" for i in range(2, 10))
+iv = IV2SLS.from_formula(f"lwage ~ 1 + {ctrl} + [educ ~ nearc4]", data=df).fit(cov_type="robust")
+# TODO: OLS, first stage F, AR test: regress (lwage - b0*educ) on nearc4 + controls for a grid of b0
+```
+
+<details class="solution" markdown="1"><summary>Solution, output and discussion</summary>
+
+```python
+import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+from linearmodels.iv import IV2SLS
+df = wd.data("card")
+ctrl = "exper + expersq + black + smsa + south + smsa66 + " + " + ".join(f"reg66{i}" for i in range(2, 10))
+ols = smf.ols(f"lwage ~ educ + {ctrl}", data=df).fit(cov_type="HC1")
+fs = smf.ols(f"educ ~ nearc4 + {ctrl}", data=df).fit(cov_type="HC1")
+iv = IV2SLS.from_formula(f"lwage ~ 1 + {ctrl} + [educ ~ nearc4]", data=df).fit(cov_type="robust")
+print(f"OLS  return to educ: {ols.params['educ']:.4f} (se {ols.bse['educ']:.4f})")
+print(f"first stage: nearc4 -> educ = {fs.params['nearc4']:.4f}, robust F = {fs.tvalues['nearc4']**2:.1f}")
+print(f"2SLS return to educ: {iv.params['educ']:.4f} (se {iv.std_errors['educ']:.4f})")
+
+acc = []
+for b0 in np.arange(-0.10, 0.60, 0.0025):
+    df["ytil"] = df["lwage"] - b0 * df["educ"]
+    t = smf.ols(f"ytil ~ nearc4 + {ctrl}", data=df).fit(cov_type="HC1").tvalues["nearc4"]
+    if abs(t) < 1.96:
+        acc.append(b0)
+print(f"Anderson-Rubin 95% set: [{min(acc):.3f}, {max(acc):.3f}]  vs Wald: [{iv.params['educ']-1.96*iv.std_errors['educ']:.3f}, {iv.params['educ']+1.96*iv.std_errors['educ']:.3f}]")
+```
+
+Output:
+
+```text
+OLS  return to educ: 0.0747 (se 0.0036)
+first stage: nearc4 -> educ = 0.3199, robust F = 14.1
+2SLS return to educ: 0.1315 (se 0.0540)
+Anderson-Rubin 95% set: [0.030, 0.280]  vs Wald: [0.026, 0.237]
+```
+
+The 2SLS return (about 13%) is close to double the OLS estimate (7.5%), with a standard error about fifteen times larger. The first-stage
+\(F\) is above 10 but well below the ~105 needed for the usual \(t\)-test to have exactly correct size (Lee et al., 2022).
+The Anderson–Rubin set is therefore wider than the Wald interval and **asymmetric**, extending further to the right.
+It is valid regardless of instrument strength. Interpretation: a LATE for men whose schooling responded to living near
+a college, who plausibly face higher marginal returns. The exclusion restriction is open to challenge — proximity to a
+college correlates with urban labor markets and family background, which the controls only partly capture.
+
+</details>
+
+### Exercise 5.2 — Returns to education for married women: over-identification and endogeneity tests
+
+*Data:* `mroz` — 753 married women, PSID 1975 (428 in the labor force); `fatheduc`, `motheduc` = parents' education.
+
+1. For women in the labor force (`inlf == 1`), estimate `lwage` on `educ`, `exper`, `expersq` by OLS and by 2SLS using `fatheduc` and `motheduc` as instruments for `educ`.
+2. Report the first-stage \(F\) for the two excluded instruments.
+3. Test the over-identifying restriction (robust Hansen \(J\) / Wooldridge score test).
+4. Test the endogeneity of `educ` with the control-function regression.
+
+```python
+import wooldridge as wd, statsmodels.formula.api as smf
+from linearmodels.iv import IV2SLS
+df = wd.data("mroz").query("inlf == 1").copy()
+iv = IV2SLS.from_formula("lwage ~ 1 + exper + expersq + [educ ~ fatheduc + motheduc]", data=df).fit(cov_type="robust")
+# TODO: iv.first_stage, iv.wooldridge_overid, control function: add first-stage residual to OLS
+```
+
+<details class="solution" markdown="1"><summary>Solution, output and discussion</summary>
+
+```python
+import wooldridge as wd, statsmodels.formula.api as smf
+from linearmodels.iv import IV2SLS
+df = wd.data("mroz").query("inlf == 1").copy()
+ols = smf.ols("lwage ~ educ + exper + expersq", data=df).fit(cov_type="HC1")
+iv = IV2SLS.from_formula("lwage ~ 1 + exper + expersq + [educ ~ fatheduc + motheduc]", data=df).fit(cov_type="robust")
+print(f"OLS  educ: {ols.params['educ']:.4f} (se {ols.bse['educ']:.4f})")
+print(f"2SLS educ: {iv.params['educ']:.4f} (se {iv.std_errors['educ']:.4f})")
+
+fs = smf.ols("educ ~ fatheduc + motheduc + exper + expersq", data=df).fit(cov_type="HC1")
+print(f"first-stage robust F (2 instruments): {fs.wald_test('fatheduc = 0, motheduc = 0', scalar=True).statistic/2:.1f}")
+o = iv.wooldridge_overid
+print(f"over-identification (Wooldridge score): stat = {o.stat:.3f}, p = {o.pval:.3f}")
+
+df["vhat"] = smf.ols("educ ~ fatheduc + motheduc + exper + expersq", data=df).fit().resid
+cf = smf.ols("lwage ~ educ + exper + expersq + vhat", data=df).fit(cov_type="HC1")
+print(f"control function: educ = {cf.params['educ']:.4f} (equals 2SLS), vhat t = {cf.tvalues['vhat']:.2f}, p = {cf.pvalues['vhat']:.3f}")
+```
+
+Output:
+
+```text
+OLS  educ: 0.1075 (se 0.0132)
+2SLS educ: 0.0614 (se 0.0332)
+first-stage robust F (2 instruments): 49.5
+over-identification (Wooldridge score): stat = 0.443, p = 0.505
+control function: educ = 0.0614 (equals 2SLS), vhat t = 1.60, p = 0.110
+```
+
+The 2SLS estimate is smaller than OLS and much less precise. The instruments are strong, and the over-identification
+test does not reject, so the two parental-education instruments give mutually consistent answers. That does **not**
+prove both are valid: if both are correlated with unobserved ability in the same direction, the test has no power. The
+control-function coefficient on `educ` equals 2SLS exactly, and the endogeneity test is not significant at 10% (p ≈ 0.11), so
+the data cannot sharply distinguish OLS from 2SLS here. Note also the sample selection: wages are observed only for
+women who work, so these regressions condition on participation (Heckman, 1979).
+
+</details>
+
 ## Reading
 **Required:** Angrist and Pischke, *Mostly Harmless Econometrics*, chapter 4; Hansen, *Econometrics*, chapter 12.
 **Further:** Imbens and Angrist (1994), "Identification and estimation of local average treatment effects", *Econometrica* 62(2); Angrist (1990), "Lifetime earnings and the Vietnam era draft lottery", *AER* 80(3); Bound, Jaeger and Baker (1995), *JASA* 90(430); Staiger and Stock (1997), *Econometrica* 65(3); Stock and Yogo (2005), in *Identification and Inference for Econometric Models*; Montiel Olea and Pflueger (2013), *JBES* 31(3); Andrews, Stock and Sun (2019), "Weak instruments in IV regression: theory and practice", *Annual Review of Economics* 11; Lee, McCrary, Moreira and Porter (2022), "Valid t-ratio inference for IV", *AER* 112(10).

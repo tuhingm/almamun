@@ -157,6 +157,118 @@ print("ADF p-value ignoring break:", round(adfuller(y, regression="c")[1], 3),
 
 Tasks: (i) compare the simulated critical value with the tabulated one; (ii) plot power as a function of \(\phi\in[0.8,1]\) for \(T=100,200,500\); (iii) apply `statsmodels.tsa.stattools.zivot_andrews` to the break series; (iv) download log real GDP (FRED: GDPC1) and reproduce the worked example. In R, use `urca::ur.df`, `ur.ers` (DF-GLS), `ur.kpss`, and `strucchange::Fstats` / `breakpoints`.
 
+## Coding exercises
+
+These exercises use **real data** and run in Python. Install the packages once with
+`pip install wooldridge statsmodels linearmodels scipy`. The `wooldridge` package contains the datasets
+from Wooldridge's *Introductory Econometrics*; `statsmodels` ships U.S. and Danish macroeconomic series.
+Try the starter code first, then open the solution. Every printed result below was produced by running the solution code exactly as shown.
+
+### Exercise 10.1 — Is U.S. real GDP trend-stationary?
+
+*Data:* `macrodata` — U.S. quarterly real GDP, 1959Q1–2009Q3.
+
+1. Run ADF (with constant and trend, AIC lag choice) and KPSS (trend) tests on `log(realgdp)`.
+2. Run the same tests on GDP growth, \(\Delta\log(realgdp)\), with a constant only.
+3. Run the Zivot–Andrews test that allows a break in the trend.
+4. What do the four results say together?
+
+```python
+import numpy as np, statsmodels.api as sm
+from statsmodels.tsa.stattools import adfuller, kpss, zivot_andrews
+y = np.log(sm.datasets.macrodata.load_pandas().data["realgdp"].to_numpy())
+# TODO: adfuller(y, regression="ct", autolag="AIC"); kpss(y, regression="ct", nlags="auto")
+```
+
+<details class="solution" markdown="1"><summary>Solution, output and discussion</summary>
+
+```python
+import numpy as np, statsmodels.api as sm
+from statsmodels.tsa.stattools import adfuller, kpss, zivot_andrews
+m = sm.datasets.macrodata.load_pandas().data
+y = np.log(m["realgdp"].to_numpy()); dy = np.diff(y)
+a = adfuller(y, regression="ct", autolag="AIC"); k = kpss(y, regression="ct", nlags="auto")
+print(f"log GDP:   ADF(ct) t = {a[0]:.2f} (5% cv {a[4]['5%']:.2f}, p = {a[1]:.3f}, lags {a[2]});  KPSS(ct) = {k[0]:.3f} (5% cv {k[3]['5%']})")
+a2 = adfuller(dy, regression="c", autolag="AIC"); k2 = kpss(dy, regression="c", nlags="auto")
+print(f"growth:    ADF(c)  t = {a2[0]:.2f} (p = {a2[1]:.4f});  KPSS(c) = {k2[0]:.3f} (5% cv {k2[3]['5%']})")
+za = zivot_andrews(y, regression="ct", autolag="AIC")
+bp = int(za[4]); yr = m['year'].iloc[bp]; q = m['quarter'].iloc[bp]
+print(f"Zivot-Andrews (break in level and trend): stat = {za[0]:.2f}, p = {za[1]:.3f}, break at {int(yr)}Q{int(q)}")
+```
+
+Output:
+
+```text
+log GDP:   ADF(ct) t = -2.38 (5% cv -3.43, p = 0.389, lags 2);  KPSS(ct) = 0.207 (5% cv 0.146)
+growth:    ADF(c)  t = -6.97 (p = 0.0000);  KPSS(c) = 0.324 (5% cv 0.463)
+Zivot-Andrews (break in level and trend): stat = -3.70, p = 0.697, break at 1968Q2
+```
+
+The ADF test does not reject a unit root in log GDP, and KPSS rejects trend-stationarity: both point to a stochastic
+trend. Growth is clearly stationary by both tests, so log GDP behaves as I(1). Allowing for one endogenous break in
+level and trend, Zivot–Andrews still does not reject the unit root at 5% in this sample. The conclusion "GDP has a unit
+root" is therefore robust to a single break here, but remember the low power of these tests against roots of
+0.95–0.98 in 200 quarters (Lecture 10, lab), and that the sample ends in the middle of the Great Recession.
+
+</details>
+
+### Exercise 10.2 — A structural break in the Nile: Chow, sup-F and the effect on unit-root tests
+
+*Data:* `nile` (statsmodels) — annual flow of the Nile at Aswan, 1871–1970.
+
+The first Aswan dam was completed in 1902; hydrologists date a drop in flow to about 1898.
+
+1. Compute the Chow statistic for a break in the mean at every candidate year (15% trimming) and find the sup-\(F\) and its date.
+2. Compare the sup-\(F\) with Andrews' 5% critical value for one parameter (about 8.7).
+3. Run an ADF test on the raw series and on the series demeaned with a separate mean before and after the estimated break. Explain the difference.
+
+```python
+import numpy as np, statsmodels.api as sm
+from statsmodels.tsa.stattools import adfuller
+d = sm.datasets.nile.load_pandas().data
+y = d["volume"].to_numpy(); years = d["year"].astype(int).to_numpy()
+# TODO: for each break b, F = (SSR_r - SSR_u) / (SSR_u / (n - 2)) with a one-mean vs two-means model
+```
+
+<details class="solution" markdown="1"><summary>Solution, output and discussion</summary>
+
+```python
+import numpy as np, statsmodels.api as sm
+from statsmodels.tsa.stattools import adfuller
+d = sm.datasets.nile.load_pandas().data
+y = d["volume"].to_numpy(); years = d["year"].astype(int).to_numpy(); n = len(y)
+ssr_r = ((y - y.mean())**2).sum()
+F = {}
+for b in range(int(0.15 * n), int(0.85 * n)):
+    ssr_u = ((y[:b] - y[:b].mean())**2).sum() + ((y[b:] - y[b:].mean())**2).sum()
+    F[b] = (ssr_r - ssr_u) / (ssr_u / (n - 2))
+b = max(F, key=F.get)
+print(f"sup-F = {F[b]:.1f} at a break starting in {years[b]} (Andrews 5% cv ~ 8.7)")
+print(f"mean flow before: {y[:b].mean():.0f}, after: {y[b:].mean():.0f}")
+a1 = adfuller(y, regression="c", autolag="AIC")
+z = y.copy().astype(float); z[:b] -= y[:b].mean(); z[b:] -= y[b:].mean()
+a2 = adfuller(z, regression="n", autolag="AIC")
+print(f"ADF raw series:            t = {a1[0]:.2f}, p = {a1[1]:.3f}")
+print(f"ADF break-adjusted series: t = {a2[0]:.2f}, p = {a2[1]:.4f}")
+```
+
+Output:
+
+```text
+sup-F = 75.9 at a break starting in 1899 (Andrews 5% cv ~ 8.7)
+mean flow before: 1098, after: 850
+ADF raw series:            t = -4.05, p = 0.001
+ADF break-adjusted series: t = -8.38, p = 0.0000
+```
+
+The sup-\(F\) statistic is far above Andrews' critical value, and the estimated break falls at the end of the 1890s, matching
+the historical record: mean flow drops by roughly a fifth. On the raw series, the ADF test rejects less strongly than on
+the break-adjusted series, where the evidence of stationarity is overwhelming. This is Perron's (1989) point in miniature:
+an ignored level shift makes a stationary series look more persistent. (Strictly, after estimating the break date, the
+second ADF test needs adjusted critical values, as in Zivot–Andrews.)
+
+</details>
+
 ## Reading
 **Required:** Hamilton, *Time Series Analysis*, chapters 15–17; Stock and Watson, *Introduction to Econometrics*, chapter 15.6–15.7.
 **Further:** Dickey and Fuller (1979), *JASA* 74(366); Nelson and Plosser (1982), "Trends and random walks in macroeconomic time series", *Journal of Monetary Economics* 10(2); Perron (1989), "The great crash, the oil price shock, and the unit root hypothesis", *Econometrica* 57(6); Elliott, Rothenberg and Stock (1996), *Econometrica* 64(4); Kwiatkowski, Phillips, Schmidt and Shin (1992), *Journal of Econometrics* 54(1–3); Andrews (1993), "Tests for parameter instability and structural change with unknown change point", *Econometrica* 61(4); Bai and Perron (2003), *Journal of Applied Econometrics* 18(1); Zivot and Andrews (1992), *JBES* 10(3).

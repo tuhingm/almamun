@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Advanced Macroeconomics · Lecture 2</h3>
       <div class="profile-item"><strong>Part</strong><span>Part I · Neoclassical foundations</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 2 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 8 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="01-dynamic-household.html">Lecture 1: The Dynamic Household: Intertemporal Choice and Euler Equations</a></span></div>
       
     </aside>
@@ -105,6 +105,92 @@ q_t=E_t\left[M_{t,t+1}\{r_{t+1}^k+(1-\delta)q_{t+1}\}\right],
 <li>Derive the investment FOC from the adjustment-cost function.</li>
 <li>Interpret the capital valuation equation.</li>
 </ol>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises combine <strong>real U.S. macroeconomic data</strong> (the quarterly <code>macrodata</code> series in <code>statsmodels</code>, 1959–2009,
+and annual series from the <code>wooldridge</code> package) with <strong>numerical solutions of the models</strong> in this lecture. Install once
+with <code>pip install numpy scipy pandas statsmodels wooldridge</code>. Try the starter code first, then open the solution. Every
+printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-21-building-a-capital-stock-and-a-solow-residual-for-the-us">Exercise 2.1 — Building a capital stock and a Solow residual for the U.S.</h3>
+<p><em>Data:</em> <code>macrodata</code> — U.S. quarterly real GDP, real investment, unemployment rate and population, 1959–2009.</p>
+<ol>
+<li>Build a capital stock with the perpetual-inventory method <span class="arithmatex">\(K_{t+1}=(1-\delta)K_t+I_t\)</span>, <span class="arithmatex">\(\delta=0.025\)</span> per quarter, initializing <span class="arithmatex">\(K_0=I_0/(g+\delta)\)</span> with <span class="arithmatex">\(g\)</span> the average investment growth rate.</li>
+<li>Proxy labor input by employment, <span class="arithmatex">\(N_t=pop_t(1-u_t/100)\)</span>, and compute the Solow residual <span class="arithmatex">\(\log z_t=\log Y_t-\alpha\log K_t-(1-\alpha)\log N_t\)</span> with <span class="arithmatex">\(\alpha=1/3\)</span>.</li>
+<li>Decompose average annual growth of output per worker into capital deepening and TFP growth, before and after 1973.</li>
+</ol>
+<pre><code class="language-python">import numpy as np, pandas as pd, statsmodels.api as sm
+m = sm.datasets.macrodata.load_pandas().data
+Y, I = m[&quot;realgdp&quot;].to_numpy(), m[&quot;realinv&quot;].to_numpy(); d = 0.025; a = 1/3
+# TODO: perpetual inventory; employment; Solow residual; growth accounting by period
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, pandas as pd, statsmodels.api as sm
+m = sm.datasets.macrodata.load_pandas().data
+Y, I = m[&quot;realgdp&quot;].to_numpy(), m[&quot;realinv&quot;].to_numpy(); dl, a = 0.025, 1/3
+g = np.mean(np.diff(np.log(I)))
+K = np.empty_like(Y); K[0] = I[0] / (g + dl)
+for t in range(len(Y) - 1):
+    K[t + 1] = (1 - dl) * K[t] + I[t]
+N = m[&quot;pop&quot;].to_numpy() * (1 - m[&quot;unemp&quot;].to_numpy() / 100)
+logz = np.log(Y) - a * np.log(K) - (1 - a) * np.log(N)
+df = pd.DataFrame({&quot;year&quot;: m[&quot;year&quot;], &quot;y&quot;: np.log(Y / N), &quot;k&quot;: np.log(K / N), &quot;z&quot;: logz})
+print(f&quot;capital-output ratio (annual): 1959 {K[0]/Y[0]/4:.2f}, 1973 {K[56]/Y[56]/4:.2f}, 2009 {K[-1]/Y[-1]/4:.2f}&quot;)
+for lo, hi in ((1960, 1973), (1973, 2007)):
+    s = df[(df.year &gt;= lo) &amp; (df.year &lt;= hi)]; T = (len(s) - 1) / 4
+    gy = 100 * (s.y.iloc[-1] - s.y.iloc[0]) / T; gk = 100 * a * (s.k.iloc[-1] - s.k.iloc[0]) / T; gz = 100 * (s.z.iloc[-1] - s.z.iloc[0]) / T
+    print(f&quot;{lo}-{hi}: output/worker {gy:.2f}%/yr = capital deepening {gk:.2f} + TFP {gz:.2f}&quot;)
+np.save(&quot;/tmp/us_logz.npy&quot;, logz)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">capital-output ratio (annual): 1959 0.80, 1973 0.82, 2009 1.29
+1960-1973: output/worker 2.77%/yr = capital deepening 1.09 + TFP 1.68
+1973-2007: output/worker 1.86%/yr = capital deepening 1.00 + TFP 0.86
+</code></pre>
+<p>The perpetual-inventory capital stock rises relative to output over the sample. Growth accounting shows the post-1973
+productivity slowdown: output per worker growth fell from about 2.8% to 1.9% a year, and almost all of the decline is
+TFP (from about 1.7% to 0.9%), while the contribution of capital deepening was stable at about 1 point. This replicates
+the classic finding with a crude employment measure; using hours and a capital measure that excludes residential
+structures changes the levels but not the story.</p>
+</details>
+<h3 id="exercise-22-tobins-q-does-market-value-predict-investment">Exercise 2.2 — Tobin's q: does market value predict investment?</h3>
+<p><em>Data:</em> <code>grunfeld</code> (statsmodels) — investment, market value and capital stock of 11 large U.S. firms, 1935–1954.</p>
+<p>With adjustment costs, investment depends on Tobin's <span class="arithmatex">\(q\)</span>. Grunfeld's data give firm value <span class="arithmatex">\(V\)</span> and capital <span class="arithmatex">\(K\)</span>; use
+<span class="arithmatex">\(V/K\)</span> as a (crude) average-<span class="arithmatex">\(q\)</span> proxy.</p>
+<ol>
+<li>Regress the investment rate <span class="arithmatex">\(I_{it}/K_{it}\)</span> on lagged <span class="arithmatex">\(V/K\)</span>, with firm fixed effects.</li>
+<li>Interpret the coefficient as <span class="arithmatex">\(1/\phi\)</span> for quadratic adjustment costs <span class="arithmatex">\(\frac{\phi}{2}(I/K)^2K\)</span>, and report the implied <span class="arithmatex">\(\phi\)</span>.</li>
+<li>Why does the <span class="arithmatex">\(q\)</span> theory typically explain investment poorly, and what does measurement error in <span class="arithmatex">\(q\)</span> do to the coefficient?</li>
+</ol>
+<pre><code class="language-python">import numpy as np, statsmodels.api as sm, statsmodels.formula.api as smf
+g = sm.datasets.grunfeld.load_pandas().data.sort_values([&quot;firm&quot;, &quot;year&quot;])
+g[&quot;ik&quot;] = g[&quot;invest&quot;] / g[&quot;capital&quot;]; g[&quot;q&quot;] = g[&quot;value&quot;] / g[&quot;capital&quot;]
+# TODO: lag q by firm; ik ~ q_lag + C(firm)
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, statsmodels.api as sm, statsmodels.formula.api as smf
+g = sm.datasets.grunfeld.load_pandas().data.sort_values([&quot;firm&quot;, &quot;year&quot;])
+g = g[g[&quot;capital&quot;] &gt; 5].copy()
+g[&quot;ik&quot;] = g[&quot;invest&quot;] / g[&quot;capital&quot;]; g[&quot;q&quot;] = g[&quot;value&quot;] / g[&quot;capital&quot;]
+g[&quot;q_lag&quot;] = g.groupby(&quot;firm&quot;)[&quot;q&quot;].shift(1)
+d = g.dropna(subset=[&quot;q_lag&quot;])
+r = smf.ols(&quot;ik ~ q_lag + C(firm)&quot;, data=d).fit(cov_type=&quot;cluster&quot;, cov_kwds={&quot;groups&quot;: d[&quot;firm&quot;]})
+b = r.params[&quot;q_lag&quot;]
+print(f&quot;investment rate on lagged V/K (firm FE): {b:.4f} (cluster se {r.bse['q_lag']:.4f}), within R2 approx {r.rsquared:.3f}&quot;)
+print(f&quot;implied adjustment-cost parameter phi = 1/b = {1/b:.1f}&quot;)
+print(f&quot;median I/K {d['ik'].median():.3f}; median V/K {d['q'].median():.2f}&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">investment rate on lagged V/K (firm FE): 0.0291 (cluster se 0.0092), within R2 approx 0.533
+implied adjustment-cost parameter phi = 1/b = 34.4
+median I/K 0.379; median V/K 3.51
+</code></pre>
+<p>The coefficient on lagged <span class="arithmatex">\(V/K\)</span> is positive and significant, but small: it implies an adjustment-cost parameter of about
+34, so firms would take decades to close a gap between <span class="arithmatex">\(q\)</span> and one. That is the well-known failure of <span class="arithmatex">\(q\)</span> theory —
+implausibly slow adjustment. One reason is measurement: <span class="arithmatex">\(V/K\)</span> is <strong>average</strong> q, the relevant concept is <strong>marginal</strong> q,
+and market values are noisy, so the coefficient is attenuated (Erickson and Whited, 2000). With 11 firms, the clustered
+standard error also rests on few clusters.</p>
+</details>
 </section><section class="box reading"><h2 id="further-reading">Further reading</h2>
 <p>Hayashi (1982), “Tobin's Marginal q and Average q”; Ljungqvist and Sargent, <em>Recursive Macroeconomic Theory</em>.</p></section></article>
     <nav class="pager">

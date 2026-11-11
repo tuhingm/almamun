@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Calculus · Lecture 4</h3>
       <div class="profile-item"><strong>Part</strong><span>Part I · Single-variable analysis</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 2 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 7 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="03-differentiation.html">Lecture 3: Differentiation, Mean Value Theorems, and Comparative Rates</a></span></div>
       
     </aside>
@@ -89,6 +89,93 @@ f(a+h)=f(a)+f'(a)h+\frac12f''(a)h^2+o(h^2).
 </ol>
 </section><section class="box lab"><h2 id="computational-lab">Computational lab</h2>
 <p>Plot objectives and tangent/quadratic approximations. Numerically optimize convex and non-convex functions; compare local optimization with grid search.</p>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises apply the calculus of this lecture to <strong>real economic data</strong> in Python, mixing symbolic (<code>sympy</code>),
+numerical (<code>scipy</code>) and statistical (<code>statsmodels</code>) tools. Install once with
+<code>pip install sympy scipy numpy pandas statsmodels wooldridge</code>. Try the starter code first, then open the solution.
+Every printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-41-the-arrowpratt-approximation-with-real-stock-returns">Exercise 4.1 — The Arrow–Pratt approximation with real stock returns</h3>
+<p><em>Data:</em> <code>volat</code> — monthly S&amp;P 500 returns (<code>rsp500</code>, % per year) and 3-month T-bill yields (<code>i3</code>), 1947–1993.</p>
+<p>An investor with CRRA utility <span class="arithmatex">\(u(w)=w^{1-\gamma}/(1-\gamma)\)</span> puts all wealth in the S&amp;P 500 for one month.</p>
+<ol>
+<li>Using the empirical distribution of monthly gross returns <span class="arithmatex">\(R\)</span>, compute the <strong>exact</strong> certainty equivalent <span class="arithmatex">\(CE=u^{-1}(E[u(R)])\)</span> and risk premium <span class="arithmatex">\(E[R]-CE\)</span> for <span class="arithmatex">\(\gamma=2,5,10\)</span>.</li>
+<li>Compare with the second-order Taylor (Arrow–Pratt) approximation <span class="arithmatex">\(\pi\approx\tfrac12\gamma\operatorname{Var}(R)/E[R]\)</span> (relative risk aversion form).</li>
+<li>When does the approximation break down, and why (think of the third-order term and skewness)?</li>
+</ol>
+<pre><code class="language-python">import numpy as np, wooldridge as wd
+v = wd.data(&quot;volat&quot;).dropna(subset=[&quot;rsp500&quot;])
+R = 1 + v[&quot;rsp500&quot;].to_numpy() / 1200         # monthly gross return
+u = lambda w, g: w**(1 - g) / (1 - g)
+# TODO: CE = ((1-g) * mean(u(R)))**(1/(1-g)); compare with 0.5*g*var/mean
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, wooldridge as wd
+from scipy import stats
+v = wd.data(&quot;volat&quot;).dropna(subset=[&quot;rsp500&quot;])
+R = 1 + v[&quot;rsp500&quot;].to_numpy() / 1200
+m, var = R.mean(), R.var()
+print(f&quot;monthly gross return: mean {m:.5f}, sd {np.sqrt(var):.5f}, skewness {stats.skew(R):.3f}&quot;)
+for g in (2, 5, 10, 50):
+    EU = np.mean(R**(1 - g) / (1 - g))
+    ce = ((1 - g) * EU)**(1 / (1 - g))
+    exact, approx = m - ce, 0.5 * g * var / m
+    print(f&quot;gamma = {g:2d}: exact premium {1e4*exact:7.3f} bp/month, Arrow-Pratt {1e4*approx:7.3f} bp, relative error {approx/exact - 1:+.2%}&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">monthly gross return: mean 1.01012, sd 0.03355, skewness -0.452
+gamma =  2: exact premium  11.356 bp/month, Arrow-Pratt  11.144 bp, relative error -1.87%
+gamma =  5: exact premium  29.010 bp/month, Arrow-Pratt  27.861 bp, relative error -3.96%
+gamma = 10: exact premium  60.488 bp/month, Arrow-Pratt  55.721 bp, relative error -7.88%
+gamma = 50: exact premium 452.166 bp/month, Arrow-Pratt 278.605 bp, relative error -38.38%
+</code></pre>
+<p>For moderate risk aversion, the Arrow–Pratt approximation is excellent: the error is under 2% at <span class="arithmatex">\(\gamma=2\)</span> and under
+8% at <span class="arithmatex">\(\gamma=10\)</span>. It always understates the premium here, because monthly stock returns are <strong>negatively skewed</strong>:
+the third-order Taylor term, which a CRRA investor dislikes, adds to the premium. At <span class="arithmatex">\(\gamma=50\)</span> the approximation
+misses almost 40%, because higher-order terms grow with <span class="arithmatex">\(\gamma\)</span> and the distribution's tails dominate. Second-order
+approximations are a local tool.</p>
+</details>
+<h3 id="exercise-42-a-revenue-maximizing-price-from-an-estimated-demand-curve">Exercise 4.2 — A revenue-maximizing price from an estimated demand curve</h3>
+<p><em>Data:</em> <code>apple</code> — randomized prices and demand for eco-labeled apples.</p>
+<ol>
+<li>Using the linear demand from Lecture 1's exercise, write revenue <span class="arithmatex">\(TR(p)=p\,q(p)\)</span> at the mean regular-apple price.</li>
+<li>Find the revenue-maximizing price from the first-order condition, and verify the second-order condition (concavity).</li>
+<li>Propagate estimation uncertainty: compute a delta-method standard error for the optimal price.</li>
+<li>Is the optimal price inside the range of prices used in the survey?</li>
+</ol>
+<pre><code class="language-python">import sympy as sp, wooldridge as wd, statsmodels.formula.api as smf
+a = wd.data(&quot;apple&quot;)
+r = smf.ols(&quot;ecolbs ~ ecoprc + regprc&quot;, data=a).fit(cov_type=&quot;HC1&quot;)
+p, b0, b1, b2, pr = sp.symbols(&quot;p b0 b1 b2 pr&quot;)
+TR = p * (b0 + b1 * p + b2 * pr)
+# TODO: solve dTR/dp = 0 for p; second derivative; gradient of p* w.r.t. (b0, b1, b2)
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, sympy as sp, wooldridge as wd, statsmodels.formula.api as smf
+a = wd.data(&quot;apple&quot;)
+r = smf.ols(&quot;ecolbs ~ ecoprc + regprc&quot;, data=a).fit(cov_type=&quot;HC1&quot;)
+p, b0, b1, b2, pr = sp.symbols(&quot;p b0 b1 b2 pr&quot;)
+TR = p * (b0 + b1 * p + b2 * pr)
+pstar = sp.solve(sp.diff(TR, p), p)[0]
+print(&quot;p* =&quot;, pstar, &quot;   d2TR/dp2 =&quot;, sp.diff(TR, p, 2))
+vals = {b0: r.params[&quot;Intercept&quot;], b1: r.params[&quot;ecoprc&quot;], b2: r.params[&quot;regprc&quot;], pr: a[&quot;regprc&quot;].mean()}
+ps = float(pstar.subs(vals))
+grad = np.array([float(sp.diff(pstar, s).subs(vals)) for s in (b0, b1, b2)])
+se = np.sqrt(grad @ r.cov_params().to_numpy() @ grad)
+print(f&quot;revenue-maximizing eco price: ${ps:.3f} (delta-method se {se:.3f}); second derivative = 2*b1 = {2*vals[b1]:.3f} &lt; 0&quot;)
+print(f&quot;revenue at p*: {float(TR.subs(vals).subs(p, ps)):.3f} $/household;  survey prices ranged ${a['ecoprc'].min():.2f}-${a['ecoprc'].max():.2f}&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">p* = (-b0 - b2*pr)/(2*b1)    d2TR/dp2 = 2*b1
+revenue-maximizing eco price: $0.793 (delta-method se 0.042); second derivative = 2*b1 = -5.853 &lt; 0
+revenue at p*: 1.838 $/household;  survey prices ranged $0.59-$1.59
+</code></pre>
+<p>With linear demand, revenue is a concave quadratic in price (second derivative <span class="arithmatex">\(2\beta_1&lt;0\)</span>), so the first-order
+condition gives the unique maximum: about 79 cents per pound, where the demand elasticity equals <span class="arithmatex">\(-1\)</span> (compare
+Exercise 1.2). The delta-method standard error of about 4 cents reflects uncertainty in the estimated demand curve. The
+optimal price is inside the range of prices the survey randomized, so we are not extrapolating.</p>
+</details>
 </section><section class="box reading"><h2 id="reading">Reading</h2>
 <p>Apostol, <em>Calculus</em>, Vol. 1; Chiang and Wainwright, <em>Fundamental Methods of Mathematical Economics</em>; Simon and Blume, <em>Mathematics for Economists</em>.</p></section></article>
     <nav class="pager">

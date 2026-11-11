@@ -148,6 +148,138 @@ for method in ("bonferroni", "holm", "fdr_bh"):
 
 Tasks: (i) interpret the coverage results for the mean of a lognormal and explain the role of skewness; (ii) add a bootstrap percentile-\(t\) interval and compare coverage at \(n=30\); (iii) write a template README and master script for your own term project, following the Social Science Data Editors' template.
 
+## Coding exercises
+
+These exercises use **real data** and run in Python. Install the packages once with
+`pip install wooldridge statsmodels linearmodels scipy`. The `wooldridge` package contains the datasets
+from Wooldridge's *Introductory Econometrics*; `statsmodels` ships U.S. and Danish macroeconomic series.
+Try the starter code first, then open the solution. Every printed result below was produced by running the solution code exactly as shown.
+
+### Exercise 14.1 — Wild cluster bootstrap with few clusters
+
+*Data:* `wagepan` — 545 workers, 1980–1987; the dummies `occ1`–`occ9` give each person-year's occupation (9 groups).
+
+Many applied papers have few clusters. Build an `occupation` variable from the dummies `occ1`–`occ9` and use it (9 groups) as the cluster:
+
+1. Regress `lwage` on `union`, `educ`, `exper`, `expersq` and year dummies; report the cluster-robust \(t\)-statistic on `union` with 9 occupation clusters.
+2. Implement a **wild cluster bootstrap-t** with Rademacher weights and the null \(\beta_{union}=0\) imposed (999 draws, seed 1). Compare p-values.
+3. Why can the conventional cluster-robust p-value be misleading here?
+
+```python
+import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+df = wd.data("wagepan")
+df["occupation"] = df[[f"occ{k}" for k in range(1, 10)]].to_numpy().argmax(1) + 1
+f = "lwage ~ union + educ + exper + expersq + C(year)"
+# TODO: restricted model without union; y* = fitted_r + v_g * resid_r; refit unrestricted; cluster t each draw
+```
+
+<details class="solution" markdown="1"><summary>Solution, output and discussion</summary>
+
+```python
+import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+df = wd.data("wagepan").reset_index(drop=True)
+df["occupation"] = df[[f"occ{k}" for k in range(1, 10)]].to_numpy().argmax(1) + 1
+f = "lwage ~ union + educ + exper + expersq + C(year)"
+g = df["occupation"].to_numpy(); G = len(np.unique(g))
+fit = lambda d: smf.ols(f, data=d).fit(cov_type="cluster", cov_kwds={"groups": g, "use_correction": True})
+base = fit(df); t0 = base.tvalues["union"]
+from scipy import stats
+print(f"{G} clusters: union = {base.params['union']:.4f}, cluster t = {t0:.2f}, p (normal) = {2*stats.norm.sf(abs(t0)):.4f}, p (t_{G-1}) = {2*stats.t.sf(abs(t0), G-1):.4f}")
+
+r = smf.ols(f.replace("union + ", ""), data=df).fit()
+rng = np.random.default_rng(1); ts = []
+groups = np.unique(g)
+for _ in range(999):
+    v = dict(zip(groups, rng.choice([-1.0, 1.0], size=G)))
+    d = df.copy(); d["lwage"] = r.fittedvalues + r.resid * np.vectorize(v.get)(g)
+    ts.append(fit(d).tvalues["union"])
+p_wcb = np.mean(np.abs(ts) >= abs(t0))
+print(f"wild cluster bootstrap-t p-value: {p_wcb:.3f}   (with G = {G}, Rademacher weights give only 2^{G} = {2**G} distinct draws)")
+```
+
+Output:
+
+```text
+9 clusters: union = 0.1768, cluster t = 5.37, p (normal) = 0.0000, p (t_8) = 0.0007
+wild cluster bootstrap-t p-value: 0.012   (with G = 9, Rademacher weights give only 2^9 = 512 distinct draws)
+```
+
+With only 9 clusters, the cluster-robust variance estimator is noisy and biased downward, so normal (or even \(t_{G-1}\))
+critical values overstate significance. The wild cluster bootstrap with the null imposed gives a more honest p-value —
+here noticeably larger than the conventional one. With very few clusters, Rademacher weights allow only \(2^G\) distinct
+bootstrap samples; Webb's six-point weights are recommended for \(G<12\). The deeper question, as in Lecture 4, is
+whether occupation is the right clustering level for this design at all (Abadie et al., 2023).
+
+</details>
+
+### Exercise 14.2 — Multiple outcomes and multiple testing in the NSW experiment
+
+*Data:* `jtrain2` — NSW randomized experiment.
+
+1. Estimate the effect of training on six outcomes: `re78`, `unem78`, an indicator of positive 1978 earnings, earnings above \$5,000, above \$10,000, and the change `re78 − re75`.
+2. Report unadjusted p-values and Holm, Bonferroni and Benjamini–Hochberg adjustments.
+3. Build a standardized summary index (Kling, Liebman and Katz, 2007): standardize each outcome by the control-group mean and SD (signing `unem78` so higher is better), average them, and test the treatment effect on the index.
+
+```python
+import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+from statsmodels.stats.multitest import multipletests
+d = wd.data("jtrain2")
+d["pos78"] = (d.re78 > 0).astype(int); d["gt5"] = (d.re78 > 5).astype(int); d["gt10"] = (d.re78 > 10).astype(int); d["chg"] = d.re78 - d.re75
+# TODO: loop over outcomes, collect robust p-values, apply multipletests
+```
+
+<details class="solution" markdown="1"><summary>Solution, output and discussion</summary>
+
+```python
+import numpy as np, pandas as pd, wooldridge as wd, statsmodels.formula.api as smf
+from statsmodels.stats.multitest import multipletests
+d = wd.data("jtrain2")
+d["pos78"] = (d.re78 > 0).astype(int); d["gt5"] = (d.re78 > 5).astype(int)
+d["gt10"] = (d.re78 > 10).astype(int); d["chg"] = d.re78 - d.re75
+outs = ["re78", "unem78", "pos78", "gt5", "gt10", "chg"]
+rows = []
+for y in outs:
+    r = smf.ols(f"{y} ~ train", data=d).fit(cov_type="HC1")
+    rows.append((y, r.params["train"], r.pvalues["train"]))
+tab = pd.DataFrame(rows, columns=["outcome", "effect", "p"]).set_index("outcome")
+for meth, lab in (("bonferroni", "Bonferroni"), ("holm", "Holm"), ("fdr_bh", "BH (FDR)")):
+    tab[lab] = multipletests(tab["p"], method=meth)[1]
+print(tab.round(4).to_string())
+
+c = d[d.train == 0]; z = []
+for y in outs:
+    s = (d[y] - c[y].mean()) / c[y].std()
+    z.append(-s if y == "unem78" else s)
+d["index"] = np.mean(z, axis=0)
+ri = smf.ols("index ~ train", data=d).fit(cov_type="HC1")
+print(f"\nsummary index: effect {ri.params['train']:.3f} control-SD units (robust se {ri.bse['train']:.3f}, p = {ri.pvalues['train']:.4f})")
+```
+
+Output:
+
+```text
+effect       p  Bonferroni    Holm  BH (FDR)
+outcome                                              
+re78     1.7943  0.0075      0.0449  0.0449    0.0216
+unem78  -0.1106  0.0108      0.0648  0.0540    0.0216
+pos78    0.1106  0.0108      0.0648  0.0540    0.0216
+gt5      0.0771  0.1042      0.6252  0.2084    0.1158
+gt10     0.0601  0.1158      0.6951  0.2084    0.1158
+chg      1.5292  0.0324      0.1947  0.0973    0.0487
+
+summary index: effect 0.227 control-SD units (robust se 0.085, p = 0.0074)
+```
+
+Four of the six outcomes are individually significant at 5%. After adjusting for six tests, only 1978 earnings survives
+Bonferroni and Holm (Holm's adjusted p-values are smaller, but here they cross 5% at the same point), while the
+Benjamini–Hochberg FDR procedure keeps four. Notice that `unem78` and `pos78` give identical results: they are almost the
+same variable (positive earnings = employed), which is a reminder to define the outcome family carefully before testing. The summary index answers the
+question "did training improve labor-market outcomes overall?" with a single test and more power than any one outcome.
+Pre-specify which family of outcomes will be adjusted and which index will be primary *before* seeing the data
+(Lecture 14, §1).
+
+</details>
+
 ## Reading
 **Required:** Christensen, Freese and Miguel, *Transparent and Reproducible Social Science Research* (2019), chapters 4–7 and 11; the Social Science Data Editors' template README and the AEA Data and Code Availability Policy.
 **Further:** Cameron and Trivedi, *Microeconometrics* (2005), chapter 11 (bootstrap); Horowitz (2001), "The bootstrap", *Handbook of Econometrics* vol. 5; MacKinnon (2009), "Bootstrap hypothesis testing", in *Handbook of Computational Econometrics*; Romano and Wolf (2005), *Econometrica* 73(4); Benjamini and Hochberg (1995), *JRSS-B* 57(1); Anderson (2008), *JASA* 103(484); Olken (2015), "Promises and perils of pre-analysis plans", *Journal of Economic Perspectives* 29(3); Brodeur, Cook and Heyes (2020), "Methods matter: p-hacking and publication bias in causal analysis in economics", *AER* 110(11).

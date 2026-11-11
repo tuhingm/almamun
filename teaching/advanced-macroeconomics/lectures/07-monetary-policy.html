@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Advanced Macroeconomics · Lecture 7</h3>
       <div class="profile-item"><strong>Part</strong><span>Part II · Nominal rigidities and policy</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 2 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 9 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="06-three-equation-nk.html">Lecture 6: The Three-Equation New Keynesian Model</a></span></div>
       
     </aside>
@@ -92,6 +92,101 @@ L=\frac12E_0\sum_{t=0}^{\infty}\beta^t(\pi_t^2+\lambda_xx_t^2).
 <li>Derive the approximate real interest rate.</li>
 <li>Explain why forward guidance can affect current output.</li>
 </ol>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises combine <strong>real U.S. macroeconomic data</strong> (the quarterly <code>macrodata</code> series in <code>statsmodels</code>, 1959–2009,
+and annual series from the <code>wooldridge</code> package) with <strong>numerical solutions of the models</strong> in this lecture. Install once
+with <code>pip install numpy scipy pandas statsmodels wooldridge</code>. Try the starter code first, then open the solution. Every
+printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-71-taylor-rules-before-and-after-volcker">Exercise 7.1 — Taylor rules before and after Volcker</h3>
+<p><em>Data:</em> <code>macrodata</code> — U.S. quarterly 3-month T-bill rate, CPI inflation and real GDP.</p>
+<p>Clarida, Galí and Gertler (2000) argue that U.S. policy was "passive" (<span class="arithmatex">\(\phi_\pi&lt;1\)</span>) before 1979 and "active" (<span class="arithmatex">\(\phi_\pi&gt;1\)</span>) afterwards.</p>
+<ol>
+<li>Construct four-quarter inflation and the HP output gap.</li>
+<li>Estimate a Taylor rule with interest-rate smoothing, <span class="arithmatex">\(i_t=(1-\rho)(c+\phi_\pi\pi_t+\phi_xx_t)+\rho i_{t-1}+e_t\)</span>, by nonlinear least squares for 1960–1979 and 1987–2007.</li>
+<li>Report the long-run responses <span class="arithmatex">\(\phi_\pi,\phi_x\)</span> with delta-method standard errors, and relate them to the determinacy condition of Lecture 6.</li>
+</ol>
+<pre><code class="language-python">import numpy as np, pandas as pd, statsmodels.api as sm, statsmodels.formula.api as smf
+from statsmodels.tsa.filters.hp_filter import hpfilter
+m = sm.datasets.macrodata.load_pandas().data
+# TODO: pi4 = rolling 4-quarter mean of infl; gap = 100*HP cycle of log GDP; OLS of i on pi4, gap, i_lag -&gt; recover long-run coefficients
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, pandas as pd, statsmodels.api as sm, statsmodels.formula.api as smf
+from statsmodels.tsa.filters.hp_filter import hpfilter
+m = sm.datasets.macrodata.load_pandas().data
+d = pd.DataFrame({&quot;year&quot;: m[&quot;year&quot;], &quot;i&quot;: m[&quot;tbilrate&quot;], &quot;pi&quot;: m[&quot;infl&quot;].rolling(4).mean(),
+                  &quot;x&quot;: 100 * hpfilter(np.log(m[&quot;realgdp&quot;]), 1600)[0]})
+d[&quot;i_lag&quot;] = d[&quot;i&quot;].shift(1)
+for lo, hi in ((1960, 1979), (1987, 2007)):
+    s = d[(d.year &gt;= lo) &amp; (d.year &lt;= hi)].dropna()
+    r = smf.ols(&quot;i ~ pi + x + i_lag&quot;, data=s).fit(cov_type=&quot;HAC&quot;, cov_kwds={&quot;maxlags&quot;: 4})
+    rho = r.params[&quot;i_lag&quot;]; V = r.cov_params()
+    out = {}
+    for v in (&quot;pi&quot;, &quot;x&quot;):
+        est = r.params[v] / (1 - rho)
+        g = np.zeros(len(r.params)); g[list(r.params.index).index(v)] = 1 / (1 - rho); g[list(r.params.index).index(&quot;i_lag&quot;)] = r.params[v] / (1 - rho)**2
+        out[v] = (est, np.sqrt(g @ V.to_numpy() @ g))
+    print(f&quot;{lo}-{hi}: smoothing rho = {rho:.3f};  long-run phi_pi = {out['pi'][0]:.2f} (se {out['pi'][1]:.2f}), phi_x = {out['x'][0]:.2f} (se {out['x'][1]:.2f})&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">1960-1979: smoothing rho = 0.688;  long-run phi_pi = 0.56 (se 0.09), phi_x = 0.70 (se 0.20)
+1987-2007: smoothing rho = 0.917;  long-run phi_pi = 0.55 (se 0.73), phi_x = 2.03 (se 0.73)
+</code></pre>
+<p>For 1960–79, the long-run inflation response is about 0.56, well below one: policy accommodated inflation, consistent with
+Clarida, Galí and Gertler (2000). For 1987–2007, this simple specification does <strong>not</strong> find <span class="arithmatex">\(\phi_\pi&gt;1\)</span>: the point estimate
+is similar but has a huge standard error (0.73), because inflation varied little after the mid-1980s and smoothing is high, so
+the inflation response is poorly identified. CGG use expected future inflation (GMM), the GDP deflator, the federal funds
+rate and a different gap measure, and find about 2. Specification choices matter a lot for this famous result — an honest
+lesson.</p>
+</details>
+<h3 id="exercise-72-the-effective-lower-bound-in-2009-what-did-a-taylor-rule-prescribe">Exercise 7.2 — The effective lower bound in 2009: what did a Taylor rule prescribe?</h3>
+<p><em>Data:</em> <code>macrodata</code> — U.S. data through 2009Q3.</p>
+<ol>
+<li>Compute the rate prescribed by Taylor's (1993) original rule, <span class="arithmatex">\(i_t=1+1.5\pi_t+0.5x_t\)</span>, for each quarter of 2008–2009, using an output gap whose trend is estimated only through 2007 (to avoid the end-point problem of the HP filter).</li>
+<li>Compare it with the actual T-bill rate and with the rule estimated on 1987–2007 in the previous exercise. In which quarter did the prescribed rate first fall below zero, and how negative did it get?</li>
+<li>What tools did the Fed use when the rule called for negative rates (forward guidance, asset purchases), and how does a "shadow rate" summarize them?</li>
+</ol>
+<pre><code class="language-python">import numpy as np, pandas as pd, statsmodels.api as sm, statsmodels.formula.api as smf
+from statsmodels.tsa.filters.hp_filter import hpfilter
+m = sm.datasets.macrodata.load_pandas().data
+# TODO: estimate on 1987-2007 as before; prescribed = c + phi_pi * pi + phi_x * x for 2008-2009
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, pandas as pd, statsmodels.api as sm, statsmodels.formula.api as smf
+from statsmodels.tsa.filters.hp_filter import hpfilter
+m = sm.datasets.macrodata.load_pandas().data
+d = pd.DataFrame({&quot;year&quot;: m[&quot;year&quot;], &quot;q&quot;: m[&quot;quarter&quot;], &quot;i&quot;: m[&quot;tbilrate&quot;], &quot;pi&quot;: m[&quot;infl&quot;].rolling(4).mean(),
+                  &quot;x&quot;: 100 * hpfilter(np.log(m[&quot;realgdp&quot;].loc[:195]), 1600)[0].reindex(m.index)})
+# HP trend estimated through 2007Q4 only and extended linearly, to avoid the end-point problem of the filter
+tr = np.log(m[&quot;realgdp&quot;]) - d[&quot;x&quot;] / 100
+slope = tr.loc[190:195].diff().mean()
+d.loc[196:, &quot;x&quot;] = 100 * (np.log(m[&quot;realgdp&quot;].loc[196:]) - (tr.loc[195] + slope * np.arange(1, len(m) - 195)))
+d[&quot;i_lag&quot;] = d[&quot;i&quot;].shift(1)
+s = d[(d.year &gt;= 1987) &amp; (d.year &lt;= 2007)].dropna()
+r = smf.ols(&quot;i ~ pi + x + i_lag&quot;, data=s).fit()
+rho = r.params[&quot;i_lag&quot;]; c, fpi, fx = (r.params[v] / (1 - rho) for v in (&quot;Intercept&quot;, &quot;pi&quot;, &quot;x&quot;))
+print(f&quot;estimated 1987-2007 rule: i = {c:.2f} + {fpi:.2f} pi + {fx:.2f} x;   Taylor (1993): i = 1 + 1.5 pi + 0.5 x&quot;)
+for _, row in d[d.year &gt;= 2008].iterrows():
+    print(f&quot;  {int(row.year)}Q{int(row.q)}: inflation {row.pi:5.2f}, gap {row.x:6.2f} -&gt; Taylor 1993 {1 + 1.5*row.pi + 0.5*row.x:6.2f}%, estimated rule {c + fpi*row.pi + fx*row.x:7.2f}%, actual T-bill {row.i:.2f}%&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">estimated 1987-2007 rule: i = 2.95 + 0.38 pi + 2.71 x;   Taylor (1993): i = 1 + 1.5 pi + 0.5 x
+  2008Q1: inflation  3.85, gap  -0.98 -&gt; Taylor 1993   6.28%, estimated rule    1.75%, actual T-bill 1.56%
+  2008Q2: inflation  5.29, gap  -1.27 -&gt; Taylor 1993   8.31%, estimated rule    1.52%, actual T-bill 1.74%
+  2008Q3: inflation  3.64, gap  -2.60 -&gt; Taylor 1993   5.16%, estimated rule   -2.72%, actual T-bill 1.17%
+  2008Q4: inflation -0.15, gap  -4.64 -&gt; Taylor 1993  -1.54%, estimated rule   -9.69%, actual T-bill 0.12%
+  2009Q1: inflation -0.62, gap  -6.95 -&gt; Taylor 1993  -3.40%, estimated rule  -16.14%, actual T-bill 0.22%
+  2009Q2: inflation -1.91, gap  -7.79 -&gt; Taylor 1993  -5.76%, estimated rule  -18.91%, actual T-bill 0.18%
+  2009Q3: inflation -0.23, gap  -7.75 -&gt; Taylor 1993  -3.22%, estimated rule  -18.17%, actual T-bill 0.12%
+</code></pre>
+<p>Taylor's 1993 rule would have called for a negative policy rate from 2008Q4, reaching about −5.8% in 2009Q2 — close to
+estimates in the literature (Rudebusch, 2009). The rule estimated on 1987–2007 gives absurd values (below −18%), because its
+large output-gap coefficient was estimated in a period of small gaps — an extrapolation warning. The T-bill rate was stuck
+near zero. With conventional policy constrained, the Fed turned to forward guidance and large-scale asset purchases;
+"shadow rate" estimates (Wu and Xia, 2016) translate their effect into an equivalent negative policy rate of a few percent.</p>
+</details>
 </section><section class="box reading"><h2 id="further-reading">Further reading</h2>
 <p>Woodford, <em>Interest and Prices</em>; Clarida, Galí and Gertler (1999); Galí, <em>Monetary Policy, Inflation, and the Business Cycle</em>.</p></section></article>
     <nav class="pager">

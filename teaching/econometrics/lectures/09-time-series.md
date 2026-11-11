@@ -156,6 +156,134 @@ print("pseudo out-of-sample RMSFE:", np.sqrt(np.mean(np.square(errs))).round(3))
 
 Tasks: (i) relate the sample ACF/PACF to the theoretical patterns; (ii) simulate \(y_t=0.5y_{t-1}+u_t\), \(u_t=0.5u_{t-1}+e_t\), and confirm the OLS limit from problem 3; (iii) compare the AR forecast with a random-walk forecast using a Diebold–Mariano test. In R, use `arima()`, `forecast::auto.arima()` and `forecast::dm.test()`.
 
+## Coding exercises
+
+These exercises use **real data** and run in Python. Install the packages once with
+`pip install wooldridge statsmodels linearmodels scipy`. The `wooldridge` package contains the datasets
+from Wooldridge's *Introductory Econometrics*; `statsmodels` ships U.S. and Danish macroeconomic series.
+Try the starter code first, then open the solution. Every printed result below was produced by running the solution code exactly as shown.
+
+### Exercise 9.1 — Forecasting U.S. inflation: AR(p) by BIC against a random walk
+
+*Data:* `macrodata` (statsmodels) — U.S. quarterly macro series, 1959Q1–2009Q3; `infl` = annualized CPI inflation.
+
+1. Plot the ACF and PACF of inflation and choose an AR order by BIC on the 1960–1984 sample.
+2. Produce pseudo out-of-sample one-quarter-ahead forecasts for 1985Q1–2009Q3 from (a) an AR(\(p\)) re-estimated each quarter on an expanding window and (b) a random walk (the forecast is the last observed value).
+3. Report the RMSFE of each and a Diebold–Mariano test with a HAC standard error.
+
+```python
+import numpy as np, statsmodels.api as sm
+from statsmodels.tsa.ar_model import AutoReg, ar_select_order
+y = sm.datasets.macrodata.load_pandas().data["infl"].to_numpy()
+# observations 4..103 are 1960Q1..1984Q4; 104..202 are 1985Q1..2009Q3
+# TODO: ar_select_order(y[4:104], maxlag=8, ic="bic"); loop over t, fit AutoReg(y[:t], p), forecast y[t]
+```
+
+<details class="solution" markdown="1"><summary>Solution, output and discussion</summary>
+
+```python
+import numpy as np, statsmodels.api as sm, statsmodels.formula.api as smf
+from statsmodels.tsa.ar_model import AutoReg, ar_select_order
+from statsmodels.tsa.stattools import acf, pacf
+y = sm.datasets.macrodata.load_pandas().data["infl"].to_numpy()
+print("ACF  lags 1-6:", acf(y[4:104], nlags=6)[1:].round(2))
+print("PACF lags 1-6:", pacf(y[4:104], nlags=6)[1:].round(2))
+p = len(ar_select_order(y[4:104], maxlag=8, ic="bic").ar_lags)
+print("BIC-selected AR order on 1960-1984:", p)
+
+e_ar, e_rw = [], []
+for t in range(104, len(y)):
+    fit = AutoReg(y[:t], lags=p, trend="c").fit()
+    e_ar.append(y[t] - fit.predict(start=t, end=t)[0])
+    e_rw.append(y[t] - y[t - 1])
+e_ar, e_rw = np.array(e_ar), np.array(e_rw)
+print(f"RMSFE 1985Q1-2009Q3:  AR({p}) {np.sqrt(np.mean(e_ar**2)):.3f}   random walk {np.sqrt(np.mean(e_rw**2)):.3f}")
+d = e_ar**2 - e_rw**2
+dm = smf.ols("d ~ 1", data={"d": d}).fit(cov_type="HAC", cov_kwds={"maxlags": 4})
+print(f"Diebold-Mariano: mean loss differential {d.mean():.3f}, HAC t = {dm.tvalues.iloc[0]:.2f}, p = {dm.pvalues.iloc[0]:.3f}")
+```
+
+Output:
+
+```text
+ACF  lags 1-6: [0.75 0.72 0.72 0.62 0.52 0.48]
+PACF lags 1-6: [ 0.76  0.36  0.31 -0.06 -0.2  -0.1 ]
+BIC-selected AR order on 1960-1984: 3
+RMSFE 1985Q1-2009Q3:  AR(3) 2.457   random walk 2.913
+Diebold-Mariano: mean loss differential -2.450, HAC t = -2.01, p = 0.044
+```
+
+Inflation in 1960–84 is highly persistent: the ACF decays slowly and the PACF cuts off after a few lags, pointing to a
+low-order AR. Out of sample, after 1985, the AR model **beats** the random walk, because quarterly CPI inflation became
+noisy and much less persistent during the Great Moderation; the random walk then carries every transitory spike forward.
+That is the opposite of the 1970s pattern, and a reminder that forecasting rankings depend on the sample (Stock and
+Watson, 2007). The DM test uses HAC standard errors; the sharp 2008Q4 deflation spike dominates the loss differential —
+check how sensitive the result is to excluding it.
+
+</details>
+
+### Exercise 9.2 — The persistence of unemployment: AR(1), half-life and the Kendall bias
+
+*Data:* `phillips` — U.S. annual unemployment and inflation, 1948–2003.
+
+1. Estimate an AR(1) for the unemployment rate `unem`. Compute the half-life of a shock.
+2. Correct \(\widehat\rho\) for the Kendall bias \(-(1+3\rho)/T\) and recompute the half-life.
+3. Check the residuals for remaining autocorrelation with a Ljung–Box test.
+4. Forecast unemployment for 2004–2008 with 95% intervals (ignoring parameter uncertainty).
+
+```python
+import numpy as np, wooldridge as wd
+from statsmodels.tsa.ar_model import AutoReg
+u = wd.data("phillips")["unem"].to_numpy()
+fit = AutoReg(u, lags=1, trend="c").fit()
+# TODO: half-life = ln(0.5)/ln(rho); bias-corrected rho_bc = rho + (1+3 rho)/T
+```
+
+<details class="solution" markdown="1"><summary>Solution, output and discussion</summary>
+
+```python
+import numpy as np, wooldridge as wd
+from statsmodels.tsa.ar_model import AutoReg
+from statsmodels.stats.diagnostic import acorr_ljungbox
+ph = wd.data("phillips")
+u = ph["unem"].to_numpy(); T = len(u) - 1
+fit = AutoReg(u, lags=1, trend="c").fit()
+c, rho = fit.params
+hl = lambda r: np.log(0.5) / np.log(r)
+rho_bc = rho + (1 + 3 * rho) / T
+print(f"rho = {rho:.3f} (se {fit.bse[1]:.3f}), mean = {c/(1-rho):.2f}%, half-life = {hl(rho):.2f} years")
+print(f"bias-corrected rho = {rho_bc:.3f}, half-life = {hl(rho_bc):.2f} years")
+lb = acorr_ljungbox(fit.resid, lags=[4], return_df=True)
+print(f"Ljung-Box(4) on residuals: Q = {lb['lb_stat'].iloc[0]:.2f}, p = {lb['lb_pvalue'].iloc[0]:.3f}")
+s2 = fit.sigma2; last = u[-1]; mu = c / (1 - rho)
+for h in range(1, 6):
+    f = mu + rho**h * (last - mu); v = s2 * sum(rho**(2*j) for j in range(h))
+    print(f"  {int(ph['year'].iloc[-1]) + h}: {f:.2f}%  [{f - 1.96*np.sqrt(v):.2f}, {f + 1.96*np.sqrt(v):.2f}]")
+```
+
+Output:
+
+```text
+rho = 0.742 (se 0.088), mean = 5.78%, half-life = 2.33 years
+bias-corrected rho = 0.801, half-life = 3.12 years
+Ljung-Box(4) on residuals: Q = 3.06, p = 0.548
+  2004: 5.94%  [4.02, 7.87]
+  2005: 5.90%  [3.51, 8.30]
+  2006: 5.87%  [3.25, 8.49]
+  2007: 5.85%  [3.12, 8.58]
+  2008: 5.83%  [3.04, 8.63]
+```
+
+Annual unemployment is persistent: \(\widehat\rho\approx0.74\), a half-life of about 2.3 years. Because OLS is biased
+downward in a sample of 56 years, the bias-corrected estimate (about 0.80) implies a half-life of about 3 years — a large
+difference for a policy question such as how long a recession's unemployment lingers. The
+Ljung–Box test does not detect remaining autocorrelation, but with annual data it has little power, and a business-cycle
+AR(2) is worth trying. The intervals widen quickly toward the unconditional variance. Actual U.S. unemployment in 2004–2008
+was 5.5, 5.1, 4.6, 4.6 and 5.8% — all inside the intervals. But 2009's 9.3% would have been far above them: an AR(1) cannot
+anticipate a financial crisis.
+
+</details>
+
 ## Reading
 **Required:** Hamilton, *Time Series Analysis*, chapters 3–4; Stock and Watson, *Introduction to Econometrics*, chapter 15.
 **Further:** Box, Jenkins, Reinsel and Ljung, *Time Series Analysis: Forecasting and Control*; Diebold and Mariano (1995), "Comparing predictive accuracy", *JBES* 13(3); Clark and West (2007), *Journal of Econometrics* 138(1); Stock and Watson (2007), "Why has U.S. inflation become harder to forecast?", *Journal of Money, Credit and Banking* 39(s1).

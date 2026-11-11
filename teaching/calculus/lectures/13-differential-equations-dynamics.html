@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Calculus · Lecture 13</h3>
       <div class="profile-item"><strong>Part</strong><span>Part V · Dynamic systems</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 2 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 8 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="12-multiple-integrals-jacobians.html">Lecture 12: Multiple Integrals, Change of Variables, and Probability</a></span></div>
       
     </aside>
@@ -86,6 +86,102 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
 </ol>
 </section><section class="box lab"><h2 id="computational-lab">Computational lab</h2>
 <p>Simulate ODE paths using numerical solvers. Compare analytical and numerical solutions; plot phase diagrams and trajectories near stable and unstable steady states.</p>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises apply the calculus of this lecture to <strong>real economic data</strong> in Python, mixing symbolic (<code>sympy</code>),
+numerical (<code>scipy</code>) and statistical (<code>statsmodels</code>) tools. Install once with
+<code>pip install sympy scipy numpy pandas statsmodels wooldridge</code>. Try the starter code first, then open the solution.
+Every printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-131-the-continuous-time-solow-model-calibrated-to-the-us">Exercise 13.1 — The continuous-time Solow model calibrated to the U.S.</h3>
+<p><em>Data:</em> <code>macrodata</code> — U.S. investment share and population growth (calibration as in Lecture 11).</p>
+<p>Capital per worker follows <span class="arithmatex">\(\dot k=s\,k^{\alpha}-(n+\delta)k\)</span>.</p>
+<ol>
+<li>Solve the ODE numerically with <code>solve_ivp</code> starting from half the steady-state capital.</li>
+<li>Linearize around <span class="arithmatex">\(k^*\)</span>: <span class="arithmatex">\(\dot k\approx-\lambda(k-k^*)\)</span> with <span class="arithmatex">\(\lambda=(1-\alpha)(n+\delta)\)</span>. Compute the implied half-life <span class="arithmatex">\(\ln2/\lambda\)</span>.</li>
+<li>Measure the half-life in the numerical solution. Why is it close but not identical to the linear prediction?</li>
+</ol>
+<pre><code class="language-python">import numpy as np, statsmodels.api as sm
+from scipy.integrate import solve_ivp
+m = sm.datasets.macrodata.load_pandas().data
+s = (m[&quot;realinv&quot;] / m[&quot;realgdp&quot;]).mean(); n = np.log(m[&quot;pop&quot;]).diff().mean() * 4; a, dl = 1/3, 0.05
+kss = (s / (n + dl))**(1 / (1 - a))
+# TODO: solve_ivp(lambda t, k: s*k**a - (n+dl)*k, (0, 150), [kss/2], dense_output=True)
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, statsmodels.api as sm
+from scipy.integrate import solve_ivp
+from scipy.optimize import brentq
+m = sm.datasets.macrodata.load_pandas().data
+s = (m[&quot;realinv&quot;] / m[&quot;realgdp&quot;]).mean(); n = np.log(m[&quot;pop&quot;]).diff().mean() * 4; a, dl = 1/3, 0.05
+kss = (s / (n + dl))**(1 / (1 - a))
+sol = solve_ivp(lambda t, k: s * k**a - (n + dl) * k, (0, 150), [kss / 2], dense_output=True, rtol=1e-10, atol=1e-12)
+lam = (1 - a) * (n + dl)
+print(f&quot;k* = {kss:.4f}; convergence rate lambda = {lam:.4f} per year; linear half-life = {np.log(2)/lam:.2f} years&quot;)
+gap = lambda t: (kss - sol.sol(t)[0]) - 0.5 * (kss - kss / 2)
+print(f&quot;numerical half-life (gap halves): {brentq(gap, 0.1, 100):.2f} years&quot;)
+for t in (0, 10, 20, 40, 80):
+    print(f&quot;  t = {t:3d}: k = {sol.sol(t)[0]:.4f} ({sol.sol(t)[0]/kss:.1%} of k*)&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">k* = 3.2142; convergence rate lambda = 0.0406 per year; linear half-life = 17.06 years
+numerical half-life (gap halves): 18.50 years
+  t =   0: k = 1.6071 (50.0% of k*)
+  t =  10: k = 2.1024 (65.4% of k*)
+  t =  20: k = 2.4561 (76.4% of k*)
+  t =  40: k = 2.8695 (89.3% of k*)
+  t =  80: k = 3.1453 (97.9% of k*)
+</code></pre>
+<p>Starting at half the steady state, capital per worker closes 90% of the gap after about 40 years. Linearization predicts a
+half-life of 17.1 years; the numerical solution takes about 18.5. The linear approximation is accurate only near <span class="arithmatex">\(k^*\)</span>:
+starting far below, the true dynamics are slower at the beginning in terms of the <strong>proportional</strong> gap, because
+<span class="arithmatex">\(\dot k/k=sk^{\alpha-1}-(n+\delta)\)</span> is not linear in <span class="arithmatex">\(k\)</span>. The calibrated convergence rate of about 4% a year is in
+the range of empirical estimates (2–3%) only roughly; a higher capital share brings it down.</p>
+</details>
+<h3 id="exercise-132-exponential-growth-fitting-dot-ygy-to-us-real-gdp">Exercise 13.2 — Exponential growth: fitting <span class="arithmatex">\(\dot y=gy\)</span> to U.S. real GDP</h3>
+<p><em>Data:</em> <code>macrodata</code> — U.S. quarterly real GDP, 1959–2009.</p>
+<ol>
+<li>The solution of <span class="arithmatex">\(\dot y=gy\)</span> is <span class="arithmatex">\(y(t)=y_0e^{gt}\)</span>, so <span class="arithmatex">\(\log y\)</span> is linear in <span class="arithmatex">\(t\)</span>. Estimate <span class="arithmatex">\(g\)</span> by regressing <span class="arithmatex">\(\log GDP\)</span> on time (in years).</li>
+<li>Compute the implied doubling time <span class="arithmatex">\(\ln2/g\)</span> and compare with the actual doubling time in the data.</li>
+<li>Plot (or tabulate) the deviation of log GDP from the fitted exponential path at business-cycle troughs (1975Q1, 1982Q4, 1991Q1, 2009Q2). Is the growth rate constant over 1959–2009? Compare <span class="arithmatex">\(g\)</span> for 1959–1983 and 1984–2009.</li>
+</ol>
+<pre><code class="language-python">import numpy as np, statsmodels.api as sm, statsmodels.formula.api as smf
+m = sm.datasets.macrodata.load_pandas().data
+m[&quot;t&quot;] = m[&quot;year&quot;] + (m[&quot;quarter&quot;] - 1) / 4 - 1959
+# TODO: smf.ols(&quot;np.log(realgdp) ~ t&quot;, m).fit()
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, statsmodels.api as sm, statsmodels.formula.api as smf
+m = sm.datasets.macrodata.load_pandas().data
+m[&quot;t&quot;] = m[&quot;year&quot;] + (m[&quot;quarter&quot;] - 1) / 4 - 1959
+r = smf.ols(&quot;np.log(realgdp) ~ t&quot;, data=m).fit()
+g = r.params[&quot;t&quot;]
+print(f&quot;g = {100*g:.3f}% per year;  implied doubling time {np.log(2)/g:.1f} years&quot;)
+y0 = m[&quot;realgdp&quot;].iloc[0]; k = np.argmax(m[&quot;realgdp&quot;].to_numpy() &gt;= 2 * y0)
+print(f&quot;actual first doubling: {m['t'].iloc[k]:.2f} years (reached in {int(m['year'].iloc[k])}Q{int(m['quarter'].iloc[k])})&quot;)
+for yq in ((1975, 1), (1982, 4), (1991, 1), (2009, 2)):
+    row = m[(m.year == yq[0]) &amp; (m.quarter == yq[1])]
+    if len(row): print(f&quot;  {yq[0]}Q{yq[1]}: log deviation from exponential trend {100*r.resid[row.index[0]]:+.2f}%&quot;)
+for lo, hi in ((1959, 1983), (1984, 2009)):
+    s = m[(m.year &gt;= lo) &amp; (m.year &lt;= hi)]
+    print(f&quot;g over {lo}-{hi}: {100*smf.ols('np.log(realgdp) ~ t', data=s).fit().params['t']:.3f}% per year&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">g = 3.161% per year;  implied doubling time 21.9 years
+actual first doubling: 18.50 years (reached in 1977Q3)
+  1975Q1: log deviation from exponential trend -1.32%
+  1982Q4: log deviation from exponential trend -5.58%
+  1991Q1: log deviation from exponential trend -1.34%
+  2009Q2: log deviation from exponential trend -10.60%
+g over 1959-1983: 3.433% per year
+g over 1984-2009: 2.985% per year
+</code></pre>
+<p>Real GDP grew at about 3.2% a year on average, implying a doubling time of about 22 years. It actually doubled faster, in
+18.5 years (by 1977), because growth was higher early in the sample: 3.4% a year in 1959–83 against 3.0% in 1984–2009. The
+constant-growth model is a first approximation. The deviations from trend at recession troughs grow over time, ending
+10.6% below trend in 2009 — partly because of the deep recession and partly because the trend slowed, which a single
+exponential cannot capture.</p>
+</details>
 </section><section class="box reading"><h2 id="reading">Reading</h2>
 <p>Boyce, DiPrima, and Meade, <em>Elementary Differential Equations</em>; Chiang and Wainwright, <em>Fundamental Methods of Mathematical Economics</em>; Strogatz, <em>Nonlinear Dynamics and Chaos</em>.</p></section></article>
     <nav class="pager">

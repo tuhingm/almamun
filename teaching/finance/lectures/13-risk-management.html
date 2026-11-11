@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Finance · Lecture 13</h3>
       <div class="profile-item"><strong>Part</strong><span>Part IV · Banking and risk</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 2 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 8 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="12-banking.html">Lecture 12: Banking, Financial Intermediation, and Systemic Risk</a></span></div>
       
     </aside>
@@ -94,6 +94,104 @@ ES_\alpha(L)=E[L\mid L\geq VaR_\alpha(L)].
 <li>Compare historical and parametric simulation.</li>
 <li>Design a stress test for a leveraged portfolio.</li>
 </ol>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises use <strong>real market data</strong> in Python: monthly Fama–French factor returns (1926–2018), daily S&amp;P 500 and
+NASDAQ prices (1999–2018), the VIX, Moody's AAA and BAA corporate bond yields (1919–2018), all bundled with the <code>arch</code>
+package, plus U.S. Treasury yields and household data from the <code>wooldridge</code> package. Install once with
+<code>pip install arch wooldridge statsmodels scipy numpy pandas</code>. Try the starter code first, then open the solution. Every
+printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-131-value-at-risk-and-expected-shortfall-for-the-sp-500-with-backtests">Exercise 13.1 — Value-at-Risk and Expected Shortfall for the S&amp;P 500, with backtests</h3>
+<p><em>Data:</em> Daily S&amp;P 500 log returns, 1999–2018.</p>
+<ol>
+<li>Using a rolling 500-day window, compute one-day 99% VaR each day by (a) historical simulation, (b) a normal distribution with the window's mean and SD, and (c) RiskMetrics EWMA volatility (<span class="arithmatex">\(\lambda=0.94\)</span>) with normal quantiles.</li>
+<li>Count VaR violations over 2001–2018 and run Kupiec's unconditional-coverage likelihood-ratio test for each method.</li>
+<li>Report the violations in 2008 alone. Why does historical simulation over a long window react slowly to a crisis?</li>
+<li>Compute the full-sample 99% Expected Shortfall by historical simulation and compare it with VaR.</li>
+</ol>
+<pre><code class="language-python">import numpy as np, pandas as pd
+from scipy.stats import norm, chi2
+from arch.data import sp500
+r = 100 * np.log(sp500.load()[&quot;Adj Close&quot;]).diff().dropna()
+# TODO: rolling quantile, rolling std, EWMA variance; violations; Kupiec LR
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, pandas as pd
+from scipy.stats import norm, chi2
+from arch.data import sp500
+r = 100 * np.log(sp500.load()[&quot;Adj Close&quot;]).diff().dropna()
+hs = -r.rolling(500).quantile(0.01).shift(1)
+nv = -(r.rolling(500).mean() - norm.ppf(0.99) * r.rolling(500).std()).shift(1)
+ew = np.zeros(len(r)); ew[0] = r.iloc[:50].var()
+for t in range(1, len(r)): ew[t] = 0.94 * ew[t - 1] + 0.06 * r.iloc[t - 1]**2
+em = pd.Series(norm.ppf(0.99) * np.sqrt(ew), index=r.index)
+def kupiec(v, p=0.01):
+    n, x = len(v), v.sum(); ph = x / n
+    return -2 * ((n - x) * np.log(1 - p) + x * np.log(p) - (n - x) * np.log(1 - ph) - x * np.log(ph))
+for lab, var in ((&quot;historical&quot;, hs), (&quot;normal&quot;, nv), (&quot;EWMA&quot;, em)):
+    s = pd.concat([r, var], axis=1, keys=[&quot;r&quot;, &quot;var&quot;]).loc[&quot;2001&quot;:].dropna(); v = (s.r &lt; -s[&quot;var&quot;])
+    lr = kupiec(v)
+    print(f&quot;{lab:10s}: {v.sum():3d} violations in {len(v)} days ({v.mean():.2%}, expected 1%), Kupiec LR = {lr:.2f} (p = {chi2.sf(lr, 1):.3f}); in 2008: {v.loc['2008'].sum()}&quot;)
+q = r.quantile(0.01)
+print(f&quot;full sample: 99% VaR {-q:.2f}%, 99% Expected Shortfall {-r[r &lt;= q].mean():.2f}%&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">historical:  73 violations in 4527 days (1.61%, expected 1%), Kupiec LR = 14.47 (p = 0.000); in 2008: 21
+normal    : 113 violations in 4527 days (2.50%, expected 1%), Kupiec LR = 72.30 (p = 0.000); in 2008: 28
+EWMA      :  96 violations in 4527 days (2.12%, expected 1%), Kupiec LR = 43.44 (p = 0.000); in 2008: 9
+full sample: 99% VaR 3.36%, 99% Expected Shortfall 4.81%
+</code></pre>
+<p>All three methods produce too many violations over 2001–2018, and Kupiec's test rejects correct coverage for each. The
+normal model is worst (2.5% violations), because daily returns have fat tails. Historical simulation does better on average
+but clusters its violations: 21 in 2008 alone, because a 500-day window adapts slowly to a sudden jump in volatility. EWMA
+reacts quickly (only 9 violations in 2008) but uses normal quantiles, so it fails in the tails overall. Expected Shortfall
+(4.8%) is much larger than VaR (3.4%): the average loss beyond the VaR threshold is large, which is why Basel III moved to ES.</p>
+</details>
+<h3 id="exercise-132-garch-volatility-and-filtered-historical-simulation">Exercise 13.2 — GARCH volatility and filtered historical simulation</h3>
+<p><em>Data:</em> Daily S&amp;P 500 log returns, 1999–2018.</p>
+<ol>
+<li>Estimate a GARCH(1,1) with Student-<span class="arithmatex">\(t\)</span> errors using the <code>arch</code> package. Report the persistence <span class="arithmatex">\(\alpha+\beta\)</span>, the half-life of volatility shocks and the degrees of freedom.</li>
+<li>Compare the conditional volatility at its 2008 peak and at the end of 2018 with the unconditional volatility.</li>
+<li>Compute a one-day 99% VaR for 2 January 2019 by <strong>filtered historical simulation</strong>: scale the empirical quantile of standardized residuals by the forecast volatility. Compare with the GARCH-<span class="arithmatex">\(t\)</span> quantile.</li>
+</ol>
+<pre><code class="language-python">import numpy as np
+from arch import arch_model
+from arch.data import sp500
+r = 100 * np.log(sp500.load()[&quot;Adj Close&quot;]).diff().dropna()
+res = arch_model(r, vol=&quot;GARCH&quot;, p=1, q=1, dist=&quot;t&quot;).fit(disp=&quot;off&quot;)
+# TODO: persistence, half-life, conditional_volatility, forecast(horizon=1), std_resid quantile
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np
+from scipy import stats
+from arch import arch_model
+from arch.data import sp500
+r = 100 * np.log(sp500.load()[&quot;Adj Close&quot;]).diff().dropna()
+res = arch_model(r, vol=&quot;GARCH&quot;, p=1, q=1, dist=&quot;t&quot;).fit(disp=&quot;off&quot;)
+a, b, nu = res.params[&quot;alpha[1]&quot;], res.params[&quot;beta[1]&quot;], res.params[&quot;nu&quot;]
+print(res.params.round(4).to_dict())
+print(f&quot;persistence alpha + beta = {a + b:.4f}, half-life {np.log(0.5)/np.log(a + b):.0f} days, t degrees of freedom {nu:.1f}&quot;)
+cv = res.conditional_volatility; unc = np.sqrt(res.params[&quot;omega&quot;] / (1 - a - b))
+print(f&quot;conditional vol: 2008 peak {cv.loc['2008'].max():.2f}% ({cv.loc['2008'].idxmax().date()}), end-2018 {cv.iloc[-1]:.2f}%, unconditional {unc:.2f}% (sample sd {r.std():.2f}%)&quot;)
+f = np.sqrt(res.forecast(horizon=1).variance.iloc[-1, 0])
+z = res.std_resid.dropna()
+var_fhs = -(res.params[&quot;mu&quot;] + f * np.quantile(z, 0.01))
+var_t = -(res.params[&quot;mu&quot;] + f * stats.t.ppf(0.01, nu) * np.sqrt((nu - 2) / nu))
+print(f&quot;forecast vol for the next day {f:.2f}%: 99% VaR by filtered historical simulation {var_fhs:.2f}%, GARCH-t {var_t:.2f}%&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">{'mu': 0.0646, 'omega': 0.0086, 'alpha[1]': 0.0995, 'beta[1]': 0.9002, 'nu': 6.5094}
+persistence alpha + beta = 0.9996, half-life 1980 days, t degrees of freedom 6.5
+conditional vol: 2008 peak 5.61% (2008-10-16), end-2018 2.03%, unconditional 4.97% (sample sd 1.20%)
+forecast vol for the next day 1.94%: 99% VaR by filtered historical simulation 5.22%, GARCH-t 4.88%
+</code></pre>
+<p>Volatility is extremely persistent: <span class="arithmatex">\(\alpha+\beta\approx0.9996\)</span>, close to integrated GARCH, so the implied "unconditional"
+volatility (5%) is unreliable — far above the sample SD of 1.2%. In practice, shocks to volatility decay over months. The
+Student-<span class="arithmatex">\(t\)</span> degrees of freedom (about 6.5) confirm fat tails even after conditioning on volatility. Conditional volatility
+peaked at about 5.6% a day in October 2008. Filtered historical simulation gives a slightly higher VaR than the GARCH-<span class="arithmatex">\(t\)</span>
+quantile, because the empirical standardized residuals have a heavier left tail than a symmetric <span class="arithmatex">\(t\)</span> distribution.</p>
+</details>
 </section><section class="box reading"><h2 id="further-reading">Further reading</h2>
 <p>Jorion, <em>Value at Risk</em>; McNeil, Frey and Embrechts, <em>Quantitative Risk Management</em>.</p></section></article>
     <nav class="pager">

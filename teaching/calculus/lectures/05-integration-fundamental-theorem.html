@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Calculus · Lecture 5</h3>
       <div class="profile-item"><strong>Part</strong><span>Part I · Single-variable analysis</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 2 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 7 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="04-taylor-convexity-optimization.html">Lecture 4: Taylor Approximation, Convexity, and Single-Variable Optimization</a></span></div>
       
     </aside>
@@ -100,6 +100,86 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
 </ol>
 </section><section class="box lab"><h2 id="computational-lab">Computational lab</h2>
 <p>Approximate definite integrals with left, right, and midpoint sums; compare errors with exact antiderivatives. Explore numerical integration near an integrable singularity.</p>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises apply the calculus of this lecture to <strong>real economic data</strong> in Python, mixing symbolic (<code>sympy</code>),
+numerical (<code>scipy</code>) and statistical (<code>statsmodels</code>) tools. Install once with
+<code>pip install sympy scipy numpy pandas statsmodels wooldridge</code>. Try the starter code first, then open the solution.
+Every printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-51-consumer-surplus-as-an-integral-under-an-estimated-demand-curve">Exercise 5.1 — Consumer surplus as an integral under an estimated demand curve</h3>
+<p><em>Data:</em> <code>apple</code> — randomized prices and demand for eco-labeled apples.</p>
+<ol>
+<li>With the estimated linear demand (regular price at its mean), find the choke price where demand reaches zero.</li>
+<li>Compute consumer surplus at the mean eco price, <span class="arithmatex">\(CS=\int_{p_0}^{p_{choke}}q(p)\,dp\)</span>, symbolically and numerically (<code>scipy.integrate.quad</code>).</li>
+<li>Compute the change in consumer surplus if the eco price rises by 20 cents, using the fundamental theorem of calculus, and compare with the approximation <span class="arithmatex">\(-q(p_0)\Delta p\)</span>.</li>
+</ol>
+<pre><code class="language-python">import sympy as sp, wooldridge as wd, statsmodels.formula.api as smf
+from scipy import integrate
+a = wd.data(&quot;apple&quot;); r = smf.ols(&quot;ecolbs ~ ecoprc + regprc&quot;, data=a).fit()
+p = sp.symbols(&quot;p&quot;)
+q = r.params[&quot;Intercept&quot;] + r.params[&quot;ecoprc&quot;] * p + r.params[&quot;regprc&quot;] * a[&quot;regprc&quot;].mean()
+# TODO: choke = sp.solve(q, p)[0]; CS = sp.integrate(q, (p, p0, choke))
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, sympy as sp, wooldridge as wd, statsmodels.formula.api as smf
+from scipy import integrate
+a = wd.data(&quot;apple&quot;); r = smf.ols(&quot;ecolbs ~ ecoprc + regprc&quot;, data=a).fit()
+p = sp.symbols(&quot;p&quot;)
+q = r.params[&quot;Intercept&quot;] + r.params[&quot;ecoprc&quot;] * p + r.params[&quot;regprc&quot;] * a[&quot;regprc&quot;].mean()
+p0 = a[&quot;ecoprc&quot;].mean(); choke = float(sp.solve(q, p)[0])
+cs_sym = float(sp.integrate(q, (p, p0, choke)))
+cs_num = integrate.quad(sp.lambdify(p, q), p0, choke)[0]
+print(f&quot;choke price ${choke:.3f}; demand at mean price ${p0:.3f}: {float(q.subs(p, p0)):.3f} lbs&quot;)
+print(f&quot;consumer surplus: symbolic {cs_sym:.5f}, numerical {cs_num:.5f} dollars per household&quot;)
+dCS = -float(sp.integrate(q, (p, p0, p0 + 0.20)))
+print(f&quot;20-cent price rise: exact change in CS {dCS:.5f};  first-order approximation -q(p0)*dp = {-float(q.subs(p, p0))*0.20:.5f}&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">choke price $1.585; demand at mean price $1.082: 1.474 lbs
+consumer surplus: symbolic 0.37121, numerical 0.37121 dollars per household
+20-cent price rise: exact change in CS -0.23627;  first-order approximation -q(p0)*dp = -0.29480
+</code></pre>
+<p>The choke price, where predicted demand reaches zero, is about $1.59 — the top of the survey's price range. Symbolic and
+numerical integration agree: consumer surplus at the mean price is about 37 cents per household. A 20-cent price rise
+lowers surplus by about 24 cents. The first-order approximation <span class="arithmatex">\(-q\Delta p\)</span> overstates the loss (29 cents), because it
+ignores that households buy less as the price rises — the triangle term <span class="arithmatex">\(\tfrac12\Delta q\Delta p\)</span>, which is large here
+because demand is elastic.</p>
+</details>
+<h3 id="exercise-52-the-lorenz-curve-and-gini-coefficient-by-numerical-integration">Exercise 5.2 — The Lorenz curve and Gini coefficient by numerical integration</h3>
+<p><em>Data:</em> <code>401ksubs</code> — 9,275 U.S. households (1991 SIPP): family income <code>inc</code> (thousands of dollars).</p>
+<ol>
+<li>Construct the Lorenz curve <span class="arithmatex">\(L(p)\)</span>: the share of total income received by the poorest fraction <span class="arithmatex">\(p\)</span> of households.</li>
+<li>Compute the Gini coefficient <span class="arithmatex">\(G=1-2\int_0^1L(p)\,dp\)</span> with the trapezoidal rule.</li>
+<li>Check it against the mean-difference formula <span class="arithmatex">\(G=\frac{E|X-Y|}{2E[X]}\)</span> computed from the sorted data.</li>
+<li>What income shares do the bottom 50% and the top 10% receive?</li>
+</ol>
+<pre><code class="language-python">import numpy as np, wooldridge as wd
+x = np.sort(wd.data(&quot;401ksubs&quot;)[&quot;inc&quot;].to_numpy()); n = len(x)
+L = np.concatenate([[0], np.cumsum(x) / x.sum()]); P = np.arange(n + 1) / n
+# TODO: gini = 1 - 2 * np.trapezoid(L, P)
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, wooldridge as wd
+x = np.sort(wd.data(&quot;401ksubs&quot;)[&quot;inc&quot;].to_numpy()); n = len(x)
+L = np.concatenate([[0], np.cumsum(x) / x.sum()]); P = np.arange(n + 1) / n
+g_int = 1 - 2 * np.trapezoid(L, P)
+i = np.arange(1, n + 1)
+g_md = np.sum((2 * i - n - 1) * x) / (n * x.sum())          # mean-difference formula on sorted data
+print(f&quot;Gini by integrating the Lorenz curve: {g_int:.5f};  by the mean-difference formula: {g_md:.5f}&quot;)
+print(f&quot;income share of bottom 50%: {L[n//2]:.3f};  top 10%: {1 - L[int(0.9*n)]:.3f}&quot;)
+print(f&quot;mean income ${x.mean():.1f}k, median ${np.median(x):.1f}k&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">Gini by integrating the Lorenz curve: 0.31946;  by the mean-difference formula: 0.31946
+income share of bottom 50%: 0.277;  top 10%: 0.238
+mean income $39.3k, median $33.3k
+</code></pre>
+<p>Integrating the Lorenz curve with the trapezoidal rule gives a Gini coefficient of about 0.32, identical to the
+mean-difference formula — the two are algebraically the same for a step-function Lorenz curve. The poorest half of
+households receive 28% of income, and the richest tenth 24%. These are 1991 SIPP data on households <strong>eligible for 401(k)
+plans</strong>, with incomes capped at $200k, so inequality is lower than in the full U.S. income distribution.</p>
+</details>
 </section><section class="box reading"><h2 id="reading">Reading</h2>
 <p>Apostol, <em>Calculus</em>, Vol. 1; Spivak, <em>Calculus</em>; Chiang and Wainwright, <em>Fundamental Methods of Mathematical Economics</em>.</p></section></article>
     <nav class="pager">

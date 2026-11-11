@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Statistics · Lecture 2</h3>
       <div class="profile-item"><strong>Part</strong><span>Part I · Probability and asymptotics</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 3 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 8 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="01-probability-models.html">Lecture 1: Probability Models, Random Variables, and Expectation</a></span></div>
       
     </aside>
@@ -91,6 +91,92 @@ f_Y(y)=f_X(g^{-1}(y))\left|\frac{d}{dy}g^{-1}(y)\right|.
 </ol>
 </section><section class="box lab"><h2 id="computational-lab">Computational lab</h2>
 <p>Simulate binomial, Poisson, gamma, and multivariate normal data. Compare empirical and theoretical moments, and visualize how covariance changes the geometry of bivariate normal samples.</p>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises use <strong>real data</strong> in Python. Install once with
+<code>pip install wooldridge statsmodels scipy numpy pandas</code>. The <code>wooldridge</code> package holds survey, experimental and
+administrative datasets; <code>scipy.stats</code> and <code>statsmodels</code> provide the inference tools. Try the starter code first, then
+open the solution. Every printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-21-which-distribution-fits-wages-lognormal-versus-gamma-by-maximum-likelihood">Exercise 2.1 — Which distribution fits wages? Lognormal versus gamma by maximum likelihood</h3>
+<p><em>Data:</em> <code>wage1</code> — 526 hourly wages, CPS 1976.</p>
+<ol>
+<li>Fit lognormal and gamma distributions to <code>wage</code> by maximum likelihood (<code>scipy.stats</code>, location fixed at 0).</li>
+<li>Compare them by log-likelihood and AIC.</li>
+<li>Compare fitted and empirical quantiles (10th, 50th, 90th, 99th percentiles).</li>
+<li>Run a Kolmogorov–Smirnov test for each. Why are the KS p-values only approximate here?</li>
+</ol>
+<pre><code class="language-python">import numpy as np, wooldridge as wd
+from scipy import stats
+w = wd.data(&quot;wage1&quot;)[&quot;wage&quot;].to_numpy()
+ln = stats.lognorm.fit(w, floc=0); ga = stats.gamma.fit(w, floc=0)
+# TODO: log-likelihoods via .logpdf(w, *params).sum(); AIC = 2k - 2 logL; quantiles via .ppf
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, wooldridge as wd
+from scipy import stats
+w = wd.data(&quot;wage1&quot;)[&quot;wage&quot;].to_numpy()
+fits = {&quot;lognormal&quot;: (stats.lognorm, stats.lognorm.fit(w, floc=0)), &quot;gamma&quot;: (stats.gamma, stats.gamma.fit(w, floc=0))}
+q = [0.10, 0.50, 0.90, 0.99]
+print(&quot;empirical quantiles:      &quot;, np.quantile(w, q).round(2))
+for name, (dist, par) in fits.items():
+    ll = dist.logpdf(w, *par).sum()
+    ks = stats.kstest(w, dist.cdf, args=par)
+    print(f&quot;{name:9s}: logL = {ll:8.2f}, AIC = {2*2 - 2*ll:7.2f}, quantiles {dist.ppf(q, *par).round(2)}, KS = {ks.statistic:.3f} (p = {ks.pvalue:.3f})&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">empirical quantiles:       [ 2.92  4.65 10.   19.99]
+lognormal: logL = -1267.28, AIC = 2538.56, quantiles [ 2.57  5.07 10.01 17.44], KS = 0.089 (p = 0.000)
+gamma    : logL = -1298.24, AIC = 2600.47, quantiles [ 2.37  5.34 10.14 15.62], KS = 0.103 (p = 0.000)
+</code></pre>
+<p>The lognormal fits much better than the gamma by log-likelihood and AIC (a difference of over 60 AIC points), and it
+tracks the middle and upper quantiles more closely. Both understate the 99th percentile, so the right tail of wages is
+heavier than either model allows. Both KS tests reject — with 526 observations, even moderate misfit is detected. The KS
+p-values are only approximate because the parameters were estimated from the same data (a Lilliefors-type correction, or
+a parametric bootstrap, gives exact p-values).</p>
+</details>
+<h3 id="exercise-22-conditional-normal-distribution-and-the-regression-line">Exercise 2.2 — Conditional normal distribution and the regression line</h3>
+<p><em>Data:</em> <code>econmath</code> — 856 students in an introductory economics course: ACT math score <code>actmth</code> and college GPA <code>colgpa</code>.</p>
+<p>If <span class="arithmatex">\((X,Y)\)</span> is bivariate normal, <span class="arithmatex">\(E[Y\mid X=x]=\mu_Y+\frac{\sigma_{XY}}{\sigma_X^2}(x-\mu_X)\)</span> and <span class="arithmatex">\(\operatorname{Var}(Y\mid X)=\sigma_Y^2(1-\rho^2)\)</span>.</p>
+<ol>
+<li>Estimate the mean vector and covariance matrix of <code>(actmth, colgpa)</code> (drop missing values).</li>
+<li>Compute the implied conditional mean and SD of GPA at ACT math scores 20, 25 and 30.</li>
+<li>Compare the conditional-mean slope with the OLS slope, and the conditional SD with the regression's residual SD.</li>
+<li>Check the normality assumption for GPA with a skewness statistic. Is a GPA above 4.0 possible under the fitted normal model?</li>
+</ol>
+<pre><code class="language-python">import numpy as np, wooldridge as wd
+d = wd.data(&quot;econmath&quot;)[[&quot;actmth&quot;, &quot;colgpa&quot;]].dropna()
+mu = d.mean().to_numpy(); S = d.cov().to_numpy()
+# TODO: slope = S[0,1]/S[0,0]; cond_sd = sqrt(S[1,1]*(1-rho^2))
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+from scipy import stats
+d = wd.data(&quot;econmath&quot;)[[&quot;actmth&quot;, &quot;colgpa&quot;]].dropna()
+mu = d.mean().to_numpy(); S = d.cov().to_numpy(); rho = S[0, 1] / np.sqrt(S[0, 0] * S[1, 1])
+slope = S[0, 1] / S[0, 0]; csd = np.sqrt(S[1, 1] * (1 - rho**2))
+print(f&quot;n = {len(d)}, means {mu.round(3)}, correlation {rho:.3f}&quot;)
+for x in (20, 25, 30):
+    m = mu[1] + slope * (x - mu[0])
+    print(f&quot;  ACT math {x}: E[GPA|x] = {m:.3f}, SD = {csd:.3f}, P(GPA &gt; 4 | x) = {stats.norm.sf(4, m, csd):.4f}&quot;)
+ols = smf.ols(&quot;colgpa ~ actmth&quot;, data=d).fit()
+print(f&quot;conditional-mean slope {slope:.5f} vs OLS slope {ols.params['actmth']:.5f};  conditional SD {csd:.4f} vs residual SD {np.sqrt(ols.mse_resid):.4f}&quot;)
+print(f&quot;skewness of GPA: {stats.skew(d['colgpa']):.3f}  (max observed {d['colgpa'].max():.2f})&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">n = 814, means [23.211  2.811], correlation 0.300
+  ACT math 20: E[GPA|x] = 2.673, SD = 0.514, P(GPA &gt; 4 | x) = 0.0049
+  ACT math 25: E[GPA|x] = 2.888, SD = 0.514, P(GPA &gt; 4 | x) = 0.0153
+  ACT math 30: E[GPA|x] = 3.102, SD = 0.514, P(GPA &gt; 4 | x) = 0.0404
+conditional-mean slope 0.04287 vs OLS slope 0.04287;  conditional SD 0.5143 vs residual SD 0.5147
+skewness of GPA: -0.132  (max observed 4.00)
+</code></pre>
+<p>The slope implied by the bivariate normal formula, <span class="arithmatex">\(\sigma_{XY}/\sigma_X^2\)</span>, is identical to the OLS slope: the
+population regression of <span class="arithmatex">\(Y\)</span> on <span class="arithmatex">\(X\)</span> is the normal conditional mean. The conditional SD matches the residual SD
+(up to the degrees-of-freedom correction). The correlation of 0.30 means ACT math explains only 9% of GPA variance.
+The normal model assigns small but positive probability to a GPA above 4.0, which is impossible — GPA is bounded and
+slightly left-skewed, so the normal model is an approximation that fails in the tails.</p>
+</details>
 </section><section class="box reading"><h2 id="reading">Reading</h2>
 <p>Casella and Berger, <em>Statistical Inference</em>; DeGroot and Schervish, <em>Probability and Statistics</em>; Anderson, <em>An Introduction to Multivariate Statistical Analysis</em>.</p></section></article>
     <nav class="pager">

@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Advanced Macroeconomics · Lecture 3</h3>
       <div class="profile-item"><strong>Part</strong><span>Part I · Neoclassical foundations</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 2 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 9 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="02-production-investment.html">Lecture 2: Firms, Capital Accumulation, and Investment</a></span></div>
       
     </aside>
@@ -105,6 +105,111 @@ f'(k_{GR})=n+g+\delta.
 <li>Explain why the Ramsey model has a jump variable.</li>
 <li>Compare a saving-rate increase in Solow and Ramsey.</li>
 </ol>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises combine <strong>real U.S. macroeconomic data</strong> (the quarterly <code>macrodata</code> series in <code>statsmodels</code>, 1959–2009,
+and annual series from the <code>wooldridge</code> package) with <strong>numerical solutions of the models</strong> in this lecture. Install once
+with <code>pip install numpy scipy pandas statsmodels wooldridge</code>. Try the starter code first, then open the solution. Every
+printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-31-the-ramsey-model-steady-state-saddle-path-and-transition">Exercise 3.1 — The Ramsey model: steady state, saddle path and transition</h3>
+<p><em>Data:</em> Calibrated to standard annual U.S. values: <span class="arithmatex">\(\alpha=1/3\)</span>, <span class="arithmatex">\(\beta=0.96\)</span>, <span class="arithmatex">\(\delta=0.08\)</span>, <span class="arithmatex">\(\sigma=2\)</span>.</p>
+<p>In discrete time, the resource constraint is <span class="arithmatex">\(k_{t+1}=k_t^{\alpha}+(1-\delta)k_t-c_t\)</span> and the Euler equation is <span class="arithmatex">\(c_t^{-\sigma}=\beta c_{t+1}^{-\sigma}(\alpha k_{t+1}^{\alpha-1}+1-\delta)\)</span>.</p>
+<ol>
+<li>Compute the steady state <span class="arithmatex">\((k^*,c^*)\)</span> and the saving rate.</li>
+<li>Find the saddle path by <strong>shooting</strong>: from <span class="arithmatex">\(k_0=0.5k^*\)</span>, search for the initial <span class="arithmatex">\(c_0\)</span> such that the path converges to the steady state (bisection on <span class="arithmatex">\(c_0\)</span>).</li>
+<li>Report the transition: how many years until capital closes half of the gap? How does the saving rate evolve along the path?</li>
+</ol>
+<pre><code class="language-python">import numpy as np
+a, b, d, s = 1/3, 0.96, 0.08, 2.0
+kss = (a / (1/b - 1 + d))**(1 / (1 - a)); css = kss**a - d * kss
+def path(c0, k0, T=200):
+    # TODO: iterate k' from the resource constraint, c' from the Euler equation; return arrays (stop if k&lt;0 or c&lt;0)
+    ...
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np
+a, b, d, s = 1/3, 0.96, 0.08, 2.0
+kss = (a / (1/b - 1 + d))**(1 / (1 - a)); css = kss**a - d * kss
+print(f&quot;steady state: k* = {kss:.4f}, c* = {css:.4f}, y* = {kss**a:.4f}, saving rate = {d*kss/kss**a:.3f}&quot;)
+def path(c0, k0, T=150):
+    k, c = [k0], [c0]
+    for _ in range(T):
+        k1 = k[-1]**a + (1 - d) * k[-1] - c[-1]
+        if k1 &lt;= 0: return np.array(k), np.array(c), &quot;crash&quot;
+        c1 = c[-1] * (b * (a * k1**(a - 1) + 1 - d))**(1 / s)
+        k.append(k1); c.append(c1)
+        if c1 &gt; 3 * css: return np.array(k), np.array(c), &quot;explode&quot;
+    return np.array(k), np.array(c), &quot;ok&quot;
+k0 = 0.5 * kss; lo, hi = 1e-6, k0**a + (1 - d) * k0
+for _ in range(200):
+    c0 = 0.5 * (lo + hi); k, c, status = path(c0, k0)
+    if status == &quot;crash&quot; or (status == &quot;ok&quot; and k[-1] &lt; kss): hi = c0      # consumed too much -&gt; capital falls
+    else: lo = c0                                                          # consumed too little -&gt; overshoot
+k, c, _ = path(c0, k0, 60)
+print(f&quot;saddle-path initial consumption c0 = {c0:.6f} ({c0/css:.1%} of c*)&quot;)
+half = np.argmax(kss - k &lt;= 0.5 * (kss - k0))
+print(f&quot;capital closes half of the gap after {half} years&quot;)
+for t in (0, 5, 10, 20, 40):
+    y = k[t]**a
+    print(f&quot;  t = {t:2d}: k/k* = {k[t]/kss:.3f}, c/c* = {c[t]/css:.3f}, saving rate = {(y - c[t])/y:.3f}&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">steady state: k* = 4.5348, c* = 1.2924, y* = 1.6552, saving rate = 0.219
+saddle-path initial consumption c0 = 0.965075 (74.7% of c*)
+capital closes half of the gap after 9 years
+  t =  0: k/k* = 0.500, c/c* = 0.747, saving rate = 0.265
+  t =  5: k/k* = 0.662, c/c* = 0.839, saving rate = 0.249
+  t = 10: k/k* = 0.775, c/c* = 0.896, saving rate = 0.238
+  t = 20: k/k* = 0.903, c/c* = 0.957, saving rate = 0.227
+  t = 40: k/k* = 0.982, c/c* = 0.992, saving rate = 0.221
+</code></pre>
+<p>The steady-state saving rate is about 22%. Shooting finds the unique initial consumption (about 75% of its steady-state
+level) that puts the economy on the saddle path; any other choice leads to capital exhaustion or oversaving. Capital closes
+half the gap in about 9 years. Along the path, the saving rate <strong>falls</strong> from 26.5% toward 22%: with <span class="arithmatex">\(\sigma=2\)</span>, poor
+households save more while the return to capital is high. Unlike in Solow, the saving rate is an outcome, not a parameter.</p>
+</details>
+<h3 id="exercise-32-is-the-us-saving-too-much-or-too-little-the-golden-rule">Exercise 3.2 — Is the U.S. saving too much or too little? The golden rule</h3>
+<p><em>Data:</em> <code>macrodata</code> — U.S. gross investment as a share of GDP; capital stock from the perpetual-inventory method of Lecture 2.</p>
+<p>In the Solow model, steady-state consumption is maximized when the marginal product of capital net of depreciation equals the growth rate, <span class="arithmatex">\(\alpha Y/K-\delta=n+g\)</span> — equivalently, when the saving rate equals the capital share <span class="arithmatex">\(\alpha\)</span>.</p>
+<ol>
+<li>Compute the U.S. average investment share and the average capital–output ratio from the perpetual-inventory capital stock.</li>
+<li>Compute the implied net marginal product of capital <span class="arithmatex">\(\alpha Y/K-\delta\)</span> (annual) and compare it with average real GDP growth.</li>
+<li>Is the U.S. dynamically efficient (below the golden rule)? What would happen to steady-state consumption if the saving rate rose toward <span class="arithmatex">\(\alpha\)</span>?</li>
+</ol>
+<pre><code class="language-python">import numpy as np, statsmodels.api as sm
+m = sm.datasets.macrodata.load_pandas().data
+Y, I = m[&quot;realgdp&quot;].to_numpy(), m[&quot;realinv&quot;].to_numpy()
+# TODO: perpetual inventory (delta = 0.025 per quarter); s = mean(I/Y); K/Y; MPK
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, statsmodels.api as sm
+m = sm.datasets.macrodata.load_pandas().data
+Y, I = m[&quot;realgdp&quot;].to_numpy(), m[&quot;realinv&quot;].to_numpy(); dl_q, a = 0.025, 1/3
+K = np.empty_like(Y); K[0] = I[0] / (np.mean(np.diff(np.log(I))) + dl_q)
+for t in range(len(Y) - 1): K[t + 1] = (1 - dl_q) * K[t] + I[t]
+s = np.mean(I / Y); KY = np.mean(K[40:] / (4 * Y[40:]))          # annual K/Y, skipping the initialization decade
+mpk = a / KY - 4 * dl_q
+g = 4 * np.mean(np.diff(np.log(Y)))
+print(f&quot;investment share s = {s:.3f};  golden-rule saving rate = alpha = {a:.3f}&quot;)
+print(f&quot;capital-output ratio {KY:.2f} (annual);  net MPK = alpha*Y/K - delta = {100*mpk:.1f}%;  GDP growth = {100*g:.1f}%&quot;)
+print(f&quot;dynamically efficient (net MPK &gt; growth): {mpk &gt; g}&quot;)
+n_g = g; ky_gold = a / (n_g + 4 * dl_q)
+print(f&quot;golden-rule K/Y would be {ky_gold:.2f} versus {KY:.2f} today&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">investment share s = 0.133;  golden-rule saving rate = alpha = 0.333
+capital-output ratio 0.99 (annual);  net MPK = alpha*Y/K - delta = 23.7%;  GDP growth = 3.1%
+dynamically efficient (net MPK &gt; growth): True
+golden-rule K/Y would be 2.54 versus 0.99 today
+</code></pre>
+<p>The U.S. investment share (13%) is far below the capital share (1/3), and the net return to capital comfortably exceeds the
+growth rate, so the U.S. is <strong>dynamically efficient</strong>: it is below the golden rule, and higher saving would eventually raise
+steady-state consumption, after a period of lower consumption. The levels here depend on the crude capital measure: with a
+10% annual depreciation rate, the capital–output ratio is about 1, much lower than the official U.S. figure of about 3,
+which includes structures with low depreciation. A larger <span class="arithmatex">\(K/Y\)</span> lowers the net MPK, but it remains above the growth rate
+(Abel et al., 1989).</p>
+</details>
 </section><section class="box reading"><h2 id="further-reading">Further reading</h2>
 <p>Acemoglu, <em>Introduction to Modern Economic Growth</em>; Barro and Sala-i-Martin, <em>Economic Growth</em>.</p></section></article>
     <nav class="pager">

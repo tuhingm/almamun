@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Finance · Lecture 4</h3>
       <div class="profile-item"><strong>Part</strong><span>Part I · Risk, return and asset pricing</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 2 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 8 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="03-portfolio-theory.html">Lecture 3: Mean-Variance Portfolio Theory and the Efficient Frontier</a></span></div>
       
     </aside>
@@ -99,6 +99,101 @@ R_{it}-R_{ft}=\alpha_i+\boldsymbol\beta_i'\mathbf f_t+\varepsilon_{it}.
 <li>Compare CAPM and a multifactor specification.</li>
 <li>Explain beta measurement error.</li>
 </ol>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises use <strong>real market data</strong> in Python: monthly Fama–French factor returns (1926–2018), daily S&amp;P 500 and
+NASDAQ prices (1999–2018), the VIX, Moody's AAA and BAA corporate bond yields (1919–2018), all bundled with the <code>arch</code>
+package, plus U.S. Treasury yields and household data from the <code>wooldridge</code> package. Install once with
+<code>pip install arch wooldridge statsmodels scipy numpy pandas</code>. Try the starter code first, then open the solution. Every
+printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-41-does-the-capm-price-size-and-value-alphas-and-the-grs-test">Exercise 4.1 — Does the CAPM price size and value? Alphas and the GRS test</h3>
+<p><em>Data:</em> Fama–French monthly <code>SMB</code>, <code>HML</code> and <code>Mkt-RF</code>, July 1963 – November 2018.</p>
+<ol>
+<li>Run time-series CAPM regressions <span class="arithmatex">\(R^e_{it}=\alpha_i+\beta_i\,(R_m-R_f)_t+\varepsilon_{it}\)</span> for SMB and HML. Report annualized alphas, betas and HAC <span class="arithmatex">\(t\)</span>-statistics.</li>
+<li>Test <span class="arithmatex">\(\alpha_{SMB}=\alpha_{HML}=0\)</span> jointly with the Gibbons–Ross–Shanken (GRS) statistic.</li>
+<li>Interpret: what does a significant HML alpha say about the CAPM?</li>
+</ol>
+<pre><code class="language-python">import numpy as np, pandas as pd, statsmodels.api as sm
+from scipy import stats
+from arch.data import frenchdata
+ff = frenchdata.load() / 100
+ff.index = pd.period_range(&quot;1926-07&quot;, periods=len(ff), freq=&quot;M&quot;)   # monthly, decimal returns
+
+d = ff.loc[&quot;1963-07&quot;:]
+# TODO: OLS of SMB and HML on Mkt-RF; GRS = (T-N-K)/N * a' S^-1 a / (1 + mu' O^-1 mu) ~ F(N, T-N-K)
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, pandas as pd, statsmodels.api as sm
+from scipy import stats
+from arch.data import frenchdata
+ff = frenchdata.load() / 100
+ff.index = pd.period_range(&quot;1926-07&quot;, periods=len(ff), freq=&quot;M&quot;)   # monthly, decimal returns
+
+d = ff.loc[&quot;1963-07&quot;:]; X = sm.add_constant(d[&quot;Mkt-RF&quot;]); T, N, K = len(d), 2, 1
+alphas, resid = [], []
+for y in (&quot;SMB&quot;, &quot;HML&quot;):
+    r = sm.OLS(d[y], X).fit(cov_type=&quot;HAC&quot;, cov_kwds={&quot;maxlags&quot;: 6})
+    alphas.append(r.params[&quot;const&quot;]); resid.append(r.resid)
+    print(f&quot;{y}: alpha {1200*r.params['const']:.2f}% per year (HAC t = {r.tvalues['const']:.2f}), beta {r.params['Mkt-RF']:.3f}, R2 {r.rsquared:.3f}&quot;)
+a = np.array(alphas); Sig = np.cov(np.array(resid)); mu = d[&quot;Mkt-RF&quot;].mean(); om = d[&quot;Mkt-RF&quot;].var()
+grs = (T - N - K) / N * (a @ np.linalg.solve(Sig, a)) / (1 + mu**2 / om)
+print(f&quot;GRS = {grs:.2f}, p = {stats.f.sf(grs, N, T - N - K):.4f}&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">SMB: alpha 1.23% per year (HAC t = 0.88), beta 0.204, R2 0.085
+HML: alpha 4.98% per year (HAC t = 3.12), beta -0.167, R2 0.068
+GRS = 8.69, p = 0.0002
+</code></pre>
+<p>SMB's CAPM alpha is small and insignificant in 1963–2018, but HML earns an alpha of about 5% a year (<span class="arithmatex">\(t\approx3.1\)</span>) — with a
+<strong>negative</strong> beta, so its average return cannot be explained as compensation for market risk. The GRS test rejects that both
+alphas are zero. This is the anomaly behind the Fama–French three-factor model: the CAPM fails to price value stocks.
+Whether HML is a risk factor (distress risk) or mispricing (overreaction) remains debated (Lecture 14).</p>
+</details>
+<h3 id="exercise-42-has-the-value-premium-disappeared">Exercise 4.2 — Has the value premium disappeared?</h3>
+<p><em>Data:</em> Fama–French monthly <code>HML</code> and <code>Mkt-RF</code>, 1926–2018.</p>
+<ol>
+<li>Compute HML's average return and CAPM alpha (annualized) in four periods: 1926–1962, 1963–1990, 1991–2006, 2007–2018.</li>
+<li>Compute a 10-year rolling CAPM beta of HML.</li>
+<li>Is there statistical evidence that the value premium after 2007 differs from its pre-2007 average? Test with a dummy-variable regression and HAC standard errors.</li>
+</ol>
+<pre><code class="language-python">import numpy as np, pandas as pd, statsmodels.api as sm
+from arch.data import frenchdata
+ff = frenchdata.load() / 100
+ff.index = pd.period_range(&quot;1926-07&quot;, periods=len(ff), freq=&quot;M&quot;)   # monthly, decimal returns
+
+# TODO: loop over periods; rolling cov/var for beta; regression HML ~ post2007
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, pandas as pd, statsmodels.api as sm, statsmodels.formula.api as smf
+from arch.data import frenchdata
+ff = frenchdata.load() / 100
+ff.index = pd.period_range(&quot;1926-07&quot;, periods=len(ff), freq=&quot;M&quot;)   # monthly, decimal returns
+
+d = ff.rename(columns={&quot;Mkt-RF&quot;: &quot;mkt&quot;}).copy()
+for lo, hi in ((&quot;1926-07&quot;, &quot;1962-12&quot;), (&quot;1963-01&quot;, &quot;1990-12&quot;), (&quot;1991-01&quot;, &quot;2006-12&quot;), (&quot;2007-01&quot;, &quot;2018-11&quot;)):
+    s = d.loc[lo:hi]; r = sm.OLS(s[&quot;HML&quot;], sm.add_constant(s[&quot;mkt&quot;])).fit(cov_type=&quot;HAC&quot;, cov_kwds={&quot;maxlags&quot;: 6})
+    print(f&quot;{lo[:4]}-{hi[:4]}: mean HML {1200*s['HML'].mean():5.2f}%/yr, CAPM alpha {1200*r.params['const']:5.2f}% (t = {r.tvalues['const']:.2f}), beta {r.params['mkt']:.2f}&quot;)
+beta = d[&quot;HML&quot;].rolling(120).cov(d[&quot;mkt&quot;]) / d[&quot;mkt&quot;].rolling(120).var()
+print(f&quot;rolling 10-year beta of HML: min {beta.min():.2f} ({beta.idxmin()}), max {beta.max():.2f} ({beta.idxmax()}), latest {beta.iloc[-1]:.2f}&quot;)
+d[&quot;post&quot;] = (d.index &gt;= pd.Period(&quot;2007-01&quot;, &quot;M&quot;)).astype(int)
+t = smf.ols(&quot;HML ~ post&quot;, data=d.loc[&quot;1963-07&quot;:]).fit(cov_type=&quot;HAC&quot;, cov_kwds={&quot;maxlags&quot;: 6})
+print(f&quot;1963-2018: HML = {1200*t.params['Intercept']:.2f}% + {1200*t.params['post']:.2f}% x post-2007  (t = {t.tvalues['post']:.2f}, p = {t.pvalues['post']:.3f})&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">1926-1962: mean HML  4.95%/yr, CAPM alpha  1.17% (t = 0.56), beta 0.37
+1963-1990: mean HML  5.57%/yr, CAPM alpha  6.45% (t = 3.59), beta -0.20
+1991-2006: mean HML  6.42%/yr, CAPM alpha  9.58% (t = 2.82), beta -0.37
+2007-2018: mean HML -2.54%/yr, CAPM alpha -3.98% (t = -1.47), beta 0.17
+rolling 10-year beta of HML: min -0.49 (2001-07), max 0.55 (1942-06), latest 0.23
+1963-2018: HML = 5.69% + -8.23% x post-2007  (t = -2.54, p = 0.011)
+</code></pre>
+<p>The value premium was strong from 1963 to 2006, with large CAPM alphas, but <strong>negative</strong> from 2007 to 2018 (about <span class="arithmatex">\(-2.5\%\)</span> a
+year). A dummy regression finds the post-2007 drop statistically significant (<span class="arithmatex">\(p\approx0.01\)</span>). HML's market beta also
+changes sign over time, so its CAPM alpha and its raw return can tell different stories. Possible explanations include
+arbitrage after publication (McLean and Pontiff, 2016), the rise of intangible capital that book values miss, and bad luck.
+Twelve years of negative returns are still consistent with a positive long-run premium at these volatilities.</p>
+</details>
 </section><section class="box reading"><h2 id="further-reading">Further reading</h2>
 <p>Sharpe (1964); Lintner (1965); Fama and French (1993, 2015); Campbell, Lo and MacKinlay.</p></section></article>
     <nav class="pager">

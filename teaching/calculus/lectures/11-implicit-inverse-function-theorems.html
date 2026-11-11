@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Calculus · Lecture 11</h3>
       <div class="profile-item"><strong>Part</strong><span>Part III · Optimization and implicit functions</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 2 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 8 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="10-kkt-inequality-constraints.html">Lecture 10: Inequality Constraints and Karush–Kuhn–Tucker Conditions</a></span></div>
       
     </aside>
@@ -92,6 +92,98 @@ h'(x)=-\frac{F_x}{F_y}.
 </ol>
 </section><section class="box lab"><h2 id="computational-lab">Computational lab</h2>
 <p>Solve nonlinear equilibrium systems numerically. Compare finite-difference comparative statics with derivatives from the implicit function theorem.</p>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises apply the calculus of this lecture to <strong>real economic data</strong> in Python, mixing symbolic (<code>sympy</code>),
+numerical (<code>scipy</code>) and statistical (<code>statsmodels</code>) tools. Install once with
+<code>pip install sympy scipy numpy pandas statsmodels wooldridge</code>. Try the starter code first, then open the solution.
+Every printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-111-comparative-statics-of-the-solow-steady-state-with-the-implicit-function-theorem">Exercise 11.1 — Comparative statics of the Solow steady state with the implicit function theorem</h3>
+<p><em>Data:</em> <code>macrodata</code> — U.S. investment share of GDP and population growth, used to calibrate the model.</p>
+<p>In the Solow model, steady-state capital per worker <span class="arithmatex">\(k^*\)</span> solves <span class="arithmatex">\(F(k,s)=s\,k^{\alpha}-(n+\delta)k=0\)</span>.</p>
+<ol>
+<li>Calibrate <span class="arithmatex">\(s\)</span> as the average ratio of real investment to real GDP and <span class="arithmatex">\(n\)</span> as average annual population growth; set <span class="arithmatex">\(\alpha=1/3\)</span>, <span class="arithmatex">\(\delta=0.05\)</span>.</li>
+<li>Solve for <span class="arithmatex">\(k^*\)</span> numerically (<code>brentq</code>), without using the closed form.</li>
+<li>Use the implicit function theorem, <span class="arithmatex">\(dk^*/ds=-F_s/F_k\)</span>, to compute the effect of a higher saving rate, and the elasticity <span class="arithmatex">\(\frac{dk^*}{ds}\frac{s}{k^*}\)</span>. Compare with a finite difference and with the closed-form elasticity <span class="arithmatex">\(1/(1-\alpha)\)</span>.</li>
+</ol>
+<pre><code class="language-python">import numpy as np, statsmodels.api as sm
+from scipy import optimize
+m = sm.datasets.macrodata.load_pandas().data
+s = (m[&quot;realinv&quot;] / m[&quot;realgdp&quot;]).mean(); n = np.log(m[&quot;pop&quot;]).diff().mean() * 4
+a, dl = 1/3, 0.05
+F = lambda k, s: s * k**a - (n + dl) * k
+# TODO: brentq for k*, IFT derivative: -F_s/F_k with F_s = k^a, F_k = s a k^(a-1) - (n+dl)
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, statsmodels.api as sm
+from scipy import optimize
+m = sm.datasets.macrodata.load_pandas().data
+s = (m[&quot;realinv&quot;] / m[&quot;realgdp&quot;]).mean(); n = np.log(m[&quot;pop&quot;]).diff().mean() * 4
+a, dl = 1/3, 0.05
+F = lambda k, s: s * k**a - (n + dl) * k
+kstar = lambda s: optimize.brentq(F, 1e-6, 1e6, args=(s,), xtol=1e-14)
+k = kstar(s)
+print(f&quot;calibration: s = {s:.4f}, n = {n:.4f}, alpha = {a:.3f}, delta = {dl}&quot;)
+print(f&quot;steady state k* = {k:.4f}  (closed form {(s/(n+dl))**(1/(1-a)):.4f})&quot;)
+Fs, Fk = k**a, s * a * k**(a - 1) - (n + dl)
+dk = -Fs / Fk
+h = 1e-6; fd = (kstar(s + h) - kstar(s - h)) / (2 * h)
+print(f&quot;IFT: dk*/ds = {dk:.4f}  vs finite difference {fd:.4f};  F_k = {Fk:.4f} &lt; 0 (stable)&quot;)
+print(f&quot;elasticity dk*/ds * s/k* = {dk * s / k:.4f}  vs closed form 1/(1-alpha) = {1/(1-a):.4f}&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">calibration: s = 0.1328, n = 0.0110, alpha = 0.333, delta = 0.05
+steady state k* = 3.2142  (closed form 3.2142)
+IFT: dk*/ds = 36.3174  vs finite difference 36.3174;  F_k = -0.0406 &lt; 0 (stable)
+elasticity dk*/ds * s/k* = 1.5000  vs closed form 1/(1-alpha) = 1.5000
+</code></pre>
+<p>Calibrated to the U.S. (investment share 13%, population growth 1.1%), the numerical root matches the closed-form steady
+state. The implicit function theorem gives <span class="arithmatex">\(dk^*/ds=-F_s/F_k\)</span> without solving for <span class="arithmatex">\(k^*\)</span> explicitly, and it agrees with
+the finite difference. <span class="arithmatex">\(F_k&lt;0\)</span> at the steady state, which is both the condition for the IFT to apply and the condition
+for stability. The elasticity of steady-state capital with respect to the saving rate is exactly <span class="arithmatex">\(1/(1-\alpha)=1.5\)</span>.</p>
+</details>
+<h3 id="exercise-112-yield-to-maturity-as-an-inverse-function-and-duration">Exercise 11.2 — Yield to maturity as an inverse function, and duration</h3>
+<p><em>Data:</em> <code>intqrt</code> — U.S. 12-month Treasury yield (average, used as a reference yield).</p>
+<p>The price of a bond is a decreasing function of its yield, <span class="arithmatex">\(P(y)=\sum_t c_t/(1+y)^t\)</span>. Its inverse <span class="arithmatex">\(y(P)\)</span> is the yield to maturity.</p>
+<ol>
+<li>For a 10-year bond with a 6% annual coupon and face value 100, compute <span class="arithmatex">\(P\)</span> at the average 12-month yield.</li>
+<li>Invert numerically: find <span class="arithmatex">\(y\)</span> from <span class="arithmatex">\(P\)</span>, and check that the round trip recovers the yield.</li>
+<li>By the inverse function theorem, <span class="arithmatex">\(dy/dP=1/P'(y)\)</span>. Compute it, and the modified duration <span class="arithmatex">\(-P'(y)/P\)</span>. Use duration to approximate the price change from a 1-point yield rise and compare with the exact change.</li>
+</ol>
+<pre><code class="language-python">import numpy as np, wooldridge as wd
+from scipy import optimize
+y0 = wd.data(&quot;intqrt&quot;)[&quot;r12&quot;].mean() / 100
+cf = np.r_[np.full(9, 6.0), 106.0]; t = np.arange(1, 11)
+P = lambda y: np.sum(cf / (1 + y)**t); dP = lambda y: -np.sum(t * cf / (1 + y)**(t + 1))
+# TODO: price, inverse via brentq, dy/dP = 1/dP, modified duration
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, wooldridge as wd
+from scipy import optimize
+y0 = wd.data(&quot;intqrt&quot;)[&quot;r12&quot;].mean() / 100
+cf = np.r_[np.full(9, 6.0), 106.0]; t = np.arange(1, 11)
+P = lambda y: np.sum(cf / (1 + y)**t); dP = lambda y: -np.sum(t * cf / (1 + y)**(t + 1))
+p0 = P(y0)
+yinv = optimize.brentq(lambda y: P(y) - p0, -0.5, 1.0, xtol=1e-15)
+print(f&quot;yield {100*y0:.4f}% -&gt; price {p0:.4f};  inverted yield {100*yinv:.10f}%&quot;)
+print(f&quot;dy/dP = 1/P'(y) = {1/dP(y0):.6f}  (yield change per $1 of price)&quot;)
+D = -dP(y0) / p0
+print(f&quot;modified duration {D:.4f} years&quot;)
+print(f&quot;1-point yield rise: duration approximation {-D*0.01*100:.3f}% of price, exact {100*(P(y0+0.01)/p0 - 1):.3f}%&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">yield 6.9269% -&gt; price 93.4675;  inverted yield 6.9269354824%
+dy/dP = 1/P'(y) = -0.001483  (yield change per $1 of price)
+modified duration 7.2163 years
+1-point yield rise: duration approximation -7.216% of price, exact -6.890%
+</code></pre>
+<p>Because the price is strictly decreasing in the yield, the inverse function exists, and the numerical inversion recovers
+the yield to ten decimals. The inverse function theorem gives <span class="arithmatex">\(dy/dP=1/P'(y)\)</span>: a $1 price fall raises the yield by about
+15 basis points. Modified duration (7.2 years) predicts a 7.2% price fall for a 1-point yield rise, against an exact fall
+of 6.9%. The gap is convexity: the price–yield curve is convex, so duration overstates losses and understates gains (Finance,
+Lecture 7).</p>
+</details>
 </section><section class="box reading"><h2 id="reading">Reading</h2>
 <p>Simon and Blume, <em>Mathematics for Economists</em>; Chiang and Wainwright, <em>Fundamental Methods of Mathematical Economics</em>; Apostol, <em>Calculus</em>, Vol. 2.</p></section></article>
     <nav class="pager">

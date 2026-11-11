@@ -154,6 +154,122 @@ print("supply slope 2SLS:", iv_s[1].round(3))
 
 Tasks: (i) compute the theoretical OLS limit for the demand slope (exogenous shifters included) and compare; (ii) set the weather coefficient to zero and observe what happens to the demand estimate (rank failure); (iii) estimate both equations jointly by 3SLS with `linearmodels.system.IV3SLS` (Python) or `systemfit` (R) and compare standard errors.
 
+## Coding exercises
+
+These exercises use **real data** and run in Python. Install the packages once with
+`pip install wooldridge statsmodels linearmodels scipy`. The `wooldridge` package contains the datasets
+from Wooldridge's *Introductory Econometrics*; `statsmodels` ships U.S. and Danish macroeconomic series.
+Try the starter code first, then open the solution. Every printed result below was produced by running the solution code exactly as shown.
+
+### Exercise 6.1 — Labor supply and wage offers of married women as a simultaneous system
+
+*Data:* `mroz` — working married women (428 observations).
+
+Wooldridge (2020, Example 16.5) writes a two-equation system:
+
+- **labor supply:** `hours` on `lwage`, `educ`, `age`, `kidslt6`, `nwifeinc`;
+- **wage offer:** `lwage` on `hours`, `educ`, `exper`, `expersq`.
+
+1. Check the order condition for each equation.
+2. Estimate each equation by OLS and by 2SLS, using all exogenous variables in the system as instruments.
+3. Interpret the implied labor supply elasticity at the mean of `hours`.
+4. Check the rank condition empirically: in the first stage for `lwage`, are `exper` and `expersq` jointly significant?
+
+```python
+import wooldridge as wd, statsmodels.formula.api as smf
+from linearmodels.iv import IV2SLS
+df = wd.data("mroz").query("inlf == 1").copy()
+supply = IV2SLS.from_formula("hours ~ 1 + educ + age + kidslt6 + nwifeinc + [lwage ~ exper + expersq]", data=df).fit(cov_type="robust")
+# TODO: wage-offer equation instruments hours with age, kidslt6, nwifeinc
+```
+
+<details class="solution" markdown="1"><summary>Solution, output and discussion</summary>
+
+```python
+import wooldridge as wd, statsmodels.formula.api as smf
+from linearmodels.iv import IV2SLS
+df = wd.data("mroz").query("inlf == 1").copy()
+s_ols = smf.ols("hours ~ lwage + educ + age + kidslt6 + nwifeinc", data=df).fit(cov_type="HC1")
+s_iv = IV2SLS.from_formula("hours ~ 1 + educ + age + kidslt6 + nwifeinc + [lwage ~ exper + expersq]", data=df).fit(cov_type="robust")
+w_ols = smf.ols("lwage ~ hours + educ + exper + expersq", data=df).fit(cov_type="HC1")
+w_iv = IV2SLS.from_formula("lwage ~ 1 + educ + exper + expersq + [hours ~ age + kidslt6 + nwifeinc]", data=df).fit(cov_type="robust")
+print(f"supply: hours on lwage   OLS {s_ols.params['lwage']:8.1f}   2SLS {s_iv.params['lwage']:8.1f} (se {s_iv.std_errors['lwage']:.1f})")
+print(f"offer:  lwage on hours   OLS {w_ols.params['hours']:8.5f}   2SLS {w_iv.params['hours']:8.5f} (se {w_iv.std_errors['hours']:.5f})")
+print(f"implied labor supply elasticity at mean hours ({df['hours'].mean():.0f}): {s_iv.params['lwage']/df['hours'].mean():.2f}")
+fs = smf.ols("lwage ~ exper + expersq + educ + age + kidslt6 + nwifeinc", data=df).fit(cov_type="HC1")
+print(f"rank check, first stage for lwage: F(exper, expersq) = {fs.wald_test('exper = 0, expersq = 0', scalar=True).statistic/2:.2f}")
+```
+
+Output:
+
+```text
+supply: hours on lwage   OLS     -2.0   2SLS   1639.6 (se 593.3)
+offer:  lwage on hours   OLS -0.00006   2SLS  0.00013 (se 0.00029)
+implied labor supply elasticity at mean hours (1303): 1.26
+rank check, first stage for lwage: F(exper, expersq) = 6.17
+```
+
+Each equation excludes enough exogenous variables: supply excludes `exper` and `expersq` (just enough for one
+endogenous regressor, plus one over-identifying restriction), and the wage-offer equation excludes three. OLS finds a
+**negative** effect of wages on hours, because of simultaneity bias. 2SLS reverses the sign and implies a labor supply
+elasticity of about 1.3. The first-stage \(F\) for the supply equation's instruments is only about 6 — below the rule of
+thumb of 10 — so the estimate is imprecise and weak-instrument-robust inference (Lecture 5) is needed before taking the
+elasticity seriously. The exclusion of experience from the
+supply equation is itself debatable.
+
+</details>
+
+### Exercise 6.2 — Inflation and openness: a cross-country simultaneous system (Romer, 1993)
+
+*Data:* `openness` — 114 countries, averages 1973–1990: inflation `inf`, imports as share of GDP `open`, log land area `lland`, log per capita income `lpcinc`.
+
+Romer (1993) argues that more open economies have less incentive to inflate. Openness is plausibly endogenous, but
+small countries are mechanically more open, so land area can shift openness without affecting inflation directly.
+
+1. Estimate `inf` on `open` and `lpcinc` by OLS.
+2. Estimate the first stage of `open` on `lland` and `lpcinc`.
+3. Estimate 2SLS with `lland` instrumenting `open`. Compare.
+4. Discuss the exclusion restriction.
+
+```python
+import wooldridge as wd, statsmodels.formula.api as smf
+from linearmodels.iv import IV2SLS
+df = wd.data("openness").rename(columns={"inf": "infl"})   # "inf" would be read as infinity in a formula
+# TODO: OLS, first stage and IV2SLS.from_formula("infl ~ 1 + lpcinc + [open ~ lland]", ...)
+```
+
+<details class="solution" markdown="1"><summary>Solution, output and discussion</summary>
+
+```python
+import wooldridge as wd, statsmodels.formula.api as smf
+from linearmodels.iv import IV2SLS
+df = wd.data("openness")
+df = df.rename(columns={"inf": "infl"})
+ols = smf.ols("infl ~ open + lpcinc", data=df).fit(cov_type="HC1")
+fs = smf.ols("open ~ lland + lpcinc", data=df).fit(cov_type="HC1")
+iv = IV2SLS.from_formula("infl ~ 1 + lpcinc + [open ~ lland]", data=df).fit(cov_type="robust")
+print(f"OLS : effect of openness on inflation {ols.params['open']:.3f} (se {ols.bse['open']:.3f})")
+print(f"first stage: lland -> open {fs.params['lland']:.3f}, robust F = {fs.tvalues['lland']**2:.1f}")
+print(f"2SLS: effect of openness on inflation {iv.params['open']:.3f} (se {iv.std_errors['open']:.3f})")
+print(f"a 10-point rise in openness changes inflation by {10*iv.params['open']:.2f} percentage points (2SLS)")
+```
+
+Output:
+
+```text
+OLS : effect of openness on inflation -0.215 (se 0.079)
+first stage: lland -> open -7.567, robust F = 43.9
+2SLS: effect of openness on inflation -0.337 (se 0.150)
+a 10-point rise in openness changes inflation by -3.37 percentage points (2SLS)
+```
+
+Land area is a strong instrument: larger countries trade less. Both OLS and 2SLS give a negative effect of openness on
+inflation, and 2SLS is larger in absolute value, consistent with Romer's argument. Exclusion requires that country size
+affects inflation only through openness. Size could also matter through the political economy of central banking or
+seigniorage needs, so the restriction is an assumption to be argued, not a fact.
+
+</details>
+
 ## Reading
 **Required:** Wooldridge, *Econometric Analysis of Cross Section and Panel Data*, chapter 9; Hayashi, *Econometrics*, chapter 4.
 **Further:** Haavelmo (1943), "The statistical implications of a system of simultaneous equations", *Econometrica* 11(1); Graddy (1995), "Testing for imperfect competition at the Fulton fish market", *RAND Journal of Economics* 26(1); Angrist, Graddy and Imbens (2000), *Review of Economic Studies* 67(3); Rigobon (2003), "Identification through heteroskedasticity", *REStat* 85(4); Matzkin (2013), "Nonparametric identification in structural economic models", *Annual Review of Economics* 5.

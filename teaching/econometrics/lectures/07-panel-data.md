@@ -163,6 +163,128 @@ print(f"pooled {b_pool:.3f}  FE {b_fe:.3f}  FD {b_fd:.3f}  Mundlak {b_mundlak:.3
 
 Tasks: (i) explain the pooled-OLS bias using the OVB formula; (ii) add classical measurement error to \(x\) and compare the attenuation of pooled OLS and FE; (iii) estimate RE with `linearmodels.panel.RandomEffects` and test \(\xi=0\) in the Mundlak regression with standard errors clustered by unit. In R, use `fixest::feols(y ~ x | id, cluster = ~id)` and `plm(model = "random")`. In Stata, use `xtreg, fe vce(cluster id)` and `xtreg, re` followed by the Mundlak regression.
 
+## Coding exercises
+
+These exercises use **real data** and run in Python. Install the packages once with
+`pip install wooldridge statsmodels linearmodels scipy`. The `wooldridge` package contains the datasets
+from Wooldridge's *Introductory Econometrics*; `statsmodels` ships U.S. and Danish macroeconomic series.
+Try the starter code first, then open the solution. Every printed result below was produced by running the solution code exactly as shown.
+
+### Exercise 7.1 — The union wage premium: pooled OLS, random effects, fixed effects and first differences
+
+*Data:* `wagepan` — 545 men, 1980–1987.
+
+1. Estimate the union premium in `lwage` by pooled OLS, RE, FE and FD, with year effects and the controls `married`, `exper²` (and `educ`, `black`, `hisp` where identified). Use standard errors clustered by worker.
+2. Run the Mundlak (correlated random effects) test of RE against FE, adding worker means of the time-varying regressors.
+3. Interpret the ranking of the estimates.
+
+```python
+import wooldridge as wd
+from linearmodels.panel import PooledOLS, RandomEffects, PanelOLS, FirstDifferenceOLS
+df = wd.data("wagepan").set_index(["nr", "year"])
+fe = PanelOLS.from_formula("lwage ~ union + married + expersq + TimeEffects + EntityEffects", data=df).fit(cov_type="clustered", cluster_entity=True)
+# TODO: pooled, RE, FD; Mundlak: add group means of union, married, expersq to a RE/pooled regression
+```
+
+<details class="solution" markdown="1"><summary>Solution, output and discussion</summary>
+
+```python
+import pandas as pd, wooldridge as wd, statsmodels.formula.api as smf
+from linearmodels.panel import PooledOLS, RandomEffects, PanelOLS, FirstDifferenceOLS
+raw = wd.data("wagepan")
+df = raw.set_index(["nr", "year"])
+yd = " + ".join(f"d8{i}" for i in range(1, 8))
+cl = dict(cov_type="clustered", cluster_entity=True)
+po = PooledOLS.from_formula(f"lwage ~ 1 + union + married + expersq + educ + black + hisp + {yd}", data=df).fit(**cl)
+re = RandomEffects.from_formula(f"lwage ~ 1 + union + married + expersq + educ + black + hisp + {yd}", data=df).fit(**cl)
+fe = PanelOLS.from_formula("lwage ~ union + married + expersq + TimeEffects + EntityEffects", data=df).fit(**cl)
+fd = FirstDifferenceOLS.from_formula(f"lwage ~ union + married + expersq + {yd}", data=df).fit(**cl)
+tab = pd.DataFrame({m: [r.params["union"], r.std_errors["union"]] for m, r in
+                    [("pooled", po), ("RE", re), ("FE", fe), ("FD", fd)]}, index=["union", "cluster se"]).round(4)
+print(tab)
+
+for v in ("union", "married", "expersq"):
+    raw[v + "_bar"] = raw.groupby("nr")[v].transform("mean")
+mk = smf.ols(f"lwage ~ union + married + expersq + union_bar + married_bar + expersq_bar + educ + black + hisp + {yd}",
+             data=raw).fit(cov_type="cluster", cov_kwds={"groups": raw["nr"]})
+print(f"\nMundlak: union coefficient {mk.params['union']:.4f} (= FE)")
+w = mk.wald_test("union_bar = 0, married_bar = 0, expersq_bar = 0", scalar=True)
+print(f"robust test of RE vs FE (xi = 0): chi2(3) = {w.statistic:.2f}, p = {w.pvalue:.4f}")
+```
+
+Output:
+
+```text
+pooled      RE      FE      FD
+union       0.1892  0.1103  0.0800  0.0411
+cluster se  0.0275  0.0210  0.0243  0.0219
+
+Mundlak: union coefficient 0.0800 (= FE)
+robust test of RE vs FE (xi = 0): chi2(3) = 68.17, p = 0.0000
+```
+
+Pooled OLS gives the largest premium, RE an intermediate one, and FE and FD the smallest. The Mundlak regression
+reproduces the FE coefficient exactly, and its cluster-robust test rejects \(\xi=0\) decisively, so the worker effect is
+correlated with the regressors and RE is inconsistent. The drop from pooled OLS to FE is consistent with positive
+selection of higher-wage workers into union jobs. Part of it may also be attenuation, because misreported switches in
+union status loom large in within-worker variation (Lecture 7, worked example). The difference between FE and FD hints at
+remaining measurement error or a failure of strict exogeneity.
+
+</details>
+
+### Exercise 7.2 — Crime and deterrence across North Carolina counties
+
+*Data:* `crime4` — 90 North Carolina counties, 1981–1987 (Cornwell and Trumbull, 1994).
+
+1. Estimate `lcrmrte` (log crimes per person) on log probability of arrest `lprbarr`, conviction `lprbconv`, prison `lprbpris`, log average sentence `lavgsen` and log police per capita `lpolpc`, with year effects, by pooled OLS and by county fixed effects. Cluster by county.
+2. Compare the deterrence elasticities. Why could FE still be biased for `lpolpc`?
+
+```python
+import wooldridge as wd
+from linearmodels.panel import PanelOLS, PooledOLS
+df = wd.data("crime4").set_index(["county", "year"])
+x = "lprbarr + lprbconv + lprbpris + lavgsen + lpolpc"
+# TODO: PooledOLS with year dummies vs PanelOLS with EntityEffects + TimeEffects
+```
+
+<details class="solution" markdown="1"><summary>Solution, output and discussion</summary>
+
+```python
+import pandas as pd, wooldridge as wd
+from linearmodels.panel import PanelOLS, PooledOLS
+df = wd.data("crime4").set_index(["county", "year"])
+x = "lprbarr + lprbconv + lprbpris + lavgsen + lpolpc"
+yd = " + ".join(f"d8{i}" for i in range(2, 8))
+cl = dict(cov_type="clustered", cluster_entity=True)
+po = PooledOLS.from_formula(f"lcrmrte ~ 1 + {x} + {yd}", data=df).fit(**cl)
+fe = PanelOLS.from_formula(f"lcrmrte ~ {x} + EntityEffects + TimeEffects", data=df).fit(**cl)
+names = x.split(" + ")
+print(pd.DataFrame({"pooled": po.params[names], "pooled se": po.std_errors[names],
+                    "FE": fe.params[names], "FE se": fe.std_errors[names]}).round(3))
+print(f"\nwithin R2 (FE): {fe.rsquared_within:.3f};  counties: {df.index.get_level_values(0).nunique()}")
+```
+
+Output:
+
+```text
+pooled  pooled se     FE  FE se
+lprbarr   -0.720      0.109 -0.360  0.064
+lprbconv  -0.546      0.070 -0.286  0.055
+lprbpris   0.248      0.108 -0.183  0.049
+lavgsen   -0.087      0.112 -0.004  0.036
+lpolpc     0.366      0.120  0.424  0.091
+
+within R2 (FE): 0.354;  counties: 90
+```
+
+Fixed effects shrink the deterrence elasticities for arrest and conviction probabilities substantially compared with
+pooled OLS: counties with persistently low crime also have high arrest rates for reasons that FE removes. The police
+coefficient is **positive** in both models. That is the classic sign of reverse causality — counties hire police when
+crime rises — which county fixed effects cannot fix because the feedback is time-varying. This is exactly the failure of
+strict exogeneity discussed in Lecture 7, and it calls for an instrument or a dynamic model.
+
+</details>
+
 ## Reading
 **Required:** Wooldridge, *Econometric Analysis of Cross Section and Panel Data*, chapter 10; Angrist and Pischke, *Mostly Harmless Econometrics*, chapter 5.1.
 **Further:** Mundlak (1978), "On the pooling of time series and cross section data", *Econometrica* 46(1); Hausman and Taylor (1981), *Econometrica* 49(6); Griliches and Hausman (1986), "Errors in variables in panel data", *Journal of Econometrics* 31(1); Arellano (1987), "Computing robust standard errors for within-groups estimators", *Oxford Bulletin* 49(4); Freeman (1984), "Longitudinal analyses of the effects of trade unions", *Journal of Labor Economics* 2(1).

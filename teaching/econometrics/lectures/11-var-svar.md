@@ -154,6 +154,140 @@ print("VAR response:                         ", irf.orth_irfs[:9, 0, 2].round(3)
 
 Tasks: (i) compare the estimated impact matrix with `B0inv`; (ii) reorder the variables and show how the impact responses change; (iii) plot VAR responses with bootstrap bands (`irf.plot(orth=True)`) alongside LP responses with HAC bands. In R, use `vars::VAR`, `vars::irf` and `lpirfs`. Real-data extension: FRED-QD variables GDPC1, GDPDEF, PPIACO and FEDFUNDS for the worked example.
 
+## Coding exercises
+
+These exercises use **real data** and run in Python. Install the packages once with
+`pip install wooldridge statsmodels linearmodels scipy`. The `wooldridge` package contains the datasets
+from Wooldridge's *Introductory Econometrics*; `statsmodels` ships U.S. and Danish macroeconomic series.
+Try the starter code first, then open the solution. Every printed result below was produced by running the solution code exactly as shown.
+
+### Exercise 11.1 — A three-variable monetary VAR for the U.S.
+
+*Data:* `macrodata` — U.S. quarterly data, 1959Q1–2009Q3: real GDP, CPI inflation, 3-month T-bill rate.
+
+1. Build a VAR in GDP growth (annualized, %), inflation, and the T-bill rate. Choose the lag by AIC and BIC (max 8).
+2. Check stability (eigenvalues of the companion matrix).
+3. Test whether the T-bill rate Granger-causes GDP growth.
+4. Compute recursive (Cholesky) impulse responses to a one-standard-deviation interest-rate shock, ordering growth, inflation, rate. Report the response of GDP growth and inflation over 12 quarters.
+5. Report the 12-quarter forecast-error variance decomposition of GDP growth.
+
+```python
+import numpy as np, pandas as pd, statsmodels.api as sm
+from statsmodels.tsa.api import VAR
+m = sm.datasets.macrodata.load_pandas().data
+df = pd.DataFrame({"growth": 400 * np.log(m["realgdp"]).diff(), "infl": m["infl"], "rate": m["tbilrate"]}).dropna()
+model = VAR(df)
+# TODO: model.select_order(8); res = model.fit(p); res.is_stable(); res.test_causality(...); res.irf(12); res.fevd(12)
+```
+
+<details class="solution" markdown="1"><summary>Solution, output and discussion</summary>
+
+```python
+import numpy as np, pandas as pd, statsmodels.api as sm
+from statsmodels.tsa.api import VAR
+m = sm.datasets.macrodata.load_pandas().data
+df = pd.DataFrame({"growth": 400 * np.log(m["realgdp"]).diff(), "infl": m["infl"], "rate": m["tbilrate"]}).dropna()
+model = VAR(df.to_numpy())
+sel = model.select_order(8)
+print("lag order by AIC:", sel.aic, " by BIC:", sel.bic)
+res = model.fit(4)
+companion = np.vstack([np.hstack(res.coefs), np.eye(3 * 3, 3 * 4)])      # [A1 A2 A3 A4; I 0]
+print("stable:", res.is_stable(), " max |eigenvalue| of companion:", round(max(abs(np.linalg.eigvals(companion))), 3))
+gc = res.test_causality(0, [2], kind="wald")
+print(f"Granger: rate -> growth  chi2 = {gc.test_statistic:.2f}, p = {gc.pvalue:.4f}")
+irf = res.irf(12).orth_irfs
+print("response to a 1-s.d. rate shock (Cholesky: growth, infl, rate):")
+print(pd.DataFrame({"growth": irf[:, 0, 2], "infl": irf[:, 1, 2], "rate": irf[:, 2, 2]}).iloc[[0, 1, 2, 4, 6, 8, 12]].round(3).to_string())
+fe = res.fevd(12).decomp[0, -1]
+print("FEVD of growth at h=12 (shares of growth, infl, rate shocks):", fe.round(3))
+```
+
+Output:
+
+```text
+lag order by AIC: 6  by BIC: 1
+stable: True  max |eigenvalue| of companion: 0.902
+Granger: rate -> growth  chi2 = 15.16, p = 0.0044
+response to a 1-s.d. rate shock (Cholesky: growth, infl, rate):
+    growth   infl   rate
+0    0.000  0.000  0.731
+1    0.458  0.488  0.713
+2   -0.498  0.177  0.492
+4    0.060  0.376  0.582
+6   -0.116  0.144  0.463
+8   -0.036  0.079  0.388
+12   0.006  0.016  0.271
+FEVD of growth at h=12 (shares of growth, infl, rate shocks): [0.867 0.09  0.043]
+```
+
+AIC and BIC disagree on the lag length, a typical outcome; we use four lags (one year), a common compromise for quarterly
+data. The system is stable. Interest rates Granger-cause GDP growth strongly — but as Problem 3 explains, that may reflect
+the Fed reacting to information about future growth, not a causal effect of policy. After a recursive interest-rate
+shock, output growth first *rises* and then falls in the second quarter, and **inflation rises** for several quarters: the
+**price puzzle** of Lecture 11. The recursive ordering attributes to "policy shocks" some of the Fed's response to anticipated inflation. The
+FEVD shows that interest-rate shocks explain only about 4% of the variance of growth at a 3-year horizon; almost 90% is
+due to growth's own shocks.
+
+</details>
+
+### Exercise 11.2 — How much does the ordering matter?
+
+*Data:* `macrodata`, same VAR as above.
+
+1. Re-estimate the Cholesky responses with the rate ordered **first** (the policy rate cannot respond within the quarter to output and inflation).
+2. Compare the impact responses and the 8-quarter responses of growth to the rate shock under the two orderings.
+3. Compute the correlation of the reduced-form residuals. Why does the ordering matter more when this correlation is large?
+
+```python
+import numpy as np, pandas as pd, statsmodels.api as sm
+from statsmodels.tsa.api import VAR
+m = sm.datasets.macrodata.load_pandas().data
+df = pd.DataFrame({"growth": 400 * np.log(m["realgdp"]).diff(), "infl": m["infl"], "rate": m["tbilrate"]}).dropna()
+# TODO: fit VAR(4) on df and on df[["rate", "growth", "infl"]]; compare orth_irfs
+```
+
+<details class="solution" markdown="1"><summary>Solution, output and discussion</summary>
+
+```python
+import numpy as np, pandas as pd, statsmodels.api as sm
+from statsmodels.tsa.api import VAR
+m = sm.datasets.macrodata.load_pandas().data
+df = pd.DataFrame({"growth": 400 * np.log(m["realgdp"]).diff(), "infl": m["infl"], "rate": m["tbilrate"]}).dropna()
+a = VAR(df).fit(4); b = VAR(df[["rate", "growth", "infl"]]).fit(4)
+ia, ib = a.irf(12).orth_irfs, b.irf(12).orth_irfs
+print("response of growth to the rate shock")
+print(pd.DataFrame({"rate ordered last": ia[:, 0, 2], "rate ordered first": ib[:, 1, 0]}).iloc[[0, 1, 2, 4, 8]].round(3).to_string())
+print("\nreduced-form residual correlations:")
+print(pd.DataFrame(a.resid).corr().round(3).to_string())
+```
+
+Output:
+
+```text
+response of growth to the rate shock
+   rate ordered last  rate ordered first
+0              0.000               0.951
+1              0.458               0.742
+2             -0.498              -0.297
+4              0.060              -0.049
+8             -0.036              -0.160
+
+reduced-form residual correlations:
+        growth   infl   rate
+growth   1.000  0.145  0.304
+infl     0.145  1.000  0.350
+rate     0.304  0.350  1.000
+```
+
+With the rate ordered last, growth cannot respond on impact by construction. With the rate ordered first, the impact
+response is whatever the residual correlation implies. That correlation is positive: in the data, unexpected rate rises
+come with unexpectedly strong growth, because the Fed responds within the quarter. Ordering the rate first therefore
+attributes that co-movement to the policy shock, and growth appears to **rise** on impact after a tightening — an
+implausible result. Identification is an economic assumption about timing, and the data alone cannot settle it. External
+instruments (high-frequency surprises) are the modern response.
+
+</details>
+
 ## Reading
 **Required:** Kilian and Lütkepohl, *Structural Vector Autoregressive Analysis* (2017), chapters 2, 8–9 and 12–13; Stock and Watson (2016), "Dynamic factor models, factor-augmented VARs, and SVARs in macroeconomics", *Handbook of Macroeconomics* vol. 2.
 **Further:** Sims (1980), "Macroeconomics and reality", *Econometrica* 48(1); Blanchard and Quah (1989), *AER* 79(4); Christiano, Eichenbaum and Evans (1999), *Handbook of Macroeconomics* vol. 1A; Uhlig (2005), *Journal of Monetary Economics* 52(2); Baumeister and Hamilton (2015), *Econometrica* 83(5); Mertens and Ravn (2013), *AER* 103(4); Gertler and Karadi (2015), *AEJ: Macro* 7(1); Jordà (2005), *AER* 95(1); Plagborg-Møller and Wolf (2021), "Local projections and VARs estimate the same impulse responses", *Econometrica* 89(2).

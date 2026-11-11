@@ -35,7 +35,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
       <small>THIS LECTURE</small>
       <h3>Calculus · Lecture 2</h3>
       <div class="profile-item"><strong>Part</strong><span>Part I · Single-variable analysis</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 2 min read</span></div>
+      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · 8 min read</span></div>
       <div class="profile-item"><strong>Previous</strong><span><a href="01-limits-continuity.html">Lecture 1: Limits, Continuity, and the Logic of Analysis</a></span></div>
       
     </aside>
@@ -88,6 +88,93 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
 </ol>
 </section><section class="box lab"><h2 id="computational-lab">Computational lab</h2>
 <p>Plot partial sums for geometric, harmonic, p-series, and alternating harmonic series. Compare numerical behavior with analytic tests.</p>
+</section><section class="box lab"><h2 id="coding-exercises">Coding exercises</h2>
+<p>These exercises apply the calculus of this lecture to <strong>real economic data</strong> in Python, mixing symbolic (<code>sympy</code>),
+numerical (<code>scipy</code>) and statistical (<code>statsmodels</code>) tools. Install once with
+<code>pip install sympy scipy numpy pandas statsmodels wooldridge</code>. Try the starter code first, then open the solution.
+Every printed result below comes from running the solution code exactly as shown.</p>
+<h3 id="exercise-21-log-differences-versus-percent-changes-a-taylor-series-for-growth-rates">Exercise 2.1 — Log differences versus percent changes: a Taylor series for growth rates</h3>
+<p><em>Data:</em> <code>macrodata</code> (statsmodels) — U.S. quarterly real GDP and CPI, 1959–2009.</p>
+<p>Economists often measure growth as <span class="arithmatex">\(\Delta\log y\)</span> instead of <span class="arithmatex">\(\Delta y/y\)</span>. Since <span class="arithmatex">\(\log(1+g)=g-g^2/2+g^3/3-\dots\)</span>,
+the two differ at second order.</p>
+<ol>
+<li>Compute quarterly percent changes and log differences of real GDP and of the CPI. Report the largest gap between them.</li>
+<li>Show that adding the second-order term, <span class="arithmatex">\(g-g^2/2\)</span>, removes most of the gap.</li>
+<li>Annualize quarterly growth in two ways — <span class="arithmatex">\(4\times\)</span> the quarterly rate and <span class="arithmatex">\((1+g)^4-1\)</span> — and compare for the most extreme quarter.</li>
+</ol>
+<pre><code class="language-python">import numpy as np, statsmodels.api as sm
+m = sm.datasets.macrodata.load_pandas().data
+y = m[&quot;realgdp&quot;].to_numpy()
+g = y[1:] / y[:-1] - 1; lg = np.diff(np.log(y))
+# TODO: max |g - lg|; max |g - g**2/2 - lg|; annualization
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, statsmodels.api as sm
+m = sm.datasets.macrodata.load_pandas().data
+for name in (&quot;realgdp&quot;, &quot;cpi&quot;):
+    y = m[name].to_numpy(); g = y[1:] / y[:-1] - 1; lg = np.diff(np.log(y))
+    k = np.argmax(np.abs(g))
+    print(f&quot;{name}: largest |quarterly change| {100*g[k]:.3f}% (log diff {100*lg[k]:.3f}%)&quot;)
+    print(f&quot;   max |g - log| = {np.max(np.abs(g - lg))*100:.4f} pp;  max |g - g^2/2 - log| = {np.max(np.abs(g - g**2/2 - lg))*100:.5f} pp;  max |g - g^2/2 + g^3/3 - log| = {np.max(np.abs(g - g**2/2 + g**3/3 - lg))*100:.6f} pp&quot;)
+    print(f&quot;   annualized at that quarter: 4g = {400*g[k]:.2f}%,  (1+g)^4 - 1 = {100*((1+g[k])**4-1):.2f}%,  4*log diff = {400*lg[k]:.2f}%&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">realgdp: largest |quarterly change| 3.934% (log diff 3.859%)
+   max |g - log| = 0.0754 pp;  max |g - g^2/2 - log| = 0.00197 pp;  max |g - g^2/2 + g^3/3 - log| = 0.000058 pp
+   annualized at that quarter: 4g = 15.74%,  (1+g)^4 - 1 = 16.69%,  4*log diff = 15.43%
+cpi: largest |quarterly change| 3.723% (log diff 3.656%)
+   max |g - log| = 0.0676 pp;  max |g - g^2/2 - log| = 0.00167 pp;  max |g - g^2/2 + g^3/3 - log| = 0.000047 pp
+   annualized at that quarter: 4g = 14.89%,  (1+g)^4 - 1 = 15.75%,  4*log diff = 14.62%
+</code></pre>
+<p>Quarterly changes are small, so log differences and percent changes differ by at most 0.08 percentage points. Adding the
+<span class="arithmatex">\(-g^2/2\)</span> term cuts the gap by a factor of about 40, and the cubic term by another 30 — the Taylor series converges fast
+for small <span class="arithmatex">\(g\)</span>. Annualization matters more: for GDP's strongest quarter, simple multiplication by four gives 15.7%, true
+compounding 16.7%, and four times the log difference 15.4%. Always state which convention a reported growth rate uses.</p>
+</details>
+<h3 id="exercise-22-present-values-as-geometric-series-pricing-a-perpetuity-and-a-bond">Exercise 2.2 — Present values as geometric series: pricing a perpetuity and a bond</h3>
+<p><em>Data:</em> <code>intqrt</code> — U.S. Treasury yields; we use the sample's average 12-month yield <code>r12</code> as a discount rate.</p>
+<ol>
+<li>A perpetuity pays $100 per year forever. Write its value as a geometric series and sum it with <code>sympy</code>.</li>
+<li>Compute the partial sums for 10, 30 and 100 years. How many years of payments make up 90% of the perpetuity's value?</li>
+<li>Price a 10-year bond with a 5% annual coupon and face value $1,000 at the average yield, using the closed form for a finite geometric series. Check it with a direct sum.</li>
+</ol>
+<pre><code class="language-python">import numpy as np, sympy as sp, wooldridge as wd
+r = wd.data(&quot;intqrt&quot;)[&quot;r12&quot;].mean() / 100
+t, R = sp.symbols(&quot;t R&quot;, positive=True)
+# TODO: sp.summation(100 / (1 + R)**t, (t, 1, sp.oo)); partial sums; bond price
+</code></pre>
+<details class="solution">
+<summary>Solution, output and discussion</summary>
+<pre><code class="language-python">import numpy as np, sympy as sp, wooldridge as wd
+r = wd.data(&quot;intqrt&quot;)[&quot;r12&quot;].mean() / 100
+t, R = sp.symbols(&quot;t R&quot;, positive=True)
+pv = sp.simplify(sp.summation(100 / (1 + R)**t, (t, 1, sp.oo)))
+print(f&quot;discount rate r = {100*r:.3f}%;  symbolic perpetuity value: {pv}  -&gt;  ${float(pv.subs(R, r)):,.2f}&quot;)
+total = 100 / r
+for T in (10, 30, 100):
+    s = sum(100 / (1 + r)**k for k in range(1, T + 1))
+    print(f&quot;  first {T:3d} years: ${s:,.2f} ({s/total:.1%} of the perpetuity)&quot;)
+T90 = np.log(10) / np.log(1 + r)
+print(f&quot;years needed for 90% of the value: {T90:.1f}&quot;)
+c, F, n = 50, 1000, 10
+closed = c * (1 - (1 + r)**-n) / r + F / (1 + r)**n
+direct = sum(c / (1 + r)**k for k in range(1, n + 1)) + F / (1 + r)**n
+print(f&quot;10-year 5% coupon bond: closed form ${closed:,.2f}, direct sum ${direct:,.2f}&quot;)
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">discount rate r = 6.927%;  symbolic perpetuity value: 100/R  -&gt;  $1,443.64
+  first  10 years: $704.74 (48.8% of the perpetuity)
+  first  30 years: $1,250.07 (86.6% of the perpetuity)
+  first 100 years: $1,441.86 (99.9% of the perpetuity)
+years needed for 90% of the value: 34.4
+10-year 5% coupon bond: closed form $864.20, direct sum $864.20
+</code></pre>
+<p><code>sympy</code> sums the geometric series to <span class="arithmatex">\(100/R\)</span>, about $1,444 at a 6.9% discount rate. The first 10 years contribute less
+than half of that value, and it takes about 34 years of payments to reach 90%: distant payments matter a lot when rates are
+moderate, which is why long-duration assets are so sensitive to interest rates. The closed form for the finite geometric
+series prices the 5% coupon bond at $864, below par because the coupon is below the yield.</p>
+</details>
 </section><section class="box reading"><h2 id="reading">Reading</h2>
 <p>Apostol, <em>Calculus</em>, Vol. 1; Spivak, <em>Calculus</em>; Rudin, <em>Principles of Mathematical Analysis</em>.</p></section></article>
     <nav class="pager">

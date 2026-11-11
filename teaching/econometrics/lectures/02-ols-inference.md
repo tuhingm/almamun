@@ -213,6 +213,127 @@ for n in (50, 200, 1000):
 
 Tasks: (i) explain why the classical test over-rejects under heteroskedasticity; (ii) set `hetero=False` and confirm that both tests have size close to 5%; (iii) plot a histogram of the robust \(t\) statistic for \(n=50\) and compare its tails with \(N(0,1)\). In R, use `lm()` with `sandwich::vcovHC(type = "HC1")` and `lmtest::coeftest()`. In Stata, use `regress y x, vce(robust)`.
 
+## Coding exercises
+
+These exercises use **real data** and run in Python. Install the packages once with
+`pip install wooldridge statsmodels linearmodels scipy`. The `wooldridge` package contains the datasets
+from Wooldridge's *Introductory Econometrics*; `statsmodels` ships U.S. and Danish macroeconomic series.
+Try the starter code first, then open the solution. Every printed result below was produced by running the solution code exactly as shown.
+
+### Exercise 2.1 — Testing a hedonic price model: classical versus robust inference
+
+*Data:* `hprice1` — 88 house sales in Boston-area communities, 1990 (price, lot size, square footage, bedrooms).
+
+1. Estimate \(\log(price)=\beta_0+\beta_1\log(lotsize)+\beta_2\log(sqrft)+\beta_3 bdrms+u\).
+2. Report classical and HC1 standard errors side by side.
+3. Test \(H_0:\beta_1+\beta_2=1\) (a 1% increase in both lot size and floor space raises price by 1%) with a robust Wald test, and build a 95% confidence interval for \(\beta_1+\beta_2\).
+4. Test the joint null \(\beta_1=\beta_3=0\).
+
+```python
+import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+df = wd.data("hprice1")
+m = smf.ols("np.log(price) ~ np.log(lotsize) + np.log(sqrft) + bdrms", data=df)
+# TODO: fit with cov_type="nonrobust" and cov_type="HC1"; use .t_test() and .wald_test()
+```
+
+<details class="solution" markdown="1"><summary>Solution, output and discussion</summary>
+
+```python
+import numpy as np, pandas as pd, wooldridge as wd, statsmodels.formula.api as smf
+df = wd.data("hprice1")
+m = smf.ols("np.log(price) ~ np.log(lotsize) + np.log(sqrft) + bdrms", data=df)
+cl, rb = m.fit(), m.fit(cov_type="HC1")
+print(pd.DataFrame({"coef": cl.params, "se classical": cl.bse, "se HC1": rb.bse}).round(4))
+
+t = rb.t_test("np.log(lotsize) + np.log(sqrft) = 1")
+est = float(np.squeeze(t.effect)); se = float(np.squeeze(t.sd))
+print(f"\nbeta1 + beta2 = {est:.4f} (robust se {se:.4f});  t = {float(np.squeeze(t.tvalue)):.3f}, p = {float(t.pvalue):.4f}")
+print(f"95% CI for beta1 + beta2: [{est - 1.96*se:.3f}, {est + 1.96*se:.3f}]")
+w = rb.wald_test("np.log(lotsize) = 0, bdrms = 0", scalar=True)
+print(f"joint test beta1 = beta3 = 0: chi2(2) = {w.statistic:.3f}, p = {w.pvalue:.4f}")
+```
+
+Output:
+
+```text
+coef  se classical  se HC1
+Intercept       -1.2970        0.6513  0.7813
+np.log(lotsize)  0.1680        0.0383  0.0415
+np.log(sqrft)    0.7002        0.0929  0.1038
+bdrms            0.0370        0.0275  0.0306
+
+beta1 + beta2 = 0.8682 (robust se 0.1088);  t = -1.211, p = 0.2258
+95% CI for beta1 + beta2: [0.655, 1.081]
+joint test beta1 = beta3 = 0: chi2(2) = 18.056, p = 0.0001
+```
+
+The point estimate of \(\beta_1+\beta_2\) is about 0.87, but the robust 95% interval runs from about 0.66 to 1.08 and
+contains one, so the test does **not** reject proportionality. With 88 houses, the data cannot distinguish a size
+elasticity of 0.87 from 1. The combined standard error uses the estimated covariance between the two coefficients,
+which a calculation from the two separate standard errors would ignore. Robust standard errors are 8–20% larger than
+classical ones here. The joint test that lot size and bedrooms both have no effect is rejected decisively, driven by
+lot size.
+
+</details>
+
+### Exercise 2.2 — Delta method versus bootstrap for a turning point
+
+*Data:* `wage1` — 526 workers, CPS 1976.
+
+1. Estimate \(\log(wage)=\beta_0+\beta_1 educ+\beta_2 exper+\beta_3 exper^2+u\).
+2. Compute the experience level at which predicted log wages peak, \(x^*=-\beta_2/(2\beta_3)\), with a delta-method standard error (robust covariance).
+3. Compute a pairs-bootstrap 95% percentile interval (999 draws, seed 42) and compare.
+
+```python
+import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+df = wd.data("wage1")
+f = "np.log(wage) ~ educ + exper + I(exper**2)"
+res = smf.ols(f, data=df).fit(cov_type="HC1")
+# TODO: gradient of g(b) = -b2/(2 b3); se = sqrt(g' V g); bootstrap rows with rng.integers
+```
+
+<details class="solution" markdown="1"><summary>Solution, output and discussion</summary>
+
+```python
+import numpy as np, wooldridge as wd, statsmodels.formula.api as smf
+df = wd.data("wage1")
+f = "np.log(wage) ~ educ + exper + I(exper**2)"
+res = smf.ols(f, data=df).fit(cov_type="HC1")
+b2, b3 = res.params["exper"], res.params["I(exper ** 2)"]
+xstar = -b2 / (2 * b3)
+V = res.cov_params().loc[["exper", "I(exper ** 2)"], ["exper", "I(exper ** 2)"]].to_numpy()
+g = np.array([-1 / (2 * b3), b2 / (2 * b3**2)])
+se = np.sqrt(g @ V @ g)
+print(f"turning point x* = {xstar:.2f} years, delta-method se = {se:.2f}")
+print(f"delta-method 95% CI: [{xstar - 1.96*se:.1f}, {xstar + 1.96*se:.1f}]")
+
+rng = np.random.default_rng(42); draws = []
+for _ in range(999):
+    p = smf.ols(f, data=df.iloc[rng.integers(0, len(df), len(df))]).fit().params
+    draws.append(-p["exper"] / (2 * p["I(exper ** 2)"]))
+lo, hi = np.percentile(draws, [2.5, 97.5])
+print(f"bootstrap 95% CI:    [{lo:.1f}, {hi:.1f}]  (bootstrap se {np.std(draws, ddof=1):.2f})")
+print("share of sample with exper above x*:", round((df["exper"] > xstar).mean(), 3))
+```
+
+Output:
+
+```text
+turning point x* = 28.74 years, delta-method se = 1.48
+delta-method 95% CI: [25.8, 31.6]
+bootstrap 95% CI:    [26.3, 33.0]  (bootstrap se 1.71)
+share of sample with exper above x*: 0.23
+```
+
+Predicted log wages peak after about 29 years of experience. The bootstrap interval is shifted to the **right**
+of the symmetric delta-method interval and is wider, reflecting the ratio form of \(x^*\): the bootstrap standard error is
+about 15% larger. With a less precise quadratic term, the delta method would be much less reliable (Lecture 2,
+Problem 3). About a quarter of the sample lies beyond the estimated peak, so the decline at high experience is
+supported by data rather than pure extrapolation — but a quadratic forces the profile to turn down; a more flexible
+specification (splines) would test that.
+
+</details>
+
 ## Reading
 **Required:** Hansen, *Econometrics*, chapters 5–7 and 9; Hayashi, *Econometrics*, sections 1.4 and 2.1–2.6.
 **Further:** White (1980), "A heteroskedasticity-consistent covariance matrix estimator and a direct test for heteroskedasticity", *Econometrica* 48(4); Engle (1984), "Wald, likelihood ratio, and Lagrange multiplier tests in econometrics", *Handbook of Econometrics* vol. 2; Wasserstein and Lazar (2016), "The ASA statement on p-values", *The American Statistician* 70(2).

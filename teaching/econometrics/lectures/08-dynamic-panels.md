@@ -175,6 +175,140 @@ print(f"OLS {rho_ols:.3f}  FE {rho_fe:.3f} (Nickell approx {rho - (1 + rho) / (T
 
 Tasks: (i) increase \(T\) and confirm that the FE bias shrinks at rate \(1/T\); (ii) set \(\rho=0.95\) and observe the instability of Anderson–Hsiao (weak instruments); (iii) estimate difference and system GMM with `pydynpd` (Python), `plm::pgmm` (R) or `xtabond2` (Stata) with `collapse` and lag limits, and report the instrument count, AR(2) and Hansen tests.
 
+## Coding exercises
+
+These exercises use **real data** and run in Python. Install the packages once with
+`pip install wooldridge statsmodels linearmodels scipy`. The `wooldridge` package contains the datasets
+from Wooldridge's *Introductory Econometrics*; `statsmodels` ships U.S. and Danish macroeconomic series.
+Try the starter code first, then open the solution. Every printed result below was produced by running the solution code exactly as shown.
+
+### Exercise 8.1 — Wage persistence: the OLS–FE bracket and Anderson–Hsiao IV
+
+*Data:* `wagepan` — 545 men, 1980–1987.
+
+Model \(lwage_{it}=\rho\,lwage_{i,t-1}+\beta\,union_{it}+\lambda_t+c_i+u_{it}\).
+
+1. Estimate \(\rho\) by pooled OLS and by fixed effects. Which way should each be biased?
+2. Estimate the first-differenced equation by 2SLS, instrumenting \(\Delta lwage_{i,t-1}\) with the level \(lwage_{i,t-2}\) (Anderson–Hsiao). Report the first-stage \(F\).
+3. Does the IV estimate fall inside the OLS–FE bracket?
+4. Test for second-order serial correlation in the differenced residuals.
+
+```python
+import numpy as np, pandas as pd, wooldridge as wd, statsmodels.formula.api as smf
+df = wd.data("wagepan").sort_values(["nr", "year"])
+g = df.groupby("nr")
+df["l1"] = g["lwage"].shift(1); df["l2"] = g["lwage"].shift(2)
+df["dy"] = df["lwage"] - df["l1"]; df["dl1"] = df["l1"] - df["l2"]
+# TODO: pooled OLS and FE of lwage on l1; 2SLS of dy on dl1 (instrument: l2 = lwage two years back)
+```
+
+<details class="solution" markdown="1"><summary>Solution, output and discussion</summary>
+
+```python
+import numpy as np, pandas as pd, wooldridge as wd, statsmodels.formula.api as smf
+from linearmodels.iv import IV2SLS
+from linearmodels.panel import PanelOLS
+df = wd.data("wagepan").sort_values(["nr", "year"])
+g = df.groupby("nr")
+df["l1"], df["l2"], df["l3"] = g["lwage"].shift(1), g["lwage"].shift(2), g["lwage"].shift(3)
+df["dy"], df["dl1"] = df["lwage"] - df["l1"], df["l1"] - df["l2"]
+df["dunion"] = df["union"] - g["union"].shift(1)
+
+po = smf.ols("lwage ~ l1 + union + C(year)", data=df.dropna(subset=["l1"])).fit(cov_type="cluster", cov_kwds={"groups": df.dropna(subset=["l1"])["nr"]})
+fe = PanelOLS.from_formula("lwage ~ l1 + union + TimeEffects + EntityEffects", data=df.dropna(subset=["l1"]).set_index(["nr", "year"])).fit(cov_type="clustered", cluster_entity=True)
+d = df.dropna(subset=["dy", "dl1", "l2", "dunion"]).copy()
+ah = IV2SLS.from_formula("dy ~ 1 + dunion + C(year) + [dl1 ~ l2]", data=d).fit(cov_type="clustered", clusters=d["nr"])
+fs = smf.ols("dl1 ~ l2 + dunion + C(year)", data=d).fit(cov_type="cluster", cov_kwds={"groups": d["nr"]})
+print(f"pooled OLS rho = {po.params['l1']:.3f}   FE rho = {fe.params['l1']:.3f}   Anderson-Hsiao rho = {ah.params['dl1']:.3f} (se {ah.std_errors['dl1']:.3f})")
+print(f"AH first stage: coefficient on l2 = {fs.params['l2']:.3f}, clustered F = {fs.tvalues['l2']**2:.1f}")
+print(f"union effect: pooled {po.params['union']:.3f}, FE {fe.params['union']:.3f}, AH {ah.params['dunion']:.3f}")
+
+d["e"] = ah.resids
+d["e_lag2"] = d.groupby("nr")["e"].shift(2)
+dd = d.dropna(subset=["e_lag2"])
+ar2 = smf.ols("e ~ e_lag2", data=dd).fit(cov_type="cluster", cov_kwds={"groups": dd["nr"]})
+print(f"AR(2) check: corr of differenced residuals at lag 2 = {dd['e'].corr(dd['e_lag2']):.3f}, cluster t = {ar2.tvalues['e_lag2']:.2f}")
+```
+
+Output:
+
+```text
+pooled OLS rho = 0.602   FE rho = 0.064   Anderson-Hsiao rho = 0.120 (se 0.034)
+AH first stage: coefficient on l2 = -0.392, clustered F = 178.9
+union effect: pooled 0.064, FE 0.069, AH 0.024
+AR(2) check: corr of differenced residuals at lag 2 = 0.039, cluster t = 1.71
+```
+
+Pooled OLS is biased **up** (the lag contains the worker effect) and FE is biased **down** (Nickell bias with only
+\(T=8\)). They bracket the true \(\rho\) widely. The Anderson–Hsiao estimate lies inside the bracket, which is a reassuring
+sanity check. Its first stage is strong here because wages are only moderately persistent once worker effects are
+removed. The AR(2) check is what licenses the \(t-2\) instrument: a significant lag-2 correlation of the differenced
+residuals would mean serial correlation in \(u_{it}\), and deeper lags would be needed. Arellano–Bond GMM uses all
+available lags; try `pydynpd` and compare, reporting the instrument count.
+
+</details>
+
+### Exercise 8.2 — Grunfeld investment: how instrument count changes GMM
+
+*Data:* `grunfeld` (statsmodels) — investment, market value and capital of 11 large U.S. firms, 1935–1954.
+
+With only \(N=11\) firms and \(T=20\), the Arellano–Bond instrument count explodes relative to \(N\).
+
+1. Estimate \(invest_{it}=\rho\,invest_{i,t-1}+\beta_1 value_{it}+\beta_2 capital_{it}+c_i+u_{it}\) by pooled OLS and FE.
+2. Count how many Arellano–Bond moment conditions "all lags" would use for the lagged dependent variable alone.
+3. Estimate the differenced equation by just-identified IV (lag-2 level) and by an over-identified IV with lags 2–4 (collapsed). Compare.
+4. Explain why "panel GMM" is a poor tool for this dataset.
+
+```python
+import statsmodels.api as sm
+df = sm.datasets.grunfeld.load_pandas().data.sort_values(["firm", "year"])
+# TODO: create lags by firm; pooled OLS, FE; IV on first differences with y_{t-2}, y_{t-3}, y_{t-4}
+```
+
+<details class="solution" markdown="1"><summary>Solution, output and discussion</summary>
+
+```python
+import statsmodels.api as sm, statsmodels.formula.api as smf
+from linearmodels.iv import IV2SLS
+df = sm.datasets.grunfeld.load_pandas().data.sort_values(["firm", "year"]).reset_index(drop=True)
+g = df.groupby("firm")
+for k in (1, 2, 3, 4):
+    df[f"i{k}"] = g["invest"].shift(k)
+df["dy"], df["dl1"] = df["invest"] - df["i1"], df["i1"] - df["i2"]
+df["dv"], df["dk"] = g["value"].diff(), g["capital"].diff()
+
+d1 = df.dropna(subset=["i1"])
+po = smf.ols("invest ~ i1 + value + capital", data=d1).fit()
+fe = smf.ols("invest ~ i1 + value + capital + C(firm)", data=d1).fit()
+print(f"pooled OLS rho = {po.params['i1']:.3f}    FE rho = {fe.params['i1']:.3f}")
+T = df["year"].nunique()
+print(f"Arellano-Bond 'all lags' moments for the lagged dependent variable: {sum(t - 1 for t in range(2, T))} with N = {df['firm'].nunique()} firms")
+
+d2 = df.dropna(subset=["dy", "dl1", "i2", "i3", "i4", "dv", "dk"])
+cl = dict(cov_type="clustered", clusters=d2["firm"].astype("category").cat.codes)
+ji = IV2SLS.from_formula("dy ~ 0 + dv + dk + [dl1 ~ i2]", data=d2).fit(**cl)
+oi = IV2SLS.from_formula("dy ~ 0 + dv + dk + [dl1 ~ i2 + i3 + i4]", data=d2).fit(**cl)
+print(f"IV, lag 2 only:   rho = {ji.params['dl1']:.3f} (se {ji.std_errors['dl1']:.3f})")
+print(f"IV, lags 2-4:     rho = {oi.params['dl1']:.3f} (se {oi.std_errors['dl1']:.3f})")
+```
+
+Output:
+
+```text
+pooled OLS rho = 0.876    FE rho = 0.684
+Arellano-Bond 'all lags' moments for the lagged dependent variable: 171 with N = 11 firms
+IV, lag 2 only:   rho = 0.010 (se 0.215)
+IV, lags 2-4:     rho = 0.804 (se 0.213)
+```
+
+"All lags" would use 171 moment conditions for the lagged dependent variable alone — with 11 firms, the GMM weight matrix
+cannot even be estimated. The two IV estimates differ wildly (about 0.01 with one instrument, 0.80 with three), and both have
+standard errors above 0.2: the instruments carry little reliable information. With \(T=20\), the Nickell bias of FE is modest (order \(1/T\)), so FE is already a reasonable
+estimator here; difference-GMM methods are designed for **large \(N\), small \(T\)**, the opposite of this dataset.
+The clustered standard errors rest on only 11 clusters, so even they should not be trusted (Lecture 4). Choosing the estimator to fit the dimensions of the data is part of the econometrics.
+
+</details>
+
 ## Reading
 **Required:** Arellano, *Panel Data Econometrics* (2003), chapters 6–8; Roodman (2009), "How to do xtabond2: an introduction to difference and system GMM in Stata", *Stata Journal* 9(1).
 **Further:** Nickell (1981), "Biases in dynamic models with fixed effects", *Econometrica* 49(6); Hansen (1982), "Large sample properties of generalized method of moments estimators", *Econometrica* 50(4); Anderson and Hsiao (1981), *JASA* 76(375); Arellano and Bond (1991), *Review of Economic Studies* 58(2); Blundell and Bond (1998), *Journal of Econometrics* 87(1); Windmeijer (2005), *Journal of Econometrics* 126(1); Roodman (2009), "A note on the theme of too many instruments", *Oxford Bulletin* 71(1); Bond, Hoeffler and Temple (2001), "GMM estimation of empirical growth models", CEPR DP 3048.
