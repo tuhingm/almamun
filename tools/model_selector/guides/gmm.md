@@ -1,8 +1,8 @@
 title: 2SLS and GMM
 short: 2SLS / GMM
 when: Endogenous regressors that need instruments
-data: U.S. federal funds rate, inflation and the output gap, quarterly, 1979–2007
-lead: Use this guide when a regressor is correlated with the error term, so that OLS is biased. It covers choosing instruments, two-stage least squares, instrument strength, overidentification and endogeneity tests, efficient GMM, and robustness, with sample text for the paper and a note on dynamic panels.
+data: U.S. policy rule, quarterly, 1979–2007; UK firm employment panel, 1976–1984
+lead: Use this guide when a regressor is correlated with the error term, so that OLS is biased. It covers choosing instruments, two-stage least squares, instrument strength, overidentification and endogeneity tests, efficient GMM and robustness for a time-series model, then difference GMM for a dynamic panel with its specification tests, with sample text for the paper.
 ---
 
 ## The question and why OLS fails
@@ -224,32 +224,138 @@ estimate(("1961Q1", "1979Q2"), (1, 2, 3, 4), "Before Volcker: 1961-1979")
 Why would the estimate collapse after 1983? Inflation was low and stable, so there is little variation to identify the response from, and the smoothing coefficient above 0.9 makes the long-run ratio very sensitive. The measurement of the variables matters too: studies that use real-time data and forecasts, rather than the revised data and HP-filtered gap used here, find stronger responses in this period. A careful paper reports this sensitivity and does not claim more than the 1979–2007 result supports.
 </div>
 
-## If your data is a panel: dynamic panel GMM
+## Part 2. Dynamic panels: why OLS and fixed effects both fail
 
-The same logic extends to panel data with a lagged dependent variable, such as growth regressions across countries or leverage regressions across firms:
+The second half of this guide applies the same idea to **panel data with a lagged dependent variable**, the setting of growth regressions across countries and of investment, leverage or employment equations across firms:
 
 \[
-y_{it} = \alpha\, y_{i,t-1} + \beta' x_{it} + \eta_i + \varepsilon_{it}
+y_{it} = \alpha\, y_{i,t-1} + \beta' x_{it} + \eta_i + \lambda_t + \varepsilon_{it}
 \]
 
-The lagged dependent variable is correlated with the fixed effect \(\eta_i\), so pooled OLS overstates \(\alpha\); the fixed-effects estimator understates it when the number of periods is small (the Nickell bias). The remedies are GMM estimators.
+Here \(\eta_i\) is a fixed effect for each unit and \(\lambda_t\) a year effect. The lagged dependent variable is endogenous by construction, and the two usual estimators are biased in opposite directions.
 
-| Estimator | Idea | Use when |
+| Estimator | Problem | Direction of bias in \(\alpha\) |
 |---|---|---|
-| Difference GMM (Arellano–Bond) | First-difference to remove \(\eta_i\); instrument \(\Delta y_{i,t-1}\) with levels dated \(t-2\) and earlier | many units, few periods |
-| System GMM (Blundell–Bond) | Adds the level equation, instrumented with lagged differences | the series are very persistent, where difference GMM has weak instruments |
+| Pooled OLS | \(y_{i,t-1}\) contains \(\eta_i\), which is in the error | **upwards** |
+| Fixed effects | demeaning makes \(y_{i,t-1}\) correlated with the demeaned error when T is small (Nickell bias) | **downwards** |
+| Difference GMM (Arellano–Bond) | first-difference to remove \(\eta_i\), then instrument \(\Delta y_{i,t-1}\) with levels dated \(t-2\) and earlier | consistent if the instruments are valid and strong |
 
-A dynamic panel GMM table is not complete without these four items.
+The example is the one the method was developed on: employment in 140 UK manufacturing firms, 1976–1984, from Arellano and Bond (1991). The question is **how persistent is firm employment, and how does it respond to wages and capital?**
 
-1. **AR(1) and AR(2) tests** on the differenced residuals. AR(1) should be significant by construction. **AR(2) must not be**: if it is, the lag-2 instruments are invalid and you must start from deeper lags.
-2. **Hansen J test** of the overidentifying restrictions, with a p-value that is neither below 0.05 nor suspiciously close to 1.
-3. **The number of instruments**, which must be smaller than the number of units. Use collapsed instruments and limit the lag depth; too many instruments overfit and make the Hansen test useless.
-4. **A bounds check:** the GMM estimate of \(\alpha\) should lie between the fixed-effects estimate (too low) and the pooled OLS estimate (too high).
+```python
+from diff_gmm import diff_gmm          # helper file: research-guide/examples/diff_gmm.py
+import statsmodels.formula.api as smf
 
-<div class="warn" markdown="1">
-**Why this guide has no worked panel example**
+raw = pd.read_csv("employment.csv")
+panel = pd.DataFrame({"firm": raw["firm"], "year": raw["year"], "n": np.log(raw["emp"]), "w": np.log(raw["wage"]),
+                      "k": np.log(raw["capital"]), "ys": np.log(raw["output"])})
+by_firm = panel.groupby("firm")
+for var, lag in (("n", 1), ("n", 2), ("w", 1), ("k", 1), ("k", 2), ("ys", 1), ("ys", 2)):
+    panel[f"{var}_l{lag}"] = by_firm[var].shift(lag)
 
-A worked example was prepared on a panel of annual inflation in 115 countries, but it did not pass the tests above: the Hansen test rejected the instruments in most specifications. A guide should not teach from an example that fails its own specification tests, so it is left out. The method and its code are covered in the [Dynamic panels lecture](../teaching/econometrics/lectures/08-dynamic-panels.html) of the Econometrics course. In Stata the standard tool is `xtabond2`; in R, `plm::pgmm`.
+print(f"{panel['firm'].nunique()} firms, {panel['year'].min()}-{panel['year'].max()}, {len(panel)} observations")
+print("Years per firm:", by_firm["year"].count().value_counts().sort_index().to_dict())
+```
+
+<div class="read" markdown="1">
+**How to read it**
+
+This is the typical shape for dynamic panel GMM: **many units (140) and few periods (7 to 9)**. The method relies on the number of units being large. With a long panel of few units, such as 20 countries over 40 years, fixed effects is the better choice and the Nickell bias is small.
+
+The variables are in logs: employment `n`, the real wage `w`, capital `k` and industry output `ys`. The model has two lags of employment, current and lagged wages, and current and two lags of capital and output, as in the original paper. [Download the helper file](examples/diff_gmm.py) and the [data](examples/employment.csv) into your working folder.
+</div>
+
+## Panel step 1: pooled OLS and fixed effects give the bounds
+
+```python
+controls = ["w", "w_l1", "k", "k_l1", "k_l2", "ys", "ys_l1", "ys_l2"]
+formula = "n ~ n_l1 + n_l2 + " + " + ".join(controls) + " + C(year)"
+sample = panel.dropna()
+cluster = {"cov_type": "cluster", "cov_kwds": {"groups": sample["firm"]}}
+
+pooled = smf.ols(formula, sample).fit(**cluster)
+fixed = smf.ols(formula + " + C(firm)", sample).fit(**cluster)
+print(f"{'':16s}{'L1.n':>8s}{'L2.n':>8s}{'w':>8s}{'k':>8s}")
+for name, m in (("Pooled OLS", pooled), ("Fixed effects", fixed)):
+    print(f"{name:16s}{m.params['n_l1']:8.3f}{m.params['n_l2']:8.3f}{m.params['w']:8.3f}{m.params['k']:8.3f}")
+```
+
+<div class="read" markdown="1">
+**How to read it**
+
+The coefficient on lagged employment is 1.05 by pooled OLS and 0.73 by fixed effects. Because the first is biased upwards and the second downwards, **a credible estimate should lie between them**. This bounds check, suggested by Bond (2002), costs two regressions and is the first thing to run in any dynamic panel study.
+</div>
+
+## Panel step 2: difference GMM
+
+```python
+gmm_panel = diff_gmm(panel, unit="firm", time="year", y="n", lags_y=2, x=controls, gmm_lags=(2, None))
+print(gmm_panel["table"].loc[["L1.n", "L2.n"] + controls].round(4))
+print(f"\nObservations: {gmm_panel['nobs']}   firms: {gmm_panel['units']}   instruments: {gmm_panel['instruments']}")
+
+t = gmm_panel["table"]["coef"]
+persistence = 1 - t["L1.n"] - t["L2.n"]
+print(f"Long-run wage elasticity:    {(t['w'] + t['w_l1']) / persistence:.2f}")
+print(f"Long-run capital elasticity: {(t['k'] + t['k_l1'] + t['k_l2']) / persistence:.2f}")
+```
+
+<div class="read" markdown="1">
+**How to read it**
+
+These are one-step estimates with standard errors robust to heteroskedasticity and to correlation within each firm. They reproduce the published results for this dataset exactly (a coefficient of 0.686 on lagged employment), which is how the helper function was checked.
+
+- **Wages.** A 1% rise in the real wage lowers employment by 0.61% in the same year. Allowing for the dynamics, the long-run elasticity is about −0.54.
+- **Capital.** A 1% rise in the capital stock raises employment by 0.36% at once, and by about 0.70% in the long run.
+- **Persistence.** The coefficient on lagged employment is 0.69. Compare it with the bounds from the previous step: it lies **below** the fixed-effects estimate of 0.73, not between the two. Keep this in mind for the next two steps.
+
+`gmm_lags=(2, None)` uses all available lags from \(t-2\) back as instruments, which gives 41 instruments for 140 firms.
+</div>
+
+## Panel step 3: the three specification tests
+
+```python
+z1, p1 = gmm_panel["ar1"]; z2, p2 = gmm_panel["ar2"]; j, dof, pj = gmm_panel["hansen"]
+print(f"Arellano-Bond AR(1) test:  z = {z1:6.2f}   p-value = {p1:.3f}")
+print(f"Arellano-Bond AR(2) test:  z = {z2:6.2f}   p-value = {p2:.3f}")
+print(f"Hansen J test:             chi2({dof}) = {j:.2f}   p-value = {pj:.3f}")
+print(f"Instruments: {gmm_panel['instruments']}    firms: {gmm_panel['units']}")
+```
+
+<div class="read" markdown="1">
+**How to read it**
+
+A dynamic panel GMM table is not complete without these.
+
+- **AR(1)** is significant, which is expected: first-differencing creates first-order correlation by construction. It tells you nothing about validity.
+- **AR(2) is the test that matters.** Its null is no second-order serial correlation in the differenced residuals. If it is rejected, the errors in levels are serially correlated and levels dated \(t-2\) are not valid instruments. Here p = 0.61, so the instruments pass. If it had rejected, you would start the instruments at \(t-3\).
+- **Hansen J** has the null that the instruments are valid as a group. Here p = 0.18, which does not reject. Be suspicious of p-values very close to 1: that is a sign of too many instruments, not of very good ones.
+- **Instrument count.** 41 instruments for 140 firms. The count must stay well below the number of units, because too many instruments overfit the endogenous variable and weaken the Hansen test.
+</div>
+
+## Panel step 4: robustness to the instrument set
+
+```python
+specs = {"All lags (baseline)": {}, "Lags 2 to 4": {"gmm_lags": (2, 4)}, "Lags 2 to 3": {"gmm_lags": (2, 3)},
+         "Lags 3 and deeper": {"gmm_lags": (3, None)}, "Collapsed instruments": {"collapse": True}}
+print(f"{'':24s}{'L1.n':>7s}{'(s.e.)':>9s}{'w':>8s}{'k':>8s}{'instr.':>8s}{'AR(2) p':>9s}{'Hansen p':>10s}")
+for name, options in specs.items():
+    r = diff_gmm(panel, unit="firm", time="year", y="n", lags_y=2, x=controls, **options)
+    c, se = r["table"]["coef"], r["table"]["std err"]
+    print(f"{name:24s}{c['L1.n']:7.3f}{'(' + format(se['L1.n'], '.3f') + ')':>9s}{c['w']:8.3f}{c['k']:8.3f}{r['instruments']:8d}{r['ar2'][1]:9.3f}{r['hansen'][2]:10.3f}")
+print(f"\nBounds for L1.n:  fixed effects {fixed.params['n_l1']:.3f}   pooled OLS {pooled.params['n_l1']:.3f}")
+```
+
+<div class="read" markdown="1">
+**How to read it**
+
+The table separates what this dataset can tell you from what it cannot.
+
+- **The wage and capital effects are robust.** Across all five instrument sets the wage coefficient stays between −0.60 and −0.71 and the capital coefficient between 0.31 and 0.37. Neither the AR(2) test nor the Hansen test rejects at the 5% level in any row, although two rows come close (p = 0.07 and 0.08).
+- **The persistence coefficient is not.** It ranges from 0.39 to 1.36 depending on the instruments, with large standard errors, and in four of the five rows it falls outside the bounds of 0.73 and 1.05.
+
+This is a known weakness of difference GMM, not a mistake in the code. When a series is highly persistent, its past **levels** are weak instruments for its current **changes**, and the estimate of \(\alpha\) becomes imprecise and biased towards the fixed-effects value. Blundell and Bond (1998) proposed **system GMM** for exactly this case: it adds the equation in levels, instrumented with lagged differences, and is now the standard estimator for persistent series such as output, capital or employment. In Stata it is `xtabond2` without the `noleveleq` option; in R, `plm::pgmm` with `transformation = "ld"`.
+
+So the paper can report the wage and capital elasticities with confidence, and should say plainly that the degree of persistence is not well identified by difference GMM in this sample.
 </div>
 
 ## Write the paper
@@ -261,11 +367,18 @@ A worked example was prepared on a panel of annual inflation in 115 countries, b
 | Results | OLS and IV estimates side by side | Steps 3, 4 and 8 |
 | Instrument diagnostics | First-stage F and partial R², overidentification test, endogeneity test, all in the main table | Steps 5 to 7 |
 | Robustness | Alternative instrument sets and samples | Step 9 |
+| Dynamic panel | Pooled OLS and fixed-effects bounds, GMM estimates, AR(1), AR(2), Hansen test, number of instruments and of units | Steps 10 to 14 |
 
 <div class="write" markdown="1">
 **How to write it: results**
 
 Table 2 reports OLS, 2SLS and two-step GMM estimates of the policy rule for 1979:Q3–2007:Q4. The instruments are strong, with first-stage F-statistics of 301 for inflation and 58 for the output gap, and the Hansen J test does not reject the overidentifying restrictions (p = 0.34). A Wu–Hausman test rejects the exogeneity of inflation and the output gap (p < 0.01), confirming the need for instrumental-variable estimation. The GMM estimates imply a smoothing coefficient of 0.87 and long-run responses of 1.79 to inflation (s.e. 0.49) and 1.50 to the output gap (s.e. 0.86). The point estimate of the inflation response exceeds one, consistent with the Taylor principle, although the hypothesis that it is at most one is rejected only at the 10% level (p = 0.054). For 1961–1979 the corresponding estimate is 0.52. The post-1979 estimate is sensitive to the sample: it falls to about one when the 1979–82 disinflation is excluded.
+</div>
+
+<div class="write" markdown="1">
+**How to write it: dynamic panel results**
+
+Table 4 reports one-step difference GMM estimates of the employment equation for 140 firms over 1976–1984, with standard errors robust to heteroskedasticity and within-firm correlation. Lagged employment is instrumented with its levels dated \(t-2\) and earlier, giving 41 instruments. The Arellano–Bond test does not reject the absence of second-order serial correlation in the differenced residuals (z = −0.52, p = 0.61), and the Hansen test does not reject the overidentifying restrictions (\(\chi^2(25)\) = 31.4, p = 0.18). The short-run wage elasticity of employment is −0.61 (s.e. 0.18) and the short-run capital elasticity is 0.36 (s.e. 0.06); both are stable across alternative instrument sets. The coefficient on lagged employment is 0.69, slightly below the fixed-effects estimate of 0.73, and it is sensitive to the choice of instruments. This pattern is characteristic of weak instruments in difference GMM for persistent series, so the degree of employment persistence should be interpreted with caution.
 </div>
 
 <div class="warn" markdown="1">
@@ -275,6 +388,8 @@ Table 2 reports OLS, 2SLS and two-step GMM estimates of the policy rule for 1979
 - **Are they strong?** Report the first-stage F for every endogenous regressor.
 - **Do the results depend on the instrument set?** Show at least one alternative set.
 - **How many instruments?** Report the count. In panels it must be below the number of units.
+- **Does the estimate lie between fixed effects and pooled OLS?** If not, as in the panel example here, suspect weak instruments and consider system GMM.
+- **Did AR(2) pass?** If it is rejected, lag-2 instruments are invalid.
 - **Is IV needed at all?** Report the endogeneity test and the OLS estimates.
 - **How was the output gap measured?** The gap here uses a two-sided HP filter, which uses future data; a real-time measure would be a useful check, and the paper should say so.
 </div>

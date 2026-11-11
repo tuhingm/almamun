@@ -31,6 +31,8 @@ def run_blocks(slug, body):
     ns, cells = {"__name__": "__main__"}, []
     (OUT / "img").mkdir(exist_ok=True)
     cwd = os.getcwd(); os.chdir(OUT / "examples")
+    if str(OUT / "examples") not in sys.path:
+        sys.path.insert(0, str(OUT / "examples"))   # so guides can import helper files kept with the data
 
     def sub(m):
         code = m.group(2)
