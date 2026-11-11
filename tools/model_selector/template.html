@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0033A0">
+<meta name="description" content="An interactive model-selection tool for empirical papers in economics and finance: test your data and find out whether OLS, VAR, VECM, ARDL, NARDL or GMM fits.">
+<title>Empirical Research Guide | Tuhin G. M. Al Mamun</title>
+<link rel="canonical" href="https://tuhingm.github.io/almamun/research-guide/">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Tuhin Al Mamun, Ph.D.">
+<meta property="og:title" content="Empirical Research Guide | Which model fits your data?"><meta property="og:description" content="Test your data and find out whether OLS, VAR, VECM, ARDL, NARDL or GMM fits. With real examples and Python code.">
+<meta property="og:url" content="https://tuhingm.github.io/almamun/research-guide/"><meta property="og:image" content="https://tuhingm.github.io/almamun/assets/og/research-guide.jpg">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml"><link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0033a0;--navy2:#00205b;--ink:#1b2437;--muted:#55617a;--paper:#f3f5fa;--white:#fff;--line:#d5dcea;--sky:#9fd3f0;--sky2:#6ec1e4;--tint:#e3eaf7;--ok:#0f7a4f;--warn:#a05a00}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:25px}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.7 "DM Sans",sans-serif}a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer}.wrap{width:min(1120px,calc(100% - 44px));margin:auto}
+header{background:rgba(0,51,160,.98);color:white;border-bottom:1px solid #ffffff22}.nav{height:72px;display:flex;align-items:center;justify-content:space-between}.brand{font:800 15px Manrope}.brand b{color:var(--sky)}nav{display:flex;gap:25px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#e3ecf8}nav a:hover,nav a.current{color:var(--sky)}
+.hero{background:radial-gradient(circle at 85% 12%,#6ec1e445,transparent 29%),linear-gradient(120deg,#0033a0,#00205b);color:white;padding:60px 0 52px}.kicker{font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--sky)}h1{font:800 clamp(34px,5vw,50px)/1.12 Manrope;letter-spacing:-1.7px;margin:12px 0 14px}.lead{max-width:760px;color:#d0dcf0;margin:0;font-size:15px}.meta{display:flex;gap:22px;flex-wrap:wrap;margin-top:22px;color:#c5d4ea;font-size:11px}.meta strong{color:white}
+main{padding:34px 0 80px}
+.modes{display:flex;gap:8px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:14px;padding:7px;box-shadow:0 5px 18px rgba(0,32,91,.06)}
+.modes button{flex:1 1 180px;border:0;background:transparent;border-radius:10px;padding:13px 14px;text-align:left;color:var(--ink);transition:background .2s,color .2s,transform .2s}
+.modes button b{display:block;font:800 14px Manrope}.modes button span{font-size:11px;color:var(--muted)}
+.modes button:hover{background:#f3f6fc}.modes button[aria-pressed=true]{background:var(--navy);color:#fff;transform:translateY(-1px);box-shadow:0 6px 16px #0033a040}.modes button[aria-pressed=true] span{color:#cfe0fa}
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:22px;margin-top:22px;align-items:start}
+.panel{min-width:0;background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:0 5px 18px rgba(0,32,91,.06)}
+.panel h2{font:800 18px Manrope;margin:0 0 4px;letter-spacing:-.3px}.panel>p.sub{font-size:12px;color:var(--muted);margin:0 0 16px}
+.label{font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#7f8aa1}
+.ex{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.ex button{border:1px solid var(--line);background:#fff;border-radius:11px;padding:14px;text-align:left;transition:transform .2s,box-shadow .2s,border-color .2s}
+.ex button:hover{transform:translateY(-3px);box-shadow:0 12px 26px rgba(0,32,91,.12);border-color:#b9c9e6}.ex button.sel{border-color:var(--navy);box-shadow:0 0 0 2px #0033a030}
+.ex b{display:block;font:700 13.5px/1.35 Manrope;margin:5px 0 4px}.ex small{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--navy)}.ex span{font-size:11px;color:var(--muted);line-height:1.5;display:block}
+.drop{border:2px dashed #b9c9e6;border-radius:12px;padding:26px;text-align:center;background:#f8fafe;transition:background .2s,border-color .2s}.drop.over{background:var(--tint);border-color:var(--navy)}
+.btn{display:inline-flex;align-items:center;gap:6px;background:var(--navy);color:#fff;border:0;border-radius:8px;padding:11px 16px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;transition:transform .2s,box-shadow .2s}.btn:hover{transform:translateY(-2px);box-shadow:0 8px 18px #0033a040}
+.btn.ghost{background:#fff;color:var(--navy);border:1px solid #b9c9e6}.btn[disabled]{opacity:.55;cursor:default;transform:none;box-shadow:none}
+.hint{font-size:11.5px;color:var(--muted);margin:12px 0 0}.hint a{color:var(--navy);font-weight:700}
+.status{display:none;align-items:center;gap:10px;font-size:12px;color:var(--navy);font-weight:600;margin-top:14px}.status.on{display:flex}.spin{width:16px;height:16px;border:2px solid #b9c9e6;border-top-color:var(--navy);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.err{background:#fdf0ee;border:1px solid #f0c5bd;color:#8a2a17;border-radius:9px;padding:11px 14px;font-size:12px;margin-top:14px}
+.q{margin-top:6px}.q h3{font:700 15.5px/1.45 Manrope;margin:6px 0 12px}.opts{display:grid;gap:8px}.opts button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:12px 14px;text-align:left;font-size:13px;transition:background .2s,border-color .2s,transform .2s}.opts button:hover{background:#f3f6fc;border-color:var(--navy);transform:translateX(4px)}.opts small{display:block;color:var(--muted);font-size:11px}
+.step{border-top:1px solid #e6ebf4;padding:18px 0 4px;margin-top:18px;opacity:0;transform:translateY(16px);transition:opacity .55s ease,transform .55s cubic-bezier(.2,.7,.2,1)}.step.in{opacity:1;transform:none}
+.step h3{font:800 14.5px Manrope;margin:3px 0 10px}.step p{font-size:12.5px;color:#434f66;margin:8px 0}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:11.5px}th{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#7f8aa1;text-align:right;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}td{padding:7px 8px;border-bottom:1px solid #edf1f7;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}th:first-child,td:first-child{text-align:left;font-weight:600}
+.tag{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.06em;padding:3px 8px;border-radius:30px;background:var(--tint);color:var(--navy)}.tag.i1{background:#fff1d6;color:var(--warn)}.tag.i2{background:#fde3df;color:#8a2a17}.tag.ok{background:#dcf3e8;color:var(--ok)}
+.sparks{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.spark{border:1px solid #e6ebf4;border-radius:9px;padding:9px 10px}.spark b{font-size:11px}.spark svg{display:block;width:100%;height:44px;margin-top:4px}.spark path{fill:none;stroke:var(--navy);stroke-width:1.4;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.4s ease}.step.in .spark path{stroke-dashoffset:0}
+.explain{background:#f6f8fd;border:1px solid #dfe6f3;border-radius:10px;padding:13px 16px;margin:0 0 14px}.explain summary{font:800 12.5px Manrope;cursor:pointer;color:var(--navy)}.explain p{font-size:12.5px;margin:9px 0 0}.explain ul{margin:8px 0 0;padding-left:18px;font-size:12.5px;color:#434f66}.explain li{margin:4px 0}
+.urv{border:1px solid #e6ebf4;border-radius:11px;padding:14px 16px;margin:10px 0}.urv-head{display:flex;justify-content:space-between;align-items:center;gap:10px}.urv-head b{font:800 13.5px Manrope}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}.pair div{background:#f8fafe;border-radius:8px;padding:7px 9px}.pair small{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#7f8aa1}.pair svg{display:block;width:100%;height:52px;margin-top:3px}.pair path{fill:none;stroke:var(--navy);stroke-width:1.3}.pair line{stroke:#c46000;stroke-width:1;stroke-dasharray:4 3}
+.urv ol{margin:6px 0 0;padding:0;list-style:none;font-size:12.5px;color:#434f66}.urv li{padding:6px 0;border-top:1px solid #edf1f7}.urv li b{color:var(--ink)}.urv .v{margin-top:8px;font-size:12.5px;font-weight:600;color:var(--navy)}
+.yes{color:var(--ok);font-weight:700}.no{color:var(--warn);font-weight:700}
+@media(max-width:480px){.pair{grid-template-columns:1fr}}
+details.code{margin:10px 0 0}details.code summary{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--navy);cursor:pointer}pre{background:#111c36;color:#e3ebfa;border-radius:9px;padding:13px 15px;font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow-x:auto;margin:8px 0 0}
+.side{position:sticky;top:18px}
+.tree svg{display:block;width:100%;height:auto}.tree .n rect{fill:#fff;stroke:#c3d0e6;stroke-width:1.2;transition:fill .35s,stroke .35s}.tree .n text{font:600 13px "DM Sans",sans-serif;fill:#41506a;text-anchor:middle;dominant-baseline:central;transition:fill .35s}
+.tree .n.leaf rect{fill:#f3f6fc}.tree .n.leaf text{font:800 14px Manrope,sans-serif}.tree #n-I2 text{font-size:12px}
+.tree .e{fill:none;stroke:#c9d4e8;stroke-width:1.4}.tree .e{transition:stroke .45s ease,stroke-width .45s ease}.tree .e.hl{stroke:var(--navy);stroke-width:2.8}
+.tree .el{font:700 11px "DM Sans",sans-serif;fill:#8793ab;text-anchor:middle}
+.tree .n.on rect{fill:var(--tint);stroke:var(--navy)}.tree .n.on text{fill:var(--navy)}.tree .n.leaf.on rect{fill:var(--navy);stroke:var(--navy);animation:pop .5s ease}.tree .n.leaf.on text{fill:#fff}.tree .n.alt rect{stroke:var(--navy);stroke-dasharray:4 3}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.12)}100%{transform:scale(1)}}.tree .n{transform-box:fill-box;transform-origin:center}
+.trail{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:14px;min-height:28px}.trail span{font-size:10.5px;font-weight:700;padding:5px 10px;border-radius:30px;background:var(--tint);color:var(--navy);animation:rise .4s ease both}.trail span.final{background:var(--navy);color:#fff}.trail i{color:#9aa6bd;font-style:normal;font-size:11px}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.result{margin-top:22px;border-radius:16px;padding:26px;color:#fff;background:radial-gradient(circle at 88% 10%,#6ec1e455,transparent 34%),linear-gradient(120deg,#0033a0,#00205b);box-shadow:0 18px 40px rgba(0,32,91,.25);animation:rise .6s cubic-bezier(.2,.7,.2,1) both}
+.result .label{color:var(--sky)}.result h2{font:800 clamp(30px,5vw,44px)/1.1 Manrope;letter-spacing:-1.2px;margin:8px 0 10px}.result p{color:#d6e2f6;font-size:13.5px;margin:0 0 12px;max-width:820px}
+.result ul{margin:6px 0 16px;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:7px}.result li{font-size:11px;font-weight:600;padding:6px 11px;border:1px solid #ffffff44;border-radius:30px;background:#ffffff14}
+.result .acts{display:flex;gap:10px;flex-wrap:wrap}.result .btn{background:#fff;color:var(--navy)}.result .btn.ghost{background:transparent;color:#fff;border:1px solid #ffffff77}
+.result .caution{background:#ffffff18;border:1px solid #ffffff33;border-radius:10px;padding:11px 14px;font-size:12px;color:#eef4ff;margin:0 0 14px}
+.guides{margin-top:46px}.guides-head{display:flex;justify-content:space-between;align-items:end;gap:20px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:16px}.guides h2{font:800 22px Manrope;margin:4px 0 0;letter-spacing:-.4px}.guides-head p{font-size:12px;color:var(--muted);margin:0;max-width:430px}
+.gcards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.gcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;box-shadow:0 5px 18px rgba(0,32,91,.06);transition:transform .25s,box-shadow .25s,border-color .25s;scroll-margin-top:20px}.gcard:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(0,32,91,.13);border-color:#b9c9e6}.gcard.flash{animation:flash 1.6s ease}@keyframes flash{0%,60%{box-shadow:0 0 0 3px #0033a055}100%{box-shadow:0 5px 18px rgba(0,32,91,.06)}}
+.gcard h3{font:800 17px Manrope;margin:6px 0 4px}.gcard .when{font-size:11.5px;color:var(--navy);font-weight:700;margin:0 0 8px}.gcard p{font-size:11.5px;color:var(--muted);margin:0 0 12px;line-height:1.6}.gcard a{display:block;font-size:11.5px;font-weight:700;color:var(--navy);margin-top:5px}.gcard a:hover{text-decoration:underline}
+.note{font-size:11.5px;color:#4a586f;background:var(--tint);border:1px solid #cfdaf0;border-radius:9px;padding:14px 18px;margin-top:26px}
+footer{background:var(--navy2);color:#c3d0e4;padding:22px 0;font-size:10px}.foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.foot b{color:#fff}
+[hidden]{display:none!important}
+@media(max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}.side{position:static}.tree svg{display:none}.tree .sub2{display:none}.gcards{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.wrap{width:calc(100% - 34px)}.nav{height:65px}nav{gap:11px;font-size:8.5px}.hero{padding:44px 0 38px}.ex{grid-template-columns:1fr}.gcards{grid-template-columns:1fr}.panel{padding:17px}.guides-head{display:block}.result{padding:20px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+@media(max-width:650px){.brand{white-space:nowrap;margin-right:12px}header nav{gap:9px;font-size:8px;letter-spacing:.06em;line-height:1.35;text-align:left}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav"><a class="brand" href="../index.html">TGM <b>AL MAMUN</b></a><nav><a href="../teaching/index.html">Teaching Courses</a><a href="../working-papers/index.html">Working Papers</a><a class="current" href="index.html">Research Guide</a><a href="../Tuhin%20Al%20Mamun_CV.pdf" target="_blank" rel="noopener">CV</a></nav></div></header>
+<section class="hero"><div class="wrap"><div class="kicker">Empirical Research Guide · Economics and Finance</div><h1>Which model fits your data?</h1><p class="lead">The right econometric model depends on the properties of your data, not on preference. Test a real dataset, upload your own, or enter your test results, and follow the path to the model your paper needs.</p><div class="meta"><span><strong>6</strong> model guides</span><span><strong>5</strong> real example datasets</span><span>Python · statsmodels</span></div></div></section>
+<main class="wrap">
+<div class="modes" role="group" aria-label="Choose how to start">
+<button type="button" data-mode="example" aria-pressed="true"><b>Try a real example</b><span>See the full sequence on real data</span></button>
+<button type="button" data-mode="upload" aria-pressed="false"><b>Use my own data</b><span>Upload a CSV; tests run in your browser</span></button>
+<button type="button" data-mode="ask" aria-pressed="false"><b>I have my test results</b><span>Answer a few questions</span></button>
+</div>
+<div class="grid">
+<section class="panel" id="work" aria-live="polite">
+ <div id="m-example">
+  <h2>Choose a dataset</h2><p class="sub">Five real U.S. datasets. Each one leads to a different outcome.</p>
+  <div class="ex" id="ex"></div>
+ </div>
+ <div id="m-upload" hidden>
+  <h2>Upload your data</h2><p class="sub">A CSV file with one column per variable. Put the dependent variable first; a date column is optional.</p>
+  <div class="drop" id="drop"><p style="margin:0 0 12px;font-size:13px">Drop a CSV file here, or</p><label class="btn">Choose file<input type="file" id="file" accept=".csv,text/csv,text/plain" hidden></label></div>
+  <p class="hint">Your file is analysed on your own device and is not uploaded anywhere. Transform your variables first (logs, growth rates) as your paper requires. Up to 8 variables, at least 30 rows. Format examples: <a href="examples/returns.csv" download>returns.csv</a>, <a href="examples/rates.csv" download>rates.csv</a>.</p>
+  <div class="status" id="status"><span class="spin"></span><span id="status-text"></span></div>
+  <div id="upload-err"></div>
+ </div>
+ <div id="m-ask" hidden>
+  <h2>Answer from your own results</h2><p class="sub">Use this if you have already run unit-root and cointegration tests. If you have not, choose “Use my own data” and the tests are run and explained for you.</p>
+  <div class="q" id="q"></div>
+ </div>
+ <div id="steps"></div>
+</section>
+<aside class="side">
+ <div class="panel tree"><div class="label">Decision path</div><p class="sub sub2" style="font-size:12px;color:var(--muted);margin:2px 0 8px">The path lights up as the evidence comes in.</p><div id="tree"></div><div class="trail" id="trail"></div></div>
+</aside>
+</div>
+<div id="result"></div>
+
+<section class="guides" id="guides"><div class="guides-head"><div><div class="label">Model guides</div><h2>Six routes to a finished paper</h2></div><p>Each guide will take one real dataset through estimation, diagnostic tests and writing. The step-by-step guides are in preparation; the linked lectures cover the same methods now.</p></div>
+<div class="gcards" id="gcards"></div></section>
+<div class="note"><b>How the tool decides.</b> A series is treated as stationary, I(0), if the ADF test rejects a unit root in levels at 5%; as I(1) if it rejects only after first differencing. The KPSS test is reported as a cross-check, and the tool warns you when the two disagree. When every series is I(1), the Johansen trace test decides between VAR and VECM. These are standard rules, but tests have low power in short samples and can be distorted by structural breaks, so treat the result as a starting point and justify the choice in your paper.</div>
+</main>
+<footer><div class="wrap foot"><span><b>Tuhin G. M. Al Mamun, Ph.D.</b> · Empirical Research Guide</span><span>© <span id="year"></span></span></div></footer>
+
+<script type="text/plain" id="py-src">#PYSRC#</script>
+<script>
+const EXAMPLES=/*EXAMPLES*/;
+const PYO='https://cdn.jsdelivr.net/pyodide/v0.27.2/full/';
+const L='../teaching/econometrics/lectures/';
+const MODELS={
+ OLS:{name:'OLS regression',when:'All variables stationary in levels',why:'Every series is stationary in levels, so a regression in levels is valid and standard inference applies.',steps:['Specify the regression','HAC (Newey–West) standard errors','Serial correlation: Breusch–Godfrey','Heteroskedasticity: White','Normality: Jarque–Bera','Functional form: RESET','Multicollinearity: VIF','Stability: CUSUM, break tests'],lec:[['02-ols-inference.html','Lecture: OLS inference'],['04-heteroskedasticity-robust-inference.html','Lecture: Robust inference']]},
+ VAR:{name:'VAR in first differences',when:'All variables I(1), no cointegration',why:'Every series has a unit root and no long-run relationship ties them together, so the model is estimated on first differences.',steps:['Difference the data','Lag-order selection (AIC, BIC)','Stability: roots inside the unit circle','Residual autocorrelation: LM test','Granger causality','Impulse responses','Variance decomposition'],lec:[['11-var-svar.html','Lecture: VAR and SVAR']]},
+ VECM:{name:'Vector error-correction model',when:'All variables I(1), cointegrated',why:'Every series has a unit root, but they share a long-run relationship. A VECM estimates that relationship and the speed of adjustment back to it.',steps:['Lag order and deterministic terms','Johansen trace and max-eigenvalue tests','Long-run vector (normalised)','Adjustment coefficients','Weak exogeneity','Short-run causality','Residual diagnostics','FMOLS / DOLS as robustness'],lec:[['12-cointegration-ardl.html','Lecture: Cointegration and ARDL']]},
+ ARDL:{name:'ARDL bounds-testing model',when:'A mix of I(0) and I(1) variables',why:'The series have different orders of integration and none is I(2). The ARDL bounds test is valid in exactly this case.',steps:['Lag selection','Bounds test for a long-run relationship','Long-run coefficients','Error-correction form','Serial correlation and heteroskedasticity','Stability: CUSUM and CUSUMSQ'],lec:[['12-cointegration-ardl.html','Lecture: Cointegration and ARDL']]},
+ NARDL:{name:'Nonlinear ARDL',when:'Mixed orders, asymmetric effects',why:'The series have mixed orders of integration and you expect increases and decreases to act differently. NARDL splits each regressor into positive and negative partial sums.',steps:['Positive and negative partial sums','Lag selection','Bounds test','Wald tests of long-run symmetry','Wald tests of short-run symmetry','Dynamic multipliers','Diagnostics and stability'],lec:[['12-cointegration-ardl.html','Lecture: Cointegration and ARDL']]},
+ GMM:{name:'2SLS and GMM',when:'Endogenous regressors or dynamic panels',why:'With endogenous regressors or a lagged dependent variable in a panel, OLS is inconsistent. Instrumental-variable and GMM estimators deal with this.',steps:['Choose and justify instruments','First-stage F statistic','Overidentification: Hansen J','Endogeneity test','Panels: difference and system GMM','AR(1) and AR(2) tests','Instrument count'],lec:[['05-endogeneity-iv.html','Lecture: Endogeneity and IV'],['08-dynamic-panels.html','Lecture: Dynamic panels']]}
+};
+const $=s=>document.querySelector(s), el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches, D=reduce?0:1;
+const fmt=(v,d=3)=>v==null?'–':Number(v).toFixed(d), pf=p=>p==null?'–':(p<0.001?'<0.001':p.toFixed(3));
+let run=0;
+
+/* ---------- decision tree ---------- */
+const N={start:[330,28,116,'Your data'],q1:[330,98,196,'Panel or endogenous?'],GMM:[596,98,112,'2SLS / GMM',1],ur:[330,172,150,'Unit-root tests'],
+ i0:[60,250,100,'All I(0)'],i1:[250,250,100,'All I(1)'],mix:[455,250,156,'Mixed I(0) / I(1)'],i2:[650,250,116,'Some I(2)'],co:[250,328,146,'Cointegration?'],as:[455,328,176,'Asymmetric effects?'],
+ OLS:[60,412,84,'OLS',1],VAR:[195,412,84,'VAR',1],VECM:[305,412,84,'VECM',1],ARDL:[400,412,84,'ARDL',1],NARDL:[510,412,86,'NARDL',1],I2:[650,412,128,'Transform, re-test',1]};
+const E=[['start','q1'],['q1','GMM','yes'],['q1','ur','no'],['ur','i0'],['ur','i1'],['ur','mix'],['ur','i2'],['i0','OLS'],['i1','co'],['co','VAR','no'],['co','VECM','yes'],['mix','as'],['as','ARDL','no'],['as','NARDL','yes'],['i2','I2']];
+const PATHS={OLS:['start','q1','ur','i0','OLS'],VAR:['start','q1','ur','i1','co','VAR'],VECM:['start','q1','ur','i1','co','VECM'],ARDL:['start','q1','ur','mix','as','ARDL'],NARDL:['start','q1','ur','mix','as','NARDL'],GMM:['start','q1','GMM'],I2:['start','q1','ur','i2','I2']};
+const TL={start:'Your data',q1:'Time series',ur:'Unit-root tests',i0:'All I(0)',i1:'All I(1)',mix:'Mixed I(0)/I(1)',i2:'Some I(2)',I2:'Transform and re-test',co:'Cointegration test',as:'Asymmetry?'};
+function drawTree(){
+ const H=16;let s='<svg viewBox="0 0 724 444" role="img" aria-label="Decision tree from data to model">';
+ for(const [a,b,lab] of E){const A=N[a],B=N[b];let d,lx,ly;
+  if(A[1]===B[1]){d=`M${A[0]+A[2]/2} ${A[1]}H${B[0]-B[2]/2}`;lx=(A[0]+A[2]/2+B[0]-B[2]/2)/2;ly=A[1]-5}
+  else{const my=(A[1]+B[1])/2;d=`M${A[0]} ${A[1]+H}V${my}H${B[0]}V${B[1]-H}`;lx=B[0]+(B[0]<A[0]?-15:15);ly=my+15}
+  s+=`<path class="e" id="e-${a}-${b}" pathLength="1" d="${d}"/>`;if(lab)s+=`<text class="el" x="${lx}" y="${ly}">${lab}</text>`}
+ for(const k in N){const [x,y,w,t,leaf]=N[k];s+=`<g class="n${leaf?' leaf':''}" id="n-${k}"><rect x="${x-w/2}" y="${y-H}" width="${w}" height="${2*H}" rx="${leaf?16:8}"/><text x="${x}" y="${y}">${t}</text></g>`}
+ $('#tree').innerHTML=s+'</svg>';
+}
+let lit=new Set(),tEnd=0;
+function resetTree(){lit=new Set();tEnd=0;document.querySelectorAll('.tree .on,.tree .hl,.tree .alt').forEach(e=>e.classList.remove('on','hl','alt'));$('#trail').innerHTML=''}
+function light(path,labels={},final=true){ // animate along a list of node ids; returns the time until the animation ends
+ const my=run,now=performance.now();let at=Math.max(now,tEnd);
+ path.forEach((id,i)=>{if(lit.has(id))return;lit.add(id);const wait=at-now;at+=380*D;
+  setTimeout(()=>{if(my!==run)return;const n=$('#n-'+id);n&&n.classList.add('on');if(i>0){const e=document.getElementById(`e-${path[i-1]}-${id}`);e&&e.classList.add('hl')}
+   const t=$('#trail');if(t.children.length)t.appendChild(el('i','','→'));const isLeaf=!!MODELS[id]||id==='I2';t.appendChild(el('span',isLeaf&&final?'final':'',esc(labels[id]||TL[id]||id)))},wait)});
+ tEnd=at;return at-now;
+}
+
+/* ---------- results ---------- */
+function spark(v){const a=v.filter(x=>x!=null),mn=Math.min(...a),mx=Math.max(...a),r=mx-mn||1;return '<svg viewBox="0 0 200 44" preserveAspectRatio="none"><path pathLength="1" d="'+v.map((y,i)=>(i?'L':'M')+(i/(v.length-1)*200).toFixed(1)+' '+(40-(y-mn)/r*36).toFixed(1)).join('')+'"/></svg>'}
+const code=c=>`<details class="code"><summary>Python code for this step</summary><pre>${esc(c)}</pre></details>`;
+function addStep(n,title,html,delay){const s=el('div','step',`<div class="label">Step ${n}</div><h3>${title}</h3>${html}`);$('#steps').appendChild(s);const my=run;setTimeout(()=>{if(my!==run)return;s.classList.add('in');if(n>1&&!reduce)s.scrollIntoView({behavior:'smooth',block:'nearest'})},delay);return s}
+function show(R,label){
+ const my=++run;$('#steps').innerHTML='';$('#result').innerHTML='';resetTree();let t=150,gap=900*D,k=1;
+ light(['start','q1'],{q1:'Time series'});
+ addStep(k++,'The data',`<p><b>${R.n}</b> observations, <b>${R.vars.length}</b> variables${label?' · '+esc(label):''}. Dependent variable: <b>${esc(R.dep)}</b>.${R.skipped&&R.skipped.length?' Ignored columns: '+R.skipped.map(esc).join(', ')+'.':''}</p><div class="sparks">${R.vars.map(v=>`<div class="spark"><b>${esc(v)}</b>${spark(R.series[v])}</div>`).join('')}</div>`+code(`import pandas as pd\n\ndf = pd.read_csv("data.csv")\ndf = df.select_dtypes("number").dropna()\ndf.plot(subplots=True, figsize=(8, 6))`),t);t+=gap;
+ addStep(k++,'Summary statistics',`<div class="tw"><table><tr><th>Variable</th><th>Mean</th><th>Std. dev.</th><th>Min</th><th>Max</th><th>Skewness</th><th>Kurtosis</th></tr>${R.summary.map(s=>`<tr><td>${esc(s.var)}</td><td>${fmt(s.mean)}</td><td>${fmt(s.sd)}</td><td>${fmt(s.min)}</td><td>${fmt(s.max)}</td><td>${fmt(s.skew,2)}</td><td>${fmt(s.kurt,2)}</td></tr>`).join('')}</table></div>`+code(`stats = df.describe().T[["mean", "std", "min", "max"]]\nstats["skew"] = df.skew()\nstats["kurt"] = df.kurt() + 3\nprint(stats.round(3))`),t);t+=gap;
+ const cc=v=>{const a=Math.min(1,Math.abs(v))*.55;return v>=0?`rgba(0,51,160,${a})`:`rgba(196,96,0,${a})`};
+ addStep(k++,'Correlation matrix',`<div class="tw"><table><tr><th></th>${R.vars.map(v=>`<th>${esc(v)}</th>`).join('')}</tr>${R.corr.map((r,i)=>`<tr><td>${esc(R.vars[i])}</td>${r.map(v=>`<td style="background:${cc(v)};color:${Math.abs(v)>.6?'#fff':'inherit'}">${fmt(v,2)}</td>`).join('')}</tr>`).join('')}</table></div><p>Correlations above about 0.8 between regressors are a warning of multicollinearity. Between trending series, a high correlation may be spurious until the unit-root tests are done.</p>`+code(`print(df.corr().round(2))`),t);t+=gap;
+ const tg=o=>o===0?'<span class="tag ok">I(0)</span>':o===1?'<span class="tag i1">I(1)</span>':o===2?'<span class="tag i2">I(2)</span>':'<span class="tag i2">above I(2)</span>';
+ const sp2=v=>{const a=v.filter(x=>x!=null),mn=Math.min(...a),mx=Math.max(...a),r=mx-mn||1,mean=a.reduce((p,c)=>p+c,0)/a.length,ym=(46-(mean-mn)/r*40).toFixed(1);return '<svg viewBox="0 0 200 52" preserveAspectRatio="none"><line x1="0" x2="200" y1="'+ym+'" y2="'+ym+'"/><path d="'+v.map((y,i)=>(i?'L':'M')+(i/(v.length-1)*200).toFixed(1)+' '+(46-(y-mn)/r*40).toFixed(1)).join('')+'"/></svg>'};
+ const kp=p=>p==null?'–':p<=0.01?'≤ 0.01':p>=0.1?'≥ 0.10':p.toFixed(3);
+ const urCard=u=>{const r0=u.adf_p<0.05,r1=u.dadf_p<0.05,ks=u.kpss_p!=null&&u.kpss_p<0.05;
+  const verdict=u.order===0?`<b>${esc(u.var)}</b> is stationary in levels: it is I(0) and can be used as it is.`:u.order===1?`<b>${esc(u.var)}</b> has a unit root in levels but is stationary after one difference: it is I(1).`:u.order===2?`<b>${esc(u.var)}</b> becomes stationary only after two differences: it is I(2).`:`<b>${esc(u.var)}</b> is not stationary even after two differences. Check the data and the transformation.`;
+  return `<div class="urv"><div class="urv-head"><b>${esc(u.var)}</b>${tg(u.order)}</div>
+  <div class="pair"><div><small>Level</small>${sp2(R.series[u.var])}</div><div><small>First difference</small>${R.dseries?sp2(R.dseries[u.var]):''}</div></div>
+  <ol><li><b>ADF test on the level.</b> Statistic ${fmt(u.adf_stat,2)}, p-value ${pf(u.adf_p)}. ${r0?'<span class="yes">p &lt; 0.05: reject the unit root.</span> The series is stationary.':'<span class="no">p ≥ 0.05: cannot reject the unit root.</span> The level is not stationary, so test the first difference.'}</li>
+  ${r0?'':`<li><b>ADF test on the first difference.</b> Statistic ${fmt(u.dadf_stat,2)}, p-value ${pf(u.dadf_p)}. ${r1?'<span class="yes">p &lt; 0.05: reject the unit root.</span> One difference makes it stationary.':'<span class="no">p ≥ 0.05: still cannot reject.</span> One difference is not enough, so test the second difference.'}</li>`}
+  ${u.d2adf_p==null?'':`<li><b>ADF test on the second difference.</b> Statistic ${fmt(u.d2adf_stat,2)}, p-value ${pf(u.d2adf_p)}. ${u.d2adf_p<0.05?'<span class="yes">p &lt; 0.05: reject the unit root.</span> Two differences make it stationary.':'<span class="no">p ≥ 0.05: still cannot reject.</span>'}</li>`}
+  <li><b>KPSS test on the level (cross-check).</b> Statistic ${fmt(u.kpss_stat,2)}, p-value ${kp(u.kpss_p)}. ${ks?'p &lt; 0.05: KPSS rejects stationarity.':'p ≥ 0.05: KPSS does not reject stationarity.'} ${u.conflict?'<span class="no">⚠ This disagrees with the ADF result.</span>':(ks===!r0?'<span class="yes">This agrees with the ADF result.</span>':'')}</li></ol>
+  <div class="v">→ ${verdict}</div></div>`};
+ addStep(k++,'Unit-root tests',`<details class="explain" open><summary>What is a unit-root test, and why does it come first?</summary>
+  <p>A <b>stationary</b> series keeps returning to a constant mean, like the first-difference charts below. A series with a <b>unit root</b> wanders without returning, like a stock-price index. Regressing one wandering series on another can give a high R² and significant t-statistics even when the two are unrelated (a <b>spurious regression</b>), so you must know which kind each variable is before choosing a model.</p>
+  <ul><li><b>ADF test.</b> Null hypothesis: the series has a unit root. A p-value below 0.05 rejects the null, so the series is stationary.</li>
+  <li><b>KPSS test.</b> The null is the opposite: the series is stationary. A p-value below 0.05 means it is <em>not</em> stationary. It is used to cross-check the ADF result.</li>
+  <li><b>Order of integration.</b> Stationary in levels is written I(0). Stationary only after taking the first difference (this period minus the last) is I(1). If it takes two differences, the series is I(2); this is common for price levels and money stocks in logs, whose growth rates are themselves persistent.</li></ul>
+  <p>In each chart the dashed line is the mean. A stationary series crosses it often; a unit-root series stays on one side for long stretches.</p></details>
+  ${R.unitroot.map(urCard).join('')}
+  <div class="label" style="margin-top:16px">Summary table for your paper</div>
+  <div class="tw"><table><tr><th>Variable</th><th>ADF, level (p)</th><th>ADF, 1st diff. (p)</th><th>KPSS, level (p)</th><th>Order</th></tr>${R.unitroot.map(u=>`<tr><td>${esc(u.var)}</td><td>${fmt(u.adf_stat,2)} (${pf(u.adf_p)})</td><td>${fmt(u.dadf_stat,2)} (${pf(u.dadf_p)})</td><td>${fmt(u.kpss_stat,2)} (${kp(u.kpss_p)})</td><td>${tg(u.order)}${u.conflict?' ⚠':''}</td></tr>`).join('')}</table></div>
+  <p><b>Result:</b> ${R.model==='OLS'?'every variable is I(0), so a regression in levels is valid.':R.model==='I2'?'at least one variable is I(2). None of the standard models is valid until that variable is transformed.':R.model==='ARDL'?'the variables are a mix of I(0) and I(1). A model that allows mixed orders is needed.':'every variable is I(1). The next question is whether they move together in the long run (cointegration).'}${R.conflicts.length?' <b>⚠ ADF and KPSS disagree for '+R.conflicts.map(esc).join(', ')+'</b>, which often points to a structural break or a shift in the mean.':''}</p>`+code(`from statsmodels.tsa.stattools import adfuller, kpss\n\nfor col in df:\n    adf_level = adfuller(df[col], autolag="AIC")                 # H0: unit root\n    adf_diff = adfuller(df[col].diff().dropna(), autolag="AIC")  # H0: unit root in the first difference\n    kpss_level = kpss(df[col], regression="c", nlags="auto")     # H0: stationary\n    print(col, round(adf_level[0], 2), round(adf_level[1], 3),\n          round(adf_diff[1], 3), round(kpss_level[1], 3))`),t);
+ const branch=R.model==='OLS'?'i0':(R.model==='VAR'||R.model==='VECM')?'i1':R.model==='ARDL'?'mix':'i2';
+ setTimeout(()=>{if(my!==run)return;light(['start','q1','ur'].concat(branch?[branch]:[]))},t+300*D);t+=gap+400*D;
+ if(R.johansen){const J=R.johansen;
+  addStep(k++,'Cointegration: Johansen trace test',`<details class="explain" open><summary>What is cointegration?</summary><p>Two I(1) series each wander, but they are <b>cointegrated</b> if they wander together, so that some combination of them is stationary. Short and long interest rates are the classic case: each drifts, but the gap between them keeps returning to a stable level. If such a long-run relationship exists, a model in differences alone throws it away, and a VECM is needed. If it does not exist, a VAR in first differences is correct.</p><p>The Johansen trace test is read from the top row down. Each row tests “at most <em>r</em> cointegrating relations”. Stop at the first row that is <em>not</em> rejected (trace statistic below the critical value): that <em>r</em> is the rank.</p></details><div class="tw"><table><tr><th>Null hypothesis</th><th>Trace statistic</th><th>5% critical value</th><th>Decision</th></tr>${J.rows.map(r=>`<tr><td>At most ${r.h0} cointegrating relation${r.h0===1?'':'s'}</td><td>${fmt(r.trace,2)}</td><td>${fmt(r.cv,2)}</td><td>${r.reject?'Reject':'Do not reject'}</td></tr>`).join('')}</table></div><p>VAR lag order chosen by AIC: ${J.lags}. Estimated cointegrating rank: <b>${J.rank}</b>.${R.fullrank?' The rank equals the number of variables, which suggests the series may be stationary after all; check the unit-root results again.':''}</p>`+code(`from statsmodels.tsa.api import VAR\nfrom statsmodels.tsa.vector_ar.vecm import coint_johansen\n\np = VAR(df).select_order(8).aic              # lag order in levels\njoh = coint_johansen(df, det_order=0, k_ar_diff=p - 1)\nprint(joh.lr1)       # trace statistics\nprint(joh.cvt[:, 1]) # 5% critical values`),t);
+  setTimeout(()=>{if(my!==run)return;light(['start','q1','ur','i1','co'])},t+300*D);t+=gap+400*D}
+ setTimeout(()=>{if(my!==run)return;
+  if(R.model==='I2')return i2card(R);
+  if(R.model==='ARDL'){light(PATHS.ARDL.slice(0,5));return askAsym(R)}
+  finish(R.model,R)},t);
+}
+function evidence(R,m){if(!R)return '';const u=R.unitroot,nm=o=>u.filter(x=>x.order===o).map(x=>esc(x.var)).join(', ');
+ if(m==='OLS')return `ADF rejects a unit root in levels for all ${u.length} variables.`;
+ if(m==='VAR')return `All ${u.length} variables are I(1), and the Johansen trace test finds no cointegrating relation (trace ${fmt(R.johansen.rows[0].trace,2)} against a 5% critical value of ${fmt(R.johansen.rows[0].cv,2)}).`;
+ if(m==='VECM')return `All ${u.length} variables are I(1), and the Johansen trace test finds ${R.johansen.rank} cointegrating relation${R.johansen.rank===1?'':'s'}.`;
+ return `Stationary in levels: ${nm(0)}. Stationary only after differencing: ${nm(1)}.`}
+function finish(m,R,alt){const my=run,M=MODELS[m];const d=light(PATHS[m]);if(alt){const a=$('#n-'+alt);a&&a.classList.add('alt')}
+ setTimeout(()=>{if(my!==run)return;
+  const ev=evidence(R,m),caution=R&&R.conflicts&&R.conflicts.length?`<div class="caution"><b>Mixed evidence.</b> ADF and KPSS disagree for ${R.conflicts.map(esc).join(', ')}. Report both tests, check for a structural break, and consider ARDL as a robustness check, since it is valid whether a variable is I(0) or I(1).</div>`:'';
+  $('#result').innerHTML=`<div class="result"><div class="label">Recommended model</div><h2>${M.name}</h2><p>${M.why}${ev?' <b>In this data:</b> '+ev:''}</p>${caution}<div class="label" style="margin-bottom:6px">What the paper needs</div><ul>${M.steps.map(s=>`<li>${s}</li>`).join('')}</ul><div class="acts"><a class="btn" href="#g-${m}" data-go="${m}">Go to the ${m==='GMM'?'2SLS / GMM':m} guide →</a>${alt?`<a class="btn ghost" href="#g-${alt}" data-go="${alt}">Alternative: ${alt}</a>`:''}${R?'':'<button class="btn ghost" type="button" id="again">Start over</button>'}</div>${R?'<p style="font-size:11.5px;margin:14px 0 0;color:#c5d4ea">Panel data, or regressors that are endogenous? Then see the 2SLS / GMM guide instead.</p>':''}</div>`;
+  $('#result').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});
+  const ag=$('#again');ag&&ag.addEventListener('click',()=>setMode('ask'));
+ },d+250*D)}
+function askAsym(R){const s=el('div','step',`<div class="label">One question</div><h3>Do you expect increases and decreases in a regressor to affect ${esc(R.dep)} differently?</h3><p>Your variables are a mix of I(0) and I(1), so the ARDL family applies. The answer decides between the linear and the nonlinear version.</p><div class="opts"><button type="button" data-a="ARDL">No, or I have no reason to expect it<small>Linear ARDL</small></button><button type="button" data-a="NARDL">Yes, for example oil-price rises and falls, or depreciation and appreciation<small>Nonlinear ARDL</small></button></div>`);
+ $('#steps').appendChild(s);requestAnimationFrame(()=>s.classList.add('in'));if(!reduce)s.scrollIntoView({behavior:'smooth',block:'nearest'});
+ s.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{s.querySelectorAll('button').forEach(x=>x.disabled=true);b.style.borderColor='var(--navy)';b.style.background='var(--tint)';finish(b.dataset.a,R,b.dataset.a==='ARDL'?'NARDL':'ARDL')}))}
+function i2card(R){const my=run,d=light(PATHS.I2);const bad=R?R.unitroot.filter(u=>u.order>=2).map(u=>u.var):[];
+ setTimeout(()=>{if(my!==run)return;
+ $('#result').innerHTML=`<div class="result"><div class="label">Transform, then test again</div><h2>${bad.length===1?'One variable is I(2)':bad.length?bad.length+' variables are I(2)':'A variable is I(2)'}</h2><p>${bad.length?'<b>In this data:</b> '+bad.map(esc).join(', ')+(bad.length===1?' is':' are')+' still non-stationary after one difference. ':''}OLS, VAR, VECM, ARDL and NARDL all assume that no variable is integrated of order two. The ARDL bounds test in particular has no valid critical values with an I(2) variable, so the model must not be estimated on the data as it stands.</p><div class="label" style="margin-bottom:6px">What to do</div><ul><li>Replace the I(2) variable by its first difference, for example inflation instead of the log price level, or money growth instead of log money. The new variable is I(1)</li><li>Use real instead of nominal values</li><li>Test for a structural break (Zivot–Andrews): a break can make an I(1) series look I(2)</li><li>Check a different or shorter sample</li><li>Then run this tool again on the transformed data</li></ul><div class="acts"><a class="btn" href="${L}10-unit-roots-breaks.html">Lecture: Unit roots and breaks →</a>${R?'':'<button class="btn ghost" type="button" id="again">Start over</button>'}</div></div>`;
+ $('#result').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});const ag=$('#again');ag&&ag.addEventListener('click',()=>setMode('ask'))},d+250*D)}
+
+/* ---------- mode: examples ---------- */
+function initExamples(){EXAMPLES.forEach(x=>{const b=el('button','',`<small>${esc(x.meta)}</small><b>${esc(x.title)}</b><span>${esc(x.desc)}</span>`);b.type='button';
+ b.addEventListener('click',()=>{document.querySelectorAll('.ex button').forEach(e=>e.classList.remove('sel'));b.classList.add('sel');show(x.result,x.title)});$('#ex').appendChild(b)})}
+
+/* ---------- mode: upload (Python in the browser) ---------- */
+let pyReady=null;
+function status(t){$('#status').classList.toggle('on',!!t);$('#status-text').textContent=t||''}
+function loadPy(){if(pyReady)return pyReady;pyReady=(async()=>{status('Loading Python. The first time takes about 15 seconds…');
+  await new Promise((res,rej)=>{const s=document.createElement('script');s.src=PYO+'pyodide.js';s.onload=res;s.onerror=()=>rej(new Error('Could not load Python. Check your internet connection and try again.'));document.head.appendChild(s)});
+  const py=await loadPyodide({indexURL:PYO});status('Loading pandas and statsmodels…');await py.loadPackage(['pandas','statsmodels']);py.runPython($('#py-src').textContent);return py})();
+ pyReady.catch(()=>{pyReady=null});return pyReady}
+async function handleFile(f){$('#upload-err').innerHTML='';$('#steps').innerHTML='';$('#result').innerHTML='';++run;resetTree();
+ try{if(f.size>5e6)throw new Error('The file is larger than 5 MB. Please upload a smaller CSV.');
+  const text=await f.text();const py=await loadPy();status('Running the tests on your data…');await new Promise(r=>setTimeout(r,30));
+  const R=JSON.parse(py.globals.get('analyze')(text));status('');if(R.error)throw new Error(R.error);show(R,f.name)}
+ catch(e){status('');$('#upload-err').innerHTML=`<div class="err">${esc(e.message||e)}</div>`}}
+function initUpload(){const d=$('#drop');$('#file').addEventListener('change',e=>{e.target.files[0]&&handleFile(e.target.files[0]);e.target.value=''});
+ ['dragenter','dragover'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.add('over')}));['dragleave','drop'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove('over')}));
+ d.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];f&&handleFile(f)})}
+
+/* ---------- mode: questions ---------- */
+const QS={q1:{t:'Is your data a panel (many units over time), or do you have endogenous regressors that need instruments?',o:[['No. A single time series for each variable','','q2',['start','q1','ur']],['Yes','Panel data, or instruments needed','GMM']]},
+ q2:{t:'What did your unit-root tests show?',o:[['All variables are stationary in levels','All I(0): ADF rejects a unit root for every variable','OLS'],['All variables are stationary only after first differencing','All I(1)','q3',['start','q1','ur','i1','co']],['A mix: some I(0), some I(1)','None is I(2)','q4',['start','q1','ur','mix','as']],['At least one variable needs differencing twice','Some I(2)','I2']]},
+ q3:{t:'Does a cointegration test (Johansen or Engle–Granger) find a long-run relationship?',o:[['Yes, the variables are cointegrated','','VECM'],['No cointegration','','VAR']]},
+ q4:{t:'Do you expect increases and decreases in a regressor to have different effects?',o:[['No, or I have no reason to expect it','','ARDL'],['Yes','For example oil-price rises and falls','NARDL']]}};
+function ask(id,n=1){const Q=QS[id];$('#q').innerHTML=`<div class="label">Question ${n}</div><h3>${Q.t}</h3><div class="opts">${Q.o.map((o,i)=>`<button type="button" data-i="${i}">${o[0]}${o[1]?`<small>${o[1]}</small>`:''}</button>`).join('')}</div>`;
+ $('#q').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const o=Q.o[+b.dataset.i],to=o[2];
+  if(QS[to]){light(o[3]);ask(to,n+1)}else{$('#q').innerHTML='<p class="sub" style="margin:0">Your answers lead to the model shown below.</p>';to==='I2'?i2card():finish(to,null,to==='ARDL'?'NARDL':to==='NARDL'?'ARDL':null)}}))}
+
+/* ---------- guides, modes, init ---------- */
+function initGuides(){Object.entries(MODELS).forEach(([k,M])=>{$('#gcards').appendChild(el('article','gcard',`<span class="tag">In preparation</span><h3>${k==='GMM'?'2SLS / GMM':k}</h3><p class="when">${M.when}</p><p>${M.steps.slice(0,5).join(' · ')} …</p>${M.lec.map(l=>`<a href="${L+l[0]}">${l[1]} →</a>`).join('')}`)).id='g-'+k})}
+document.addEventListener('click',e=>{const a=e.target.closest('[data-go]');if(!a)return;const c=$('#g-'+a.dataset.go);if(c){c.classList.remove('flash');void c.offsetWidth;c.classList.add('flash')}});
+function setMode(m){++run;document.querySelectorAll('.modes button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));['example','upload','ask'].forEach(x=>$('#m-'+x).hidden=x!==m);
+ $('#steps').innerHTML='';$('#result').innerHTML='';$('#upload-err').innerHTML='';status('');resetTree();document.querySelectorAll('.ex button').forEach(e=>e.classList.remove('sel'));if(m==='ask'){light(['start']);ask('q1')}}
+document.querySelectorAll('.modes button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+drawTree();initExamples();initUpload();initGuides();$('#year').textContent=new Date().getFullYear();
+</script>
+</body>
+</html>
