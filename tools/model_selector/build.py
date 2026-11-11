@@ -40,6 +40,13 @@ ex["money"] = (e, "Money, prices and output", "Quarterly, 1960–2019 · U.S.",
 M2 = m[(m.year >= 1970) & (m.year <= 2019)]
 pd.DataFrame({"date": M2.date, "baa_yield": M2.baa, "fedfunds": M2.ffr}).to_csv(OUT / "examples" / "passthrough.csv", index=False)
 
+# data for the 2SLS / GMM guide: federal funds rate, 4-quarter GDP-deflator inflation and the HP-filtered output gap
+from statsmodels.tsa.filters.hp_filter import hpfilter
+T = q[(q.t >= 1959) & (q.t < 2020)].copy()
+T["inflation"] = 100 * (np.log(T.gdpdef) - np.log(T.gdpdef.shift(4)))
+T["output_gap"] = hpfilter(100 * np.log(T.rgdp), 1600)[0]
+T[T.t >= 1960][["date", "ffr", "inflation", "output_gap"]].rename(columns={"ffr": "fedfunds"}).round(4).to_csv(OUT / "examples" / "taylor.csv", index=False)
+
 examples = []
 for key, (df, title, meta, desc) in ex.items():
     df = df.round(5); path = OUT / "examples" / f"{key}.csv"; df.to_csv(path, index=False)
