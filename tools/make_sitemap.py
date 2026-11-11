@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Write sitemap.xml for the GitHub Pages site. Run after tools/build_courses.py.
+"""Write sitemap.xml for the GitHub Pages site. Run after tools/build_courses.py, then tools/make_og_images.py.
 
 Every .html page is listed (except the Google verification file); lastmod is the date of the file's last git commit,
 or today for uncommitted files. index.html pages are listed under their folder URL.
