@@ -79,7 +79,7 @@ for key, (df, title, meta, desc) in ex.items():
 ts = (ROOT / "tools/model_selector/template.html").read_text()
 css = ts[ts.index("<style>") + 7: ts.index("</style>")].strip()
 tpl = (HERE / "template.html").read_text()
-page = (tpl.replace("/*TS_CSS*/", css).replace("#RESOURCES#", (HERE / "resources.html").read_text())
+page = (tpl.replace("/*TS_CSS*/", css)
         .replace("/*EXAMPLES*/", json.dumps(examples, ensure_ascii=False, separators=(",", ":")))
         .replace("#LONGT#", str(pa.LONG_T)).replace("#GMMN#", str(pa.GMM_N)).replace("#FEWN#", str(pa.FEW_N)).replace("#PYSRC#", src.replace("</script", "<\\/script")))
 (OUT / "index.html").write_text(page)
