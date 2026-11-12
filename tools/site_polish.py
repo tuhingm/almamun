@@ -30,16 +30,17 @@ NAV = [("Home", "index.html", ""), ("Teaching Courses", "teaching/index.html", "
        ("Time-Series Guide", "research-guide/index.html", "research-guide"),
        ("Panel-Data Guide", "panel-data-guide/index.html", "panel-data-guide"),
        ("Causal Inference", "causal-inference-guide/index.html", "causal-inference-guide"),
-       ("DSGE Guide", "dsge-guide/index.html", "dsge-guide"), ("ML Guide", "ml-guide/index.html", "ml-guide"), ("CV", "Tuhin%20Al%20Mamun_CV.pdf", None)]
+       ("DSGE Guide", "dsge-guide/index.html", "dsge-guide"), ("ML Guide", "ml-guide/index.html", "ml-guide"),
+       ("AI Agent Guide", "ai-agent-guide/index.html", "ai-agent-guide"), ("CV", "Tuhin%20Al%20Mamun_CV.pdf", None)]
 SECTION = {"teaching": "Teaching Courses", "working-papers": "Working Papers",
            "research-guide": "Empirical Research Guide (Time Series)", "panel-data-guide": "Panel Data Research Guide",
            "causal-inference-guide": "Causal Inference Research Guide", "dsge-guide": "DSGE Research Guide",
-           "ml-guide": "Machine Learning Research Guide"}
+           "ml-guide": "Machine Learning Research Guide", "ai-agent-guide": "AI Agent Research Guide"}
 KICKER = {"panel-data-guide": "Panel Data Research Guide", "causal-inference-guide": "Causal Inference Research Guide",
           "dsge-guide": "DSGE Research Guide", "research-guide": "Empirical Research Guide",
-          "ml-guide": "Machine Learning Research Guide"}
+          "ml-guide": "Machine Learning Research Guide", "ai-agent-guide": "AI Agent Research Guide"}
 CARD_KICKER = {"panel-data-guide": "Panel Data Guide", "causal-inference-guide": "Causal Inference Guide",
-               "dsge-guide": "DSGE Guide · Dynare", "ml-guide": "Machine Learning Guide"}
+               "dsge-guide": "DSGE Guide · Dynare", "ml-guide": "Machine Learning Guide", "ai-agent-guide": "AI Agent Guide"}
 INDEX_CARDS = {
     "panel-data-guide/index.html": ("Which panel model fits your data?",
         "Test your panel and follow the path to pooled OLS, FE/RE, GMM, Mean Group, PMG or CS-ARDL. Real examples and Python code."),
@@ -47,6 +48,8 @@ INDEX_CARDS = {
         "DiD, staggered DiD, synthetic control, RDD, IV and interrupted time series, tested on your data, step by step."),
     "ml-guide/index.html": ("Which machine-learning method fits your data?",
         "LASSO, ridge, elastic net, random forest, XGBoost or double machine learning, chosen by tests on your data."),
+    "ai-agent-guide/index.html": ("Let an AI agent run your econometric workflow",
+        "A walkthrough of the open-source MaRCo@BIS framework and a country-neutral copy with added regime-switching, threshold and cointegration models."),
     "dsge-guide/index.html": ("Which DSGE model fits your question?",
         "RBC, New Keynesian, open economy, Bayesian estimation, OccBin and optimal policy, step by step in Dynare."),
 }
@@ -170,7 +173,7 @@ for p in pages:
               f'<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">\n'
               f'<meta name="twitter:card" content="summary_large_image">')
         s = re.sub(r'(<link rel="canonical" href="[^"]*">)', lambda m: m.group(1) + "\n" + og, s, count=1)
-    if rel.startswith(("panel-data-guide/", "causal-inference-guide/", "dsge-guide/", "ml-guide/")):
+    if rel.startswith(("panel-data-guide/", "causal-inference-guide/", "dsge-guide/", "ml-guide/", "ai-agent-guide/")):
         kicker = CARD_KICKER[section] + (" · Lecture" if "/lectures/" in rel else (" · Model guide" if not rel.endswith("index.html") else ""))
         t_, sub_ = INDEX_CARDS.get(rel, (name, short(_sub(name, meta(s, "description") or ""), 130)))
         cards.append(dict(out="assets/og/" + rel[:-5] + ".jpg", kicker=kicker, title=t_, sub=sub_))
