@@ -20,7 +20,7 @@ Variance: Var(βhat|X)=σ²(X'X)^(-1); estimate σ² by RSS/(n-k). Derive t and 
 Levels, log-level, level-log, log-log, polynomials, interactions, dummy variables, elasticities, marginal effects, and nonlinear transformations. For log(y)=β0+β1log(x)+u, β1 is an elasticity. Interpret coefficients conditionally; a regression coefficient is not automatically causal. Cover RESET, residual plots, leverage, studentized residuals, and Cook's distance.
 
 ## 4. Inference and robust covariance
-Test H0:Rβ=r using Wald, likelihood-ratio, or score procedures. Explain size, power, confidence coverage, p-values, multiple testing, and economic significance. Under heteroskedasticity, use sandwich covariance (X'X)^(-1)[Σ x_i x_i' uhat_i²](X'X)^(-1). HC0-HC3 differ in finite-sample leverage corrections. Robust standard errors do not fix endogeneity or wrong functional form.
+Test H0:Rβ=r using Wald, likelihood-ratio, or score procedures. Explain size, power, confidence coverage, p-values, multiple testing, and economic significance. Under heteroskedasticity, use sandwich covariance (X'X)^(-1) (Σ x_i x_i' uhat_i²) (X'X)^(-1). HC0-HC3 differ in finite-sample leverage corrections. Robust standard errors do not fix endogeneity or wrong functional form.
 
 ## 5. Endogeneity and instrumental variables
 Endogeneity arises from omitted variables, simultaneity, measurement error, or selection. Instrument z must satisfy relevance and exclusion/exogeneity. With instrument matrix Z, P_Z=Z(Z'Z)^(-1)Z' and βhat_2SLS=(X'P_ZX)^(-1)X'P_Zy. Explain first-stage partial R², weak-instrument diagnostics, weak-IV robust inference, overidentification tests, and local average treatment effects. Relevance is empirically assessable; exclusion needs institutional and economic justification.

@@ -29,3 +29,19 @@ table in `syllabus.md`, the readings from each lecture's `## Reading` section.
   and *Reading* are styled as boxes automatically.
 - Theorem-style blocks: `<div class="theorem" markdown="1"> ... </div>` (also `definition`, `proof`, `remark`).
 - Collapsible solutions: `<details class="solution" markdown="1"><summary>Solution</summary> ... </details>`.
+
+## Site-wide finishing pass (run after any builder)
+Every page shares one top menu, link-preview tags and search metadata. After running any page builder, run:
+
+```bash
+python3 tools/site_polish.py      # same menu on every page, missing preview tags, author/robots, JSON-LD + breadcrumbs
+python3 tools/make_og_images.py   # preview images (needs Playwright; OG_ONLY=assets/og/dsge-guide renders a subset)
+python3 tools/og_tags.py          # completes og:/twitter: tags; bump VERSION to refresh cached previews
+python3 tools/make_sitemap.py
+```
+
+| Path | Purpose |
+|---|---|
+| `assets/css/site-header.css` | the one menu style for every page (desktop row; dropdown below 1040px) |
+| `tools/site_polish.py` | menu markup, name variants for search (`ALT_NAMES`), structured data |
+| `tools/og_cards_site.json` | preview cards for the panel, causal-inference and DSGE guide pages (written by `site_polish.py`) |
