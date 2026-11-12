@@ -24,7 +24,7 @@ with all variables in logs: employment \(n\), the real wage \(w\), capital \(k\)
 <div class="read" markdown="1">
 **When to use this guide, and when not**
 
-GMM for dynamic panels is designed for **many units and few periods**. Its consistency comes from N growing, not T. With 20 countries over 40 years the Nickell bias is small, the instruments multiply out of control, and fixed effects (or the macro-panel guides) are the better choice. The model selection tool sends a panel here only when T is short and you say the model is dynamic.
+GMM for dynamic panels is designed for **many units and few periods**. Its consistency comes from N growing, not T. With 20 countries over 40 years the Nickell bias is small, the instruments multiply out of control, and fixed effects (or the macro-panel guides) are the better choice. The model selection tool sends a panel here only when T is short (below 15), N is large (at least 30 units) and you say the model is dynamic. With fewer units it recommends bias-corrected fixed effects (LSDVC) instead.
 </div>
 
 <div class="write" markdown="1">

@@ -89,7 +89,7 @@ n_{it} = \alpha_1 n_{i,t-1} + \alpha_2 n_{i,t-2} + \beta_0 w_{it} + \beta_1 w_{i
 </table>
 <div class="read">
 <p><strong>When to use this guide, and when not</strong></p>
-<p>GMM for dynamic panels is designed for <strong>many units and few periods</strong>. Its consistency comes from N growing, not T. With 20 countries over 40 years the Nickell bias is small, the instruments multiply out of control, and fixed effects (or the macro-panel guides) are the better choice. The model selection tool sends a panel here only when T is short and you say the model is dynamic.</p>
+<p>GMM for dynamic panels is designed for <strong>many units and few periods</strong>. Its consistency comes from N growing, not T. With 20 countries over 40 years the Nickell bias is small, the instruments multiply out of control, and fixed effects (or the macro-panel guides) are the better choice. The model selection tool sends a panel here only when T is short (below 15), N is large (at least 30 units) and you say the model is dynamic. With fewer units it recommends bias-corrected fixed effects (LSDVC) instead.</p>
 </div>
 <div class="write">
 <p><strong>How to write it: model section</strong></p>

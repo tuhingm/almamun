@@ -4,10 +4,14 @@ analyze(csv_text) reads a long-format panel CSV: entity identifier, time identif
 regressors (one column per variable). It reports the panel structure, summary statistics (overall, between, within),
 correlations and then one of two test sequences:
 
-* short panels (median T below LONG_T): F test for unit effects, Breusch-Pagan LM test, Hausman and Mundlak tests,
+The route depends on both dimensions: the number of units N and the median number of periods per unit T.
+
+* T below LONG_T (short panels): F test for unit effects, Breusch-Pagan LM test, Hausman and Mundlak tests,
   with pooled OLS, random-effects and fixed-effects estimates;
-* long panels: Pesaran CD tests, the Pesaran-Yamagata slope-homogeneity test, panel unit-root tests (Fisher-ADF and
+  A dynamic model is sent to GMM only when N >= GMM_N; with fewer units, to bias-corrected fixed effects (LSDVC).
+* T of LONG_T or more and N >= FEW_N (long panels): Pesaran CD tests, the Pesaran-Yamagata slope-homogeneity test, panel unit-root tests (Fisher-ADF and
   CIPS) on levels and differences, and, when every variable is I(1), Kao and Fisher-Engle-Granger cointegration tests.
+* T of LONG_T or more but N below FEW_N: too few units for panel asymptotics; each unit is modelled as a time series.
 
 Returns a JSON string. The same file runs in the browser (Pyodide) for uploaded data and offline for the examples.
 """
@@ -15,7 +19,9 @@ import io, json, math, warnings
 import numpy as np
 import pandas as pd
 
-LONG_T = 15
+LONG_T = 15     # periods: below this the panel is short
+GMM_N = 30      # units: difference / system GMM needs many units
+FEW_N = 10      # units: CD, CIPS, CCE and CS-ARDL need at least this many
 CIPS_Q = {}  # filled in by the page builder: simulated quantiles of the CIPS statistic (see simulate_cips.py)
 ID_NAMES = ("id", "entity", "unit", "country", "code", "iso", "iso3", "state", "province", "region", "county", "city",
             "firm", "company", "bank", "industry", "sector", "nr", "person", "pid", "hhid", "household", "individual", "panel")
@@ -559,7 +565,8 @@ def analyze(csv_text, max_vars=6):
     Tmed = float(Ti.median())
     out = dict(n=n, N=N, T=Tn, Tmin=int(Ti.min()), Tmax=int(Ti.max()), Tmed=_f(Tmed, 1), balanced=bool(Ti.min() == Ti.max() == Tn),
                entity=ent, time=tim, first=str(periods[0]), last=str(periods[-1]), vars=V, dep=dep, skipped=rd["skipped"],
-               branch="long" if Tmed >= LONG_T else "short", long_t=LONG_T)
+               branch="short" if Tmed < LONG_T else ("long" if N >= FEW_N else "few"), long_t=LONG_T, gmm_n=GMM_N, few_n=FEW_N,
+               n_large=bool(N >= GMM_N))
 
     # charts: cross-sectional mean over time with the 10th-90th percentile band, and the same for first differences
     g = df.groupby("_ti")
@@ -591,8 +598,10 @@ def analyze(csv_text, max_vars=6):
             return json.dumps({"error": r["error"]})
         out["static"] = r
         out["model"] = r["static_model"]
-    else:
+    elif out["branch"] == "long":
         out.update(_long_panel(df, ent, dep, xs, Tn))
+    else:
+        out["model"] = "TS"
     return json.dumps(out)
 
 
