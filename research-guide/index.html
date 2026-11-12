@@ -78,9 +78,10 @@ footer{background:var(--navy2);color:#c3d0e4;padding:22px 0;font-size:10px}.foot
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 @media(max-width:650px){.brand{white-space:nowrap;margin-right:12px}header nav{gap:9px;font-size:8px;letter-spacing:.06em;line-height:1.35;text-align:left}}
 </style>
+<link rel="stylesheet" href="../assets/css/mobile-nav.css">
 </head>
 <body>
-<header><div class="wrap nav"><a class="brand" href="../index.html">TGM <b>AL MAMUN</b></a><nav aria-label="Main navigation"><a href="../index.html">Home</a><a href="../teaching/index.html">Teaching Courses</a><a href="../working-papers/index.html">Working Papers</a><a href="../research-guide/index.html" class="current" aria-current="page">Time-Series Guide</a><a href="../panel-data-guide/index.html">Panel-Data Guide</a><a href="../causal-inference-guide/index.html">Causal Inference</a><a href="../dsge-guide/index.html">DSGE Guide</a><a href="../Tuhin%20Al%20Mamun_CV.pdf">CV</a></nav></div></header>
+<header><div class="wrap nav"><a class="brand" href="../index.html">TGM <b>AL MAMUN</b></a><button id="menu" type="button" aria-expanded="false" aria-controls="nav">Menu</button><nav id="nav" aria-label="Main navigation"><a href="../index.html">Home</a><a href="../teaching/index.html">Teaching Courses</a><a href="../working-papers/index.html">Working Papers</a><a href="../research-guide/index.html" class="current" aria-current="page">Time-Series Guide</a><a href="../panel-data-guide/index.html">Panel-Data Guide</a><a href="../causal-inference-guide/index.html">Causal Inference</a><a href="../dsge-guide/index.html">DSGE Guide</a><a href="../Tuhin%20Al%20Mamun_CV.pdf">CV</a></nav></div></header>
 <section class="hero"><div class="wrap"><div class="kicker">Empirical Research Guide · Economics and Finance</div><h1>Which model fits your data?</h1><p class="lead">The right econometric model depends on the properties of your data, not on preference. Test a real dataset, upload your own, or enter your test results, and follow the path to the model your paper needs.</p><div class="meta"><span><strong>6</strong> model guides</span><span><strong>5</strong> real example datasets</span><span>Python · statsmodels</span></div></div></section>
 <main class="wrap">
 <div class="modes" role="group" aria-label="Choose how to start">
@@ -363,5 +364,6 @@ function setMode(m){++run;document.querySelectorAll('.modes button').forEach(b=>
 document.querySelectorAll('.modes button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
 drawTree();initExamples();initUpload();initGuides();$('#year').textContent=new Date().getFullYear();
 </script>
+<script src="../assets/js/mobile-nav.js" defer></script>
 </body>
 </html>
