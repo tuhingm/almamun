@@ -108,10 +108,28 @@
   "sub": "Nonlinearity: an occasionally binding constraint. Step-by-step guide with Dynare code and real output."
  },
  {
+  "out": "assets/og/ml-guide/enet.jpg",
+  "kicker": "Machine Learning Guide · Model guide",
+  "title": "Elastic Net",
+  "sub": "Linear, strongly correlated predictors. Step-by-step guide with Python code and real output."
+ },
+ {
   "out": "assets/og/ml-guide/index.jpg",
   "kicker": "Machine Learning Guide",
   "title": "Which machine-learning method fits your data?",
   "sub": "LASSO, ridge, elastic net, random forest, XGBoost or double machine learning, chosen by tests on your data."
+ },
+ {
+  "out": "assets/og/ml-guide/lasso.jpg",
+  "kicker": "Machine Learning Guide · Model guide",
+  "title": "LASSO",
+  "sub": "Linear, few predictors matter. Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/ml-guide/ridge.jpg",
+  "kicker": "Machine Learning Guide · Model guide",
+  "title": "Ridge Regression",
+  "sub": "Linear, many small effects. Step-by-step guide with Python code and real output."
  },
  {
   "out": "assets/og/panel-data-guide/csardl.jpg",
