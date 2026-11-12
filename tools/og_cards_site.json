@@ -126,6 +126,12 @@
   "sub": "Linear, few predictors matter. Step-by-step guide with Python code and real output."
  },
  {
+  "out": "assets/og/ml-guide/rf.jpg",
+  "kicker": "Machine Learning Guide · Model guide",
+  "title": "Random Forest",
+  "sub": "Nonlinear, fewer than 1,000 observations. Step-by-step guide with Python code and real output."
+ },
+ {
   "out": "assets/og/ml-guide/ridge.jpg",
   "kicker": "Machine Learning Guide · Model guide",
   "title": "Ridge Regression",
