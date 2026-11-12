@@ -1,0 +1,10 @@
+/* Shared mobile navigation: same dropdown interaction as the homepage. */
+#menu{display:none;background:transparent;color:white;border:1px solid #ffffff66;border-radius:7px;padding:7px 12px;font:inherit;cursor:pointer}
+@media(max-width:650px){
+  header{position:relative;z-index:30}
+  .nav{height:64px;position:relative}
+  #menu{display:block;flex:0 0 auto}
+  header nav#nav{display:none;position:absolute;top:64px;left:0;right:0;z-index:40;background:var(--navy,#0033a0);padding:17px 22px;flex-direction:column;align-items:flex-start;gap:15px;max-height:calc(100vh - 64px);overflow-y:auto;box-shadow:0 8px 18px rgba(0,0,0,.18);font-size:11px;line-height:1.4;letter-spacing:.08em}
+  header nav#nav.show{display:flex}
+  header nav#nav a{display:block;width:100%;white-space:normal}
+}
