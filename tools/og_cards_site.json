@@ -3,13 +3,13 @@
   "out": "assets/og/causal-inference-guide/did.jpg",
   "kicker": "Causal Inference Guide · Model guide",
   "title": "Difference-in-Differences",
-  "sub": "Many treated units, one adoption date. Step-by-step guide with Python code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/causal-inference-guide/gsc.jpg",
   "kicker": "Causal Inference Guide · Model guide",
   "title": "Generalized Synthetic Control",
-  "sub": "Many treated units, pre-trends not parallel. Step-by-step guide with Python code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/causal-inference-guide/index.jpg",
@@ -21,7 +21,7 @@
   "out": "assets/og/causal-inference-guide/its.jpg",
   "kicker": "Causal Inference Guide · Model guide",
   "title": "Interrupted Time Series",
-  "sub": "One treated series, no comparison units. Step-by-step guide with Python code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/causal-inference-guide/iv.jpg",
@@ -39,31 +39,31 @@
   "out": "assets/og/causal-inference-guide/scm.jpg",
   "kicker": "Causal Inference Guide · Model guide",
   "title": "Synthetic Control",
-  "sub": "One or a few treated units, many comparison units. Step-by-step guide with Python code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/causal-inference-guide/staggered.jpg",
   "kicker": "Causal Inference Guide · Model guide",
   "title": "Staggered Difference-in-Differences",
-  "sub": "Many treated units, several adoption dates. Step-by-step guide with Python code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/dsge-guide/estimation.jpg",
   "kicker": "DSGE Guide · Dynare · Model guide",
   "title": "Bayesian Estimation of a New Keynesian Model",
-  "sub": "Estimate with data: a small model, 3 observables. Step-by-step guide with Dynare code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Dynare code, real output and sample text."
  },
  {
   "out": "assets/og/dsge-guide/higher.jpg",
   "kicker": "DSGE Guide · Dynare · Model guide",
   "title": "Higher-Order Solutions and Welfare",
-  "sub": "Nonlinearity: risk, large shocks, welfare. Step-by-step guide with Dynare code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Dynare code, real output and sample text."
  },
  {
   "out": "assets/og/dsge-guide/identification.jpg",
   "kicker": "DSGE Guide · Dynare · Model guide",
   "title": "Identification Before Estimation",
-  "sub": "Estimate with data: check which parameters the data can pin down. Step-by-step guide with Dynare code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Dynare code, real output and sample text."
  },
  {
   "out": "assets/og/dsge-guide/index.jpg",
@@ -75,37 +75,37 @@
   "out": "assets/og/dsge-guide/medium.jpg",
   "kicker": "DSGE Guide · Dynare · Model guide",
   "title": "Medium-Scale New Keynesian Model",
-  "sub": "Estimate with data: a richer model, 5 observables. Step-by-step guide with Dynare code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Dynare code, real output and sample text."
  },
  {
   "out": "assets/og/dsge-guide/nk.jpg",
   "kicker": "DSGE Guide · Dynare · Model guide",
   "title": "Three-Equation New Keynesian Model",
-  "sub": "Explain a mechanism with nominal rigidities. Step-by-step guide with Dynare code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Dynare code, real output and sample text."
  },
  {
   "out": "assets/og/dsge-guide/optimal.jpg",
   "kicker": "DSGE Guide · Dynare · Model guide",
   "title": "Optimal Monetary Policy",
-  "sub": "Design policy: commitment, discretion or simple rules. Step-by-step guide with Dynare code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Dynare code, real output and sample text."
  },
  {
   "out": "assets/og/dsge-guide/rbc.jpg",
   "kicker": "DSGE Guide · Dynare · Model guide",
   "title": "Real Business Cycle Model",
-  "sub": "Explain a mechanism, no nominal rigidities. Step-by-step guide with Dynare code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Dynare code, real output and sample text."
  },
  {
   "out": "assets/og/dsge-guide/soe.jpg",
   "kicker": "DSGE Guide · Dynare · Model guide",
   "title": "Small Open-Economy New Keynesian Model",
-  "sub": "Explain a mechanism in an open economy. Step-by-step guide with Dynare code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Dynare code, real output and sample text."
  },
  {
   "out": "assets/og/dsge-guide/zlb.jpg",
   "kicker": "DSGE Guide · Dynare · Model guide",
   "title": "The Zero Lower Bound with OccBin",
-  "sub": "Nonlinearity: an occasionally binding constraint. Step-by-step guide with Dynare code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Dynare code, real output and sample text."
  },
  {
   "out": "assets/og/ml-guide/causal-forest.jpg",
@@ -117,19 +117,19 @@
   "out": "assets/og/ml-guide/dml-irm.jpg",
   "kicker": "Machine Learning Guide · Model guide",
   "title": "Double Machine Learning: Interactive Model",
-  "sub": "Binary treatment, many or nonlinear controls. Step-by-step guide with Python code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/ml-guide/dml-iv.jpg",
   "kicker": "Machine Learning Guide · Model guide",
   "title": "Double Machine Learning with an Instrument (DML-IV)",
-  "sub": "Endogenous treatment, valid instrument. Step-by-step guide with Python code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/ml-guide/dml-plr.jpg",
   "kicker": "Machine Learning Guide · Model guide",
   "title": "Double Machine Learning: Partially Linear Model",
-  "sub": "Continuous treatment, many or nonlinear controls. Step-by-step guide with Python code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/ml-guide/enet.jpg",
@@ -165,19 +165,19 @@
   "out": "assets/og/ml-guide/xgb.jpg",
   "kicker": "Machine Learning Guide · Model guide",
   "title": "Gradient Boosting (XGBoost)",
-  "sub": "Nonlinear, at least 1,000 observations. Step-by-step guide with Python code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/panel-data-guide/csardl.jpg",
   "kicker": "Panel Data Guide · Model guide",
   "title": "Cross-Sectionally Augmented ARDL",
-  "sub": "Long-run relationship with common shocks. Step-by-step guide with Python code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/panel-data-guide/diff.jpg",
   "kicker": "Panel Data Guide · Model guide",
   "title": "Panel Model in First Differences",
-  "sub": "All variables I(1), not cointegrated. Step-by-step guide with Python code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/panel-data-guide/fe.jpg",
@@ -189,13 +189,13 @@
   "out": "assets/og/panel-data-guide/fedk.jpg",
   "kicker": "Panel Data Guide · Model guide",
   "title": "Fixed Effects with Driscoll–Kraay Standard Errors",
-  "sub": "Long panel, stationary variables, homogeneous slopes. Step-by-step guide with Python code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/panel-data-guide/gmm.jpg",
   "kicker": "Panel Data Guide · Model guide",
   "title": "Difference GMM for Dynamic Panels",
-  "sub": "Dynamic panel, large N, short T. Step-by-step guide with Python code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/panel-data-guide/index.jpg",
@@ -213,13 +213,13 @@
   "out": "assets/og/panel-data-guide/mg.jpg",
   "kicker": "Panel Data Guide · Model guide",
   "title": "Mean Group and CCE Mean Group",
-  "sub": "Long panel, stationary variables, heterogeneous slopes. Step-by-step guide with Python code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/panel-data-guide/pmg.jpg",
   "kicker": "Panel Data Guide · Model guide",
   "title": "Panel ARDL: Pooled Mean Group",
-  "sub": "Long-run relationship, cross-sectionally independent units. Step-by-step guide with Python code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/panel-data-guide/pols.jpg",
@@ -231,6 +231,6 @@
   "out": "assets/og/panel-data-guide/re.jpg",
   "kicker": "Panel Data Guide · Model guide",
   "title": "Random Effects",
-  "sub": "Unit effects present, uncorrelated with the regressors. Step-by-step guide with Python code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  }
 ]

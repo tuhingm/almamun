@@ -1,0 +1,424 @@
+{
+ "ols": {
+  "nobs": 420,
+  "table_index": 0,
+  "table": "Coefficient estimates",
+  "row": "const",
+  "col": "Coef.",
+  "value": 0.715022,
+  "rtol": 0.001,
+  "seconds": 0.3,
+  "summary": {
+   "label": "R-squared",
+   "value": 0.2048
+  }
+ },
+ "ardl": {
+  "nobs": 237,
+  "table_index": 1,
+  "table": "Bounds test (Pesaran, Shin and Smith 2001), case 3: F = 8.179",
+  "row": "10%",
+  "col": "I(0) bound",
+  "value": 2.457,
+  "rtol": 0.001,
+  "seconds": 0.1,
+  "summary": {
+   "label": "Bounds F",
+   "value": 8.179
+  }
+ },
+ "nardl": {
+  "nobs": 596,
+  "table_index": 1,
+  "table": "Bounds test (Pesaran, Shin and Smith 2001), case 3: F = 9.771",
+  "row": "10%",
+  "col": "I(0) bound",
+  "value": 2.73,
+  "rtol": 0.001,
+  "seconds": 0.1,
+  "summary": {
+   "label": "Bounds F",
+   "value": 9.771
+  }
+ },
+ "var": {
+  "nobs": 415,
+  "table_index": 0,
+  "table": "Lag-order selection",
+  "row": "0",
+  "col": "AIC",
+  "value": -16.8539,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "AIC",
+   "value": -17.2258
+  }
+ },
+ "vecm": {
+  "nobs": 232,
+  "table_index": 0,
+  "table": "Johansen trace test (lags in differences = 7, deterministic = 'ci')",
+  "row": "r <= 0",
+  "col": "Trace statistic",
+  "value": 29.394,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Log-likelihood",
+   "value": -219.976
+  }
+ },
+ "iv_gmm": {
+  "nobs": 114,
+  "table_index": 0,
+  "table": "Two-step efficient GMM estimates",
+  "row": "const",
+  "col": "Coef.",
+  "value": 0.037817,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Min first-stage F",
+   "value": 57.63
+  }
+ },
+ "pols": {
+  "nobs": 630,
+  "table_index": 0,
+  "table": "Coefficient estimates",
+  "row": "const",
+  "col": "Coef.",
+  "value": -2.206728,
+  "rtol": 0.001,
+  "seconds": 0.1,
+  "summary": {
+   "label": "R-squared",
+   "value": 0.5658
+  }
+ },
+ "fe": {
+  "nobs": 4360,
+  "table_index": 0,
+  "table": "Coefficient estimates",
+  "row": "union",
+  "col": "Coef.",
+  "value": 0.080002,
+  "rtol": 0.001,
+  "seconds": 2.4,
+  "summary": {
+   "label": "Within R-squared",
+   "value": 0.0216
+  }
+ },
+ "re": {
+  "nobs": 5320,
+  "table_index": 0,
+  "table": "Coefficient estimates",
+  "row": "const",
+  "col": "Coef.",
+  "value": 7.351593,
+  "rtol": 0.001,
+  "seconds": 2.3,
+  "summary": {
+   "label": "sigma2 unit effect",
+   "value": 0.0254
+  }
+ },
+ "fd": {
+  "nobs": 324,
+  "table_index": 0,
+  "table": "Coefficient estimates",
+  "row": "const",
+  "col": "Coef.",
+  "value": 0.019983,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "R-squared",
+   "value": 0.469
+  }
+ },
+ "fedk": {
+  "nobs": 336,
+  "table_index": 0,
+  "table": "Coefficient estimates",
+  "row": "unem",
+  "col": "Coef.",
+  "value": -0.343758,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Within R-squared",
+   "value": 0.1516
+  }
+ },
+ "diff_gmm": {
+  "nobs": 611,
+  "table_index": 0,
+  "table": "Difference GMM estimates (one-step, robust)",
+  "row": "L1.log_emp",
+  "col": "Coef.",
+  "value": 0.686225,
+  "rtol": 0.001,
+  "seconds": 0.1
+ },
+ "mg": {
+  "nobs": 3125,
+  "table_index": 0,
+  "table": "Mean group (Pesaran and Smith 1995)",
+  "row": "sr",
+  "col": "Coef.",
+  "value": 0.345675,
+  "rtol": 0.001,
+  "seconds": 0.5
+ },
+ "pmg": {
+  "nobs": 1380,
+  "table_index": 0,
+  "table": "Pooled mean group: long-run coefficients",
+  "row": "dm_log_price",
+  "col": "Coef.",
+  "value": -0.76606,
+  "rtol": 0.001,
+  "seconds": 0.2,
+  "summary": {
+   "label": "PMG speed of adjustment",
+   "value": -0.1927
+  }
+ },
+ "csardl": {
+  "nobs": 1380,
+  "table_index": 0,
+  "table": "CS-ARDL(1,1) long-run coefficients (mean group), 1 lag(s) of the averages",
+  "row": "log_price",
+  "col": "Coef.",
+  "value": 0.144108,
+  "rtol": 0.001,
+  "seconds": 0.6
+ },
+ "did": {
+  "nobs": 462,
+  "table_index": 0,
+  "table": "Average effect on the treated",
+  "row": "Difference-in-differences ATT",
+  "col": "Coef.",
+  "value": 0.0024,
+  "rtol": 0.001,
+  "seconds": 3.1,
+  "summary": {
+   "label": "ATT",
+   "value": 0.0024
+  }
+ },
+ "staggered": {
+  "nobs": 550,
+  "table_index": 0,
+  "table": "Average effect on the treated",
+  "row": "Callaway-Sant'Anna ATT (never-treated controls)",
+  "col": "Coef.",
+  "value": 0.0194,
+  "rtol": 0.001,
+  "seconds": 7.8,
+  "summary": {
+   "label": "ATT",
+   "value": 0.0194
+  }
+ },
+ "its": {
+  "nobs": 192,
+  "table_index": 0,
+  "table": "Segmented regression",
+  "row": "const",
+  "col": "Coef.",
+  "value": 1872.0622,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Pre-period mean",
+   "value": 1717.7515
+  }
+ },
+ "iv": {
+  "nobs": 3003,
+  "table_index": 0,
+  "table": "Effect of the treatment",
+  "row": "educ (2SLS)",
+  "col": "Coef.",
+  "value": 0.1242,
+  "rtol": 0.001,
+  "seconds": 0.1,
+  "summary": {
+   "label": "2SLS estimate",
+   "value": 0.1242
+  }
+ },
+ "rdd": {
+  "nobs": 13566,
+  "table_index": 0,
+  "table": "Sharp RD: local linear estimate (triangular kernel, IK bandwidth h = 0.1084)",
+  "row": "RD effect at demvoteshare = 0.5",
+  "col": "Coef.",
+  "value": 46.7369,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Bandwidth",
+   "value": 0.1084
+  }
+ },
+ "scm": {
+  "nobs": 816,
+  "table_index": 0,
+  "table": "Synthetic Texas: donor weights",
+  "row": "Florida",
+  "col": "Weight",
+  "value": 0.373,
+  "rtol": 0.001,
+  "seconds": 0.1,
+  "summary": {
+   "label": "Average gap",
+   "value": 21013.1882
+  }
+ },
+ "gsc": {
+  "nobs": 550,
+  "table_index": 0,
+  "table": "Average effect on the treated",
+  "row": "ATT (interactive fixed effects)",
+  "col": "Coef.",
+  "value": 0.0211,
+  "rtol": 0.001,
+  "seconds": 1.2,
+  "summary": {
+   "label": "ATT",
+   "value": 0.0211
+  }
+ },
+ "lasso": {
+  "nobs": 814,
+  "table_index": 0,
+  "table": "Out-of-sample accuracy",
+  "row": "LASSO",
+  "col": "Test RMSE",
+  "value": 9.2658,
+  "rtol": 0.05,
+  "seconds": 1.1,
+  "summary": {
+   "label": "CV RMSE (training)",
+   "value": 10.359
+  }
+ },
+ "ridge": {
+  "nobs": 663,
+  "table_index": 0,
+  "table": "Out-of-sample accuracy",
+  "row": "Ridge",
+  "col": "Test RMSE",
+  "value": 0.4054,
+  "rtol": 0.05,
+  "seconds": 0.6,
+  "summary": {
+   "label": "CV RMSE (training)",
+   "value": 0.3402
+  }
+ },
+ "enet": {
+  "nobs": 197,
+  "table_index": 0,
+  "table": "Out-of-sample accuracy",
+  "row": "Elastic net",
+  "col": "Test RMSE",
+  "value": 3.5496,
+  "rtol": 0.05,
+  "seconds": 1.7,
+  "summary": {
+   "label": "CV RMSE (training)",
+   "value": 2.712
+  }
+ },
+ "rf": {
+  "nobs": 353,
+  "table_index": 0,
+  "table": "Out-of-sample accuracy",
+  "row": "Random forest",
+  "col": "Test RMSE",
+  "value": 0.6518,
+  "rtol": 0.05,
+  "seconds": 5.1,
+  "summary": {
+   "label": "CV RMSE (training)",
+   "value": 0.649
+  }
+ },
+ "xgb": {
+  "nobs": 6822,
+  "table_index": 0,
+  "table": "Out-of-sample accuracy",
+  "row": "XGBoost",
+  "col": "Test RMSE",
+  "value": 0.9811,
+  "rtol": 0.05,
+  "seconds": 4.2,
+  "summary": {
+   "label": "CV RMSE (training)",
+   "value": 0.9936
+  }
+ },
+ "dml_plr": {
+  "nobs": 90,
+  "table_index": 0,
+  "table": "Effect of gdpsh465 on growth: partially linear model",
+  "row": "DML with LASSO",
+  "col": "Coef.",
+  "value": -0.049038,
+  "rtol": 0.05,
+  "seconds": 6.1,
+  "summary": {
+   "label": "Estimate",
+   "value": -0.0359
+  }
+ },
+ "dml_irm": {
+  "nobs": 9915,
+  "table_index": 0,
+  "table": "Effect of e401 on net_tfa: interactive model (ATE)",
+  "row": "DML with random forest",
+  "col": "Coef.",
+  "value": 8629.22613,
+  "rtol": 0.05,
+  "seconds": 25.5,
+  "summary": {
+   "label": "Estimate",
+   "value": 8629.2261
+  }
+ },
+ "dml_iv": {
+  "nobs": 9915,
+  "table_index": 0,
+  "table": "Effect of p401 on net_tfa: partially linear IV model",
+  "row": "DML with random forest",
+  "col": "Coef.",
+  "value": 13446.618386,
+  "rtol": 0.05,
+  "seconds": 23.9,
+  "summary": {
+   "label": "Estimate",
+   "value": 13446.6184
+  }
+ },
+ "causal_forest": {
+  "nobs": 9915,
+  "table_index": 0,
+  "table": "Effect of e401 on net_tfa",
+  "row": "Average treatment effect (doubly robust)",
+  "col": "Coef.",
+  "value": 8629.22613,
+  "rtol": 0.05,
+  "seconds": 23.4,
+  "summary": {
+   "label": "ATE",
+   "value": 8629.2261
+  }
+ }
+}

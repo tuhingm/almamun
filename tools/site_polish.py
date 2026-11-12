@@ -30,11 +30,12 @@ NAV = [("Home", "index.html", ""), ("Teaching Courses", "teaching/index.html", "
        ("Time-Series Guide", "research-guide/index.html", "research-guide"),
        ("Panel-Data Guide", "panel-data-guide/index.html", "panel-data-guide"),
        ("Causal Inference", "causal-inference-guide/index.html", "causal-inference-guide"),
-       ("DSGE Guide", "dsge-guide/index.html", "dsge-guide"), ("ML Guide", "ml-guide/index.html", "ml-guide"), ("CV", "Tuhin%20Al%20Mamun_CV.pdf", None)]
+       ("DSGE Guide", "dsge-guide/index.html", "dsge-guide"), ("ML Guide", "ml-guide/index.html", "ml-guide"),
+       ("Open Econometric Systems", "oes/index.html", "oes"), ("CV", "Tuhin%20Al%20Mamun_CV.pdf", None)]
 SECTION = {"teaching": "Teaching Courses", "working-papers": "Working Papers",
            "research-guide": "Empirical Research Guide (Time Series)", "panel-data-guide": "Panel Data Research Guide",
            "causal-inference-guide": "Causal Inference Research Guide", "dsge-guide": "DSGE Research Guide",
-           "ml-guide": "Machine Learning Research Guide"}
+           "ml-guide": "Machine Learning Research Guide", "oes": "Open Econometric Systems"}
 KICKER = {"panel-data-guide": "Panel Data Research Guide", "causal-inference-guide": "Causal Inference Research Guide",
           "dsge-guide": "DSGE Research Guide", "research-guide": "Empirical Research Guide",
           "ml-guide": "Machine Learning Research Guide"}
