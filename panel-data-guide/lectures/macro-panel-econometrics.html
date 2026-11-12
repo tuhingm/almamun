@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0033A0">
+<title>Supplementary Lecture: Macroeconomic Panel Econometrics | Tuhin G. M. Al Mamun</title>
+<meta name="description" content="Graduate lecture on cross-sectional dependence, slope heterogeneity, panel unit roots, cointegration, Mean Group, CCE, AMG, PMG and CS-ARDL.">
+<link rel="canonical" href="https://tuhingm.github.io/almamun/panel-data-guide/lectures/macro-panel-econometrics.html">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags:'ams'}};</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<style>
+:root{--blue:#0033a0;--deep:#00205b;--ink:#17233b;--muted:#596780;--paper:#f3f6fb;--line:#dbe3ef;--sky:#6ec1e4}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.78 "DM Sans",sans-serif}a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}.wrap{width:min(1050px,calc(100% - 38px));margin:auto}
+header{background:var(--blue);color:#fff}.nav{min-height:66px;display:flex;align-items:center;justify-content:space-between;gap:15px}.brand{font:800 15px Manrope;color:white}.brand b{color:var(--sky)}nav{display:flex;gap:18px;flex-wrap:wrap;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}nav a{color:#e6eefb}
+.hero{background:radial-gradient(circle at 85% 12%,#6ec1e444,transparent 28%),linear-gradient(120deg,var(--blue),var(--deep));color:#fff;padding:46px 0}.eyebrow{font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#9fdaf2}h1{font:800 clamp(32px,5vw,48px)/1.12 Manrope;letter-spacing:-1.3px;margin:10px 0}.lead{max-width:800px;color:#d5e1f3;margin:0}.meta{display:flex;gap:18px;flex-wrap:wrap;margin-top:18px;font-size:11px;color:#d4e0f2}
+main{padding:30px 0 70px}.layout{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:18px;align-items:start}.article,.sidecard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:24px;box-shadow:0 6px 20px #00205b0a}.article h2{font:800 23px Manrope;letter-spacing:-.4px;margin:30px 0 10px;padding-bottom:8px;border-bottom:1px solid #e7edf5}.article h2:first-child{margin-top:0}.article h3{font:800 16px Manrope;margin:20px 0 6px}.article p,.article li{font-size:13px;color:#45536c}.article ul,.article ol{padding-left:21px}.article li{margin:5px 0}.equation{overflow-x:auto;background:#f7f9fd;border:1px solid #e3eaf4;border-radius:9px;padding:13px 16px;margin:12px 0}.definition{border-left:3px solid var(--blue);background:#f5f8fd;padding:12px 16px;margin:14px 0;font-size:12px;color:#44536b}.tablewrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:11px;margin:12px 0}th,td{padding:9px 10px;border-bottom:1px solid #e5ebf4;text-align:left;vertical-align:top}th{background:#f4f7fc;color:#53617a;font-size:9px;text-transform:uppercase;letter-spacing:.08em}pre{overflow:auto;background:#111c36;color:#e3ebfa;padding:15px;border-radius:9px;font:11px/1.65 ui-monospace,Consolas,monospace}.sidecard{position:sticky;top:14px;padding:18px}.sidecard b{font:800 12px Manrope}.sidecard a{display:block;font-size:11px;margin:8px 0}.btn{display:inline-block;border-radius:7px;background:var(--blue);color:#fff;padding:9px 13px;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.btn:hover{color:#fff;text-decoration:none;background:var(--deep)}footer{background:var(--deep);color:#c5d2e7;padding:20px 0;font-size:10px}
+@media(max-width:800px){.layout{grid-template-columns:1fr}.sidecard{position:static;order:-1}.article,.sidecard{padding:18px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav"><a class="brand" href="../../index.html">TGM <b>AL MAMUN</b></a><nav><a href="../index.html">Panel-Data Guide</a><a href="../../research-guide/index.html">Time-Series Guide</a><a href="../../teaching/econometrics/lecture-notes.html">Econometrics Lectures</a></nav></div></header>
+<section class="hero"><div class="wrap"><div class="eyebrow">Supplementary graduate lecture · Macroeconomic panels</div><h1>Cross-Sectional Dependence, Heterogeneity and Long-Run Panel Models</h1><p class="lead">A methodological lecture for country-year and other macro panels. It develops the common-factor structure, dependence and heterogeneity diagnostics, second-generation unit-root testing, panel cointegration, and heterogeneous long-run estimators.</p><div class="meta"><span>Panel asymptotics</span><span>CCE · AMG · PMG · CS-ARDL</span><span>Stata computational workflow</span></div></div></section>
+<main class="wrap"><div class="layout">
+<article class="article">
+<h2 id="framework">1. Panel structure and the common-factor problem</h2>
+<p>Let \(i=1,\ldots,N\) index countries or other macro units and \(t=1,\ldots,T\) index time. A heterogeneous panel regression is</p>
+<div class="equation">\[y_{it}=\alpha_i+\boldsymbol{\beta}_i'\mathbf{x}_{it}+\boldsymbol{\lambda}_i'\mathbf{f}_t+\varepsilon_{it},\]</div>
+<p>where \(\alpha_i\) is a unit-specific intercept, \(\boldsymbol{\beta}_i\) is a potentially heterogeneous slope vector, \(\mathbf{f}_t\) is a vector of unobserved common factors, and \(\boldsymbol{\lambda}_i\) contains unit-specific factor loadings. Global interest rates, commodity prices, financial conditions, technology and common policy shocks can induce dependence across countries even after observed controls are included.</p>
+<div class="definition"><b>Core distinction.</b> Cross-sectional dependence concerns dependence across \(i\) at a given time; slope heterogeneity concerns variation in \(\boldsymbol{\beta}_i\). They are different features and require different diagnostics and estimator responses.</div>
+<p>For macro panels, asymptotics often require both \(N\) and \(T\) to be sufficiently informative. A large-\(N\), short-\(T\) micro-panel design is not interchangeable with a country panel having moderate or large \(T\).</p>
+
+<h2 id="dependence">2. Cross-sectional dependence</h2>
+<p>After a baseline model is estimated, let \(\widehat{\rho}_{ij}\) be the pairwise correlation between residuals for units \(i\) and \(j\). Pesaran's CD statistic is based on</p>
+<div class="equation">\[CD=\sqrt{\frac{2T}{N(N-1)}}\sum_{i=1}^{N-1}\sum_{j=i+1}^{N}\widehat{\rho}_{ij}.\]</div>
+<p>The null is cross-sectional independence. Rejection indicates that conventional first-generation panel procedures relying on cross-sectional independence may not be appropriate without adjustment. The test should be considered alongside the economic structure of common shocks and residual diagnostics.</p>
+<p><b>Implementation:</b> Stata's <code>xtcd2</code> is distributed with <code>xtdcce2</code>. Run it on the variables or, more importantly, on residuals from a defensible baseline model.</p>
+
+<h2 id="heterogeneity">3. Slope heterogeneity</h2>
+<p>In a homogeneous specification, \(\boldsymbol{\beta}_i=\boldsymbol{\beta}\) for all \(i\). The Pesaran–Yamagata delta test assesses this restriction using dispersion in unit-specific slope estimates relative to a pooled estimate. The economic question is whether a common response is credible across countries with different institutions, production structures, energy mixes and policy regimes.</p>
+<ul><li>If homogeneity is defensible, pooled estimators may gain precision.</li><li>If slopes differ, Mean Group or CCE-MG/AMG estimators allow unit-specific slopes.</li><li>PMG imposes a common long-run coefficient vector but allows short-run coefficients and adjustment speeds to vary.</li></ul>
+
+<h2 id="unitroots">4. Panel unit roots: first versus second generation</h2>
+<div class="tablewrap"><table><thead><tr><th>Family</th><th>Examples</th><th>Key maintained structure</th></tr></thead><tbody>
+<tr><td>First generation</td><td>LLC, IPS, Fisher-ADF, Fisher-PP</td><td>Cross-sectional independence, or an adjustment that makes it credible.</td></tr>
+<tr><td>Second generation</td><td>CADF and CIPS</td><td>Cross-sectional averages proxy unobserved common factors.</td></tr>
+</tbody></table></div>
+<p>The cross-sectionally augmented Dickey–Fuller regression includes lagged levels and cross-sectional averages. The CIPS statistic is the cross-sectional average of individual CADF statistics:</p>
+<div class="equation">\[CIPS=\frac{1}{N}\sum_{i=1}^{N}CADF_i.\]</div>
+<p>In Stata, <code>xtcips</code> implements the Pesaran CIPS test and requires a balanced panel. Deterministic terms (intercept or trend), lag selection and sample comparability must be specified and reported. A test result should not be treated as an integration-order label independent of those choices.</p>
+
+<h2 id="cointegration">5. Panel cointegration</h2>
+<p>Cointegration is considered when variables are appropriately established as I(1) and theory supports a long-run equilibrium relation. Residual-based tests include Pedroni and Kao. Westerlund's error-correction tests ask whether deviations from long-run equilibrium generate adjustment.</p>
+<div class="equation">\[\Delta y_{it}=\alpha_i+\phi_i\big(y_{i,t-1}-\boldsymbol{\theta}_i'\mathbf{x}_{i,t-1}\big)+\sum_j\psi_{ij}\Delta y_{i,t-j}+\sum_j\boldsymbol{\delta}_{ij}'\Delta\mathbf{x}_{i,t-j}+\varepsilon_{it}.\]</div>
+<p>The null in the Westerlund error-correction framework is no error correction (no cointegration); the alternative can allow adjustment in some or all panel members depending on the statistic. When cross-sectional dependence is material, bootstrap inference or a dependence-aware implementation is important. Cointegration tests do not by themselves establish a common long-run coefficient vector.</p>
+
+<h2 id="estimators">6. Estimator families</h2>
+<h3>6.1 Mean Group (MG)</h3>
+<p>Estimate a separate time-series regression for each unit and average the coefficients:</p>
+<div class="equation">\[\widehat{\boldsymbol{\beta}}_{MG}=\frac{1}{N}\sum_{i=1}^{N}\widehat{\boldsymbol{\beta}}_i.\]</div>
+<p>MG allows slope heterogeneity but does not automatically remove bias from unobserved common factors. It is a useful heterogeneous benchmark when each unit has enough time observations.</p>
+<h3>6.2 Common Correlated Effects (CCE / CCEMG)</h3>
+<p>CCE augments unit-specific regressions with cross-sectional averages of the dependent and explanatory variables, and where needed their lags. These averages proxy the unobserved common factors. CCEMG averages the unit-specific CCE slope estimates. The rank condition and the number of cross-sectional averages relative to the factor structure matter.</p>
+<h3>6.3 Augmented Mean Group (AMG)</h3>
+<p>AMG estimates a common dynamic process from a pooled first-difference model with time effects, then includes that process in unit-specific regressions. It allows heterogeneous slopes while controlling for an estimated common dynamic component.</p>
+<h3>6.4 Pooled Mean Group (PMG)</h3>
+<p>For an error-correction representation, PMG constrains the long-run vector to be common, while allowing short-run coefficients, intercepts, variances and adjustment speeds to differ:</p>
+<div class="equation">\[\Delta y_{it}=\phi_i\big(y_{i,t-1}-\boldsymbol{\theta}'\mathbf{x}_{i,t-1}\big)+\sum_{j=1}^{p_i-1}\psi_{ij}\Delta y_{i,t-j}+\sum_{j=0}^{q_i-1}\boldsymbol{\delta}_{ij}'\Delta\mathbf{x}_{i,t-j}+\mu_i+\varepsilon_{it}.\]</div>
+<p>The long-run restriction \(\boldsymbol{\theta}_i=\boldsymbol{\theta}\) is substantive. Compare PMG with MG and dependence-aware estimators; do not select PMG solely because it produces a smaller standard error.</p>
+<h3>6.5 CS-ARDL</h3>
+<p>CS-ARDL augments a dynamic heterogeneous ARDL with current and lagged cross-sectional averages. Unit-specific long-run effects can be formed from the distributed-lag coefficients and then averaged. This combines dynamic adjustment with a proxy for unobserved common factors.</p>
+
+<h2 id="workflow">7. Empirical workflow</h2>
+<ol><li>Describe \(N\), \(T\), balancedness, missingness, frequency and the economic comparability of units.</li><li>Estimate transparent baseline FE/RE specifications and inspect residual dependence.</li><li>Test cross-sectional dependence and slope homogeneity.</li><li>Choose first- or second-generation unit-root procedures accordingly; specify intercepts, trends and lags.</li><li>Test cointegration only when the integration orders and theoretical relation warrant it.</li><li>Compare MG, CCE-MG, AMG, PMG and CS-ARDL under explicit restrictions.</li><li>Report residual dependence, serial correlation, adjustment coefficients, lag sensitivity, sample sensitivity and long-run coefficient comparisons.</li></ol>
+
+<h2 id="stata">8. Stata computational implementation</h2>
+<p>The downloadable do-file in the guide contains a complete workflow for baseline FE/RE/CRE, Pesaran CD, CIPS, Pedroni/Westerlund cointegration, PMG and CS-ARDL. Map the identifier, time and variable names at the top of the script.</p>
+<pre>xtset country_id year
+
+* Cross-sectional dependence
+xtcd2 ln_gdp
+
+* CIPS (balanced panel)
+xtcips ln_gdp, maxlags(2) bglags(1)
+
+* Cointegration after establishing I(1) properties
+xtcointtest pedroni ln_gdp ln_energy ln_co2
+xtcointtest westerlund ln_gdp ln_energy ln_co2, demean
+
+* PMG: common long-run vector
+xtpmg D.ln_gdp D.ln_energy D.ln_co2, ///
+    lr(L.ln_gdp ln_energy ln_co2) ec(ec) replace pmg
+
+* CS-ARDL with cross-sectional averages
+xtdcce2 D.ln_gdp ln_energy ln_co2 D.(ln_energy ln_co2), ///
+    crosssectional(D.ln_gdp D.ln_energy D.ln_co2) ///
+    cr_lags(0 3 3) ///
+    lr(L.ln_gdp ln_energy ln_co2) lr_options(ardl)</pre>
+<div class="definition"><b>Implementation discipline.</b> The commands above are templates, not a universal sequence. Check panel balance for CIPS, choose deterministic components and lag orders, and confirm that the long-run estimator's restrictions match the research design. See the Stata do-file for package installation and full workflow.</div>
+<p><a class="btn" href="../implementations/macro_panel_workflow.do" download>Download macro-panel Stata implementation</a></p>
+
+<h2 id="problems">9. Problem set</h2>
+<ol><li>Write a factor-augmented panel regression and explain how omitted common factors can generate cross-sectional dependence and bias pooled estimates.</li><li>Explain why rejection of cross-sectional independence changes the choice between first- and second-generation panel unit-root tests.</li><li>State the restriction that distinguishes PMG from MG. Give an economic setting where a common long-run elasticity is plausible and one where it is not.</li><li>Explain why a significant Westerlund statistic does not establish that all countries share the same long-run coefficient vector.</li><li>Compare CCEMG and AMG in terms of how each proxies unobserved common factors.</li></ol>
+
+<h2 id="reading">10. Core readings</h2>
+<ul><li>Pesaran, M. H. (2006). Estimation and inference in large heterogeneous panels with a multifactor error structure. <i>Econometrica</i>, 74(4), 967–1012.</li><li>Pesaran, M. H. (2007). A simple panel unit root test in the presence of cross-section dependence. <i>Journal of Applied Econometrics</i>, 22(2), 265–312.</li><li>Pesaran, M. H., & Smith, R. (1995). Estimating long-run relationships from dynamic heterogeneous panels. <i>Journal of Econometrics</i>, 68(1), 79–113.</li><li>Pesaran, M. H., Shin, Y., & Smith, R. P. (1999). Pooled mean group estimation of dynamic heterogeneous panels. <i>Journal of the American Statistical Association</i>, 94(446), 621–634.</li><li>Westerlund, J. (2007). Testing for error correction in panel data. <i>Oxford Bulletin of Economics and Statistics</i>, 69(6), 709–748.</li><li>Chudik, A., & Pesaran, M. H. (2015). Common correlated effects estimation of heterogeneous dynamic panel data models with weakly exogenous regressors. <i>Journal of Econometrics</i>, 188(2), 393–420.</li><li>Ditzen, J. (2018). Estimating dynamic common-correlated effects in Stata. <i>Stata Journal</i>, 18(3), 585–617.</li></ul>
+</article>
+<aside class="sidecard"><b>Lecture contents</b><a href="#framework">1. Common-factor framework</a><a href="#dependence">2. Cross-sectional dependence</a><a href="#heterogeneity">3. Slope heterogeneity</a><a href="#unitroots">4. Panel unit roots</a><a href="#cointegration">5. Cointegration</a><a href="#estimators">6. Estimator families</a><a href="#workflow">7. Empirical workflow</a><a href="#stata">8. Stata implementation</a><a href="#problems">9. Problem set</a><a href="#reading">10. Readings</a><hr><a class="btn" href="../index.html">Return to Panel Data Guide</a></aside>
+</div></main>
+<footer><div class="wrap">Tuhin G. M. Al Mamun · Supplementary Lecture in Macroeconomic Panel Econometrics</div></footer>
+</body></html>
