@@ -1,0 +1,53 @@
+<section class="resources" id="lectures">
+<div class="resource-head"><div><div class="eyebrow">Lecture notes and computational labs</div><h2>Study the theory, then reproduce the results</h2></div><p>These are the existing graduate Econometrics lectures on your website. The panel guide now connects directly to their derivations, worked examples, problem sets and computational labs.</p></div>
+<div class="resource-grid">
+<article class="resource"><span class="badge">Lecture 07 · Static panels</span><h3>Panel Data: Fixed Effects, Random Effects, and Correlated Effects</h3><p>Full mathematical lecture with the unobserved-effects model, within and first-difference estimators, RE quasi-demeaning, Mundlak correlated effects, robust Hausman testing, clustered inference and TWFE limitations.</p><ul><li>Worked examples: union wage premium and North Carolina crime deterrence.</li><li>Problem set with solutions and a Monte Carlo lab comparing pooled OLS, FE, FD and Mundlak.</li><li>Real-data coding exercises using Wooldridge's <code>wagepan</code> and <code>crime4</code>.</li></ul><div class="links"><a class="primary" href="../teaching/econometrics/lectures/07-panel-data.html">Open full Lecture 07</a><a href="../teaching/econometrics/lecture-notes.html">All Econometrics Lectures</a></div></article>
+<article class="resource"><span class="badge">Lecture 08 · Dynamic panels</span><h3>Dynamic Panels, Difference GMM, and System GMM</h3><p>Nickell bias, sequential exogeneity, Anderson–Hsiao IV, Arellano–Bond difference GMM, Blundell–Bond system GMM, moment conditions and efficient weighting.</p><ul><li>Worked examples: wage persistence and Grunfeld investment.</li><li>Problem set and computational lab comparing pooled OLS, FE and Anderson–Hsiao IV.</li><li>Diagnostics: AR(1), AR(2), Hansen/Sargan, difference-in-Hansen and instrument proliferation.</li></ul><div class="links"><a class="primary" href="../teaching/econometrics/lectures/08-dynamic-panels.html">Open full Lecture 08</a><a href="../teaching/econometrics/lecture-notes.html">All Econometrics Lectures</a></div></article>
+<article class="resource"><span class="badge">Supplementary lecture · Macro panels</span><h3>Cross-Sectional Dependence, Heterogeneity and Long-Run Panel Models</h3><p>Dedicated macro-panel lecture covering common-factor structures, Pesaran CD, slope heterogeneity, CIPS/CADF, panel cointegration, MG, CCE/CCEMG, AMG, PMG and CS-ARDL.</p><ul><li>Formal model equations and estimator restrictions.</li><li>Empirical workflow and Stata implementation commands.</li><li>Problem set and core readings.</li></ul><div class="links"><a class="primary" href="lectures/macro-panel-econometrics.html">Open macro-panel lecture</a><a href="implementations/macro_panel_workflow.do" download>Download Stata workflow</a></div></article>
+</div>
+</section>
+<section class="resources" id="implementations">
+<div class="resource-head"><div><div class="eyebrow">Reproducible implementations</div><h2>Download the code and run the models</h2></div><p>Complete scripts are available in Python and Stata. The Python exercises use the same named datasets and estimator workflows as the lecture notes; the Stata workflows extend the macro and micro panel pathways.</p></div>
+<div class="resource-grid">
+<article class="resource"><span class="badge">Python · Static panel</span><h3>Pooled OLS, RE, FE, FD and Mundlak</h3><p>Runs the <code>wagepan</code> and <code>crime4</code> empirical exercises. Reports the union coefficient and entity-clustered standard errors, performs a joint Mundlak test, and compares deterrence elasticities under pooled OLS and two-way FE.</p><ul><li>Packages: <code>wooldridge</code>, <code>pandas</code>, <code>statsmodels</code>, <code>linearmodels</code>.</li><li>Data are loaded from the Wooldridge dataset package.</li></ul><details class="codebox"><summary>View installation and execution</summary><pre>python -m pip install wooldridge pandas statsmodels linearmodels
+python panel_static_models.py
+
+from linearmodels.panel import PanelOLS, RandomEffects
+import wooldridge as wd
+panel = wd.data("wagepan").set_index(["nr", "year"])
+fe = PanelOLS.from_formula(
+    "lwage ~ union + married + expersq + TimeEffects + EntityEffects",
+    data=panel
+).fit(cov_type="clustered", cluster_entity=True)
+re = RandomEffects.from_formula(
+    "lwage ~ 1 + union + married + expersq", data=panel
+).fit(cov_type="clustered", cluster_entity=True)
+print(fe.summary)
+print(re.summary)</pre></details><div class="links"><a class="primary" href="implementations/panel_static_models.py" download>Download Python implementation</a><a href="../teaching/econometrics/lectures/07-panel-data.html">Lecture and output</a></div></article>
+<article class="resource"><span class="badge">Python · Dynamic panel</span><h3>Nickell bias and Anderson–Hsiao IV</h3><p>Reproduces the wage persistence exercise using pooled OLS, fixed effects and first-differenced 2SLS. The instrument for the differenced lagged outcome is the second lag of the level outcome.</p><ul><li>Reports pooled OLS, FE and Anderson–Hsiao estimates.</li><li>Computes the first-stage clustered t-squared and a descriptive lag-2 residual check.</li><li>Explicitly distinguishes Anderson–Hsiao IV from Arellano–Bond/System GMM.</li></ul><details class="codebox"><summary>View installation and execution</summary><pre>python -m pip install wooldridge pandas numpy statsmodels linearmodels
+python dynamic_panel_models.py
+
+from linearmodels.iv import IV2SLS
+# dy = Delta(y_it); dyl1 = Delta(y_i,t-1); y_l2 = y_i,t-2
+ah = IV2SLS.from_formula(
+    "dy ~ 1 + dunion + C(year) + [dyl1 ~ y_l2]",
+    data=iv_sample
+).fit(cov_type="clustered", clusters=iv_sample["nr"])
+print(ah.summary)</pre></details><div class="links"><a class="primary" href="implementations/dynamic_panel_models.py" download>Download Python implementation</a><a href="../teaching/econometrics/lectures/08-dynamic-panels.html">Lecture and output</a></div></article>
+<article class="resource"><span class="badge">Stata · Micro panel</span><h3>FE, RE, Mundlak and dynamic GMM</h3><p>Runnable workflow template for static panel specification and dynamic panel GMM. Maps entity, time, outcome and regressors at the top of the file.</p><ul><li><code>xtreg</code> FE/RE, <code>xttest0</code> and Mundlak joint test.</li><li><code>xtabond2</code> difference GMM and system GMM with collapsed, lag-limited instruments.</li><li>Reports AR(1), AR(2), Hansen/Sargan and instrument-count diagnostics through xtabond2.</li></ul><div class="links"><a class="primary" href="implementations/micro_panel_workflow.do" download>Download Stata do-file</a><a href="../teaching/econometrics/lectures/07-panel-data.html">Static panel lecture</a><a href="../teaching/econometrics/lectures/08-dynamic-panels.html">Dynamic panel lecture</a></div></article>
+<article class="resource"><span class="badge">Stata · Macro panel</span><h3>CD, CIPS, cointegration, PMG and CS-ARDL</h3><p>Macro panel workflow for common shocks, heterogeneous dynamics and long-run relationships. Maps country, year, dependent variable and regressors at the top.</p><ul><li>Pesaran CD, CIPS, Pedroni and Westerlund procedures.</li><li>PMG via <code>xtpmg</code>; MG, CCE and CS-ARDL via <code>xtdcce2</code>.</li><li>Includes package installation notes and a comparison workflow.</li></ul><details class="codebox"><summary>View required Stata packages</summary><pre>ssc install xtdcce2
+ssc install xtcips
+ssc install xtwest
+ssc install xtpmg
+ssc install xthst
+
+* Slope homogeneity
+xthst y x1 x2
+
+* CS-ARDL: cross-sectional averages and long-run vector
+xtdcce2 D.y x1 x2 D.(x1 x2), ///
+    crosssectional(D.y D.x1 D.x2) cr_lags(0 3 3) ///
+    lr(L.y x1 x2) lr_options(ardl)</pre></details><div class="links"><a class="primary" href="implementations/macro_panel_workflow.do" download>Download Stata do-file</a><a href="https://janditzen.github.io/xtdcce2/" target="_blank" rel="noopener">xtdcce2 documentation</a></div></article>
+</div>
+<div class="note"><b>Reproducibility note.</b> The two Python scripts follow the datasets and coding exercises in Lectures 7 and 8. The Stata files are reusable workflows requiring the researcher to map their own variable names and verify the relevant assumptions. The macro-panel do-file calls community-contributed Stata commands; package installation and command availability depend on the installed Stata version.</div>
+</section>
