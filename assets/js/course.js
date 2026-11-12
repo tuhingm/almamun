@@ -57,7 +57,7 @@
     var li = document.createElement('li');
     var a = document.createElement('a');
     a.href = '#' + h.id;
-    a.textContent = h.textContent.replace(/^\\d+\\.\\s*/, '');
+    a.textContent = h.textContent.replace(/^\d+\.\s*/, '');
     li.appendChild(a);
     toc.appendChild(li);
   });
