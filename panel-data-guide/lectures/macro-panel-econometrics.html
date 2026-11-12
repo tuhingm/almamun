@@ -79,6 +79,9 @@ main{padding:30px 0 70px}.layout{display:grid;grid-template-columns:minmax(0,1fr
 <p>The downloadable do-file in the guide contains a complete workflow for baseline FE/RE/CRE, Pesaran CD, CIPS, Pedroni/Westerlund cointegration, PMG and CS-ARDL. Map the identifier, time and variable names at the top of the script.</p>
 <pre>xtset country_id year
 
+* Slope homogeneity
+xthst ln_gdp ln_energy ln_co2
+
 * Cross-sectional dependence
 xtcd2 ln_gdp
 
