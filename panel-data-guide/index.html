@@ -88,7 +88,7 @@ footer{background:var(--navy2);color:#c3d0e4;padding:22px 0;font-size:10px}.foot
 </head>
 <body>
 <header><div class="wrap nav"><a class="brand" href="../index.html">TGM <b>AL MAMUN</b></a><nav aria-label="Main navigation"><a href="../index.html">Home</a><a href="../teaching/index.html">Teaching Courses</a><a href="../working-papers/index.html">Working Papers</a><a href="../research-guide/index.html">Time-Series Guide</a><a href="../panel-data-guide/index.html" class="current" aria-current="page">Panel-Data Guide</a><a href="../causal-inference-guide/index.html">Causal Inference</a><a href="../dsge-guide/index.html">DSGE Guide</a><a href="../Tuhin%20Al%20Mamun_CV.pdf">CV</a></nav></div></header>
-<section class="hero"><div class="wrap"><div class="kicker">Empirical Research Guide · Panel Econometrics</div><h1>Which panel model fits your data?</h1><p class="lead">The right panel estimator depends on the properties of your panel, not on preference. Test a real dataset, upload your own, or enter your test results, and follow the path to the estimator your paper needs.</p><div class="meta"><span><strong>10</strong> estimator routes</span><span><strong>6</strong> real example panels</span><span>Python · statsmodels</span></div></div></section>
+<section class="hero"><div class="wrap"><div class="kicker">Empirical Research Guide · Panel Econometrics</div><h1>Which panel model fits your data?</h1><p class="lead">The right panel estimator depends on the properties of your panel, not on preference. Test a real dataset, upload your own, or enter your test results, and follow the path to the estimator your paper needs.</p><div class="meta"><span><strong>9</strong> estimator guides</span><span><strong>6</strong> real example panels</span><span>Python · statsmodels</span></div></div></section>
 <main class="wrap">
 <div class="modes" role="group" aria-label="Choose how to start">
 <button type="button" data-mode="example" aria-pressed="true"><b>Try a real example</b><span>See the full sequence on real data</span></button>
@@ -120,7 +120,7 @@ footer{background:var(--navy2);color:#c3d0e4;padding:22px 0;font-size:10px}.foot
 </div>
 <div id="result"></div>
 
-<section class="guides" id="guides"><div class="guides-head"><div><div class="label">Estimator guides</div><h2>Ten routes to a finished paper</h2></div><p>Each route lists what the paper needs to report, with links to the full lectures, derivations and computational labs.</p></div>
+<section class="guides" id="guides"><div class="guides-head"><div><div class="label">Estimator guides</div><h2>Nine routes to a finished paper</h2></div><p>Each guide takes one real panel through estimation, diagnostic tests and writing, with Python code, real output and sample text for the paper.</p></div>
 <div class="gcards" id="gcards"></div>
 <div class="gcards extra">
 <article class="gcard"><span class="tag">Design-based</span><h3>DiD and event studies</h3><p class="when">Treatment timing and a comparison group</p><p>Define treatment and timing · parallel trends and anticipation · staggered adoption needs heterogeneity-robust estimators · cluster at the assignment level …</p><a href="../causal-inference-guide/index.html">Open the Causal Inference Guide →</a></article>
@@ -821,6 +821,7 @@ const EXAMPLES=[{"key":"wagepan","title":"Union wage premium","meta":"Workers ×
 const LONGT=15;
 const PYO='https://cdn.jsdelivr.net/pyodide/v0.27.2/full/';
 const L='../teaching/econometrics/lectures/', ML='lectures/macro-panel-econometrics.html';
+const GUIDE={POLS:'pols',RE:'re',FE:'fe',GMM:'gmm',FEDK:'fedk',MG:'mg',DIFF:'diff',PMG:'pmg',CSARDL:'csardl'};
 const LEC={st:[L+'07-panel-data.html','Lecture 07: Static panels'],dy:[L+'08-dynamic-panels.html','Lecture 08: Dynamic panels'],mp:[ML,'Macro-panel lecture'],ur:[L+'10-unit-roots-breaks.html','Lecture: Unit roots'],co:[L+'12-cointegration-ardl.html','Lecture: Cointegration and ARDL']};
 const MODELS={
  POLS:{name:'Pooled OLS with clustered errors',short:'Pooled OLS',when:'Short panel, no significant unit effects',why:'Neither the F test nor the Breusch–Pagan LM test finds unit-specific effects, so pooling the observations is defensible. Standard errors must still be clustered by unit, because observations on the same unit are not independent.',steps:['Pooled OLS with time effects','Cluster standard errors by unit','F test for unit effects','Breusch–Pagan LM test','Wooldridge test for serial correlation','Robustness: FE estimates'],lec:[LEC.st]},
@@ -972,7 +973,7 @@ function cautionFor(R,m){if(!R)return '';const c=[];
  return c.length?`<div class="caution"><b>Mixed or limited evidence.</b> ${c.join(' ')}</div>`:''}
 function finish(m,R,alt){const my=run,M=MODELS[m];if(m==='I2')return i2card(R);const d=light(pathTo(m,R));if(alt){const a=$('#n-'+alt);a&&a.classList.add('alt')}
  setTimeout(()=>{if(my!==run)return;const ev=evidence(R,m);
-  $('#result').innerHTML=`<div class="result"><div class="label">Recommended estimator</div><h2>${M.name}</h2><p>${M.why}${ev?' <b>In this data:</b> '+ev:''}</p>${cautionFor(R,m)}<div class="label" style="margin-bottom:6px">What the paper needs</div><ul>${M.steps.map(s=>`<li>${s}</li>`).join('')}</ul><div class="acts">${M.lec.map((l,i)=>`<a class="btn${i?' ghost':''}" href="${l[0]}">${l[1]} →</a>`).join('')}${alt?`<a class="btn ghost" href="#g-${alt}" data-go="${alt}">Benchmark: ${MODELS[alt].short}</a>`:''}${R?'':'<button class="btn ghost" type="button" id="again">Start over</button>'}</div>${R?'<p style="font-size:11.5px;margin:14px 0 0;color:#c5d4ea">A policy change with treated and untreated units? Then see the Causal Inference Guide for difference-in-differences.</p>':''}</div>`;
+  $('#result').innerHTML=`<div class="result"><div class="label">Recommended estimator</div><h2>${M.name}</h2><p>${M.why}${ev?' <b>In this data:</b> '+ev:''}</p>${cautionFor(R,m)}<div class="label" style="margin-bottom:6px">What the paper needs</div><ul>${M.steps.map(s=>`<li>${s}</li>`).join('')}</ul><div class="acts">${GUIDE[m]?`<a class="btn" href="${GUIDE[m]}.html">Go to the ${M.short} guide →</a>`:''}${M.lec.map(l=>`<a class="btn ghost" href="${l[0]}">${l[1]} →</a>`).join('')}${alt?`<a class="btn ghost" href="#g-${alt}" data-go="${alt}">Benchmark: ${MODELS[alt].short}</a>`:''}${R?'':'<button class="btn ghost" type="button" id="again">Start over</button>'}</div>${R?'<p style="font-size:11.5px;margin:14px 0 0;color:#c5d4ea">A policy change with treated and untreated units? Then see the Causal Inference Guide for difference-in-differences.</p>':''}</div>`;
   $('#result').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});const ag=$('#again');ag&&ag.addEventListener('click',()=>setMode('ask'))},d+250*D)}
 function i2card(R){const my=run,d=light(pathTo('I2',R));const bad=R?R.unitroot.filter(u=>u.order>=2).map(u=>u.var):[];
  setTimeout(()=>{if(my!==run)return;
@@ -1015,7 +1016,7 @@ function ask(id,n=1){const Q=QS[id];$('#q').innerHTML=`<div class="label">Questi
   if(QS[to]){o[3]&&light(o[3]);ask(to,n+1)}else{$('#q').innerHTML='<p class="sub" style="margin:0">Your answers lead to the estimator shown below.</p>';finish(to,null,to==='CSARDL'?'PMG':to==='PMG'?'CSARDL':to==='GMM'?'FE':null)}}))}
 
 /* ---------- guides, modes, init ---------- */
-function initGuides(){Object.entries(MODELS).filter(([k])=>k!=='I2').forEach(([k,M])=>{$('#gcards').appendChild(el('article','gcard',`<span class="tag ok">${['POLS','RE','FE','GMM'].includes(k)?'Short panel':'Long panel'}</span><h3>${M.short}</h3><p class="when">${M.when}</p><p>${M.steps.slice(0,5).join(' · ')} …</p>${M.lec.map(l=>`<a href="${l[0]}">${l[1]} →</a>`).join('')}`)).id='g-'+k})}
+function initGuides(){Object.entries(MODELS).filter(([k])=>k!=='I2').forEach(([k,M])=>{$('#gcards').appendChild(el('article','gcard',`<span class="tag ok">Step-by-step guide</span><h3>${M.short}</h3><p class="when">${M.when}</p><p>${M.steps.slice(0,5).join(' · ')} …</p><a href="${GUIDE[k]}.html" style="font-size:12.5px">Open the ${M.short} guide →</a>${M.lec.map(l=>`<a href="${l[0]}">${l[1]} →</a>`).join('')}`)).id='g-'+k})}
 document.addEventListener('click',e=>{const a=e.target.closest('[data-go]');if(!a)return;const c=$('#g-'+a.dataset.go);if(c){c.classList.remove('flash');void c.offsetWidth;c.classList.add('flash')}});
 function setMode(m){++run;QA={};document.querySelectorAll('.modes button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));['example','upload','ask'].forEach(x=>$('#m-'+x).hidden=x!==m);
  $('#steps').innerHTML='';$('#result').innerHTML='';$('#upload-err').innerHTML='';status('');resetTree();document.querySelectorAll('.ex button').forEach(e=>e.classList.remove('sel'));if(m==='ask'){light(['start']);ask('q1')}}
