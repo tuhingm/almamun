@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0033A0">
+<meta name="description" content="An interactive design-selection tool for causal inference in economics and finance: test your data and find out whether difference-in-differences, staggered DiD, generalized synthetic control, synthetic control, interrupted time series, regression discontinuity or instrumental variables fits.">
+<title>Causal Inference Research Guide | Tuhin G. M. Al Mamun</title>
+<link rel="canonical" href="https://tuhingm.github.io/almamun/causal-inference-guide/">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml"><link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/*TS_CSS*/
+/* causal-specific additions */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}.stat{background:#f8fafe;border:1px solid #e6ebf4;border-radius:9px;padding:9px 10px}.stat b{display:block;font:800 18px Manrope;color:var(--navy)}.stat span{font-size:10px;color:var(--muted)}
+.chart svg{display:block;width:100%;height:auto;background:#fbfcfe;border:1px solid #e6ebf4;border-radius:9px}.chart .ax{stroke:#c9d4e8;stroke-width:1}.chart .zero{stroke:#8793ab;stroke-width:1;stroke-dasharray:3 3}.chart .tv{stroke:#c46000;stroke-width:1.4;stroke-dasharray:5 4}
+.chart .s0{fill:none;stroke:var(--navy);stroke-width:2}.chart .s1{fill:none;stroke:#c46000;stroke-width:2;stroke-dasharray:6 4}.chart .s2{fill:none;stroke:#9aa9c4;stroke-width:1.6}
+.chart .pt{fill:var(--navy)}.chart .pt.pre{fill:#8793ab}.chart .ci{stroke:var(--navy);stroke-width:1.4}.chart .ci.pre{stroke:#8793ab}.chart .dot{fill:#0033a0aa}.chart .fit{stroke:#c46000;stroke-width:2.4}.chart .bar{fill:#0033a033}.chart text{font:600 10px "DM Sans",sans-serif;fill:#7f8aa1}
+.legend{font-size:10.5px;color:var(--muted);margin-top:4px}.legend i{display:inline-block;width:16px;height:3px;vertical-align:middle;margin:0 5px 0 10px;background:var(--navy)}.legend i.b{background:#c46000}.legend i.c{background:#9aa9c4}
+.roles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}.roles label{display:flex;flex-direction:column;gap:4px;font-size:11px;font-weight:700;color:var(--muted)}.roles select,.roles input{font:500 13px "DM Sans",sans-serif;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}.roles select[multiple]{height:84px}.roles .full{grid-column:1/-1}.roles small{font-weight:500}
+.nt{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.nt label{display:flex;flex-direction:column;gap:5px;font-size:11px;font-weight:700;color:var(--muted);flex:1 1 150px}.nt input{font:600 15px 'DM Sans',sans-serif;padding:10px 12px;border:1px solid var(--line);border-radius:9px;color:var(--ink);background:#fff}
+.tree .el{font-size:10.5px}.tree .n text{font-size:12.5px}.tree .n.leaf text{font-size:13px}
+.gcards.extra{margin-top:14px}
+@media(max-width:650px){.stats{grid-template-columns:repeat(2,1fr)}.roles{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav"><a class="brand" href="../index.html">TGM <b>AL MAMUN</b></a><nav aria-label="Main navigation"><a href="../index.html">Home</a><a href="../teaching/index.html">Teaching Courses</a><a href="../working-papers/index.html">Working Papers</a><a href="../research-guide/index.html">Time-Series Guide</a><a href="../panel-data-guide/index.html">Panel-Data Guide</a><a href="../causal-inference-guide/index.html" class="current" aria-current="page">Causal Inference</a><a href="../dsge-guide/index.html">DSGE Guide</a><a href="../Tuhin%20Al%20Mamun_CV.pdf">CV</a></nav></div></header>
+<section class="hero"><div class="wrap"><div class="kicker">Empirical Research Guide · Causal Inference</div><h1>Which causal design fits your data?</h1><p class="lead">A causal estimate is only as good as its source of variation. Test a real dataset, upload your own, or enter what you know about your design, and follow the path to the method your paper needs, with the diagnostics a referee will ask for.</p><div class="meta"><span><strong>7</strong> design guides</span><span><strong>7</strong> real example datasets</span><span>Python · statsmodels</span></div></div></section>
+<main class="wrap">
+<div class="modes" role="group" aria-label="Choose how to start">
+<button type="button" data-mode="example" aria-pressed="true"><b>Try a real example</b><span>See the full sequence on real data</span></button>
+<button type="button" data-mode="upload" aria-pressed="false"><b>Use my own data</b><span>Upload a CSV; checks run in your browser</span></button>
+<button type="button" data-mode="ask" aria-pressed="false"><b>I know my design</b><span>Answer a few questions</span></button>
+</div>
+<div class="grid">
+<section class="panel" id="work" aria-live="polite">
+ <div id="m-example">
+  <h2>Choose a dataset</h2><p class="sub">Seven real datasets from well-known studies. Each one leads to a different design.</p>
+  <div class="ex" id="ex"></div>
+ </div>
+ <div id="m-upload" hidden>
+  <h2>Upload your data</h2><p class="sub">A CSV with one row per observation (for a panel, one row per unit and period). After loading, tell the tool which column plays which role.</p>
+  <div class="drop" id="drop"><p style="margin:0 0 12px;font-size:13px">Drop a CSV file here, or</p><label class="btn">Choose file<input type="file" id="file" accept=".csv,text/csv,text/plain" hidden></label></div>
+  <div id="rolebox" hidden>
+   <div class="roles">
+    <label class="full">Outcome<select id="r-outcome"></select></label>
+    <label>Treatment<small>0/1 indicator, or the endogenous variable for IV</small><select id="r-treat"></select></label>
+    <label>Unit identifier<small>for panels (state, firm, person)</small><select id="r-unit"></select></label>
+    <label>Time variable<small>year, quarter, date</small><select id="r-time"></select></label>
+    <label>Running variable<small>for a cutoff design</small><select id="r-running"></select></label>
+    <label>Cutoff<small>value of the running variable</small><input id="r-cutoff" type="number" step="any" placeholder="e.g. 0"></label>
+    <label>Instrument(s)<small>for IV; Ctrl/⌘-click for several</small><select id="r-instruments" multiple></select></label>
+    <label class="full">Control variables (IV only, optional)<select id="r-controls" multiple></select></label>
+   </div>
+   <p class="hint">Which roles you fill decides the design family: a <b>running variable and cutoff</b> → regression discontinuity; an <b>instrument</b> → IV; a <b>treatment and time variable</b> (with or without units) → a design for a policy that starts at a point in time. The file is analysed on your own device and is not uploaded anywhere.</p>
+   <button class="btn" type="button" id="runUp" style="margin-top:12px">Run the analysis</button>
+  </div>
+  <p class="hint">Format examples: <a href="examples/castle.csv" download>castle.csv</a> (staggered policy), <a href="examples/close_elections.csv" download>close_elections.csv</a> (cutoff), <a href="examples/card.csv" download>card.csv</a> (instrument).</p>
+  <div class="status" id="status"><span class="spin"></span><span id="status-text"></span></div>
+  <div id="upload-err"></div>
+ </div>
+ <div id="m-ask" hidden>
+  <h2>Answer from what you know</h2><p class="sub">Use this if you know your design and have run the diagnostics. If you have not, choose “Use my own data” and the checks are run and explained for you.</p>
+  <div class="q" id="q"></div>
+ </div>
+ <div id="steps"></div>
+</section>
+<aside class="side">
+ <div class="panel tree"><div class="label">Decision path</div><p class="sub sub2" style="font-size:12px;color:var(--muted);margin:2px 0 8px">The path lights up as the evidence comes in.</p><div id="tree"></div><div class="trail" id="trail"></div></div>
+</aside>
+</div>
+<div id="result"></div>
+
+<section class="guides" id="guides"><div class="guides-head"><div><div class="label">Design guides</div><h2>Seven routes to a finished paper</h2></div><p>Each guide takes one real dataset through estimation, diagnostic tests and writing, with Python code, real output and sample text for the paper.</p></div>
+<div class="gcards" id="gcards"></div></section>
+<div class="note"><b>How the tool decides.</b> The design follows from the source of variation, which you declare through the column roles; the data then decide among the designs in that family. With a <b>running variable and a cutoff</b>, the tool estimates a local linear regression discontinuity with the Imbens–Kalyanaraman bandwidth and checks manipulation (McCrary density test), covariate continuity, placebo cutoffs and bandwidth sensitivity; if the treatment is not fully determined by the cutoff, the design is fuzzy. With an <b>instrument</b>, it compares OLS and 2SLS and reports the first-stage F statistic (below 10 signals a weak instrument), the weak-instrument-robust Anderson–Rubin test and an endogeneity test. With a <b>treatment that starts at a point in time</b>, the number of treated units decides: with #FEW# or fewer, a synthetic control if at least #DONORS# untreated units are available and an interrupted time series otherwise; with more, an event study tests for parallel pre-trends (leads −5 to −2, cluster bootstrap), sending designs that fail to generalized synthetic control, and the others to DiD (one adoption date) or a heterogeneity-robust staggered DiD (several dates). These rules organise the evidence; they do not establish identification, which rests on the argument for the source of variation.</div>
+</main>
+<footer><div class="wrap foot"><span><b>Tuhin G. M. Al Mamun, Ph.D.</b> · Causal Inference Research Guide</span><span><a href="../research-guide/index.html">Time-Series Guide</a> · <a href="../panel-data-guide/index.html">Panel-Data Guide</a> · © <span id="year"></span></span></div></footer>
+
+<script type="text/plain" id="py-src">#PYSRC#</script>
+<script>
+const EXAMPLES=/*EXAMPLES*/;
+const FEW=#FEW#, DONORS=#DONORS#;
+const PYO='https://cdn.jsdelivr.net/pyodide/v0.27.2/full/';
+const L='../teaching/econometrics/lectures/';
+const LEC={ci:[L+'13-causal-inference.html','Lecture 13: Causal inference'],iv:[L+'05-endogeneity-iv.html','Lecture 05: Endogeneity and IV'],pa:[L+'07-panel-data.html','Lecture 07: Panel data'],ur:[L+'10-unit-roots-breaks.html','Lecture 10: Breaks']};
+const GUIDE={DID:'did',STAG:'staggered',GSC:'gsc',SCM:'scm',ITS:'its',RDD:'rdd',IV:'iv'};
+const MODELS={
+ DID:{name:'Difference-in-differences',short:'DiD',when:'Many treated units, one adoption date',why:'Many units are treated at the same date and others never are, and the event study shows no differential trends before treatment. The untreated units’ change over time then estimates what would have happened to the treated units without treatment.',steps:['Define treated, control and the adoption date','Two-way fixed effects with clustered errors','Event study: leads and lags','Joint test of the pre-treatment coefficients','Placebo outcomes and dates','Sensitivity to violations of parallel trends'],lec:[LEC.ci,LEC.pa]},
+ STAG:{name:'Staggered difference-in-differences',short:'Staggered DiD',when:'Many treated units, several adoption dates',why:'Units adopt the policy at different dates. With effects that change over time or differ across cohorts, the conventional two-way fixed-effects estimate uses already-treated units as controls and can be badly biased. Heterogeneity-robust estimators (Callaway and Sant’Anna; Sun and Abraham; imputation) compare each cohort only with clean controls.',steps:['Adoption cohorts and clean controls','Group-time ATT(g, t)','Event-study aggregation','Pre-trend test on the leads','Compare with two-way fixed effects','Never-treated vs not-yet-treated controls'],lec:[LEC.ci]},
+ GSC:{name:'Generalized synthetic control',short:'GSC',when:'Many treated units, pre-trends not parallel',why:'The event study rejects parallel pre-trends, so plain DiD is not credible. Generalized synthetic control (Xu 2017) models the untreated outcome with unit and time effects plus latent factors with unit-specific loadings, which lets treated and control units follow different trends, and imputes each treated unit’s counterfactual.',steps:['Estimate factors on the control units','Choose the number of factors by cross-validation','Fit loadings on pre-treatment periods','Pre-treatment fit (placebo gaps)','ATT and dynamic effects with bootstrap errors','Compare with DiD and staggered DiD'],lec:[LEC.ci]},
+ SCM:{name:'Synthetic control',short:'Synthetic control',when:'One or a few treated units, many comparison units',why:'Only one or a few units are treated, so averaging over treated units is impossible and DiD inference fails. The synthetic control method builds a weighted combination of untreated units that reproduces the treated unit’s pre-treatment path, and uses it as the counterfactual.',steps:['Donor pool and pre-treatment period','Weights: nonnegative, summing to one','Pre-treatment fit (RMSPE)','Gap between actual and synthetic','Placebo-in-space permutation inference','Leave-one-out and in-time placebos'],lec:[LEC.ci]},
+ ITS:{name:'Interrupted time series',short:'ITS',when:'One treated series, no comparison units',why:'There is no untreated comparison group, so the counterfactual must come from the treated series’ own pre-treatment path. A segmented regression estimates the level and slope change at the intervention date, with seasonality and serial correlation handled explicitly.',steps:['Pre-treatment trend and seasonality','Level and slope change at the intervention','Newey–West standard errors','Residual autocorrelation','Placebo intervention dates','Rule out coinciding events'],lec:[LEC.ur,LEC.ci]},
+ RDD:{name:'Regression discontinuity',short:'RDD',when:'Treatment assigned by a cutoff',why:'Treatment is determined, fully or partly, by whether a running variable crosses a known cutoff. Units just above and just below the cutoff are comparable, so the jump in the outcome at the cutoff estimates the effect of treatment there.',steps:['Plot the data around the cutoff','Local linear estimate, data-driven bandwidth','McCrary density test (manipulation)','Covariate continuity','Bandwidth sensitivity and placebo cutoffs','Fuzzy design: first stage and local Wald'],lec:[LEC.ci]},
+ IV:{name:'Instrumental variables',short:'IV',when:'An instrument shifts the treatment',why:'The treatment is endogenous, but a variable that shifts it is available and, under the exclusion restriction, affects the outcome only through the treatment. Two-stage least squares uses only the variation in treatment driven by the instrument.',steps:['Argue relevance, exclusion and independence','First stage and its F statistic','2SLS against OLS','Weak-instrument-robust inference (Anderson–Rubin)','Endogeneity and overidentification tests','Interpret as a local average treatment effect'],lec:[LEC.iv,LEC.ci]}
+};
+const $=s=>document.querySelector(s), el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches, D=reduce?0:1;
+const fmt=(v,d=3)=>v==null?'–':Number(v).toFixed(d), pf=p=>p==null?'–':(p<0.001?'<0.001':p.toFixed(3));
+const rej=p=>p!=null&&p<0.05;
+let run=0;
+
+/* ---------- decision tree ---------- */
+const N={start:[380,26,116,'Your design'],as:[380,92,200,'How is treatment assigned?'],
+ cut:[80,160,92,'A cutoff'],rdc:[80,236,128,'Density, balance'],RDD:[80,312,64,'RDD',1],
+ ins:[215,160,108,'An instrument'],fs:[215,236,110,'First stage'],IV:[215,312,52,'IV',1],
+ ot:[540,160,146,'Policy over time'],ntr:[540,226,136,'Treated units?'],few:[400,292,96,'One or few'],many:[640,292,70,'Many'],
+ cmp:[400,352,116,'Donor pool?'],SCM:[350,412,62,'SCM',1],ITS:[452,412,52,'ITS',1],
+ pre:[640,352,164,'Parallel pre-trends?'],tim:[575,412,86,'Timing'],GSC:[715,412,58,'GSC',1],DID:[528,472,58,'DiD',1],STAG:[640,472,120,'Staggered DiD',1]};
+const E=[['start','as'],['as','cut'],['as','ins'],['as','ot'],['cut','rdc'],['rdc','RDD'],['ins','fs'],['fs','IV'],['ot','ntr'],['ntr','few','≤ '+FEW],['ntr','many','> '+FEW],
+ ['few','cmp'],['cmp','SCM','yes'],['cmp','ITS','no'],['many','pre'],['pre','tim','yes'],['pre','GSC','no'],['tim','DID','one date'],['tim','STAG','several']];
+const TL={start:'Your design',as:'Assignment',cut:'Cutoff',rdc:'Density and balance',ins:'Instrument',fs:'First stage',ot:'Policy over time',ntr:'Treated units',few:'One or few treated',many:'Many treated',cmp:'Donor pool?',pre:'Pre-trends',tim:'Adoption timing'};
+function pathTo(m){const S=['start','as'];
+ if(m==='RDD')return S.concat(['cut','rdc','RDD']);if(m==='IV')return S.concat(['ins','fs','IV']);
+ if(m==='SCM'||m==='ITS')return S.concat(['ot','ntr','few','cmp',m]);if(m==='GSC')return S.concat(['ot','ntr','many','pre','GSC']);
+ return S.concat(['ot','ntr','many','pre','tim',m])}
+function drawTree(){
+ const H=16;let s='<svg viewBox="0 0 760 500" role="img" aria-label="Decision tree from research design to method">';
+ for(const [a,b,lab] of E){const A=N[a],B=N[b];let d,lx,ly;
+  if(A[1]===B[1]){const r=B[0]>A[0];d=r?`M${A[0]+A[2]/2} ${A[1]}H${B[0]-B[2]/2}`:`M${A[0]-A[2]/2} ${A[1]}H${B[0]+B[2]/2}`;lx=(A[0]+B[0])/2;ly=A[1]-6}
+  else{const my=(A[1]+B[1])/2;d=`M${A[0]} ${A[1]+H}V${my}H${B[0]}V${B[1]-H}`;lx=A[0]===B[0]?A[0]+18:(A[0]+B[0])/2;ly=A[0]===B[0]?my+4:my-5}
+  s+=`<path class="e" id="e-${a}-${b}" pathLength="1" d="${d}"/>`;if(lab)s+=`<text class="el" x="${lx}" y="${ly}">${lab}</text>`}
+ for(const k in N){const [x,y,w,t,leaf]=N[k];s+=`<g class="n${leaf?' leaf':''}" id="n-${k}"><rect x="${x-w/2}" y="${y-H}" width="${w}" height="${2*H}" rx="${leaf?16:8}"/><text x="${x}" y="${y}">${t}</text></g>`}
+ $('#tree').innerHTML=s+'</svg>';
+}
+let lit=new Set(),tEnd=0;
+function resetTree(){lit=new Set();tEnd=0;document.querySelectorAll('.tree .on,.tree .hl,.tree .alt').forEach(e=>e.classList.remove('on','hl','alt'));$('#trail').innerHTML=''}
+function light(path,labels={},final=true){
+ const my=run,now=performance.now();let at=Math.max(now,tEnd);
+ path.forEach((id,i)=>{if(lit.has(id))return;lit.add(id);const wait=at-now;at+=380*D;
+  setTimeout(()=>{if(my!==run)return;const n=$('#n-'+id);n&&n.classList.add('on');if(i>0){const e=document.getElementById(`e-${path[i-1]}-${id}`);e&&e.classList.add('hl')}
+   const t=$('#trail');if(t.children.length)t.appendChild(el('i','','→'));const isLeaf=!!MODELS[id];t.appendChild(el('span',isLeaf&&final?'final':'',esc(labels[id]||(MODELS[id]?MODELS[id].short:TL[id])||id)))},wait)});
+ tEnd=at;return at-now;
+}
+
+/* ---------- charts ---------- */
+const W_=520,H_=220,PL=46,PR=10,PT=10,PB=26;
+function frame(xs,ys,opt={}){const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys),ry=(y1-y0)||1,rx=(x1-x0)||1;
+ const sx=x=>PL+(x-x0)/rx*(W_-PL-PR),sy=y=>PT+(1-(y-(y0-ry*.06))/(ry*1.12))*(H_-PT-PB);
+ let g=`<line class="ax" x1="${PL}" x2="${W_-PR}" y1="${H_-PB}" y2="${H_-PB}"/><line class="ax" x1="${PL}" x2="${PL}" y1="${PT}" y2="${H_-PB}"/>`;
+ [y0,(y0+y1)/2,y1].forEach(v=>{g+=`<text x="${PL-5}" y="${sy(v)+3}" text-anchor="end">${Math.abs(v)>=1000?Math.round(v):(+v.toPrecision(3))}</text>`});
+ if(opt.xl)opt.xl.forEach(([v,l])=>{g+=`<text x="${sx(v)}" y="${H_-PB+14}" text-anchor="middle">${esc(l)}</text>`});
+ if(opt.zero&&y0<0&&y1>0)g+=`<line class="zero" x1="${PL}" x2="${W_-PR}" y1="${sy(0)}" y2="${sy(0)}"/>`;
+ if(opt.vline!=null)g+=`<line class="tv" x1="${sx(opt.vline)}" x2="${sx(opt.vline)}" y1="${PT}" y2="${H_-PB}"/>`;
+ return {sx,sy,g}}
+const svg=g=>`<div class="chart"><svg viewBox="0 0 ${W_} ${H_}" preserveAspectRatio="xMidYMid meet">${g}</svg></div>`;
+function lines(series,labels,vline,cls=['s0','s1','s2']){const n=labels.length,xs=[...Array(n).keys()],ys=[].concat(...series.map(s=>s.filter(v=>v!=null)));
+ const step=Math.max(1,Math.ceil(n/6)),xl=xs.filter(i=>i%step===0).map(i=>[i,labels[i]]);
+ const F=frame(xs,ys,{xl,vline});let g=F.g;
+ series.forEach((s,k)=>{let d='',pen=false;s.forEach((v,i)=>{if(v==null){pen=false;return}d+=(pen?'L':'M')+F.sx(i).toFixed(1)+' '+F.sy(v).toFixed(1);pen=true});g+=`<path class="${cls[k]}" d="${d}"/>`});
+ return svg(g)}
+function eventPlot(ev){const xs=ev.map(e=>e.e),ys=[].concat(...ev.map(e=>[e.est-1.96*(e.se||0),e.est+1.96*(e.se||0),0]));
+ const F=frame(xs.concat([-1]),ys,{xl:xs.concat([-1]).sort((a,b)=>a-b).map(e=>[e,String(e)]),zero:true,vline:-0.5});let g=F.g;
+ const pts=ev.concat([{e:-1,est:0,se:0}]);pts.forEach(e=>{const pre=e.e<0;if(e.se)g+=`<line class="ci${pre?' pre':''}" x1="${F.sx(e.e)}" x2="${F.sx(e.e)}" y1="${F.sy(e.est-1.96*e.se)}" y2="${F.sy(e.est+1.96*e.se)}"/>`;g+=`<circle class="pt${pre?' pre':''}" cx="${F.sx(e.e)}" cy="${F.sy(e.est)}" r="3.4"/>`});
+ return svg(g)+'<div class="legend">Periods relative to adoption (−1 is the base period). Bars: 95% confidence intervals.</div>'}
+function rdPlot(R){const b=R.bins,xs=b.map(p=>p[0]).concat([R.cutoff]),ys=b.map(p=>p[1]).concat(...R.fit.map(f=>f.map(p=>p[1])));
+ const F=frame(xs,ys,{vline:R.cutoff,xl:[[Math.min(...xs),String(+Math.min(...xs).toPrecision(3))],[R.cutoff,'cutoff '+R.cutoff],[Math.max(...xs),String(+Math.max(...xs).toPrecision(3))]]});let g=F.g;
+ b.forEach(p=>{g+=`<circle class="dot" cx="${F.sx(p[0])}" cy="${F.sy(p[1])}" r="3"/>`});R.fit.forEach(f=>{g+=`<line class="fit" x1="${F.sx(f[0][0])}" y1="${F.sy(f[0][1])}" x2="${F.sx(f[1][0])}" y2="${F.sy(f[1][1])}"/>`});
+ return svg(g)+'<div class="legend">Dots: averages of the outcome in bins of the running variable. Lines: local linear fits within the bandwidth.</div>'}
+function histPlot(h,c){const xs=h.mid,ys=h.f.concat([0]);const F=frame(xs,ys,{vline:c,xl:[[xs[0],String(+xs[0].toPrecision(3))],[c,'cutoff'],[xs[xs.length-1],String(+xs[xs.length-1].toPrecision(3))]]});let g=F.g;
+ const bw=(F.sx(xs[1])-F.sx(xs[0]))*.9;xs.forEach((x,i)=>{g+=`<rect class="bar" x="${F.sx(x)-bw/2}" y="${F.sy(h.f[i])}" width="${bw}" height="${Math.max(0,F.sy(0)-F.sy(h.f[i]))}"/>`});return svg(g)}
+
+/* ---------- results ---------- */
+const code=c=>`<details class="code"><summary>Python code for this step</summary><pre>${esc(c)}</pre></details>`;
+function addStep(n,title,html,delay){const s=el('div','step',`<div class="label">Step ${n}</div><h3>${title}</h3>${html}`);$('#steps').appendChild(s);const my=run;setTimeout(()=>{if(my!==run)return;s.classList.add('in');if(n>1&&!reduce)s.scrollIntoView({behavior:'smooth',block:'nearest'})},delay);return s}
+const pyList=a=>'['+a.map(v=>JSON.stringify(v)).join(', ')+']';
+function show(R,label){
+ const my=++run;$('#steps').innerHTML='';$('#result').innerHTML='';resetTree();
+ const st={my,t:150,gap:900*D,k:1};
+ light(['start','as']);
+ if(R.design==='RDD')return showRDD(R,label,st);
+ if(R.design==='IV')return showIV(R,label,st);
+ return showTime(R,label,st);
+}
+function later(st,f,extra=0){const my=st.my;setTimeout(()=>{if(my!==run)return;f()},st.t+extra)}
+
+function showRDD(R,label,st){const r=R.roles;
+ addStep(st.k++,'The design: a cutoff',`<p><b>${R.n}</b> observations${label?' · '+esc(label):''}. Outcome: <b>${esc(R.outcome)}</b>. Running variable: <b>${esc(R.running)}</b>, cutoff <b>${R.cutoff}</b>. ${R.n_left} observations below and ${R.n_right} at or above the cutoff.</p>
+ <p>${R.fuzzy?`The treatment indicator <b>${esc(r.treat)}</b> agrees with the cutoff rule for only ${fmt(R.treat_agree*100,1)}% of observations, so the design is <b>fuzzy</b>: crossing the cutoff changes the probability of treatment, not treatment itself.`:'Treatment switches on exactly at the cutoff (a <b>sharp</b> design), so the jump in the outcome at the cutoff is the treatment effect there.'}</p>`,st.t);st.t+=st.gap;
+ later(st,()=>light(['start','as','cut']),-st.gap+300*D);
+ const e=R.rd;
+ addStep(st.k++,'The discontinuity',`<details class="explain" open><summary>How a regression discontinuity estimates an effect</summary><p>Units just below and just above the cutoff are alike in everything except treatment, as long as they cannot precisely choose which side they fall on. The tool fits a straight line on each side of the cutoff, using only observations within a <b>bandwidth</b> and giving more weight to those closest to it (triangular kernel). The gap between the two lines at the cutoff is the estimate. The bandwidth is the Imbens–Kalyanaraman MSE-optimal choice.</p></details>
+ ${rdPlot(R)}
+ <div class="urv"><ol><li><b>Jump in ${esc(R.outcome)} at the cutoff.</b> ${fmt(e.est)} (robust s.e. ${fmt(e.se)}), p-value ${pf(e.p)}, using ${e.n} observations within the bandwidth h = ${fmt(R.h,4)}. ${rej(e.p)?'<span class="yes">p &lt; 0.05: a significant discontinuity.</span>':'<span class="no">p ≥ 0.05: no significant discontinuity.</span>'}</li>
+ ${R.fuzzy&&R.first_stage?`<li><b>First stage: jump in the treatment probability.</b> ${fmt(R.first_stage.est)} (s.e. ${fmt(R.first_stage.se)}).</li><li><b>Fuzzy RD (local Wald) estimate</b> = outcome jump ÷ treatment jump = ${fmt(R.wald&&R.wald.est)} (s.e. ${fmt(R.wald&&R.wald.se)}).</li>`:''}</ol></div>`+code(`from causal_tests import rd_estimate      # implementations/causal_tests.py\n\nprint(rd_estimate(df["${R.running}"], df["${R.outcome}"], cutoff=${R.cutoff}))`),st.t);st.t+=st.gap;
+ addStep(st.k++,'Bandwidth sensitivity',`<div class="tw"><table><tr><th>Bandwidth</th><th>h</th><th>Estimate</th><th>s.e.</th><th>Obs.</th></tr>${R.sensitivity.map(s=>`<tr><td>${s.mult}×</td><td>${fmt(s.h,4)}</td><td>${fmt(s.est)}</td><td>${fmt(s.se)}</td><td>${s.n}</td></tr>`).join('')}</table></div><p>A narrower bandwidth reduces bias but uses fewer observations; a wider one is more precise but leans on observations far from the cutoff. A credible RD estimate is stable across this range.</p>`,st.t);st.t+=st.gap;
+ const dn=R.density;
+ addStep(st.k++,'Manipulation and covariate balance',`<details class="explain" open><summary>Why these checks decide whether the design is credible</summary><ul><li><b>McCrary density test.</b> If units can sort just above (or below) the cutoff, the density of the running variable jumps there and the units on the two sides are no longer comparable. Null hypothesis: no jump in the density.</li><li><b>Covariate continuity.</b> Characteristics determined before treatment should not jump at the cutoff. Each row runs the same RD with a covariate as the outcome.</li><li><b>Placebo cutoffs.</b> At points where nothing happens, there should be no jump.</li></ul></details>
+ ${dn?histPlot(dn.hist,R.cutoff)+`<div class="urv"><ol><li><b>McCrary test.</b> Log difference in density = ${fmt(dn.theta)} (s.e. ${fmt(dn.se)}), p-value ${pf(dn.p)}. ${rej(dn.p)?'<span class="no">p &lt; 0.05: the density jumps at the cutoff, a sign of sorting.</span>':'<span class="yes">p ≥ 0.05: no evidence of manipulation.</span>'}</li></ol></div>`:'<p>The density test could not be computed for this running variable.</p>'}
+ ${R.covariates.length?`<div class="tw"><table><tr><th>Covariate</th><th>Jump</th><th>s.e.</th><th>p-value</th></tr>${R.covariates.map(c=>`<tr><td>${esc(c.var)}</td><td>${fmt(c.est)}</td><td>${fmt(c.se)}</td><td>${pf(c.p)}${rej(c.p)?' ⚠':''}</td></tr>`).join('')}</table></div>`:'<p>No other numeric columns to test for continuity.</p>'}
+ <div class="tw"><table><tr><th>Placebo cutoff</th><th>Jump</th><th>s.e.</th><th>p-value</th></tr>${R.placebo.map(p=>`<tr><td>${p.side} median (${fmt(p.cutoff,3)})</td><td>${fmt(p.est)}</td><td>${fmt(p.se)}</td><td>${pf(p.p)}</td></tr>`).join('')}</table></div>`+code(`from causal_tests import mccrary_test, rd_estimate\n\nprint(mccrary_test(df["${R.running}"], cutoff=${R.cutoff}))\nfor cov in ["..."]:   # covariates fixed before treatment\n    print(cov, rd_estimate(df["${R.running}"], df[cov], cutoff=${R.cutoff}))`),st.t);
+ later(st,()=>light(['start','as','cut','rdc']),300*D);st.t+=st.gap;
+ later(st,()=>finish('RDD',R));
+}
+
+function showIV(R,label,st){
+ addStep(st.k++,'The design: an instrument',`<p><b>${R.n}</b> observations${label?' · '+esc(label):''}. Outcome <b>${esc(R.outcome)}</b>, endogenous treatment <b>${esc(R.treat)}</b>, instrument${R.instruments.length>1?'s':''} <b>${R.instruments.map(esc).join(', ')}</b>${R.controls.length?', controls: '+R.controls.map(esc).join(', '):''}.</p><details class="explain" open><summary>What an instrument must do</summary><ul><li><b>Relevance:</b> it shifts the treatment. Testable: the first stage.</li><li><b>Exclusion:</b> it affects the outcome only through the treatment. Not testable; it must be argued.</li><li><b>Independence:</b> it is as good as randomly assigned, given the controls. Not testable; it must be argued.</li></ul></details>`,st.t);st.t+=st.gap;
+ later(st,()=>light(['start','as','ins']),-st.gap+300*D);
+ const fs=R.first_stage;
+ addStep(st.k++,'First stage: is the instrument relevant?',`<div class="tw"><table><tr><th>Instrument</th><th>Effect on ${esc(R.treat)}</th><th>s.e.</th></tr>${fs.coefs.map(c=>`<tr><td>${esc(c.var)}</td><td>${fmt(c.est,4)}</td><td>${fmt(c.se,4)}</td></tr>`).join('')}</table></div>
+ <div class="urv"><ol><li><b>First-stage F statistic (robust)</b> = ${fmt(fs.F,2)}; partial R² = ${fmt(fs.partial_r2,4)}. ${fs.F>=10?'<span class="yes">F ≥ 10: not weak by the Staiger–Stock rule of thumb.</span>':'<span class="no">F &lt; 10: a weak instrument. 2SLS is biased towards OLS and its standard errors are unreliable.</span>'} ${fs.F>=10&&fs.F<104.7?'For t-tests with correct size, Lee et al. (2022) require F above 104.7; otherwise rely on the Anderson–Rubin test below.':''}</li></ol></div>`+code(`import statsmodels.api as sm\n\nX1 = sm.add_constant(df[${pyList(R.instruments.concat(R.controls))}])\nfirst = sm.OLS(df["${R.treat}"], X1).fit(cov_type="HC1")\nprint(first.f_test(" = ".join(${JSON.stringify(R.instruments)}) + " = 0"))`),st.t);st.t+=st.gap;
+ later(st,()=>light(['start','as','ins','fs']),-st.gap+300*D);
+ addStep(st.k++,'2SLS against OLS',`<div class="tw"><table><tr><th>Estimator</th><th>Effect of ${esc(R.treat)}</th><th>s.e.</th></tr><tr><td>OLS</td><td>${fmt(R.ols.est,4)}</td><td>${fmt(R.ols.se,4)}</td></tr><tr><td>2SLS</td><td>${fmt(R.tsls.est,4)}</td><td>${fmt(R.tsls.se,4)}</td></tr></table></div>
+ <p>2SLS uses only the part of the variation in ${esc(R.treat)} that the instrument creates. It is far less precise than OLS: here the standard error is ${fmt(R.tsls.se/R.ols.se,1)} times larger. ${R.tsls.p!=null?`The 2SLS estimate has p-value ${pf(R.tsls.p)}.`:''}</p>`+code(`from linearmodels.iv import IV2SLS\n\niv = IV2SLS(df["${R.outcome}"], sm.add_constant(df[${pyList(R.controls)}]), df["${R.treat}"], df[${pyList(R.instruments)}]).fit(cov_type="robust")\nprint(iv.summary)`),st.t);st.t+=st.gap;
+ const ar=R.ar,en=R.endog,ov=R.overid;
+ addStep(st.k++,'Weak-instrument-robust inference and specification tests',`<div class="urv"><ol><li><b>Anderson–Rubin test</b> of no effect: F = ${fmt(ar.F,2)}, p-value ${pf(ar.p)}. Its size is correct however weak the instrument. ${ar.ci?`95% AR confidence set: [${fmt(ar.ci[0],4)}, ${fmt(ar.ci[1],4)}]${ar.bounded?'':' (unbounded within the search range)'}.`:''}</li>
+ <li><b>Endogeneity test</b> (control function, robust): t = ${fmt(en.t,2)}, p-value ${pf(en.p)}. ${rej(en.p)?'OLS and 2SLS differ significantly: the treatment is endogenous.':'No significant difference between OLS and 2SLS: OLS is not rejected, but the test has little power when 2SLS is imprecise.'}</li>
+ ${ov?`<li><b>Hansen J overidentification test:</b> χ²(${ov.df}) = ${fmt(ov.J,2)}, p-value ${pf(ov.p)}. ${rej(ov.p)?'The instruments disagree: at least one is invalid.':'No evidence against the instruments’ validity (as a group).'}</li>`:'<li>With one instrument the model is exactly identified, and the exclusion restriction cannot be tested.</li>'}</ol></div>`,st.t);
+ st.t+=st.gap;later(st,()=>finish('IV',R));
+}
+
+function showTime(R,label,st){
+ const nt=R.n_treated;
+ addStep(st.k++,'The design: a policy over time',`<p><b>${R.n}</b> observations${label?' · '+esc(label):''}: ${R.has_unit?`<b>${R.N}</b> units over <b>${R.T}</b> periods (${esc(R.first)}–${esc(R.last)})`:`one series of <b>${R.T}</b> periods`}. Outcome: <b>${esc(R.outcome)}</b>.</p>
+ <div class="stats"><div class="stat"><b>${nt}</b><span>Treated units</span></div><div class="stat"><b>${R.n_never}</b><span>Never treated</span></div><div class="stat"><b>${R.n_cohorts}</b><span>Adoption date${R.n_cohorts>1?'s':''}</span></div><div class="stat"><b>${R.T}</b><span>Periods</span></div></div>
+ ${lines([R.means.treated,R.means.untreated||[]].filter(s=>s.length),R.labels,R.g0-0.5)}<div class="legend"><i></i>treated units (mean)${R.means.untreated?'<i class="b"></i>never-treated units (mean)':''} · dashed vertical line: first adoption</div>
+ <p>${R.route==='many'?`With ${nt} treated units, effects can be averaged across units and compared with untreated units: the difference-in-differences family applies. ${R.n_cohorts>1?`Units adopt at ${R.n_cohorts} different dates (${R.adoption.map(esc).join(', ')}).`:`All adopt at the same date (${esc(R.adoption[0])}).`}`:R.route==='few_donors'?`Only ${nt} treated unit${nt>1?'s':''}, so averaging over treated units is not possible, but ${R.n_never} untreated units can serve as a donor pool for a synthetic control.`:`Only ${nt} treated unit${nt>1?'s':''} and ${R.n_never} untreated comparison units: too few to build a comparison group. The counterfactual must come from the treated series’ own history.`}${R.switch_off?' <b>⚠ The treatment switches off for some units.</b> The tool uses the first adoption date; designs with reversals need different estimators.':''}</p>`,st.t);
+ later(st,()=>light(['start','as','ot','ntr',R.route==='many'?'many':'few'],{ntr:nt+' treated'}),300*D);st.t+=st.gap;
+ if(R.route==='few_none')return showITS(R,st);
+ if(R.route==='few_donors')return showSCM(R,st);
+ const Dd=R.did,pt=Dd.pretrend;
+ addStep(st.k++,'Event study: are the pre-trends parallel?',`<details class="explain" open><summary>Why the leads come first</summary><p>Difference-in-differences assumes that, without the policy, treated and untreated units would have followed parallel paths. That cannot be checked after treatment, but it can before: the estimated “effects” in the periods <i>before</i> adoption (the leads) should be close to zero. The event study estimates the effect for each period relative to adoption, comparing each adoption cohort only with never-treated units (Callaway–Sant’Anna, base period −1), with standard errors from a cluster bootstrap over units.</p></details>
+ ${eventPlot(Dd.event)}
+ <div class="urv"><ol><li><b>Joint test that the leads −5 to −2 are zero.</b> ${pt?`χ²(${pt.df}) = ${fmt(pt.stat,2)}, p-value ${pf(pt.p)}. ${rej(pt.p)?'<span class="no">p &lt; 0.05: the pre-trends are not parallel.</span> Plain DiD is not credible here.':'<span class="yes">p ≥ 0.05: no evidence of diverging pre-trends.</span> Not proof of parallel trends, but no evidence against them.'}`:'Not enough pre-treatment periods to test.'}</li></ol></div>`+code(`from causal_tests import event_study       # implementations/causal_tests.py\n\nprint(event_study(df, unit="${R.roles.unit}", time="${R.roles.time}", y="${R.outcome}", treat="${R.roles.treat}"))`),st.t);
+ later(st,()=>light(['start','as','ot','ntr','many','pre']),300*D);st.t+=st.gap;
+ if(R.model==='GSC'){const G=R.gsc;
+  if(G)addStep(st.k++,'Generalized synthetic control',`<p>Because the pre-trends are not parallel, the tool models the untreated outcome with latent common factors that each unit can load on differently: <i>Y(0)<sub>it</sub> = α<sub>i</sub> + ξ<sub>t</sub> + λ<sub>i</sub>′f<sub>t</sub></i>. The factors are estimated on the never-treated units, each treated unit’s loadings on its own pre-treatment periods, and the number of factors by cross-validation: <b>r = ${G.r}</b>.</p>${eventPlot(G.event)}
+  <div class="urv"><ol><li><b>ATT</b> = ${fmt(G.att.est,4)} (bootstrap s.e. ${fmt(G.att.se,4)}), p-value ${pf(G.att.p)}.</li><li><b>Pre-treatment fit:</b> the gaps before adoption are the placebo effects; their root mean square is ${fmt(G.pre_rmspe,4)}.</li><li>For comparison, the DiD estimate was ${fmt(Dd.att.est,4)} (s.e. ${fmt(Dd.att.se,4)}).</li></ol></div>`,st.t),st.t+=st.gap;
+  return later(st,()=>finish('GSC',R,R.timing==='staggered'?'STAG':'DID'))}
+ later(st,()=>light(['start','as','ot','ntr','many','pre','tim']),300*D);
+ if(R.model==='STAG')addStep(st.k++,'Staggered adoption: robust estimate against two-way fixed effects',`<details class="explain" open><summary>Why two-way fixed effects can mislead with staggered adoption</summary><p>The conventional TWFE regression of the outcome on a treatment dummy with unit and year effects is a weighted average of all possible 2×2 comparisons, including comparisons that use <b>already-treated units as controls</b>. If effects change over time, those comparisons subtract part of the effect, and some weights can even be negative (Goodman-Bacon 2021). The robust estimator compares each cohort only with never-treated units and then averages.</p></details>
+  <div class="tw"><table><tr><th>Estimator</th><th>ATT</th><th>s.e.</th><th>p-value</th></tr><tr><td>Heterogeneity-robust (Callaway–Sant’Anna)</td><td>${fmt(Dd.att.est,4)}</td><td>${fmt(Dd.att.se,4)}</td><td>${pf(Dd.att.p)}</td></tr><tr><td>Two-way fixed effects</td><td>${fmt(Dd.twfe.est,4)}</td><td>${fmt(Dd.twfe.se,4)}</td><td>${pf(Dd.twfe.p)}</td></tr></table></div><p>${Math.abs(Dd.att.est-Dd.twfe.est)>Math.abs(Dd.att.se)?'The two estimates differ by more than one standard error. Either TWFE is contaminated by comparisons with already-treated units, or the two handle a pre-trend differently: TWFE uses all pre-treatment years as its baseline, the robust estimator only the year before adoption. The guide shows how to tell which (an imputation estimator separates the two).':'The two estimates are close here, but only the robust one is valid if effects differ across cohorts or over time.'}</p>`,st.t);
+ else addStep(st.k++,'The DiD estimate',`<div class="tw"><table><tr><th>Estimator</th><th>ATT</th><th>s.e.</th><th>p-value</th></tr><tr><td>Two-way fixed effects (clustered by unit)</td><td>${fmt(Dd.twfe.est,4)}</td><td>${fmt(Dd.twfe.se,4)}</td><td>${pf(Dd.twfe.p)}</td></tr><tr><td>Event-study average of post periods (base −1)</td><td>${fmt(Dd.att.est,4)}</td><td>${fmt(Dd.att.se,4)}</td><td>${pf(Dd.att.p)}</td></tr></table></div><p>With a single adoption date and no evidence against parallel trends, the two-way fixed-effects regression is the standard DiD estimator. It compares the average change in the treated units with the average change in the untreated units across all pre- and post-treatment periods; the event-study average uses only the last pre-treatment period as its base, so the two can differ when pre-treatment years are noisy.</p>`,st.t);
+ st.t+=st.gap;later(st,()=>finish(R.model,R));
+}
+function showSCM(R,st){const u=R.scm.units[0];
+ addStep(st.k++,'Synthetic control: weights and pre-treatment fit',`<p>The synthetic ${esc(u.unit)} is a weighted average of untreated units, with weights chosen so that it tracks ${esc(u.unit)}’s outcome before ${esc(u.g_label)} as closely as possible. Weights are nonnegative and sum to one, so the counterfactual is an interpolation, not an extrapolation.</p>
+ <div class="tw"><table><tr><th>Donor</th><th>Weight</th></tr>${u.weights.map(w=>`<tr><td>${esc(w.unit)}</td><td>${fmt(w.w,3)}</td></tr>`).join('')}</table></div>
+ ${lines([u.actual,u.synth],R.labels,u.g-0.5)}<div class="legend"><i></i>${esc(u.unit)}<i class="b"></i>synthetic ${esc(u.unit)}</div>
+ <p>Pre-treatment root mean squared prediction error (RMSPE): ${fmt(u.pre_rmspe)}, against a pre-treatment mean of ${fmt(u.mean_pre)}. ${R.scm.units.length>1?`(${R.scm.units.length} treated units; the first is shown.)`:''}</p>`+code(`from causal_tests import synth_weights     # implementations/causal_tests.py\n\nW = df.pivot(index="${R.roles.time}", columns="${R.roles.unit}", values="${R.outcome}")\npre = W.index < W.index[${u.g}]\ndonors = [c for c in W.columns if c != "${u.unit}"]   # untreated units only\nw = synth_weights(W.loc[pre, "${u.unit}"], W.loc[pre, donors])\nprint(dict(zip(donors, w.round(3))))`),st.t);
+ later(st,()=>light(['start','as','ot','ntr','few','cmp']),300*D);st.t+=st.gap;
+ addStep(st.k++,'Effect and placebo inference',`${lines([u.gap],R.labels,u.g-0.5)}<div class="legend"><i></i>gap: actual minus synthetic</div>
+ <div class="urv"><ol><li><b>Average effect after ${esc(u.g_label)}</b>: ${fmt(u.att)} (post-treatment gap).</li><li><b>Post/pre RMSPE ratio</b> = ${fmt(u.ratio,2)}. A large ratio means the gap after treatment is large relative to how well the synthetic control fit before.</li><li><b>Placebo-in-space test.</b> The same method is applied to each of the ${u.n_placebo} donor units as if it had been treated. ${esc(u.unit)}’s ratio ranks such that the permutation p-value is ${pf(u.perm_p)}. ${u.perm_p<=0.1?'<span class="yes">Few placebo units show a gap as large: the effect is unlikely to be chance.</span>':'<span class="no">Several placebo units show gaps as large: the effect is not clearly distinguishable from chance.</span>'}</li></ol></div>`,st.t);
+ st.t+=st.gap;later(st,()=>finish('SCM',R));
+}
+function showITS(R,st){const I=R.its,c=I.coefs;
+ addStep(st.k++,'Segmented regression around the intervention',`<p>The model fits the pre-intervention trend${I.seasonal?' and seasonal pattern':''} and estimates a <b>level change</b> and a <b>slope change</b> at ${esc(I.g_label)}. Standard errors are Newey–West (${I.nw_lags} lags), robust to serial correlation.</p>
+ ${lines([I.series,I.counterfactual],I.labels,I.g-0.5)}<div class="legend"><i></i>observed<i class="b"></i>counterfactual: pre-intervention model extended</div>
+ <div class="tw"><table><tr><th>Term</th><th>Estimate</th><th>s.e.</th><th>p-value</th></tr>${c.slice(0,4).map(x=>`<tr><td>${esc(x.var)}</td><td>${fmt(x.est)}</td><td>${fmt(x.se)}</td><td>${pf(x.p)}</td></tr>`).join('')}</table></div>
+ <p>Average gap between observed and counterfactual after the intervention: ${fmt(I.avg_effect)} (pre-intervention mean ${fmt(I.mean_pre)}).</p>`,st.t);
+ later(st,()=>light(['start','as','ot','ntr','few','cmp']),300*D);st.t+=st.gap;
+ addStep(st.k++,'Diagnostics: autocorrelation and placebo dates',`<div class="urv"><ol><li><b>Durbin–Watson</b> = ${fmt(I.dw,2)}. ${I.dw<1.5?'Values well below 2 indicate positive autocorrelation, which the Newey–West errors allow for; consider modelling it (ARIMA errors).':'No strong first-order autocorrelation.'}</li>${I.placebo.map(p=>`<li><b>Placebo intervention at ${esc(p.at)}</b> (pre-period data only): level change ${fmt(p.est)}, p-value ${pf(p.p)}. ${rej(p.p)?'<span class="no">A significant “effect” where there was no intervention: other events move this series too.</span>':'<span class="yes">No significant effect, as expected.</span>'}</li>`).join('')}</ol></div><p>With no comparison group, an ITS estimate is only as good as the argument that nothing else changed at the same date.</p>`,st.t);
+ st.t+=st.gap;later(st,()=>finish('ITS',R));
+}
+
+function evidence(R,m){if(!R)return '';
+ if(m==='RDD')return `The outcome jumps by ${fmt(R.rd.est)} at the cutoff (p ${pf(R.rd.p)}).${R.fuzzy&&R.wald?` Fuzzy design: local Wald estimate ${fmt(R.wald.est)}.`:''}`;
+ if(m==='IV')return `2SLS estimate ${fmt(R.tsls.est,4)} against OLS ${fmt(R.ols.est,4)}; first-stage F = ${fmt(R.first_stage.F,1)}.`;
+ const Dd=R.did;
+ if(m==='DID')return `${R.n_treated} units adopt at the same date; the leads are jointly insignificant (p ${pf(Dd.pretrend&&Dd.pretrend.p)}); TWFE ATT = ${fmt(Dd.twfe.est,4)} (s.e. ${fmt(Dd.twfe.se,4)}).`;
+ if(m==='STAG')return `${R.n_treated} units adopt at ${R.n_cohorts} dates; the leads are jointly insignificant (p ${pf(Dd.pretrend&&Dd.pretrend.p)}); robust ATT = ${fmt(Dd.att.est,4)} against TWFE ${fmt(Dd.twfe.est,4)}.`;
+ if(m==='GSC')return `The event-study leads reject parallel pre-trends (p ${pf(Dd.pretrend.p)}).${R.gsc?` GSC with ${R.gsc.r} factor${R.gsc.r===1?'':'s'}: ATT = ${fmt(R.gsc.att.est,4)} (s.e. ${fmt(R.gsc.att.se,4)}).`:''}`;
+ if(m==='SCM'){const u=R.scm.units[0];return `${R.n_treated} treated unit${R.n_treated>1?'s':''} and ${R.n_never} donors; post/pre RMSPE ratio ${fmt(u.ratio,1)}, permutation p-value ${pf(u.perm_p)}.`}
+ if(m==='ITS'){const c=R.its.coefs;return `Level change at ${esc(R.its.g_label)}: ${fmt(c[2].est)} (p ${pf(c[2].p)}); slope change ${fmt(c[3].est)}.`}
+ return ''}
+function cautionFor(R,m){if(!R)return '';const c=[];
+ if(m==='RDD'){if(R.flags.includes('density'))c.push('The McCrary test finds a jump in the density at the cutoff: units may be sorting, which undermines the comparison.');if(R.flags.includes('covariates'))c.push('At least one covariate jumps at the cutoff. Check whether it is determined before treatment and whether a narrower bandwidth removes the imbalance; report estimates with covariates.')}
+ if(m==='IV'&&R.weak)c.push('The first-stage F is below 10: the instrument is weak. Report Anderson–Rubin confidence sets rather than 2SLS t-tests.');
+ if(m==='IV'&&!R.weak&&R.first_stage.F<104.7)c.push('With F below 104.7, conventional 2SLS t-tests can over-reject (Lee et al. 2022); report the Anderson–Rubin confidence set alongside.');
+ if((m==='DID'||m==='STAG')&&R.did.pretrend&&R.did.pretrend.p<0.1)c.push('The pre-trend test is close to rejecting. Report a sensitivity analysis for violations of parallel trends (Rambachan and Roth 2023).');
+ if(m==='SCM'&&R.scm.units[0].perm_p>0.1)c.push('The permutation p-value is above 0.10: the estimated effect is not clearly larger than the gaps of placebo units.');
+ if(m==='ITS'&&R.its.placebo.some(p=>p.p<0.05))c.push('A placebo date shows a significant break: other events move this series, so the attribution to the intervention needs a strong argument.');
+ if(R.switch_off)c.push('The treatment switches off for some units; estimators for non-absorbing treatments are needed.');
+ return c.length?`<div class="caution"><b>Check before you write.</b> ${c.join(' ')}</div>`:''}
+function finish(m,R,alt){const my=run,M=MODELS[m];const d=light(pathTo(m));if(alt){const a=$('#n-'+alt);a&&a.classList.add('alt')}
+ setTimeout(()=>{if(my!==run)return;const ev=evidence(R,m);
+  $('#result').innerHTML=`<div class="result"><div class="label">Recommended design</div><h2>${M.name}</h2><p>${M.why}${ev?' <b>In this data:</b> '+ev:''}</p>${cautionFor(R,m)}<div class="label" style="margin-bottom:6px">What the paper needs</div><ul>${M.steps.map(s=>`<li>${s}</li>`).join('')}</ul><div class="acts"><a class="btn" href="${GUIDE[m]}.html">Go to the ${M.short} guide →</a>${M.lec.map(l=>`<a class="btn ghost" href="${l[0]}">${l[1]} →</a>`).join('')}${alt?`<a class="btn ghost" href="#g-${alt}" data-go="${alt}">Compare: ${MODELS[alt].short}</a>`:''}${R?'':'<button class="btn ghost" type="button" id="again">Start over</button>'}</div></div>`;
+  $('#result').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});const ag=$('#again');ag&&ag.addEventListener('click',()=>setMode('ask'))},d+250*D)}
+
+/* ---------- mode: examples ---------- */
+function initExamples(){EXAMPLES.forEach(x=>{const b=el('button','',`<small>${esc(x.meta)}</small><b>${esc(x.title)}</b><span>${esc(x.desc)}</span>`);b.type='button';
+ b.addEventListener('click',()=>{document.querySelectorAll('.ex button').forEach(e=>e.classList.remove('sel'));b.classList.add('sel');show(x.result,x.title)});$('#ex').appendChild(b)})}
+
+/* ---------- mode: upload (Python in the browser) ---------- */
+let pyReady=null,csvText='',csvName='';
+function status(t){$('#status').classList.toggle('on',!!t);$('#status-text').textContent=t||''}
+function loadPy(){if(pyReady)return pyReady;pyReady=(async()=>{status('Loading Python. The first time takes about 15 seconds…');
+  await new Promise((res,rej)=>{const s=document.createElement('script');s.src=PYO+'pyodide.js';s.onload=res;s.onerror=()=>rej(new Error('Could not load Python. Check your internet connection and try again.'));document.head.appendChild(s)});
+  const py=await loadPyodide({indexURL:PYO});status('Loading pandas, SciPy and statsmodels…');await py.loadPackage(['pandas','scipy','statsmodels']);py.runPython($('#py-src').textContent);return py})();
+ pyReady.catch(()=>{pyReady=null});return pyReady}
+function headerOf(text){const line=text.split(/\r?\n/).find(l=>l.trim())||'';const sep=[',',';','\t'].sort((a,b)=>line.split(b).length-line.split(a).length)[0];return line.split(sep).map(h=>h.trim().replace(/^"|"$/g,''))}
+async function loadFile(f){$('#upload-err').innerHTML='';$('#steps').innerHTML='';$('#result').innerHTML='';++run;resetTree();
+ try{if(f.size>8e6)throw new Error('The file is larger than 8 MB. Please upload a smaller CSV.');
+  csvText=await f.text();csvName=f.name;const H=headerOf(csvText);if(H.length<2)throw new Error('The file needs at least two columns.');
+  const opt=(blank)=>(blank?`<option value="">${blank}</option>`:'')+H.map(h=>`<option>${esc(h)}</option>`).join('');
+  $('#r-outcome').innerHTML=opt('');['treat','unit','time','running'].forEach(k=>$('#r-'+k).innerHTML=opt('— none —'));$('#r-instruments').innerHTML=opt();$('#r-controls').innerHTML=opt();
+  const low=H.map(h=>h.toLowerCase()),pick=(k,names)=>{const i=low.findIndex(h=>names.includes(h));if(i>=0)$('#r-'+k).value=H[i]};
+  pick('unit',['id','unit','state','country','firm','county','city','school','person','sid']);pick('time',['year','time','period','date','quarter','month']);
+  $('#rolebox').hidden=false;status('')}
+ catch(e){$('#upload-err').innerHTML=`<div class="err">${esc(e.message||e)}</div>`}}
+async function runUpload(){$('#upload-err').innerHTML='';$('#steps').innerHTML='';$('#result').innerHTML='';++run;resetTree();
+ const v=k=>$('#r-'+k).value,multi=k=>[...$('#r-'+k).selectedOptions].map(o=>o.value);
+ const roles={outcome:v('outcome'),treat:v('treat')||null,unit:v('unit')||null,time:v('time')||null,running:v('running')||null,cutoff:$('#r-cutoff').value===''?null:+$('#r-cutoff').value,instruments:multi('instruments'),controls:multi('controls')};
+ try{if(!roles.outcome)throw new Error('Choose the outcome variable.');
+  if(!roles.running&&!roles.instruments.length&&!(roles.treat&&roles.time))throw new Error('Choose a running variable and cutoff (cutoff design), an instrument (IV), or a treatment and a time variable (policy over time).');
+  const py=await loadPy();status('Running the checks on your data…');await new Promise(r=>setTimeout(r,30));
+  const R=JSON.parse(py.globals.get('analyze')(csvText,JSON.stringify(roles)));status('');if(R.error)throw new Error(R.error);show(R,csvName)}
+ catch(e){status('');$('#upload-err').innerHTML=`<div class="err">${esc(e.message||e)}</div>`}}
+function initUpload(){const d=$('#drop');$('#file').addEventListener('change',e=>{e.target.files[0]&&loadFile(e.target.files[0]);e.target.value=''});
+ ['dragenter','dragover'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.add('over')}));['dragleave','drop'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove('over')}));
+ d.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];f&&loadFile(f)});$('#runUp').addEventListener('click',runUpload)}
+
+/* ---------- mode: questions ---------- */
+let QA={};
+const QS={
+ q1:{t:'How is treatment assigned?',o:[['By a cutoff in a running variable','For example a test score, an income threshold, an election margin','qrd',['start','as','cut']],['Through an instrument','A variable that shifts the treatment but affects the outcome only through it','qfs',['start','as','ins']],['A policy that starts at a point in time','Some units are treated from a date onwards (or one unit or region is)','NT',['start','as','ot']]]},
+ qrd:{t:'Are the McCrary density test and the covariate-continuity checks passed?',o:[['Yes, no sign of sorting or imbalance','','RDD',['start','as','cut','rdc']],['No, or not yet checked','The design is still RDD, but credibility depends on these checks','RDDc',['start','as','cut','rdc']]]},
+ qfs:{t:'What is the first-stage F statistic of the excluded instrument(s)?',o:[['10 or more','Not weak by the rule of thumb','IV',['start','as','ins','fs']],['Below 10','A weak instrument','IVw',['start','as','ins','fs']]]},
+ qpt:{t:'Do the event-study leads (pre-treatment coefficients) show parallel trends?',o:[['Yes, the leads are jointly insignificant','','qtim',['start','as','ot','ntr','many','pre','tim']],['No, treated and untreated units diverge before treatment','','GSC']]},
+ qtim:{t:'Do all treated units adopt the policy at the same date?',o:[['Yes, one adoption date','','DID'],['No, adoption is staggered','','STAG']]}};
+function askNT(n){$('#q').innerHTML=`<div class="label">Question ${n}</div><h3>How many units are treated, and how many untreated comparison units do you have?</h3><p class="sub" style="margin:-4px 0 12px">For a single time series with no comparison group, enter 1 and 0.</p><div class="nt"><label>Treated units<input type="number" id="inT" min="1" step="1" placeholder="e.g. 21"></label><label>Untreated comparison units<input type="number" id="inC" min="0" step="1" placeholder="e.g. 29"></label><button class="btn" type="button" id="ntGo">Continue →</button></div><div id="ntErr"></div>`;
+ const go=()=>{const T=Math.round(+$('#inT').value),C=Math.round(+$('#inC').value);if(!(T>=1&&C>=0&&$('#inC').value!=='')){$('#ntErr').innerHTML='<div class="err">Enter whole numbers: at least 1 treated unit, and 0 or more comparison units.</div>';return}
+  const note=`<p class="sub" style="margin:0 0 14px"><b>${T} treated, ${C} comparison units:</b> `;light(['start','as','ot','ntr',T<=FEW?'few':'many'],{ntr:T+' treated'});
+  if(T<=FEW){const m=C>=DONORS?'SCM':'ITS';light(['start','as','ot','ntr','few','cmp']);$('#q').innerHTML=note+(m==='SCM'?`too few treated units to average over, but enough donors (${DONORS} or more) for a synthetic control.</p>`:`too few treated units and too few donors (fewer than ${DONORS}): the counterfactual must come from the treated series itself.</p>`)+'<p class="sub" style="margin:0">Your answers lead to the design shown below.</p>';finish(m,null);return}
+  ask('qpt',n+1);$('#q').insertAdjacentHTML('afterbegin',note+'enough treated units for the difference-in-differences family.</p>')};
+ $('#ntGo').addEventListener('click',go);['#inT','#inC'].forEach(i=>$(i).addEventListener('keydown',e=>{if(e.key==='Enter')go()}))}
+function ask(id,n=1){const Q=QS[id];$('#q').innerHTML=`<div class="label">Question ${n}</div><h3>${Q.t}</h3><div class="opts">${Q.o.map((o,i)=>`<button type="button" data-i="${i}">${o[0]}${o[1]?`<small>${o[1]}</small>`:''}</button>`).join('')}</div>`;
+ $('#q').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const o=Q.o[+b.dataset.i];let to=o[2];o[3]&&light(o[3]);
+  if(to==='NT')return askNT(n+1);
+  if(QS[to])return ask(to,n+1);
+  const map={RDDc:'RDD',IVw:'IV'},m=map[to]||to;
+  $('#q').innerHTML='<p class="sub" style="margin:0">Your answers lead to the design shown below.</p>'+(to==='RDDc'?'<p class="sub" style="margin:8px 0 0"><b>Run the McCrary and covariate checks before relying on the estimate.</b></p>':to==='IVw'?'<p class="sub" style="margin:8px 0 0"><b>With a weak instrument, report Anderson–Rubin confidence sets rather than 2SLS t-tests.</b></p>':'');
+  finish(m,null,m==='DID'||m==='STAG'?'GSC':m==='GSC'?'STAG':null)}))}
+
+/* ---------- guides, modes, init ---------- */
+function initGuides(){Object.entries(MODELS).forEach(([k,M])=>{$('#gcards').appendChild(el('article','gcard',`<span class="tag ok">Step-by-step guide</span><h3>${M.short}</h3><p class="when">${M.when}</p><p>${M.steps.slice(0,5).join(' · ')} …</p><a href="${GUIDE[k]}.html" style="font-size:12.5px">Open the ${M.short} guide →</a>${M.lec.map(l=>`<a href="${l[0]}">${l[1]} →</a>`).join('')}`)).id='g-'+k})}
+document.addEventListener('click',e=>{const a=e.target.closest('[data-go]');if(!a)return;const c=$('#g-'+a.dataset.go);if(c){c.classList.remove('flash');void c.offsetWidth;c.classList.add('flash')}});
+function setMode(m){++run;QA={};document.querySelectorAll('.modes button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));['example','upload','ask'].forEach(x=>$('#m-'+x).hidden=x!==m);
+ $('#steps').innerHTML='';$('#result').innerHTML='';$('#upload-err').innerHTML='';status('');resetTree();document.querySelectorAll('.ex button').forEach(e=>e.classList.remove('sel'));if(m==='ask'){light(['start']);ask('q1')}}
+document.querySelectorAll('.modes button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+drawTree();initExamples();initUpload();initGuides();$('#year').textContent=new Date().getFullYear();
+</script>
+</body>
+</html>
