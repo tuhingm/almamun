@@ -323,7 +323,7 @@ function askNO(n){$('#q').innerHTML=`<div class="label">Question ${n}</div><h3>H
  $('#noGo').addEventListener('click',go);['#inO','#inS'].forEach(i=>$(i).addEventListener('keydown',e=>{if(e.key==='Enter')go()}))}
 
 /* ---------- guides, modes, init ---------- */
-function initGuides(){['RBC','NK','SOE','ID','EST','MED','OPT','ZLB','HO'].forEach(k=>{const M=MODELS[k];$('#gcards').appendChild(el('article','gcard',`<span class="tag ok">Step-by-step guide</span><h3>${M.short}</h3><p class="when">${M.when}</p><p>${M.steps.join(' · ')}</p><a href="${M.g}.html" style="font-size:12.5px">Open the ${M.short} guide →</a>`)).id='g-'+k})}
+function initGuides(){['RBC','NK','SOE','ID','EST','MED','OPT','ZLB','HO'].forEach(k=>{const M=MODELS[k];$('#gcards').appendChild(el('article','gcard',`<span class="tag ok">Step-by-step guide</span><h3>${M.short}</h3><p class="when">${M.when}</p><p>${M.steps.join(' · ')}</p><a href="${M.g}.html" style="font-size:12.5px">Open the ${M.short} guide →</a>${(M.lec||[]).map(l=>`<a href="${l[0]}">${l[1]} →</a>`).join('')}`)).id='g-'+k})}
 document.addEventListener('click',e=>{const a=e.target.closest('[data-go]');if(!a)return;const c=$('#g-'+a.dataset.go);if(c){c.classList.remove('flash');void c.offsetWidth;c.classList.add('flash')}});
 function setMode(m){++run;document.querySelectorAll('.modes button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));['example','upload','ask'].forEach(x=>$('#m-'+x).hidden=x!==m);
  $('#steps').innerHTML='';$('#result').innerHTML='';$('#upload-err').innerHTML='';status('');resetTree();document.querySelectorAll('.ex button').forEach(e=>e.classList.remove('sel'));if(m==='ask'){light(G);ask('q1')}}
