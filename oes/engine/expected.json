@@ -105,7 +105,7 @@
   "col": "Coef.",
   "value": 0.080002,
   "rtol": 0.001,
-  "seconds": 2.4,
+  "seconds": 2.5,
   "summary": {
    "label": "Within R-squared",
    "value": 0.0216
@@ -119,7 +119,7 @@
   "col": "Coef.",
   "value": 7.351593,
   "rtol": 0.001,
-  "seconds": 2.3,
+  "seconds": 2.2,
   "summary": {
    "label": "sigma2 unit effect",
    "value": 0.0254
@@ -171,7 +171,7 @@
   "col": "Coef.",
   "value": 0.345675,
   "rtol": 0.001,
-  "seconds": 0.5
+  "seconds": 0.4
  },
  "pmg": {
   "nobs": 1380,
@@ -195,7 +195,7 @@
   "col": "Coef.",
   "value": 0.144108,
   "rtol": 0.001,
-  "seconds": 0.6
+  "seconds": 0.7
  },
  "did": {
   "nobs": 462,
@@ -205,7 +205,7 @@
   "col": "Coef.",
   "value": 0.0024,
   "rtol": 0.001,
-  "seconds": 3.1,
+  "seconds": 2.9,
   "summary": {
    "label": "ATT",
    "value": 0.0024
@@ -219,7 +219,7 @@
   "col": "Coef.",
   "value": 0.0194,
   "rtol": 0.001,
-  "seconds": 7.8,
+  "seconds": 7.6,
   "summary": {
    "label": "ATT",
    "value": 0.0194
@@ -289,7 +289,7 @@
   "col": "Coef.",
   "value": 0.0211,
   "rtol": 0.001,
-  "seconds": 1.2,
+  "seconds": 1.3,
   "summary": {
    "label": "ATT",
    "value": 0.0211
@@ -303,7 +303,7 @@
   "col": "Test RMSE",
   "value": 9.2658,
   "rtol": 0.05,
-  "seconds": 1.1,
+  "seconds": 1.0,
   "summary": {
    "label": "CV RMSE (training)",
    "value": 10.359
@@ -331,7 +331,7 @@
   "col": "Test RMSE",
   "value": 3.5496,
   "rtol": 0.05,
-  "seconds": 1.7,
+  "seconds": 1.5,
   "summary": {
    "label": "CV RMSE (training)",
    "value": 2.712
@@ -345,7 +345,7 @@
   "col": "Test RMSE",
   "value": 0.6518,
   "rtol": 0.05,
-  "seconds": 5.1,
+  "seconds": 4.8,
   "summary": {
    "label": "CV RMSE (training)",
    "value": 0.649
@@ -373,7 +373,7 @@
   "col": "Coef.",
   "value": -0.049038,
   "rtol": 0.05,
-  "seconds": 6.1,
+  "seconds": 5.5,
   "summary": {
    "label": "Estimate",
    "value": -0.0359
@@ -387,7 +387,7 @@
   "col": "Coef.",
   "value": 8629.22613,
   "rtol": 0.05,
-  "seconds": 25.5,
+  "seconds": 25.1,
   "summary": {
    "label": "Estimate",
    "value": 8629.2261
@@ -401,7 +401,7 @@
   "col": "Coef.",
   "value": 13446.618386,
   "rtol": 0.05,
-  "seconds": 23.9,
+  "seconds": 23.2,
   "summary": {
    "label": "Estimate",
    "value": 13446.6184
@@ -415,10 +415,184 @@
   "col": "Coef.",
   "value": 8629.22613,
   "rtol": 0.05,
-  "seconds": 23.4,
+  "seconds": 22.9,
   "summary": {
    "label": "ATE",
    "value": 8629.2261
+  }
+ },
+ "bayes_reg": {
+  "nobs": 663,
+  "table_index": 0,
+  "table": "Posterior of the coefficients (Zellner g-prior on the slopes, g = 663, flat constant)",
+  "row": "const",
+  "col": "Mean",
+  "value": 5.127229,
+  "rtol": 0.05,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Posterior mean of sigma^2",
+   "value": 0.1256
+  }
+ },
+ "bvar": {
+  "nobs": 236,
+  "table_index": 0,
+  "table": "Equation: log_price",
+  "row": "const",
+  "col": "Mean",
+  "value": -0.00876,
+  "rtol": 0.05,
+  "seconds": 0.2,
+  "summary": {
+   "label": "lambda1",
+   "value": 0.1
+  }
+ },
+ "favar": {
+  "nobs": 200,
+  "table_index": 0,
+  "table": "Principal-component factors",
+  "row": "F1",
+  "col": "Share of variance",
+  "value": 0.4176,
+  "rtol": 0.05,
+  "seconds": 0.2,
+  "summary": {
+   "label": "Variance explained",
+   "value": 0.605
+  }
+ },
+ "mabvar": {
+  "nobs": 200,
+  "table_index": 0,
+  "table": "Steady states (posterior)",
+  "row": "gdp_growth",
+  "col": "Mean",
+  "value": 3.10877,
+  "rtol": 0.05,
+  "seconds": 0.6,
+  "summary": {
+   "label": "Steady state of gdp_growth",
+   "value": 3.1088
+  }
+ },
+ "pvar": {
+  "nobs": 336,
+  "table_index": 0,
+  "table": "Mean-group equation: gdp_growth",
+  "row": "const",
+  "col": "Mean",
+  "value": 2.381776,
+  "rtol": 0.05,
+  "seconds": 0.0
+ },
+ "tvpvar": {
+  "nobs": 160,
+  "table_index": 1,
+  "table": "Residual covariance (posterior)",
+  "row": "Sigma[inflation,inflation]",
+  "col": "Mean",
+  "value": 4.922737,
+  "rtol": 0.05,
+  "seconds": 9.1,
+  "summary": {
+   "label": "kQ",
+   "value": 0.01
+  }
+ },
+ "svvar": {
+  "nobs": 200,
+  "table_index": 0,
+  "table": "Equation: inflation",
+  "row": "const",
+  "col": "Mean",
+  "value": 0.691626,
+  "rtol": 0.05,
+  "seconds": 3.8,
+  "summary": {
+   "label": "Last volatility: inflation",
+   "value": 4.5728
+  }
+ },
+ "mfbvar": {
+  "nobs": 419,
+  "table_index": 1,
+  "table": "Monthly VAR equation: ip_growth",
+  "row": "const",
+  "col": "Mean",
+  "value": 0.231313,
+  "rtol": 0.05,
+  "seconds": 17.5
+ },
+ "tvar": {
+  "nobs": 200,
+  "table_index": 0,
+  "table": "Posterior of the delay",
+  "row": "1",
+  "col": "Posterior probability",
+  "value": 0.0001,
+  "rtol": 0.05,
+  "seconds": 0.4,
+  "summary": {
+   "label": "Threshold",
+   "value": 1.6095
+  }
+ },
+ "ms_reg": {
+  "nobs": 226,
+  "table_index": 0,
+  "table": "Parameter estimates",
+  "row": "p[0->0]",
+  "col": "Estimate",
+  "value": 0.982096,
+  "rtol": 0.001,
+  "seconds": 0.2,
+  "summary": {
+   "label": "Log-likelihood",
+   "value": -508.636
+  }
+ },
+ "ms_ar": {
+  "nobs": 131,
+  "table_index": 0,
+  "table": "Parameter estimates",
+  "row": "p[0->0]",
+  "col": "Estimate",
+  "value": 0.754664,
+  "rtol": 0.001,
+  "seconds": 2.3,
+  "summary": {
+   "label": "Log-likelihood",
+   "value": -181.263
+  }
+ },
+ "msvar": {
+  "nobs": 201,
+  "table_index": 0,
+  "table": "Regime-dependent intercepts",
+  "row": "gdp_growth",
+  "col": "Regime 0",
+  "value": 1.733877,
+  "rtol": 0.001,
+  "seconds": 0.8,
+  "summary": {
+   "label": "Log-likelihood",
+   "value": -937.439
+  }
+ },
+ "mspvar": {
+  "nobs": 336,
+  "table_index": 0,
+  "table": "Regime-dependent intercepts",
+  "row": "gdp_growth",
+  "col": "Regime 0",
+  "value": -1.238508,
+  "rtol": 0.001,
+  "seconds": 1.1,
+  "summary": {
+   "label": "Log-likelihood",
+   "value": -985.409
   }
  }
 }

@@ -45,7 +45,7 @@ for m in E.MODELS:
     ti = next(i for i, tb in enumerate(r["tables"]) if tb["rows"] and isinstance(tb["rows"][0][1], (int, float)))
     tb = r["tables"][ti]
     row = tb["rows"][0]
-    ml = m["group"] == "Machine learning"
+    ml = m["group"] in ("Machine learning", "Bayesian")   # simulation-based: allow small cross-platform differences
     expected[m["id"]] = {"nobs": r["nobs"], "table_index": ti, "table": tb["title"], "row": str(row[0]), "col": tb["columns"][1],
                          "value": row[1], "rtol": 0.05 if ml else 1e-3, "seconds": round(time.time() - t, 1)}
     # and the first non-integer statistic of the summary tiles (bounds F, R-squared, ATT, test RMSE, ...)
@@ -54,3 +54,10 @@ for m in E.MODELS:
         expected[m["id"]]["summary"] = {"label": sm["label"], "value": sm["value"]}
     print(f"{m['id']:14s} {expected[m['id']]['seconds']:5.1f}s  {row[0]} = {row[1]};  {sm and sm['label']} = {sm and sm['value']}")
 (ROOT / "oes/engine/expected.json").write_text(json.dumps(expected, indent=1))
+
+# the Web Worker loads the engine file by file: its list must match the engine
+import re
+listed = set(re.findall(r'"(\w+\.py)"', (ROOT / "oes/worker.js").read_text()))
+on_disk = {f.name for f in dst.glob("*.py")}
+if listed != on_disk:
+    raise SystemExit(f"oes/worker.js FILES is out of date: missing {sorted(on_disk - listed)}, extra {sorted(listed - on_disk)}")

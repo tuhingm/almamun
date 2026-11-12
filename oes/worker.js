@@ -3,8 +3,8 @@
    Messages in:  {cmd: "init"} | {cmd: "run", job, model, csv, spec, packages}
    Messages out: {type: "status", text} | {type: "ready", version} | {type: "result", job, result, seconds} | {type: "error", job, error} */
 const PYODIDE = "https://cdn.jsdelivr.net/pyodide/v0.27.2/full/";
-const FILES = ["__init__.py", "core.py", "timeseries.py", "panel.py", "causal.py", "ml.py",
-               "_causal_core.py", "_panel_core.py", "_panel_tests.py", "_diff_gmm.py", "_ml_core.py"];
+const FILES = ["__init__.py", "core.py", "timeseries.py", "panel.py", "causal.py", "ml.py", "bayes.py", "statespace_var.py",
+               "pvar.py", "markov.py", "_causal_core.py", "_panel_core.py", "_panel_tests.py", "_diff_gmm.py", "_ml_core.py"];
 const BASE = ["numpy", "pandas", "scipy", "statsmodels"];
 let py = null, booting = null;
 const loaded = new Set();
