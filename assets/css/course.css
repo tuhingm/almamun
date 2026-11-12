@@ -12,8 +12,8 @@ h1,h2,h3,h4{font-family:Manrope,sans-serif;line-height:1.25}
 header{position:sticky;top:0;z-index:20;background:rgba(0,51,160,.98);color:white;box-shadow:0 3px 18px #001b5030}
 .nav{height:72px;display:flex;align-items:center;justify-content:space-between;gap:20px}
 .brand{font:800 15px Manrope;letter-spacing:.06em}.brand span{color:var(--sky)}
-nav#nav{display:flex;align-items:center;gap:24px}
-nav#nav a{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#e7eefb}
+nav#nav{display:flex;align-items:center;gap:12px;min-width:0}
+nav#nav a{font-size:10px;font-weight:800;letter-spacing:.035em;text-transform:uppercase;color:#e7eefb;white-space:nowrap}
 nav#nav a:hover,nav#nav a.current{color:var(--sky)}
 #menu{display:none;background:transparent;color:white;border:1px solid #ffffff66;border-radius:7px;padding:7px 12px}
 
@@ -158,9 +158,12 @@ footer{background:var(--deep);color:#c5d2e7;padding:27px 0 15px}
   .course-side>.card{display:none}.course-side.open>.card{display:block}.course-side.open>.course-menu{display:flex}
   .cards{grid-template-columns:repeat(2,1fr)}
 }
+@media(max-width:1100px){
+  .nav{height:64px}#menu{display:block}
+  nav#nav{display:none;position:absolute;top:64px;left:0;right:0;background:var(--blue);padding:17px 22px;flex-direction:column;align-items:flex-start;gap:15px;max-height:calc(100vh - 64px);overflow-y:auto}nav#nav.show{display:flex}
+}
 @media(max-width:650px){
-  .wrap{width:calc(100% - 34px)}.nav{height:64px}#menu{display:block}
-  nav#nav{display:none;position:absolute;top:64px;left:0;right:0;background:var(--blue);padding:17px 22px;flex-direction:column;align-items:flex-start;gap:15px}nav#nav.show{display:flex}
+  .wrap{width:calc(100% - 34px)}
   .hero{padding:24px 0 48px}.crumbs{margin-bottom:24px}.hero h1{font-size:42px}.subtitle{font-size:15px}
   .course-body{padding:30px 0 56px}
   .section-head{display:block}.section-intro{margin-top:10px}
