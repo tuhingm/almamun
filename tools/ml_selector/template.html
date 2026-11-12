@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0033A0">
+<meta name="description" content="An interactive method-selection tool for machine learning in economics: test your data and find out whether LASSO, ridge, elastic net, random forest, XGBoost, double machine learning or a causal forest fits.">
+<title>Machine Learning Research Guide | Tuhin G. M. Al Mamun</title>
+<link rel="canonical" href="https://tuhingm.github.io/almamun/ml-guide/">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml"><link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/*TS_CSS*/
+/* machine-learning guide additions (same look as the Panel Data Guide) */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}.stat{background:#f8fafe;border:1px solid #e6ebf4;border-radius:9px;padding:9px 10px}.stat b{display:block;font:800 18px Manrope;color:var(--navy)}.stat span{font-size:10px;color:var(--muted)}
+.tree .el{font-size:10.5px}.tree .n text{font-size:12.5px}.tree .n.leaf text{font-size:13px}
+.gcards.extra{margin-top:14px}
+.exgroup{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#7f8aa1;margin:16px 0 8px}.exgroup:first-child{margin-top:4px}
+.goal{display:flex;gap:8px;margin:0 0 14px}.goal button{flex:1;border:1px solid var(--line);background:#fff;border-radius:10px;padding:11px 12px;text-align:left;font-size:13px}.goal button[aria-pressed=true]{border-color:var(--navy);background:var(--tint);box-shadow:0 0 0 2px #0033a022}.goal small{display:block;color:var(--muted);font-size:11px}
+.cfg{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-top:14px}.cfg label{display:flex;flex-direction:column;gap:5px;font-size:11px;font-weight:700;color:var(--muted)}.cfg select{font:600 13px 'DM Sans',sans-serif;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink)}
+.bars{margin:10px 0}.bar{display:grid;grid-template-columns:120px 1fr 70px;gap:10px;align-items:center;font-size:12px;margin:5px 0}.bar i{display:block;height:12px;border-radius:6px;background:#9fb3d6;transition:width .8s cubic-bezier(.2,.7,.2,1)}.bar.best i{background:var(--navy)}.bar b{font-weight:700;text-align:right}
+.hist svg{display:block;width:100%;height:110px}.hist .t{fill:#0033a0;opacity:.75}.hist .c{fill:#c46000;opacity:.55}.hist line{stroke:#8a2a17;stroke-dasharray:3 3}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.chips span{font-size:11px;border-radius:20px;padding:3px 9px;background:#e8f4ee;color:#0f6a44;border:1px solid #bfe3cf}.chips span.out{background:#f4f6fa;color:#8793ab;border-color:#e1e6ef;text-decoration:line-through}
+@media(max-width:650px){.stats{grid-template-columns:repeat(2,1fr)}.cfg{grid-template-columns:1fr}.bar{grid-template-columns:90px 1fr 60px}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav"><a class="brand" href="../index.html">TGM <span>AL MAMUN</span></a><button id="menu" type="button" aria-expanded="false" aria-controls="nav">Menu</button><nav id="nav" aria-label="Main navigation"><a href="../index.html">Home</a></nav></div></header>
+<section class="hero"><div class="wrap"><div class="kicker">Empirical Research Guide · Machine Learning</div><h1>Which machine-learning method fits your data?</h1><p class="lead">The right method depends on your question and on your data, not on fashion. Decide first whether you want to predict an outcome or estimate a causal effect; then the tests below choose between LASSO, ridge, elastic net, random forest and XGBoost, or between OLS and double machine learning.</p><div class="meta"><span><strong>9</strong> method guides</span><span><strong>9</strong> real example datasets</span><span>Python · scikit-learn · DoubleML</span></div></div></section>
+<main class="wrap">
+<div class="modes" role="group" aria-label="Choose how to start">
+<button type="button" data-mode="example" aria-pressed="true"><b>Try a real example</b><span>See the full sequence on real data</span></button>
+<button type="button" data-mode="upload" aria-pressed="false"><b>Use my own data</b><span>Upload a CSV; the checks run in your browser</span></button>
+<button type="button" data-mode="ask" aria-pressed="false"><b>I have my results</b><span>Answer a few questions</span></button>
+</div>
+<div class="grid">
+<section class="panel" id="work" aria-live="polite">
+ <div id="m-example">
+  <h2>Choose a dataset</h2><p class="sub">Nine real datasets: five prediction problems and four causal questions. Each one leads to a different method.</p>
+  <div id="ex"></div>
+ </div>
+ <div id="m-upload" hidden>
+  <h2>Upload your data</h2><p class="sub">First choose the aim. Then upload a CSV with one row per observation: the outcome in the first column, then the other variables.</p>
+  <div class="goal" role="group" aria-label="Aim"><button type="button" data-goal="predict" aria-pressed="true"><b>Predict an outcome</b><small>Outcome first, then the predictors</small></button><button type="button" data-goal="causal" aria-pressed="false"><b>Estimate a causal effect</b><small>Outcome first, then the treatment, then the controls</small></button></div>
+  <div class="drop" id="drop"><p style="margin:0 0 12px;font-size:13px">Drop a CSV file here, or</p><label class="btn">Choose file<input type="file" id="file" accept=".csv,text/csv,text/plain" hidden></label></div>
+  <p class="hint">Your file is analysed on your own device and is not uploaded anywhere. Numeric columns only (code categories as 0/1 dummies). A column named <code>year</code>, <code>quarter</code>, <code>month</code> or <code>date</code> marks the data as a time series; for forecasting, enter the predictors already lagged (for example <code>infl_l1</code>). Files above 4,000 rows are subsampled for the forest checks. Format examples: <a href="examples/econmath.csv" download>econmath.csv</a> (prediction), <a href="examples/k401_irm.csv" download>k401_irm.csv</a> (causal).</p>
+  <div id="cfg"></div>
+  <div class="status" id="status"><span class="spin"></span><span id="status-text"></span></div>
+  <div id="upload-err"></div>
+ </div>
+ <div id="m-ask" hidden>
+  <h2>Answer from your own results</h2><p class="sub">Use this if you have already run the checks. If you have not, choose “Use my own data” and they are run and explained for you.</p>
+  <div class="q" id="q"></div>
+ </div>
+ <div id="steps"></div>
+</section>
+<aside class="side">
+ <div class="panel tree"><div class="label">Decision path</div><p class="sub sub2" style="font-size:12px;color:var(--muted);margin:2px 0 8px">The path lights up as the evidence comes in.</p><div id="tree"></div><div class="trail" id="trail"></div></div>
+</aside>
+</div>
+<div id="result"></div>
+
+<section class="guides" id="guides"><div class="guides-head"><div><div class="label">Method guides</div><h2>Nine routes to a finished paper</h2></div><p>Each guide takes one real dataset through tuning, validation, diagnostics and writing, with Python code, real output and sample text for the paper.</p></div>
+<div class="gcards" id="gcards"></div>
+<div class="gcards extra">
+<article class="gcard"><span class="tag">No machine learning needed</span><h3>OLS with robust standard errors</h3><p class="when">Few controls that enter linearly</p><p>With fewer than #FEWCTRL# controls and no sign of nonlinearity, OLS already adjusts for the confounders; report the DML estimate as a robustness check …</p><a href="../teaching/econometrics/lectures/02-ols-inference.html">Lecture 02: OLS inference →</a></article>
+<article class="gcard"><span class="tag">Design-based</span><h3>Unobserved confounders</h3><p class="when">Selection on unobservables, no instrument</p><p>Machine learning cannot fix confounding by variables you do not observe. Use a research design: difference-in-differences, synthetic control or regression discontinuity …</p><a href="../causal-inference-guide/index.html">Open the Causal Inference Guide →</a></article>
+</div></section>
+<div class="note"><b>How the tool decides.</b> <b>Prediction.</b> (A1) A date column with at least #MINTS# periods marks a time series: each series is tested with ADF and KPSS, I(1) series are differenced, and validation uses rolling-origin splits that never shuffle time. (A2) With fewer than #SMALLN# observations only regularised linear models are used. (A3) Otherwise a random forest is compared with LASSO by five-fold cross-validated RMSE; if the forest is at least #GAIN#% better, the data are treated as nonlinear. (A4) Linear: if any two predictors are correlated above #HIGHR#, the elastic net; otherwise LASSO if it keeps fewer than half of the predictors at the one-standard-error penalty, and ridge if it keeps more. (A5) Nonlinear: a random forest below #BIGN# observations, XGBoost (gradient boosting) above. <b>Causal effect.</b> (B1) If confounders are unobserved and there is no instrument, machine learning cannot help. (B2) With fewer than #FEWCTRL# controls that enter linearly (the forest does not beat LASSO by #GAIN#% for the outcome or the treatment), OLS is enough. (B3) An instrument leads to DML-IV (the first-stage F should be at least #WEAKF#); a binary treatment to the interactive model, after checking that the propensity scores lie in [#OVLO#, #OVHI#]; a continuous treatment to the partially linear model. (B4) DML is estimated with LASSO and random-forest learners, five-fold cross-fitting; if the two differ by more than one standard error, the forest is reported. (B5) With at least #CFN# observations and a question about who is affected most, a causal forest. These cut-offs are common rules of thumb, like T &lt; 15 in the Panel Data Guide; report the choice and its robustness.</div>
+</main>
+<footer><div class="wrap foot"><span><b>Tuhin G. M. Al Mamun, Ph.D.</b> · Machine Learning Research Guide</span><span><a href="../causal-inference-guide/index.html">Causal Inference Guide</a> · © <span id="year"></span></span></div></footer>
+
+<script type="text/plain" id="py-src">#PYSRC#</script>
+<script>
+const EXAMPLES=/*EXAMPLES*/;
+const C={MINTS:#MINTS#,SMALLN:#SMALLN#,GAIN:#GAIN#,HIGHR:#HIGHR#,BIGN:#BIGN#,FEWCTRL:#FEWCTRL#,WEAKF:#WEAKF#,OVLO:#OVLO#,OVHI:#OVHI#,CFN:#CFN#,SPARSE:#SPARSE#};
+const PYO='https://cdn.jsdelivr.net/pyodide/v0.27.2/full/';
+const L='../teaching/econometrics/lectures/', S='../teaching/statistics/lectures/';
+const ALLG={LASSO:'lasso',RIDGE:'ridge',ENET:'enet',RF:'rf',XGB:'xgb',PLR:'dml-plr',IRM:'dml-irm',PLIV:'dml-iv',CF:'causal-forest'};
+const READY=/*READY*/;   // guide pages already written; the others show as in preparation
+const GUIDE=Object.fromEntries(Object.entries(ALLG).filter(([k,v])=>READY.includes(v)));
+const LEC={reg:[L+'02-ols-inference.html','Lecture 02: OLS inference'],ovb:[L+'03-functional-form-ovb.html','Lecture 03: Functional form and omitted variables'],glm:[S+'09-regression-glm.html','Lecture 09: Regression and GLMs'],ts:[L+'09-time-series.html','Lecture 09: Time-series foundations'],ur:[L+'10-unit-roots-breaks.html','Lecture 10: Unit roots and breaks'],iv:[L+'05-endogeneity-iv.html','Lecture 05: Endogeneity and IV'],ci:[L+'13-causal-inference.html','Lecture 13: Causal inference']};
+const MODELS={
+ LASSO:{name:'LASSO',short:'LASSO',when:'Linear, few predictors matter',why:'The relationship is close to linear, no two predictors are strongly correlated, and the LASSO penalty sets most coefficients to exactly zero. The model is sparse: a few predictors carry the signal, and LASSO finds them while it predicts.',steps:['Standardise the predictors','Choose the penalty by cross-validation (minimum and one-standard-error)','The selected predictors and their stability','Out-of-sample RMSE against OLS','Post-LASSO OLS, and why its p-values are not valid','Write the variable-selection paragraph'],lec:[LEC.glm,LEC.ovb]},
+ RIDGE:{name:'Ridge regression',short:'Ridge',when:'Linear, many small effects',why:'The relationship is close to linear and most predictors carry some signal: LASSO keeps more than half of them even at the one-standard-error penalty. Ridge shrinks every coefficient towards zero without dropping any, which predicts better when the effects are dense.',steps:['Standardise the predictors','Ridge path and cross-validated penalty','Shrinkage of each coefficient','Out-of-sample RMSE against OLS and LASSO','Effective degrees of freedom','Write the shrinkage paragraph'],lec:[LEC.glm,LEC.reg]},
+ ENET:{name:'Elastic net',short:'Elastic net',when:'Linear, strongly correlated predictors',why:'The relationship is close to linear, but some predictors are correlated above '+'#HIGHR#'+'. LASSO picks one of a correlated group almost at random; the elastic net mixes the LASSO and ridge penalties, keeps or drops correlated predictors together, and gives a more stable selection.',steps:['Standardise the predictors','Cross-validate the penalty and the mixing weight α','Grouped selection of correlated predictors','Out-of-sample RMSE against LASSO and ridge','Stability of the selection','Write the model paragraph'],lec:[LEC.glm,LEC.ts]},
+ RF:{name:'Random forest',short:'Random forest',when:'Nonlinear, fewer than '+'#BIGN#'+' observations',why:'A random forest predicts at least '+'#GAIN#'+'% better than LASSO out of sample, so the outcome depends on the predictors nonlinearly or through interactions. With fewer than '+'#BIGN#'+' observations a random forest is the safer choice: it needs little tuning and averages away much of the variance of single trees.',steps:['Grow the forest: trees, depth and features per split','Out-of-bag error and cross-validated RMSE','Tune min. leaf size and max. features','Permutation importance','Partial-dependence plots','Write the model paragraph'],lec:[LEC.glm,LEC.ovb]},
+ XGB:{name:'Gradient boosting (XGBoost)',short:'XGBoost',when:'Nonlinear, at least '+'#BIGN#'+' observations',why:'The data are nonlinear (the forest beats LASSO by at least '+'#GAIN#'+'%) and there are enough observations to tune a boosted model. Gradient boosting fits trees one after another, each correcting the errors of the last; with early stopping it is usually the most accurate method for tabular data.',steps:['Learning rate, depth and number of trees','Early stopping on a validation set','Cross-validated RMSE against the forest','SHAP values for interpretation','Partial dependence of the key predictor','Write the model paragraph'],lec:[LEC.glm,LEC.ovb]},
+ PLR:{name:'Double machine learning: partially linear model',short:'DML partially linear',when:'Continuous treatment, many or nonlinear controls',why:'The treatment is continuous and the controls are many or enter nonlinearly, so OLS would rely on a functional form the data do not support. DML predicts the outcome and the treatment from the controls with machine learning, by cross-fitting, and regresses residual on residual: the effect is estimated with valid standard errors.',steps:['The model: Y = θD + g(X) + ε','Learners for E[Y|X] and E[D|X]','Five-fold cross-fitting, repeated','θ with LASSO and random-forest learners','Compare with OLS','Sensitivity to the learner'],lec:[LEC.ci,LEC.ovb]},
+ IRM:{name:'Double machine learning: interactive model',short:'DML interactive',when:'Binary treatment, many or nonlinear controls',why:'The treatment is binary and the controls are many or enter nonlinearly. The interactive model lets the effect differ with the controls and estimates the average treatment effect with the doubly robust (AIPW) score: it stays consistent if either the outcome model or the propensity score is right.',steps:['The model and the ATE','Propensity scores and overlap; trimming','Learners for the outcome and the propensity','Cross-fitted AIPW estimate of the ATE','LASSO vs random-forest learners','Compare with OLS'],lec:[LEC.ci,LEC.ovb]},
+ PLIV:{name:'Double machine learning with an instrument (DML-IV)',short:'DML-IV',when:'Endogenous treatment, valid instrument',why:'The treatment is endogenous, but an instrument shifts it and, given the controls, affects the outcome only through it. DML-IV partials the controls out of the outcome, the treatment and the instrument with machine learning and then applies IV to the residuals.',steps:['Argue relevance and exclusion','First stage and its F statistic','Partial out the controls by cross-fitting','θ with LASSO and random-forest learners','Compare with 2SLS','Weak-instrument checks'],lec:[LEC.iv,LEC.ci]},
+ CF:{name:'Causal forest',short:'Causal forest',when:'Effects that differ across people, N ≥ '+'#CFN#',why:'You need to know not only the average effect but who gains most, and there are enough observations to estimate effects by subgroup. A causal forest (generalised random forest) estimates the effect for each combination of the controls, with honest splitting and valid confidence intervals.',steps:['Average effect first (DML)','Grow an honest causal forest','Conditional effects and their distribution','Which variables drive the heterogeneity','Effects by subgroup (best linear projection)','Write the heterogeneity paragraph'],lec:[LEC.ci,LEC.reg]},
+ OLS:{name:'OLS with robust standard errors',short:'OLS',when:'Few controls that enter linearly',why:'There are fewer than '+'#FEWCTRL#'+' controls and neither the outcome nor the treatment depends on them nonlinearly: a random forest does not beat LASSO by '+'#GAIN#'+'% for either. OLS already adjusts for the confounders, and machine learning adds variance without removing bias. Report the DML estimate as a robustness check.',steps:['OLS with heteroskedasticity-robust errors','Check the functional form of the controls','DML as a robustness check'],lec:[LEC.reg,LEC.ovb]},
+ CIG:{name:'A research design, not a learner',short:'Causal Inference Guide',when:'Unobserved confounders, no instrument',why:'Machine learning adjusts better for the confounders you observe; it cannot adjust for those you do not. Without an instrument, the effect has to come from a research design: a policy change with a comparison group (difference-in-differences, synthetic control) or a cut-off (regression discontinuity).',steps:[],lec:[LEC.ci]}
+};
+</script>
+<script>
+/*APP_JS*/
+</script>
+</body>
+</html>

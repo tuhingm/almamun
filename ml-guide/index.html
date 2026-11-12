@@ -1,0 +1,712 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0033A0">
+<meta name="description" content="An interactive method-selection tool for machine learning in economics: test your data and find out whether LASSO, ridge, elastic net, random forest, XGBoost, double machine learning or a causal forest fits.">
+<title>Machine Learning Research Guide | Tuhin G. M. Al Mamun</title>
+<link rel="canonical" href="https://tuhingm.github.io/almamun/ml-guide/">
+<meta property="og:locale" content="en_US">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="author" content="Tuhin G. M. Al Mamun">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Tuhin Al Mamun, Ph.D.">
+<meta property="og:title" content="Machine Learning Research Guide | Machine Learning Research Guide | Tuhin Al Mamun"><meta property="og:description" content="An interactive method-selection tool for machine learning in economics: test your data and find out whether LASSO, ridge, elastic net, random forest, XGBoost, double machine learning or a causal forest fits.">
+<meta property="og:url" content="https://tuhingm.github.io/almamun/ml-guide/"><meta property="og:image" content="https://tuhingm.github.io/almamun/assets/og/ml-guide/index.jpg?v=4">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="og:image:type" content="image/jpeg"><meta property="og:image:alt" content="Preview card: Machine Learning Research Guide | Machine Learning Research Guide | Tuhin Al Mamun">
+<meta name="twitter:title" content="Machine Learning Research Guide | Machine Learning Research Guide | Tuhin Al Mamun"><meta name="twitter:description" content="An interactive method-selection tool for machine learning in economics: test your data and find out whether LASSO, ridge, elastic net, random forest, XGBoost, double machine learning or a causal forest fits."><meta name="twitter:image" content="https://tuhingm.github.io/almamun/assets/og/ml-guide/index.jpg?v=4"><meta name="twitter:image:alt" content="Preview card: Machine Learning Research Guide | Machine Learning Research Guide | Tuhin Al Mamun">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml"><link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0033a0;--navy2:#00205b;--ink:#1b2437;--muted:#55617a;--paper:#f3f5fa;--white:#fff;--line:#d5dcea;--sky:#9fd3f0;--sky2:#6ec1e4;--tint:#e3eaf7;--ok:#0f7a4f;--warn:#a05a00}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:25px}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.7 "DM Sans",sans-serif}a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer}.wrap{width:min(1120px,calc(100% - 44px));margin:auto}
+header{background:rgba(0,51,160,.98);color:white;border-bottom:1px solid #ffffff22}.nav{height:72px;display:flex;align-items:center;justify-content:space-between}.brand{font:800 15px Manrope}.brand b{color:var(--sky)}nav{display:flex;gap:25px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#e3ecf8}nav a:hover,nav a.current{color:var(--sky)}
+.hero{background:radial-gradient(circle at 85% 12%,#6ec1e445,transparent 29%),linear-gradient(120deg,#0033a0,#00205b);color:white;padding:60px 0 52px}.kicker{font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--sky)}h1{font:800 clamp(34px,5vw,50px)/1.12 Manrope;letter-spacing:-1.7px;margin:12px 0 14px}.lead{max-width:760px;color:#d0dcf0;margin:0;font-size:15px}.meta{display:flex;gap:22px;flex-wrap:wrap;margin-top:22px;color:#c5d4ea;font-size:11px}.meta strong{color:white}
+main{padding:34px 0 80px}
+.modes{display:flex;gap:8px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:14px;padding:7px;box-shadow:0 5px 18px rgba(0,32,91,.06)}
+.modes button{flex:1 1 180px;border:0;background:transparent;border-radius:10px;padding:13px 14px;text-align:left;color:var(--ink);transition:background .2s,color .2s,transform .2s}
+.modes button b{display:block;font:800 14px Manrope}.modes button span{font-size:11px;color:var(--muted)}
+.modes button:hover{background:#f3f6fc}.modes button[aria-pressed=true]{background:var(--navy);color:#fff;transform:translateY(-1px);box-shadow:0 6px 16px #0033a040}.modes button[aria-pressed=true] span{color:#cfe0fa}
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:22px;margin-top:22px;align-items:start}
+.panel{min-width:0;background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:0 5px 18px rgba(0,32,91,.06)}
+.panel h2{font:800 18px Manrope;margin:0 0 4px;letter-spacing:-.3px}.panel>p.sub{font-size:12px;color:var(--muted);margin:0 0 16px}
+.label{font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#7f8aa1}
+.ex{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.ex button{border:1px solid var(--line);background:#fff;border-radius:11px;padding:14px;text-align:left;transition:transform .2s,box-shadow .2s,border-color .2s}
+.ex button:hover{transform:translateY(-3px);box-shadow:0 12px 26px rgba(0,32,91,.12);border-color:#b9c9e6}.ex button.sel{border-color:var(--navy);box-shadow:0 0 0 2px #0033a030}
+.ex b{display:block;font:700 13.5px/1.35 Manrope;margin:5px 0 4px}.ex small{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--navy)}.ex span{font-size:11px;color:var(--muted);line-height:1.5;display:block}
+.drop{border:2px dashed #b9c9e6;border-radius:12px;padding:26px;text-align:center;background:#f8fafe;transition:background .2s,border-color .2s}.drop.over{background:var(--tint);border-color:var(--navy)}
+.btn{display:inline-flex;align-items:center;gap:6px;background:var(--navy);color:#fff;border:0;border-radius:8px;padding:11px 16px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;transition:transform .2s,box-shadow .2s}.btn:hover{transform:translateY(-2px);box-shadow:0 8px 18px #0033a040}
+.btn.ghost{background:#fff;color:var(--navy);border:1px solid #b9c9e6}.btn[disabled]{opacity:.55;cursor:default;transform:none;box-shadow:none}
+.hint{font-size:11.5px;color:var(--muted);margin:12px 0 0}.hint a{color:var(--navy);font-weight:700}
+.status{display:none;align-items:center;gap:10px;font-size:12px;color:var(--navy);font-weight:600;margin-top:14px}.status.on{display:flex}.spin{width:16px;height:16px;border:2px solid #b9c9e6;border-top-color:var(--navy);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.err{background:#fdf0ee;border:1px solid #f0c5bd;color:#8a2a17;border-radius:9px;padding:11px 14px;font-size:12px;margin-top:14px}
+.q{margin-top:6px}.q h3{font:700 15.5px/1.45 Manrope;margin:6px 0 12px}.opts{display:grid;gap:8px}.opts button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:12px 14px;text-align:left;font-size:13px;transition:background .2s,border-color .2s,transform .2s}.opts button:hover{background:#f3f6fc;border-color:var(--navy);transform:translateX(4px)}.opts small{display:block;color:var(--muted);font-size:11px}
+.step{border-top:1px solid #e6ebf4;padding:18px 0 4px;margin-top:18px;opacity:0;transform:translateY(16px);transition:opacity .55s ease,transform .55s cubic-bezier(.2,.7,.2,1)}.step.in{opacity:1;transform:none}
+.step h3{font:800 14.5px Manrope;margin:3px 0 10px}.step p{font-size:12.5px;color:#434f66;margin:8px 0}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:11.5px}th{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#7f8aa1;text-align:right;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}td{padding:7px 8px;border-bottom:1px solid #edf1f7;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}th:first-child,td:first-child{text-align:left;font-weight:600}
+.tag{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.06em;padding:3px 8px;border-radius:30px;background:var(--tint);color:var(--navy)}.tag.i1{background:#fff1d6;color:var(--warn)}.tag.i2{background:#fde3df;color:#8a2a17}.tag.ok{background:#dcf3e8;color:var(--ok)}
+.sparks{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.spark{border:1px solid #e6ebf4;border-radius:9px;padding:9px 10px}.spark b{font-size:11px}.spark svg{display:block;width:100%;height:44px;margin-top:4px}.spark path{fill:none;stroke:var(--navy);stroke-width:1.4;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.4s ease}.step.in .spark path{stroke-dashoffset:0}
+.explain{background:#f6f8fd;border:1px solid #dfe6f3;border-radius:10px;padding:13px 16px;margin:0 0 14px}.explain summary{font:800 12.5px Manrope;cursor:pointer;color:var(--navy)}.explain p{font-size:12.5px;margin:9px 0 0}.explain ul{margin:8px 0 0;padding-left:18px;font-size:12.5px;color:#434f66}.explain li{margin:4px 0}
+.urv{border:1px solid #e6ebf4;border-radius:11px;padding:14px 16px;margin:10px 0}.urv-head{display:flex;justify-content:space-between;align-items:center;gap:10px}.urv-head b{font:800 13.5px Manrope}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}.pair div{background:#f8fafe;border-radius:8px;padding:7px 9px}.pair small{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#7f8aa1}.pair svg{display:block;width:100%;height:52px;margin-top:3px}.pair path{fill:none;stroke:var(--navy);stroke-width:1.3}.pair line{stroke:#c46000;stroke-width:1;stroke-dasharray:4 3}
+.urv ol{margin:6px 0 0;padding:0;list-style:none;font-size:12.5px;color:#434f66}.urv li{padding:6px 0;border-top:1px solid #edf1f7}.urv li b{color:var(--ink)}.urv .v{margin-top:8px;font-size:12.5px;font-weight:600;color:var(--navy)}
+.yes{color:var(--ok);font-weight:700}.no{color:var(--warn);font-weight:700}
+@media(max-width:480px){.pair{grid-template-columns:1fr}}
+details.code{margin:10px 0 0}details.code summary{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--navy);cursor:pointer}pre{background:#111c36;color:#e3ebfa;border-radius:9px;padding:13px 15px;font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow-x:auto;margin:8px 0 0}
+.side{position:sticky;top:18px}
+.tree svg{display:block;width:100%;height:auto}.tree .n rect{fill:#fff;stroke:#c3d0e6;stroke-width:1.2;transition:fill .35s,stroke .35s}.tree .n text{font:600 13px "DM Sans",sans-serif;fill:#41506a;text-anchor:middle;dominant-baseline:central;transition:fill .35s}
+.tree .n.leaf rect{fill:#f3f6fc}.tree .n.leaf text{font:800 14px Manrope,sans-serif}.tree #n-I2 text{font-size:12px}
+.tree .e{fill:none;stroke:#c9d4e8;stroke-width:1.4}.tree .e{transition:stroke .45s ease,stroke-width .45s ease}.tree .e.hl{stroke:var(--navy);stroke-width:2.8}
+.tree .el{font:700 11px "DM Sans",sans-serif;fill:#8793ab;text-anchor:middle}
+.tree .n.on rect{fill:var(--tint);stroke:var(--navy)}.tree .n.on text{fill:var(--navy)}.tree .n.leaf.on rect{fill:var(--navy);stroke:var(--navy);animation:pop .5s ease}.tree .n.leaf.on text{fill:#fff}.tree .n.alt rect{stroke:var(--navy);stroke-dasharray:4 3}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.12)}100%{transform:scale(1)}}.tree .n{transform-box:fill-box;transform-origin:center}
+.trail{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:14px;min-height:28px}.trail span{font-size:10.5px;font-weight:700;padding:5px 10px;border-radius:30px;background:var(--tint);color:var(--navy);animation:rise .4s ease both}.trail span.final{background:var(--navy);color:#fff}.trail i{color:#9aa6bd;font-style:normal;font-size:11px}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.result{margin-top:22px;border-radius:16px;padding:26px;color:#fff;background:radial-gradient(circle at 88% 10%,#6ec1e455,transparent 34%),linear-gradient(120deg,#0033a0,#00205b);box-shadow:0 18px 40px rgba(0,32,91,.25);animation:rise .6s cubic-bezier(.2,.7,.2,1) both}
+.result .label{color:var(--sky)}.result h2{font:800 clamp(30px,5vw,44px)/1.1 Manrope;letter-spacing:-1.2px;margin:8px 0 10px}.result p{color:#d6e2f6;font-size:13.5px;margin:0 0 12px;max-width:820px}
+.result ul{margin:6px 0 16px;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:7px}.result li{font-size:11px;font-weight:600;padding:6px 11px;border:1px solid #ffffff44;border-radius:30px;background:#ffffff14}
+.result .acts{display:flex;gap:10px;flex-wrap:wrap}.result .btn{background:#fff;color:var(--navy)}.result .btn.ghost{background:transparent;color:#fff;border:1px solid #ffffff77}
+.result .caution{background:#ffffff18;border:1px solid #ffffff33;border-radius:10px;padding:11px 14px;font-size:12px;color:#eef4ff;margin:0 0 14px}
+.guides{margin-top:46px}.guides-head{display:flex;justify-content:space-between;align-items:end;gap:20px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:16px}.guides h2{font:800 22px Manrope;margin:4px 0 0;letter-spacing:-.4px}.guides-head p{font-size:12px;color:var(--muted);margin:0;max-width:430px}
+.gcards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.gcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;box-shadow:0 5px 18px rgba(0,32,91,.06);transition:transform .25s,box-shadow .25s,border-color .25s;scroll-margin-top:20px}.gcard:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(0,32,91,.13);border-color:#b9c9e6}.gcard.flash{animation:flash 1.6s ease}@keyframes flash{0%,60%{box-shadow:0 0 0 3px #0033a055}100%{box-shadow:0 5px 18px rgba(0,32,91,.06)}}
+.gcard h3{font:800 17px Manrope;margin:6px 0 4px}.gcard .when{font-size:11.5px;color:var(--navy);font-weight:700;margin:0 0 8px}.gcard p{font-size:11.5px;color:var(--muted);margin:0 0 12px;line-height:1.6}.gcard a{display:block;font-size:11.5px;font-weight:700;color:var(--navy);margin-top:5px}.gcard a:hover{text-decoration:underline}
+.note{font-size:11.5px;color:#4a586f;background:var(--tint);border:1px solid #cfdaf0;border-radius:9px;padding:14px 18px;margin-top:26px}
+footer{background:var(--navy2);color:#c3d0e4;padding:22px 0;font-size:10px}.foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.foot b{color:#fff}
+[hidden]{display:none!important}
+@media(max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}.side{position:static}.tree svg{display:none}.tree .sub2{display:none}.gcards{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.wrap{width:calc(100% - 34px)}.nav{height:65px}nav{gap:11px;font-size:8.5px}.hero{padding:44px 0 38px}.ex{grid-template-columns:1fr}.gcards{grid-template-columns:1fr}.panel{padding:17px}.guides-head{display:block}.result{padding:20px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+@media(max-width:650px){.brand{white-space:nowrap;margin-right:12px}header nav{gap:9px;font-size:8px;letter-spacing:.06em;line-height:1.35;text-align:left}}
+/* machine-learning guide additions (same look as the Panel Data Guide) */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}.stat{background:#f8fafe;border:1px solid #e6ebf4;border-radius:9px;padding:9px 10px}.stat b{display:block;font:800 18px Manrope;color:var(--navy)}.stat span{font-size:10px;color:var(--muted)}
+.tree .el{font-size:10.5px}.tree .n text{font-size:12.5px}.tree .n.leaf text{font-size:13px}
+.gcards.extra{margin-top:14px}
+.exgroup{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#7f8aa1;margin:16px 0 8px}.exgroup:first-child{margin-top:4px}
+.goal{display:flex;gap:8px;margin:0 0 14px}.goal button{flex:1;border:1px solid var(--line);background:#fff;border-radius:10px;padding:11px 12px;text-align:left;font-size:13px}.goal button[aria-pressed=true]{border-color:var(--navy);background:var(--tint);box-shadow:0 0 0 2px #0033a022}.goal small{display:block;color:var(--muted);font-size:11px}
+.cfg{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-top:14px}.cfg label{display:flex;flex-direction:column;gap:5px;font-size:11px;font-weight:700;color:var(--muted)}.cfg select{font:600 13px 'DM Sans',sans-serif;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink)}
+.bars{margin:10px 0}.bar{display:grid;grid-template-columns:120px 1fr 70px;gap:10px;align-items:center;font-size:12px;margin:5px 0}.bar i{display:block;height:12px;border-radius:6px;background:#9fb3d6;transition:width .8s cubic-bezier(.2,.7,.2,1)}.bar.best i{background:var(--navy)}.bar b{font-weight:700;text-align:right}
+.hist svg{display:block;width:100%;height:110px}.hist .t{fill:#0033a0;opacity:.75}.hist .c{fill:#c46000;opacity:.55}.hist line{stroke:#8a2a17;stroke-dasharray:3 3}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.chips span{font-size:11px;border-radius:20px;padding:3px 9px;background:#e8f4ee;color:#0f6a44;border:1px solid #bfe3cf}.chips span.out{background:#f4f6fa;color:#8793ab;border-color:#e1e6ef;text-decoration:line-through}
+@media(max-width:650px){.stats{grid-template-columns:repeat(2,1fr)}.cfg{grid-template-columns:1fr}.bar{grid-template-columns:90px 1fr 60px}}
+</style>
+<link rel="stylesheet" href="../assets/css/site-header.css">
+<script type="application/ld+json" id="site-ld">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://tuhingm.github.io/almamun/ml-guide/#webpage","url":"https://tuhingm.github.io/almamun/ml-guide/","name":"Machine Learning Research Guide | Tuhin G. M. Al Mamun","description":"An interactive method-selection tool for machine learning in economics: test your data and find out whether LASSO, ridge, elastic net, random forest, XGBoost, double machine learning or a causal forest fits.","isPartOf":{"@id":"https://tuhingm.github.io/almamun/#website"},"inLanguage":"en","author":{"@id":"https://tuhingm.github.io/almamun/#person"},"copyrightHolder":{"@id":"https://tuhingm.github.io/almamun/#person"},"primaryImageOfPage":{"@type":"ImageObject","url":"https://tuhingm.github.io/almamun/assets/og/ml-guide/index.jpg"},"breadcrumb":{"@id":"https://tuhingm.github.io/almamun/ml-guide/#breadcrumb"}},{"@type":"Person","@id":"https://tuhingm.github.io/almamun/#person","name":"Tuhin G. M. Al Mamun","alternateName":["Tuhin Al Mamun","Tuhin","Tuhin G M Al Mamun","Tuhin G.M. Al Mamun","Tuhin GM Al Mamun","T. G. M. Al Mamun","TGM Al Mamun","Al Mamun Tuhin","Tuhin Al Mamun, Ph.D.","Dr. Tuhin Al Mamun"],"givenName":"Tuhin","familyName":"Al Mamun","honorificSuffix":"Ph.D.","url":"https://tuhingm.github.io/almamun/","image":"https://tuhingm.github.io/almamun/assets/og-image.jpg","jobTitle":"Economist and Quantitative Researcher","description":"Economist and quantitative researcher working on monetary and fiscal policy, DSGE and HANK models, environmental economics and econometrics.","alumniOf":{"@type":"CollegeOrUniversity","name":"Hannam University","address":"Daejeon, South Korea"},"hasCredential":{"@type":"EducationalOccupationalCredential","credentialCategory":"degree","name":"Ph.D. in Economics","recognizedBy":{"@type":"CollegeOrUniversity","name":"Hannam University"}},"nationality":{"@type":"Country","name":"Bangladesh"},"knowsAbout":["Monetary policy","Fiscal policy","Macroeconomics","DSGE models","Heterogeneous Agent New Keynesian (HANK) models","Bayesian estimation","Econometrics","Time-series econometrics","Panel data econometrics","Causal inference","Environmental economics","Climate economics","Statistics"],"sameAs":["https://orcid.org/0009-0005-0275-6922","https://scholar.google.com/citations?user=CMV8R_0AAAAJ&hl=en","https://www.scopus.com/authid/detail.uri?authorId=59544050900","https://www.linkedin.com/in/tuhinecon/","https://sites.google.com/view/tuhin2022/profile","https://www.researchgate.net/profile/Tuhin-G-M-Al-Mamun","https://github.com/tuhingm"]},{"@type":"WebSite","@id":"https://tuhingm.github.io/almamun/#website","url":"https://tuhingm.github.io/almamun/","name":"Tuhin G. M. Al Mamun, Ph.D.","alternateName":["Tuhin Al Mamun","TGM Al Mamun"],"publisher":{"@id":"https://tuhingm.github.io/almamun/#person"},"inLanguage":"en"},{"@type":"BreadcrumbList","@id":"https://tuhingm.github.io/almamun/ml-guide/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://tuhingm.github.io/almamun/"},{"@type":"ListItem","position":2,"name":"Machine Learning Research Guide","item":"https://tuhingm.github.io/almamun/ml-guide/"}]}]}</script>
+</head>
+<body>
+<header class="site-header"><div class="wrap nav"><a class="brand" href="../index.html" aria-label="Tuhin G. M. Al Mamun — home">TGM <span>AL MAMUN</span></a><button id="menu" type="button" aria-expanded="false" aria-controls="nav">Menu</button><nav id="nav" aria-label="Main navigation"><a href="../index.html">Home</a><a href="../teaching/index.html">Teaching Courses</a><a href="../working-papers/index.html">Working Papers</a><a href="../research-guide/index.html">Time-Series Guide</a><a href="../panel-data-guide/index.html">Panel-Data Guide</a><a href="../causal-inference-guide/index.html">Causal Inference</a><a href="../dsge-guide/index.html">DSGE Guide</a><a href="../ml-guide/index.html" class="current" aria-current="page">ML Guide</a><a href="../Tuhin%20Al%20Mamun_CV.pdf">CV</a></nav></div></header>
+<section class="hero"><div class="wrap"><div class="kicker">Empirical Research Guide · Machine Learning</div><h1>Which machine-learning method fits your data?</h1><p class="lead">The right method depends on your question and on your data, not on fashion. Decide first whether you want to predict an outcome or estimate a causal effect; then the tests below choose between LASSO, ridge, elastic net, random forest and XGBoost, or between OLS and double machine learning.</p><div class="meta"><span><strong>9</strong> method guides</span><span><strong>9</strong> real example datasets</span><span>Python · scikit-learn · DoubleML</span></div></div></section>
+<main class="wrap">
+<div class="modes" role="group" aria-label="Choose how to start">
+<button type="button" data-mode="example" aria-pressed="true"><b>Try a real example</b><span>See the full sequence on real data</span></button>
+<button type="button" data-mode="upload" aria-pressed="false"><b>Use my own data</b><span>Upload a CSV; the checks run in your browser</span></button>
+<button type="button" data-mode="ask" aria-pressed="false"><b>I have my results</b><span>Answer a few questions</span></button>
+</div>
+<div class="grid">
+<section class="panel" id="work" aria-live="polite">
+ <div id="m-example">
+  <h2>Choose a dataset</h2><p class="sub">Nine real datasets: five prediction problems and four causal questions. Each one leads to a different method.</p>
+  <div id="ex"></div>
+ </div>
+ <div id="m-upload" hidden>
+  <h2>Upload your data</h2><p class="sub">First choose the aim. Then upload a CSV with one row per observation: the outcome in the first column, then the other variables.</p>
+  <div class="goal" role="group" aria-label="Aim"><button type="button" data-goal="predict" aria-pressed="true"><b>Predict an outcome</b><small>Outcome first, then the predictors</small></button><button type="button" data-goal="causal" aria-pressed="false"><b>Estimate a causal effect</b><small>Outcome first, then the treatment, then the controls</small></button></div>
+  <div class="drop" id="drop"><p style="margin:0 0 12px;font-size:13px">Drop a CSV file here, or</p><label class="btn">Choose file<input type="file" id="file" accept=".csv,text/csv,text/plain" hidden></label></div>
+  <p class="hint">Your file is analysed on your own device and is not uploaded anywhere. Numeric columns only (code categories as 0/1 dummies). A column named <code>year</code>, <code>quarter</code>, <code>month</code> or <code>date</code> marks the data as a time series; for forecasting, enter the predictors already lagged (for example <code>infl_l1</code>). Files above 4,000 rows are subsampled for the forest checks. Format examples: <a href="examples/econmath.csv" download>econmath.csv</a> (prediction), <a href="examples/k401_irm.csv" download>k401_irm.csv</a> (causal).</p>
+  <div id="cfg"></div>
+  <div class="status" id="status"><span class="spin"></span><span id="status-text"></span></div>
+  <div id="upload-err"></div>
+ </div>
+ <div id="m-ask" hidden>
+  <h2>Answer from your own results</h2><p class="sub">Use this if you have already run the checks. If you have not, choose “Use my own data” and they are run and explained for you.</p>
+  <div class="q" id="q"></div>
+ </div>
+ <div id="steps"></div>
+</section>
+<aside class="side">
+ <div class="panel tree"><div class="label">Decision path</div><p class="sub sub2" style="font-size:12px;color:var(--muted);margin:2px 0 8px">The path lights up as the evidence comes in.</p><div id="tree"></div><div class="trail" id="trail"></div></div>
+</aside>
+</div>
+<div id="result"></div>
+
+<section class="guides" id="guides"><div class="guides-head"><div><div class="label">Method guides</div><h2>Nine routes to a finished paper</h2></div><p>Each guide takes one real dataset through tuning, validation, diagnostics and writing, with Python code, real output and sample text for the paper.</p></div>
+<div class="gcards" id="gcards"></div>
+<div class="gcards extra">
+<article class="gcard"><span class="tag">No machine learning needed</span><h3>OLS with robust standard errors</h3><p class="when">Few controls that enter linearly</p><p>With fewer than 10 controls and no sign of nonlinearity, OLS already adjusts for the confounders; report the DML estimate as a robustness check …</p><a href="../teaching/econometrics/lectures/02-ols-inference.html">Lecture 02: OLS inference →</a></article>
+<article class="gcard"><span class="tag">Design-based</span><h3>Unobserved confounders</h3><p class="when">Selection on unobservables, no instrument</p><p>Machine learning cannot fix confounding by variables you do not observe. Use a research design: difference-in-differences, synthetic control or regression discontinuity …</p><a href="../causal-inference-guide/index.html">Open the Causal Inference Guide →</a></article>
+</div></section>
+<div class="note"><b>How the tool decides.</b> <b>Prediction.</b> (A1) A date column with at least 50 periods marks a time series: each series is tested with ADF and KPSS, I(1) series are differenced, and validation uses rolling-origin splits that never shuffle time. (A2) With fewer than 100 observations only regularised linear models are used. (A3) Otherwise a random forest is compared with LASSO by five-fold cross-validated RMSE; if the forest is at least 5% better, the data are treated as nonlinear. (A4) Linear: if any two predictors are correlated above 0.8, the elastic net; otherwise LASSO if it keeps fewer than half of the predictors at the one-standard-error penalty, and ridge if it keeps more. (A5) Nonlinear: a random forest below 1000 observations, XGBoost (gradient boosting) above. <b>Causal effect.</b> (B1) If confounders are unobserved and there is no instrument, machine learning cannot help. (B2) With fewer than 10 controls that enter linearly (the forest does not beat LASSO by 5% for the outcome or the treatment), OLS is enough. (B3) An instrument leads to DML-IV (the first-stage F should be at least 10); a binary treatment to the interactive model, after checking that the propensity scores lie in [0.05, 0.95]; a continuous treatment to the partially linear model. (B4) DML is estimated with LASSO and random-forest learners, five-fold cross-fitting; if the two differ by more than one standard error, the forest is reported. (B5) With at least 2000 observations and a question about who is affected most, a causal forest. These cut-offs are common rules of thumb, like T &lt; 15 in the Panel Data Guide; report the choice and its robustness.</div>
+</main>
+<footer><div class="wrap foot"><span><b>Tuhin G. M. Al Mamun, Ph.D.</b> · Machine Learning Research Guide</span><span><a href="../causal-inference-guide/index.html">Causal Inference Guide</a> · © <span id="year"></span></span></div></footer>
+
+<script type="text/plain" id="py-src">"""Decision engine for the Machine Learning Guide (ml-guide/index.html).
+
+Runs at build time on the example datasets and in the visitor's browser (Pyodide) on uploaded data, so it uses only
+numpy, pandas, scipy, statsmodels and scikit-learn. analyze(csv_text, goal, treat, instr) returns a JSON string.
+
+Route A (prediction)                                    Route B (causal effect of one treatment D on the outcome Y)
+  A1  time series (a date column, T >= 50): ADF + KPSS,     B2  OLS is enough if p < 10 controls and neither Y nor D
+      I(1) variables are differenced; validation is              depends on the controls nonlinearly
+      rolling-origin, never shuffled                        B3  treatment type: instrument -> DML-IV (first-stage F);
+  A2  N < 100: regularised linear models only                    binary -> DML interactive model (overlap check);
+  A3  random forest vs LASSO, cross-validated RMSE:              continuous -> DML partially linear model
+      forest >= 5 % lower -> nonlinear                      B4  DML with LASSO and with random-forest learners;
+  A4  linear: max |r| > 0.8 -> elastic net; LASSO keeps          a gap above one standard error -> nonlinear,
+      < 50 % of predictors -> LASSO; otherwise ridge              report the forest
+  A5  nonlinear: N < 1,000 -> random forest; else XGBoost   B5  N >= 2,000 and effects by subgroup -> causal forest
+"""
+import io, json, re, warnings
+import numpy as np
+import pandas as pd
+
+warnings.simplefilter("ignore")
+
+MIN_TS = 50          # A1: periods needed to treat the data as a time series
+SMALL_N = 100        # A2: below this, only regularised linear models
+GAIN = 0.05          # A3: random forest must cut the CV RMSE by at least 5 %
+HIGH_R = 0.8         # A4: correlation that calls for the elastic net
+SPARSE = 0.5         # A4: LASSO keeps fewer than half of the predictors -> sparse
+BIG_N = 1000         # A5: XGBoost needs at least this many observations
+FEW_CTRL = 10        # B2: fewer controls than this, OLS may be enough
+OVERLAP = (0.05, 0.95)   # B3: propensity scores outside this range are a problem
+WEAK_F = 10          # B3: first-stage F below this means a weak instrument
+CF_N = 2000          # B5: causal forests need at least this many observations
+MAX_ROWS = 4000      # computing budget in the browser: larger files are subsampled for the forest checks
+TIME_NAMES = re.compile(r"^(year|date|time|period|quarter|month|week|day|t|yq|ym)$", re.I)
+
+
+def _f(x, d=4):
+    return None if x is None or not np.isfinite(x) else round(float(x), d)
+
+
+def read(text):
+    df = pd.read_csv(io.StringIO(text))
+    df.columns = [str(c).strip() for c in df.columns]
+    tcol = next((c for c in df.columns if TIME_NAMES.match(c)), None)
+    if tcol:
+        df = df.sort_values(tcol)
+    num = [c for c in df.columns if c != tcol and pd.api.types.is_numeric_dtype(df[c])]
+    skipped = [c for c in df.columns if c != tcol and c not in num]
+    df = df[([tcol] if tcol else []) + num].dropna().reset_index(drop=True)
+    return df, tcol, num, skipped
+
+
+def is_binary(s):
+    u = np.unique(s.dropna())
+    return len(u) == 2 and set(np.round(u, 8)) <= {0.0, 1.0}
+
+
+def unit_root(x):
+    """ADF (AIC lag choice) and KPSS on the level, then on the first difference if needed. Returns the order and tests."""
+    from statsmodels.tsa.stattools import adfuller, kpss
+    out, s = {}, pd.Series(x).dropna()
+    for order, lab in ((0, "level"), (1, "diff")):
+        a = adfuller(s, autolag="AIC")
+        try:
+            k = kpss(s, regression="c", nlags="auto")
+            kp = (k[0], k[1])
+        except Exception:
+            kp = (None, None)
+        out[lab] = dict(adf=_f(a[0], 3), adf_p=_f(a[1], 4), kpss=_f(kp[0], 3), kpss_p=_f(kp[1], 3))
+        if a[1] < 0.05:
+            out["order"] = order
+            return out
+        s = s.diff().dropna()
+    out["order"] = 2
+    return out
+
+
+def splitter(n, ts, k=5):
+    from sklearn.model_selection import KFold, TimeSeriesSplit
+    return TimeSeriesSplit(n_splits=k) if ts else KFold(n_splits=k, shuffle=True, random_state=0)
+
+
+def cv_rmse(model, X, y, ts):
+    from sklearn.model_selection import cross_val_score
+    s = cross_val_score(model, X, y, cv=splitter(len(y), ts), scoring="neg_mean_squared_error")
+    return float(np.sqrt(-s.mean()))
+
+
+def models():
+    from sklearn.pipeline import make_pipeline
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.linear_model import LassoCV, RidgeCV, ElasticNetCV, LinearRegression
+    from sklearn.ensemble import RandomForestRegressor, HistGradientBoostingRegressor
+    return dict(
+        ols=make_pipeline(StandardScaler(), LinearRegression()),
+        lasso=make_pipeline(StandardScaler(), LassoCV(cv=5, random_state=0, max_iter=20000)),
+        ridge=make_pipeline(StandardScaler(), RidgeCV(alphas=np.logspace(-3, 4, 40))),
+        enet=make_pipeline(StandardScaler(), ElasticNetCV(l1_ratio=[.1, .5, .9], cv=5, random_state=0, max_iter=20000)),
+        rf=RandomForestRegressor(n_estimators=200, min_samples_leaf=5, max_features=0.5, random_state=0, n_jobs=1),
+        gb=HistGradientBoostingRegressor(max_iter=300, learning_rate=0.05, random_state=0))
+
+
+def lasso_1se(X, y, ts):
+    """Variables kept by LASSO at the one-standard-error penalty (the largest penalty whose CV error is within one
+    standard error of the minimum; glmnet's lambda.1se), the usual choice when the aim is to see which predictors matter."""
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.linear_model import LassoCV, Lasso
+    Xs = StandardScaler().fit_transform(X)
+    cv = LassoCV(cv=splitter(len(y), ts), random_state=0, max_iter=20000).fit(Xs, y)
+    m, s = cv.mse_path_.mean(1), cv.mse_path_.std(1) / np.sqrt(cv.mse_path_.shape[1])
+    i = int(np.argmin(m))
+    ok = np.where(m <= m[i] + s[i])[0]
+    alpha = float(cv.alphas_[ok].max())
+    coef = Lasso(alpha=alpha, max_iter=20000).fit(Xs, y).coef_
+    return [x for x, b in zip(X.columns, coef) if abs(b) > 1e-10], alpha
+
+
+def summarize(df, cols):
+    return [dict(var=c, mean=_f(df[c].mean()), sd=_f(df[c].std()), min=_f(df[c].min()), max=_f(df[c].max()),
+                 binary=bool(is_binary(df[c]))) for c in cols]
+
+
+def corr_info(X):
+    c = X.corr().to_numpy(copy=True)
+    np.fill_diagonal(c, 0)
+    i, j = np.unravel_index(np.nanargmax(np.abs(c)), c.shape) if c.size > 1 else (0, 0)
+    return dict(max_r=_f(abs(c[i, j]) if c.size > 1 else 0, 3), pair=[X.columns[i], X.columns[j]] if c.size > 1 else [],
+                n_high=int((np.abs(np.triu(c, 1)) > HIGH_R).sum()))
+
+
+def sub(df, n=MAX_ROWS, ts=False):
+    if len(df) <= n:
+        return df, False
+    return (df.tail(n) if ts else df.sample(n, random_state=0)), True
+
+
+# ------------------------------------------------------------------ route A: prediction
+def predict(df, tcol, cols):
+    y_name, xs = cols[0], cols[1:]
+    R = dict(goal="predict", dep=y_name, xs=xs, n=len(df), p=len(xs), time=tcol)
+    R["summary"] = summarize(df, cols)
+    R["corr"] = corr_info(df[xs]) if len(xs) > 1 else dict(max_r=0, pair=[], n_high=0)
+    ts = bool(tcol) and len(df) >= MIN_TS
+    R["ts"] = ts
+    d = df[cols].copy()
+    if ts:
+        ur, diffed, base_order = [], [], {}
+        lag = re.compile(r"^(.*?)_(?:l|lag)(\d+)$")
+        for c in cols:                     # lags of one series share its order: test each series once
+            m = lag.match(c)
+            base = m.group(1) if m else c
+            if base not in base_order:
+                if is_binary(df[c]) or df[c].nunique() < 8:
+                    base_order[base] = 0
+                    ur.append(dict(var=base, order=0, skipped=True))
+                else:
+                    u = unit_root(df[c]); u["var"] = base; ur.append(u)
+                    base_order[base] = u["order"]
+            if base_order[base] >= 1:
+                d[c] = d[c].diff(); diffed.append(c)
+        d = d.dropna().reset_index(drop=True)
+        R["unitroot"], R["diffed"] = ur, diffed
+        R["first"], R["last"] = str(df[tcol].iloc[0]), str(df[tcol].iloc[-1])
+    n = len(d)
+    R["n_used"] = n
+    X, y = d[xs], d[y_name]
+    M = models()
+    dd, R["subsampled"] = sub(d, ts=ts)
+    Xs, ys = dd[xs], dd[y_name]
+    R["rmse"] = {"ols": _f(cv_rmse(M["ols"], Xs, ys, ts)), "lasso": _f(cv_rmse(M["lasso"], Xs, ys, ts))}
+    R["sd_y"] = _f(float(ys.std()))
+    if n < SMALL_N:
+        R["small"] = True
+        R["nonlinear"] = None
+    else:
+        R["small"] = False
+        R["rmse"]["rf"] = _f(cv_rmse(M["rf"], Xs, ys, ts))
+        R["gain"] = _f(1 - R["rmse"]["rf"] / R["rmse"]["lasso"], 4)
+        R["nonlinear"] = bool(R["gain"] >= GAIN)
+    if R["nonlinear"]:
+        if n >= BIG_N:
+            R["rmse"]["gb"] = _f(cv_rmse(M["gb"], Xs, ys, ts))
+        R["model"] = "XGB" if n >= BIG_N else "RF"
+    else:
+        kept, alpha = lasso_1se(X, y, ts)
+        R["lasso_kept"], R["lasso_share"] = kept, _f(len(kept) / len(xs), 3)
+        R["lasso_alpha"] = _f(alpha, 6)
+        R["rmse"]["ridge"] = _f(cv_rmse(M["ridge"], Xs, ys, ts))
+        R["rmse"]["enet"] = _f(cv_rmse(M["enet"], Xs, ys, ts))
+        if R["corr"]["max_r"] > HIGH_R:
+            R["model"] = "ENET"
+        elif len(kept) / len(xs) < SPARSE:
+            R["model"] = "LASSO"
+        else:
+            R["model"] = "RIDGE"
+    return R
+
+
+# ------------------------------------------------------------------ route B: causal effect
+def crossfit(y, D, X, learner, kind, Z=None, folds=5, reps=2, seed=0):
+    """Double machine learning by cross-fitting (Chernozhukov et al. 2018). Returns theta, se (median over repetitions)."""
+    from sklearn.base import clone
+    from sklearn.model_selection import KFold
+    from sklearn.linear_model import LogisticRegressionCV
+    from sklearn.ensemble import RandomForestClassifier
+    y, D, X = np.asarray(y, float), np.asarray(D, float), np.asarray(X, float)
+    Z = None if Z is None else np.asarray(Z, float)
+    ths, ses = [], []
+    for r in range(reps):
+        kf = KFold(folds, shuffle=True, random_state=seed + r)
+        if kind == "IRM":
+            g0, g1, m = np.zeros_like(y), np.zeros_like(y), np.zeros_like(y)
+            for tr, te in kf.split(X):
+                for v, arr in ((0, g0), (1, g1)):
+                    idx = tr[D[tr] == v]
+                    arr[te] = clone(learner["reg"]).fit(X[idx], y[idx]).predict(X[te])
+                clf = clone(learner["clf"]).fit(X[tr], D[tr])
+                m[te] = clf.predict_proba(X[te])[:, 1]
+            m = np.clip(m, 0.01, 0.99)
+            psi = g1 - g0 + D * (y - g1) / m - (1 - D) * (y - g0) / (1 - m)
+            th = psi.mean(); se = psi.std(ddof=1) / np.sqrt(len(y))
+        else:
+            ly, md, mz = np.zeros_like(y), np.zeros_like(y), np.zeros_like(y)
+            for tr, te in kf.split(X):
+                ly[te] = clone(learner["reg"]).fit(X[tr], y[tr]).predict(X[te])
+                md[te] = clone(learner["reg"]).fit(X[tr], D[tr]).predict(X[te])
+                if Z is not None:
+                    mz[te] = clone(learner["reg"]).fit(X[tr], Z[tr]).predict(X[te])
+            uy, ud = y - ly, D - md
+            v = ud if Z is None else Z - mz
+            th = (v @ uy) / (v @ ud)
+            e = uy - th * ud
+            J = -(v @ ud) / len(y)
+            se = np.sqrt(np.mean((v * e) ** 2) / J ** 2 / len(y))
+        ths.append(th); ses.append(se)
+    th = float(np.median(ths))
+    se = float(np.median(np.sqrt(np.array(ses) ** 2 + (np.array(ths) - th) ** 2)))
+    return th, se
+
+
+def learners(binary=False):
+    from sklearn.pipeline import make_pipeline
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.linear_model import LassoCV, LogisticRegressionCV
+    from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+    return {"lasso": dict(reg=make_pipeline(StandardScaler(), LassoCV(cv=5, random_state=0, max_iter=20000)),
+                          clf=make_pipeline(StandardScaler(), LogisticRegressionCV(cv=5, penalty="l1", solver="saga", max_iter=5000, Cs=10))),
+            "rf": dict(reg=RandomForestRegressor(n_estimators=200, min_samples_leaf=5, max_features=0.5, random_state=0, n_jobs=1),
+                       clf=RandomForestClassifier(n_estimators=200, min_samples_leaf=5, max_features=0.5, random_state=0, n_jobs=1))}
+
+
+def causal(df, cols, treat, instr):
+    import statsmodels.api as sm
+    y_name = cols[0]
+    treat = treat if treat in cols and treat != y_name else cols[1]
+    instr = instr if instr and instr in cols and instr not in (y_name, treat) else None
+    xs = [c for c in cols if c not in (y_name, treat, instr)]
+    R = dict(goal="causal", dep=y_name, treat=treat, instr=instr, xs=xs, n=len(df), p=len(xs))
+    R["summary"] = summarize(df, [y_name, treat] + ([instr] if instr else []) + xs)
+    R["corr"] = corr_info(df[xs]) if len(xs) > 1 else dict(max_r=0, pair=[], n_high=0)
+    R["binary"] = bool(is_binary(df[treat]))
+    dd, R["subsampled"] = sub(df)
+    y, D, X = dd[y_name], dd[treat], dd[xs]
+    # OLS benchmark with robust standard errors
+    o = sm.OLS(df[y_name], sm.add_constant(df[[treat] + xs])).fit(cov_type="HC1")
+    R["ols"] = dict(b=_f(o.params[treat]), se=_f(o.bse[treat]), p=_f(o.pvalues[treat], 4))
+    # B2: do the controls enter nonlinearly? random forest vs LASSO for Y on X and for D on X
+    M = models()
+    nl = {}
+    for lab, tgt in (("y", y), ("d", D)):
+        l, r = cv_rmse(M["lasso"], X, tgt, False), cv_rmse(M["rf"], X, tgt, False)
+        nl[lab] = dict(lasso=_f(l), rf=_f(r), gain=_f(1 - r / l, 4))
+    R["nl"] = nl
+    R["controls_nonlinear"] = bool(max(nl["y"]["gain"], nl["d"]["gain"]) >= GAIN)
+    R["ols_enough"] = bool(len(xs) < FEW_CTRL and not R["controls_nonlinear"])
+    # B3: treatment type, overlap, instrument strength
+    if instr:
+        fs = sm.OLS(df[treat], sm.add_constant(df[[instr] + xs])).fit(cov_type="HC1")
+        R["first_stage"] = dict(b=_f(fs.params[instr]), se=_f(fs.bse[instr]), F=_f((fs.params[instr] / fs.bse[instr]) ** 2, 2))
+        R["weak"] = bool(R["first_stage"]["F"] < WEAK_F)
+        kind = "PLIV"
+    elif R["binary"]:
+        from sklearn.model_selection import cross_val_predict
+        from sklearn.ensemble import RandomForestClassifier
+        ps = cross_val_predict(RandomForestClassifier(n_estimators=200, min_samples_leaf=5, max_features=0.5, random_state=0, n_jobs=1),
+                               X, D.astype(int), cv=5, method="predict_proba")[:, 1]
+        lo, hi = OVERLAP
+        R["overlap"] = dict(min=_f(ps.min(), 3), max=_f(ps.max(), 3), share_out=_f(np.mean((ps < lo) | (ps > hi)), 4),
+                            hist_t=np.histogram(ps[D.to_numpy() == 1], bins=20, range=(0, 1))[0].tolist(),
+                            hist_c=np.histogram(ps[D.to_numpy() == 0], bins=20, range=(0, 1))[0].tolist())
+        R["treated_share"] = _f(D.mean(), 4)
+        kind = "IRM"
+    else:
+        kind = "PLR"
+    R["kind"] = kind
+    # B4: DML with both learners
+    L = learners(R["binary"])
+    Z = dd[instr] if instr else None
+    est = {}
+    for k in ("lasso", "rf"):
+        th, se = crossfit(y, D, X, L[k], kind, Z=Z)
+        est[k] = dict(theta=_f(th), se=_f(se), lo=_f(th - 1.96 * se), hi=_f(th + 1.96 * se))
+    R["dml"] = est
+    gap = abs(est["lasso"]["theta"] - est["rf"]["theta"])
+    R["gap_se"] = _f(gap / max(est["lasso"]["se"], est["rf"]["se"]), 3)
+    R["learner"] = "rf" if R["gap_se"] > 1 else "both"
+    R["cf_possible"] = bool(len(df) >= CF_N)
+    R["model"] = "OLS" if R["ols_enough"] and not instr else kind
+    return R
+
+
+def analyze(text, goal="predict", treat=None, instr=None):
+    try:
+        df, tcol, num, skipped = read(text)
+        if len(num) < 2:
+            return json.dumps(dict(error="The file needs at least two numeric columns: the outcome and one predictor."))
+        if len(df) < 30:
+            return json.dumps(dict(error=f"Only {len(df)} complete rows. The checks need at least 30."))
+        if goal == "causal":
+            if len(num) < 3 and not treat:
+                return json.dumps(dict(error="A causal analysis needs the outcome, the treatment and at least one control."))
+            R = causal(df, num, treat, instr)
+        else:
+            R = predict(df, tcol, num)
+        R["skipped"] = skipped
+        R["cols"] = num
+        return json.dumps(R)
+    except Exception as e:  # report the problem to the page instead of failing silently
+        return json.dumps(dict(error=f"{type(e).__name__}: {e}"))
+</script>
+<script>
+const EXAMPLES=[{"key":"econmath","group":"Prediction","title":"Exam scores in economics","meta":"Students · 814 · cross-section","desc":"Score in an introductory economics course from study habits, grades, ACT scores and background (Wooldridge econmath).","file":"examples/econmath.csv","result":{"goal":"predict","dep":"score","xs":["age","work","study","econhs","colgpa","hsgpa","acteng","actmth","male","calculus","attexc","attgood","fathcoll","mothcoll"],"n":814,"p":14,"time":null,"summary":[{"var":"score","mean":72.6087,"sd":13.3045,"min":20.31,"max":98.44,"binary":false},{"var":"age","mean":19.4152,"sd":0.9435,"min":18.0,"max":29.0,"binary":false},{"var":"work","mean":8.6572,"sd":9.2431,"min":0.0,"max":37.5,"binary":false},{"var":"study","mean":13.845,"sd":7.823,"min":0.0,"max":50.0,"binary":false},{"var":"econhs","mean":0.3636,"sd":0.4813,"min":0.0,"max":1.0,"binary":true},{"var":"colgpa","mean":2.811,"sd":0.5392,"min":0.875,"max":4.0,"binary":false},{"var":"hsgpa","mean":3.3452,"sd":0.3433,"min":2.355,"max":4.26,"binary":false},{"var":"acteng","mean":22.5946,"sd":3.7887,"min":12.0,"max":34.0,"binary":false},{"var":"actmth","mean":23.2113,"sd":3.7734,"min":12.0,"max":36.0,"binary":false},{"var":"male","mean":0.4988,"sd":0.5003,"min":0.0,"max":1.0,"binary":true},{"var":"calculus","mean":0.6732,"sd":0.4693,"min":0.0,"max":1.0,"binary":true},{"var":"attexc","mean":0.2998,"sd":0.4584,"min":0.0,"max":1.0,"binary":true},{"var":"attgood","mean":0.5835,"sd":0.4933,"min":0.0,"max":1.0,"binary":true},{"var":"fathcoll","mean":0.5258,"sd":0.4996,"min":0.0,"max":1.0,"binary":true},{"var":"mothcoll","mean":0.6179,"sd":0.4862,"min":0.0,"max":1.0,"binary":true}],"corr":{"max_r":0.774,"pair":["attexc","attgood"],"n_high":0},"ts":false,"n_used":814,"subsampled":false,"rmse":{"ols":10.2953,"lasso":10.1949,"rf":10.3895,"ridge":10.2759,"enet":10.2011},"sd_y":13.3045,"small":false,"gain":-0.0191,"nonlinear":false,"lasso_kept":["work","colgpa","hsgpa","actmth","male","calculus"],"lasso_share":0.429,"lasso_alpha":1.094035,"model":"LASSO","skipped":[],"cols":["score","age","work","study","econhs","colgpa","hsgpa","acteng","actmth","male","calculus","attexc","attgood","fathcoll","mothcoll"]}},{"key":"wage2","group":"Prediction","title":"Wages and ability","meta":"Men · 663 · cross-section","desc":"Log wage from IQ, a knowledge test, schooling, experience, family background and region (Blackburn–Neumark).","file":"examples/wage2.csv","result":{"goal":"predict","dep":"lwage","xs":["hours","IQ","KWW","educ","exper","tenure","age","married","black","south","urban","sibs","brthord","meduc","feduc"],"n":663,"p":15,"time":null,"summary":[{"var":"lwage","mean":6.8143,"sd":0.4122,"min":4.7449,"max":8.032,"binary":false},{"var":"hours","mean":44.0618,"sd":7.1599,"min":25.0,"max":80.0,"binary":false},{"var":"IQ","mean":102.4811,"sd":14.6861,"min":54.0,"max":145.0,"binary":false},{"var":"KWW","mean":36.1946,"sd":7.5292,"min":13.0,"max":56.0,"binary":false},{"var":"educ","mean":13.6802,"sd":2.2314,"min":9.0,"max":18.0,"binary":false},{"var":"exper","mean":11.3967,"sd":4.2584,"min":1.0,"max":22.0,"binary":false},{"var":"tenure","mean":7.2172,"sd":5.0557,"min":0.0,"max":22.0,"binary":false},{"var":"age","mean":32.9834,"sd":3.063,"min":28.0,"max":38.0,"binary":false},{"var":"married","mean":0.9005,"sd":0.2996,"min":0.0,"max":1.0,"binary":true},{"var":"black","mean":0.0814,"sd":0.2737,"min":0.0,"max":1.0,"binary":true},{"var":"south","mean":0.3228,"sd":0.4679,"min":0.0,"max":1.0,"binary":true},{"var":"urban","mean":0.7195,"sd":0.4496,"min":0.0,"max":1.0,"binary":true},{"var":"sibs","mean":2.8462,"sd":2.2409,"min":0.0,"max":14.0,"binary":false},{"var":"brthord","mean":2.178,"sd":1.4876,"min":1.0,"max":10.0,"binary":false},{"var":"meduc","mean":10.8281,"sd":2.8232,"min":0.0,"max":18.0,"binary":false},{"var":"feduc","mean":10.273,"sd":3.2882,"min":0.0,"max":18.0,"binary":false}],"corr":{"max_r":0.578,"pair":["sibs","brthord"],"n_high":0},"ts":false,"n_used":663,"subsampled":false,"rmse":{"ols":0.3548,"lasso":0.3551,"rf":0.3601,"ridge":0.3541,"enet":0.3548},"sd_y":0.4122,"small":false,"gain":-0.0141,"nonlinear":false,"lasso_kept":["hours","IQ","KWW","educ","tenure","age","married","south","urban","meduc","feduc"],"lasso_share":0.733,"lasso_alpha":0.040558,"model":"RIDGE","skipped":[],"cols":["lwage","hours","IQ","KWW","educ","exper","tenure","age","married","black","south","urban","sibs","brthord","meduc","feduc"]}},{"key":"macro","group":"Prediction","title":"Forecasting U.S. inflation","meta":"Quarters · 1960–2009 · time series","desc":"Next-quarter inflation from four lags of inflation, unemployment, the T-bill rate, GDP growth and money growth.","file":"examples/macro.csv","result":{"goal":"predict","dep":"infl","xs":["infl_l1","infl_l2","infl_l3","infl_l4","unemp_l1","unemp_l2","unemp_l3","unemp_l4","tbilrate_l1","tbilrate_l2","tbilrate_l3","tbilrate_l4","gdp_growth_l1","gdp_growth_l2","gdp_growth_l3","gdp_growth_l4","m1_growth_l1","m1_growth_l2","m1_growth_l3","m1_growth_l4"],"n":198,"p":20,"time":"quarter","summary":[{"var":"infl","mean":4.0227,"sd":3.2657,"min":-8.79,"max":14.62,"binary":false},{"var":"infl_l1","mean":4.0164,"sd":3.2678,"min":-8.79,"max":14.62,"binary":false},{"var":"infl_l2","mean":4.0007,"sd":3.2783,"min":-8.79,"max":14.62,"binary":false},{"var":"infl_l3","mean":4.0098,"sd":3.2723,"min":-8.79,"max":14.62,"binary":false},{"var":"infl_l4","mean":4.066,"sd":3.1444,"min":-4.39,"max":14.62,"binary":false},{"var":"unemp_l1","mean":5.8747,"sd":1.4512,"min":3.4,"max":10.7,"binary":false},{"var":"unemp_l2","mean":5.8566,"sd":1.4317,"min":3.4,"max":10.7,"binary":false},{"var":"unemp_l3","mean":5.8424,"sd":1.4233,"min":3.4,"max":10.7,"binary":false},{"var":"unemp_l4","mean":5.8333,"sd":1.4222,"min":3.4,"max":10.7,"binary":false},{"var":"tbilrate_l1","mean":5.3743,"sd":2.8005,"min":0.12,"max":15.33,"binary":false},{"var":"tbilrate_l2","mean":5.3953,"sd":2.7769,"min":0.12,"max":15.33,"binary":false},{"var":"tbilrate_l3","mean":5.4135,"sd":2.7545,"min":0.12,"max":15.33,"binary":false},{"var":"tbilrate_l4","mean":5.4284,"sd":2.7336,"min":0.9,"max":15.33,"binary":false},{"var":"gdp_growth_l1","mean":3.097,"sd":3.5092,"min":-8.2832,"max":15.4342,"binary":false},{"var":"gdp_growth_l2","mean":3.1078,"sd":3.5006,"min":-8.2832,"max":15.4342,"binary":false},{"var":"gdp_growth_l3","mean":3.139,"sd":3.4403,"min":-8.2832,"max":15.4342,"binary":false},{"var":"gdp_growth_l4","mean":3.2172,"sd":3.4185,"min":-8.2832,"max":15.4342,"binary":false},{"var":"m1_growth_l1","mean":4.988,"sd":5.1726,"min":-9.5706,"max":26.701,"binary":false},{"var":"m1_growth_l2","mean":4.9051,"sd":5.143,"min":-9.5706,"max":26.701,"binary":false},{"var":"m1_growth_l3","mean":4.8672,"sd":5.1765,"min":-9.5706,"max":26.701,"binary":false},{"var":"m1_growth_l4","mean":4.761,"sd":4.9364,"min":-9.5706,"max":19.8202,"binary":false}],"corr":{"max_r":0.974,"pair":["unemp_l3","unemp_l4"],"n_high":12},"ts":true,"unitroot":[{"level":{"adf":-3.075,"adf_p":0.0285,"kpss":0.447,"kpss_p":0.057},"order":0,"var":"infl"},{"level":{"adf":-3.132,"adf_p":0.0243,"kpss":0.243,"kpss_p":0.1},"order":0,"var":"unemp"},{"level":{"adf":-1.972,"adf_p":0.2989,"kpss":0.452,"kpss_p":0.055},"diff":{"adf":-5.885,"adf_p":0.0,"kpss":0.123,"kpss_p":0.1},"order":1,"var":"tbilrate"},{"level":{"adf":-6.544,"adf_p":0.0,"kpss":0.319,"kpss_p":0.1},"order":0,"var":"gdp_growth"},{"level":{"adf":-3.713,"adf_p":0.0039,"kpss":0.209,"kpss_p":0.1},"order":0,"var":"m1_growth"}],"diffed":["tbilrate_l1","tbilrate_l2","tbilrate_l3","tbilrate_l4"],"first":"1960Q2","last":"2009Q3","n_used":197,"subsampled":false,"rmse":{"ols":3.1663,"lasso":2.7342,"rf":3.0969,"ridge":2.8277,"enet":2.7209},"sd_y":3.2622,"small":false,"gain":-0.1327,"nonlinear":false,"lasso_kept":["infl_l1","infl_l2","infl_l3","tbilrate_l1","tbilrate_l3","gdp_growth_l3","m1_growth_l2","m1_growth_l3"],"lasso_share":0.4,"lasso_alpha":0.182134,"model":"ENET","skipped":[],"cols":["infl","infl_l1","infl_l2","infl_l3","infl_l4","unemp_l1","unemp_l2","unemp_l3","unemp_l4","tbilrate_l1","tbilrate_l2","tbilrate_l3","tbilrate_l4","gdp_growth_l1","gdp_growth_l2","gdp_growth_l3","gdp_growth_l4","m1_growth_l1","m1_growth_l2","m1_growth_l3","m1_growth_l4"]}},{"key":"mlb1","group":"Prediction","title":"Baseball salaries","meta":"Players · 353 · cross-section","desc":"Log salary of Major League Baseball players from career statistics (Wooldridge mlb1).","file":"examples/mlb1.csv","result":{"goal":"predict","dep":"lsalary","xs":["years","games","atbats","runs","hits","hruns","rbis","bavg","bb","so","sbases","fldperc","yrsallst","black","hispan"],"n":353,"p":15,"time":null,"summary":[{"var":"lsalary","mean":13.4922,"sd":1.1825,"min":11.5991,"max":15.6607,"binary":false},{"var":"years","mean":6.3258,"sd":3.8801,"min":1.0,"max":20.0,"binary":false},{"var":"games","mean":648.4249,"sd":538.6975,"min":7.0,"max":2729.0,"binary":false},{"var":"atbats","mean":2168.5921,"sd":2025.0598,"min":7.0,"max":10554.0,"binary":false},{"var":"runs","mean":290.4023,"sd":301.0109,"min":1.0,"max":1570.0,"binary":false},{"var":"hits","mean":584.7365,"sd":575.3786,"min":1.0,"max":3025.0,"binary":false},{"var":"hruns","mean":55.0312,"sd":73.8651,"min":0.0,"max":432.0,"binary":false},{"var":"rbis","mean":264.745,"sd":282.9887,"min":1.0,"max":1710.0,"binary":false},{"var":"bavg","mean":258.9858,"sd":38.4224,"min":111.0,"max":625.0,"binary":false},{"var":"bb","mean":212.0822,"sd":227.9062,"min":0.0,"max":1286.0,"binary":false},{"var":"so","mean":340.4079,"sd":325.0485,"min":0.0,"max":1891.0,"binary":false},{"var":"sbases","mean":65.8017,"sd":113.1662,"min":0.0,"max":1042.0,"binary":false},{"var":"fldperc","mean":976.5099,"sd":19.7346,"min":800.0,"max":1000.0,"binary":false},{"var":"yrsallst","mean":0.8924,"sd":2.0656,"min":0.0,"max":13.0,"binary":false},{"var":"black","mean":0.3059,"sd":0.4615,"min":0.0,"max":1.0,"binary":true},{"var":"hispan","mean":0.1813,"sd":0.3858,"min":0.0,"max":1.0,"binary":true}],"corr":{"max_r":0.995,"pair":["atbats","hits"],"n_high":27},"ts":false,"n_used":353,"subsampled":false,"rmse":{"ols":0.8963,"lasso":0.8883,"rf":0.6369},"sd_y":1.1825,"small":false,"gain":0.283,"nonlinear":true,"model":"RF","skipped":[],"cols":["lsalary","years","games","atbats","runs","hits","hruns","rbis","bavg","bb","so","sbases","fldperc","yrsallst","black","hispan"]}},{"key":"airfare","group":"Prediction","title":"Airline fares","meta":"Routes × years · 4,596 · pooled","desc":"Log fare on U.S. air routes from distance, passengers and market concentration, 1997–2000 (Wooldridge airfare).","file":"examples/airfare.csv","result":{"goal":"predict","dep":"lfare","xs":["dist","passen","concen","bmktshr"],"n":4596,"p":4,"time":null,"summary":[{"var":"lfare","mean":5.0956,"sd":0.4364,"min":3.6109,"max":6.2577,"binary":false},{"var":"dist","mean":989.745,"sd":611.8315,"min":95.0,"max":2724.0,"binary":false},{"var":"passen","mean":636.8242,"sd":812.0,"min":2.0,"max":8497.0,"binary":false},{"var":"concen","mean":0.6101,"sd":0.1964,"min":0.1605,"max":1.0,"binary":false},{"var":"bmktshr","mean":0.6101,"sd":0.1964,"min":0.1605,"max":1.0,"binary":false}],"corr":{"max_r":1.0,"pair":["concen","bmktshr"],"n_high":1},"ts":false,"n_used":4596,"subsampled":true,"rmse":{"ols":0.3397,"lasso":0.3397,"rf":0.2832,"gb":0.2719},"sd_y":0.4382,"small":false,"gain":0.1663,"nonlinear":true,"model":"XGB","skipped":[],"cols":["lfare","dist","passen","concen","bmktshr"]}},{"key":"jtrain2","group":"Causal effect","title":"Job training and earnings","meta":"Men · 445 · randomised experiment","desc":"Effect of the National Supported Work programme on 1978 earnings, with eight controls (LaLonde; Wooldridge jtrain2).","file":"examples/jtrain2.csv","result":{"goal":"causal","dep":"re78","treat":"train","instr":null,"xs":["age","educ","black","hisp","married","nodegree","re74","re75"],"n":445,"p":8,"summary":[{"var":"re78","mean":5.3008,"sd":6.6315,"min":0.0,"max":60.3079,"binary":false},{"var":"train","mean":0.4157,"sd":0.4934,"min":0.0,"max":1.0,"binary":true},{"var":"age","mean":25.3708,"sd":7.1003,"min":17.0,"max":55.0,"binary":false},{"var":"educ","mean":10.1955,"sd":1.7921,"min":3.0,"max":16.0,"binary":false},{"var":"black","mean":0.8337,"sd":0.3728,"min":0.0,"max":1.0,"binary":true},{"var":"hisp","mean":0.0876,"sd":0.2831,"min":0.0,"max":1.0,"binary":true},{"var":"married","mean":0.1685,"sd":0.3748,"min":0.0,"max":1.0,"binary":true},{"var":"nodegree","mean":0.782,"sd":0.4133,"min":0.0,"max":1.0,"binary":true},{"var":"re74","mean":2.1023,"sd":5.3636,"min":0.0,"max":39.5707,"binary":false},{"var":"re75","mean":1.3771,"sd":3.151,"min":0.0,"max":25.1422,"binary":false}],"corr":{"max_r":0.694,"pair":["black","hisp"],"n_high":0},"binary":true,"subsampled":false,"ols":{"b":1.6763,"se":0.6767,"p":0.0132},"nl":{"y":{"lasso":6.59,"rf":6.683,"gain":-0.0141},"d":{"lasso":0.4929,"rf":0.5036,"gain":-0.0216}},"controls_nonlinear":false,"ols_enough":true,"overlap":{"min":0.119,"max":0.93,"share_out":0.0,"hist_t":[0,0,3,12,14,23,21,21,10,11,12,6,4,9,2,1,3,21,12,0],"hist_c":[0,0,3,6,15,35,41,31,13,17,21,13,2,9,2,2,4,23,23,0]},"treated_share":0.4157,"kind":"IRM","dml":{"lasso":{"theta":1.7683,"se":0.6794,"lo":0.4367,"hi":3.0999},"rf":{"theta":1.9013,"se":0.7538,"lo":0.424,"hi":3.3787}},"gap_se":0.176,"learner":"both","cf_possible":false,"model":"OLS","skipped":[],"cols":["re78","train","age","educ","black","hisp","married","nodegree","re74","re75"],"b1":"training was assigned at random"}},{"key":"growth","group":"Causal effect","title":"Growth convergence","meta":"Countries · 90 · 60 controls","desc":"Effect of initial GDP per capita on growth, 1965–1975, with 60 country characteristics (Barro–Lee; Belloni et al.).","file":"examples/growth.csv","result":{"goal":"causal","dep":"growth","treat":"gdpsh465","instr":null,"xs":["bmp1l","freeop","freetar","h65","hm65","hf65","p65","pm65","pf65","s65","sm65","sf65","fert65","mort65","lifee065","gpop1","fert1","mort1","invsh41","geetot1","geerec1","gde1","govwb1","govsh41","gvxdxe41","high65","highm65","highf65","highc65","highcm65","highcf65","human65","humanm65","humanf65","hyr65","hyrm65","hyrf65","no65","nom65","nof65","pinstab1","pop65","worker65","pop1565","pop6565","sec65","secm65","secf65","secc65","seccm65","seccf65","syr65","syrm65","syrf65","teapri65","teasec65","ex1","im1","xr65","tot1"],"n":90,"p":60,"summary":[{"var":"growth","mean":0.0453,"sd":0.0513,"min":-0.101,"max":0.1855,"binary":false},{"var":"gdpsh465","mean":7.7029,"sd":0.8962,"min":5.7621,"max":9.2298,"binary":false},{"var":"bmp1l","mean":0.1687,"sd":0.2491,"min":0.0,"max":1.6378,"binary":false},{"var":"freeop","mean":0.2201,"sd":0.0749,"min":0.0785,"max":0.4162,"binary":false},{"var":"freetar","mean":0.0283,"sd":0.0219,"min":0.0,"max":0.1099,"binary":false},{"var":"h65","mean":0.1116,"sd":0.1014,"min":0.002,"max":0.573,"binary":false},{"var":"hm65","mean":0.1372,"sd":0.1168,"min":0.004,"max":0.635,"binary":false},{"var":"hf65","mean":0.0822,"sd":0.0915,"min":0.0,"max":0.527,"binary":false},{"var":"p65","mean":0.8933,"sd":0.1649,"min":0.29,"max":1.0,"binary":false},{"var":"pm65","mean":0.9196,"sd":0.1346,"min":0.37,"max":1.0,"binary":false},{"var":"pf65","mean":0.8496,"sd":0.2109,"min":0.21,"max":1.0,"binary":false},{"var":"s65","mean":0.4066,"sd":0.2472,"min":0.02,"max":0.91,"binary":false},{"var":"sm65","mean":0.4362,"sd":0.2465,"min":0.03,"max":0.95,"binary":false},{"var":"sf65","mean":0.3798,"sd":0.2658,"min":0.01,"max":0.92,"binary":false},{"var":"fert65","mean":4.742,"sd":1.9749,"min":1.45,"max":8.0,"binary":false},{"var":"mort65","mean":0.0705,"sd":0.0472,"min":0.009,"max":0.183,"binary":false},{"var":"lifee065","mean":4.102,"sd":0.1679,"min":3.6939,"max":4.3175,"binary":false},{"var":"gpop1","mean":0.0213,"sd":0.0099,"min":0.0026,"max":0.039,"binary":false},{"var":"fert1","mean":4.9624,"sd":1.9369,"min":1.742,"max":8.0,"binary":false},{"var":"mort1","mean":0.0872,"sd":0.0519,"min":0.015,"max":0.204,"binary":false},{"var":"invsh41","mean":0.1967,"sd":0.087,"min":0.0271,"max":0.4755,"binary":false},{"var":"geetot1","mean":0.0356,"sd":0.0145,"min":0.0117,"max":0.077,"binary":false},{"var":"geerec1","mean":0.0298,"sd":0.0127,"min":0.0041,"max":0.0687,"binary":false},{"var":"gde1","mean":0.0321,"sd":0.0337,"min":0.005,"max":0.251,"binary":false},{"var":"govwb1","mean":0.1267,"sd":0.0456,"min":0.0615,"max":0.3523,"binary":false},{"var":"govsh41","mean":0.1552,"sd":0.0613,"min":0.0355,"max":0.3859,"binary":false},{"var":"gvxdxe41","mean":0.0949,"sd":0.0538,"min":0.01,"max":0.3105,"binary":false},{"var":"high65","mean":4.203,"sd":5.2526,"min":0.12,"max":30.9,"binary":false},{"var":"highm65","mean":5.5316,"sd":5.9081,"min":0.23,"max":33.4,"binary":false},{"var":"highf65","mean":2.9469,"sd":4.7818,"min":0.01,"max":28.5,"binary":false},{"var":"highc65","mean":2.4556,"sd":2.4872,"min":0.09,"max":15.63,"binary":false},{"var":"highcm65","mean":3.4342,"sd":3.1116,"min":0.18,"max":18.83,"binary":false},{"var":"highcf65","mean":1.5297,"sd":2.0664,"min":0.01,"max":12.77,"binary":false},{"var":"human65","mean":4.2149,"sd":2.5304,"min":0.301,"max":11.158,"binary":false},{"var":"humanm65","mean":4.6983,"sd":2.4233,"min":0.568,"max":11.535,"binary":false},{"var":"humanf65","mean":3.746,"sd":2.6925,"min":0.043,"max":10.798,"binary":false},{"var":"hyr65","mean":0.1332,"sd":0.1517,"min":0.004,"max":0.829,"binary":false},{"var":"hyrm65","mean":0.1793,"sd":0.1772,"min":0.008,"max":0.96,"binary":false},{"var":"hyrf65","mean":0.0895,"sd":0.1336,"min":0.0,"max":0.712,"binary":false},{"var":"no65","mean":34.7231,"sd":29.1011,"min":0.0,"max":89.46,"binary":false},{"var":"nom65","mean":28.9999,"sd":25.3073,"min":0.0,"max":82.35,"binary":false},{"var":"nof65","mean":40.3271,"sd":33.4468,"min":0.0,"max":98.61,"binary":false},{"var":"pinstab1","mean":0.1142,"sd":0.2144,"min":0.0,"max":1.0685,"binary":false},{"var":"pop65","mean":39825.3,"sd":87794.3128,"min":1482.0,"max":620701.0,"binary":false},{"var":"worker65","mean":0.3693,"sd":0.0695,"min":0.2156,"max":0.526,"binary":false},{"var":"pop1565","mean":0.3752,"sd":0.0934,"min":0.2018,"max":0.5158,"binary":false},{"var":"pop6565","mean":0.0592,"sd":0.0377,"min":0.0215,"max":0.1511,"binary":false},{"var":"sec65","mean":15.318,"sd":13.0393,"min":0.45,"max":57.1,"binary":false},{"var":"secm65","mean":16.6221,"sd":12.4213,"min":0.75,"max":56.37,"binary":false},{"var":"secf65","mean":14.0241,"sd":14.1218,"min":0.17,"max":57.8,"binary":false},{"var":"secc65","mean":6.4441,"sd":6.3514,"min":0.13,"max":34.09,"binary":false},{"var":"seccm65","mean":6.7029,"sd":6.1823,"min":0.15,"max":31.27,"binary":false},{"var":"seccf65","mean":6.1718,"sd":6.8573,"min":0.04,"max":36.61,"binary":false},{"var":"syr65","mean":0.9124,"sd":0.8232,"min":0.033,"max":4.211,"binary":false},{"var":"syrm65","mean":1.0454,"sd":0.8318,"min":0.057,"max":4.227,"binary":false},{"var":"syrf65","mean":0.7838,"sd":0.8395,"min":0.01,"max":4.198,"binary":false},{"var":"teapri65","mean":33.2033,"sd":9.8185,"min":18.2,"max":62.4,"binary":false},{"var":"teasec65","mean":19.4122,"sd":6.3842,"min":7.2,"max":37.1,"binary":false},{"var":"ex1","mean":0.134,"sd":0.1187,"min":0.0178,"max":0.747,"binary":false},{"var":"im1","mean":0.1444,"sd":0.1209,"min":0.0222,"max":0.8489,"binary":false},{"var":"xr65","mean":42.6639,"sd":119.3351,"min":0.003,"max":652.85,"binary":false},{"var":"tot1","mean":0.0092,"sd":0.0592,"min":-0.1569,"max":0.2075,"binary":false}],"corr":{"max_r":0.993,"pair":["no65","nof65"],"n_high":253},"binary":false,"subsampled":false,"ols":{"b":-0.0094,"se":0.0324,"p":0.7724},"nl":{"y":{"lasso":0.0513,"rf":0.0481,"gain":0.0626},"d":{"lasso":0.366,"rf":0.3787,"gain":-0.0346}},"controls_nonlinear":true,"ols_enough":false,"kind":"PLR","dml":{"lasso":{"theta":-0.0395,"se":0.0166,"lo":-0.072,"hi":-0.007},"rf":{"theta":-0.0384,"se":0.0153,"lo":-0.0684,"hi":-0.0083}},"gap_se":0.066,"learner":"both","cf_possible":false,"model":"PLR","skipped":[],"cols":["growth","gdpsh465","bmp1l","freeop","freetar","h65","hm65","hf65","p65","pm65","pf65","s65","sm65","sf65","fert65","mort65","lifee065","gpop1","fert1","mort1","invsh41","geetot1","geerec1","gde1","govwb1","govsh41","gvxdxe41","high65","highm65","highf65","highc65","highcm65","highcf65","human65","humanm65","humanf65","hyr65","hyrm65","hyrf65","no65","nom65","nof65","pinstab1","pop65","worker65","pop1565","pop6565","sec65","secm65","secf65","secc65","seccm65","seccf65","syr65","syrm65","syrf65","teapri65","teasec65","ex1","im1","xr65","tot1"],"b1":"convergence is conditional on the country characteristics in the controls"}},{"key":"k401_irm","group":"Causal effect","title":"401(k) eligibility and saving","meta":"Households · 9,915 · binary treatment","desc":"Effect of 401(k) eligibility on net financial assets, with flexible income, age and education controls (SIPP 1991).","file":"examples/k401_irm.csv","result":{"goal":"causal","dep":"net_tfa","treat":"e401","instr":null,"xs":["age","age_sq","inc","inc_sq","educ","educ_sq","fsize","marr","twoearn","db","pira","hown"],"n":9915,"p":12,"summary":[{"var":"net_tfa","mean":18051.5348,"sd":63522.5015,"min":-502302.0,"max":1536798.0,"binary":false},{"var":"e401","mean":0.3714,"sd":0.4832,"min":0.0,"max":1.0,"binary":true},{"var":"age","mean":41.0602,"sd":10.3445,"min":25.0,"max":64.0,"binary":false},{"var":"age_sq","mean":-17.2121,"sd":73.1753,"min":-127.0,"max":113.0,"binary":false},{"var":"inc","mean":37200.6232,"sd":24774.288,"min":-2652.0,"max":242124.0,"binary":false},{"var":"inc_sq","mean":1997589811.2508,"sd":3026127666.7252,"min":0.0,"max":58624032768.0,"binary":false},{"var":"educ","mean":13.2063,"sd":2.8104,"min":1.0,"max":18.0,"binary":false},{"var":"educ_sq","mean":-40.8551,"sd":74.5799,"min":-112.0,"max":121.0,"binary":false},{"var":"fsize","mean":2.8659,"sd":1.5389,"min":1.0,"max":13.0,"binary":false},{"var":"marr","mean":0.6048,"sd":0.4889,"min":0.0,"max":1.0,"binary":true},{"var":"twoearn","mean":0.3808,"sd":0.4856,"min":0.0,"max":1.0,"binary":true},{"var":"db","mean":0.271,"sd":0.4445,"min":0.0,"max":1.0,"binary":true},{"var":"pira","mean":0.2422,"sd":0.4284,"min":0.0,"max":1.0,"binary":true},{"var":"hown","mean":0.6352,"sd":0.4814,"min":0.0,"max":1.0,"binary":true}],"corr":{"max_r":0.926,"pair":["inc","inc_sq"],"n_high":1},"binary":true,"subsampled":true,"ols":{"b":9395.8821,"se":1314.1355,"p":0.0},"nl":{"y":{"lasso":61931.0373,"rf":63027.0724,"gain":-0.0177},"d":{"lasso":0.4464,"rf":0.4518,"gain":-0.0121}},"controls_nonlinear":false,"ols_enough":false,"overlap":{"min":0.0,"max":0.9,"share_out":0.0635,"hist_t":[14,22,44,53,88,91,106,127,112,109,128,115,126,140,99,95,38,15,0,0],"hist_c":[240,168,189,212,221,216,222,211,166,138,120,92,72,76,72,45,15,3,0,0]},"treated_share":0.3805,"kind":"IRM","dml":{"lasso":{"theta":8795.0519,"se":2156.3726,"lo":4568.5617,"hi":13021.5422},"rf":{"theta":9178.2075,"se":2285.819,"lo":4698.0023,"hi":13658.4127}},"gap_se":0.168,"learner":"both","cf_possible":true,"model":"IRM","skipped":[],"cols":["net_tfa","e401","age","age_sq","inc","inc_sq","educ","educ_sq","fsize","marr","twoearn","db","pira","hown"],"b1":"eligibility is as good as random once income, age, education and family are held fixed (Poterba, Venti and Wise)"}},{"key":"k401_iv","group":"Causal effect","title":"401(k) participation, instrumented","meta":"Households · 9,915 · instrument","desc":"Effect of participating in a 401(k) on net financial assets, with eligibility as the instrument (SIPP 1991).","file":"examples/k401_iv.csv","result":{"goal":"causal","dep":"net_tfa","treat":"p401","instr":"e401","xs":["age","age_sq","inc","inc_sq","educ","educ_sq","fsize","marr","twoearn","db","pira","hown"],"n":9915,"p":12,"summary":[{"var":"net_tfa","mean":18051.5348,"sd":63522.5015,"min":-502302.0,"max":1536798.0,"binary":false},{"var":"p401","mean":0.2616,"sd":0.4395,"min":0.0,"max":1.0,"binary":true},{"var":"e401","mean":0.3714,"sd":0.4832,"min":0.0,"max":1.0,"binary":true},{"var":"age","mean":41.0602,"sd":10.3445,"min":25.0,"max":64.0,"binary":false},{"var":"age_sq","mean":-17.2121,"sd":73.1753,"min":-127.0,"max":113.0,"binary":false},{"var":"inc","mean":37200.6232,"sd":24774.288,"min":-2652.0,"max":242124.0,"binary":false},{"var":"inc_sq","mean":1997589811.2508,"sd":3026127666.7252,"min":0.0,"max":58624032768.0,"binary":false},{"var":"educ","mean":13.2063,"sd":2.8104,"min":1.0,"max":18.0,"binary":false},{"var":"educ_sq","mean":-40.8551,"sd":74.5799,"min":-112.0,"max":121.0,"binary":false},{"var":"fsize","mean":2.8659,"sd":1.5389,"min":1.0,"max":13.0,"binary":false},{"var":"marr","mean":0.6048,"sd":0.4889,"min":0.0,"max":1.0,"binary":true},{"var":"twoearn","mean":0.3808,"sd":0.4856,"min":0.0,"max":1.0,"binary":true},{"var":"db","mean":0.271,"sd":0.4445,"min":0.0,"max":1.0,"binary":true},{"var":"pira","mean":0.2422,"sd":0.4284,"min":0.0,"max":1.0,"binary":true},{"var":"hown","mean":0.6352,"sd":0.4814,"min":0.0,"max":1.0,"binary":true}],"corr":{"max_r":0.926,"pair":["inc","inc_sq"],"n_high":1},"binary":true,"subsampled":true,"ols":{"b":14158.8518,"se":1495.8681,"p":0.0},"nl":{"y":{"lasso":61931.0373,"rf":63027.0724,"gain":-0.0177},"d":{"lasso":0.4172,"rf":0.4227,"gain":-0.0131}},"controls_nonlinear":false,"ols_enough":false,"first_stage":{"b":0.6947,"se":0.008,"F":7618.66},"weak":false,"kind":"PLIV","dml":{"lasso":{"theta":13983.4281,"se":3264.7839,"lo":7584.4517,"hi":20382.4045},"rf":{"theta":13896.1536,"se":3300.9592,"lo":7426.2736,"hi":20366.0337}},"gap_se":0.026,"learner":"both","cf_possible":true,"model":"PLIV","skipped":[],"cols":["net_tfa","p401","e401","age","age_sq","inc","inc_sq","educ","educ_sq","fsize","marr","twoearn","db","pira","hown"]}}];
+const C={MINTS:50,SMALLN:100,GAIN:5,HIGHR:0.8,BIGN:1000,FEWCTRL:10,WEAKF:10,OVLO:0.05,OVHI:0.95,CFN:2000,SPARSE:0.5};
+const PYO='https://cdn.jsdelivr.net/pyodide/v0.27.2/full/';
+const L='../teaching/econometrics/lectures/', S='../teaching/statistics/lectures/';
+const ALLG={LASSO:'lasso',RIDGE:'ridge',ENET:'enet',RF:'rf',XGB:'xgb',PLR:'dml-plr',IRM:'dml-irm',PLIV:'dml-iv',CF:'causal-forest'};
+const READY=[];   // guide pages already written; the others show as in preparation
+const GUIDE=Object.fromEntries(Object.entries(ALLG).filter(([k,v])=>READY.includes(v)));
+const LEC={reg:[L+'02-ols-inference.html','Lecture 02: OLS inference'],ovb:[L+'03-functional-form-ovb.html','Lecture 03: Functional form and omitted variables'],glm:[S+'09-regression-glm.html','Lecture 09: Regression and GLMs'],ts:[L+'09-time-series.html','Lecture 09: Time-series foundations'],ur:[L+'10-unit-roots-breaks.html','Lecture 10: Unit roots and breaks'],iv:[L+'05-endogeneity-iv.html','Lecture 05: Endogeneity and IV'],ci:[L+'13-causal-inference.html','Lecture 13: Causal inference']};
+const MODELS={
+ LASSO:{name:'LASSO',short:'LASSO',when:'Linear, few predictors matter',why:'The relationship is close to linear, no two predictors are strongly correlated, and the LASSO penalty sets most coefficients to exactly zero. The model is sparse: a few predictors carry the signal, and LASSO finds them while it predicts.',steps:['Standardise the predictors','Choose the penalty by cross-validation (minimum and one-standard-error)','The selected predictors and their stability','Out-of-sample RMSE against OLS','Post-LASSO OLS, and why its p-values are not valid','Write the variable-selection paragraph'],lec:[LEC.glm,LEC.ovb]},
+ RIDGE:{name:'Ridge regression',short:'Ridge',when:'Linear, many small effects',why:'The relationship is close to linear and most predictors carry some signal: LASSO keeps more than half of them even at the one-standard-error penalty. Ridge shrinks every coefficient towards zero without dropping any, which predicts better when the effects are dense.',steps:['Standardise the predictors','Ridge path and cross-validated penalty','Shrinkage of each coefficient','Out-of-sample RMSE against OLS and LASSO','Effective degrees of freedom','Write the shrinkage paragraph'],lec:[LEC.glm,LEC.reg]},
+ ENET:{name:'Elastic net',short:'Elastic net',when:'Linear, strongly correlated predictors',why:'The relationship is close to linear, but some predictors are correlated above '+'0.8'+'. LASSO picks one of a correlated group almost at random; the elastic net mixes the LASSO and ridge penalties, keeps or drops correlated predictors together, and gives a more stable selection.',steps:['Standardise the predictors','Cross-validate the penalty and the mixing weight α','Grouped selection of correlated predictors','Out-of-sample RMSE against LASSO and ridge','Stability of the selection','Write the model paragraph'],lec:[LEC.glm,LEC.ts]},
+ RF:{name:'Random forest',short:'Random forest',when:'Nonlinear, fewer than '+'1000'+' observations',why:'A random forest predicts at least '+'5'+'% better than LASSO out of sample, so the outcome depends on the predictors nonlinearly or through interactions. With fewer than '+'1000'+' observations a random forest is the safer choice: it needs little tuning and averages away much of the variance of single trees.',steps:['Grow the forest: trees, depth and features per split','Out-of-bag error and cross-validated RMSE','Tune min. leaf size and max. features','Permutation importance','Partial-dependence plots','Write the model paragraph'],lec:[LEC.glm,LEC.ovb]},
+ XGB:{name:'Gradient boosting (XGBoost)',short:'XGBoost',when:'Nonlinear, at least '+'1000'+' observations',why:'The data are nonlinear (the forest beats LASSO by at least '+'5'+'%) and there are enough observations to tune a boosted model. Gradient boosting fits trees one after another, each correcting the errors of the last; with early stopping it is usually the most accurate method for tabular data.',steps:['Learning rate, depth and number of trees','Early stopping on a validation set','Cross-validated RMSE against the forest','SHAP values for interpretation','Partial dependence of the key predictor','Write the model paragraph'],lec:[LEC.glm,LEC.ovb]},
+ PLR:{name:'Double machine learning: partially linear model',short:'DML partially linear',when:'Continuous treatment, many or nonlinear controls',why:'The treatment is continuous and the controls are many or enter nonlinearly, so OLS would rely on a functional form the data do not support. DML predicts the outcome and the treatment from the controls with machine learning, by cross-fitting, and regresses residual on residual: the effect is estimated with valid standard errors.',steps:['The model: Y = θD + g(X) + ε','Learners for E[Y|X] and E[D|X]','Five-fold cross-fitting, repeated','θ with LASSO and random-forest learners','Compare with OLS','Sensitivity to the learner'],lec:[LEC.ci,LEC.ovb]},
+ IRM:{name:'Double machine learning: interactive model',short:'DML interactive',when:'Binary treatment, many or nonlinear controls',why:'The treatment is binary and the controls are many or enter nonlinearly. The interactive model lets the effect differ with the controls and estimates the average treatment effect with the doubly robust (AIPW) score: it stays consistent if either the outcome model or the propensity score is right.',steps:['The model and the ATE','Propensity scores and overlap; trimming','Learners for the outcome and the propensity','Cross-fitted AIPW estimate of the ATE','LASSO vs random-forest learners','Compare with OLS'],lec:[LEC.ci,LEC.ovb]},
+ PLIV:{name:'Double machine learning with an instrument (DML-IV)',short:'DML-IV',when:'Endogenous treatment, valid instrument',why:'The treatment is endogenous, but an instrument shifts it and, given the controls, affects the outcome only through it. DML-IV partials the controls out of the outcome, the treatment and the instrument with machine learning and then applies IV to the residuals.',steps:['Argue relevance and exclusion','First stage and its F statistic','Partial out the controls by cross-fitting','θ with LASSO and random-forest learners','Compare with 2SLS','Weak-instrument checks'],lec:[LEC.iv,LEC.ci]},
+ CF:{name:'Causal forest',short:'Causal forest',when:'Effects that differ across people, N ≥ '+'2000',why:'You need to know not only the average effect but who gains most, and there are enough observations to estimate effects by subgroup. A causal forest (generalised random forest) estimates the effect for each combination of the controls, with honest splitting and valid confidence intervals.',steps:['Average effect first (DML)','Grow an honest causal forest','Conditional effects and their distribution','Which variables drive the heterogeneity','Effects by subgroup (best linear projection)','Write the heterogeneity paragraph'],lec:[LEC.ci,LEC.reg]},
+ OLS:{name:'OLS with robust standard errors',short:'OLS',when:'Few controls that enter linearly',why:'There are fewer than '+'10'+' controls and neither the outcome nor the treatment depends on them nonlinearly: a random forest does not beat LASSO by '+'5'+'% for either. OLS already adjusts for the confounders, and machine learning adds variance without removing bias. Report the DML estimate as a robustness check.',steps:['OLS with heteroskedasticity-robust errors','Check the functional form of the controls','DML as a robustness check'],lec:[LEC.reg,LEC.ovb]},
+ CIG:{name:'A research design, not a learner',short:'Causal Inference Guide',when:'Unobserved confounders, no instrument',why:'Machine learning adjusts better for the confounders you observe; it cannot adjust for those you do not. Without an instrument, the effect has to come from a research design: a policy change with a comparison group (difference-in-differences, synthetic control) or a cut-off (regression discontinuity).',steps:[],lec:[LEC.ci]}
+};
+</script>
+<script>
+const $=s=>document.querySelector(s), el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches, D=reduce?0:1;
+const fmt=(v,d=3)=>v==null?'–':Number(v).toFixed(d), pf=p=>p==null?'–':(p<0.001?'<0.001':p.toFixed(3));
+const big=v=>v==null?'–':Math.abs(v)>=1000?Math.round(v).toLocaleString('en-US'):fmt(v,Math.abs(v)<1?4:3);
+const pct=v=>v==null?'–':(v*100).toFixed(1)+'%';
+const pyList=a=>'['+a.map(v=>JSON.stringify(v)).join(', ')+']';
+let run=0, QA={}, GOAL='predict';
+
+/* ---------- decision tree ---------- */
+const N={start:[440,26,120,'Your question'],goal:[440,92,150,'Predict or explain?'],
+ ts:[215,160,124,'Time series?'],nn:[215,226,126,'N ≥ '+C.SMALLN+'?'],nl:[300,292,150,'Forest ≥ '+C.GAIN+'% better?'],
+ lin:[130,362,120,'Linear model'],bign:[340,362,104,'N ≥ '+C.BIGN.toLocaleString('en-US')+'?'],
+ ENET:[48,440,76,'Elastic net',1],LASSO:[130,440,66,'LASSO',1],RIDGE:[206,440,62,'Ridge',1],RF:[296,440,92,'Random forest',1],XGB:[392,440,72,'XGBoost',1],
+ conf:[650,160,170,'Confounders observed?'],CIG:[838,160,76,'Design',1],ctl:[650,226,160,'Many or nonlinear controls?'],OLS:[838,226,56,'OLS',1],
+ typ:[650,292,124,'Treatment type'],PLR:[548,362,86,'DML-PLR',1],IRM:[650,362,84,'DML-IRM',1],PLIV:[766,362,72,'DML-IV',1],
+ het:[600,440,124,'Who gains most?'],CF:[760,440,108,'Causal forest',1]};
+const E=[['start','goal'],['goal','ts','predict'],['goal','conf','causal effect'],['ts','nn'],['nn','lin','no'],['nn','nl','yes'],['nl','lin','no'],['nl','bign','yes'],
+ ['lin','ENET'],['lin','LASSO'],['lin','RIDGE'],['bign','RF','no'],['bign','XGB','yes'],
+ ['conf','CIG','no'],['conf','ctl','yes'],['ctl','OLS','no'],['ctl','typ','yes'],['typ','PLR'],['typ','IRM'],['typ','PLIV'],['PLR','het'],['IRM','het'],['het','CF','N ≥ '+C.CFN.toLocaleString('en-US')]];
+const TL={start:'Your question',goal:'Aim',ts:'Time series?',nn:'Sample size',nl:'Nonlinearity test',lin:'Linear models',bign:'Large sample?',conf:'Confounders',ctl:'Controls',typ:'Treatment type',het:'Heterogeneity'};
+function pathTo(m,R){const P=['start','goal'],pa=P.concat(['ts','nn']);
+ if(['ENET','LASSO','RIDGE'].includes(m)){const small=R?R.small:QA.small;return pa.concat(small?['lin',m]:['nl','lin',m])}
+ if(m==='RF'||m==='XGB')return pa.concat(['nl','bign',m]);
+ const pc=P.concat(['conf']);if(m==='CIG')return pc.concat(['CIG']);if(m==='OLS')return pc.concat(['ctl','OLS']);
+ if(m==='CF'){const k=R?R.kind:QA.kind;return pc.concat(['ctl','typ',k||'IRM','het','CF'])}
+ return pc.concat(['ctl','typ',m])}
+function drawTree(){
+ const H=16;let s='<svg viewBox="0 0 900 470" role="img" aria-label="Decision tree from research question to machine-learning method">';
+ for(const [a,b,lab] of E){const A=N[a],B=N[b];let d,lx,ly;
+  if(A[1]===B[1]){const r=B[0]>A[0];d=r?`M${A[0]+A[2]/2} ${A[1]}H${B[0]-B[2]/2}`:`M${A[0]-A[2]/2} ${A[1]}H${B[0]+B[2]/2}`;lx=r?(A[0]+A[2]/2+B[0]-B[2]/2)/2:(A[0]-A[2]/2+B[0]+B[2]/2)/2;ly=A[1]-6}
+  else{const my=(A[1]+B[1])/2;d=`M${A[0]} ${A[1]+H}V${my}H${B[0]}V${B[1]-H}`;lx=A[0]===B[0]?A[0]+16:(A[0]+B[0])/2;ly=A[0]===B[0]?my+4:my-5}
+  s+=`<path class="e" id="e-${a}-${b}" pathLength="1" d="${d}"/>`;if(lab)s+=`<text class="el" x="${lx}" y="${ly}">${lab}</text>`}
+ for(const k in N){const [x,y,w,t,leaf]=N[k];s+=`<g class="n${leaf?' leaf':''}" id="n-${k}"><rect x="${x-w/2}" y="${y-H}" width="${w}" height="${2*H}" rx="${leaf?16:8}"/><text x="${x}" y="${y}">${t}</text></g>`}
+ $('#tree').innerHTML=s+'</svg>';
+}
+let lit=new Set(),tEnd=0;
+function resetTree(){lit=new Set();tEnd=0;document.querySelectorAll('.tree .on,.tree .hl,.tree .alt').forEach(e=>e.classList.remove('on','hl','alt'));$('#trail').innerHTML=''}
+function light(path,labels={},final=true){
+ const my=run,now=performance.now();let at=Math.max(now,tEnd);
+ path.forEach((id,i)=>{if(lit.has(id))return;lit.add(id);const wait=at-now;at+=380*D;
+  setTimeout(()=>{if(my!==run)return;const n=$('#n-'+id);n&&n.classList.add('on');if(i>0){const e=document.getElementById(`e-${path[i-1]}-${id}`);e&&e.classList.add('hl')}
+   const t=$('#trail');if(t.children.length)t.appendChild(el('i','','→'));const isLeaf=!!MODELS[id];t.appendChild(el('span',isLeaf&&final?'final':'',esc(labels[id]||(MODELS[id]?MODELS[id].short:TL[id])||id)))},wait)});
+ tEnd=at;return at-now;
+}
+
+/* ---------- small charts ---------- */
+function bars(rows){const mx=Math.max(...rows.map(r=>r[1]||0)),mn=Math.min(...rows.filter(r=>r[1]!=null).map(r=>r[1]));
+ return `<div class="bars">${rows.filter(r=>r[1]!=null).map(r=>`<div class="bar${r[1]===mn?' best':''}"><span>${r[0]}</span><i style="width:${(r[1]/mx*100).toFixed(1)}%"></i><b>${big(r[1])}</b></div>`).join('')}</div>`}
+function hist(O){const t=O.hist_t,c=O.hist_c,mx=Math.max(...t,...c,1),w=400/20,h=100,y=v=>h-v/mx*(h-6);
+ let s='<div class="hist"><svg viewBox="0 0 400 110" preserveAspectRatio="none">';
+ c.forEach((v,i)=>s+=`<rect class="c" x="${i*w+1}" y="${y(v)}" width="${w-2}" height="${h-y(v)}"/>`);t.forEach((v,i)=>s+=`<rect class="t" x="${i*w+w/4}" y="${y(v)}" width="${w/2}" height="${h-y(v)}"/>`);
+ s+=`<line x1="${C.OVLO*400}" x2="${C.OVLO*400}" y1="0" y2="${h}"/><line x1="${C.OVHI*400}" x2="${C.OVHI*400}" y1="0" y2="${h}"/></svg><div class="legend" style="font-size:10.5px;color:var(--muted)"><span style="color:#0033a0">■</span> treated · <span style="color:#c46000">■</span> untreated · dashed lines: ${C.OVLO} and ${C.OVHI} · propensity score from 0 to 1</div></div>`;return s}
+
+/* ---------- steps ---------- */
+const code=c=>`<details class="code"><summary>Python code for this step</summary><pre>${esc(c)}</pre></details>`;
+function addStep(n,title,html,delay){const s=el('div','step',`<div class="label">Step ${n}</div><h3>${title}</h3>${html}`);$('#steps').appendChild(s);const my=run;setTimeout(()=>{if(my!==run)return;s.classList.add('in');if(n>1&&!reduce)s.scrollIntoView({behavior:'smooth',block:'nearest'})},delay);return s}
+function sumTable(R){const rows=R.summary,many=rows.length>12;
+ const tb=`<div class="tw"><table><tr><th>Variable</th><th>Mean</th><th>Std. dev.</th><th>Min</th><th>Max</th><th>Type</th></tr>${rows.map(s=>`<tr><td>${esc(s.var)}</td><td>${big(s.mean)}</td><td>${big(s.sd)}</td><td>${big(s.min)}</td><td>${big(s.max)}</td><td>${s.binary?'0/1':'continuous'}</td></tr>`).join('')}</table></div>`;
+ return many?`<details class="explain"><summary>Summary statistics for all ${rows.length} variables</summary>${tb}</details>`:tb}
+function show(R,label){
+ const my=++run;$('#steps').innerHTML='';$('#result').innerHTML='';resetTree();let t=150,gap=900*D,k=1;
+ light(['start','goal'],{goal:R.goal==='causal'?'Causal effect':'Prediction'});
+ if(R.goal==='causal')return showCausal(R,label,my,t,gap,k);
+ addStep(k++,'The data',`<p><b>${R.n.toLocaleString('en-US')}</b> observations of <b>${esc(R.dep)}</b> and <b>${R.p}</b> predictors${label?' · '+esc(label):''}.${R.time?` Time column: <code>${esc(R.time)}</code> (${esc(R.first||'')}–${esc(R.last||'')}).`:''}${R.skipped&&R.skipped.length?' Ignored non-numeric columns: '+R.skipped.map(esc).join(', ')+'.':''}</p>
+  <div class="stats"><div class="stat"><b>${R.n.toLocaleString('en-US')}</b><span>Observations (N)</span></div><div class="stat"><b>${R.p}</b><span>Predictors (p)</span></div><div class="stat"><b>${R.ts?'Yes':'No'}</b><span>Time series</span></div><div class="stat"><b>${fmt(R.corr.max_r,2)}</b><span>Largest |r| between predictors</span></div></div>
+  ${sumTable(R)}
+  <details class="explain" open><summary>Why the aim comes first</summary><p>Prediction and causal inference ask different questions of the same data. <b>Prediction</b> asks how well Y can be forecast from X; any variable that helps is welcome, and the test is accuracy on data the model has not seen. <b>Causal inference</b> asks how Y changes when one variable D changes, holding the others fixed; accuracy is not the test, bias is. This dataset is a prediction problem, so the methods are compared by out-of-sample error.</p></details>`+code(`import pandas as pd\n\ndf = pd.read_csv("data.csv")\ny, X = df["${R.dep}"], df[${pyList(R.xs.slice(0,8))}${R.xs.length>8?' + ...':''}]\nprint(df.describe().T)\nprint(X.corr().abs().where(lambda c: c < 1).max().max())   # largest |r| between predictors`),t);t+=gap;
+ if(R.ts){const ur=R.unitroot||[];
+  addStep(k++,'Time series: unit roots before learning',`<details class="explain" open><summary>Why stationarity still matters for machine learning</summary><p>Tree-based learners cannot extrapolate: a forest trained on a trending series predicts the highest value it has seen, never a new high. Linear learners on I(1) series suffer from the same spurious-regression problem as OLS. So each series is tested first, and I(1) series are differenced, exactly as in the Time-Series Guide. Lags of one series share its order.</p><ul><li><b>ADF test.</b> Null hypothesis: a unit root. p &lt; 0.05 means the series is stationary.</li><li><b>KPSS test.</b> Null hypothesis: stationary. Reported as a cross-check.</li></ul></details>
+   <div class="tw"><table><tr><th>Series</th><th>ADF level (p)</th><th>KPSS level (p)</th><th>ADF difference (p)</th><th>Order</th></tr>${ur.map(u=>u.skipped?`<tr><td>${esc(u.var)}</td><td colspan="3">binary or few values: not tested</td><td><span class="tag ok">I(0)</span></td></tr>`:`<tr><td>${esc(u.var)}</td><td>${fmt(u.level.adf,2)} (${pf(u.level.adf_p)})</td><td>${fmt(u.level.kpss,2)} (${pf(u.level.kpss_p)})</td><td>${u.diff?fmt(u.diff.adf,2)+' ('+pf(u.diff.adf_p)+')':'–'}</td><td>${u.order===0?'<span class="tag ok">I(0)</span>':u.order===1?'<span class="tag i1">I(1)</span>':'<span class="tag i2">I(2)</span>'}</td></tr>`).join('')}</table></div>
+   <p><b>Result:</b> ${R.diffed.length?`differenced before learning: ${R.diffed.map(esc).join(', ')}.`:'every series is stationary; nothing is differenced.'} Cross-validation below uses <b>rolling-origin splits</b>: each fold trains on the past and predicts the next block, never the other way round.</p>`+code(`from statsmodels.tsa.stattools import adfuller, kpss\nfrom sklearn.model_selection import TimeSeriesSplit\n\nfor v in ${pyList(ur.map(u=>u.var))}:\n    print(v, "ADF p =", round(adfuller(df[v].dropna(), autolag="AIC")[1], 3),\n             "KPSS p =", round(kpss(df[v].dropna(), nlags="auto")[1], 3))\ncv = TimeSeriesSplit(n_splits=5)          # never shuffle time`),t);t+=gap;
+  setTimeout(()=>{if(my!==run)return;light(['start','goal','ts'],{ts:'Time series: yes'})},t-gap+300*D)}
+ else setTimeout(()=>{if(my!==run)return;light(['start','goal','ts'],{ts:'Cross-section'})},t-gap+300*D);
+ const rm=R.rmse;
+ addStep(k++,'Sample size',`<p>${R.n_used.toLocaleString('en-US')} observations are available for learning${R.subsampled?` (a random ${(4000).toLocaleString('en-US')} are used for the forest checks in the browser)`:''}.</p><p><b>Rule A2:</b> ${R.small?`<span class="no">N &lt; ${C.SMALLN}</span>: too few observations for tree-based methods, which would memorise the sample. Only regularised linear models are compared.`:`<span class="yes">N ≥ ${C.SMALLN}</span>: enough observations to test for nonlinearity with a random forest.`}</p>`,t);t+=gap;
+ setTimeout(()=>{if(my!==run)return;light(['start','goal','ts','nn'],{nn:'N = '+R.n_used.toLocaleString('en-US')})},t-gap+300*D);
+ if(!R.small){
+  addStep(k++,'Is the relationship nonlinear? Random forest vs LASSO',`<details class="explain" open><summary>How the test works</summary><p>LASSO can only fit a linear relationship; a random forest can fit any shape and any interaction. Both are scored by five-fold cross-validated RMSE${R.ts?' with rolling-origin splits':''}: the error on observations each model did not see. If the forest's error is at least <b>${C.GAIN}%</b> lower, the data contain nonlinearities or interactions worth modelling; if not, the simpler linear model is preferred.</p></details>
+   ${bars([['OLS',rm.ols],['LASSO',rm.lasso],['Random forest',rm.rf],['Boosting',rm.gb]])}
+   <p style="font-size:11px;color:#8793ab">Cross-validated RMSE in units of ${esc(R.dep)}; shorter is better. Standard deviation of ${esc(R.dep)}: ${big(R.sd_y)}.</p>
+   <p><b>Rule A3:</b> the forest's RMSE is ${R.gain>=0?`${pct(R.gain)} lower`:`${pct(-R.gain)} higher`} than LASSO's. ${R.nonlinear?`<span class="yes">At least ${C.GAIN}%: the relationship is nonlinear.</span>`:`<span class="no">Less than ${C.GAIN}%: no evidence that a nonlinear model is worth its extra variance.</span>`}</p>`+code(`from sklearn.model_selection import KFold, cross_val_score\nfrom sklearn.pipeline import make_pipeline\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.linear_model import LassoCV\nfrom sklearn.ensemble import RandomForestRegressor\n\ncv = ${R.ts?'TimeSeriesSplit(n_splits=5)':'KFold(5, shuffle=True, random_state=0)'}\nrmse = lambda m: (-cross_val_score(m, X, y, cv=cv, scoring="neg_mean_squared_error").mean()) ** .5\nlasso = make_pipeline(StandardScaler(), LassoCV(cv=5))\nforest = RandomForestRegressor(n_estimators=200, min_samples_leaf=5, max_features=0.5, random_state=0)\nprint("LASSO", rmse(lasso), " forest", rmse(forest), " gain", 1 - rmse(forest) / rmse(lasso))`),t);t+=gap;
+  setTimeout(()=>{if(my!==run)return;light(['start','goal','ts','nn','nl'],{nl:R.nonlinear?'Nonlinear':'Linear'})},t-gap+300*D)}
+ if(R.model==='RF'||R.model==='XGB'){
+  addStep(k++,'Forest or boosting? Sample size again',`<p><b>Rule A5:</b> ${R.n_used>=C.BIGN?`<span class="yes">N ≥ ${C.BIGN.toLocaleString('en-US')}</span>: enough data to tune a gradient-boosted model, which usually predicts best on tabular data${rm.gb!=null?` (here, scikit-learn's histogram boosting reaches an RMSE of ${big(rm.gb)} against ${big(rm.rf)} for the forest)`:''}. XGBoost is the standard implementation in papers.`:`<span class="no">N &lt; ${C.BIGN.toLocaleString('en-US')}</span>: boosting has many tuning parameters and overfits small samples easily. A random forest needs little tuning and is the safer choice.`}</p>`,t);t+=gap;
+  setTimeout(()=>{if(my!==run)return;light(['start','goal','ts','nn','nl','bign'])},t-gap+300*D);
+ }else{const kept=new Set(R.lasso_kept||[]);
+  addStep(k++,'Which linear model? Correlation and sparsity',`<details class="explain" open><summary>LASSO, ridge or elastic net?</summary><ul><li><b>LASSO</b> sets weak coefficients to exactly zero: it suits a <b>sparse</b> problem in which a few predictors matter.</li><li><b>Ridge</b> shrinks all coefficients but drops none: it suits a <b>dense</b> problem with many small effects.</li><li><b>Elastic net</b> mixes both penalties. When predictors are strongly correlated, LASSO keeps one of a group almost arbitrarily; the elastic net keeps or drops them together.</li></ul><p>Sparsity is judged at the <b>one-standard-error penalty</b>: the largest penalty whose cross-validated error is within one standard error of the minimum (glmnet's <code>lambda.1se</code>).</p></details>
+   ${bars([['OLS',rm.ols],['LASSO',rm.lasso],['Ridge',rm.ridge],['Elastic net',rm.enet]])}
+   <ol class="urv" style="padding-left:18px"><li><b>Correlation.</b> The largest correlation between two predictors is ${fmt(R.corr.max_r,2)}${R.corr.pair.length?` (${R.corr.pair.map(esc).join(' and ')})`:''}. ${R.corr.max_r>C.HIGHR?`<span class="no">Above ${C.HIGHR}: correlated predictors</span>.`:`<span class="yes">Below ${C.HIGHR}</span>.`}</li>
+   <li><b>Sparsity.</b> At the one-standard-error penalty LASSO keeps <b>${(R.lasso_kept||[]).length} of ${R.p}</b> predictors (${pct(R.lasso_share)}). ${R.lasso_share<C.SPARSE?'<span class="yes">Fewer than half: a sparse problem.</span>':'<span class="no">Half or more: a dense problem.</span>'}${(R.lasso_kept||[]).length===0?' None of the predictors improves on the sample mean by more than noise.':''}</li></ol>
+   <div class="chips">${R.xs.slice(0,40).map(x=>`<span class="${kept.has(x)?'':'out'}">${esc(x)}</span>`).join('')}${R.xs.length>40?`<span class="out">+${R.xs.length-40} more</span>`:''}</div>
+   <p><b>Rule A4:</b> ${R.model==='ENET'?`correlation above ${C.HIGHR}, so the elastic net.`:R.model==='LASSO'?`correlations below ${C.HIGHR} and fewer than half of the predictors kept, so LASSO.`:`correlations below ${C.HIGHR} and half or more of the predictors kept, so ridge.`}</p>`+code(`import numpy as np\nfrom sklearn.linear_model import LassoCV, Lasso\nfrom sklearn.preprocessing import StandardScaler\n\nXs = StandardScaler().fit_transform(X)\ncv = LassoCV(cv=5, random_state=0).fit(Xs, y)\nm, se = cv.mse_path_.mean(1), cv.mse_path_.std(1) / np.sqrt(5)\nlam_1se = cv.alphas_[m <= m.min() + se[m.argmin()]].max()      # one-standard-error penalty\nkept = X.columns[Lasso(alpha=lam_1se).fit(Xs, y).coef_ != 0]\nprint(len(kept), "of", X.shape[1], "kept:", list(kept))`),t);t+=gap;
+  setTimeout(()=>{if(my!==run)return;light(R.small?['start','goal','ts','nn','lin']:['start','goal','ts','nn','nl','lin'])},t-gap+300*D)}
+ setTimeout(()=>{if(my!==run)return;finish(R.model,R)},t);
+}
+function showCausal(R,label,my,t,gap,k){
+ addStep(k++,'The question',`<p>Effect of <b>${esc(R.treat)}</b> (${R.binary?'binary':'continuous'}) on <b>${esc(R.dep)}</b>, with <b>${R.p}</b> controls${R.instr?` and the instrument <b>${esc(R.instr)}</b>`:''}. <b>${R.n.toLocaleString('en-US')}</b> observations${label?' · '+esc(label):''}.</p>
+  <div class="stats"><div class="stat"><b>${R.n.toLocaleString('en-US')}</b><span>Observations (N)</span></div><div class="stat"><b>${R.p}</b><span>Controls (p)</span></div><div class="stat"><b>${R.binary?'Binary':'Continuous'}</b><span>Treatment</span></div><div class="stat"><b>${R.instr?'Yes':'No'}</b><span>Instrument</span></div></div>
+  ${sumTable(R)}
+  <details class="explain" open><summary>What machine learning can and cannot do for a causal effect</summary><p>The effect of D on Y is identified if, after adjusting for the controls X, D is as good as random (<b>selection on observables</b>), or if an instrument shifts D. Machine learning helps with the <b>adjustment</b>: it can model how Y and D depend on many controls, or on controls that enter nonlinearly, without the researcher guessing the functional form. It cannot help if an important confounder is missing from X.</p><p><b>Rule B1:</b> ${R.instr?`an instrument is available, so the question is whether it is valid (see below).`:`this analysis assumes the controls contain the confounders${R.b1?': '+esc(R.b1):''}. If they do not, use the Causal Inference Guide.`}</p></details>`,t);t+=gap;
+ setTimeout(()=>{if(my!==run)return;light(['start','goal','conf'],{conf:R.instr?'Instrument':'Observed'})},t-gap+300*D);
+ const nl=R.nl;
+ addStep(k++,'Is OLS enough? Number of controls and their functional form',`<details class="explain" open><summary>When does double machine learning add something?</summary><p>OLS adjusts for the controls linearly. That is enough when there are few controls and they enter linearly; then machine learning only adds variance. DML is needed when there are <b>many controls</b> (OLS overfits, and choosing among them by hand invites specification search) or when the outcome or the treatment depends on them <b>nonlinearly</b>. The nonlinearity test is the same as for prediction: a random forest against LASSO, by cross-validated RMSE.</p></details>
+  <div class="tw"><table><tr><th>Prediction of</th><th>LASSO RMSE</th><th>Forest RMSE</th><th>Forest gain</th></tr><tr><td>${esc(R.dep)} (outcome) from X</td><td>${big(nl.y.lasso)}</td><td>${big(nl.y.rf)}</td><td>${pct(nl.y.gain)}</td></tr><tr><td>${esc(R.treat)} (treatment) from X</td><td>${big(nl.d.lasso)}</td><td>${big(nl.d.rf)}</td><td>${pct(nl.d.gain)}</td></tr></table></div>
+  <p>OLS benchmark (robust standard errors): effect of ${esc(R.treat)} = <b>${big(R.ols.b)}</b> (s.e. ${big(R.ols.se)}, p ${pf(R.ols.p)}).</p>
+  <p><b>Rule B2:</b> ${R.p}${R.p<C.FEWCTRL?` &lt; ${C.FEWCTRL}`:` ≥ ${C.FEWCTRL}`} controls, and the forest ${R.controls_nonlinear?`beats LASSO by at least ${C.GAIN}%`:`does not beat LASSO by ${C.GAIN}%`}. ${R.ols_enough?`<span class="no">OLS is enough</span>${R.instr?', but the treatment is endogenous, so the instrument is still needed.':': DML is reported below as a robustness check.'}`:`<span class="yes">Double machine learning is needed.</span>`}</p>`+code(`import statsmodels.api as sm\n\nols = sm.OLS(df["${R.dep}"], sm.add_constant(df[["${R.treat}"] + controls])).fit(cov_type="HC1")\nprint(ols.params["${R.treat}"], ols.bse["${R.treat}"])\n# nonlinearity of the controls: forest vs LASSO for the outcome and for the treatment\nfor target in ["${R.dep}", "${R.treat}"]:\n    print(target, rmse(lasso, df[controls], df[target]), rmse(forest, df[controls], df[target]))`),t);t+=gap;
+ setTimeout(()=>{if(my!==run)return;light(['start','goal','conf','ctl'],{ctl:R.ols_enough?'Few, linear':'Many or nonlinear'})},t-gap+300*D);
+ if(!(R.ols_enough&&!R.instr)){
+  let body='';
+  if(R.instr){const F=R.first_stage;body=`<p>The instrument <b>${esc(R.instr)}</b> must (1) shift the treatment, (2) affect the outcome only through the treatment, given the controls, and (3) be as good as random given the controls. Only (1) can be tested.</p><div class="tw"><table><tr><th>First stage</th><th>Coefficient</th><th>Robust s.e.</th><th>F statistic</th></tr><tr><td>${esc(R.treat)} on ${esc(R.instr)} and the controls</td><td>${big(F.b)}</td><td>${big(F.se)}</td><td>${fmt(F.F,1)}</td></tr></table></div><p><b>Rule B3:</b> ${R.weak?`<span class="no">F &lt; ${C.WEAKF}: a weak instrument.</span> DML-IV is still the method, but report Anderson–Rubin confidence intervals, which stay valid when the instrument is weak.`:`<span class="yes">F ≥ ${C.WEAKF}</span>: the instrument is strong. DML-IV.`}</p>`}
+  else if(R.binary){const O=R.overlap;body=`<p>With a binary treatment, the interactive model compares treated and untreated people with the same controls. That requires <b>overlap</b>: everyone must have some chance of being in either group. The propensity score (the probability of treatment given the controls) is estimated by cross-validated random forest.</p>${hist(O)}<p>Propensity scores range from ${fmt(O.min,3)} to ${fmt(O.max,3)}; <b>${pct(O.share_out)}</b> lie outside [${C.OVLO}, ${C.OVHI}]. ${pct(R.treated_share)} of the sample is treated.</p><p><b>Rule B3:</b> a binary treatment, so the <b>interactive model</b> (doubly robust AIPW score). ${O.share_out>0?`<span class="no">Trim or clip the ${pct(O.share_out)} of observations outside [${C.OVLO}, ${C.OVHI}]</span>, and report the estimate with and without trimming.`:`<span class="yes">Overlap is good.</span>`}</p>`}
+  else body=`<p>The treatment is continuous, so the <b>partially linear model</b>: Y = θD + g(X) + ε, where g is any function of the controls, learned by machine learning. θ is a single slope, as in OLS.</p><p><b>Rule B3:</b> continuous treatment → DML partially linear model.</p>`;
+  addStep(k++,R.instr?'The instrument: first stage':R.binary?'Binary treatment: propensity scores and overlap':'Continuous treatment',body+code(R.instr?`fs = sm.OLS(df["${R.treat}"], sm.add_constant(df[["${R.instr}"] + controls])).fit(cov_type="HC1")\nprint("first-stage F =", (fs.params["${R.instr}"] / fs.bse["${R.instr}"]) ** 2)`:R.binary?`from sklearn.model_selection import cross_val_predict\nfrom sklearn.ensemble import RandomForestClassifier\n\nps = cross_val_predict(RandomForestClassifier(n_estimators=200, min_samples_leaf=5, random_state=0),\n                       df[controls], df["${R.treat}"], cv=5, method="predict_proba")[:, 1]\nprint(ps.min(), ps.max(), ((ps < ${C.OVLO}) | (ps > ${C.OVHI})).mean())`:`# continuous treatment: partially linear model Y = theta * D + g(X) + e`),t);t+=gap;
+  setTimeout(()=>{if(my!==run)return;light(['start','goal','conf','ctl','typ'],{typ:R.instr?'Instrument':R.binary?'Binary':'Continuous'})},t-gap+300*D)}
+ const de=R.dml,lab={PLR:'partially linear model',IRM:'interactive model (ATE)',PLIV:'partially linear IV model'}[R.kind];
+ addStep(k++,'Double machine learning: LASSO and random-forest learners',`<details class="explain" open><summary>How DML works, in three lines</summary><ol><li>Predict the outcome and the treatment${R.instr?' and the instrument':''} from the controls with a machine-learning model, each prediction made on data the model was not trained on (<b>cross-fitting</b>: five folds).</li><li>Take the residuals: the part of each that the controls do not explain.</li><li>Regress the outcome residual on the treatment residual${R.instr?', using the instrument residual as the instrument':''}${R.kind==='IRM'?'; for a binary treatment, combine outcome models and propensity scores in the doubly robust score':''}. The result is θ with a valid standard error.</li></ol><p>The estimate should not depend much on which learner is used. <b>Rule B4:</b> if LASSO and the forest differ by more than one standard error, the relationship is nonlinear and the forest is reported.</p></details>
+  <div class="tw"><table><tr><th>Estimator</th><th>θ</th><th>s.e.</th><th>95% CI</th></tr><tr><td>OLS${R.instr?' (not IV)':''}</td><td>${big(R.ols.b)}</td><td>${big(R.ols.se)}</td><td>–</td></tr><tr><td>DML ${lab}, LASSO</td><td>${big(de.lasso.theta)}</td><td>${big(de.lasso.se)}</td><td>[${big(de.lasso.lo)}, ${big(de.lasso.hi)}]</td></tr><tr><td>DML ${lab}, random forest</td><td>${big(de.rf.theta)}</td><td>${big(de.rf.se)}</td><td>[${big(de.rf.lo)}, ${big(de.rf.hi)}]</td></tr></table></div>
+  <p style="font-size:11px;color:#8793ab">Five-fold cross-fitting, two repetitions (the median is reported); the guide uses DoubleML with more repetitions.${R.subsampled?' A random 4,000 observations are used in the browser.':''}</p>
+  <p><b>Result:</b> the two learners differ by ${fmt(R.gap_se,2)} standard errors. ${R.gap_se>1?'<span class="no">More than one: report the random-forest learner and discuss the difference.</span>':'<span class="yes">Less than one: the estimate is robust to the learner.</span>'}</p>`+code(`import doubleml as dml\nfrom sklearn.linear_model import LassoCV${R.kind==='IRM'?', LogisticRegressionCV':''}\nfrom sklearn.ensemble import RandomForestRegressor${R.kind==='IRM'?', RandomForestClassifier':''}\n\ndata = dml.DoubleMLData(df, y_col="${R.dep}", d_cols="${R.treat}", x_cols=controls${R.instr?`, z_cols="${R.instr}"`:''})\nrf = RandomForestRegressor(n_estimators=500, min_samples_leaf=5, max_features=0.5)\n${R.kind==='IRM'?`model = dml.DoubleMLIRM(data, ml_g=rf, ml_m=RandomForestClassifier(n_estimators=500, min_samples_leaf=5), n_folds=5, n_rep=10)`:R.kind==='PLIV'?`model = dml.DoubleMLPLIV(data, ml_l=rf, ml_m=rf, ml_r=rf, n_folds=5, n_rep=10)`:`model = dml.DoubleMLPLR(data, ml_l=rf, ml_m=rf, n_folds=5, n_rep=10)`}\nprint(model.fit().summary)`),t);t+=gap;
+ if(R.model==='OLS'){setTimeout(()=>{if(my!==run)return;finish('OLS',R)},t);return}
+ setTimeout(()=>{if(my!==run)return;
+  if(R.cf_possible&&R.kind!=='PLIV')askHet(R);else finish(R.model,R)},t);
+}
+function askHet(R){const s=el('div','step',`<div class="label">One question</div><h3>Do you need to know who gains most from ${esc(R.treat)}, not only the average effect?</h3><p>With ${R.n.toLocaleString('en-US')} observations (at least ${C.CFN.toLocaleString('en-US')}), there are enough data to estimate how the effect varies with the controls.</p><div class="opts"><button type="button" data-a="${R.model}">No, the average effect answers my question<small>${MODELS[R.model].name}</small></button><button type="button" data-a="CF">Yes, for example by income or age<small>Causal forest, with the DML average effect as the benchmark</small></button></div>`);
+ $('#steps').appendChild(s);requestAnimationFrame(()=>s.classList.add('in'));if(!reduce)s.scrollIntoView({behavior:'smooth',block:'nearest'});
+ s.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{s.querySelectorAll('button').forEach(x=>x.disabled=true);b.style.borderColor='var(--navy)';b.style.background='var(--tint)';finish(b.dataset.a,R,b.dataset.a==='CF'?R.model:null)}))}
+
+/* ---------- recommendation ---------- */
+function evidence(R,m){if(!R)return '';const rm=R.rmse||{};
+ if(m==='LASSO')return `No two predictors are correlated above ${C.HIGHR} (largest ${fmt(R.corr.max_r,2)}), and LASSO keeps ${(R.lasso_kept||[]).length} of ${R.p} predictors at the one-standard-error penalty.${R.nonlinear===false?` The forest is ${pct(-R.gain)} ${R.gain<0?'worse':'better'} than LASSO, below the ${C.GAIN}% threshold.`:''}`;
+ if(m==='RIDGE')return `No two predictors are correlated above ${C.HIGHR}, and LASSO keeps ${(R.lasso_kept||[]).length} of ${R.p} predictors (${pct(R.lasso_share)}): the effects are dense. Cross-validated RMSE: ridge ${big(rm.ridge)}, LASSO ${big(rm.lasso)}.`;
+ if(m==='ENET')return `${R.corr.pair.map(esc).join(' and ')} are correlated at ${fmt(R.corr.max_r,2)}, above ${C.HIGHR}. Cross-validated RMSE: elastic net ${big(rm.enet)}, LASSO ${big(rm.lasso)}, ridge ${big(rm.ridge)}.`;
+ if(m==='RF')return `The forest's cross-validated RMSE is ${pct(R.gain)} below LASSO's (${big(rm.rf)} against ${big(rm.lasso)}), and N = ${R.n_used.toLocaleString('en-US')} is below ${C.BIGN.toLocaleString('en-US')}.`;
+ if(m==='XGB')return `The forest's cross-validated RMSE is ${pct(R.gain)} below LASSO's, and N = ${R.n_used.toLocaleString('en-US')} is above ${C.BIGN.toLocaleString('en-US')}.${rm.gb!=null?` Boosting: ${big(rm.gb)}; forest: ${big(rm.rf)}.`:''}`;
+ if(m==='OLS')return `${R.p} controls, and the forest improves on LASSO by only ${pct(Math.max(R.nl.y.gain,R.nl.d.gain))} at best. OLS: ${big(R.ols.b)} (s.e. ${big(R.ols.se)}); DML with a forest: ${big(R.dml.rf.theta)} (s.e. ${big(R.dml.rf.se)}).`;
+ const th=R.learner==='rf'?R.dml.rf:R.dml.lasso;
+ if(m==='CF')return `N = ${R.n.toLocaleString('en-US')}, enough for a causal forest. The DML average effect, ${big(R.dml.rf.theta)} (s.e. ${big(R.dml.rf.se)}), is the benchmark the forest's average must match.`;
+ return `${R.p} controls${R.controls_nonlinear?', entering nonlinearly':''}. DML estimate: ${big(th.theta)} (95% CI ${big(th.lo)} to ${big(th.hi)}), against ${big(R.ols.b)} by OLS.${R.kind==='PLIV'?` First-stage F = ${fmt(R.first_stage.F,1)}.`:''}`}
+function caution(R,m){if(!R)return QA.weak&&m==='PLIV'?`<div class="caution"><b>Check before you write.</b> A first-stage F below ${C.WEAKF} means a weak instrument: report Anderson–Rubin confidence intervals.</div>`:'';
+ const c=[];if(m==='IRM'||m==='CF'){if(R.overlap&&R.overlap.share_out>0)c.push(`${pct(R.overlap.share_out)} of propensity scores lie outside [${C.OVLO}, ${C.OVHI}]: report the estimate with those observations trimmed.`)}
+ if(m==='PLIV'&&R.weak)c.push(`The first-stage F is ${fmt(R.first_stage.F,1)}, below ${C.WEAKF}: report Anderson–Rubin confidence intervals.`);
+ if(R.goal==='predict'&&R.ts)c.push('Time series: keep rolling-origin validation and compare every model with an AR benchmark.');
+ if(['PLR','IRM','PLIV'].includes(m)&&R.gap_se>1)c.push(`LASSO and the forest differ by ${fmt(R.gap_se,1)} standard errors: report both, and lead with the forest.`);
+ if((R.lasso_kept||[1]).length===0&&m==='LASSO')c.push('LASSO keeps no predictor: the variables in this file do not predict the outcome better than its mean. Look for better predictors before fitting any model.');
+ return c.length?`<div class="caution"><b>Check before you write.</b> ${c.join(' ')}</div>`:''}
+function finish(m,R,alt){const my=run,M=MODELS[m];const d=light(pathTo(m,R));if(alt){const a=$('#n-'+alt);a&&a.classList.add('alt')}
+ setTimeout(()=>{if(my!==run)return;const ev=evidence(R,m);
+  $('#result').innerHTML=`<div class="result"><div class="label">Recommended method</div><h2>${M.name}</h2><p>${M.why}${ev?' <b>In this data:</b> '+ev:''}</p>${caution(R,m)}${M.steps.length?`<div class="label" style="margin-bottom:6px">What the paper needs</div><ul>${M.steps.map(s=>`<li>${s}</li>`).join('')}</ul>`:''}<div class="acts">${GUIDE[m]?`<a class="btn" href="${GUIDE[m]}.html">Go to the ${M.short} guide →</a>`:m==='CIG'?'<a class="btn" href="../causal-inference-guide/index.html">Open the Causal Inference Guide →</a>':''}${M.lec.map((l,i)=>`<a class="btn${GUIDE[m]||m==='CIG'||i?' ghost':''}" href="${l[0]}">${l[1]} →</a>`).join('')}${alt?`<a class="btn ghost" href="#g-${alt}" data-go="${alt}">Benchmark: ${MODELS[alt].short}</a>`:''}${R?'':'<button class="btn ghost" type="button" id="again">Start over</button>'}</div></div>`;
+  $('#result').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});const ag=$('#again');ag&&ag.addEventListener('click',()=>setMode('ask'))},d+250*D)}
+
+/* ---------- examples ---------- */
+function initExamples(){let grp=null;EXAMPLES.forEach(x=>{if(x.group!==grp){grp=x.group;$('#ex').appendChild(el('div','exgroup',esc(grp)));$('#ex').appendChild(el('div','ex'))}
+ const b=el('button','',`<small>${esc(x.meta)}</small><b>${esc(x.title)}</b><span>${esc(x.desc)}</span>`);b.type='button';
+ b.addEventListener('click',()=>{document.querySelectorAll('.ex button').forEach(e=>e.classList.remove('sel'));b.classList.add('sel');show(x.result,x.title)});$('#ex').lastChild.appendChild(b)})}
+
+/* ---------- upload ---------- */
+let pyReady=null,pending=null;
+function status(t){$('#status').classList.toggle('on',!!t);$('#status-text').textContent=t||''}
+function loadPy(){if(pyReady)return pyReady;pyReady=(async()=>{status('Loading Python. The first time takes about 20 seconds…');
+  await new Promise((res,rej)=>{const s=document.createElement('script');s.src=PYO+'pyodide.js';s.onload=res;s.onerror=()=>rej(new Error('Could not load Python. Check your internet connection and try again.'));document.head.appendChild(s)});
+  const py=await loadPyodide({indexURL:PYO});status('Loading pandas, statsmodels and scikit-learn…');await py.loadPackage(['pandas','scipy','statsmodels','scikit-learn']);py.runPython($('#py-src').textContent);return py})();
+ pyReady.catch(()=>{pyReady=null});return pyReady}
+async function analyse(text,name,treat,instr){$('#upload-err').innerHTML='';$('#steps').innerHTML='';$('#result').innerHTML='';++run;resetTree();
+ try{const py=await loadPy();status(GOAL==='causal'?'Running the checks and double machine learning. This can take one to three minutes…':'Running the checks on your data. This can take up to a minute…');await new Promise(r=>setTimeout(r,40));
+  const R=JSON.parse(py.globals.get('analyze')(text,GOAL,treat||null,instr||null));status('');if(R.error)throw new Error(R.error);show(R,name)}
+ catch(e){status('');$('#upload-err').innerHTML=`<div class="err">${esc(e.message||e)}</div>`}}
+async function handleFile(f){$('#upload-err').innerHTML='';$('#cfg').innerHTML='';
+ if(f.size>8e6){$('#upload-err').innerHTML='<div class="err">The file is larger than 8 MB. Please upload a smaller CSV.</div>';return}
+ const text=await f.text();
+ if(GOAL!=='causal')return analyse(text,f.name);
+ const head=text.split(/\r?\n/)[0].split(',').map(s=>s.trim().replace(/^"|"$/g,''));
+ if(head.length<3){$('#upload-err').innerHTML='<div class="err">A causal analysis needs at least three columns: the outcome, the treatment and one control.</div>';return}
+ const opt=(sel)=>head.slice(1).map(h=>`<option${h===sel?' selected':''}>${esc(h)}</option>`).join('');
+ $('#cfg').innerHTML=`<div class="cfg"><label>Treatment<select id="cT">${opt(head[1])}</select></label><label>Instrument (optional)<select id="cZ"><option value="">None</option>${opt('')}</select></label><button class="btn" type="button" id="cGo">Run the checks</button></div><div class="q" style="margin-top:12px"><div class="label">Rule B1</div><p style="margin:4px 0 8px;font-size:13px">Are all the important confounders of <b>${esc(head[1])}</b> among your controls? If not, and you have no instrument, machine learning cannot remove the bias.</p><div class="opts"><button type="button" id="cNo">No, and I have no instrument<small>Go to the research designs</small></button></div></div>`;
+ $('#cT').addEventListener('change',e=>{$('#cfg .q b').textContent=e.target.value});
+ $('#cNo').addEventListener('click',()=>{++run;resetTree();$('#steps').innerHTML='';light(['start','goal','conf'],{goal:'Causal effect',conf:'Unobserved'});finish('CIG',null)});
+ $('#cGo').addEventListener('click',()=>{const T=$('#cT').value,Z=$('#cZ').value;if(Z&&Z===T){$('#upload-err').innerHTML='<div class="err">The instrument must be a different column from the treatment.</div>';return}analyse(text,f.name,T,Z)})}
+function initUpload(){const d=$('#drop');$('#file').addEventListener('change',e=>{e.target.files[0]&&handleFile(e.target.files[0]);e.target.value=''});
+ ['dragenter','dragover'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.add('over')}));['dragleave','drop'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove('over')}));
+ d.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];f&&handleFile(f)});
+ document.querySelectorAll('.goal button').forEach(b=>b.addEventListener('click',()=>{GOAL=b.dataset.goal;document.querySelectorAll('.goal button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));$('#cfg').innerHTML='';$('#upload-err').innerHTML=''}))}
+
+/* ---------- questions ---------- */
+const QS={
+ goal:{t:'What do you want to do?',o:[['Predict or forecast an outcome','Accuracy on new data is what matters','ts',['start','goal','ts']],['Estimate the effect of one variable on another','A causal effect, with a standard error','conf',['start','goal','conf'],'causal',1]]},
+ ts:{t:'Is your data a time series?',o:[['Yes','Test every series for a unit root first, difference I(1) series, and validate with rolling-origin splits','nn',['ts','nn'],'ts',1],['No, a cross-section or pooled data','','nn',['ts','nn']]]},
+ nn:{t:'How many observations do you have?',o:[['Fewer than '+C.SMALLN,'Tree-based methods would overfit','lin',['nn','lin'],'small',1],[C.SMALLN+' or more','','nl',['nn','nl']]]},
+ nl:{t:'Is a random forest’s cross-validated RMSE at least '+C.GAIN+'% below LASSO’s?',o:[['Yes','The relationship is nonlinear','bign',['nl','bign']],['No','A linear model is enough','lin',['nl','lin']]]},
+ bign:{t:'Do you have at least '+C.BIGN.toLocaleString('en-US')+' observations?',o:[['Yes','Enough to tune a boosted model','XGB'],['No','','RF']]},
+ lin:{t:'Are any two predictors correlated above '+C.HIGHR+'?',o:[['Yes','','ENET'],['No','','sp']]},
+ sp:{t:'At the one-standard-error penalty, does LASSO keep fewer than half of the predictors?',o:[['Yes','A few predictors carry the signal','LASSO'],['No','Many small effects','RIDGE']]},
+ conf:{t:'Are all the important confounders among your control variables?',o:[['Yes','Selection on observables','ctl',['conf','ctl']],['No, but I have an instrument','A variable that shifts the treatment and affects the outcome only through it','ivF',['conf','ctl','typ']],['No, and I have no instrument','','CIG']]},
+ ivF:{t:'Is the first-stage F statistic of the instrument at least '+C.WEAKF+'?',o:[['Yes','','PLIV'],['No','A weak instrument','PLIV',null,'weak',1]]},
+ ctl:{t:'Do you have at least '+C.FEWCTRL+' controls, or does a random forest beat LASSO by '+C.GAIN+'% in predicting the outcome or the treatment from them?',o:[['Yes','Many or nonlinear controls','typ',['ctl','typ']],['No','Few controls that enter linearly','OLS']]},
+ typ:{t:'Is the treatment binary or continuous?',o:[['Binary (0/1)','For example a programme, a policy or eligibility','het',['typ','IRM','het'],'kind','IRM'],['Continuous','For example a price, an amount or a rate','het',['typ','PLR','het'],'kind','PLR']]},
+ het:{t:'Do you need to know who gains most, and do you have at least '+C.CFN.toLocaleString('en-US')+' observations?',o:[['No, the average effect is enough','','KIND'],['Yes','Effects by subgroup','CF']]}
+};
+function ask(id,n=1){const Q=QS[id];$('#q').innerHTML=`<div class="label">Question ${n}</div><h3>${Q.t}</h3><div class="opts">${Q.o.map((o,i)=>`<button type="button" data-i="${i}">${o[0]}${o[1]?`<small>${o[1]}</small>`:''}</button>`).join('')}</div>`;
+ $('#q').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const o=Q.o[+b.dataset.i];let to=o[2];if(o[4])QA[o[4]]=o[5];
+  if(to==='KIND')to=QA.kind;
+  if(QS[to]){o[3]&&light(o[3]);ask(to,n+1)}else{$('#q').innerHTML='<p class="sub" style="margin:0">Your answers lead to the method shown below.</p>';finish(to,null,to==='CF'?QA.kind:to==='XGB'?'RF':to==='RF'?'XGB':null)}}))}
+
+/* ---------- guides, modes, init ---------- */
+function initGuides(){Object.entries(MODELS).filter(([k])=>ALLG[k]).forEach(([k,M])=>{const g=GUIDE[k];$('#gcards').appendChild(el('article','gcard',`<span class="tag${g?' ok':''}">${g?'Step-by-step guide':'In preparation'}</span><h3>${M.short}</h3><p class="when">${M.when}</p><p>${M.steps.slice(0,5).join(' · ')} …</p>${g?`<a href="${g}.html" style="font-size:12.5px">Open the ${M.short} guide →</a>`:''}${M.lec.map(l=>`<a href="${l[0]}">${l[1]} →</a>`).join('')}`)).id='g-'+k})}
+document.addEventListener('click',e=>{const a=e.target.closest('[data-go]');if(!a)return;const c=$('#g-'+a.dataset.go);if(c){c.classList.remove('flash');void c.offsetWidth;c.classList.add('flash')}});
+function setMode(m){++run;QA={};document.querySelectorAll('.modes button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));['example','upload','ask'].forEach(x=>$('#m-'+x).hidden=x!==m);
+ $('#steps').innerHTML='';$('#result').innerHTML='';$('#upload-err').innerHTML='';$('#cfg').innerHTML='';status('');resetTree();document.querySelectorAll('.ex button').forEach(e=>e.classList.remove('sel'));if(m==='ask'){light(['start']);ask('goal')}}
+document.querySelectorAll('.modes button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+drawTree();initExamples();initUpload();initGuides();$('#year').textContent=new Date().getFullYear();
+
+</script>
+<script src="../assets/js/mobile-nav.js" defer></script>
+</body>
+</html>
