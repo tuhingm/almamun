@@ -4,98 +4,129 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0033A0">
-<meta name="description" content="Interactive panel-data econometric research guide for macroeconomic and microeconomic panels. Explore panel structure, specification, dependence, heterogeneity, unit roots, cointegration, estimators and diagnostics.">
+<meta name="description" content="An interactive model-selection tool for panel data in economics and finance: test your panel and find out whether pooled OLS, random effects, fixed effects, GMM, Driscoll–Kraay, mean-group, PMG or CS-ARDL fits.">
 <title>Panel Data Research Guide | Tuhin G. M. Al Mamun</title>
 <link rel="canonical" href="https://tuhingm.github.io/almamun/panel-data-guide/">
-<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml"><link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--navy:#0033a0;--navy2:#00205b;--ink:#1b2437;--muted:#55617a;--paper:#f3f5fa;--white:#fff;--line:#d5dcea;--sky:#9fd3f0;--tint:#e3eaf7;--ok:#0f7a4f;--warn:#a05a00;--red:#8a2a17}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.7 "DM Sans",sans-serif}a{color:inherit;text-decoration:none}button,input,select{font:inherit}button{cursor:pointer}.wrap{width:min(1160px,calc(100% - 40px));margin:auto}
-header{background:rgba(0,51,160,.98);color:#fff}.nav{height:68px;display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{font:800 15px Manrope;white-space:nowrap}.brand b{color:var(--sky)}nav{display:flex;gap:22px;align-items:center;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#e4ecf8}nav a:hover,nav a.current{color:var(--sky)}
-.hero{color:white;padding:52px 0 45px;background:radial-gradient(circle at 85% 12%,#6ec1e445,transparent 29%),linear-gradient(120deg,#0033a0,#00205b)}.kicker,.eyebrow{font-size:10px;font-weight:800;letter-spacing:.19em;text-transform:uppercase;color:var(--sky)}h1{font:800 clamp(34px,5vw,52px)/1.1 Manrope;letter-spacing:-1.7px;margin:12px 0}.lead{max-width:820px;color:#d3def1;margin:0}.meta{display:flex;gap:22px;flex-wrap:wrap;margin-top:20px;color:#c5d4ea;font-size:11px}.meta strong{color:white}
-main{padding:30px 0 75px}.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:7px;box-shadow:0 5px 18px #00205b0d}.mode{border:0;background:transparent;border-radius:10px;padding:13px 15px;text-align:left;color:var(--ink)}.mode b{display:block;font:800 14px Manrope}.mode span{font-size:11px;color:var(--muted)}.mode[aria-pressed=true]{background:var(--navy);color:#fff}.mode[aria-pressed=true] span{color:#d1e0f8}
-.layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);gap:20px;margin-top:20px;align-items:start}.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:21px;box-shadow:0 5px 18px #00205b0d;min-width:0}.panel h2{font:800 18px Manrope;margin:0 0 4px}.sub{font-size:12px;color:var(--muted);margin:0 0 16px}.label{font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#7f8aa1}
-.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.choice{border:1px solid var(--line);border-radius:11px;background:#fff;text-align:left;padding:14px;transition:.2s}.choice:hover{border-color:var(--navy);transform:translateY(-2px);box-shadow:0 8px 20px #00205b14}.choice b{display:block;font:700 13px Manrope;margin:5px 0}.choice small{font-size:9px;color:var(--navy);font-weight:800;letter-spacing:.1em;text-transform:uppercase}.choice span{display:block;color:var(--muted);font-size:11px;line-height:1.5}
-.drop{border:2px dashed #b9c9e6;background:#f8fafe;border-radius:12px;padding:24px;text-align:center}.drop.over{background:var(--tint);border-color:var(--navy)}.btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:8px;background:var(--navy);color:#fff;padding:10px 15px;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.btn.secondary{background:#fff;color:var(--navy);border:1px solid #b9c9e6}.btn:disabled{opacity:.45;cursor:not-allowed}
-.fieldgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px;margin:14px 0}.field{display:grid;gap:5px}.field label{font-size:10px;font-weight:800;color:#53617a}.field select,.field input{width:100%;border:1px solid #cbd5e5;border-radius:8px;background:white;padding:9px 10px;color:var(--ink);font-size:12px}.hint{font-size:11px;color:var(--muted);margin:10px 0 0}.status{font-size:11px;color:var(--navy);font-weight:700;margin-top:12px}.error{color:var(--red);background:#fff0ed;border:1px solid #efc7be;border-radius:8px;padding:10px;font-size:11px;margin-top:10px}
-.question{border-top:1px solid #e7ecf4;padding:16px 0 2px;margin-top:14px}.question h3{font:700 14px Manrope;margin:4px 0 10px}.options{display:grid;gap:7px}.options button{border:1px solid var(--line);background:white;border-radius:9px;padding:10px 12px;text-align:left;font-size:12px}.options button:hover{border-color:var(--navy);background:#f5f8fd}.options button.selected{border-color:var(--navy);background:var(--tint);font-weight:700}.options small{display:block;color:var(--muted);font-size:10px;font-weight:400}
-.result{margin-top:20px;padding:24px;border-radius:15px;color:#fff;background:radial-gradient(circle at 88% 10%,#6ec1e455,transparent 34%),linear-gradient(120deg,#0033a0,#00205b);box-shadow:0 15px 34px #00205b25}.result h2{font:800 clamp(25px,4vw,38px)/1.12 Manrope;margin:6px 0 10px}.result p{font-size:12px;color:#e0e9f8;margin:7px 0}.result .eyebrow{color:var(--sky)}.result ul{padding-left:18px;color:#e4ecf8;font-size:11px}.result .caution{background:#ffffff18;border:1px solid #ffffff30;padding:10px 12px;border-radius:8px;color:#f3f6fd;font-size:11px;margin-top:12px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:13px 0}.stat{background:#f7f9fd;border:1px solid #e4eaf3;border-radius:9px;padding:10px}.stat b{display:block;font:800 19px Manrope;color:var(--navy)}.stat span{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-.tree{position:sticky;top:15px}.tree ol{padding-left:20px;margin:12px 0;color:#4c5a72;font-size:11px}.tree li{padding:4px 0}.pill{display:inline-block;background:var(--tint);color:var(--navy);padding:3px 8px;border-radius:30px;font-size:9px;font-weight:800;margin:2px}
-.guides{margin-top:36px}.guides h2{font:800 23px Manrope;margin:0}.guides>p{font-size:12px;color:var(--muted);max-width:780px}.guidegrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:15px}.gcard{background:#fff;border:1px solid var(--line);border-radius:11px;padding:17px;box-shadow:0 4px 15px #00205b0b}.gcard h3{font:800 14px Manrope;margin:5px 0}.gcard p,.gcard li{font-size:10.5px;color:var(--muted)}.gcard ul{padding-left:16px;margin:8px 0}.note{background:#eaf0fa;border:1px solid #d1def0;border-radius:10px;padding:14px 17px;margin-top:20px;font-size:11px;color:#46546d}.resources{margin-top:38px}.resource-head{display:flex;justify-content:space-between;align-items:end;gap:18px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:15px}.resource-head h2{font:800 23px Manrope;margin:4px 0}.resource-head p{font-size:12px;color:var(--muted);max-width:520px;margin:0}.resource-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}.resource{background:#fff;border:1px solid var(--line);border-radius:12px;padding:19px;box-shadow:0 5px 18px #00205b0b}.resource h3{font:800 15px Manrope;margin:5px 0 8px}.resource p,.resource li{font-size:11px;color:var(--muted)}.resource ul{padding-left:17px;margin:8px 0}.resource .links{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.resource .links a{font-size:10px;font-weight:800;color:var(--navy);border:1px solid #cbd6e8;border-radius:7px;padding:7px 10px}.resource .links a.primary{background:var(--navy);color:#fff;border-color:var(--navy)}.codebox{margin-top:12px}.codebox summary{cursor:pointer;font-size:10px;font-weight:800;color:var(--navy);letter-spacing:.08em;text-transform:uppercase}.codebox pre{overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;background:#111c36;color:#e4ecfa;border-radius:9px;padding:13px;font:10px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}.resource .badge{display:inline-block;background:var(--tint);color:var(--navy);border-radius:20px;padding:3px 8px;font-size:9px;font-weight:800}.hide{display:none!important}
-footer{background:var(--navy2);color:#c3d0e4;padding:20px 0;font-size:10px}.foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.foot b{color:white}
-@media(max-width:850px){.layout{grid-template-columns:1fr}.tree{position:static}.guidegrid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:600px){.wrap{width:calc(100% - 30px)}.nav{height:auto;min-height:62px;flex-wrap:wrap;padding:10px 0}nav{gap:10px;flex-wrap:wrap;font-size:8px}.hero{padding:40px 0}.modes{grid-template-columns:1fr}.mode{padding:10px}.cards,.fieldgrid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.guidegrid{grid-template-columns:1fr}.panel{padding:16px}}
-@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+:root{--navy:#0033a0;--navy2:#00205b;--ink:#1b2437;--muted:#55617a;--paper:#f3f5fa;--white:#fff;--line:#d5dcea;--sky:#9fd3f0;--sky2:#6ec1e4;--tint:#e3eaf7;--ok:#0f7a4f;--warn:#a05a00}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:25px}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.7 "DM Sans",sans-serif}a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer}.wrap{width:min(1120px,calc(100% - 44px));margin:auto}
+header{background:rgba(0,51,160,.98);color:white;border-bottom:1px solid #ffffff22}.nav{height:72px;display:flex;align-items:center;justify-content:space-between}.brand{font:800 15px Manrope}.brand b{color:var(--sky)}nav{display:flex;gap:25px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#e3ecf8}nav a:hover,nav a.current{color:var(--sky)}
+.hero{background:radial-gradient(circle at 85% 12%,#6ec1e445,transparent 29%),linear-gradient(120deg,#0033a0,#00205b);color:white;padding:60px 0 52px}.kicker{font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--sky)}h1{font:800 clamp(34px,5vw,50px)/1.12 Manrope;letter-spacing:-1.7px;margin:12px 0 14px}.lead{max-width:760px;color:#d0dcf0;margin:0;font-size:15px}.meta{display:flex;gap:22px;flex-wrap:wrap;margin-top:22px;color:#c5d4ea;font-size:11px}.meta strong{color:white}
+main{padding:34px 0 80px}
+.modes{display:flex;gap:8px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:14px;padding:7px;box-shadow:0 5px 18px rgba(0,32,91,.06)}
+.modes button{flex:1 1 180px;border:0;background:transparent;border-radius:10px;padding:13px 14px;text-align:left;color:var(--ink);transition:background .2s,color .2s,transform .2s}
+.modes button b{display:block;font:800 14px Manrope}.modes button span{font-size:11px;color:var(--muted)}
+.modes button:hover{background:#f3f6fc}.modes button[aria-pressed=true]{background:var(--navy);color:#fff;transform:translateY(-1px);box-shadow:0 6px 16px #0033a040}.modes button[aria-pressed=true] span{color:#cfe0fa}
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:22px;margin-top:22px;align-items:start}
+.panel{min-width:0;background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:0 5px 18px rgba(0,32,91,.06)}
+.panel h2{font:800 18px Manrope;margin:0 0 4px;letter-spacing:-.3px}.panel>p.sub{font-size:12px;color:var(--muted);margin:0 0 16px}
+.label{font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#7f8aa1}
+.ex{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.ex button{border:1px solid var(--line);background:#fff;border-radius:11px;padding:14px;text-align:left;transition:transform .2s,box-shadow .2s,border-color .2s}
+.ex button:hover{transform:translateY(-3px);box-shadow:0 12px 26px rgba(0,32,91,.12);border-color:#b9c9e6}.ex button.sel{border-color:var(--navy);box-shadow:0 0 0 2px #0033a030}
+.ex b{display:block;font:700 13.5px/1.35 Manrope;margin:5px 0 4px}.ex small{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--navy)}.ex span{font-size:11px;color:var(--muted);line-height:1.5;display:block}
+.drop{border:2px dashed #b9c9e6;border-radius:12px;padding:26px;text-align:center;background:#f8fafe;transition:background .2s,border-color .2s}.drop.over{background:var(--tint);border-color:var(--navy)}
+.btn{display:inline-flex;align-items:center;gap:6px;background:var(--navy);color:#fff;border:0;border-radius:8px;padding:11px 16px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;transition:transform .2s,box-shadow .2s}.btn:hover{transform:translateY(-2px);box-shadow:0 8px 18px #0033a040}
+.btn.ghost{background:#fff;color:var(--navy);border:1px solid #b9c9e6}.btn[disabled]{opacity:.55;cursor:default;transform:none;box-shadow:none}
+.hint{font-size:11.5px;color:var(--muted);margin:12px 0 0}.hint a{color:var(--navy);font-weight:700}
+.status{display:none;align-items:center;gap:10px;font-size:12px;color:var(--navy);font-weight:600;margin-top:14px}.status.on{display:flex}.spin{width:16px;height:16px;border:2px solid #b9c9e6;border-top-color:var(--navy);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.err{background:#fdf0ee;border:1px solid #f0c5bd;color:#8a2a17;border-radius:9px;padding:11px 14px;font-size:12px;margin-top:14px}
+.q{margin-top:6px}.q h3{font:700 15.5px/1.45 Manrope;margin:6px 0 12px}.opts{display:grid;gap:8px}.opts button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:12px 14px;text-align:left;font-size:13px;transition:background .2s,border-color .2s,transform .2s}.opts button:hover{background:#f3f6fc;border-color:var(--navy);transform:translateX(4px)}.opts small{display:block;color:var(--muted);font-size:11px}
+.step{border-top:1px solid #e6ebf4;padding:18px 0 4px;margin-top:18px;opacity:0;transform:translateY(16px);transition:opacity .55s ease,transform .55s cubic-bezier(.2,.7,.2,1)}.step.in{opacity:1;transform:none}
+.step h3{font:800 14.5px Manrope;margin:3px 0 10px}.step p{font-size:12.5px;color:#434f66;margin:8px 0}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:11.5px}th{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#7f8aa1;text-align:right;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}td{padding:7px 8px;border-bottom:1px solid #edf1f7;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}th:first-child,td:first-child{text-align:left;font-weight:600}
+.tag{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.06em;padding:3px 8px;border-radius:30px;background:var(--tint);color:var(--navy)}.tag.i1{background:#fff1d6;color:var(--warn)}.tag.i2{background:#fde3df;color:#8a2a17}.tag.ok{background:#dcf3e8;color:var(--ok)}
+.sparks{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.spark{border:1px solid #e6ebf4;border-radius:9px;padding:9px 10px}.spark b{font-size:11px}.spark svg{display:block;width:100%;height:44px;margin-top:4px}.spark path{fill:none;stroke:var(--navy);stroke-width:1.4;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.4s ease}.step.in .spark path{stroke-dashoffset:0}
+.explain{background:#f6f8fd;border:1px solid #dfe6f3;border-radius:10px;padding:13px 16px;margin:0 0 14px}.explain summary{font:800 12.5px Manrope;cursor:pointer;color:var(--navy)}.explain p{font-size:12.5px;margin:9px 0 0}.explain ul{margin:8px 0 0;padding-left:18px;font-size:12.5px;color:#434f66}.explain li{margin:4px 0}
+.urv{border:1px solid #e6ebf4;border-radius:11px;padding:14px 16px;margin:10px 0}.urv-head{display:flex;justify-content:space-between;align-items:center;gap:10px}.urv-head b{font:800 13.5px Manrope}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}.pair div{background:#f8fafe;border-radius:8px;padding:7px 9px}.pair small{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#7f8aa1}.pair svg{display:block;width:100%;height:52px;margin-top:3px}.pair path{fill:none;stroke:var(--navy);stroke-width:1.3}.pair line{stroke:#c46000;stroke-width:1;stroke-dasharray:4 3}
+.urv ol{margin:6px 0 0;padding:0;list-style:none;font-size:12.5px;color:#434f66}.urv li{padding:6px 0;border-top:1px solid #edf1f7}.urv li b{color:var(--ink)}.urv .v{margin-top:8px;font-size:12.5px;font-weight:600;color:var(--navy)}
+.yes{color:var(--ok);font-weight:700}.no{color:var(--warn);font-weight:700}
+@media(max-width:480px){.pair{grid-template-columns:1fr}}
+details.code{margin:10px 0 0}details.code summary{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--navy);cursor:pointer}pre{background:#111c36;color:#e3ebfa;border-radius:9px;padding:13px 15px;font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow-x:auto;margin:8px 0 0}
+.side{position:sticky;top:18px}
+.tree svg{display:block;width:100%;height:auto}.tree .n rect{fill:#fff;stroke:#c3d0e6;stroke-width:1.2;transition:fill .35s,stroke .35s}.tree .n text{font:600 13px "DM Sans",sans-serif;fill:#41506a;text-anchor:middle;dominant-baseline:central;transition:fill .35s}
+.tree .n.leaf rect{fill:#f3f6fc}.tree .n.leaf text{font:800 14px Manrope,sans-serif}.tree #n-I2 text{font-size:12px}
+.tree .e{fill:none;stroke:#c9d4e8;stroke-width:1.4}.tree .e{transition:stroke .45s ease,stroke-width .45s ease}.tree .e.hl{stroke:var(--navy);stroke-width:2.8}
+.tree .el{font:700 11px "DM Sans",sans-serif;fill:#8793ab;text-anchor:middle}
+.tree .n.on rect{fill:var(--tint);stroke:var(--navy)}.tree .n.on text{fill:var(--navy)}.tree .n.leaf.on rect{fill:var(--navy);stroke:var(--navy);animation:pop .5s ease}.tree .n.leaf.on text{fill:#fff}.tree .n.alt rect{stroke:var(--navy);stroke-dasharray:4 3}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.12)}100%{transform:scale(1)}}.tree .n{transform-box:fill-box;transform-origin:center}
+.trail{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:14px;min-height:28px}.trail span{font-size:10.5px;font-weight:700;padding:5px 10px;border-radius:30px;background:var(--tint);color:var(--navy);animation:rise .4s ease both}.trail span.final{background:var(--navy);color:#fff}.trail i{color:#9aa6bd;font-style:normal;font-size:11px}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.result{margin-top:22px;border-radius:16px;padding:26px;color:#fff;background:radial-gradient(circle at 88% 10%,#6ec1e455,transparent 34%),linear-gradient(120deg,#0033a0,#00205b);box-shadow:0 18px 40px rgba(0,32,91,.25);animation:rise .6s cubic-bezier(.2,.7,.2,1) both}
+.result .label{color:var(--sky)}.result h2{font:800 clamp(30px,5vw,44px)/1.1 Manrope;letter-spacing:-1.2px;margin:8px 0 10px}.result p{color:#d6e2f6;font-size:13.5px;margin:0 0 12px;max-width:820px}
+.result ul{margin:6px 0 16px;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:7px}.result li{font-size:11px;font-weight:600;padding:6px 11px;border:1px solid #ffffff44;border-radius:30px;background:#ffffff14}
+.result .acts{display:flex;gap:10px;flex-wrap:wrap}.result .btn{background:#fff;color:var(--navy)}.result .btn.ghost{background:transparent;color:#fff;border:1px solid #ffffff77}
+.result .caution{background:#ffffff18;border:1px solid #ffffff33;border-radius:10px;padding:11px 14px;font-size:12px;color:#eef4ff;margin:0 0 14px}
+.guides{margin-top:46px}.guides-head{display:flex;justify-content:space-between;align-items:end;gap:20px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:16px}.guides h2{font:800 22px Manrope;margin:4px 0 0;letter-spacing:-.4px}.guides-head p{font-size:12px;color:var(--muted);margin:0;max-width:430px}
+.gcards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.gcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;box-shadow:0 5px 18px rgba(0,32,91,.06);transition:transform .25s,box-shadow .25s,border-color .25s;scroll-margin-top:20px}.gcard:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(0,32,91,.13);border-color:#b9c9e6}.gcard.flash{animation:flash 1.6s ease}@keyframes flash{0%,60%{box-shadow:0 0 0 3px #0033a055}100%{box-shadow:0 5px 18px rgba(0,32,91,.06)}}
+.gcard h3{font:800 17px Manrope;margin:6px 0 4px}.gcard .when{font-size:11.5px;color:var(--navy);font-weight:700;margin:0 0 8px}.gcard p{font-size:11.5px;color:var(--muted);margin:0 0 12px;line-height:1.6}.gcard a{display:block;font-size:11.5px;font-weight:700;color:var(--navy);margin-top:5px}.gcard a:hover{text-decoration:underline}
+.note{font-size:11.5px;color:#4a586f;background:var(--tint);border:1px solid #cfdaf0;border-radius:9px;padding:14px 18px;margin-top:26px}
+footer{background:var(--navy2);color:#c3d0e4;padding:22px 0;font-size:10px}.foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.foot b{color:#fff}
+[hidden]{display:none!important}
+@media(max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}.side{position:static}.tree svg{display:none}.tree .sub2{display:none}.gcards{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.wrap{width:calc(100% - 34px)}.nav{height:65px}nav{gap:11px;font-size:8.5px}.hero{padding:44px 0 38px}.ex{grid-template-columns:1fr}.gcards{grid-template-columns:1fr}.panel{padding:17px}.guides-head{display:block}.result{padding:20px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+@media(max-width:650px){.brand{white-space:nowrap;margin-right:12px}header nav{gap:9px;font-size:8px;letter-spacing:.06em;line-height:1.35;text-align:left}}
+/* panel-specific additions */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}.stat{background:#f8fafe;border:1px solid #e6ebf4;border-radius:9px;padding:9px 10px}.stat b{display:block;font:800 18px Manrope;color:var(--navy)}.stat span{font-size:10px;color:var(--muted)}
+.band svg{display:block;width:100%;height:120px}.band .area{fill:#0033a01a;stroke:none}.band .mean{fill:none;stroke:var(--navy);stroke-width:2}.band .unit{fill:none;stroke:#9aa9c4;stroke-width:.9;opacity:.7}
+.legend{font-size:10.5px;color:var(--muted);margin-top:4px}.legend i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin:0 5px 0 10px;background:var(--navy)}.legend i.a{height:8px;background:#0033a01a}.legend i.u{background:#9aa9c4;height:1.5px}
+.spark .area{fill:#0033a014;stroke:none}.spark path.area{stroke-dasharray:none;stroke-dashoffset:0}
+.tree .el{font-size:10.5px}.tree .n text{font-size:12.5px}.tree .n.leaf text{font-size:13px}
+.resources{margin-top:38px}.resource-head{display:flex;justify-content:space-between;align-items:end;gap:18px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:15px}.resource-head h2{font:800 22px Manrope;margin:4px 0;letter-spacing:-.4px}.resource-head p{font-size:12px;color:var(--muted);max-width:520px;margin:0}
+.resource-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}.resource{background:#fff;border:1px solid var(--line);border-radius:12px;padding:19px;box-shadow:0 5px 18px #00205b0b}.resource h3{font:800 15px Manrope;margin:5px 0 8px}.resource p,.resource li{font-size:11.5px;color:var(--muted)}.resource ul{padding-left:17px;margin:8px 0}
+.resource .links{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.resource .links a{font-size:10px;font-weight:800;color:var(--navy);border:1px solid #cbd6e8;border-radius:7px;padding:7px 10px}.resource .links a.primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+.codebox{margin-top:12px}.codebox summary{cursor:pointer;font-size:10px;font-weight:800;color:var(--navy);letter-spacing:.08em;text-transform:uppercase}.codebox pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:10.5px}
+.resource .badge,.eyebrow{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#7f8aa1}.resource .badge{background:var(--tint);color:var(--navy);border-radius:20px;padding:3px 8px;letter-spacing:.04em;text-transform:none}
+.gcards.extra{margin-top:14px}
+@media(max-width:900px){.resource-grid{grid-template-columns:1fr}.resource-head{display:block}}
+@media(max-width:650px){.stats{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
 <header><div class="wrap nav"><a class="brand" href="../index.html">TGM <b>AL MAMUN</b></a><nav aria-label="Main navigation"><a href="../index.html">Home</a><a href="../teaching/index.html">Teaching Courses</a><a href="../working-papers/index.html">Working Papers</a><a href="../research-guide/index.html">Time-Series Guide</a><a href="../panel-data-guide/index.html" class="current" aria-current="page">Panel-Data Guide</a><a href="../causal-inference-guide/index.html">Causal Inference</a><a href="../dsge-guide/index.html">DSGE Guide</a><a href="../Tuhin%20Al%20Mamun_CV.pdf">CV</a></nav></div></header>
-<section class="hero"><div class="wrap"><div class="kicker">Empirical Research Guide · Panel Econometrics</div><h1>Which panel-data model fits your research?</h1><p class="lead">A structured guide for macroeconomic and microeconomic panels. Inspect your panel structure, assess dependence and heterogeneity, enter diagnostic results, and follow a model-selection pathway with assumptions and post-estimation checks.</p><div class="meta"><span><strong>4</strong> worked panel cases</span><span><strong>3</strong> full lectures</span><span><strong>4</strong> reproducible implementations</span></div></div></section>
+<section class="hero"><div class="wrap"><div class="kicker">Empirical Research Guide · Panel Econometrics</div><h1>Which panel model fits your data?</h1><p class="lead">The right panel estimator depends on the properties of your panel, not on preference. Test a real dataset, upload your own, or enter your test results, and follow the path to the estimator your paper needs.</p><div class="meta"><span><strong>10</strong> estimator routes</span><span><strong>6</strong> real example panels</span><span>Python · statsmodels</span></div></div></section>
 <main class="wrap">
-<div class="modes" role="group" aria-label="Choose a starting mode">
-<button class="mode" data-mode="examples" aria-pressed="true"><b>Explore example cases</b><span>Macro, firm and policy panels</span></button>
-<button class="mode" data-mode="upload" aria-pressed="false"><b>Inspect my panel CSV</b><span>Panel structure and descriptive diagnostics</span></button>
-<button class="mode" data-mode="results" aria-pressed="false"><b>I have test results</b><span>Build a recommendation from diagnostics</span></button>
+<div class="modes" role="group" aria-label="Choose how to start">
+<button type="button" data-mode="example" aria-pressed="true"><b>Try a real example</b><span>See the full sequence on real data</span></button>
+<button type="button" data-mode="upload" aria-pressed="false"><b>Use my own data</b><span>Upload a CSV; tests run in your browser</span></button>
+<button type="button" data-mode="ask" aria-pressed="false"><b>I have my test results</b><span>Answer a few questions</span></button>
 </div>
-<div class="layout">
-<section class="panel" id="workspace">
-<div id="examples">
-<h2>Choose a panel-data case</h2><p class="sub">Three real datasets from Lectures 7 and 8 include reported estimation results. A fourth synthetic macro-panel case demonstrates common-factor and heterogeneous-slope methods.</p>
-<div class="cards">
-<button class="choice" data-example="macro"><small>Macro · synthetic illustration</small><b>Countries × years</b><span>Simulated common shocks, heterogeneous slopes and a long-run relationship. Not an empirical dataset.</span></button>
-<button class="choice" data-example="firm"><small>Real data · Wooldridge wagepan</small><b>Workers × years</b><span>545 men, 1980–1987. Compare pooled OLS, RE, FE, FD and the Mundlak test.</span></button>
-<button class="choice" data-example="policy"><small>Real data · crime4</small><b>North Carolina counties × years</b><span>90 counties, 1981–1987. Compare pooled deterrence estimates with county and year FE.</span></button>
-<button class="choice" data-example="binary"><small>Real data · Grunfeld</small><b>Firms × years</b><span>11 U.S. firms, 1935–1954. Examine dynamic persistence and why GMM can fail with small N.</span></button>
-</div>
-<div id="exampleResult" class="result hide" aria-live="polite"></div>
-</div>
-<div id="upload" class="hide">
-<h2>Inspect your panel dataset</h2><p class="sub">Upload a CSV containing one row per entity-period observation. The file is parsed locally in your browser; it is not sent to a server.</p>
-<div class="drop" id="drop"><p><b>Drop a CSV file here</b></p><p class="hint">or select a file from your device</p><input id="file" type="file" accept=".csv,text/csv"><p class="hint">Recommended columns: entity identifier, time identifier, outcome and explanatory variables.</p></div>
-<div id="mapping" class="hide">
-<div class="fieldgrid">
-<div class="field"><label for="entity">Entity identifier</label><select id="entity"></select></div>
-<div class="field"><label for="time">Time identifier</label><select id="time"></select></div>
-<div class="field"><label for="outcome">Outcome variable (optional)</label><select id="outcome"></select></div>
-<div class="field"><label for="domain">Research domain</label><select id="domain"><option value="macro">Macroeconomic panel</option><option value="micro">Microeconomic panel</option></select></div>
-</div>
-<button class="btn" id="inspect">Inspect panel structure</button>
-<div id="uploadError"></div><div id="diagnostics"></div>
-</div>
-</div>
-<div id="results" class="hide">
-<h2>Enter your diagnostic results</h2><p class="sub">Select the panel setting and enter the findings from tests appropriate to your data. The guide uses these answers to construct a reasoned estimator pathway; it does not calculate the tests from this form.</p>
-<div class="fieldgrid">
-<div class="field"><label for="domain2">Panel application</label><select id="domain2"><option value="macro">Macroeconomic panel</option><option value="micro">Microeconomic / firm / household panel</option></select></div>
-<div class="field"><label for="shape">Panel dimensions</label><select id="shape"><option value="largeT">Moderate / large T</option><option value="largeN">Large N, small T</option><option value="both">Large N and T</option></select></div>
-<div class="field"><label for="cd">Cross-sectional dependence (CD)</label><select id="cd"><option value="unknown">Not tested / uncertain</option><option value="yes">Evidence of dependence</option><option value="no">No evidence of dependence</option></select></div>
-<div class="field"><label for="hetero">Slope heterogeneity</label><select id="hetero"><option value="unknown">Not tested / uncertain</option><option value="yes">Heterogeneous slopes</option><option value="no">Homogeneous slopes defensible</option></select></div>
-<div class="field"><label for="integration">Integration properties</label><select id="integration"><option value="unknown">Not established</option><option value="i0">Variables are I(0)</option><option value="i1c">I(1), cointegrated</option><option value="i1n">I(1), not cointegrated</option><option value="mixed">Mixed I(0)/I(1), no I(2)</option></select></div>
-<div class="field"><label for="dynamic">Dynamic structure / endogeneity</label><select id="dynamic"><option value="static">Static model; no material endogeneity identified</option><option value="dynamic">Lagged dependent variable; short T, large N</option><option value="endog">Endogenous regressors / valid instruments considered</option></select></div>
-<div class="field"><label for="design">Research design</label><select id="design"><option value="observational">Observational panel</option><option value="did">Treatment / control and pre/post policy design</option></select></div>
-<div class="field"><label for="outcomeType">Outcome type</label><select id="outcomeType"><option value="continuous">Continuous</option><option value="binary">Binary</option><option value="count">Count</option></select></div>
-<div class="field"><label for="heterogeneity">Unobserved unit heterogeneity</label><select id="heterogeneity"><option value="yes">Likely / central to design</option><option value="no">Limited / pooled model plausible</option><option value="unknown">Uncertain</option></select></div>
-</div>
-<button class="btn" id="recommend">Generate estimator pathway</button>
-</div>
+<div class="grid">
+<section class="panel" id="work" aria-live="polite">
+ <div id="m-example">
+  <h2>Choose a dataset</h2><p class="sub">Six real panels: three micro panels (people, counties, firms) and three macro panels (states, countries). Each one leads to a different outcome.</p>
+  <div class="ex" id="ex"></div>
+ </div>
+ <div id="m-upload" hidden>
+  <h2>Upload your panel</h2><p class="sub">A CSV in long format, one row per entity and period: the entity identifier, the time identifier, then the dependent variable, then the regressors.</p>
+  <div class="drop" id="drop"><p style="margin:0 0 12px;font-size:13px">Drop a CSV file here, or</p><label class="btn">Choose file<input type="file" id="file" accept=".csv,text/csv,text/plain" hidden></label></div>
+  <p class="hint">Your file is analysed on your own device and is not uploaded anywhere. Transform your variables first (logs, growth rates, real values) as your paper requires. Columns named like <code>country</code>, <code>state</code>, <code>firm</code> or <code>id</code> and <code>year</code> or <code>period</code> are recognised as identifiers; otherwise the first two columns are used. Up to 6 variables, at least 5 entities and 30 rows. Format examples: <a href="examples/wagepan.csv" download>wagepan.csv</a>, <a href="examples/cigar.csv" download>cigar.csv</a>.</p>
+  <div class="status" id="status"><span class="spin"></span><span id="status-text"></span></div>
+  <div id="upload-err"></div>
+ </div>
+ <div id="m-ask" hidden>
+  <h2>Answer from your own results</h2><p class="sub">Use this if you have already run the panel tests. If you have not, choose “Use my own data” and the tests are run and explained for you.</p>
+  <div class="q" id="q"></div>
+ </div>
+ <div id="steps"></div>
 </section>
-<aside class="panel tree">
-<div class="eyebrow">Decision architecture</div><h2>How the guide reasons</h2><p class="sub">A staged assessment, not a one-test automatic selector.</p>
-<ol>
-<li><b>Identify the panel:</b> entity/time dimensions, balancedness, missingness and variable variation.</li>
-<li><b>Choose the research branch:</b> macroeconomic time-series properties or microeconomic identification/design.</li>
-<li><b>Assess dependence and heterogeneity:</b> first- versus second-generation panel procedures; homogeneous versus heterogeneous estimators.</li>
-<li><b>Assess dynamics:</b> stationarity, cointegration, endogeneity, treatment assignment and outcome type.</li>
-<li><b>Select an estimator family:</b> FE/RE/CRE, DiD, GMM, CCE/AMG/PMG/CS-ARDL or nonlinear panel models.</li>
-<li><b>Validate inference:</b> robust standard errors, residual diagnostics, identification and sensitivity checks.</li>
-</ol>
-<div><span class="pill">Macro panels</span><span class="pill">Micro panels</span><span class="pill">Static</span><span class="pill">Dynamic</span><span class="pill">Causal design</span></div>
+<aside class="side">
+ <div class="panel tree"><div class="label">Decision path</div><p class="sub sub2" style="font-size:12px;color:var(--muted);margin:2px 0 8px">The path lights up as the evidence comes in.</p><div id="tree"></div><div class="trail" id="trail"></div></div>
 </aside>
 </div>
-<div id="finalResult" class="result hide" aria-live="polite"></div>
+<div id="result"></div>
+
+<section class="guides" id="guides"><div class="guides-head"><div><div class="label">Estimator guides</div><h2>Ten routes to a finished paper</h2></div><p>Each route lists what the paper needs to report, with links to the full lectures, derivations and computational labs.</p></div>
+<div class="gcards" id="gcards"></div>
+<div class="gcards extra">
+<article class="gcard"><span class="tag">Design-based</span><h3>DiD and event studies</h3><p class="when">Treatment timing and a comparison group</p><p>Define treatment and timing · parallel trends and anticipation · staggered adoption needs heterogeneity-robust estimators · cluster at the assignment level …</p><a href="../causal-inference-guide/index.html">Open the Causal Inference Guide →</a></article>
+<article class="gcard"><span class="tag">Limited outcomes</span><h3>Binary and count panels</h3><p class="when">Outcome is 0/1 or a count</p><p>Conditional FE logit · RE logit / probit with distributional assumptions · FE Poisson for counts · report marginal effects · incidental-parameter problem …</p><a href="../teaching/econometrics/lectures/07-panel-data.html">Lecture: Panel data →</a></article>
+<article class="gcard"><span class="tag">Code</span><h3>All the tests in one file</h3><p class="when">The Python behind this tool</p><p>CD, Pesaran–Yamagata, Fisher-ADF, CIPS with simulated critical values, Kao, Fisher–Engle–Granger, F, LM, Hausman and Mundlak …</p><a href="implementations/panel_tests.py" download>Download panel_tests.py →</a></article>
+</div></section>
 <section class="resources" id="lectures">
 <div class="resource-head"><div><div class="eyebrow">Lecture notes and computational labs</div><h2>Study the theory, then reproduce the results</h2></div><p>These are the existing graduate Econometrics lectures on your website. The panel guide now connects directly to their derivations, worked examples, problem sets and computational labs.</p></div>
 <div class="resource-grid">
@@ -149,65 +180,847 @@ xtdcce2 D.y x1 x2 D.(x1 x2), ///
 </div>
 <div class="note"><b>Reproducibility note.</b> The two Python scripts follow the datasets and coding exercises in Lectures 7 and 8. The Stata files are reusable workflows requiring the researcher to map their own variable names and verify the relevant assumptions. The macro-panel do-file calls community-contributed Stata commands; package installation and command availability depend on the installed Stata version.</div>
 </section>
-<section class="guides">
-<div class="eyebrow">Methodological reference</div><h2>Estimator and test guides</h2><p>Use these summaries to understand the role of each procedure. Exact implementation depends on the data structure, deterministic components, estimator assumptions, and the research design.</p>
-<div class="guidegrid">
-<article class="gcard"><div class="label">Specification</div><h3>Pooled OLS, FE, RE and CRE</h3><p>Separate within-unit variation from between-unit variation and model time-invariant unobserved heterogeneity.</p><ul><li>FE absorbs time-invariant unit effects.</li><li>RE requires the unit effect to be uncorrelated with included regressors.</li><li>Mundlak / correlated RE models the correlation through unit means.</li><li>Use F, LM and Hausman-type comparisons as specification evidence, not mechanical rules.</li></ul></article>
-<article class="gcard"><div class="label">Dependence</div><h3>Pesaran CD and common factors</h3><p>Cross-sectional dependence can invalidate conventional first-generation panel tests and standard errors.</p><ul><li>Consider Pesaran CD and residual dependence diagnostics.</li><li>Common correlated effects (CCE) uses cross-sectional averages.</li><li>Driscoll–Kraay changes inference under broad dependence conditions when T is sufficiently informative.</li><li>PCSE requires a defensible covariance structure.</li></ul></article>
-<article class="gcard"><div class="label">Heterogeneity</div><h3>Pesaran–Yamagata delta</h3><p>Assess whether slope homogeneity is a defensible restriction in panels with suitable N and T asymptotics.</p><ul><li>Mean Group (MG) estimates unit-specific relationships.</li><li>CCEMG combines unit-specific slopes with common-factor controls.</li><li>AMG accommodates unobserved common dynamic processes.</li><li>PMG imposes common long-run coefficients while allowing short-run heterogeneity.</li></ul></article>
-<article class="gcard"><div class="label">Panel stationarity</div><h3>First- and second-generation unit roots</h3><p>Choose procedures in light of dependence, deterministic terms and the relative dimensions N and T.</p><ul><li>First generation: LLC, IPS, Fisher-ADF and Fisher-PP.</li><li>Second generation: CADF and CIPS (cross-sectionally augmented IPS).</li><li>Specify intercept/trend and lag selection consistently.</li><li>Do not infer common integration order from one test alone.</li></ul></article>
-<article class="gcard"><div class="label">Long-run relationships</div><h3>Panel cointegration</h3><p>Cointegration analysis is relevant for nonstationary I(1) variables when a long-run equilibrium relation is theoretically meaningful.</p><ul><li>Pedroni and Kao residual-based tests.</li><li>Westerlund error-correction-based tests.</li><li>Account for cross-sectional dependence and slope heterogeneity.</li><li>Consider bootstrap critical values where appropriate.</li></ul></article>
-<article class="gcard"><div class="label">Dynamic panels</div><h3>Difference and System GMM</h3><p>For dynamic panels with large N and short T, GMM may address lagged dependent variables and selected endogenous regressors.</p><ul><li>State the moment conditions and instrument timing.</li><li>Report AR(1) and AR(2) tests in differenced residuals.</li><li>Report Hansen/Sargan and difference-in-Hansen tests where relevant.</li><li>Control instrument proliferation and report instrument counts.</li></ul></article>
-<article class="gcard"><div class="label">Macroeconomic dynamics</div><h3>PMG-ARDL, MG and CS-ARDL</h3><p>Dynamic heterogeneous panels require explicit assumptions about long-run homogeneity, common factors and cross-sectional dependence.</p><ul><li>PMG constrains long-run coefficients to be common.</li><li>MG allows long-run and short-run coefficients to vary by unit.</li><li>CS-ARDL augments dynamic equations with cross-sectional averages and lags.</li><li>CCE-MG / AMG are alternatives under common-factor dependence.</li></ul></article>
-<article class="gcard"><div class="label">Causal inference</div><h3>Difference-in-Differences and event studies</h3><p>Use a design-based pathway when treatment timing and a comparison group identify a policy effect.</p><ul><li>Define treatment, comparison group and treatment timing.</li><li>Assess parallel trends and anticipation.</li><li>For staggered adoption, use estimators robust to treatment-effect heterogeneity.</li><li>Cluster uncertainty at the assignment level where justified.</li></ul></article>
-<article class="gcard"><div class="label">Limited outcomes</div><h3>Binary and count panel models</h3><p>Match the conditional mean or likelihood to the outcome support and the unit-effects structure.</p><ul><li>Conditional FE logit for suitable binary FE settings.</li><li>RE logit/probit requires distributional assumptions on unit effects.</li><li>FE Poisson can estimate conditional mean effects for count outcomes.</li><li>Interpret marginal effects and incidental-parameter limitations carefully.</li></ul></article>
-</div>
-<div class="note"><b>Scope and limitations.</b> CSV inspection computes structural summaries in the browser; it does not automatically run Pesaran CD, slope-homogeneity, panel unit-root, cointegration, Hausman, GMM, or causal-identification tests. Those results must be obtained using a suitable statistical package or supplied by the researcher. Recommendations are conditional research guidance, not proof of identification or estimator validity.</div>
-</section>
+
+<div class="note"><b>How the tool decides.</b> Panels with a median of fewer than 15 periods per unit are treated as short (micro) panels: the F test asks whether unit effects matter, the Breusch–Pagan LM test whether random effects improve on pooled OLS, and the cluster-robust Mundlak test (reported with the conventional Hausman test) whether the unit effects are correlated with the regressors. Longer panels are treated as macro panels: the Pesaran CD test checks for cross-sectional dependence, the Pesaran–Yamagata Δ test for slope heterogeneity, and each variable is tested for a unit root in levels and differences with CIPS when it is cross-sectionally dependent and with the Fisher-ADF (Choi Z) test otherwise. CIPS p-values come from simulated critical values. When every variable is I(1), cointegration is tested with the Fisher–Engle–Granger test if slopes are heterogeneous and with the Kao test otherwise. These are standard rules, but panel tests have low power when T is short and can be distorted by breaks, so treat the result as a starting point and justify the choice in your paper.</div>
 </main>
-<footer><div class="wrap foot"><span><b>Tuhin G. M. Al Mamun</b> · Panel Data Econometric Research Guide</span><span><a href="../research-guide/index.html">Time-Series Research Guide</a> · <a href="../index.html">Academic Portfolio</a></span></div></footer>
+<footer><div class="wrap foot"><span><b>Tuhin G. M. Al Mamun, Ph.D.</b> · Panel Data Research Guide</span><span><a href="../research-guide/index.html">Time-Series Guide</a> · © <span id="year"></span></span></div></footer>
+
+<script type="text/plain" id="py-src">"""Model-selection analysis for the Panel-Data Research Guide.
+
+analyze(csv_text) reads a long-format panel CSV: entity identifier, time identifier, then the dependent variable and the
+regressors (one column per variable). It reports the panel structure, summary statistics (overall, between, within),
+correlations and then one of two test sequences:
+
+* short panels (median T below LONG_T): F test for unit effects, Breusch-Pagan LM test, Hausman and Mundlak tests,
+  with pooled OLS, random-effects and fixed-effects estimates;
+* long panels: Pesaran CD tests, the Pesaran-Yamagata slope-homogeneity test, panel unit-root tests (Fisher-ADF and
+  CIPS) on levels and differences, and, when every variable is I(1), Kao and Fisher-Engle-Granger cointegration tests.
+
+Returns a JSON string. The same file runs in the browser (Pyodide) for uploaded data and offline for the examples.
+"""
+import io, json, math, warnings
+import numpy as np
+import pandas as pd
+
+LONG_T = 15
+CIPS_Q = {"p":1,"N":[5,10,15,20,30,50,100,200],"T":[10,15,20,25,30,40,50,75,100],"probs":[0.001,0.005,0.01,0.025,0.05,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.95,0.99],"q":[[[-17.0544,-10.8133,-8.3805,-6.0689,-4.664,-3.6353,-2.7288,-2.245,-1.9329,-1.6544,-1.4076,-1.1434,-0.8754,-0.4853,-0.1938,0.6766],[-4.0929,-3.422,-3.1978,-2.9654,-2.7229,-2.4617,-2.1603,-1.9448,-1.7494,-1.5869,-1.4356,-1.2758,-1.0999,-0.8379,-0.6369,-0.2343],[-3.442,-3.1381,-2.9779,-2.7353,-2.5629,-2.3649,-2.1206,-1.9551,-1.8065,-1.668,-1.5296,-1.3809,-1.2042,-0.9416,-0.7127,-0.3599],[-3.4224,-3.1389,-3.0014,-2.7549,-2.5733,-2.3648,-2.1452,-1.9797,-1.8271,-1.7025,-1.5734,-1.4223,-1.2583,-1.0364,-0.8285,-0.3891],[-3.2526,-3.0311,-2.9058,-2.743,-2.5838,-2.3837,-2.1593,-1.9872,-1.8362,-1.7053,-1.5719,-1.4309,-1.2778,-1.0278,-0.8362,-0.474],[-3.142,-3.0126,-2.8966,-2.7246,-2.5614,-2.3674,-2.1593,-2.0009,-1.8619,-1.7322,-1.6059,-1.4668,-1.3001,-1.096,-0.9113,-0.496],[-3.2401,-3.0193,-2.9121,-2.7176,-2.5543,-2.3692,-2.1557,-2.0041,-1.8798,-1.7503,-1.6274,-1.4978,-1.3394,-1.1089,-0.9341,-0.5657],[-3.1784,-3.0,-2.8952,-2.7091,-2.5685,-2.3934,-2.1777,-2.0225,-1.8995,-1.7836,-1.6636,-1.5382,-1.3694,-1.1523,-0.9624,-0.6248],[-3.2549,-2.9794,-2.811,-2.6703,-2.5451,-2.3892,-2.1766,-2.028,-1.9108,-1.7856,-1.6723,-1.5536,-1.4076,-1.1802,-0.9871,-0.6391]],[[-22.5906,-7.895,-6.484,-4.7427,-3.9443,-3.1199,-2.5263,-2.1809,-1.9094,-1.6905,-1.487,-1.2852,-1.0733,-0.7775,-0.5291,-0.036],[-3.2373,-2.8668,-2.7572,-2.5845,-2.4116,-2.2278,-2.0263,-1.8703,-1.7396,-1.621,-1.4993,-1.3699,-1.2262,-1.0275,-0.871,-0.5717],[-2.8719,-2.7456,-2.649,-2.4952,-2.3708,-2.1975,-2.0108,-1.8781,-1.7546,-1.6446,-1.5442,-1.4333,-1.3145,-1.1304,-0.9735,-0.7148],[-2.9173,-2.7077,-2.6093,-2.46,-2.3501,-2.2046,-2.0275,-1.9056,-1.7977,-1.7009,-1.5993,-1.4941,-1.3718,-1.2004,-1.0732,-0.8092],[-2.8747,-2.67,-2.5727,-2.4494,-2.3321,-2.1912,-2.0317,-1.9106,-1.801,-1.7118,-1.6211,-1.526,-1.4045,-1.2211,-1.0848,-0.8044],[-2.7626,-2.6151,-2.5519,-2.4454,-2.3102,-2.1944,-2.039,-1.925,-1.8311,-1.7382,-1.643,-1.5424,-1.4346,-1.2726,-1.144,-0.8867],[-2.7844,-2.5834,-2.5079,-2.4084,-2.3098,-2.1887,-2.0492,-1.9345,-1.8453,-1.757,-1.6693,-1.5769,-1.4708,-1.3159,-1.177,-0.9308],[-2.8478,-2.6676,-2.5307,-2.4171,-2.3253,-2.1961,-2.0425,-1.9445,-1.8524,-1.7624,-1.6811,-1.599,-1.4902,-1.3398,-1.2203,-0.97],[-2.7869,-2.6062,-2.5466,-2.4278,-2.3174,-2.2074,-2.0646,-1.9633,-1.8706,-1.7809,-1.6975,-1.6046,-1.494,-1.3371,-1.1968,-0.97]],[[-12.8944,-7.722,-5.7105,-4.3254,-3.6372,-3.0768,-2.5065,-2.1969,-1.9465,-1.7585,-1.5678,-1.3884,-1.1947,-0.9154,-0.7032,-0.3059],[-3.0812,-2.7438,-2.5966,-2.419,-2.2927,-2.1338,-1.9458,-1.8189,-1.7177,-1.6145,-1.5157,-1.4062,-1.2845,-1.119,-0.9843,-0.7628],[-2.6864,-2.5549,-2.5018,-2.3407,-2.2372,-2.1243,-1.9767,-1.8545,-1.7587,-1.6725,-1.5795,-1.478,-1.3732,-1.2232,-1.1162,-0.9259],[-2.7387,-2.5312,-2.4752,-2.3672,-2.2631,-2.1306,-1.9868,-1.8818,-1.7931,-1.7105,-1.6188,-1.5244,-1.4336,-1.2895,-1.1802,-0.9564],[-2.6307,-2.522,-2.4351,-2.3335,-2.2447,-2.1301,-1.9918,-1.8904,-1.8014,-1.7162,-1.6304,-1.544,-1.4425,-1.2998,-1.1828,-0.9782],[-2.7402,-2.5416,-2.4392,-2.3266,-2.2359,-2.1329,-2.0058,-1.9031,-1.8168,-1.7384,-1.6571,-1.5713,-1.467,-1.3177,-1.2036,-1.0204],[-2.629,-2.4929,-2.4147,-2.3163,-2.2471,-2.1361,-2.0083,-1.9063,-1.8248,-1.7448,-1.6736,-1.5935,-1.4893,-1.3562,-1.2506,-1.0552],[-2.5898,-2.4905,-2.4193,-2.3216,-2.2437,-2.1362,-2.0076,-1.9217,-1.8485,-1.765,-1.6896,-1.6099,-1.5106,-1.384,-1.2691,-1.0807],[-2.6136,-2.4863,-2.4356,-2.3332,-2.242,-2.1426,-2.0186,-1.9277,-1.847,-1.7696,-1.6939,-1.6168,-1.5286,-1.4016,-1.3162,-1.1167]],[[-10.4906,-7.1271,-5.3017,-4.1929,-3.5006,-2.9679,-2.4601,-2.1653,-1.9311,-1.7561,-1.5941,-1.4352,-1.2443,-1.0103,-0.8056,-0.3262],[-2.7642,-2.6009,-2.5123,-2.3583,-2.253,-2.1137,-1.9504,-1.8294,-1.724,-1.6228,-1.5266,-1.4299,-1.312,-1.1641,-1.0503,-0.8109],[-2.561,-2.4605,-2.3724,-2.2726,-2.1876,-2.0746,-1.9327,-1.8317,-1.7467,-1.6642,-1.5875,-1.5061,-1.3992,-1.2546,-1.1421,-0.9492],[-2.6216,-2.4372,-2.3886,-2.2873,-2.1932,-2.089,-1.9548,-1.8553,-1.7762,-1.6963,-1.6162,-1.5351,-1.4385,-1.3104,-1.2077,-1.0128],[-2.667,-2.4527,-2.393,-2.2646,-2.1797,-2.0886,-1.955,-1.8627,-1.7861,-1.7079,-1.6291,-1.5515,-1.457,-1.346,-1.2395,-1.0372],[-2.5204,-2.4036,-2.3532,-2.2702,-2.1875,-2.0869,-1.9765,-1.8865,-1.8029,-1.7262,-1.6565,-1.582,-1.494,-1.3658,-1.2619,-1.0882],[-2.5155,-2.4097,-2.3648,-2.2629,-2.188,-2.0903,-1.977,-1.8893,-1.8157,-1.7439,-1.6768,-1.5977,-1.5107,-1.3962,-1.2979,-1.1219],[-2.5746,-2.3921,-2.3505,-2.2614,-2.1991,-2.1032,-1.9924,-1.9123,-1.8404,-1.7693,-1.7039,-1.6324,-1.5498,-1.429,-1.3423,-1.1903],[-2.4782,-2.3729,-2.3279,-2.2633,-2.1955,-2.1067,-1.9985,-1.9128,-1.8393,-1.7732,-1.7001,-1.6243,-1.5376,-1.42,-1.3297,-1.1788]],[[-8.665,-5.9596,-4.6128,-3.9195,-3.3325,-2.8536,-2.421,-2.1663,-1.9699,-1.7949,-1.6333,-1.4847,-1.3114,-1.0761,-0.9108,-0.5893],[-2.6115,-2.4627,-2.3739,-2.2611,-2.1574,-2.0305,-1.8909,-1.7842,-1.6934,-1.6061,-1.525,-1.4309,-1.337,-1.2048,-1.1029,-0.9327],[-2.5001,-2.3493,-2.2913,-2.2084,-2.1308,-2.035,-1.9083,-1.8215,-1.7434,-1.6599,-1.5907,-1.5092,-1.4141,-1.2901,-1.1989,-1.0248],[-2.4762,-2.3635,-2.3163,-2.212,-2.1295,-2.0433,-1.9194,-1.8361,-1.7622,-1.6911,-1.6138,-1.5393,-1.4575,-1.3454,-1.2596,-1.1095],[-2.4464,-2.3399,-2.2693,-2.2054,-2.1379,-2.0452,-1.9362,-1.848,-1.7768,-1.7131,-1.6495,-1.579,-1.4876,-1.3819,-1.2907,-1.1459],[-2.4234,-2.3444,-2.2885,-2.2151,-2.1413,-2.0578,-1.9485,-1.8686,-1.8023,-1.7423,-1.6701,-1.6021,-1.5227,-1.4125,-1.3401,-1.1648],[-2.4084,-2.324,-2.2788,-2.2032,-2.1373,-2.0589,-1.9548,-1.8757,-1.8076,-1.7462,-1.6837,-1.6145,-1.5388,-1.4258,-1.3419,-1.1964],[-2.399,-2.3374,-2.29,-2.2216,-2.1525,-2.0767,-1.9752,-1.9014,-1.8317,-1.7724,-1.7038,-1.6355,-1.56,-1.4632,-1.3839,-1.2449],[-2.3854,-2.3128,-2.2745,-2.2005,-2.1478,-2.0739,-1.9668,-1.8897,-1.8307,-1.7699,-1.7083,-1.647,-1.576,-1.4766,-1.4041,-1.2723]],[[-7.7857,-5.2741,-4.3686,-3.6088,-3.138,-2.7622,-2.3988,-2.1497,-1.9915,-1.8353,-1.6964,-1.5547,-1.4012,-1.1957,-1.0279,-0.7105],[-2.5678,-2.3961,-2.3031,-2.1989,-2.1026,-1.9976,-1.8683,-1.7733,-1.6933,-1.6259,-1.5451,-1.46,-1.3659,-1.2518,-1.167,-1.0085],[-2.3878,-2.3014,-2.2439,-2.1524,-2.0814,-1.9995,-1.8861,-1.8116,-1.7316,-1.6602,-1.5938,-1.5175,-1.4408,-1.3366,-1.2532,-1.1109],[-2.4055,-2.3024,-2.25,-2.1618,-2.0872,-1.9995,-1.8985,-1.8172,-1.7448,-1.6803,-1.6203,-1.552,-1.478,-1.3807,-1.2952,-1.163],[-2.405,-2.3086,-2.2486,-2.1797,-2.1021,-2.0202,-1.9154,-1.843,-1.7788,-1.7175,-1.6534,-1.5829,-1.5101,-1.4198,-1.3422,-1.2218],[-2.3345,-2.2614,-2.2192,-2.1564,-2.097,-2.0257,-1.9269,-1.8564,-1.7939,-1.7324,-1.6749,-1.6157,-1.5484,-1.4508,-1.3815,-1.2415],[-2.3407,-2.2591,-2.2301,-2.1596,-2.1051,-2.0394,-1.9401,-1.8663,-1.8045,-1.7436,-1.6867,-1.6325,-1.5637,-1.4792,-1.4113,-1.2923],[-2.3269,-2.2629,-2.2314,-2.1632,-2.105,-2.0346,-1.9463,-1.8766,-1.8183,-1.7598,-1.7039,-1.6489,-1.5885,-1.5063,-1.4414,-1.3287],[-2.3717,-2.2559,-2.2284,-2.1642,-2.1089,-2.0461,-1.9568,-1.8911,-1.8322,-1.7726,-1.7173,-1.657,-1.5908,-1.5137,-1.4511,-1.3431]],[[-9.1091,-3.9298,-3.6372,-3.2191,-2.8902,-2.6172,-2.2914,-2.1365,-1.998,-1.8688,-1.7432,-1.6186,-1.4665,-1.2844,-1.1448,-0.8966],[-2.4678,-2.2988,-2.223,-2.1406,-2.0465,-1.9599,-1.8464,-1.7605,-1.6873,-1.6177,-1.5475,-1.4775,-1.3979,-1.2892,-1.2134,-1.0792],[-2.3442,-2.2446,-2.1834,-2.1025,-2.0392,-1.9624,-1.8791,-1.8006,-1.7349,-1.6741,-1.6103,-1.5404,-1.4645,-1.3736,-1.3074,-1.1923],[-2.2931,-2.2217,-2.1619,-2.1054,-2.0496,-1.9802,-1.889,-1.8211,-1.756,-1.6917,-1.6312,-1.5728,-1.5075,-1.4227,-1.3581,-1.2545],[-2.2888,-2.2188,-2.1705,-2.1114,-2.0575,-1.9938,-1.9006,-1.833,-1.7727,-1.7076,-1.649,-1.5908,-1.5218,-1.4393,-1.3851,-1.2935],[-2.2564,-2.1924,-2.1713,-2.1159,-2.0653,-2.0054,-1.9221,-1.8454,-1.78,-1.724,-1.6713,-1.6194,-1.5651,-1.4927,-1.4372,-1.3427],[-2.2643,-2.2015,-2.1746,-2.121,-2.0758,-2.0074,-1.9261,-1.8567,-1.8019,-1.7465,-1.6942,-1.6412,-1.5888,-1.5182,-1.4606,-1.3605],[-2.2357,-2.1959,-2.1694,-2.1217,-2.0821,-2.0198,-1.9381,-1.8741,-1.8143,-1.7613,-1.7087,-1.6598,-1.6012,-1.533,-1.4848,-1.392],[-2.271,-2.2012,-2.1789,-2.1249,-2.0748,-2.0197,-1.94,-1.8714,-1.8142,-1.7603,-1.7108,-1.6635,-1.6142,-1.5523,-1.4968,-1.4016]],[[-5.4223,-3.7569,-3.3479,-2.9736,-2.7367,-2.5031,-2.2655,-2.11,-1.9855,-1.8667,-1.7604,-1.6509,-1.5157,-1.349,-1.2265,-1.0292],[-2.3742,-2.2418,-2.1885,-2.0995,-2.029,-1.9466,-1.8429,-1.7568,-1.6893,-1.6175,-1.553,-1.4828,-1.4012,-1.3081,-1.238,-1.1299],[-2.2673,-2.1799,-2.1444,-2.0834,-2.0256,-1.9561,-1.8637,-1.7894,-1.7307,-1.6642,-1.599,-1.5371,-1.4675,-1.3881,-1.3324,-1.2413],[-2.2361,-2.1749,-2.1316,-2.084,-2.0317,-1.9671,-1.8782,-1.8022,-1.738,-1.6809,-1.6239,-1.5654,-1.5024,-1.4301,-1.3768,-1.2925],[-2.2613,-2.1766,-2.1382,-2.086,-2.0332,-1.9781,-1.8991,-1.8265,-1.759,-1.703,-1.6468,-1.5951,-1.5348,-1.4615,-1.4102,-1.3351],[-2.2244,-2.1688,-2.1263,-2.0819,-2.0447,-1.9882,-1.9055,-1.8435,-1.7881,-1.732,-1.6786,-1.6263,-1.5714,-1.5078,-1.46,-1.3872],[-2.2143,-2.1641,-2.1414,-2.0944,-2.0531,-1.9994,-1.9172,-1.8452,-1.789,-1.7328,-1.6819,-1.6326,-1.5838,-1.523,-1.4768,-1.4127],[-2.2013,-2.1543,-2.1297,-2.0912,-2.0501,-2.0002,-1.9241,-1.8659,-1.8063,-1.7526,-1.7033,-1.6592,-1.6098,-1.5531,-1.5092,-1.4354],[-2.2154,-2.1753,-2.1469,-2.0965,-2.0545,-2.0066,-1.9256,-1.8667,-1.8131,-1.7597,-1.7123,-1.6664,-1.618,-1.5586,-1.5148,-1.4497]]]}  # filled in by the page builder: simulated quantiles of the CIPS statistic (see simulate_cips.py)
+ID_NAMES = ("id", "entity", "unit", "country", "code", "iso", "iso3", "state", "province", "region", "county", "city",
+            "firm", "company", "bank", "industry", "sector", "nr", "person", "pid", "hhid", "household", "individual", "panel")
+TIME_NAMES = ("year", "time", "t", "period", "date", "month", "quarter", "yr", "wave")
+
+
+def _f(x, nd=4):
+    try:
+        x = float(x)
+    except Exception:
+        return None
+    return None if not np.isfinite(x) else round(x, nd)
+
+
+def _ncdf(z):
+    return 0.5 * math.erfc(-z / math.sqrt(2))
+
+
+def _ninv(p):
+    from scipy.stats import norm
+    return float(norm.ppf(p))
+
+
+def _chi2_sf(x, df):
+    from scipy.stats import chi2
+    return float(chi2.sf(x, df))
+
+
+def _f_sf(x, d1, d2):
+    from scipy.stats import f
+    return float(f.sf(x, d1, d2))
+
+
+def _ols(y, X):
+    XtX_inv = np.linalg.pinv(X.T @ X)
+    b = XtX_inv @ (X.T @ y)
+    e = y - X @ b
+    return b, e, XtX_inv
+
+
+def _cluster_vcov(X, e, XtX_inv, groups, k_used):
+    n = len(e)
+    G = len(np.unique(groups))
+    order = np.argsort(groups, kind="stable")
+    g, Xs, es = groups[order], X[order], e[order]
+    cut = np.flatnonzero(np.diff(g)) + 1
+    meat = np.zeros((X.shape[1], X.shape[1]))
+    for Xg, eg in zip(np.split(Xs, cut), np.split(es, cut)):
+        s = Xg.T @ eg
+        meat += np.outer(s, s)
+    c = (G / (G - 1)) * ((n - 1) / max(n - k_used, 1)) if G > 1 else 1.0
+    return c * XtX_inv @ meat @ XtX_inv
+
+
+def _demean(a, codes, ng):
+    a = np.asarray(a, float)
+    if a.ndim == 1:
+        m = np.bincount(codes, a, ng) / np.bincount(codes, minlength=ng)
+        return a - m[codes]
+    out = np.empty_like(a)
+    cnt = np.bincount(codes, minlength=ng)
+    for j in range(a.shape[1]):
+        out[:, j] = a[:, j] - (np.bincount(codes, a[:, j], ng) / cnt)[codes]
+    return out
+
+
+def _gmeans(a, codes, ng):
+    cnt = np.bincount(codes, minlength=ng)
+    if a.ndim == 1:
+        return (np.bincount(codes, a, ng) / cnt)
+    return np.column_stack([np.bincount(codes, a[:, j], ng) / cnt for j in range(a.shape[1])])
+
+
+def _independent_cols(X, tol=1e-8):
+    """Indices of a maximal set of linearly independent columns (keeps the earlier column when two are collinear)."""
+    keep = []
+    for j in range(X.shape[1]):
+        cand = keep + [j]
+        sub = X[:, cand]
+        if np.linalg.matrix_rank(sub, tol=tol * max(1.0, np.abs(sub).max())) == len(cand):
+            keep.append(j)
+    return keep
+
+
+# ---------------------------------------------------------------- reading and structure
+
+def _read(csv_text, max_vars):
+    try:
+        raw = pd.read_csv(io.StringIO(csv_text), sep=None, engine="python")
+    except Exception as e:
+        return None, f"Could not read the file as CSV ({e})."
+    raw.columns = [str(c).strip() for c in raw.columns]
+    raw = raw.loc[:, [c for c in raw.columns if not c.lower().startswith("unnamed")]]
+    if raw.shape[1] < 4:
+        return None, "The file needs at least four columns: entity, time, the dependent variable and one regressor."
+    cols = list(raw.columns)
+    low = [c.lower() for c in cols]
+    ent = next((cols[i] for i, c in enumerate(low) if c in ID_NAMES), None)
+    tim = next((cols[i] for i, c in enumerate(low) if c in TIME_NAMES and cols[i] != ent), None)
+    if ent is None or tim is None:
+        ent, tim = cols[0], cols[1]
+    num = raw.drop(columns=[ent, tim]).apply(pd.to_numeric, errors="coerce")
+    keep = [c for c in num.columns if num[c].notna().mean() > 0.8 and num[c].nunique() >= 2]
+    skipped = [c for c in num.columns if c not in keep]
+    if keep and num[keep[0]].nunique() <= 2:
+        return None, f"The first variable after the identifiers ({keep[0]}) is treated as the dependent variable, but it takes only two values. This guide covers continuous outcomes; see the binary and count models section below."
+    keep = keep[:max_vars]
+    if len(keep) < 2:
+        return None, "The file needs a dependent variable and at least one numeric regressor after the entity and time columns."
+    df = pd.concat([raw[[ent, tim]], num[keep]], axis=1).dropna().copy()
+    df[ent] = df[ent].astype(str).str.strip()
+    tnum = pd.to_numeric(df[tim], errors="coerce")
+    df["_t"] = tnum if tnum.notna().all() else df[tim].astype(str).str.strip()
+    if df.duplicated([ent, "_t"]).any():
+        d = df[df.duplicated([ent, "_t"], keep=False)].iloc[0]
+        return None, f"Entity “{d[ent]}” appears more than once in period {d[tim]}. Each entity–period pair must be a single row (long format)."
+    df = df.sort_values([ent, "_t"]).reset_index(drop=True)
+    periods = sorted(df["_t"].unique())
+    tmap = {p: i for i, p in enumerate(periods)}
+    df["_ti"] = df["_t"].map(tmap).astype(int)
+    cnt = df.groupby(ent)[tim].transform("size")
+    df = df[cnt >= 2].reset_index(drop=True)
+    return dict(df=df, ent=ent, tim=tim, vars=keep, skipped=skipped, periods=periods), None
+
+
+# ---------------------------------------------------------------- short-panel (static) tests
+
+def _short_panel(df, ent, dep, xs):
+    codes, uniq = pd.factorize(df[ent])
+    ng = len(uniq)
+    y = df[dep].to_numpy(float)
+    Xr = df[xs].to_numpy(float)
+    n = len(y)
+    tcodes = df["_ti"].to_numpy()
+    tlev = np.unique(tcodes)
+    D = (tcodes[:, None] == tlev[None, 1:]).astype(float)           # time dummies (first period omitted)
+    out = {"time_effects": True}
+
+    # regressors usable in FE: varying within units and not collinear with unit and time effects
+    Xw, Dw = _demean(Xr, codes, ng), _demean(D, codes, ng)
+    within_sd = Xw.std(axis=0)
+    tinv = [x for x, s in zip(xs, within_sd) if s < 1e-10]
+    cand = [j for j, s in enumerate(within_sd) if s >= 1e-10]
+    if cand:
+        Z = np.column_stack([Dw, Xw[:, cand]]) if D.shape[1] else Xw[:, cand]
+        ind = _independent_cols(Z)
+        ok = [cand[i - D.shape[1]] for i in ind if i >= D.shape[1]]
+    else:
+        ok = []
+    coll = [xs[j] for j in cand if j not in ok]
+    fx = [xs[j] for j in ok]
+    out["fe_dropped"] = dict(time_invariant=tinv, collinear=coll)
+    if not fx:
+        return {"error": "No regressor varies within units once unit and time effects are removed, so the fixed-effects and Hausman comparisons cannot be run."}
+
+    # pooled OLS with time dummies (all regressors that are not collinear with the time dummies)
+    Xp_full = np.column_stack([np.ones(n), Xr, D])
+    pk = _independent_cols(Xp_full)
+    px = [xs[j - 1] for j in pk if 1 <= j <= len(xs)]
+    Xp = Xp_full[:, pk]
+    bp, ep, Ip = _ols(y, Xp)
+    Vp = _cluster_vcov(Xp, ep, Ip, codes, Xp.shape[1])
+    ssr_p = float(ep @ ep)
+
+    # fixed effects (two-way: unit effects by demeaning, time effects by dummies)
+    Xf = np.column_stack([Xw[:, ok], Dw]) if D.shape[1] else Xw[:, ok]
+    yw = _demean(y, codes, ng)
+    bf, ef, If = _ols(yw, Xf)
+    kf = Xf.shape[1]
+    dof_f = n - ng - kf
+    s2e = float(ef @ ef) / dof_f
+    Vf_conv = s2e * If
+    Vf = _cluster_vcov(Xf, ef, If, codes, kf)
+    ssr_f = float(ef @ ef)
+
+    # F test for unit effects: FE (with the same regressors) against pooled OLS
+    Xp2 = np.column_stack([np.ones(n), Xr[:, ok], D])
+    _, ep2, _ = _ols(y, Xp2)
+    ssr_p2 = float(ep2 @ ep2)
+    F = ((ssr_p2 - ssr_f) / (ng - 1)) / (ssr_f / dof_f)
+    out["ftest"] = dict(stat=_f(F, 2), df1=int(ng - 1), df2=int(dof_f), p=_f(_f_sf(F, ng - 1, dof_f), 4))
+
+    # Breusch-Pagan LM test (Baltagi-Li version, valid for unbalanced panels), from pooled OLS residuals
+    Ti = np.bincount(codes, minlength=ng).astype(float)
+    se_i = np.bincount(codes, ep, ng)
+    lm = (n ** 2 / (2 * float((Ti * (Ti - 1)).sum()))) * ((se_i ** 2).sum() / ssr_p - 1) ** 2
+    out["lm"] = dict(stat=_f(lm, 2), p=_f(_chi2_sf(lm, 1), 4))
+
+    # random effects (Swamy-Arora variance components; unbalanced: harmonic mean of T_i)
+    Xb = np.column_stack([np.ones(ng), _gmeans(Xr[:, ok], codes, ng), _gmeans(D, codes, ng)])
+    yb = _gmeans(y, codes, ng)
+    kb = _independent_cols(Xb)
+    _, eb, _ = _ols(yb, Xb[:, kb])
+    s2b = float(eb @ eb) / max(ng - len(kb), 1)
+    Th = ng / float((1 / Ti).sum())
+    s2u = max(s2b - s2e / Th, 0.0)
+    theta = 1 - np.sqrt(s2e / (Ti * s2u + s2e))
+    th = theta[codes]
+    Xre_raw = np.column_stack([np.ones(n), Xr[:, ok], D])
+    mX = _gmeans(Xre_raw, codes, ng)[codes]
+    Xre = Xre_raw - th[:, None] * mX
+    yre = y - th * _gmeans(y, codes, ng)[codes]
+    br, er, Ir = _ols(yre, Xre)
+    s2re = float(er @ er) / (n - Xre.shape[1])
+    Vr_conv = s2re * Ir
+    Vr = _cluster_vcov(Xre, er, Ir, codes, Xre.shape[1])
+    out["re"] = dict(sigma_u=_f(math.sqrt(s2u), 4), sigma_e=_f(math.sqrt(s2e), 4),
+                     rho=_f(s2u / (s2u + s2e), 3), theta_mean=_f(float(theta.mean()), 3))
+
+    # conventional Hausman test on the regressors common to FE and RE
+    kk = len(ok)
+    d = bf[:kk] - br[1:1 + kk]
+    Vd = Vf_conv[:kk, :kk] - Vr_conv[1:1 + kk, 1:1 + kk]
+    try:
+        w, U = np.linalg.eigh((Vd + Vd.T) / 2)
+        pos = w > 1e-12 * max(1, abs(w).max())
+        H = float(d @ (U[:, pos] @ np.diag(1 / w[pos]) @ U[:, pos].T) @ d)
+        hdf = int(pos.sum())
+        out["hausman"] = dict(stat=_f(H, 2), df=hdf, p=_f(_chi2_sf(H, hdf), 4), pd=bool(pos.all()))
+    except Exception:
+        out["hausman"] = None
+
+    # Mundlak / correlated random effects: pooled OLS on X, unit means of X and time dummies, cluster-robust Wald test
+    Xm = np.column_stack([np.ones(n), Xr[:, ok], _gmeans(Xr[:, ok], codes, ng)[codes], D])
+    bm, em, Im = _ols(y, Xm)
+    Vm = _cluster_vcov(Xm, em, Im, codes, Xm.shape[1])
+    sl = slice(1 + kk, 1 + 2 * kk)
+    gm = bm[sl]
+    W = float(gm @ np.linalg.pinv(Vm[sl, sl]) @ gm)
+    out["mundlak"] = dict(stat=_f(W, 2), df=kk, p=_f(_chi2_sf(W, kk), 4))
+
+    # coefficient table (cluster-robust standard errors by entity)
+    rows = []
+    for j, x in enumerate(xs):
+        r = dict(var=x)
+        if x in px:
+            i = 1 + px.index(x)
+            r["pols"], r["pols_se"] = _f(bp[i]), _f(math.sqrt(max(Vp[i, i], 0)))
+        if x in fx:
+            i = fx.index(x)
+            r["re"], r["re_se"] = _f(br[1 + i]), _f(math.sqrt(max(Vr[1 + i, 1 + i], 0)))
+            r["fe"], r["fe_se"] = _f(bf[i]), _f(math.sqrt(max(Vf[i, i], 0)))
+        rows.append(r)
+    out["coefs"] = rows
+    out["within_r2"] = _f(1 - ssr_f / float(yw @ yw), 3)
+
+    fp, lp, mp = out["ftest"]["p"], out["lm"]["p"], out["mundlak"]["p"]
+    if fp >= 0.05 and lp >= 0.05:
+        model = "POLS"
+    elif mp < 0.05:
+        model = "FE"
+    elif lp < 0.05:
+        model = "RE"
+    else:
+        model = "FE"
+    out["static_model"] = model
+    return out
+
+
+# ---------------------------------------------------------------- long-panel tests
+
+def _wide(df, ent, v):
+    return df.pivot(index="_ti", columns=ent, values=v).sort_index()
+
+
+def _cd(W):
+    """Pesaran (2004/2015) CD test on a T x N wide array (NaN allowed). Returns CD, p, mean |rho|."""
+    A = np.asarray(W, float)
+    N = A.shape[1]
+    s, sabs, npairs = 0.0, 0.0, 0
+    M = ~np.isnan(A)
+    for i in range(N - 1):
+        for j in range(i + 1, N):
+            m = M[:, i] & M[:, j]
+            Tij = int(m.sum())
+            if Tij < 3:
+                continue
+            a, b = A[m, i], A[m, j]
+            a, b = a - a.mean(), b - b.mean()
+            den = math.sqrt(float(a @ a) * float(b @ b))
+            if den == 0:
+                continue
+            r = float(a @ b) / den
+            s += math.sqrt(Tij) * r
+            sabs += abs(r)
+            npairs += 1
+    if npairs == 0:
+        return None, None, None
+    cd = math.sqrt(2.0 / (N * (N - 1))) * s
+    return cd, 2 * (1 - _ncdf(abs(cd))), sabs / npairs
+
+
+def _fisher_adf(W, maxlag):
+    from statsmodels.tsa.stattools import adfuller
+    ps = []
+    for c in W.columns:
+        x = W[c].dropna().to_numpy(float)
+        if len(x) < 8 or np.ptp(x) == 0:
+            continue
+        ml = max(0, min(maxlag, len(x) // 3 - 2))
+        try:
+            ps.append(adfuller(x, maxlag=ml, autolag="AIC" if ml > 0 else None, regression="c")[1])
+        except Exception:
+            pass
+    if len(ps) < 2:
+        return None
+    ps = np.clip(np.array(ps), 1e-12, 1 - 1e-12)
+    N = len(ps)
+    P = -2 * np.log(ps).sum()
+    Z = sum(_ninv(p) for p in ps) / math.sqrt(N)
+    return dict(P=_f(P, 2), P_p=_f(_chi2_sf(P, 2 * N), 4), Z=_f(Z, 3), Z_p=_f(_ncdf(Z), 4), n=int(N))
+
+
+def _cips(W, p=1):
+    """Pesaran (2007) CIPS with an intercept and p lags on a T x N wide array (NaN allowed)."""
+    A = np.asarray(W, float)
+    yb = np.nanmean(A, axis=1)
+    dA, dyb = np.diff(A, axis=0), np.diff(yb)
+    T = A.shape[0]
+    ts = []
+    for i in range(A.shape[1]):
+        rows_y, rows_X = [], []
+        for t in range(p + 1, T):             # dy at time t uses index t-1 in the diff arrays
+            k = t - 1
+            vals = [dA[k, i], A[t - 1, i], yb[t - 1], dyb[k]] + [dyb[k - j] for j in range(1, p + 1)] + [dA[k - j, i] for j in range(1, p + 1)]
+            if np.all(np.isfinite(vals)):
+                rows_y.append(vals[0]); rows_X.append([1.0] + vals[1:])
+        L, kx = len(rows_y), 4 + 2 * p
+        if L < kx + 5:
+            continue
+        X, yv = np.array(rows_X), np.array(rows_y)
+        b, e, I = _ols(yv, X)
+        s2 = float(e @ e) / (L - kx)
+        se = math.sqrt(s2 * I[1, 1])
+        if se > 0:
+            ts.append(b[1] / se)
+    if len(ts) < 2:
+        return None
+    stat = float(np.mean(ts))
+    Nn, Tn = len(ts), int(np.isfinite(A).any(axis=1).sum())
+    return dict(stat=_f(stat, 3), p=_f(_cips_p(stat, Nn, Tn), 4), n=Nn, T=Tn)
+
+
+def _cips_p(stat, N, T):
+    Q = CIPS_Q
+    if not Q:
+        return None
+    Ns, Ts, probs, q = np.array(Q["N"], float), np.array(Q["T"], float), np.array(Q["probs"]), np.array(Q["q"])
+    def interp_axis(vals, x):
+        x = min(max(x, vals[0]), vals[-1])
+        j = int(np.searchsorted(vals, x))
+        j = min(max(j, 1), len(vals) - 1)
+        w = (math.log(x) - math.log(vals[j - 1])) / (math.log(vals[j]) - math.log(vals[j - 1]))
+        return j, w
+    i, wi = interp_axis(Ns, N)
+    j, wj = interp_axis(Ts, T)
+    qq = ((1 - wi) * ((1 - wj) * q[i - 1, j - 1] + wj * q[i - 1, j]) + wi * ((1 - wj) * q[i, j - 1] + wj * q[i, j]))
+    if stat <= qq[0]:
+        return float(probs[0]) / 2
+    if stat >= qq[-1]:
+        return min(1.0, float(probs[-1]) + (1 - probs[-1]) / 2)
+    return float(np.interp(stat, qq, probs))
+
+
+def _py_delta(df, ent, dep, xs):
+    """Pesaran-Yamagata (2008) slope-homogeneity test, model y_it = a_i + x_it' b_i + e_it."""
+    k = len(xs)
+    units = []
+    for _, g in df.groupby(ent, sort=False):
+        if len(g) <= k + 2:
+            continue
+        y = g[dep].to_numpy(float); X = g[xs].to_numpy(float)
+        y = y - y.mean(); X = X - X.mean(axis=0)
+        if np.linalg.matrix_rank(X) < k:
+            continue
+        units.append((y, X))
+    N = len(units)
+    if N < 5:
+        return None
+    XX = sum(X.T @ X for _, X in units); Xy = sum(X.T @ y for y, X in units)
+    bfe = np.linalg.solve(XX, Xy)
+    s2 = [float((y - X @ bfe) @ (y - X @ bfe)) / (len(y) - 1) for y, X in units]
+    A = sum(X.T @ X / s for (y, X), s in zip(units, s2)); c = sum(X.T @ y / s for (y, X), s in zip(units, s2))
+    bw = np.linalg.solve(A, c)
+    S = 0.0
+    for (y, X), s in zip(units, s2):
+        bi = np.linalg.solve(X.T @ X, X.T @ y)
+        d = bi - bw
+        S += float(d @ (X.T @ X) @ d) / s
+    T = float(np.mean([len(y) for y, _ in units]))
+    dl = math.sqrt(N) * (S / N - k) / math.sqrt(2 * k)
+    da = math.sqrt(N) * (S / N - k) / math.sqrt(2 * k * (T - k - 1) / (T + 1))
+    return dict(delta=_f(dl, 3), delta_p=_f(1 - _ncdf(dl), 4), delta_adj=_f(da, 3), delta_adj_p=_f(1 - _ncdf(da), 4), n=N)
+
+
+def _lrcov(W, bw):
+    T = W.shape[0]
+    G = W.T @ W / T
+    for j in range(1, bw + 1):
+        Gj = W[j:].T @ W[:-j] / T
+        G = G + (1 - j / (bw + 1)) * (Gj + Gj.T)
+    return G
+
+
+def _kao(df, ent, dep, xs, p=1):
+    """Kao (1999) residual-based ADF test of no cointegration (homogeneous slopes, unit intercepts)."""
+    codes, uniq = pd.factorize(df[ent]); ng = len(uniq)
+    y = df[dep].to_numpy(float); X = df[xs].to_numpy(float)
+    b, _, _ = _ols(_demean(y, codes, ng), _demean(X, codes, ng))
+    df = df.assign(_e=_demean(y - X @ b, codes, ng))
+    Sig, Om, rows_y, rows_X = [], [], [], []
+    for _, g in df.groupby(ent, sort=False):
+        e = g["_e"].to_numpy(); Xi = g[xs].to_numpy(float)
+        if len(e) < p + 5:
+            continue
+        de = np.diff(e)
+        for t in range(p + 1, len(e)):
+            rows_y.append(e[t]); rows_X.append([e[t - 1]] + [de[t - 1 - j] for j in range(1, p + 1)])
+        Wm = np.column_stack([e[1:], np.diff(Xi, axis=0)])
+        Wm = Wm - Wm.mean(axis=0)
+        Sig.append(Wm.T @ Wm / len(Wm)); Om.append(_lrcov(Wm, max(1, int(4 * (len(Wm) / 100) ** (2 / 9)))))
+    if len(Sig) < 5:
+        return None
+    N = len(Sig)
+    Sg, O = np.mean(Sig, axis=0), np.mean(Om, axis=0)
+    sv2 = Sg[0, 0] - Sg[0, 1:] @ np.linalg.pinv(Sg[1:, 1:]) @ Sg[1:, 0]
+    s0v2 = O[0, 0] - O[0, 1:] @ np.linalg.pinv(O[1:, 1:]) @ O[1:, 0]
+    if sv2 <= 0 or s0v2 <= 0:
+        return None
+    Xa, ya = np.array(rows_X), np.array(rows_y)
+    bb, ee, I = _ols(ya, Xa)
+    s2 = float(ee @ ee) / (len(ya) - Xa.shape[1])
+    t_adf = (bb[0] - 1) / math.sqrt(s2 * I[0, 0])
+    sv, s0v = math.sqrt(sv2), math.sqrt(s0v2)
+    stat = (t_adf + math.sqrt(6 * N) * sv / (2 * s0v)) / math.sqrt(s0v2 / (2 * sv2) + 3 * sv2 / (10 * s0v2))
+    return dict(stat=_f(stat, 3), p=_f(_ncdf(stat), 4), n=N)
+
+
+def _fisher_eg(df, ent, dep, xs):
+    """Maddala-Wu (1999) Fisher combination of unit-by-unit Engle-Granger tests (heterogeneous slopes)."""
+    from statsmodels.tsa.stattools import coint
+    ps = []
+    for _, g in df.groupby(ent, sort=False):
+        if len(g) < 12 + 2 * len(xs):
+            continue
+        try:
+            ps.append(coint(g[dep].to_numpy(float), g[xs].to_numpy(float), trend="c", maxlag=1, autolag=None)[1])
+        except Exception:
+            pass
+    if len(ps) < 5:
+        return None
+    ps = np.clip(np.array(ps), 1e-12, 1 - 1e-12)
+    N = len(ps)
+    P = -2 * np.log(ps).sum(); Z = sum(_ninv(p) for p in ps) / math.sqrt(N)
+    return dict(P=_f(P, 2), P_p=_f(_chi2_sf(P, 2 * N), 4), Z=_f(Z, 3), Z_p=_f(_ncdf(Z), 4), n=int(N))
+
+
+def _long_panel(df, ent, dep, xs, T):
+    out = {}
+    V = [dep] + xs
+    maxlag = max(1, min(4, int(12 * (T / 100) ** 0.25)))
+    # cross-sectional dependence of each variable and of the fixed-effects residuals
+    cds = []
+    for v in V:
+        cd, p, ar = _cd(_wide(df, ent, v).to_numpy())
+        cds.append(dict(var=v, cd=_f(cd, 2), p=_f(p, 4), absr=_f(ar, 3)))
+    out["cd"] = cds
+    codes, uniq = pd.factorize(df[ent]); ng = len(uniq)
+    yw = _demean(df[dep].to_numpy(float), codes, ng); Xw = _demean(df[xs].to_numpy(float), codes, ng)
+    b, e, I = _ols(yw, Xw)
+    cd, p, ar = _cd(df.assign(_r=e).pivot(index="_ti", columns=ent, values="_r").to_numpy())
+    out["cd_resid"] = dict(cd=_f(cd, 2), p=_f(p, 4), absr=_f(ar, 3))
+    out["slope"] = _py_delta(df, ent, dep, xs)
+
+    # panel unit-root tests on levels, first and (if needed) second differences
+    ur, orders = [], []
+    for v, c in zip(V, cds):
+        W = _wide(df, ent, v)
+        use = "CIPS" if (c["p"] is not None and c["p"] < 0.05) else "Fisher"
+        res = {"var": v, "test": use}
+        order = None
+        for d, lab in ((0, "lev"), (1, "d1"), (2, "d2")):
+            Wd = W if d == 0 else W.diff(d) if d == 1 else W.diff().diff()
+            fi, ci = _fisher_adf(Wd, maxlag), _cips(Wd.to_numpy())
+            res[lab] = dict(fisher=fi, cips=ci)
+            pv = (ci or {}).get("p") if use == "CIPS" else (fi or {}).get("Z_p")
+            if pv is None:
+                pv = (fi or {}).get("Z_p") if use == "CIPS" else (ci or {}).get("p")
+            res[lab]["p"] = pv
+            if pv is not None and pv < 0.05:
+                order = d
+                break
+        res["order"] = 3 if order is None else order
+        orders.append(res["order"])
+        ur.append(res)
+    out["unitroot"] = ur
+    out["orders"] = orders
+
+    cdr = out["cd_resid"]["p"] is not None and out["cd_resid"]["p"] < 0.05
+    het = out["slope"] is not None and out["slope"]["delta_adj_p"] is not None and out["slope"]["delta_adj_p"] < 0.05
+    out["cd_flag"], out["het_flag"] = bool(cdr), bool(het)
+    if max(orders) >= 2:
+        model = "I2"
+    elif all(o == 0 for o in orders):
+        model = "MG" if het else "FEDK"
+    else:
+        if all(o == 1 for o in orders):
+            k1, f1 = _kao(df, ent, dep, xs), _fisher_eg(df, ent, dep, xs)
+            used = "fisher" if het else "kao"
+            pv = (f1 or {}).get("Z_p") if used == "fisher" else (k1 or {}).get("p")
+            if pv is None:
+                used = "kao" if used == "fisher" else "fisher"
+                pv = (f1 or {}).get("Z_p") if used == "fisher" else (k1 or {}).get("p")
+            coint = pv is not None and pv < 0.05
+            out["coint"] = dict(kao=k1, fisher=f1, used=used, p=pv, coint=bool(coint))
+            if not coint:
+                model = "DIFF"
+            else:
+                model = "CSARDL" if cdr else "PMG"
+        else:
+            model = "CSARDL" if cdr else "PMG"
+    out["model"] = model
+    return out
+
+
+# ---------------------------------------------------------------- main entry point
+
+def analyze(csv_text, max_vars=6):
+    warnings.simplefilter("ignore")
+    rd, err = _read(csv_text, max_vars)
+    if err:
+        return json.dumps({"error": err})
+    df, ent, tim, V, periods = rd["df"], rd["ent"], rd["tim"], rd["vars"], rd["periods"]
+    dep, xs = V[0], V[1:]
+    Ti = df.groupby(ent).size()
+    N, Tn, n = int(len(Ti)), int(len(periods)), int(len(df))
+    if N < 5:
+        return json.dumps({"error": f"Only {N} entities with at least two periods were found. A panel needs several entities; with one or two, use the Time-Series Guide."})
+    if n < 30:
+        return json.dumps({"error": f"Only {n} complete entity–period rows were found. These tests need at least 30."})
+    Tmed = float(Ti.median())
+    out = dict(n=n, N=N, T=Tn, Tmin=int(Ti.min()), Tmax=int(Ti.max()), Tmed=_f(Tmed, 1), balanced=bool(Ti.min() == Ti.max() == Tn),
+               entity=ent, time=tim, first=str(periods[0]), last=str(periods[-1]), vars=V, dep=dep, skipped=rd["skipped"],
+               branch="long" if Tmed >= LONG_T else "short", long_t=LONG_T)
+
+    # charts: cross-sectional mean over time with the 10th-90th percentile band, and the same for first differences
+    g = df.groupby("_ti")
+    def band(s):
+        q = s.groupby(df["_ti"]).quantile([0.1, 0.9]).unstack()
+        return dict(mean=[_f(v, 5) for v in s.groupby(df["_ti"]).mean().values], lo=[_f(v, 5) for v in q[0.1].values], hi=[_f(v, 5) for v in q[0.9].values])
+    out["series"] = {v: band(df[v]) for v in V}
+    dfd = df.copy()
+    for v in V:
+        dfd[v] = df.groupby(ent)[v].diff()
+    out["dseries"] = {v: [_f(x, 5) for x in dfd.groupby("_ti")[v].mean().values[1:]] for v in V}
+    # a few individual units for the spaghetti chart
+    top = Ti.sort_values(ascending=False).index[:6]
+    out["units"] = {str(u): [_f(x, 5) for x in df[df[ent] == u].set_index("_ti")[dep].reindex(range(Tn)).values] for u in top}
+
+    summ = []
+    codes, uniq = pd.factorize(df[ent])
+    for v in V:
+        x = df[v].to_numpy(float)
+        m = _gmeans(x, codes, len(uniq))
+        w = x - m[codes] + x.mean()
+        summ.append(dict(var=v, mean=_f(x.mean()), sd=_f(x.std(ddof=1)), between=_f(m.std(ddof=1)), within=_f(w.std(ddof=1)), min=_f(x.min()), max=_f(x.max())))
+    out["summary"] = summ
+    out["corr"] = [[_f(c, 3) for c in row] for row in df[V].corr().values]
+
+    if out["branch"] == "short":
+        r = _short_panel(df, ent, dep, xs)
+        if "error" in r:
+            return json.dumps({"error": r["error"]})
+        out["static"] = r
+        out["model"] = r["static_model"]
+    else:
+        out.update(_long_panel(df, ent, dep, xs, Tn))
+    return json.dumps(out)
+
+
+# ---------------------------------------------------------------- public functions for use in your own scripts
+# Long-format data must be sorted by entity and time. A "wide" frame has one row per period and one column per unit,
+# for example wide = df.pivot(index="year", columns="country", values="log_gdp").
+
+def cd_test(wide):
+    """Pesaran CD test. Returns (CD statistic, p-value, mean absolute correlation)."""
+    return _cd(wide.to_numpy(float))
+
+
+def cips_test(wide, p=1):
+    """Pesaran (2007) CIPS unit-root test with an intercept and p lags (p-value from simulated quantiles, p=1)."""
+    return _cips(wide.to_numpy(float), p)
+
+
+def fisher_adf_test(wide, maxlag=4):
+    """Maddala-Wu / Choi Fisher-type ADF unit-root test (combines unit-by-unit ADF p-values)."""
+    return _fisher_adf(wide, maxlag)
+
+
+def slope_test(df, entity, y, xs):
+    """Pesaran-Yamagata (2008) slope-homogeneity test (delta and adjusted delta, upper-tail p-values)."""
+    return _py_delta(df.sort_values(entity, kind="stable"), entity, y, list(xs))
+
+
+def kao_test(df, entity, y, xs):
+    """Kao (1999) ADF test of no cointegration."""
+    return _kao(df, entity, y, list(xs))
+
+
+def fisher_eg_test(df, entity, y, xs):
+    """Maddala-Wu Fisher combination of unit-by-unit Engle-Granger cointegration tests."""
+    return _fisher_eg(df, entity, y, list(xs))
+</script>
 <script>
-(function(){
-"use strict";
-var $=function(id){return document.getElementById(id)};
-var modeButtons=document.querySelectorAll(".mode");
-function setMode(mode){modeButtons.forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.mode===mode))});["examples","upload","results"].forEach(function(id){$(id).classList.toggle("hide",id!==mode)});$("finalResult").classList.add("hide")}
-modeButtons.forEach(function(b){b.addEventListener("click",function(){setMode(b.dataset.mode)})});
-var cases={
-macro:{title:"Synthetic macroeconomic panel with common factors",lead:"A simulated country-year panel designed to illustrate common global shocks, heterogeneous adjustment and a long-run relationship. This is a teaching DGP, not observed country data.",primary:"CS-ARDL / CCE-based heterogeneous panel estimation",why:["The simulated common factor creates cross-sectional dependence across countries.","Unit-specific slopes make a homogeneous pooled long-run restriction questionable.","For nonstationary I(1) variables, a long-run estimator requires cointegration evidence and an appropriate deterministic specification.","Compare CS-ARDL, CCEMG and AMG; use PMG only when common long-run coefficients are defensible."],checks:["Assess cross-sectional dependence with Pesaran CD and residual diagnostics.","Use CADF/CIPS for unit-root testing when cross-sectional dependence is present.","Use dependence-aware cointegration tests and bootstrap inference where appropriate.","Compare CS-ARDL, CCEMG/AMG and PMG under explicit slope restrictions."],caution:"Synthetic teaching scenario. No empirical estimates are reported; use the macro-panel Stata implementation with your own dataset."},
-firm:{title:"Wooldridge wagepan: union wage premium",lead:"Real panel dataset with 545 men observed annually from 1980 to 1987. The lecture estimates the union wage premium under pooled OLS, random effects, fixed effects and first differences.",primary:"Fixed Effects / Correlated Random Effects (Mundlak) as the main within-unit comparison",why:["The same workers are followed over time, allowing the within estimator to remove time-invariant worker heterogeneity.","RE requires the worker effect to be uncorrelated with the complete regressor history.","The Mundlak specification adds worker means and tests their joint significance using clustered inference.","The published lecture output finds the Mundlak coefficient on union equal to the FE coefficient."],checks:["Cluster standard errors by worker.","Compare pooled OLS, RE, FE and FD estimates.","Test the worker-mean coefficients jointly in the Mundlak regression.","Interpret the FE–FD difference in light of measurement error and strict exogeneity."],output:"Pooled OLS union = 0.1892 (SE 0.0275); RE = 0.1103 (0.0210); FE = 0.0800 (0.0243); FD = 0.0411 (0.0219). Mundlak: chi-square(3) = 68.17, p < 0.001.",caution:"Real-data results are reproduced from Lecture 7's worked coding exercise. The coefficient is a within-worker association under strict exogeneity, not automatically a causal union effect."},
-policy:{title:"Crime and deterrence: North Carolina county panel",lead:"Real dataset with 90 North Carolina counties observed from 1981 to 1987. The lecture compares pooled OLS with county and year fixed effects for crime-rate deterrence relationships.",primary:"Two-way Fixed Effects with county-clustered standard errors",why:["County fixed effects absorb time-invariant county characteristics and year effects absorb common time shocks.","The arrest and conviction elasticities shrink substantially relative to pooled OLS.","The police coefficient remains positive, illustrating reverse causality that unit fixed effects do not remove.","The exercise motivates IV or a dynamic design when policy responds to contemporaneous crime shocks."],checks:["Cluster standard errors by county.","Compare pooled OLS and county/year FE estimates.","Assess time-varying confounding and reverse causality for police deployment.","Develop a defensible instrument or policy design before making causal claims."],output:"For log probability of arrest: pooled = −0.720 (SE 0.109), FE = −0.360 (0.064). For log probability of conviction: pooled = −0.546 (0.070), FE = −0.286 (0.055). Police per capita: pooled = 0.366 (0.120), FE = 0.424 (0.091).",caution:"Real-data results are reproduced from Lecture 7. County FE does not solve time-varying reverse causality in police deployment."},
-binary:{title:"Grunfeld investment: dynamic panel and small-N warning",lead:"Real panel dataset with 11 large U.S. firms observed from 1935 to 1954. It is used in Lecture 8 to demonstrate why Arellano–Bond GMM is poorly suited to small N and relatively large T.",primary:"Fixed Effects as a benchmark; use GMM only when N and T support its asymptotics",why:["With only 11 firms and 20 years, the number of available lag instruments can grow rapidly relative to N.","The lecture counts 171 Arellano–Bond moment conditions for the lagged dependent variable alone under the all-lags strategy.","The two IV instrument sets yield imprecise and materially different estimates.","This is a design-dimension lesson: dynamic-panel GMM is primarily motivated by large N and short T."],checks:["Report N and T before selecting a dynamic-panel estimator.","Compare pooled OLS and FE persistence estimates.","Restrict lag depth and collapse instruments if GMM is used.","Report instrument count and cluster-count limitations."],output:"Pooled OLS persistence = 0.876; FE = 0.684. All-lags Arellano–Bond instruments for the lagged outcome = 171 with N = 11. IV using lag 2: 0.010 (SE 0.215); lags 2–4: 0.804 (SE 0.213).",caution:"Real-data results are reproduced from Lecture 8. The example demonstrates why GMM can be a poor choice for small-N, long-T panels."}
+const EXAMPLES=[{"key":"wagepan","title":"Union wage premium","meta":"Workers × years · 545 men, 1980–1987","desc":"Log wage, union membership, marriage, experience squared and log hours worked (Wooldridge wagepan).","file":"examples/wagepan.csv","result":{"n":4360,"N":545,"T":8,"Tmin":8,"Tmax":8,"Tmed":8.0,"balanced":true,"entity":"nr","time":"year","first":"1980","last":"1987","vars":["lwage","union","married","expersq","lhours"],"dep":"lwage","skipped":[],"branch":"short","long_t":15,"series":{"lwage":{"mean":[1.39348,1.51287,1.57167,1.61926,1.69029,1.73941,1.79972,1.86648],"lo":[0.78824,0.93586,1.00218,1.06485,1.10488,1.17043,1.22347,1.30772],"hi":[2.01208,2.12663,2.16051,2.21092,2.28576,2.30591,2.37753,2.41546]},"union":{"mean":[0.25138,0.24954,0.25688,0.24587,0.25138,0.22385,0.21101,0.26239],"lo":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"hi":[1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0]},"married":{"mean":[0.18532,0.28807,0.3578,0.44771,0.50092,0.54128,0.57615,0.61468],"lo":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"hi":[1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0]},"expersq":{"mean":[11.82202,18.85138,27.88073,38.91009,51.93945,66.96881,83.99817,103.02752],"lo":[1.0,4.0,9.0,16.0,25.0,36.0,49.0,64.0],"hi":[25.0,36.0,49.0,64.0,81.0,100.0,121.0,144.0]},"lhours":{"mean":[7.50225,7.57663,7.60847,7.66691,7.69854,7.70763,7.71807,7.73858],"lo":[6.96523,7.15804,7.30195,7.4251,7.49554,7.55883,7.56972,7.57168],"hi":[7.8668,7.8694,7.88698,7.94647,7.97934,7.96429,7.99551,8.03359]}},"dseries":{"lwage":[0.11939,0.0588,0.0476,0.07103,0.04912,0.06031,0.06676],"union":[-0.00183,0.00734,-0.01101,0.0055,-0.02752,-0.01284,0.05138],"married":[0.10275,0.06972,0.08991,0.05321,0.04037,0.03486,0.03853],"expersq":[7.02936,9.02936,11.02936,13.02936,15.02936,17.02936,19.02936],"lhours":[0.07438,0.03184,0.05844,0.03162,0.00909,0.01045,0.02051]},"units":{"10043":[1.47398,0.4502,0.09249,1.44545,0.60772,0.84583,1.03947,1.45561],"10067":[1.36462,1.48503,1.73611,1.7501,1.90569,1.81072,2.10842,1.74832],"1007":[1.448,1.75254,1.5474,2.04386,2.15214,2.26722,2.74734,2.57718],"10091":[1.46527,2.10231,1.73599,1.26388,1.80033,1.96663,1.78512,1.71465],"10120":[-0.23682,0.27115,0.23042,1.41116,1.69252,1.48566,1.89503,1.95205],"10121":[1.22486,1.44238,1.50071,1.52345,1.58837,1.52089,1.45744,1.89369]},"summary":[{"var":"lwage","mean":1.6491,"sd":0.5326,"between":0.3907,"within":0.3623,"min":-3.5791,"max":4.0519},{"var":"union","mean":0.244,"sd":0.4296,"between":0.3294,"within":0.276,"min":0.0,"max":1.0},{"var":"married","mean":0.439,"sd":0.4963,"between":0.3766,"within":0.3236,"min":0.0,"max":1.0},{"var":"expersq","mean":50.4248,"sd":40.782,"between":26.3513,"within":31.1431,"min":0.0,"max":324.0},{"var":"lhours","mean":7.6521,"sd":0.3091,"between":0.1936,"within":0.2411,"min":4.7875,"max":8.5156}],"corr":[[1.0,0.145,0.205,0.134,0.062],[0.145,1.0,0.042,-0.003,-0.018],[0.205,0.042,1.0,0.249,0.208],[0.134,-0.003,0.249,1.0,0.185],[0.062,-0.018,0.208,0.185,1.0]],"static":{"time_effects":true,"fe_dropped":{"time_invariant":[],"collinear":[]},"ftest":{"stat":9.34,"df1":544,"df2":3804,"p":0.0},"lm":{"stat":3768.41,"p":0.0},"re":{"sigma_u":0.3514,"sigma_e":0.349,"rho":0.503,"theta_mean":0.669},"hausman":{"stat":54.74,"df":4,"p":0.0,"pd":true},"mundlak":{"stat":44.33,"df":4,"p":0.0},"coefs":[{"var":"union","pols":0.1762,"pols_se":0.0291,"re":0.101,"re_se":0.0208,"fe":0.0758,"fe_se":0.0225},{"var":"married","pols":0.1555,"pols_se":0.0271,"re":0.081,"re_se":0.0192,"fe":0.0459,"fe_se":0.0212},{"var":"expersq","pols":-0.0021,"pols_se":0.0005,"re":-0.0033,"re_se":0.0005,"fe":-0.0059,"fe_se":0.0008},{"var":"lhours","pols":-0.0356,"pols_se":0.0492,"re":-0.1203,"re_se":0.0423,"fe":-0.156,"fe_se":0.0444}],"within_r2":0.19,"static_model":"FE"},"model":"FE"}},{"key":"crime4","title":"Crime and deterrence","meta":"Counties × years · North Carolina, 1981–1987","desc":"Log crime rate, probabilities of arrest, conviction and prison, average sentence and police per capita.","file":"examples/crime4.csv","result":{"n":630,"N":90,"T":7,"Tmin":7,"Tmax":7,"Tmed":7.0,"balanced":true,"entity":"county","time":"year","first":"81","last":"87","vars":["lcrmrte","lprbarr","lprbconv","lprbpris","lavgsen","lpolpc"],"dep":"lcrmrte","skipped":[],"branch":"short","long_t":15,"series":{"lcrmrte":{"mean":[-3.55371,-3.5585,-3.63271,-3.68141,-3.67766,-3.61885,-3.54173],"lo":[-4.20578,-4.10984,-4.25485,-4.29313,-4.38536,-4.38888,-4.25592],"hi":[-2.84623,-2.83761,-2.92816,-2.95825,-2.9453,-2.86326,-2.80435]},"lprbarr":{"mean":[-1.29224,-1.25436,-1.25878,-1.24046,-1.2678,-1.30183,-1.30438],"lo":[-1.76316,-1.72614,-1.76026,-1.72701,-1.77058,-1.79505,-1.81628],"hi":[-0.78473,-0.75679,-0.78516,-0.7858,-0.83377,-0.8692,-0.80828]},"lprbconv":{"mean":[-0.73981,-0.75419,-0.67876,-0.67808,-0.59435,-0.64973,-0.75552],"lo":[-1.34146,-1.40548,-1.22716,-1.24503,-1.28864,-1.32919,-1.35227],"hi":[-0.08825,-0.24019,0.02945,0.08508,0.21098,0.08063,0.02041]},"lprbpris":{"mean":[-0.85572,-0.86095,-0.90335,-0.82673,-0.86073,-0.93071,-0.91223],"lo":[-1.05365,-1.10371,-1.20847,-1.01571,-1.09555,-1.28039,-1.1534],"hi":[-0.62937,-0.5783,-0.64774,-0.58895,-0.6685,-0.68667,-0.70648]},"lavgsen":{"mean":[2.31594,2.09423,2.1289,2.10423,2.07508,2.12359,2.23143],"lo":[2.00013,1.77927,1.85583,1.83273,1.80318,1.79591,1.87165],"hi":[2.7052,2.43052,2.43895,2.41502,2.34754,2.46326,2.56771]},"lpolpc":{"mean":[-6.53603,-6.55916,-6.48834,-6.46375,-6.45023,-6.47846,-6.45849],"lo":[-7.05169,-7.08498,-7.03183,-6.99476,-7.01214,-7.01266,-6.81818],"hi":[-6.1316,-6.23573,-6.12632,-6.0475,-6.06257,-6.05072,-6.05657]}},"dseries":{"lcrmrte":[-0.00479,-0.07421,-0.04869,0.00375,0.0588,0.07713],"lprbarr":[0.03788,-0.00442,0.01832,-0.02734,-0.03403,-0.00255],"lprbconv":[-0.01439,0.07544,0.00068,0.08373,-0.05538,-0.10579],"lprbpris":[-0.00524,-0.0424,0.07661,-0.034,-0.06998,0.01848],"lavgsen":[-0.22171,0.03467,-0.02468,-0.02915,0.04851,0.10784],"lpolpc":[-0.02312,0.07081,0.02459,0.01352,-0.02823,0.01997]},"units":{"1":[-3.22176,-3.26113,-3.49645,-3.36027,-3.30844,-3.35951,-3.33531],"101":[-3.48638,-3.40615,-3.5605,-3.50387,-3.45512,-3.27792,-3.19564],"105":[-2.76973,-2.84855,-3.03061,-3.33969,-3.11018,-2.98709,-2.96782],"107":[-3.13612,-3.06639,-3.01782,-3.03706,-3.09809,-3.10026,-3.00064],"109":[-4.20273,-4.04658,-3.96463,-3.94692,-3.91469,-4.0247,-3.76794],"11":[-3.97139,-3.91937,-3.95458,-4.08613,-4.26021,-4.07407,-4.22628]},"summary":[{"var":"lcrmrte","mean":-3.6092,"sd":0.5728,"between":0.5499,"within":0.1691,"min":-6.3136,"max":-1.8089},{"var":"lprbarr","mean":-1.2743,"sd":0.4159,"between":0.354,"within":0.2211,"min":-2.8332,"max":1.0116},{"var":"lprbconv","mean":-0.6929,"sd":0.6096,"between":0.4839,"within":0.3737,"min":-2.6827,"max":3.6109},{"var":"lprbpris","mean":-0.8786,"sd":0.2305,"between":0.1402,"within":0.1835,"min":-1.9042,"max":-0.3878},{"var":"lavgsen","mean":2.1533,"sd":0.2737,"between":0.1568,"within":0.2249,"min":1.4398,"max":3.2515},{"var":"lpolpc","mean":-6.4906,"sd":0.5267,"between":0.4663,"within":0.2489,"min":-7.6875,"max":-3.336}],"corr":[[1.0,-0.45,-0.457,0.181,0.021,0.139],[-0.45,1.0,-0.097,-0.021,-0.048,0.053],[-0.457,-0.097,1.0,-0.158,-0.027,0.273],[0.181,-0.021,-0.158,1.0,0.003,-0.056],[0.021,-0.048,-0.027,0.003,1.0,0.034],[0.139,0.053,0.273,-0.056,0.034,1.0]],"static":{"time_effects":true,"fe_dropped":{"time_invariant":[],"collinear":[]},"ftest":{"stat":45.87,"df1":89,"df2":529,"p":0.0},"lm":{"stat":953.08,"p":0.0},"re":{"sigma_u":0.3003,"sigma_e":0.1387,"rho":0.824,"theta_mean":0.828},"hausman":{"stat":46.82,"df":1,"p":0.0,"pd":false},"mundlak":{"stat":60.53,"df":5,"p":0.0},"coefs":[{"var":"lprbarr","pols":-0.7195,"pols_se":0.1096,"re":-0.4252,"re_se":0.0629,"fe":-0.3598,"fe_se":0.0594},{"var":"lprbconv","pols":-0.5457,"pols_se":0.0704,"re":-0.3271,"re_se":0.05,"fe":-0.2859,"fe_se":0.0515},{"var":"lprbpris","pols":0.2476,"pols_se":0.1088,"re":-0.1794,"re_se":0.0458,"fe":-0.1828,"fe_se":0.0452},{"var":"lavgsen","pols":-0.0868,"pols_se":0.113,"re":-0.0084,"re_se":0.0322,"fe":-0.0045,"fe_se":0.0333},{"var":"lpolpc","pols":0.366,"pols_se":0.1211,"re":0.4294,"re_se":0.0879,"fe":0.4241,"fe_se":0.0848}],"within_r2":0.434,"static_model":"FE"},"model":"FE"}},{"key":"employment","title":"Employment in UK firms","meta":"Firms × years · 140 firms, 1976–1984","desc":"Log employment, real wage, capital and industry output; the Arellano–Bond data, unbalanced.","file":"examples/employment.csv","result":{"n":1031,"N":140,"T":9,"Tmin":7,"Tmax":9,"Tmed":7.0,"balanced":false,"entity":"firm","time":"year","first":"1976","last":"1984","vars":["log_emp","log_wage","log_capital","log_output"],"dep":"log_emp","skipped":[],"branch":"short","long_t":15,"series":{"log_emp":{"mean":[1.23921,1.16024,1.17771,1.18072,1.14211,1.02666,0.92474,0.73198,0.26062],"lo":[-0.26778,-0.33904,-0.32186,-0.26801,-0.3164,-0.36522,-0.47887,-0.52855,-0.92434],"hi":[3.15418,3.05543,3.02688,3.02753,2.96197,2.7895,2.70332,2.39775,1.84374]},"log_wage":{"mean":[3.2368,3.12938,3.10784,3.11416,3.11533,3.14884,3.18759,3.16068,3.10747],"lo":[2.90258,2.72803,2.75618,2.75557,2.76642,2.83979,2.84418,2.78903,2.64267],"hi":[3.52778,3.43631,3.40277,3.40568,3.36797,3.40761,3.45084,3.45004,3.45009]},"log_capital":{"mean":[-0.29123,-0.38761,-0.33169,-0.30256,-0.33691,-0.43443,-0.56033,-0.78864,-1.19249],"lo":[-2.08708,-2.06367,-1.97134,-1.94772,-2.02751,-2.20023,-2.27395,-2.35328,-2.84664],"hi":[1.93548,1.90339,1.87333,1.80844,1.78128,1.82864,1.66784,1.55114,0.24669]},"log_output":{"mean":[4.68715,4.69948,4.70891,4.70807,4.6412,4.56055,4.54081,4.5564,4.58738],"lo":[4.55035,4.56805,4.59115,4.60987,4.60517,4.49088,4.50024,4.49535,4.50681],"hi":[4.77403,4.84548,4.82391,4.82545,4.71907,4.59912,4.59808,4.61428,4.6338]}},"dseries":{"log_emp":[0.01013,0.01254,0.00301,-0.03861,-0.11545,-0.10192,-0.0622,-0.03681],"log_wage":[-0.08213,-0.02213,0.00631,0.00118,0.03351,0.03875,0.03602,0.01681],"log_capital":[0.01549,0.05389,0.02914,-0.03435,-0.09752,-0.1259,-0.07972,-0.07008],"log_output":[0.01468,0.00831,-0.00085,-0.06687,-0.08065,-0.01973,0.01427,0.02547]},"units":{"127":[0.12927,0.06203,0.12663,0.24138,0.41211,0.41739,0.42723,0.40079,0.4631],"130":[2.99573,3.03013,3.02042,3.02529,2.91777,2.70805,2.51349,2.35328,2.2439],"129":[-0.26397,-0.23953,-0.21816,-0.14618,-0.08229,-0.09431,-0.13811,-0.13467,-0.16017],"128":[0.5318,0.6065,0.69614,0.7193,0.57493,0.45869,0.38866,0.36395,0.28292],"135":[0.8612,0.86289,0.85314,0.76314,0.59774,0.45108,0.27384,0.17143,0.17731],"136":[-0.48613,-0.29841,-0.39601,-0.37106,-1.12701,-1.48722,-1.3548,-1.03283,-0.76572]},"summary":[{"var":"log_emp","mean":1.056,"sd":1.3415,"between":1.3392,"within":0.1946,"min":-2.2634,"max":4.6873},{"var":"log_wage","mean":3.143,"sd":0.263,"between":0.244,"within":0.0831,"min":2.0816,"max":3.8118},{"var":"log_capital","mean":-0.4416,"sd":1.5141,"between":1.5093,"within":0.216,"min":-4.4312,"max":3.8524},{"var":"log_output","mean":4.638,"sd":0.094,"between":0.0393,"within":0.0855,"min":4.4648,"max":4.8549}],"corr":[[1.0,-0.014,0.911,0.089],[-0.014,1.0,0.063,0.023],[0.911,0.063,1.0,0.063],[0.089,0.023,0.063,1.0]],"static":{"time_effects":true,"fe_dropped":{"time_invariant":[],"collinear":[]},"ftest":{"stat":127.28,"df1":139,"df2":880,"p":0.0},"lm":{"stat":3011.89,"p":0.0},"re":{"sigma_u":0.5055,"sigma_e":0.1277,"rho":0.94,"theta_mean":0.907},"hausman":{"stat":72.56,"df":2,"p":0.0,"pd":false},"mundlak":{"stat":27.44,"df":3,"p":0.0},"coefs":[{"var":"log_wage","pols":-0.3832,"pols_se":0.2186,"re":-0.2995,"re_se":0.1192,"fe":-0.2969,"fe_se":0.1262},{"var":"log_capital","pols":0.8074,"pols_se":0.0333,"re":0.6458,"re_se":0.0354,"fe":0.5476,"fe_se":0.0507},{"var":"log_output","pols":0.5037,"pols_se":0.3924,"re":0.1783,"re_se":0.1467,"fe":0.2648,"fe_se":0.1529}],"within_r2":0.632,"static_model":"FE"},"model":"FE"}},{"key":"cigar","title":"Cigarette demand","meta":"States × years · 46 U.S. states, 1963–1992","desc":"Log packs per capita, real price, real income per capita and the real minimum price in neighbouring states.","file":"examples/cigar.csv","result":{"n":1380,"N":46,"T":30,"Tmin":30,"Tmax":30,"Tmed":30.0,"balanced":true,"entity":"state","time":"year","first":"63","last":"92","vars":["log_sales","log_price","log_income","log_pimin"],"dep":"log_sales","skipped":[],"branch":"long","long_t":15,"series":{"log_sales":{"mean":[4.81828,4.78834,4.80425,4.80009,4.80649,4.79557,4.78699,4.7644,4.78882,4.82024,4.83503,4.8611,4.87332,4.89393,4.89344,4.89513,4.88096,4.88508,4.88749,4.87314,4.8362,4.79187,4.78048,4.76062,4.73376,4.69898,4.65983,4.61592,4.59099,4.58115],"lo":[4.55847,4.5295,4.57775,4.55855,4.5633,4.58542,4.59042,4.53903,4.58238,4.62542,4.65433,4.69179,4.71492,4.75186,4.76346,4.76345,4.76431,4.75142,4.74404,4.7296,4.70319,4.65586,4.63473,4.57882,4.53946,4.47333,4.44376,4.42783,4.38696,4.35792],"hi":[5.02044,4.96981,4.9853,4.97466,4.97707,4.96319,4.98016,4.97287,5.00933,5.02853,5.04567,5.04762,5.0848,5.11889,5.10497,5.06313,5.05167,5.0386,5.06109,5.04915,4.99131,4.92253,4.94039,4.9196,4.89409,4.90928,4.85322,4.83423,4.79372,4.82138]},"log_price":{"mean":[-0.12435,-0.10806,-0.11637,-0.09335,-0.09918,-0.07414,-0.09537,-0.06432,-0.05378,-0.04952,-0.09864,-0.17423,-0.19359,-0.1761,-0.2128,-0.1818,-0.24609,-0.31894,-0.3656,-0.32233,-0.2038,-0.11732,-0.09586,-0.04986,-0.02395,0.01137,0.04883,0.09275,0.10835,0.20551],"lo":[-0.22031,-0.20123,-0.22315,-0.21816,-0.22018,-0.16017,-0.20827,-0.1944,-0.17939,-0.2095,-0.25373,-0.31998,-0.32176,-0.29062,-0.31908,-0.27045,-0.32702,-0.39881,-0.4433,-0.3967,-0.28701,-0.20668,-0.18979,-0.13586,-0.11611,-0.08004,-0.04158,-0.00653,-0.00037,0.10923],"hi":[-0.01981,-0.03113,-0.04215,-0.014,-0.00608,0.01991,0.0282,0.04411,0.04463,0.08697,0.03431,-0.04354,-0.06929,-0.06255,-0.11995,-0.08897,-0.15301,-0.23724,-0.27928,-0.24345,-0.10586,-0.03029,-0.01028,0.04067,0.05689,0.09507,0.15472,0.22114,0.2569,0.32227]},"log_income":{"mean":[4.21176,4.25876,4.31621,4.35256,4.37719,4.40512,4.41878,4.43885,4.46469,4.50949,4.57506,4.54275,4.5367,4.55454,4.57897,4.61473,4.60742,4.56431,4.56552,4.56102,4.58554,4.62555,4.64166,4.67247,4.68657,4.71405,4.72659,4.74341,4.73179,4.77546],"lo":[3.97934,4.0344,4.09036,4.12663,4.17208,4.20668,4.21689,4.24208,4.2618,4.3073,4.35269,4.35527,4.36979,4.38836,4.43617,4.45993,4.4534,4.39583,4.38656,4.38126,4.40183,4.44056,4.45102,4.48292,4.49061,4.50779,4.5199,4.55963,4.55519,4.60448],"hi":[4.47785,4.5255,4.56531,4.5889,4.61174,4.64219,4.65212,4.67386,4.68908,4.70642,4.76462,4.72618,4.73275,4.74558,4.77357,4.79919,4.79735,4.7622,4.74028,4.72392,4.76134,4.81476,4.84468,4.88164,4.91606,4.95842,4.95867,4.94317,4.92057,4.98037]},"log_pimin":{"mean":[-0.1889,-0.17606,-0.18736,-0.17328,-0.17848,-0.14607,-0.18083,-0.15894,-0.15689,-0.16103,-0.21155,-0.28497,-0.30301,-0.27734,-0.31123,-0.27638,-0.33278,-0.4023,-0.44878,-0.40256,-0.2906,-0.20181,-0.1791,-0.11851,-0.09958,-0.07212,-0.03745,0.00147,0.01001,0.11242],"lo":[-0.24712,-0.25593,-0.26364,-0.27136,-0.28968,-0.28005,-0.30694,-0.31556,-0.29678,-0.32347,-0.38048,-0.45112,-0.47972,-0.45778,-0.49608,-0.45418,-0.5145,-0.57644,-0.60981,-0.53885,-0.40547,-0.32062,-0.30518,-0.24949,-0.22733,-0.22568,-0.17782,-0.12277,-0.12248,-0.0326],"hi":[-0.13074,-0.10895,-0.11067,-0.07197,-0.08431,-0.07455,-0.09722,-0.02876,-0.04288,-0.02177,-0.08457,-0.16623,-0.18978,-0.17218,-0.20333,-0.17651,-0.24719,-0.31724,-0.36821,-0.32822,-0.21291,-0.13422,-0.09754,-0.04431,-0.00309,0.02833,0.04648,0.073,0.11399,0.18018]}},"dseries":{"log_sales":[-0.02994,0.0159,-0.00416,0.00641,-0.01093,-0.00857,-0.02259,0.02442,0.03141,0.0148,0.02606,0.01222,0.02061,-0.00049,0.00169,-0.01418,0.00412,0.00242,-0.01435,-0.03694,-0.04433,-0.01139,-0.01986,-0.02686,-0.03478,-0.03915,-0.04391,-0.02494,-0.00984],"log_price":[0.01629,-0.00831,0.02302,-0.00583,0.02504,-0.02123,0.03105,0.01054,0.00426,-0.04911,-0.07559,-0.01936,0.01749,-0.0367,0.031,-0.06429,-0.07285,-0.04666,0.04327,0.11854,0.08648,0.02146,0.04601,0.0259,0.03532,0.03746,0.04391,0.0156,0.09716],"log_income":[0.04699,0.05745,0.03635,0.02462,0.02794,0.01366,0.02007,0.02583,0.04481,0.06557,-0.03231,-0.00605,0.01784,0.02443,0.03576,-0.00731,-0.04311,0.0012,-0.0045,0.02452,0.04001,0.01612,0.03081,0.01409,0.02748,0.01254,0.01682,-0.01163,0.04367],"log_pimin":[0.01285,-0.0113,0.01407,-0.00519,0.03241,-0.03477,0.0219,0.00205,-0.00413,-0.05052,-0.07342,-0.01803,0.02567,-0.03389,0.03485,-0.0564,-0.06952,-0.04648,0.04622,0.11196,0.08878,0.02271,0.06059,0.01893,0.02746,0.03466,0.03892,0.00854,0.10241]},"units":{"1":[4.54223,4.55808,4.59006,4.56851,4.55913,4.48187,4.50092,4.49758,4.55808,4.61611,4.63376,4.68398,4.71582,4.75531,4.76303,4.81218,4.79909,4.81381,4.78415,4.77996,4.75617,4.72739,4.74057,4.75617,4.7362,4.71939,4.65966,4.68767,4.68121,4.69226],"10":[4.92362,4.83231,4.87596,4.87749,4.88884,4.86214,4.79744,4.81705,4.81218,4.83628,4.88734,4.91265,4.88204,4.86984,4.8911,4.89335,4.90823,4.93447,4.88884,4.88129,4.8489,4.82591,4.82189,4.82591,4.82911,4.78332,4.73444,4.70139,4.58701,4.56331],"11":[4.6849,4.67842,4.63957,4.65205,4.67002,4.65396,4.68767,4.69957,4.751,4.76217,4.78582,4.81786,4.81137,4.83549,4.85125,4.87214,4.8752,4.89784,4.88053,4.87672,4.85671,4.83866,4.85826,4.85981,4.86214,4.82109,4.76303,4.73444,4.69684,4.69318],"13":[4.57471,4.50092,4.55598,4.5486,4.58802,4.59613,4.61115,4.62889,4.68675,4.83707,4.80238,4.8331,4.81462,4.82911,4.82831,4.81056,4.76644,4.74667,4.73707,4.71403,4.71223,4.64054,4.61215,4.57161,4.55388,4.43675,4.36182,4.50092,4.44735,4.44383],"14":[4.98018,4.97328,4.98018,4.9712,4.95442,4.88734,4.87061,4.82671,4.8331,4.84103,4.8235,4.88204,4.88129,4.90082,4.89784,4.91779,4.90749,4.90676,4.89035,4.87291,4.85125,4.82028,4.80074,4.77238,4.69592,4.67842,4.65014,4.54436,4.56539,4.55177],"15":[4.93087,4.90008,4.90749,4.88356,4.90379,4.90008,4.8896,4.90231,4.93663,5.00529,5.04986,5.07267,5.09006,5.1156,5.15329,5.01662,5.00328,4.98975,5.00059,4.99518,4.96284,4.9258,4.90749,4.92435,4.89784,4.89784,4.88658,4.85437,4.84576,4.85359]},"summary":[{"var":"log_sales","mean":4.7934,"sd":0.2246,"between":0.1867,"within":0.1277,"min":3.9778,"max":5.6968},{"var":"log_price","mean":-0.1064,"sd":0.1518,"between":0.0729,"within":0.1336,"min":-0.6098,"max":0.364},{"var":"log_income","mean":4.5453,"sd":0.2099,"between":0.1482,"within":0.1503,"min":3.7663,"max":5.117},{"var":"log_pimin","mean":-0.1945,"sd":0.1511,"between":0.0781,"within":0.1299,"min":-0.6098,"max":0.2408}],"corr":[[1.0,-0.513,0.093,-0.374],[-0.513,1.0,0.271,0.815],[0.093,0.271,1.0,0.186],[-0.374,0.815,0.186,1.0]],"cd":[{"var":"log_sales","cd":101.52,"p":0.0,"absr":0.625},{"var":"log_price","cd":154.14,"p":0.0,"absr":0.875},{"var":"log_income","cd":166.27,"p":0.0,"absr":0.944},{"var":"log_pimin","cd":162.51,"p":0.0,"absr":0.922}],"cd_resid":{"cd":42.48,"p":0.0,"absr":0.402},"slope":{"delta":33.755,"delta_p":0.0,"delta_adj":36.858,"delta_adj_p":0.0,"n":46},"unitroot":[{"var":"log_sales","test":"CIPS","lev":{"fisher":{"P":62.91,"P_p":0.9912,"Z":5.738,"Z_p":1.0,"n":46},"cips":{"stat":-1.659,"p":0.5908,"n":46,"T":30},"p":0.5908},"d1":{"fisher":{"P":635.54,"P_p":0.0,"Z":-16.6,"Z_p":0.0,"n":46},"cips":{"stat":-3.619,"p":0.0005,"n":46,"T":29},"p":0.0005},"order":1},{"var":"log_price","test":"CIPS","lev":{"fisher":{"P":12.94,"P_p":1.0,"Z":8.536,"Z_p":1.0,"n":46},"cips":{"stat":-2.466,"p":0.0005,"n":46,"T":30},"p":0.0005},"order":0},{"var":"log_income","test":"CIPS","lev":{"fisher":{"P":117.23,"P_p":0.0391,"Z":-2.109,"Z_p":0.0175,"n":46},"cips":{"stat":-1.663,"p":0.5842,"n":46,"T":30},"p":0.5842},"d1":{"fisher":{"P":675.56,"P_p":0.0,"Z":-20.866,"Z_p":0.0,"n":46},"cips":{"stat":-2.86,"p":0.0005,"n":46,"T":29},"p":0.0005},"order":1},{"var":"log_pimin","test":"CIPS","lev":{"fisher":{"P":10.68,"P_p":1.0,"Z":9.45,"Z_p":1.0,"n":46},"cips":{"stat":-2.478,"p":0.0005,"n":46,"T":30},"p":0.0005},"order":0}],"orders":[1,0,1,0],"cd_flag":true,"het_flag":true,"model":"CSARDL"}},{"key":"gasoline","title":"Gasoline demand in the OECD","meta":"Countries × years · 18 countries, 1960–1978","desc":"Log gasoline use per car, real income per capita, real gasoline price and cars per capita (Baltagi–Griffin).","file":"examples/gasoline.csv","result":{"n":342,"N":18,"T":19,"Tmin":19,"Tmax":19,"Tmed":19.0,"balanced":true,"entity":"country","time":"year","first":"1960","last":"1978","vars":["lgaspcar","lincomep","lrpmg","lcarpcap"],"dep":"lgaspcar","skipped":[],"branch":"long","long_t":15,"series":{"lgaspcar":{"mean":[4.56767,4.54013,4.47266,4.42921,4.41018,4.354,4.34444,4.32149,4.30246,4.26402,4.25946,4.2488,4.23622,4.24186,4.14438,4.14474,4.12459,4.11106,4.11122],"lo":[4.0106,3.99736,3.96595,3.92879,3.91612,3.8708,3.82208,3.84826,3.81353,3.83026,3.84975,3.85836,3.87786,3.88364,3.75141,3.74225,3.76181,3.7389,3.73835],"hi":[5.32477,5.49459,5.32422,5.21081,5.20764,5.04833,5.01509,4.89114,4.8914,4.87354,4.86615,4.87072,4.86464,4.86237,4.82652,4.82999,4.82163,4.811,4.82967]},"lincomep":{"mean":[-6.50299,-6.45527,-6.42404,-6.37455,-6.3299,-6.29435,-6.25132,-6.21428,-6.1767,-6.11738,-6.07378,-6.03673,-5.99225,-5.9415,-5.92684,-5.9304,-5.89193,-5.87406,-5.84081],"lo":[-7.35575,-7.28736,-7.28688,-7.17678,-7.11717,-7.06266,-6.99584,-6.95095,-6.90013,-6.83037,-6.75442,-6.66092,-6.56874,-6.52783,-6.53105,-6.4977,-6.474,-6.44389,-6.40185],"hi":[-6.01012,-5.96593,-5.9397,-5.87129,-5.82899,-5.7773,-5.7161,-5.67646,-5.63231,-5.58899,-5.5417,-5.50486,-5.45208,-5.40244,-5.3918,-5.36922,-5.34676,-5.3256,-5.30368]},"lrpmg":{"mean":[-0.35216,-0.39471,-0.42272,-0.45028,-0.49303,-0.49873,-0.50704,-0.51575,-0.52882,-0.55659,-0.58956,-0.59029,-0.6152,-0.65601,-0.53425,-0.53219,-0.54147,-0.5654,-0.59475],"lo":[-1.01681,-1.02448,-1.03359,-1.06731,-1.06208,-1.07027,-1.06894,-1.07349,-1.07608,-1.09275,-1.12266,-1.12502,-1.16912,-1.18041,-1.1561,-1.19009,-1.08966,-1.10236,-1.11608],"hi":[0.0358,-0.06707,-0.11392,-0.14801,-0.19265,-0.14168,-0.18198,-0.16301,-0.19044,-0.22726,-0.22366,-0.12404,-0.18648,-0.24313,-0.01083,0.039,0.13001,0.18544,0.07506]},"lcarpcap":{"mean":[-9.97189,-9.83849,-9.70747,-9.58648,-9.46714,-9.33697,-9.24081,-9.14387,-9.05164,-8.95094,-8.8747,-8.80424,-8.72401,-8.65255,-8.59698,-8.5405,-8.48587,-8.42879,-8.39095],"lo":[-12.19219,-11.92484,-11.68344,-11.40929,-11.14889,-10.9005,-10.67566,-10.42692,-10.19232,-10.01845,-9.85951,-9.71228,-9.57513,-9.43559,-9.33081,-9.22121,-9.10753,-8.99376,-8.91678],"hi":[-8.63355,-8.56594,-8.50035,-8.42684,-8.37915,-8.32573,-8.28917,-8.24946,-8.21072,-8.16676,-8.13916,-8.11134,-8.06906,-8.04358,-7.99585,-7.95795,-7.91177,-7.9088,-7.90147]}},"dseries":{"lgaspcar":[-0.02754,-0.06747,-0.04345,-0.01903,-0.05618,-0.00956,-0.02294,-0.01904,-0.03843,-0.00457,-0.01065,-0.01258,0.00564,-0.09747,0.00036,-0.02016,-0.01353,0.00016],"lincomep":[0.04772,0.03123,0.04949,0.04464,0.03555,0.04303,0.03703,0.03759,0.05932,0.0436,0.03705,0.04447,0.05075,0.01466,-0.00356,0.03846,0.01787,0.03325],"lrpmg":[-0.04255,-0.02801,-0.02756,-0.04275,-0.0057,-0.0083,-0.00871,-0.01308,-0.02777,-0.03297,-0.00072,-0.02492,-0.04081,0.12175,0.00206,-0.00928,-0.02393,-0.02934],"lcarpcap":[0.1334,0.13102,0.12099,0.11933,0.13017,0.09616,0.09694,0.09223,0.1007,0.07624,0.07046,0.08022,0.07146,0.05557,0.05648,0.05463,0.05708,0.03784]},"units":{"AUSTRIA":[4.17324,4.10099,4.07318,4.05951,4.03769,4.03398,4.04754,4.05291,4.04551,4.04636,4.08089,4.10672,4.12802,4.19938,4.01849,4.02902,3.98541,3.93168,3.92275],"BELGIUM":[4.16402,4.12436,4.07596,4.00127,3.99437,3.95153,3.82054,3.90688,3.82866,3.8546,3.87039,3.87224,3.9054,3.896,3.81823,3.87778,3.86415,3.85431,3.84274],"CANADA":[4.85524,4.82655,4.85053,4.83808,4.83976,4.85083,4.87103,4.8525,4.86878,4.86443,4.89957,4.89508,4.8893,4.89969,4.89159,4.88847,4.83736,4.81099,4.85585],"DENMARK":[4.50199,4.48285,4.38545,4.354,4.32644,4.24945,4.23364,4.20347,4.16169,4.17356,4.12881,4.10315,4.08281,4.13744,4.00046,4.03301,4.00774,4.00529,4.0366],"FRANCE":[3.9077,3.88562,3.82367,3.789,3.76708,3.76058,3.74953,3.76862,3.77823,3.77346,3.80158,3.82596,3.84668,3.88499,3.808,3.80855,3.90812,3.8125,3.78888],"GERMANY":[3.91695,3.88535,3.87148,3.84878,3.86899,3.86105,3.88074,3.87503,3.88936,3.89919,3.90252,3.9321,3.9324,3.92416,3.88821,3.92203,3.89647,3.89569,3.88388]},"summary":[{"var":"lgaspcar","mean":4.2962,"sd":0.5489,"between":0.515,"within":0.2237,"min":3.3802,"max":6.1566},{"var":"lincomep","mean":-6.1394,"sd":0.6346,"between":0.6095,"within":0.2255,"min":-8.0725,"max":-5.2212},{"var":"lrpmg","mean":-0.5231,"sd":0.6782,"between":0.6844,"within":0.1275,"min":-2.8965,"max":1.1253},{"var":"lcarpcap","mean":-9.0418,"sd":1.2189,"between":1.1142,"within":0.5566,"min":-13.4752,"max":-7.5362}],"corr":[[1.0,-0.346,-0.031,-0.694],[-0.346,1.0,0.395,0.554],[-0.031,0.395,1.0,-0.392],[-0.694,0.554,-0.392,1.0]],"cd":[{"var":"lgaspcar","cd":18.92,"p":0.0,"absr":0.516},{"var":"lincomep","cd":52.73,"p":0.0,"absr":0.978},{"var":"lrpmg","cd":22.55,"p":0.0,"absr":0.501},{"var":"lcarpcap","cd":52.98,"p":0.0,"absr":0.983}],"cd_resid":{"cd":3.25,"p":0.0012,"absr":0.543},"slope":{"delta":14.763,"delta_p":0.0,"delta_adj":17.047,"delta_adj_p":0.0,"n":18},"unitroot":[{"var":"lgaspcar","test":"CIPS","lev":{"fisher":{"P":97.82,"P_p":0.0,"Z":-3.335,"Z_p":0.0004,"n":18},"cips":{"stat":-1.378,"p":0.7964,"n":18,"T":19},"p":0.7964},"d1":{"fisher":{"P":315.52,"P_p":0.0,"Z":-11.916,"Z_p":0.0,"n":18},"cips":{"stat":-2.318,"p":0.0275,"n":18,"T":18},"p":0.0275},"order":1},{"var":"lincomep","test":"CIPS","lev":{"fisher":{"P":52.05,"P_p":0.0407,"Z":-0.539,"Z_p":0.2948,"n":18},"cips":{"stat":-1.997,"p":0.1674,"n":18,"T":19},"p":0.1674},"d1":{"fisher":{"P":260.89,"P_p":0.0,"Z":-12.58,"Z_p":0.0,"n":18},"cips":{"stat":-2.681,"p":0.0017,"n":18,"T":18},"p":0.0017},"order":1},{"var":"lrpmg","test":"CIPS","lev":{"fisher":{"P":68.88,"P_p":0.0008,"Z":-1.332,"Z_p":0.0914,"n":18},"cips":{"stat":-1.978,"p":0.1801,"n":18,"T":19},"p":0.1801},"d1":{"fisher":{"P":284.73,"P_p":0.0,"Z":-11.636,"Z_p":0.0,"n":18},"cips":{"stat":-2.908,"p":0.0005,"n":18,"T":18},"p":0.0005},"order":1},{"var":"lcarpcap","test":"CIPS","lev":{"fisher":{"P":259.83,"P_p":0.0,"Z":-9.361,"Z_p":0.0,"n":18},"cips":{"stat":-1.695,"p":0.4588,"n":18,"T":19},"p":0.4588},"d1":{"fisher":{"P":88.06,"P_p":0.0,"Z":-2.718,"Z_p":0.0033,"n":18},"cips":{"stat":-2.384,"p":0.0189,"n":18,"T":18},"p":0.0189},"order":1}],"orders":[1,1,1,1],"cd_flag":true,"het_flag":true,"coint":{"kao":{"stat":-1.693,"p":0.0452,"n":18},"fisher":{"P":49.72,"P_p":0.0637,"Z":-0.678,"Z_p":0.2488,"n":18},"used":"fisher","p":0.2488,"coint":false},"model":"DIFF"}},{"key":"produc","title":"Public capital and state output","meta":"States × years · 48 U.S. states, 1970–1986","desc":"Log gross state product, public capital, private capital and employment, and the unemployment rate (Munnell).","file":"examples/produc.csv","result":{"n":816,"N":48,"T":17,"Tmin":17,"Tmax":17,"Tmed":17.0,"balanced":true,"entity":"state","time":"year","first":"1970","last":"1986","vars":["log_gsp","log_pcap","log_pc","log_emp","unemp"],"dep":"log_gsp","skipped":[],"branch":"long","long_t":15,"series":{"log_gsp":{"mean":[10.26265,10.29069,10.34933,10.40994,10.40687,10.39544,10.44356,10.49077,10.5506,10.58209,10.57706,10.60056,10.57929,10.60467,10.67009,10.70413,10.73271],"lo":[8.86502,8.9032,8.96475,9.0218,9.05698,9.07552,9.09119,9.15839,9.24987,9.27661,9.27533,9.29886,9.26329,9.29665,9.3171,9.33663,9.29079],"hi":[11.72669,11.73609,11.78157,11.84377,11.82486,11.77281,11.81753,11.86036,11.90023,11.90675,11.86458,11.87182,11.82254,11.84462,11.91169,11.94223,11.96924]},"log_pcap":{"mean":[9.48598,9.52485,9.55908,9.58823,9.61476,9.64123,9.6645,9.68575,9.70183,9.72027,9.73628,9.75159,9.76054,9.76612,9.77197,9.7807,9.79281],"lo":[8.25284,8.28468,8.32526,8.35197,8.38135,8.39871,8.40645,8.41947,8.42764,8.44444,8.46377,8.47174,8.4701,8.49297,8.49307,8.49806,8.50208],"hi":[10.79838,10.84274,10.87058,10.89284,10.90795,10.92207,10.93625,10.95161,10.96013,10.96822,10.97301,10.97791,10.97757,10.97263,10.9676,10.96286,10.95856]},"log_pc":{"mean":[10.28134,10.3219,10.35458,10.39279,10.44002,10.48164,10.51973,10.53985,10.56943,10.60694,10.64755,10.67131,10.70023,10.71545,10.72793,10.75571,10.78444],"lo":[9.12721,9.15617,9.18359,9.22829,9.27281,9.30956,9.31582,9.31997,9.34512,9.38059,9.41798,9.38074,9.39911,9.41035,9.41943,9.44397,9.47747],"hi":[11.57059,11.60876,11.64472,11.68308,11.73165,11.7775,11.72407,11.75073,11.78084,11.81878,11.85907,11.7828,11.8109,11.82682,11.83957,11.86784,11.85646]},"log_emp":{"mean":[6.75486,6.76854,6.8177,6.86937,6.89516,6.88626,6.92626,6.97087,7.02753,7.0638,7.06766,7.07442,7.05498,7.06273,7.10847,7.1346,7.15127],"lo":[5.30842,5.34125,5.39788,5.45846,5.45417,5.46218,5.50813,5.54797,5.59914,5.61816,5.61263,5.61612,5.5957,5.60944,5.63753,5.66655,5.68554],"hi":[8.21604,8.22407,8.26887,8.32398,8.34895,8.32676,8.3466,8.37285,8.40937,8.42921,8.40731,8.39777,8.3561,8.347,8.38365,8.41266,8.44591]},"unemp":{"mean":[4.89792,5.67708,5.21458,4.67708,5.33958,8.05208,7.02708,6.52917,5.53542,5.425,6.77917,7.27708,9.3,9.27917,7.23125,7.06667,6.92917],"lo":[3.37,4.14,3.67,3.37,3.6,4.51,4.17,4.52,3.8,3.47,4.87,5.0,6.24,6.07,4.94,4.9,4.44],"hi":[6.13,7.18,7.0,6.2,7.23,11.0,9.5,8.4,7.03,6.96,8.3,9.69,12.0,12.0,9.65,9.15,9.23]}},"dseries":{"log_gsp":[0.02804,0.05864,0.06061,-0.00307,-0.01143,0.04811,0.04721,0.05983,0.03149,-0.00503,0.0235,-0.02127,0.02538,0.06543,0.03403,0.02858],"log_pcap":[0.03887,0.03423,0.02915,0.02652,0.02647,0.02327,0.02125,0.01608,0.01844,0.01601,0.01531,0.00895,0.00558,0.00584,0.00874,0.01211],"log_pc":[0.04056,0.03268,0.03822,0.04723,0.04162,0.03809,0.02012,0.02957,0.03751,0.04061,0.02376,0.02892,0.01522,0.01248,0.02777,0.02873],"log_emp":[0.01368,0.04916,0.05168,0.02579,-0.0089,0.04,0.04462,0.05665,0.03628,0.00385,0.00676,-0.01944,0.00776,0.04573,0.02614,0.01666],"unemp":[0.77917,-0.4625,-0.5375,0.6625,2.7125,-1.025,-0.49792,-0.99375,-0.11042,1.35417,0.49792,2.02292,-0.02083,-2.04792,-0.16458,-0.1375]},"units":{"ALABAMA":[10.25478,10.2879,10.35147,10.41721,10.42671,10.4224,10.4847,10.53111,10.59573,10.62082,10.60609,10.62388,10.6048,10.65124,10.71704,10.75469,10.78744],"ARIZONA":[9.86724,9.95418,10.05574,10.13634,10.15417,10.12322,10.16743,10.24388,10.34374,10.43244,10.45472,10.47005,10.42237,10.49025,10.59689,10.67706,10.73766],"ARKANSAS":[9.6416,9.69135,9.78143,9.84294,9.86719,9.85346,9.91724,9.97161,10.04598,10.0648,10.05234,10.09138,10.06314,10.10295,10.18535,10.20946,10.24594],"CALIFORNIA":[12.48345,12.48975,12.54668,12.59043,12.60622,12.62649,12.67658,12.73092,12.79276,12.83449,12.84851,12.8438,12.8281,12.87525,12.94926,13.00376,13.04882],"COLORADO":[10.15382,10.21614,10.29634,10.38644,10.40544,10.42207,10.46945,10.5302,10.6096,10.66702,10.6894,10.70762,10.72,10.7477,10.80633,10.83605,10.85478],"CONNECTICUT":[10.56823,10.5588,10.59756,10.64916,10.6413,10.59338,10.62925,10.6684,10.71095,10.73657,10.73529,10.76631,10.76302,10.83159,10.91721,10.97272,11.03085]},"summary":[{"var":"log_gsp","mean":10.5088,"sd":1.0211,"between":1.0197,"within":0.1525,"min":8.3788,"max":13.0488},{"var":"log_pcap","mean":9.6792,"sd":0.9426,"between":0.9458,"within":0.1077,"min":7.8736,"max":11.8509},{"var":"log_pc","mean":10.5595,"sd":0.9247,"between":0.9188,"within":0.1656,"min":8.3071,"max":12.8356},{"var":"log_emp","mean":6.9785,"sd":1.0185,"between":1.0189,"within":0.1397,"min":4.6849,"max":9.3288},{"var":"unemp","mean":6.6022,"sd":2.2332,"between":1.2749,"within":1.8422,"min":2.8,"max":18.0}],"corr":[[1.0,0.983,0.961,0.989,0.18],[0.983,1.0,0.945,0.975,0.198],[0.961,0.945,1.0,0.926,0.21],[0.989,0.975,0.926,1.0,0.181],[0.18,0.198,0.21,0.181,1.0]],"cd":[{"var":"log_gsp","cd":123.88,"p":0.0,"absr":0.895},{"var":"log_pcap","cd":114.12,"p":0.0,"absr":0.864},{"var":"log_pc","cd":130.94,"p":0.0,"absr":0.946},{"var":"log_emp","cd":126.34,"p":0.0,"absr":0.912},{"var":"unemp","cd":78.52,"p":0.0,"absr":0.592}],"cd_resid":{"cd":30.37,"p":0.0,"absr":0.442},"slope":{"delta":13.486,"delta_p":0.0,"delta_adj":16.517,"delta_adj_p":0.0,"n":48},"unitroot":[{"var":"log_gsp","test":"CIPS","lev":{"fisher":{"P":53.36,"P_p":0.9999,"Z":8.474,"Z_p":1.0,"n":48},"cips":{"stat":-0.929,"p":0.995,"n":48,"T":17},"p":0.995},"d1":{"fisher":{"P":338.36,"P_p":0.0,"Z":-12.004,"Z_p":0.0,"n":48},"cips":{"stat":-1.422,"p":0.7542,"n":48,"T":16},"p":0.7542},"d2":{"fisher":{"P":780.61,"P_p":0.0,"Z":-22.652,"Z_p":0.0,"n":48},"cips":{"stat":-3.155,"p":0.0005,"n":48,"T":15},"p":0.0005},"order":2},{"var":"log_pcap","test":"CIPS","lev":{"fisher":{"P":557.18,"P_p":0.0,"Z":-9.453,"Z_p":0.0,"n":48},"cips":{"stat":-1.767,"p":0.3299,"n":48,"T":17},"p":0.3299},"d1":{"fisher":{"P":176.34,"P_p":0.0,"Z":-2.254,"Z_p":0.0121,"n":48},"cips":{"stat":-2.083,"p":0.0595,"n":48,"T":16},"p":0.0595},"d2":{"fisher":{"P":693.23,"P_p":0.0,"Z":-19.123,"Z_p":0.0,"n":48},"cips":{"stat":-2.647,"p":0.0005,"n":48,"T":15},"p":0.0005},"order":2},{"var":"log_pc","test":"CIPS","lev":{"fisher":{"P":90.81,"P_p":0.6305,"Z":2.043,"Z_p":0.9795,"n":48},"cips":{"stat":-1.276,"p":0.9052,"n":48,"T":17},"p":0.9052},"d1":{"fisher":{"P":353.47,"P_p":0.0,"Z":-12.321,"Z_p":0.0,"n":48},"cips":{"stat":-2.503,"p":0.0018,"n":48,"T":16},"p":0.0018},"order":1},{"var":"log_emp","test":"CIPS","lev":{"fisher":{"P":96.8,"P_p":0.458,"Z":2.266,"Z_p":0.9883,"n":48},"cips":{"stat":-1.002,"p":0.995,"n":48,"T":17},"p":0.995},"d1":{"fisher":{"P":292.62,"P_p":0.0,"Z":-10.092,"Z_p":0.0,"n":48},"cips":{"stat":-1.283,"p":0.886,"n":48,"T":16},"p":0.886},"d2":{"fisher":{"P":658.31,"P_p":0.0,"Z":-20.797,"Z_p":0.0,"n":48},"cips":{"stat":-3.046,"p":0.0005,"n":48,"T":15},"p":0.0005},"order":2},{"var":"unemp","test":"CIPS","lev":{"fisher":{"P":141.36,"P_p":0.0018,"Z":-3.172,"Z_p":0.0008,"n":48},"cips":{"stat":-1.085,"p":0.9799,"n":48,"T":17},"p":0.9799},"d1":{"fisher":{"P":502.83,"P_p":0.0,"Z":-17.07,"Z_p":0.0,"n":48},"cips":{"stat":-2.325,"p":0.0082,"n":48,"T":16},"p":0.0082},"order":1}],"orders":[2,2,1,2,1],"cd_flag":true,"het_flag":true,"model":"I2"}}];
+const LONGT=15;
+const PYO='https://cdn.jsdelivr.net/pyodide/v0.27.2/full/';
+const L='../teaching/econometrics/lectures/', ML='lectures/macro-panel-econometrics.html';
+const LEC={st:[L+'07-panel-data.html','Lecture 07: Static panels'],dy:[L+'08-dynamic-panels.html','Lecture 08: Dynamic panels'],mp:[ML,'Macro-panel lecture'],ur:[L+'10-unit-roots-breaks.html','Lecture: Unit roots'],co:[L+'12-cointegration-ardl.html','Lecture: Cointegration and ARDL']};
+const MODELS={
+ POLS:{name:'Pooled OLS with clustered errors',short:'Pooled OLS',when:'Short panel, no significant unit effects',why:'Neither the F test nor the Breusch–Pagan LM test finds unit-specific effects, so pooling the observations is defensible. Standard errors must still be clustered by unit, because observations on the same unit are not independent.',steps:['Pooled OLS with time effects','Cluster standard errors by unit','F test for unit effects','Breusch–Pagan LM test','Wooldridge test for serial correlation','Robustness: FE estimates'],lec:[LEC.st]},
+ RE:{name:'Random-effects GLS',short:'Random effects',when:'Unit effects present, uncorrelated with regressors',why:'Units differ systematically, but the Hausman and Mundlak tests do not reject that the unit effects are uncorrelated with the regressors. Random effects is then consistent and more efficient than fixed effects, and keeps time-invariant regressors.',steps:['Variance components (σᵤ, σₑ, θ)','Breusch–Pagan LM test','Hausman and robust Mundlak tests','Cluster standard errors by unit','Time effects','Robustness: FE and CRE estimates'],lec:[LEC.st]},
+ FE:{name:'Two-way fixed effects',short:'Fixed effects',when:'Unit effects correlated with the regressors',why:'The unit effects are significant and the Mundlak (or Hausman) test rejects that they are uncorrelated with the regressors, so random effects is inconsistent. Fixed effects removes every time-invariant unit characteristic and uses only within-unit variation.',steps:['Unit and time fixed effects','Cluster standard errors by unit','F test for unit effects','Hausman and robust Mundlak tests','Within R²','Serial correlation and heteroskedasticity','Mundlak / CRE to keep time-invariant regressors'],lec:[LEC.st]},
+ GMM:{name:'Difference and system GMM',short:'GMM',when:'Dynamic panel, large N, short T',why:'With a lagged dependent variable and few periods, fixed effects is biased (the Nickell bias is of order 1/T), and pooled OLS is biased the other way. Arellano–Bond and Blundell–Bond GMM use lagged levels and differences as instruments.',steps:['State the moment conditions','Difference GMM (Arellano–Bond)','System GMM (Blundell–Bond)','AR(1) and AR(2) tests','Hansen / Sargan and difference-in-Hansen','Collapse instruments, report the count','Bounds: pooled OLS above, FE below'],lec:[LEC.dy]},
+ FEDK:{name:'Fixed effects with Driscoll–Kraay errors',short:'FE-DK',when:'Long panel, stationary, homogeneous slopes',why:'Every variable is stationary and slope homogeneity is not rejected, so a pooled fixed-effects regression is valid. Driscoll–Kraay standard errors remain valid under cross-sectional dependence and serial correlation when T is reasonably long.',steps:['FE in levels with time effects','Driscoll–Kraay standard errors','Pesaran CD on residuals','Slope homogeneity (Δ test)','Robustness: CCE pooled estimator'],lec:[LEC.mp]},
+ MG:{name:'Mean group and CCE mean group',short:'MG / CCE-MG',when:'Long panel, stationary, heterogeneous slopes',why:'Every variable is stationary but the slopes differ across units, so pooling gives a misleading average. Mean-group estimators run one regression per unit and average the slopes; CCE-MG adds cross-sectional averages to absorb common shocks.',steps:['Unit-by-unit regressions','Mean-group average and its standard error','CCE-MG with cross-sectional averages','AMG as an alternative','Pesaran CD on residuals'],lec:[LEC.mp]},
+ DIFF:{name:'Panel model in first differences',short:'Differences',when:'All I(1), not cointegrated',why:'Every variable has a unit root and no long-run relationship ties them together, so a regression in levels would be spurious. Estimate the relationship in first differences, with common-correlated-effects terms if the units share shocks.',steps:['First-difference the data','FE or CCE-MG on differences','Cross-sectional averages if CD is present','Pesaran CD on residuals','Report the cointegration tests'],lec:[LEC.mp,LEC.co]},
+ PMG:{name:'Panel ARDL: PMG and MG',short:'PMG / MG',when:'Long-run relationship, independent units',why:'The variables are a mix of I(0) and I(1), or I(1) and cointegrated, and the units are not cross-sectionally dependent. The pooled mean group estimator imposes a common long-run relationship and lets short-run dynamics and adjustment speeds differ by unit.',steps:['Lag selection (ARDL per unit)','Long-run coefficients and error-correction term','PMG vs MG: Hausman test','Speed of adjustment','Pesaran CD on residuals','Robustness: DFE'],lec:[LEC.mp,LEC.co]},
+ CSARDL:{name:'Cross-sectionally augmented ARDL',short:'CS-ARDL',when:'Long-run relationship with common shocks',why:'The variables are a mix of I(0) and I(1), or I(1) and cointegrated, and the residuals are cross-sectionally dependent. CS-ARDL adds cross-sectional averages and their lags to each unit’s ARDL, so common shocks do not bias the long-run estimates.',steps:['Cross-sectional averages and lags','Long-run coefficients and error correction','Mean-group inference','CD test on residuals','Robustness: CCE-MG, AMG, CS-DL'],lec:[LEC.mp,LEC.co]},
+ I2:{name:'Transform, then test again',short:'Transform',when:'A variable is I(2)',why:'',steps:[],lec:[LEC.ur]}
+};
+const $=s=>document.querySelector(s), el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches, D=reduce?0:1;
+const fmt=(v,d=3)=>v==null?'–':Number(v).toFixed(d), pf=p=>p==null?'–':(p<0.001?'<0.001':p.toFixed(3));
+let run=0;
+
+/* ---------- decision tree ---------- */
+const N={start:[410,26,110,'Your panel'],nt:[410,92,140,'How long is T?'],
+ dyn:[170,160,128,'Dynamic model?'],GMM:[48,160,76,'GMM',1],st:[170,236,148,'F · LM · Hausman'],POLS:[75,312,80,'Pooled',1],RE:[170,312,64,'RE',1],FE:[262,312,64,'FE',1],
+ cd:[585,160,150,'CD and slope tests'],ur:[585,226,146,'Panel unit roots'],
+ i0:[385,292,82,'All I(0)'],i1:[495,292,82,'All I(1)'],mix:[650,292,118,'Mixed I(0)/I(1)'],i2:[770,292,86,'Some I(2)'],
+ sl:[385,362,112,'Slopes equal?'],co:[495,362,104,'Cointegrated?'],lr:[650,362,124,'Common shocks?'],I2:[770,362,90,'Transform',1],
+ FEDK:[338,440,76,'FE-DK',1],MG:[432,440,92,'MG / CCE',1],DIFF:[520,440,76,'Δ model',1],PMG:[612,440,78,'PMG',1],CSARDL:[708,440,94,'CS-ARDL',1]};
+const E=[['start','nt'],['nt','dyn','T < '+LONGT],['nt','cd','T ≥ '+LONGT],['dyn','GMM','yes'],['dyn','st','no'],['st','POLS'],['st','RE'],['st','FE'],
+ ['cd','ur'],['ur','i0'],['ur','i1'],['ur','mix'],['ur','i2'],['i0','sl'],['i1','co'],['mix','lr'],['i2','I2'],['sl','FEDK','yes'],['sl','MG','no'],['co','DIFF','no'],['co','lr','yes'],['lr','PMG','no'],['lr','CSARDL','yes']];
+const TL={start:'Your panel',nt:'Panel length',dyn:'Dynamic?',st:'F, LM, Hausman',cd:'CD and slope tests',ur:'Panel unit roots',i0:'All I(0)',i1:'All I(1)',mix:'Mixed I(0)/I(1)',i2:'Some I(2)',sl:'Slope homogeneity',co:'Cointegration',lr:'Common shocks?',I2:'Transform and re-test'};
+function pathTo(m,R){const S=['start','nt'],sh=['dyn'],lo=['cd','ur'];
+ if(m==='GMM')return S.concat(['dyn','GMM']);if(['POLS','RE','FE'].includes(m))return S.concat(['dyn','st',m]);
+ if(m==='I2')return S.concat(lo,['i2','I2']);if(m==='FEDK'||m==='MG')return S.concat(lo,['i0','sl',m]);if(m==='DIFF')return S.concat(lo,['i1','co','DIFF']);
+ const viaMix=R?R.orders&&R.orders.some(o=>o===0):(QA.ur==='mix');return S.concat(lo,viaMix?['mix','lr',m]:['i1','co','lr',m])}
+function drawTree(){
+ const H=16;let s='<svg viewBox="0 0 820 462" role="img" aria-label="Decision tree from panel data to estimator">';
+ for(const [a,b,lab] of E){const A=N[a],B=N[b];let d,lx,ly;
+  if(A[1]===B[1]){const r=B[0]>A[0];d=r?`M${A[0]+A[2]/2} ${A[1]}H${B[0]-B[2]/2}`:`M${A[0]-A[2]/2} ${A[1]}H${B[0]+B[2]/2}`;lx=r?(A[0]+A[2]/2+B[0]-B[2]/2)/2:(A[0]-A[2]/2+B[0]+B[2]/2)/2;ly=A[1]-6}
+  else{const my=(A[1]+B[1])/2;d=`M${A[0]} ${A[1]+H}V${my}H${B[0]}V${B[1]-H}`;lx=A[0]===B[0]?A[0]+16:(A[0]+B[0])/2;ly=A[0]===B[0]?my+4:my-5}
+  s+=`<path class="e" id="e-${a}-${b}" pathLength="1" d="${d}"/>`;if(lab)s+=`<text class="el" x="${lx}" y="${ly}">${lab}</text>`}
+ for(const k in N){const [x,y,w,t,leaf]=N[k];s+=`<g class="n${leaf?' leaf':''}" id="n-${k}"><rect x="${x-w/2}" y="${y-H}" width="${w}" height="${2*H}" rx="${leaf?16:8}"/><text x="${x}" y="${y}">${t}</text></g>`}
+ $('#tree').innerHTML=s+'</svg>';
 }
-function showExample(key){var c=cases[key];var h='<div class="eyebrow">Research pathway · '+(key==="macro"?"Synthetic macro panel":"Real panel dataset") +'</div><h2>'+c.title+'</h2><p>'+c.lead+'</p><p><b>Estimator family: '+c.primary+'</b></p><p><b>Why this pathway?</b></p><ul>'+c.why.map(function(x){return '<li>'+x+'</li>'}).join("")+'</ul>'+(c.output?'<p><b>Reported empirical output</b></p><div class="caution">'+c.output+'</div>':'')+'<p><b>Validation checklist</b></p><ul>'+c.checks.map(function(x){return '<li>'+x+'</li>'}).join("")+'</ul><div class="caution">'+c.caution+'</div>';$("exampleResult").innerHTML=h;$("exampleResult").classList.remove("hide")}
-document.querySelectorAll("[data-example]").forEach(function(b){b.addEventListener("click",function(){showExample(b.dataset.example)})});
-var rows=[],headers=[],fileName="";
-function parseCSV(text){var out=[],row=[],field="",quoted=false;for(var i=0;i<text.length;i++){var ch=text[i];if(quoted){if(ch==='"'&&text[i+1]==='"'){field+='"';i++}else if(ch==='"'){quoted=false}else field+=ch}else{if(ch==='"')quoted=true;else if(ch===","){row.push(field);field=""}else if(ch==="\n"){row.push(field.replace(/\r$/,""));out.push(row);row=[];field=""}else field+=ch}}row.push(field.replace(/\r$/,""));out.push(row);return out.filter(function(r){return r.some(function(v){return String(v).trim()!==""})})}
-function fillSelect(id,opts,first){var s=$(id);s.innerHTML="";var o=document.createElement("option");o.value="";o.textContent=first;s.appendChild(o);opts.forEach(function(v){var q=document.createElement("option");q.value=v;q.textContent=v;s.appendChild(q)})}
-function loadFile(f){if(!f)return;if(!/\.csv$/i.test(f.name)){ $("uploadError").innerHTML='<div class="error">Please select a CSV file.</div>';return}fileName=f.name;var reader=new FileReader();reader.onload=function(){try{var parsed=parseCSV(String(reader.result||""));if(parsed.length<3)throw new Error("The file must contain a header and at least two data rows.");headers=parsed[0].map(function(x,i){return String(x).trim()||("column_"+(i+1))});rows=parsed.slice(1).filter(function(r){return r.length>1});if(rows.length<2)throw new Error("No usable data rows were detected.");fillSelect("entity",headers,"Choose entity column");fillSelect("time",headers,"Choose time column");fillSelect("outcome",headers,"Optional outcome column");$("mapping").classList.remove("hide");$("uploadError").innerHTML="";$("diagnostics").innerHTML='<p class="hint">Loaded '+rows.length+' rows and '+headers.length+' columns. Select the entity and time identifiers.</p>'}catch(e){$("uploadError").innerHTML='<div class="error">'+e.message+'</div>'}};reader.readAsText(f)}
-$("file").addEventListener("change",function(e){loadFile(e.target.files[0])});
-var drop=$("drop");["dragenter","dragover"].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.add("over")})});["dragleave","drop"].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.remove("over")})});drop.addEventListener("drop",function(e){loadFile(e.dataTransfer.files[0])});
-function num(v){if(v===null||v===undefined||String(v).trim()==="")return null;var n=Number(String(v).replace(/,/g,""));return Number.isFinite(n)?n:null}
-function mean(a){return a.length?a.reduce(function(x,y){return x+y},0)/a.length:null}
-function sd(a){if(a.length<2)return null;var m=mean(a);return Math.sqrt(a.reduce(function(s,x){return s+(x-m)*(x-m)},0)/(a.length-1))}
-$("inspect").addEventListener("click",function(){var ent=$("entity").value,tim=$("time").value,y=$("outcome").value;if(!ent||!tim||ent===tim){$("uploadError").innerHTML='<div class="error">Select distinct entity and time columns.</div>';return}var ei=headers.indexOf(ent),ti=headers.indexOf(tim),yi=headers.indexOf(y);var pairs=new Set(),entities=new Set(),times=new Set(),counts={},vals=[],bad=0,dup=0;rows.forEach(function(r){var id=String(r[ei]||"").trim(),tt=String(r[ti]||"").trim();if(!id||!tt){bad++;return}entities.add(id);times.add(tt);var key=id+"\\u241f"+tt;if(pairs.has(key))dup++;pairs.add(key);counts[id]=(counts[id]||0)+1;if(yi>=0){var z=num(r[yi]);if(z===null)bad++;else vals.push(z)}});var N=entities.size,T=times.size,balanced=Object.keys(counts).length===N&&N>0&&Object.keys(counts).every(function(k){return counts[k]===T})&&pairs.size===N*T;var totalExpected=N*T;var within=[],between=[];if(yi>=0){var by={};rows.forEach(function(r){var id=String(r[ei]||"").trim(),z=num(r[yi]);if(id&&z!==null){(by[id]||(by[id]=[])).push(z)}});Object.keys(by).forEach(function(k){var m=mean(by[k]);within=within.concat(by[k].map(function(v){return v-m}));between.push(m)})}var stats='<div class="stats"><div class="stat"><b>'+N+'</b><span>Entities (N)</span></div><div class="stat"><b>'+T+'</b><span>Time periods (T)</span></div><div class="stat"><b>'+pairs.size+'</b><span>Unique entity-time rows</span></div><div class="stat"><b>'+(balanced?"Yes":"No")+'</b><span>Balanced panel</span></div></div>';var extra='<p class="hint"><b>File:</b> '+fileName+' · <b>Rows:</b> '+rows.length+' · <b>Expected cells:</b> '+totalExpected+' · <b>Duplicate entity-time pairs:</b> '+dup+' · <b>Missing identifier rows:</b> '+bad+'</p>';if(yi>=0){extra+='<p class="hint"><b>'+y+'</b> · valid numeric values: '+vals.length+' · mean: '+(mean(vals)===null?"n/a":mean(vals).toFixed(4))+' · SD: '+(sd(vals)===null?"n/a":sd(vals).toFixed(4))+' · within-unit SD: '+(sd(within)===null?"n/a":sd(within).toFixed(4))+' · SD of unit means: '+(sd(between)===null?"n/a":sd(between).toFixed(4))+'</p>'}extra+='<div class="note"><b>Structure-only inspection.</b> This browser routine does not estimate panel regressions or calculate panel dependence, unit-root, cointegration, Hausman, GMM or causal-identification tests. Use the dimensions and variation summaries to plan the next tests; then enter their results in the third mode.</div><p class="hint">Next: choose “I have test results” and enter the diagnostic findings, or use the guide cards below to select an appropriate testing sequence.</p>';$("diagnostics").innerHTML=stats+extra;$("uploadError").innerHTML=""});
-function recommendation(){
-var d=$("domain2").value,shape=$("shape").value,cd=$("cd").value,het=$("hetero").value,integ=$("integration").value,dyn=$("dynamic").value,design=$("design").value,out=$("outcomeType").value,unit=$("heterogeneity").value;
-var title="",why=[],checks=[],caution="";
-if(design==="did"){title="Difference-in-Differences / event-study design";why=["Your stated design has treatment and comparison groups observed before and after an intervention; estimator choice should follow treatment timing and the target estimand.","With staggered adoption or heterogeneous treatment effects, avoid relying mechanically on conventional two-way fixed-effects coefficients.","The panel structure supports a design-based analysis only if treatment assignment, comparison group and identifying assumptions are credible."];checks=["Define treatment timing, comparison group and the estimand (for example, group-time ATT).","Assess parallel trends using substantive design arguments and event-time diagnostics; check anticipation.","Use a staggered-adoption estimator appropriate to treatment-effect heterogeneity when required.","Cluster uncertainty at the treatment-assignment level where justified; conduct placebo and sensitivity analyses."];caution="A non-significant pre-trend test does not prove parallel trends. Identification depends on the design and assumptions."}
-else if(d==="micro"&&out!=="continuous"){title=out==="binary"?"Conditional FE logit or CRE/RE logit":"FE Poisson or a suitable count-panel model";why=["The outcome support calls for a model aligned with a binary or count conditional distribution.","Conditional FE logit controls time-invariant unit effects but uses only units with within-unit outcome variation.","RE nonlinear models retain between-unit information but require assumptions about unit effects; correlated RE can relax conventional independence."];checks=["Report units and observations contributing to estimation, including units dropped by conditional FE logit.","Compare conditional FE with CRE/RE specifications where scientifically appropriate.","Report interpretable marginal effects or predicted contrasts.","Assess serial dependence and cluster inference at the relevant unit or assignment level."];caution="The estimator changes the estimand and assumptions; do not compare coefficients across nonlinear and linear models as if they were identical."}
-else if(d==="micro"&&dyn==="dynamic"){title="Dynamic panel GMM (Difference / System GMM), conditionally";why=["Large-N, short-T dynamic panels can create finite-sample bias in within estimators with a lagged dependent variable.","GMM can use internal instruments under specified moment conditions; instrument timing and exogeneity classifications must be justified.","System GMM adds level-equation moments and should be used only when its additional restrictions are defensible."];checks=["State the moment conditions and classify regressors as exogenous, predetermined or endogenous.","Report AR(1), AR(2), Hansen/Sargan and difference-in-Hansen tests as relevant.","Restrict lag depth, collapse instruments and report instrument count relative to N.","Compare Difference and System GMM and test sensitivity to instrument sets."];caution="A large-N/small-T structure alone does not validate GMM. Weak instruments, invalid moments and instrument proliferation can undermine inference."}
-else if(d==="macro"&&(integ==="i1c"||integ==="i1n"||integ==="mixed")){if(integ==="i1n"){title="Transform to stationary representations; avoid an unsupported levels long-run model";why=["The supplied results indicate I(1) variables without cointegration; a levels regression may be spurious.","Use first differences or another theoretically justified stationary transformation, then specify short-run dynamics."];checks=["Verify integration orders with dependence-appropriate tests (CADF/CIPS when CD is present).","Reassess stationarity after transformation and specify deterministic terms.","Consider stationary dynamic panel models or differenced short-run specifications.","Do not interpret a long-run equilibrium relation without cointegration evidence."];caution="This pathway is conditional on the reported tests and their deterministic specifications."}else{title=het==="yes"||cd==="yes"?"CS-ARDL / CCEMG / AMG; compare PMG only if long-run homogeneity is defensible":"PMG-ARDL versus MG, with dependence-robust alternatives";why=["I(1) variables with cointegration support estimation of a long-run relationship, subject to valid panel cointegration evidence.","Cross-sectional dependence calls for common-factor-aware methods such as CCE, CS-ARDL or AMG.","Slope heterogeneity favors MG/CCEMG/AMG; PMG imposes common long-run coefficients while allowing short-run heterogeneity."];checks=["Use CADF/CIPS and dependence-aware cointegration tests; consider bootstrap procedures.","Specify lag orders, deterministic components and cross-sectional averages transparently.","Compare PMG with MG and CCE/AMG-based alternatives; test long-run homogeneity rather than assuming it.","Inspect residual dependence, serial correlation, stability and weak-exogeneity assumptions."];caution="PMG is not automatically selected by finding cointegration. Its common long-run coefficient restriction must be defensible."}}
-else if(d==="macro"&&cd==="yes"){title=het==="yes"?"CCE-MG / AMG or CS-ARDL":"CCE-based panel model with dependence-robust inference";why=["Cross-sectional dependence indicates common shocks or unobserved common factors that conventional pooled estimators may not absorb.","If slopes are heterogeneous, unit-specific CCE-MG or AMG is a natural comparison; CS-ARDL is useful for dynamic relationships.","If variables are nonstationary, complete unit-root and cointegration analysis before choosing a levels estimator."];checks=["Run Pesaran CD and inspect residual dependence after estimation.","Use CADF/CIPS for panel unit-root analysis when appropriate.","Compare CCE, CCEMG, AMG or CS-ARDL according to N, T and dynamic structure.","Assess common-factor specification and sensitivity to cross-sectional averages."];caution="Driscoll–Kraay standard errors adjust inference under broad dependence conditions in suitable T settings; they do not by themselves remove omitted common-factor bias."}
-else if(d==="micro"&&dyn==="endog"){title="FE/CRE with a defensible IV or GMM strategy";why=["Endogeneity requires a source of identification and valid exclusion restrictions or moment conditions, not simply a different estimator label.","For short-T, large-N dynamic settings, Difference/System GMM may be considered when internal instruments are credible.","For other settings, consider external IV or design-based identification where available."];checks=["State the source of endogeneity and the identifying variation.","Justify instrument relevance and exclusion; report weak-instrument and overidentification diagnostics where applicable.","For GMM, report AR(2), Hansen/Sargan and instrument counts.","Compare estimates under alternative instrument sets and specifications."];caution="Do not use GMM as a generic correction for endogeneity; validity depends on explicit assumptions."}
-else if(d==="macro"&&integ==="unknown"){title="Establish dependence, heterogeneity and integration before estimator selection";why=["The integration and cointegration properties have not been established, so a long-run panel estimator cannot yet be justified.","Test cross-sectional dependence and slope heterogeneity before selecting first- or second-generation procedures."];checks=["Assess Pesaran CD and Pesaran–Yamagata slope homogeneity.","If CD is present, consider CADF/CIPS rather than relying only on first-generation unit-root tests.","Determine integration orders and test cointegration only for appropriate I(1) variables.","Then compare FE/RE, CCE/AMG, PMG/MG or CS-ARDL according to the evidence."];caution="This is a testing sequence, not yet an estimator recommendation."}
-else if(d==="micro"&&dyn==="static"){title=unit==="no"?"Pooled OLS benchmark versus FE/RE specification":"Fixed Effects or Correlated Random Effects (Mundlak)";why=["For static micro panels, FE controls time-invariant unit heterogeneity correlated with regressors.","RE can be more efficient only under its orthogonality restriction; CRE/Mundlak provides a useful correlated-effects comparison.","Choose inference separately from the point estimator using the assignment and dependence structure."];checks=["Use within-unit variation and substantive theory to assess unit effects.","Compare pooled, FE, RE and CRE specifications; interpret F/LM/Hausman evidence in context.","Cluster standard errors at the panel entity or assignment level as appropriate.","Check serial correlation, heteroskedasticity, influential units and sensitivity to time effects."];caution="A Hausman test is not a substitute for a substantive argument about correlation between unit effects and regressors."}
-else{title="Static FE/RE/CRE with robust inference as the starting benchmark";why=["The supplied results do not yet indicate a dynamic, cointegrated or causal-design pathway.","Begin with a transparent static specification and assess unit effects and dependence before adding complexity."];checks=["Compare pooled OLS, FE, RE and CRE using theory and appropriate specification evidence.","Use entity-clustered or otherwise design-appropriate standard errors.","Check serial correlation, heteroskedasticity, cross-sectional dependence and time effects.","If dependence or heterogeneity is detected, reconsider CCE/AMG or other appropriate alternatives."];caution="This is a provisional baseline; the model must be revisited if diagnostics or identification requirements indicate otherwise."}
-var html='<div class="eyebrow">Recommended pathway · '+(d==="macro"?"Macroeconomic panel":"Microeconomic panel")+'</div><h2>'+title+'</h2><p>Based on the diagnostic answers supplied, this is the estimator family to investigate first—not an automatic final selection.</p><p><b>Why this pathway?</b></p><ul>'+why.map(function(x){return '<li>'+x+'</li>'}).join("")+'</ul><p><b>Required checks before reporting</b></p><ul>'+checks.map(function(x){return '<li>'+x+'</li>'}).join("")+'</ul><div class="caution">'+caution+'</div><p><b>Answers used:</b> '+[d,shape,"CD: "+cd,"heterogeneity: "+het,"integration: "+integ,"dynamics: "+dyn,"design: "+design,"outcome: "+out].join(" · ")+'</p>';
-$("finalResult").innerHTML=html;$("finalResult").classList.remove("hide");$("finalResult").scrollIntoView({behavior:"smooth",block:"start"});
+let lit=new Set(),tEnd=0;
+function resetTree(){lit=new Set();tEnd=0;document.querySelectorAll('.tree .on,.tree .hl,.tree .alt').forEach(e=>e.classList.remove('on','hl','alt'));$('#trail').innerHTML=''}
+function light(path,labels={},final=true){
+ const my=run,now=performance.now();let at=Math.max(now,tEnd);
+ path.forEach((id,i)=>{if(lit.has(id))return;lit.add(id);const wait=at-now;at+=380*D;
+  setTimeout(()=>{if(my!==run)return;const n=$('#n-'+id);n&&n.classList.add('on');if(i>0){const e=document.getElementById(`e-${path[i-1]}-${id}`);e&&e.classList.add('hl')}
+   const t=$('#trail');if(t.children.length)t.appendChild(el('i','','→'));const isLeaf=!!MODELS[id];t.appendChild(el('span',isLeaf&&final?'final':'',esc(labels[id]||(MODELS[id]?MODELS[id].short:TL[id])||id)))},wait)});
+ tEnd=at;return at-now;
 }
-$("recommend").addEventListener("click",recommendation);
-})();
+
+/* ---------- charts ---------- */
+function scale(arrs,h,pad){const a=[].concat(...arrs).filter(x=>x!=null),mn=Math.min(...a),mx=Math.max(...a),r=mx-mn||1;return y=>(h-pad-(y-mn)/r*(h-2*pad)).toFixed(1)}
+function line(v,sy,w){let d='',pen=false;v.forEach((y,i)=>{if(y==null){pen=false;return}d+=(pen?'L':'M')+(v.length>1?i/(v.length-1)*w:0).toFixed(1)+' '+sy(y);pen=true});return d}
+function area(lo,hi,sy,w){const n=lo.length,x=i=>(n>1?i/(n-1)*w:0).toFixed(1);let d='M'+x(0)+' '+sy(hi[0]);for(let i=1;i<n;i++)d+='L'+x(i)+' '+sy(hi[i]);for(let i=n-1;i>=0;i--)d+='L'+x(i)+' '+sy(lo[i]);return d+'Z'}
+function spark(S){const sy=scale([S.lo,S.hi,S.mean],44,3);return `<svg viewBox="0 0 200 44" preserveAspectRatio="none"><path class="area" d="${area(S.lo,S.hi,sy,200)}"/><path pathLength="1" d="${line(S.mean,sy,200)}"/></svg>`}
+function bandChart(S,units){const U=Object.values(units||{}),sy=scale([S.lo,S.hi,S.mean].concat(U),120,6);
+ return `<div class="band"><svg viewBox="0 0 400 120" preserveAspectRatio="none"><path class="area" d="${area(S.lo,S.hi,sy,400)}"/>${U.map(u=>`<path class="unit" d="${line(u,sy,400)}"/>`).join('')}<path class="mean" d="${line(S.mean,sy,400)}"/></svg><div class="legend"><i></i>cross-sectional mean<i class="a"></i>10th–90th percentile<i class="u"></i>individual units</div></div>`}
+const sp2=v=>{const a=v.filter(x=>x!=null);if(!a.length)return '';const mn=Math.min(...a),mx=Math.max(...a),r=mx-mn||1,mean=a.reduce((p,c)=>p+c,0)/a.length,sy=y=>(46-(y-mn)/r*40).toFixed(1);return '<svg viewBox="0 0 200 52" preserveAspectRatio="none"><line x1="0" x2="200" y1="'+sy(mean)+'" y2="'+sy(mean)+'"/><path d="'+line(v,sy,200)+'"/></svg>'};
+
+/* ---------- results ---------- */
+const code=c=>`<details class="code"><summary>Python code for this step</summary><pre>${esc(c)}</pre></details>`;
+function addStep(n,title,html,delay){const s=el('div','step',`<div class="label">Step ${n}</div><h3>${title}</h3>${html}`);$('#steps').appendChild(s);const my=run;setTimeout(()=>{if(my!==run)return;s.classList.add('in');if(n>1&&!reduce)s.scrollIntoView({behavior:'smooth',block:'nearest'})},delay);return s}
+const rej=p=>p!=null&&p<0.05;
+const tg=o=>o===0?'<span class="tag ok">I(0)</span>':o===1?'<span class="tag i1">I(1)</span>':o===2?'<span class="tag i2">I(2)</span>':'<span class="tag i2">above I(2)</span>';
+const pyList=a=>'['+a.map(v=>JSON.stringify(v)).join(', ')+']';
+function show(R,label){
+ const my=++run;$('#steps').innerHTML='';$('#result').innerHTML='';resetTree();let t=150,gap=900*D,k=1;
+ const longP=R.branch==='long';
+ light(['start','nt'],{nt:'T = '+(R.balanced?R.T:R.Tmed)+(longP?' (long)':' (short)')});
+ addStep(k++,'The panel',`<p><b>${R.N}</b> units (<code>${esc(R.entity)}</code>) observed over <b>${R.T}</b> periods (${esc(R.first)}–${esc(R.last)}), <b>${R.n}</b> observations${label?' · '+esc(label):''}. Dependent variable: <b>${esc(R.dep)}</b>.${R.skipped&&R.skipped.length?' Ignored columns: '+R.skipped.map(esc).join(', ')+'.':''}</p>
+  <div class="stats"><div class="stat"><b>${R.N}</b><span>Units (N)</span></div><div class="stat"><b>${R.T}</b><span>Periods (T)</span></div><div class="stat"><b>${R.balanced?'Yes':'No'}</b><span>Balanced${R.balanced?'':' · T from '+R.Tmin+' to '+R.Tmax}</span></div><div class="stat"><b>${longP?'Long':'Short'}</b><span>${longP?'Macro-panel tests':'Micro-panel tests'}</span></div></div>
+  ${bandChart(R.series[R.dep],R.units)}
+  <p>${longP?`With a median of ${R.Tmed} periods per unit, the time dimension is long enough for the time-series properties to matter: common shocks, unit roots and long-run relationships. The macro-panel sequence follows.`:`With a median of only ${R.Tmed} periods per unit, the panel is short. Unit-root and cointegration tests have little power here; the questions are whether the units differ and whether their differences are correlated with the regressors.`}</p>
+  <div class="sparks">${R.vars.map(v=>`<div class="spark"><b>${esc(v)}</b>${spark(R.series[v])}</div>`).join('')}</div>`+code(`import pandas as pd\n\ndf = pd.read_csv("panel.csv").set_index(["${R.entity}", "${R.time}"]).sort_index()\nTi = df.groupby(level=0).size()                    # periods per unit\nprint("N =", Ti.size, " T =", df.index.get_level_values(1).nunique(),\n      " balanced:", Ti.nunique() == 1)\ndf["${R.dep}"].unstack(0).plot(legend=False, alpha=.4)  # one line per unit`),t);t+=gap;
+ addStep(k++,'Summary statistics',`<div class="tw"><table><tr><th>Variable</th><th>Mean</th><th>Std. dev.</th><th>Between</th><th>Within</th><th>Min</th><th>Max</th></tr>${R.summary.map(s=>`<tr><td>${esc(s.var)}</td><td>${fmt(s.mean)}</td><td>${fmt(s.sd)}</td><td>${fmt(s.between)}</td><td>${fmt(s.within)}</td><td>${fmt(s.min)}</td><td>${fmt(s.max)}</td></tr>`).join('')}</table></div><p>The <b>between</b> standard deviation measures how much the unit averages differ; the <b>within</b> standard deviation measures how much each unit moves around its own average. Fixed effects uses only the within variation, so a regressor with little within variation will be estimated imprecisely, and one with none drops out.</p>`+code(`for v in ${pyList(R.vars)}:\n    x = df[v]\n    xbar_i = x.groupby(level=0).transform("mean")\n    print(v, round(x.mean(), 3), round(x.std(), 3),\n          round(x.groupby(level=0).mean().std(), 3),      # between\n          round((x - xbar_i + x.mean()).std(), 3))        # within`),t);t+=gap;
+ const cc=v=>{const a=Math.min(1,Math.abs(v))*.55;return v>=0?`rgba(0,51,160,${a})`:`rgba(196,96,0,${a})`};
+ addStep(k++,'Correlation matrix',`<div class="tw"><table><tr><th></th>${R.vars.map(v=>`<th>${esc(v)}</th>`).join('')}</tr>${R.corr.map((r,i)=>`<tr><td>${esc(R.vars[i])}</td>${r.map(v=>`<td style="background:${cc(v)};color:${Math.abs(v)>.6?'#fff':'inherit'}">${fmt(v,2)}</td>`).join('')}</tr>`).join('')}</table></div><p>Pooled correlations mix the between and within variation. Correlations above about 0.8 between regressors warn of multicollinearity${longP?'; between trending series they may be spurious until the unit-root tests are done':''}.</p>`+code(`print(df[${pyList(R.vars)}].corr().round(2))`),t);t+=gap;
+ if(longP)return showLong(R,my,t,gap,k);
+ showShort(R,my,t,gap,k);
+}
+function showShort(R,my,t,gap,k){const S=R.static,xs=R.vars.slice(1),F=S.ftest,LM=S.lm,H=S.hausman,M=S.mundlak;
+ const dr=S.fe_dropped,drop=[].concat(dr.time_invariant,dr.collinear);
+ addStep(k++,'Do the units differ? F and LM tests',`<details class="explain" open><summary>Why test for unit effects?</summary><p>Each unit (a worker, a county, a firm) may have its own permanent level of the outcome, an <b>unobserved unit effect</b>. If such effects exist, pooled OLS treats repeated observations on the same unit as independent and its standard errors are wrong; if they are also correlated with the regressors, pooled OLS is biased.</p><ul><li><b>F test.</b> Null hypothesis: all unit intercepts are equal. A p-value below 0.05 means the units differ and fixed effects improves on pooled OLS.</li><li><b>Breusch–Pagan LM test.</b> Null hypothesis: the variance of the unit effect is zero. A p-value below 0.05 means random effects improves on pooled OLS.</li></ul></details>
+  <div class="urv"><ol><li><b>F test for unit effects.</b> F(${F.df1}, ${F.df2}) = ${fmt(F.stat,2)}, p-value ${pf(F.p)}. ${rej(F.p)?'<span class="yes">p &lt; 0.05: the unit effects are significant.</span>':'<span class="no">p ≥ 0.05: no evidence of unit effects.</span>'}</li>
+  <li><b>Breusch–Pagan LM test.</b> χ²(1) = ${fmt(LM.stat,2)}, p-value ${pf(LM.p)}. ${rej(LM.p)?'<span class="yes">p &lt; 0.05: the unit-effect variance is not zero.</span>':'<span class="no">p ≥ 0.05: no evidence of a random unit effect.</span>'}</li></ol></div>
+  <p>Random-effects variance components: σᵤ = ${fmt(S.re.sigma_u)}, σₑ = ${fmt(S.re.sigma_e)}; ${fmt(S.re.rho*100,0)}% of the error variance is due to the unit effect. All models include time effects.</p>`+code(`import statsmodels.api as sm\nfrom linearmodels.panel import PanelOLS, PooledOLS, RandomEffects\n\ny, X = df["${R.dep}"], sm.add_constant(df[${pyList(xs)}])\nfe = PanelOLS(y, X, entity_effects=True, time_effects=True).fit(cov_type="clustered", cluster_entity=True)\nprint(fe.f_pooled)                          # F test: all unit effects equal\n\n# Breusch-Pagan LM (Baltagi-Li, unbalanced): from pooled OLS residuals\ne = PooledOLS(y, X).fit().resids\nn, Ti = len(e), e.groupby(level=0).size()\nLM = n**2 / (2 * (Ti * (Ti - 1)).sum()) * ((e.groupby(level=0).sum()**2).sum() / (e**2).sum() - 1)**2`),t);t+=gap;
+ const C=S.coefs,c2=(b,se)=>b==null?'<td>–</td>':`<td>${fmt(b,4)}<br><span style="color:#8793ab">(${fmt(se,4)})</span></td>`;
+ addStep(k++,'Fixed or random effects? Hausman and Mundlak tests',`<details class="explain" open><summary>What does the Hausman test compare?</summary><p>Random effects assumes the unit effect is <b>uncorrelated</b> with the regressors; fixed effects does not. If the assumption holds, both are consistent and RE is more efficient; if it fails, only FE is consistent. A large gap between the two sets of estimates is evidence against RE.</p><ul><li><b>Hausman test.</b> Null hypothesis: the FE and RE estimates differ only by sampling error. The conventional version assumes homoskedastic, serially uncorrelated errors and can fail to be computable.</li><li><b>Mundlak test.</b> Adds the unit averages of the regressors to the model and tests them jointly with cluster-robust standard errors. It answers the same question, is valid under heteroskedasticity and serial correlation, and is the one the tool uses.</li></ul></details>
+  <div class="tw"><table><tr><th>Variable</th><th>Pooled OLS</th><th>Random effects</th><th>Fixed effects</th></tr>${C.map(c=>`<tr><td>${esc(c.var)}</td>${c2(c.pols,c.pols_se)}${c2(c.re,c.re_se)}${c2(c.fe,c.fe_se)}</tr>`).join('')}</table></div>
+  <p style="font-size:11px;color:#8793ab">Standard errors clustered by ${esc(R.entity)} in parentheses. Time effects included. Within R² of the FE model: ${fmt(S.within_r2,3)}.</p>
+  ${drop.length?`<p><b>Dropped from FE:</b> ${dr.time_invariant.length?dr.time_invariant.map(esc).join(', ')+' (does not vary within units)':''}${dr.time_invariant.length&&dr.collinear.length?'; ':''}${dr.collinear.length?dr.collinear.map(esc).join(', ')+' (collinear with the unit and time effects)':''}. The Mundlak / correlated random-effects model can keep time-invariant regressors.</p>`:''}
+  <div class="urv"><ol>${H?`<li><b>Hausman test (conventional).</b> χ²(${H.df}) = ${fmt(H.stat,2)}, p-value ${pf(H.p)}. ${rej(H.p)?'<span class="yes">p &lt; 0.05: FE and RE differ systematically.</span>':'<span class="no">p ≥ 0.05: no systematic difference.</span>'}${H.pd?'':' <span class="no">⚠ The variance difference is not positive definite, a common failure of the conventional test; the statistic uses its positive part only.</span>'}</li>`:''}
+  <li><b>Mundlak test (cluster-robust).</b> χ²(${M.df}) = ${fmt(M.stat,2)}, p-value ${pf(M.p)}. ${rej(M.p)?'<span class="yes">p &lt; 0.05: the unit effects are correlated with the regressors.</span> Random effects is inconsistent.':'<span class="no">p ≥ 0.05: no evidence of correlation.</span> Random effects is consistent.'}${H&&rej(H.p)!==rej(M.p)?' <span class="no">⚠ This disagrees with the conventional Hausman test.</span>':(H?' <span class="yes">This agrees with the Hausman test.</span>':'')}</li></ol></div>
+  <p><b>Result:</b> ${R.model==='POLS'?'neither test finds unit effects, so pooled OLS with clustered errors is defensible.':R.model==='RE'?'the unit effects matter but are not correlated with the regressors, so random effects is consistent and efficient.':'the unit effects matter and are correlated with the regressors, so fixed effects is required.'} One question remains: is the model dynamic?</p>`+code(`from linearmodels.panel import compare\n\nre = RandomEffects(y, X).fit(cov_type="clustered", cluster_entity=True)\npo = PooledOLS(y, X).fit(cov_type="clustered", cluster_entity=True)\nprint(compare({"Pooled": po, "RE": re, "FE": fe}))\n\n# Mundlak test: add unit means of the regressors, test them jointly (cluster-robust)\nxs = ${pyList(xs)}\nXm = X.join(df[xs].groupby(level=0).transform("mean").add_suffix("_mean"))\nmu = PooledOLS(y, Xm).fit(cov_type="clustered", cluster_entity=True)\nprint(mu.wald_test(formula=" = ".join([c + "_mean" for c in xs]) + " = 0"))`),t);
+ setTimeout(()=>{if(my!==run)return;askDyn(R)},t+gap);
+}
+function askDyn(R){const st=R.model,s=el('div','step',`<div class="label">One question</div><h3>Does your model include a lagged dependent variable, or regressors that respond to past shocks to ${esc(R.dep)}?</h3><p>The tests above assume a static model with strictly exogenous regressors. With ${R.N} units and only ${R.Tmed} periods, a dynamic model needs a different estimator.</p><div class="opts"><button type="button" data-a="${st}">No, a static model<small>${MODELS[st].name}</small></button><button type="button" data-a="GMM">Yes, for example employment depends on last year’s employment<small>Difference / system GMM</small></button></div>`);
+ $('#steps').appendChild(s);requestAnimationFrame(()=>s.classList.add('in'));if(!reduce)s.scrollIntoView({behavior:'smooth',block:'nearest'});
+ s.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{s.querySelectorAll('button').forEach(x=>x.disabled=true);b.style.borderColor='var(--navy)';b.style.background='var(--tint)';finish(b.dataset.a,R,b.dataset.a==='GMM'?st:null)}))}
+function showLong(R,my,t,gap,k){const xs=R.vars.slice(1),cdr=R.cd_resid,SL=R.slope;
+ addStep(k++,'Cross-sectional dependence: Pesaran CD test',`<details class="explain" open><summary>What is cross-sectional dependence, and why does it come first?</summary><p>Countries, states and banks are hit by the same shocks: oil prices, global interest rates, recessions. When units move together, first-generation panel tests treat them as independent and over-reject, and estimators that ignore the common shocks can be biased. The answer decides which unit-root test is valid and which estimator to use.</p><ul><li><b>Pesaran CD test.</b> Null hypothesis: the units are cross-sectionally independent. A p-value below 0.05 means they are dependent. The average absolute correlation |ρ| shows how strong the dependence is.</li><li>The test on each variable decides between first-generation (Fisher-ADF) and second-generation (CIPS) unit-root tests; the test on the fixed-effects residuals decides whether the estimator must model common shocks.</li></ul></details>
+  <div class="tw"><table><tr><th>Series</th><th>CD statistic</th><th>p-value</th><th>Mean |ρ|</th><th>Decision</th></tr>${R.cd.map(c=>`<tr><td>${esc(c.var)}</td><td>${fmt(c.cd,2)}</td><td>${pf(c.p)}</td><td>${fmt(c.absr,3)}</td><td>${rej(c.p)?'Dependent':'Independent'}</td></tr>`).join('')}<tr><td>FE residuals</td><td>${fmt(cdr.cd,2)}</td><td>${pf(cdr.p)}</td><td>${fmt(cdr.absr,3)}</td><td>${rej(cdr.p)?'Dependent':'Independent'}</td></tr></table></div>
+  <p><b>Result:</b> ${R.cd_flag?'the residuals are cross-sectionally dependent: the units share common shocks that the estimator must account for.':'the residuals show no significant cross-sectional dependence.'}</p>`+code(`import numpy as np\nfrom scipy.stats import norm\n\ndef cd_test(wide):                      # wide: T x N DataFrame, one column per unit\n    A, N, s = wide.to_numpy(), wide.shape[1], 0.0\n    for i in range(N - 1):\n        for j in range(i + 1, N):\n            m = ~np.isnan(A[:, i]) & ~np.isnan(A[:, j])\n            s += np.sqrt(m.sum()) * np.corrcoef(A[m, i], A[m, j])[0, 1]\n    cd = np.sqrt(2 / (N * (N - 1))) * s\n    return cd, 2 * (1 - norm.cdf(abs(cd)))\n\nlong = df.reset_index()\nfor v in ${pyList(R.vars)}:\n    print(v, cd_test(long.pivot(index="${R.time}", columns="${R.entity}", values=v)))`),t);t+=gap;
+ if(SL)addStep(k++,'Slope heterogeneity: Pesaran–Yamagata Δ test',`<details class="explain"><summary>Why test whether the slopes are the same?</summary><p>A pooled estimator such as fixed effects assumes that a regressor has the same effect in every unit. If the effect differs (income elasticities across countries, say), the pooled slope is a misleading average and, in dynamic models, inconsistent. The Δ test compares each unit’s own slope with a weighted pooled slope. Null hypothesis: the slopes are homogeneous. The adjusted Δ corrects for small-sample bias.</p></details>
+  <div class="tw"><table><tr><th>Statistic</th><th>Value</th><th>p-value</th></tr><tr><td>Δ</td><td>${fmt(SL.delta,3)}</td><td>${pf(SL.delta_p)}</td></tr><tr><td>Δ adjusted</td><td>${fmt(SL.delta_adj,3)}</td><td>${pf(SL.delta_adj_p)}</td></tr></table></div>
+  <p><b>Result:</b> ${R.het_flag?'<span class="no">the slopes are heterogeneous</span> (p &lt; 0.05): pooled long-run estimates need justification, and mean-group estimators are the natural benchmark.':'<span class="yes">slope homogeneity is not rejected</span>: pooling the slopes is defensible.'}</p>`+code(`from panel_tests import slope_test        # implementations/panel_tests.py on this site\n\nprint(slope_test(df.reset_index(), "${R.entity}", "${R.dep}", ${pyList(xs)}))`),t),t+=gap;
+ setTimeout(()=>{if(my!==run)return;light(['start','nt','cd'])},t-gap+300*D);
+ const kp=x=>x==null?'–':`${fmt(x.stat,2)} (${pf(x.p)})`,kf=x=>x==null?'–':`${fmt(x.Z,2)} (${pf(x.Z_p)})`;
+ const urCard=u=>{const lev=u.lev,d1=u.d1,d2=u.d2,cips=u.test==='CIPS',nm=cips?'CIPS':'Fisher-ADF';
+  const one=(lab,x,next)=>{if(!x)return '';const p=x.p,main=cips?`CIPS = ${fmt((x.cips||{}).stat,2)}, p-value ${pf(p)}`:`Choi Z = ${fmt((x.fisher||{}).Z,2)}, p-value ${pf(p)}`;const other=cips?(x.fisher?` (Fisher-ADF Z = ${fmt(x.fisher.Z,2)}, p ${pf(x.fisher.Z_p)})`:''):(x.cips?` (CIPS = ${fmt(x.cips.stat,2)}, p ${pf(x.cips.p)})`:'');
+   return `<li><b>${nm} on the ${lab}.</b> ${main}${other}. ${rej(p)?'<span class="yes">p &lt; 0.05: reject the unit root.</span>'+(lab==='level'?' The variable is stationary.':lab==='first difference'?' One difference makes it stationary.':' Two differences make it stationary.'):'<span class="no">p ≥ 0.05: cannot reject the unit root.</span>'+(next?' Test the '+next+'.':'')}</li>`};
+  const verdict=u.order===0?`<b>${esc(u.var)}</b> is stationary in levels: it is I(0).`:u.order===1?`<b>${esc(u.var)}</b> has a unit root in levels but is stationary after one difference: it is I(1).`:u.order===2?`<b>${esc(u.var)}</b> becomes stationary only after two differences: it is I(2).`:`<b>${esc(u.var)}</b> is not stationary even after two differences. Check the data and the transformation.`;
+  return `<div class="urv"><div class="urv-head"><b>${esc(u.var)}</b><span><span class="tag">${cips?'CD present → CIPS':'No CD → Fisher-ADF'}</span> ${tg(u.order)}</span></div>
+  <div class="pair"><div><small>Level (cross-sectional mean)</small>${sp2(R.series[u.var].mean)}</div><div><small>First difference (mean)</small>${sp2(R.dseries[u.var])}</div></div>
+  <ol>${one('level',lev,'first difference')}${d1?one('first difference',d1,'second difference'):''}${d2?one('second difference',d2,''):''}</ol><div class="v">→ ${verdict}</div></div>`};
+ addStep(k++,'Panel unit-root tests',`<details class="explain" open><summary>What do panel unit-root tests add?</summary><p>As in a single time series, regressing one wandering (unit-root) variable on another can produce a <b>spurious</b> relationship, so each variable’s order of integration must be known before choosing an estimator. Panel tests pool the evidence across units, which gives them much more power than a test on one short series.</p><ul><li><b>Fisher-ADF (Maddala–Wu, Choi).</b> Runs an ADF test for each unit and combines the p-values. Null hypothesis: every unit has a unit root. Valid only if the units are independent.</li><li><b>CIPS (Pesaran).</b> Adds cross-sectional averages to each unit’s ADF regression, which absorbs a common factor. Use it when the CD test finds dependence. p-values here come from simulated critical values.</li><li>A variable is I(0) if the test rejects in levels, I(1) if it rejects only after one difference, and I(2) if it takes two.</li></ul><p>The charts show the cross-sectional mean; the dashed line is its average.</p></details>
+  ${R.unitroot.map(urCard).join('')}
+  <div class="label" style="margin-top:16px">Summary table for your paper</div>
+  <div class="tw"><table><tr><th>Variable</th><th>Test</th><th>Level (p)</th><th>1st diff. (p)</th><th>Order</th></tr>${R.unitroot.map(u=>{const s=x=>!x?'–':u.test==='CIPS'?`${fmt((x.cips||{}).stat,2)} (${pf(x.p)})`:`${fmt((x.fisher||{}).Z,2)} (${pf(x.p)})`;return `<tr><td>${esc(u.var)}</td><td>${u.test==='CIPS'?'CIPS':'Fisher-ADF Z'}</td><td>${s(u.lev)}</td><td>${s(u.d1)}</td><td>${tg(u.order)}</td></tr>`}).join('')}</table></div>
+  <p><b>Result:</b> ${R.model==='I2'?'at least one variable is I(2). None of the standard panel estimators is valid until that variable is transformed.':R.orders.every(o=>o===0)?'every variable is I(0), so a model in levels is valid.':R.orders.every(o=>o===1)?'every variable is I(1). The next question is whether they move together in the long run (cointegration).':'the variables are a mix of I(0) and I(1). The panel ARDL family is valid in this case.'}</p>`+code(`from panel_tests import cips_test, fisher_adf_test   # implementations/panel_tests.py\n\nlong = df.reset_index()\nfor v in ${pyList(R.vars)}:\n    W = long.pivot(index="${R.time}", columns="${R.entity}", values=v)\n    print(v, "level", cips_test(W), fisher_adf_test(W))\n    print(v, "diff ", cips_test(W.diff()), fisher_adf_test(W.diff()))`),t);
+ const o=R.orders,branch=R.model==='I2'?'i2':o.every(x=>x===0)?'i0':o.every(x=>x===1)?'i1':'mix';
+ setTimeout(()=>{if(my!==run)return;light(['start','nt','cd','ur',branch])},t+300*D);t+=gap+400*D;
+ if(R.coint){const C=R.coint,ka=C.kao,fi=C.fisher,dis=ka&&fi&&(rej(ka.p)!==rej(fi.Z_p));
+  addStep(k++,'Panel cointegration: Kao and Fisher–Engle–Granger tests',`<details class="explain" open><summary>What is panel cointegration?</summary><p>I(1) variables are <b>cointegrated</b> if some combination of them is stationary, so they share a long-run relationship. If they are, a model in levels (an error-correction or ARDL model) estimates that relationship; if not, the model must be in differences.</p><ul><li><b>Kao test.</b> An ADF test on the pooled fixed-effects residuals. Null hypothesis: no cointegration. It assumes the same slopes in every unit.</li><li><b>Fisher–Engle–Granger test (Maddala–Wu).</b> An Engle–Granger test for each unit, with its own slopes, and the p-values combined. Null hypothesis: no cointegration in any unit.</li><li>The tool uses ${C.used==='fisher'?'the Fisher test, because the slopes are heterogeneous':'the Kao test, because slope homogeneity was not rejected'}.</li></ul></details>
+  <div class="tw"><table><tr><th>Test</th><th>Statistic</th><th>p-value</th><th>Decision</th></tr>${ka?`<tr><td>Kao ADF t*</td><td>${fmt(ka.stat,2)}</td><td>${pf(ka.p)}</td><td>${rej(ka.p)?'Cointegrated':'Not cointegrated'}</td></tr>`:''}${fi?`<tr><td>Fisher–EG, Choi Z</td><td>${fmt(fi.Z,2)}</td><td>${pf(fi.Z_p)}</td><td>${rej(fi.Z_p)?'Cointegrated':'Not cointegrated'}</td></tr><tr><td>Fisher–EG, P (χ²(${2*fi.n}))</td><td>${fmt(fi.P,2)}</td><td>${pf(fi.P_p)}</td><td>${rej(fi.P_p)?'Cointegrated':'Not cointegrated'}</td></tr>`:''}</table></div>
+  <p><b>Result:</b> ${C.coint?'the variables are cointegrated: there is a long-run relationship to estimate.':'no evidence of cointegration: a regression in levels would be spurious.'}${dis?` <b>⚠ The Kao and Fisher tests disagree.</b> ${C.used==='fisher'?'Kao assumes common slopes, which the Δ test rejects, so the heterogeneous test is preferred; report both and add the Westerlund test (with bootstrap critical values under cross-sectional dependence) as a robustness check.':'Report both and add the Westerlund test as a robustness check.'}`:''}</p>`+code(`from panel_tests import kao_test, fisher_eg_test   # implementations/panel_tests.py\n\nlong = df.reset_index()\nprint(kao_test(long, "${R.entity}", "${R.dep}", ${pyList(xs)}))\nprint(fisher_eg_test(long, "${R.entity}", "${R.dep}", ${pyList(xs)}))`),t);
+  setTimeout(()=>{if(my!==run)return;light(['start','nt','cd','ur','i1','co'])},t+300*D);t+=gap+400*D}
+ setTimeout(()=>{if(my!==run)return;finish(R.model,R)},t);
+}
+function evidence(R,m){if(!R)return '';const S=R.static,u=R.unitroot,nm=o=>u.filter(x=>x.order===o).map(x=>esc(x.var)).join(', ');
+ const cdt=R.cd_resid?`The Pesaran CD test on the residuals ${rej(R.cd_resid.p)?'finds':'does not find'} cross-sectional dependence (CD = ${fmt(R.cd_resid.cd,2)}, p ${pf(R.cd_resid.p)}).`:'';
+ if(m==='POLS')return `F test p-value ${pf(S.ftest.p)} and LM test p-value ${pf(S.lm.p)}: no significant unit effects.`;
+ if(m==='RE')return `The unit effects are significant (LM χ²(1) = ${fmt(S.lm.stat,1)}, p ${pf(S.lm.p)}), but the Mundlak test does not reject that they are uncorrelated with the regressors (χ²(${S.mundlak.df}) = ${fmt(S.mundlak.stat,2)}, p ${pf(S.mundlak.p)}).`;
+ if(m==='FE')return `The unit effects are significant (F = ${fmt(S.ftest.stat,2)}, p ${pf(S.ftest.p)}), and the Mundlak test rejects that they are uncorrelated with the regressors (χ²(${S.mundlak.df}) = ${fmt(S.mundlak.stat,2)}, p ${pf(S.mundlak.p)}).`;
+ if(m==='GMM')return S?`N = ${R.N} units and a median of ${R.Tmed} periods: a large-N, short-T panel, the setting GMM was designed for. The static tests point to ${MODELS[R.model].short}, which is the benchmark to report alongside.`:'';
+ if(m==='FEDK')return `All ${u.length} variables are I(0), and slope homogeneity is not rejected (Δ adj. p ${pf(R.slope&&R.slope.delta_adj_p)}). ${cdt}`;
+ if(m==='MG')return `All ${u.length} variables are I(0), but the slopes are heterogeneous (Δ adj. = ${fmt(R.slope.delta_adj,2)}, p ${pf(R.slope.delta_adj_p)}). ${cdt}`;
+ if(m==='DIFF')return `All ${u.length} variables are I(1), and the ${R.coint.used==='fisher'?'Fisher–Engle–Granger':'Kao'} test finds no cointegration (p ${pf(R.coint.p)}). ${cdt}`;
+ const lr=R.coint?`All ${u.length} variables are I(1) and cointegrated (${R.coint.used==='fisher'?'Fisher–Engle–Granger':'Kao'} p ${pf(R.coint.p)}).`:`Stationary in levels: ${nm(0)}. Stationary only after differencing: ${nm(1)}.`;
+ return lr+' '+cdt+(R.slope?` Slopes are ${R.het_flag?'heterogeneous':'homogeneous'} (Δ adj. p ${pf(R.slope.delta_adj_p)}).`:'')}
+function cautionFor(R,m){if(!R)return '';const c=[];
+ if(R.static){const S=R.static;if(S.hausman&&rej(S.hausman.p)!==rej(S.mundlak.p))c.push('The conventional Hausman and the robust Mundlak tests disagree. Report both; the Mundlak test is valid under heteroskedasticity and serial correlation.');
+  const d=[].concat(S.fe_dropped.time_invariant,S.fe_dropped.collinear);if(m==='FE'&&d.length)c.push(`${d.map(esc).join(', ')} cannot be estimated with fixed effects. Use the Mundlak / correlated random-effects model if their coefficients matter.`);
+  if(m==='GMM')c.push('Report AR(2) and Hansen tests, collapse the instrument matrix and keep the instrument count below the number of units ('+R.N+').')}
+ if(R.coint&&R.coint.kao&&R.coint.fisher&&rej(R.coint.kao.p)!==rej(R.coint.fisher.Z_p))c.push('The cointegration tests disagree. Report both, add the Westerlund test, and show that the conclusions hold with a CS-ARDL or CCE-MG model in levels as a robustness check.');
+ if(R.branch==='long'&&R.Tmed<20)c.push(`With only ${R.Tmed} periods per unit, panel unit-root and cointegration tests have low power. Justify the integration orders with economic reasoning as well.`);
+ return c.length?`<div class="caution"><b>Mixed or limited evidence.</b> ${c.join(' ')}</div>`:''}
+function finish(m,R,alt){const my=run,M=MODELS[m];if(m==='I2')return i2card(R);const d=light(pathTo(m,R));if(alt){const a=$('#n-'+alt);a&&a.classList.add('alt')}
+ setTimeout(()=>{if(my!==run)return;const ev=evidence(R,m);
+  $('#result').innerHTML=`<div class="result"><div class="label">Recommended estimator</div><h2>${M.name}</h2><p>${M.why}${ev?' <b>In this data:</b> '+ev:''}</p>${cautionFor(R,m)}<div class="label" style="margin-bottom:6px">What the paper needs</div><ul>${M.steps.map(s=>`<li>${s}</li>`).join('')}</ul><div class="acts">${M.lec.map((l,i)=>`<a class="btn${i?' ghost':''}" href="${l[0]}">${l[1]} →</a>`).join('')}${alt?`<a class="btn ghost" href="#g-${alt}" data-go="${alt}">Benchmark: ${MODELS[alt].short}</a>`:''}${R?'':'<button class="btn ghost" type="button" id="again">Start over</button>'}</div>${R?'<p style="font-size:11.5px;margin:14px 0 0;color:#c5d4ea">A policy change with treated and untreated units? Then see the Causal Inference Guide for difference-in-differences.</p>':''}</div>`;
+  $('#result').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});const ag=$('#again');ag&&ag.addEventListener('click',()=>setMode('ask'))},d+250*D)}
+function i2card(R){const my=run,d=light(pathTo('I2',R));const bad=R?R.unitroot.filter(u=>u.order>=2).map(u=>u.var):[];
+ setTimeout(()=>{if(my!==run)return;
+ $('#result').innerHTML=`<div class="result"><div class="label">Transform, then test again</div><h2>${bad.length===1?'One variable is I(2)':bad.length?bad.length+' variables are I(2)':'A variable is I(2)'}</h2><p>${bad.length?'<b>In this data:</b> '+bad.map(esc).join(', ')+(bad.length===1?' is':' are')+' still non-stationary after one difference. ':''}Panel cointegration tests, PMG, MG and CS-ARDL all assume that no variable is integrated of order two, so the model must not be estimated on the data as it stands.${R&&R.Tmed<20?` With only ${R.Tmed} periods per unit the tests have little power, and an I(1) variable with a trend or a break can easily look I(2).`:''}</p><div class="label" style="margin-bottom:6px">What to do</div><ul><li>Replace the I(2) variable by its growth rate (first difference of the log), which is then I(1)</li><li>Use real or per-capita instead of nominal or total values</li><li>Add a linear trend to the unit-root regressions if the series trend upward</li><li>Test for structural breaks, which can make an I(1) series look I(2)</li><li>Use a longer sample if one is available</li><li>Then run this tool again on the transformed data</li></ul><div class="acts"><a class="btn" href="${L}10-unit-roots-breaks.html">Lecture: Unit roots and breaks →</a><a class="btn ghost" href="${ML}">Macro-panel lecture</a>${R?'':'<button class="btn ghost" type="button" id="again">Start over</button>'}</div></div>`;
+ $('#result').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});const ag=$('#again');ag&&ag.addEventListener('click',()=>setMode('ask'))},d+250*D)}
+
+/* ---------- mode: examples ---------- */
+function initExamples(){EXAMPLES.forEach(x=>{const b=el('button','',`<small>${esc(x.meta)}</small><b>${esc(x.title)}</b><span>${esc(x.desc)}</span>`);b.type='button';
+ b.addEventListener('click',()=>{document.querySelectorAll('.ex button').forEach(e=>e.classList.remove('sel'));b.classList.add('sel');show(x.result,x.title)});$('#ex').appendChild(b)})}
+
+/* ---------- mode: upload (Python in the browser) ---------- */
+let pyReady=null;
+function status(t){$('#status').classList.toggle('on',!!t);$('#status-text').textContent=t||''}
+function loadPy(){if(pyReady)return pyReady;pyReady=(async()=>{status('Loading Python. The first time takes about 15 seconds…');
+  await new Promise((res,rej)=>{const s=document.createElement('script');s.src=PYO+'pyodide.js';s.onload=res;s.onerror=()=>rej(new Error('Could not load Python. Check your internet connection and try again.'));document.head.appendChild(s)});
+  const py=await loadPyodide({indexURL:PYO});status('Loading pandas, SciPy and statsmodels…');await py.loadPackage(['pandas','scipy','statsmodels']);py.runPython($('#py-src').textContent);return py})();
+ pyReady.catch(()=>{pyReady=null});return pyReady}
+async function handleFile(f){$('#upload-err').innerHTML='';$('#steps').innerHTML='';$('#result').innerHTML='';++run;resetTree();
+ try{if(f.size>8e6)throw new Error('The file is larger than 8 MB. Please upload a smaller CSV.');
+  const text=await f.text();const py=await loadPy();status('Running the tests on your panel…');await new Promise(r=>setTimeout(r,30));
+  const R=JSON.parse(py.globals.get('analyze')(text));status('');if(R.error)throw new Error(R.error);show(R,f.name)}
+ catch(e){status('');$('#upload-err').innerHTML=`<div class="err">${esc(e.message||e)}</div>`}}
+function initUpload(){const d=$('#drop');$('#file').addEventListener('change',e=>{e.target.files[0]&&handleFile(e.target.files[0]);e.target.value=''});
+ ['dragenter','dragover'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.add('over')}));['dragleave','drop'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove('over')}));
+ d.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];f&&handleFile(f)})}
+
+/* ---------- mode: questions ---------- */
+let QA={};
+const QS={
+ q1:{t:'How many time periods does each unit have?',o:[['Few: fewer than '+LONGT+' periods','Typical of household, worker and firm panels','qd',['start','nt']],['Many: '+LONGT+' or more periods','Typical of country, state and industry panels','qcd',['start','nt']]]},
+ qd:{t:'Does your model include a lagged dependent variable, or regressors that respond to past shocks to the outcome?',o:[['Yes','A dynamic model, for example employment depends on last year’s employment','GMM'],['No, a static model','','qh',['start','nt','dyn','st']]]},
+ qh:{t:'What did the F test, the Breusch–Pagan LM test and the Hausman (or Mundlak) test show?',o:[['No significant unit effects','Neither the F test nor the LM test rejects','POLS'],['Unit effects, but Hausman / Mundlak does not reject','The effects are uncorrelated with the regressors','RE'],['Hausman / Mundlak rejects','The effects are correlated with the regressors','FE']]},
+ qcd:{t:'Did the Pesaran CD test on the residuals find cross-sectional dependence?',o:[['Yes, the units are dependent','Common shocks: use CIPS for unit roots','qur',['start','nt','cd'],'cd',1],['No dependence','Fisher-ADF or IPS unit-root tests are valid','qur',['start','nt','cd'],'cd',0]]},
+ qur:{t:'What did your panel unit-root tests show?',o:[['All variables are stationary in levels','All I(0)','qsl',['start','nt','cd','ur','i0','sl']],['All variables are stationary only after first differencing','All I(1)','qco',['start','nt','cd','ur','i1','co'],'ur','i1'],['A mix: some I(0), some I(1)','None is I(2)','LR',null,'ur','mix'],['At least one variable needs differencing twice','Some I(2)','I2']]},
+ qsl:{t:'Did the slope-homogeneity (Pesaran–Yamagata Δ) test reject?',o:[['No, the slopes can be pooled','','FEDK'],['Yes, the slopes are heterogeneous','','MG']]},
+ qco:{t:'Does a panel cointegration test (Kao, Pedroni or Westerlund) find a long-run relationship?',o:[['Yes, the variables are cointegrated','','LR'],['No cointegration','','DIFF']]}};
+function ask(id,n=1){const Q=QS[id];$('#q').innerHTML=`<div class="label">Question ${n}</div><h3>${Q.t}</h3><div class="opts">${Q.o.map((o,i)=>`<button type="button" data-i="${i}">${o[0]}${o[1]?`<small>${o[1]}</small>`:''}</button>`).join('')}</div>`;
+ $('#q').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const o=Q.o[+b.dataset.i];let to=o[2];if(o[4])QA[o[4]]=o[5];
+  if(to==='LR')to=QA.cd?'CSARDL':'PMG';
+  if(QS[to]){o[3]&&light(o[3]);ask(to,n+1)}else{$('#q').innerHTML='<p class="sub" style="margin:0">Your answers lead to the estimator shown below.</p>';finish(to,null,to==='CSARDL'?'PMG':to==='PMG'?'CSARDL':to==='GMM'?'FE':null)}}))}
+
+/* ---------- guides, modes, init ---------- */
+function initGuides(){Object.entries(MODELS).filter(([k])=>k!=='I2').forEach(([k,M])=>{$('#gcards').appendChild(el('article','gcard',`<span class="tag ok">${['POLS','RE','FE','GMM'].includes(k)?'Short panel':'Long panel'}</span><h3>${M.short}</h3><p class="when">${M.when}</p><p>${M.steps.slice(0,5).join(' · ')} …</p>${M.lec.map(l=>`<a href="${l[0]}">${l[1]} →</a>`).join('')}`)).id='g-'+k})}
+document.addEventListener('click',e=>{const a=e.target.closest('[data-go]');if(!a)return;const c=$('#g-'+a.dataset.go);if(c){c.classList.remove('flash');void c.offsetWidth;c.classList.add('flash')}});
+function setMode(m){++run;QA={};document.querySelectorAll('.modes button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));['example','upload','ask'].forEach(x=>$('#m-'+x).hidden=x!==m);
+ $('#steps').innerHTML='';$('#result').innerHTML='';$('#upload-err').innerHTML='';status('');resetTree();document.querySelectorAll('.ex button').forEach(e=>e.classList.remove('sel'));if(m==='ask'){light(['start']);ask('q1')}}
+document.querySelectorAll('.modes button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+drawTree();initExamples();initUpload();initGuides();$('#year').textContent=new Date().getFullYear();
 </script>
 </body>
 </html>
