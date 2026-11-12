@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0033A0">
+<meta name="description" content="An interactive workflow tool for DSGE research with Dynare: find out whether your question needs an RBC, New Keynesian or open-economy model, Bayesian estimation, an identification check, optimal policy, OccBin or a higher-order solution, and prepare your data for estimation.">
+<title>DSGE Research Guide | Tuhin G. M. Al Mamun</title>
+<link rel="canonical" href="https://tuhingm.github.io/almamun/dsge-guide/">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml"><link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/*TS_CSS*/
+/* dsge-specific additions */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}.stat{background:#f8fafe;border:1px solid #e6ebf4;border-radius:9px;padding:9px 10px}.stat b{display:block;font:800 18px Manrope;color:var(--navy)}.stat span{font-size:10px;color:var(--muted)}
+.chart svg{display:block;width:100%;height:auto;background:#fbfcfe;border:1px solid #e6ebf4;border-radius:9px}.chart .ax{stroke:#c9d4e8;stroke-width:1}.chart .zero{stroke:#8793ab;stroke-width:1;stroke-dasharray:3 3}.chart .tv{stroke:#c46000;stroke-width:1.4;stroke-dasharray:5 4}
+.chart .s0{fill:none;stroke:var(--navy);stroke-width:2}.chart .s1{fill:none;stroke:#c46000;stroke-width:2;stroke-dasharray:6 4}.chart .s2{fill:none;stroke:#2f8f5b;stroke-width:1.8}.chart .s3{fill:none;stroke:#9aa9c4;stroke-width:1.6;stroke-dasharray:2 3}
+.chart .band{fill:#0033a01f;stroke:none}.chart .bar{fill:#0033a0aa}.chart .bar.b{fill:#c46000aa}.chart text{font:600 10px "DM Sans",sans-serif;fill:#7f8aa1}
+.legend{font-size:10.5px;color:var(--muted);margin-top:4px}.legend i{display:inline-block;width:16px;height:3px;vertical-align:middle;margin:0 5px 0 10px;background:var(--navy)}.legend i.b{background:#c46000}.legend i.c{background:#2f8f5b}.legend i.d{background:#9aa9c4}
+.roles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}.roles label{display:flex;flex-direction:column;gap:4px;font-size:11px;font-weight:700;color:var(--muted)}.roles select,.roles input{font:500 13px "DM Sans",sans-serif;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}.roles select[multiple]{height:104px}.roles .full{grid-column:1/-1}.roles small{font-weight:500}
+.nt{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.nt label{display:flex;flex-direction:column;gap:5px;font-size:11px;font-weight:700;color:var(--muted);flex:1 1 150px}.nt input{font:600 15px 'DM Sans',sans-serif;padding:10px 12px;border:1px solid var(--line);border-radius:9px;color:var(--ink);background:#fff}
+.tree .el{font-size:10.5px}.tree .n text{font-size:12.5px}.tree .n.leaf text{font-size:13px}.tree .n.gate rect{stroke-dasharray:4 3}
+pre.mod{background:#0f1b33;color:#dfe7f5;border-radius:9px;padding:12px 14px;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;overflow:auto;white-space:pre}
+.dl{display:inline-block;margin-top:8px;font-size:12.5px;font-weight:700}
+@media(max-width:650px){.stats{grid-template-columns:repeat(2,1fr)}.roles{grid-template-columns:1fr}}
+</style>
+<link rel="stylesheet" href="../assets/css/mobile-nav.css">
+</head>
+<body>
+<header><div class="wrap nav"><a class="brand" href="../index.html">TGM <b>AL MAMUN</b></a><button id="menu" type="button" aria-expanded="false" aria-controls="nav">Menu</button><nav id="nav" aria-label="Main navigation"><a href="../index.html">Home</a><a href="../teaching/index.html">Teaching Courses</a><a href="../working-papers/index.html">Working Papers</a><a href="../research-guide/index.html">Time-Series Guide</a><a href="../panel-data-guide/index.html">Panel-Data Guide</a><a href="../causal-inference-guide/index.html">Causal Inference</a><a href="../dsge-guide/index.html" class="current" aria-current="page">DSGE Guide</a><a href="../Tuhin%20Al%20Mamun_CV.pdf">CV</a></nav></div></header>
+<section class="hero"><div class="wrap"><div class="kicker">Macroeconomic Research Guide · DSGE with Dynare</div><h1>Which DSGE workflow fits your research?</h1><p class="lead">A DSGE paper starts from the question, not the model. Run a worked Dynare example, prepare your own data for estimation, or answer a few questions, and follow the path to the model, solution method and checks your paper needs.</p><div class="meta"><span><strong>9</strong> Dynare guides</span><span><strong>9</strong> worked examples with real output</span><span>Dynare 6 · Octave / MATLAB</span></div></div></section>
+<main class="wrap">
+<div class="modes" role="group" aria-label="Choose how to start">
+<button type="button" data-mode="example" aria-pressed="true"><b>Try a worked example</b><span>Dynare results for each route</span></button>
+<button type="button" data-mode="upload" aria-pressed="false"><b>Prepare my data</b><span>Upload a CSV; checks run in your browser</span></button>
+<button type="button" data-mode="ask" aria-pressed="false"><b>I know my question</b><span>Answer a few questions</span></button>
+</div>
+<div class="grid">
+<section class="panel" id="work" aria-live="polite">
+ <div id="m-example">
+  <h2>Choose an example</h2><p class="sub">Nine models solved, estimated or simulated in Dynare. Each one leads to a different route; the numbers are Dynare's own output.</p>
+  <div class="ex" id="ex"></div>
+ </div>
+ <div id="m-upload" hidden>
+  <h2>Prepare data for estimation</h2><p class="sub">A CSV of quarterly time series, one column per series (for example real GDP, the GDP deflator and a policy rate). The tool checks each series, proposes the transformation that matches a model variable, and writes the data file and the Dynare lines for estimation. The model itself is solved and estimated in Dynare, on your own computer.</p>
+  <div class="drop" id="drop"><p style="margin:0 0 12px;font-size:13px">Drop a CSV file here, or</p><label class="btn">Choose file<input type="file" id="file" accept=".csv,text/csv,text/plain" hidden></label></div>
+  <div id="rolebox" hidden>
+   <div class="roles">
+    <label class="full">Observables<small>the series the model will be estimated on; Ctrl/⌘-click for several</small><select id="r-obs" multiple></select></label>
+    <label>Structural shocks in your model<small>number of varexo with a variance</small><input id="r-shocks" type="number" min="1" step="1" placeholder="e.g. 3"></label>
+    <label>Date column (optional)<select id="r-date"></select></label>
+   </div>
+   <p class="hint">Trending series are turned into quarterly growth rates in percent: 100·Δlog for levels (GDP, prices), 100·Δ for series already in logs. Series without a trend (inflation, interest rates) are kept in levels. All observables are demeaned, so the model's steady state does not have to match the sample means. The file is analysed on your own device and is not uploaded anywhere.</p>
+   <button class="btn" type="button" id="runUp" style="margin-top:12px">Check the data</button>
+  </div>
+  <p class="hint">Format example: <a href="data/us_small.csv" download>us_small.csv</a> (growth rates already computed) or <a href="data/us_levels.csv" download>us_levels.csv</a> (log levels).</p>
+  <div class="status" id="status"><span class="spin"></span><span id="status-text"></span></div>
+  <div id="upload-err"></div>
+ </div>
+ <div id="m-ask" hidden>
+  <h2>Answer from what you know</h2><p class="sub">Start from what the model is for. The tool points to the model class, the Dynare commands and the checks.</p>
+  <div class="q" id="q"></div>
+ </div>
+ <div id="steps"></div>
+</section>
+<aside class="side">
+ <div class="panel tree"><div class="label">Decision path</div><p class="sub sub2" style="font-size:12px;color:var(--muted);margin:2px 0 8px">The path lights up as the evidence comes in. The dashed boxes are gates every model must pass.</p><div id="tree"></div><div class="trail" id="trail"></div></div>
+</aside>
+</div>
+<div id="result"></div>
+
+<section class="guides" id="guides"><div class="guides-head"><div><div class="label">Dynare guides</div><h2>Nine routes to a finished paper</h2></div><p>Each guide takes one model through the Dynare file, the solution checks, the results and the text for the paper, with the .mod file, real Dynare output and figures.</p></div>
+<div class="gcards" id="gcards"></div></section>
+<div class="note"><b>How the tool decides.</b> The route follows from what the model is for. To <b>explain a mechanism</b>, the model needs only the frictions the mechanism requires: no nominal rigidities (RBC), sticky prices (New Keynesian), and an exchange rate and imported goods when the economy is open. To <b>estimate</b>, identification comes first; the size of the model follows from the number of observables, which must not exceed the number of shocks (otherwise the likelihood is singular). Three observables or fewer fit a small model; four or more call for a medium-scale model with capital, habits and adjustment costs. To <b>design policy</b>, the model is solved under commitment, discretion and optimised simple rules and compared by a loss function. When <b>nonlinearity</b> is the point, an occasionally binding constraint calls for OccBin, and risk, precautionary behaviour or welfare for a second- or third-order solution. On every route, the steady state must solve and the Blanchard–Kahn conditions must hold (as many explosive eigenvalues as forward-looking variables) before any result can be read. In upload mode the tool prepares and checks the data in your browser; the model is solved and estimated in Dynare.</div>
+</main>
+<footer><div class="wrap foot"><span><b>Tuhin G. M. Al Mamun, Ph.D.</b> · DSGE Research Guide</span><span><a href="../research-guide/index.html">Time-Series Guide</a> · <a href="../panel-data-guide/index.html">Panel-Data Guide</a> · <a href="../causal-inference-guide/index.html">Causal Inference</a> · © <span id="year"></span></span></div></footer>
+
+<script type="text/plain" id="py-src">#PYSRC#</script>
+<script>
+const X=/*EXPORTS*/;
+const PYO='https://cdn.jsdelivr.net/pyodide/v0.27.2/full/';
+const MODELS={
+ RBC:{g:'rbc',name:'Real business cycle model',short:'RBC',when:'Explain a mechanism, no nominal rigidities',why:'The mechanism runs through productivity, capital accumulation and labour supply, and money and price rigidities play no role. The canonical RBC model is the smallest model with those channels, and the benchmark every richer model is compared with.',steps:['Equations, timing and the steady state','check: Blanchard–Kahn conditions','Impulse responses to a technology shock','Model moments (HP-filtered) against the data','Calibration table and sensitivity'],dyn:'steady_state_model; check; stoch_simul(order=1, hp_filter=1600)'},
+ NK:{g:'nk',name:'Three-equation New Keynesian model',short:'NK',when:'Explain a mechanism with nominal rigidities',why:'The question involves monetary policy, inflation or demand, so sticky prices matter. The three-equation model (IS curve, Phillips curve, Taylor rule) is the workhorse: small enough to understand every result, rich enough for policy questions.',steps:['IS curve, Phillips curve and policy rule','Determinacy: the Taylor principle','Impulse responses to policy, demand and cost-push shocks','Variance decomposition','Comparing policy rules'],dyn:'model(linear); check; stoch_simul(order=1, irf=20)'},
+ SOE:{g:'soe',name:'Small open-economy New Keynesian model',short:'Open economy',when:'Explain a mechanism in an open economy',why:'Exchange rates, the terms of trade or imported inflation matter for the question. The Galí–Monacelli model adds them to the New Keynesian model, and the macro language switches between monetary regimes in one file.',steps:['Domestic and CPI inflation, terms of trade, exchange rate','Regimes with the macro language (@#if)','Impulse responses under each regime','Volatilities and the welfare loss','Which regime and why'],dyn:'@#define RULE = 0; model(linear); stoch_simul'},
+ ID:{g:'identification',name:'Identification check',short:'Identification',when:'Before estimating: which parameters can the data pin down?',why:'A parameter is identified only if changing it changes what the model implies for the observables. Dynare’s identification command checks this at the prior, before any estimation, and finds parameters that are not identified or that move together.',steps:['Declare the observables and the estimated parameters','identification: rank tests (Iskrev, Komunjer–Ng, Qu–Tkachenko)','Weak identification and collinearity','Fix or reparameterise what is not identified','Report the check in the paper'],dyn:'varobs y pi R; estimated_params; identification(advanced=1)'},
+ EST:{g:'estimation',name:'Bayesian estimation of a small model',short:'Estimation',when:'Estimate with data: a small model, three observables or fewer',why:'The parameters should come from the data, and the question needs only a few observables (output, inflation, the policy rate). A small New Keynesian model estimated by Bayesian methods gives posterior distributions, impulse responses with uncertainty and a historical shock decomposition.',steps:['Observables and measurement equations','Priors','Posterior mode and Metropolis–Hastings','Convergence: acceptance rate and R-hat','Posterior estimates, Bayesian IRFs, shock decomposition'],dyn:'estimation(datafile=…, mode_compute=5, mh_replic=…, bayesian_irf)'},
+ MED:{g:'medium',name:'Medium-scale New Keynesian model',short:'Medium-scale',when:'Estimate with data: four or more observables',why:'The question involves investment, consumption dynamics or several shocks at once. A Smets–Wouters-type model with capital, habit formation, investment adjustment costs and indexation can be estimated on output, consumption, investment, inflation and the policy rate.',steps:['Capital, habits, adjustment costs and indexation','Five observables and six shocks','Estimation and convergence','Posterior estimates against the priors','Variance decomposition by shock'],dyn:'estimation(datafile=…, moments_varendo, …) dy dc dinv pi R'},
+ OPT:{g:'optimal',name:'Optimal monetary policy',short:'Optimal policy',when:'Design policy: commitment, discretion or a simple rule',why:'The question is how policy should be set, not how it was set. The model is solved under commitment (Ramsey), under discretion and with an optimised simple rule, and the three are compared by the central bank’s loss.',steps:['Loss function and constraints','Commitment: ramsey_model','Discretion: discretionary_policy','Optimised simple rule: osr','Losses, volatilities and impulse responses'],dyn:'ramsey_model / discretionary_policy / osr'},
+ ZLB:{g:'zlb',name:'Occasionally binding constraint (OccBin)',short:'ZLB · OccBin',when:'Nonlinearity: a constraint that binds sometimes',why:'A constraint binds only in some states: the zero lower bound, a borrowing or collateral limit. A linear solution ignores it. OccBin solves the model piecewise, switching between the slack and the binding regime.',steps:['Equations for both regimes with tags','occbin_constraints','A deep demand shock: linear against OccBin','Duration at the bound','Sensitivity: the inflation target'],dyn:'occbin_constraints; occbin_setup; occbin_solver'},
+ HO:{g:'higher',name:'Higher-order solution and welfare',short:'Higher order',when:'Nonlinearity: risk, asymmetry, welfare',why:'The question involves risk, the average effect of volatility, asymmetric responses or welfare. A first-order solution cannot answer it: by certainty equivalence, uncertainty has no effect on averages. A second-order solution with pruning can.',steps:['A welfare recursion in the model','stoch_simul(order=2, pruning)','Risk-adjusted means: precautionary saving','Welfare cost of business cycles','Asymmetry and scaling with shock size'],dyn:'stoch_simul(order=2, pruning, k_order_solver)'}
+};
+const $=s=>document.querySelector(s), el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches, D=reduce?0:1;
+const fmt=(v,d=3)=>v==null||!isFinite(v)?'–':Number(v).toFixed(d), pf=p=>p==null?'–':(p<0.001?'<0.001':p.toFixed(3));
+let run=0;
+
+/* ---------- decision tree ---------- */
+const N={start:[380,22,120,'Your model'],ss:[380,72,176,'Steady state solves?',0,1],bk:[380,122,196,'Blanchard–Kahn holds?',0,1],goal:[380,172,200,'What is the model for?'],
+ mech:[100,236,156,'Explain a mechanism'],est:[300,236,120,'Estimate it'],pol:[490,236,124,'Design policy'],nl:[660,236,128,'Nonlinearity'],
+ nom:[100,304,124,'Sticky prices?'],RBC:[40,374,56,'RBC',1],opn:[160,374,120,'Open economy?'],NK:[110,444,50,'NK',1],SOE:[194,444,56,'SOE',1],
+ ID:[300,304,124,'Identification',1],size:[300,374,120,'Observables?'],EST:[262,444,84,'Small',1],MED:[362,444,104,'Medium-scale',1],
+ OPT:[490,304,126,'Optimal policy',1],kind:[660,304,120,'Which kind?'],ZLB:[600,374,92,'OccBin',1],HO:[710,374,100,'Higher order',1]};
+const E=[['start','ss'],['ss','bk'],['bk','goal'],['goal','mech'],['goal','est'],['goal','pol'],['goal','nl'],['mech','nom'],['nom','RBC','no'],['nom','opn','yes'],['opn','NK','no'],['opn','SOE','yes'],
+ ['est','ID'],['ID','size'],['size','EST','≤ 3'],['size','MED','≥ 4'],['pol','OPT'],['nl','kind'],['kind','ZLB','bound'],['kind','HO','risk']];
+const TL={start:'Your model',ss:'Steady state',bk:'Blanchard–Kahn',goal:'Purpose',mech:'Mechanism',est:'Estimate',pol:'Policy design',nl:'Nonlinearity',nom:'Sticky prices?',opn:'Open economy?',size:'Observables',kind:'Kind of nonlinearity'};
+const G=['start','ss','bk','goal'];
+function pathTo(m){return G.concat({RBC:['mech','nom','RBC'],NK:['mech','nom','opn','NK'],SOE:['mech','nom','opn','SOE'],ID:['est','ID'],EST:['est','ID','size','EST'],MED:['est','ID','size','MED'],OPT:['pol','OPT'],ZLB:['nl','kind','ZLB'],HO:['nl','kind','HO']}[m])}
+function drawTree(){
+ const H=16;let s='<svg viewBox="0 0 760 470" role="img" aria-label="Decision tree from research question to DSGE workflow">';
+ for(const [a,b,lab] of E){const A=N[a],B=N[b];const my=(A[1]+B[1])/2;const d=`M${A[0]} ${A[1]+H}V${my}H${B[0]}V${B[1]-H}`;
+  const lx=A[0]===B[0]?A[0]+18:(A[0]+B[0])/2,ly=A[0]===B[0]?my+4:my-5;
+  s+=`<path class="e" id="e-${a}-${b}" pathLength="1" d="${d}"/>`;if(lab)s+=`<text class="el" x="${lx}" y="${ly}">${lab}</text>`}
+ for(const k in N){const [x,y,w,t,leaf,gate]=N[k];s+=`<g class="n${leaf?' leaf':''}${gate?' gate':''}" id="n-${k}"><rect x="${x-w/2}" y="${y-H}" width="${w}" height="${2*H}" rx="${leaf?16:8}"/><text x="${x}" y="${y}">${t}</text></g>`}
+ $('#tree').innerHTML=s+'</svg>';
+}
+let lit=new Set(),tEnd=0;
+function resetTree(){lit=new Set();tEnd=0;document.querySelectorAll('.tree .on,.tree .hl,.tree .alt').forEach(e=>e.classList.remove('on','hl','alt'));$('#trail').innerHTML=''}
+function light(path,labels={},final=true){
+ const my=run,now=performance.now();let at=Math.max(now,tEnd);
+ path.forEach((id,i)=>{if(lit.has(id))return;lit.add(id);const wait=at-now;at+=360*D;
+  setTimeout(()=>{if(my!==run)return;const n=$('#n-'+id);n&&n.classList.add('on');if(i>0){const e=document.getElementById(`e-${path[i-1]}-${id}`);e&&e.classList.add('hl')}
+   const t=$('#trail');if(t.children.length)t.appendChild(el('i','','→'));const isLeaf=!!MODELS[id];t.appendChild(el('span',isLeaf&&final?'final':'',esc(labels[id]||(MODELS[id]?MODELS[id].short:TL[id])||id)))},wait)});
+ tEnd=at;return at-now;
+}
+
+/* ---------- charts ---------- */
+const W_=520,H_=220,PL=46,PR=10,PT=10,PB=26;
+function frame(xs,ys,opt={}){const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys,opt.zero?0:Infinity),y1=Math.max(...ys,opt.zero?0:-Infinity),ry=(y1-y0)||1,rx=(x1-x0)||1;
+ const sx=x=>PL+(x-x0)/rx*(W_-PL-PR),sy=y=>PT+(1-(y-(y0-ry*.06))/(ry*1.12))*(H_-PT-PB);
+ let g=`<line class="ax" x1="${PL}" x2="${W_-PR}" y1="${H_-PB}" y2="${H_-PB}"/><line class="ax" x1="${PL}" x2="${PL}" y1="${PT}" y2="${H_-PB}"/>`;
+ [y0,(y0+y1)/2,y1].forEach(v=>{g+=`<text x="${PL-5}" y="${sy(v)+3}" text-anchor="end">${+v.toPrecision(3)}</text>`});
+ if(opt.xl)opt.xl.forEach(([v,l])=>{g+=`<text x="${sx(v)}" y="${H_-PB+14}" text-anchor="middle">${esc(l)}</text>`});
+ if(opt.zero&&y0<0&&y1>0)g+=`<line class="zero" x1="${PL}" x2="${W_-PR}" y1="${sy(0)}" y2="${sy(0)}"/>`;
+ if(opt.hline!=null)g+=`<line class="tv" x1="${PL}" x2="${W_-PR}" y1="${sy(opt.hline)}" y2="${sy(opt.hline)}"/>`;
+ return {sx,sy,g}}
+const svg=g=>`<div class="chart"><svg viewBox="0 0 ${W_} ${H_}" preserveAspectRatio="xMidYMid meet">${g}</svg></div>`;
+function lines(series,labels,opt={}){const cls=opt.cls||['s0','s1','s2','s3'];const n=labels?labels.length:series[0].length,xs=[...Array(n).keys()];
+ const ys=[].concat(...series.map(s=>s.filter(v=>v!=null&&isFinite(v))),...(opt.band?[opt.band[0],opt.band[1]]:[]));
+ labels=labels||xs.map(String);const step=Math.max(1,Math.ceil(n/7)),xl=xs.filter(i=>i%step===0).map(i=>[i,labels[i]]);
+ const F=frame(xs,ys,{xl,zero:opt.zero!==false,hline:opt.hline});let g=F.g;
+ if(opt.band){const [lo,hi]=opt.band;let d='M'+xs.map(i=>F.sx(i).toFixed(1)+' '+F.sy(hi[i]).toFixed(1)).join('L')+'L'+xs.slice().reverse().map(i=>F.sx(i).toFixed(1)+' '+F.sy(lo[i]).toFixed(1)).join('L')+'Z';g+=`<path class="band" d="${d}"/>`}
+ series.forEach((s,k)=>{let d='',pen=false;s.forEach((v,i)=>{if(v==null||!isFinite(v)){pen=false;return}d+=(pen?'L':'M')+F.sx(i).toFixed(1)+' '+F.sy(v).toFixed(1);pen=true});g+=`<path class="${cls[k]}" d="${d}"/>`});
+ return svg(g)}
+function bars(vals,labels,vals2){const n=vals.length,all=vals.concat(vals2||[],[0]);const F=frame([-0.6,n-0.4],all,{zero:true,xl:labels.map((l,i)=>[i,l])});let g=F.g;const w=(F.sx(1)-F.sx(0))*(vals2?0.36:0.6);
+ vals.forEach((v,i)=>{const x=F.sx(i)-(vals2?w:w/2),y=Math.min(F.sy(v),F.sy(0));g+=`<rect class="bar" x="${x}" y="${y}" width="${w}" height="${Math.abs(F.sy(v)-F.sy(0))}"/>`});
+ if(vals2)vals2.forEach((v,i)=>{const x=F.sx(i),y=Math.min(F.sy(v),F.sy(0));g+=`<rect class="bar b" x="${x}" y="${y}" width="${w}" height="${Math.abs(F.sy(v)-F.sy(0))}"/>`});
+ return svg(g)}
+const Q=n=>[...Array(n).keys()].map(String);
+const legend=(...a)=>`<div class="legend">${a.map((t,i)=>`<i class="${['','b','c','d'][i]}"></i>${t}`).join('')}</div>`;
+const tbl=(head,rows)=>`<div class="tw"><table><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</table></div>`;
+const mod=(c,file)=>`<details class="code"><summary>Dynare code for this step</summary><pre>${esc(c)}</pre>${file?`<a class="dl" href="models/${file}" download>Download ${file.split('/').pop()} →</a>`:''}</details>`;
+
+/* ---------- steps ---------- */
+function addStep(n,title,html,delay){const s=el('div','step',`<div class="label">Step ${n}</div><h3>${title}</h3>${html}`);$('#steps').appendChild(s);const my=run;setTimeout(()=>{if(my!==run)return;s.classList.add('in');if(n>1&&!reduce)s.scrollIntoView({behavior:'smooth',block:'nearest'})},delay);return s}
+function later(st,f,extra=0){const my=st.my;setTimeout(()=>{if(my!==run)return;f()},st.t+extra)}
+function begin(){const my=++run;$('#steps').innerHTML='';$('#result').innerHTML='';resetTree();light(['start']);return {my,t:150,gap:900*D,k:1}}
+function step(st,title,html,path){addStep(st.k++,title,html,st.t);if(path)later(st,()=>light(path),300*D);st.t+=st.gap}
+function gates(st,ex){const bk=ex&&ex.n_explosive!=null?`<li><b>Blanchard–Kahn.</b> ${ex.n_explosive} eigenvalues larger than one in modulus, for ${ex.n_forward} forward-looking variables. <span class="yes">Equal numbers: a unique stable solution.</span></li>`:`<li><b>Blanchard–Kahn.</b> <span class="yes">Dynare's rank condition is verified</span>: the model has a unique stable solution at this calibration.</li>`;
+ step(st,'Gates: steady state and Blanchard–Kahn',`<details class="explain" open><summary>Why every route starts here</summary><p>A DSGE result means nothing until two checks pass. The <b>steady state</b> must solve: Dynare's <code>steady</code> finds the point around which the model is approximated (and <code>resid</code> shows which equation fails if it does not). The <b>Blanchard–Kahn conditions</b> must hold: Dynare's <code>check</code> counts the eigenvalues larger than one; if there are more than the forward-looking variables there is no stable solution, if fewer there are many (indeterminacy).</p></details><div class="urv"><ol><li><b>Steady state.</b> <span class="yes">Solved</span>${ex&&ex.ssnote?': '+ex.ssnote:'.'}</li>${bk}</ol></div>`+mod('steady;\ncheck;'),['start','ss','bk','goal'])}
+function finish(m,ev,caution,alt){const my=run,M=MODELS[m];const d=light(pathTo(m));if(alt){const a=$('#n-'+alt);a&&a.classList.add('alt')}
+ setTimeout(()=>{if(my!==run)return;
+  $('#result').innerHTML=`<div class="result"><div class="label">Recommended workflow</div><h2>${M.name}</h2><p>${M.why}${ev?' <b>In this example:</b> '+ev:''}</p>${caution?`<div class="caution"><b>Check before you write.</b> ${caution}</div>`:''}<div class="label" style="margin-bottom:6px">What the paper needs</div><ul>${M.steps.map(s=>`<li>${s}</li>`).join('')}</ul><p class="sub" style="margin:4px 0 10px">Key Dynare commands: <code>${esc(M.dyn)}</code></p><div class="acts"><a class="btn" href="${M.g}.html">Go to the ${M.short} guide →</a>${alt?`<a class="btn ghost" href="#g-${alt}" data-go="${alt}">Compare: ${MODELS[alt].short}</a>`:''}${ev?'':'<button class="btn ghost" type="button" id="again">Start again</button>'}</div></div>`;
+  $('#result').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});const ag=$('#again');ag&&ag.addEventListener('click',()=>setMode('ask'))},d+250*D)}
+
+/* ---------- the nine examples ---------- */
+const EX=[
+ {k:'RBC',meta:'Calibrated · U.S. moments 1966–2007',title:'Real business cycle model',desc:'Technology shocks, capital and labour supply; does the model reproduce U.S. business-cycle volatility?',run(st){const r=X.rbc,id=n=>r.ss_names.indexOf(n);
+  step(st,'The model',`<p>A representative household chooses consumption and hours; a firm produces with capital and labour; productivity follows an AR(1). Variables are in logs, so impulse responses are percent deviations. The steady state is written in closed form in a <code>steady_state_model</code> block, and the disutility of work is backed out so that households work a third of their time.</p>`+mod(`var y c i k h w r a;\nvarexo e;\nparameters alpha beta delta rho sigma_e psi;\nalpha = 0.33; beta = 0.99; delta = 0.025; rho = 0.95; sigma_e = 0.0072;\nmodel;\n  1/exp(c) = beta/exp(c(+1)) * (exp(r(+1)) + 1 - delta);\n  psi*exp(c) = exp(w) * (1 - exp(h));\n  exp(y) = exp(a) * exp(k(-1))^alpha * exp(h)^(1-alpha);\n  ...\nend;`,'rbc/rbc.mod'),['start']);
+  gates(st,{n_explosive:r.n_explosive,n_forward:r.n_forward,ssnote:`capital–output ratio ${fmt(Math.exp(r.ss[id('k')]-r.ss[id('y')])/4,1)} (annual), investment share ${fmt(100*Math.exp(r.ss[id('i')]-r.ss[id('y')]),0)}%, hours ${fmt(Math.exp(r.ss[id('h')]),3)}`});
+  later(st,()=>light(['mech','nom'],{nom:'No sticky prices'}),-st.gap+500*D);
+  const I=r.irf,n=I.y.length;
+  step(st,'Impulse responses to a technology shock',lines([I.y,I.c,I.i.map(v=>v/3),I.h],Q(n))+legend('output','consumption','investment ÷ 3','hours')+`<p>A one-standard-deviation productivity shock raises output by ${fmt(I.y[0],2)}% on impact. Investment rises ${fmt(I.i[0]/I.y[0],1)} times as much as output, and consumption rises gradually: households smooth consumption and save the windfall through capital.</p>`+mod('stoch_simul(order=1, irf=40, hp_filter=1600) y c i h;'));
+  step(st,'Model against U.S. data',tbl(['HP-filtered','sd output','sd(c) / sd(y)','sd(i) / sd(y)'],[['U.S. data 1966–2007',fmt(r.sd_data[0],2)+'%',fmt(r.sd_data[1]/r.sd_data[0],2),fmt(r.sd_data[2]/r.sd_data[0],2)],['RBC model',fmt(r.sd_model[0],2)+'%',fmt(r.sd_model[1]/r.sd_model[0],2),fmt(r.sd_model[2]/r.sd_model[0],2)]])+`<p>Technology shocks alone generate ${fmt(100*r.sd_model[0]/r.sd_data[0],0)}% of the volatility of U.S. output and get the ranking right (investment more volatile than output, consumption less), but consumption is too smooth. That gap is what richer models, and the next routes, try to close.</p>`);
+  later(st,()=>finish('RBC',`two explosive eigenvalues for two forward-looking variables; a technology shock raises output ${fmt(I.y[0],2)}% on impact; the model produces ${fmt(100*r.sd_model[0]/r.sd_data[0],0)}% of the volatility of U.S. output.`,'',  'NK'))}},
+ {k:'NK',meta:'Calibrated · Galí (2015)',title:'Three-equation New Keynesian model',desc:'IS curve, Phillips curve and a Taylor rule; which shocks drive output and inflation?',run(st){const r=X.nk;
+  step(st,'The model',`<p>Three linear equations in the output gap <i>x</i>, inflation <i>π</i> and the policy rate <i>i</i>, with a demand shock, a cost-push shock and a monetary policy shock. Written in <code>model(linear)</code>, so Dynare needs no steady state. The slope of the Phillips curve implied by the Galí calibration is κ = ${fmt(r.kappa,3)}.</p>`+mod(`model(linear);\n  x  = x(+1) - 1/sigma*(i - pi(+1) - rn);      // IS curve\n  pi = beta*pi(+1) + kappa*x + u;              // Phillips curve\n  i  = phi_pi*pi + phi_x*x + v;                // Taylor rule\n  rn = rho_r*rn(-1) + e_r;  u = rho_u*u(-1) + e_u;  v = rho_v*v(-1) + e_v;\nend;`,'nk/nk.mod'),['start']);
+  gates(st,{n_explosive:r.n_explosive,n_forward:r.n_forward,ssnote:'all variables are deviations from a zero steady state (linear model)'});
+  later(st,()=>light(['mech','nom','opn'],{nom:'Sticky prices',opn:'Closed economy'}),-st.gap+500*D);
+  const n=r.irf_v.x.length;
+  step(st,'Impulse responses',lines([r.irf_v.x,r.irf_v.pi,r.irf_v.i],Q(n))+legend('output gap','inflation','policy rate')+`<p>A monetary tightening (policy-rate shock) lowers the output gap by ${fmt(-r.irf_v.x[0],2)}% and inflation by ${fmt(-r.irf_v.pi[0],2)} points on impact. A cost-push shock instead raises inflation (${fmt(r.irf_u.pi[0],2)}) while output falls (${fmt(r.irf_u.x[0],2)}): the trade-off that makes policy hard.</p>`);
+  step(st,'Variance decomposition',tbl(['Variable','Demand','Cost-push','Policy'],[['Output gap',...r.vardec[0].map(v=>fmt(v,1)+'%')],['Inflation',...r.vardec[1].map(v=>fmt(v,1)+'%')],['Policy rate',...r.vardec[2].map(v=>fmt(v,1)+'%')]])+`<p>In this calibration demand shocks explain ${fmt(r.vardec[0][0],0)}% of the output gap and ${fmt(r.vardec[1][0],0)}% of inflation. The shares follow from the calibrated shock variances, which is why an estimated model (the estimation route) is needed before such shares can be reported as facts about an economy.</p>`+mod('stoch_simul(order=1, irf=20) x pi i;'));
+  later(st,()=>finish('NK',`determinacy holds (${r.n_explosive} explosive eigenvalues, ${r.n_forward} forward-looking variables); demand shocks explain ${fmt(r.vardec[0][0],0)}% of output-gap variance.`,'',  'OPT'))}},
+ {k:'SOE',meta:'Calibrated · Galí–Monacelli (2005)',title:'Small open economy: four monetary regimes',desc:'Domestic-inflation targeting, two Taylor rules and an exchange-rate peg, compared by volatility and welfare.',run(st){const r=X.soe,nm=['Domestic inflation targeting','Taylor rule, domestic inflation','Taylor rule, CPI inflation','Exchange-rate peg'];
+  step(st,'The model',`<p>The Galí–Monacelli small open economy: domestic and CPI inflation differ by the change in the terms of trade, and the nominal exchange rate links the two. A world productivity shock drives the economy. One <code>.mod</code> file holds all four monetary regimes, selected with the macro language: <code>dynare soe -DRULE=2</code>.</p>`+mod(`@#ifndef RULE\n  @#define RULE = 0\n@#endif\nmodel(linear);\n  ...\n@#if RULE == 0\n  pih = 0;                                      // domestic inflation targeting\n@#elseif RULE == 3\n  e = 0;                                        // exchange-rate peg\n@#else\n  ...\n@#endif\nend;`,'soe/soe.mod'),['start']);
+  gates(st,{ssnote:'linear model in deviations from steady state'});
+  later(st,()=>light(['mech','nom','opn'],{nom:'Sticky prices',opn:'Trade matters'}),-st.gap+500*D);
+  step(st,'Volatility and welfare under each regime',tbl(['Regime','sd output','sd domestic inflation','sd CPI inflation','Welfare loss'],r.names.map((k,i)=>[nm[i],fmt(r[k].sd[0],3),fmt(r[k].sd[1],3),fmt(r[k].sd[2],3),fmt(r.loss[i],2)]))+bars(r.loss,['DIT','DITR','CITR','PEG'])+`<p>Domestic-inflation targeting is optimal in this model (loss ${fmt(r.loss[0],2)}): stabilising domestic prices removes the price-dispersion cost. Among simple rules, the CPI-inflation Taylor rule does best here; the peg is costly because the exchange rate cannot absorb the shock.</p>`);
+  const n=r.DIT.y.length;
+  step(st,'How the exchange rate moves',lines([r.DIT.e,r.CITR.e,r.PEG.e],Q(n))+legend('exchange rate, DIT','exchange rate, CPI rule','exchange rate, peg')+`<p>Under floating regimes the exchange rate does the adjusting; under the peg it stays fixed and output and inflation adjust instead. Under the floats the exchange rate has a unit root, so its unconditional standard deviation does not exist.</p>`);
+  later(st,()=>finish('SOE',`domestic-inflation targeting gives the lowest loss; the peg's loss is ${fmt(r.loss[3],2)}.`,'',  'NK'))}},
+ {k:'ID',meta:'An–Schorfheide model · at the prior',title:'Identification before estimation',desc:'Which parameters of a small New Keynesian model can three observables pin down?',run(st){
+  step(st,'The setup',`<p>The An–Schorfheide (2007) model with output, inflation and the policy rate as observables, and the parameters that will later be estimated. Dynare's <code>identification</code> command evaluates, at the prior mean, whether each parameter changes the model's implications for the observables.</p>`+mod(`varobs y pi R;\nestimated_params;\n  tau, gamma_pdf, 2, 0.5;  kappa, gamma_pdf, 0.3, 0.1;  psi1, gamma_pdf, 1.5, 0.25;\n  ...\nend;\nidentification(advanced=1);`,'identification/as_id.mod'),['start']);
+  gates(st,{ssnote:'closed-form steady state'});
+  later(st,()=>light(['est'],{}),-st.gap+500*D);
+  step(st,'Rank tests',tbl(['Test','Based on','Result'],[['Komunjer–Ng','the minimal state-space system','<span class="yes">all parameters identified</span>'],['Iskrev','the moments of the observables','psi1, psi2, rho_R, SE_e_R weakly identified'],['Qu–Tkachenko','the spectral density','psi1, psi2, rho_R, SE_e_R weakly identified']])+`<p>The policy-rule parameters are identified in the full model but hard to learn from second moments: a well-known result (Cochrane 2011) because, in equilibrium, a determinate Taylor rule leaves little trace of its own coefficients. Expect wide posteriors for them, close to the prior.</p>`);
+  step(st,'A model that is not identified',`<p>A variant estimates the Calvo parameter θ and the labour-supply elasticity φ separately, though they enter the model only through the slope of the Phillips curve. Dynare finds <b>[φ, θ] pairwise collinear in every test</b>: no data can separate them. Fix one, or estimate the slope κ directly.</p>`+mod(`// kappa = (1-theta)*(1-beta*theta)/theta * (sigma + varphi)\nestimated_params;\n  theta, beta_pdf, 0.75, 0.05;\n  varphi, gamma_pdf, 1, 0.3;\n  ...\nend;\nidentification;`,'identification/as_bad.mod'));
+  later(st,()=>finish('ID','Komunjer–Ng finds all parameters identified; moment-based tests flag the policy-rule parameters as weakly identified; θ and φ cannot be estimated together.','',  'EST'))}},
+ {k:'EST',meta:'U.S. data · 1966Q1–2007Q4',title:'Bayesian estimation, small model',desc:'An–Schorfheide model estimated on output growth, inflation and the federal funds rate.',run(st){const r=X.estimation;
+  step(st,'Data and measurement',`<p>Three observables, 168 quarters: GDP growth, GDP-deflator inflation (annualised) and the federal funds rate, demeaned. Three observables and three shocks, so the likelihood is not singular. Measurement equations link each series to a model variable.</p>`+mod(`varobs y_obs pi_obs R_obs;\nmodel;\n  ...\n  y_obs  = y - y(-1) + z;        // output growth\n  pi_obs = 4*pi;                 // annualised inflation\n  R_obs  = 4*R;                  // annualised policy rate\nend;`,'estimation/as.mod'),['start']);
+  gates(st,{ssnote:'closed-form steady state at every draw'});
+  later(st,()=>light(['est','ID','size'],{size:'3 observables'}),-st.gap+500*D);
+  if(!r)return later(st,()=>finish('EST'));
+  step(st,'Posterior estimates and convergence',tbl(['Parameter','Prior mean','Posterior mean','90% interval','R-hat'],r.names.map((n,i)=>[/^e_/.test(n)?'sd '+n:n,fmt(r.prior_mean[i],3),fmt(r.post_mean[i],3),`[${fmt(r.q05[i],3)}, ${fmt(r.q95[i],3)}]`,fmt(r.rhat[i],3)]))+`<p>Acceptance rates by chain: ${r.acc.map(a=>fmt(a,2)).join(', ')} (the usual target is 0.2–0.4). Gelman–Rubin R-hat ${Math.max(...r.rhat)<1.1?'is below 1.1 for every parameter':'exceeds 1.1 for some parameter: run longer chains'}. Log marginal data density (modified harmonic mean): ${fmt(r.mdd,2)}.</p>`+mod("estimation(datafile='us_small_demeaned.csv', mode_compute=5, mh_replic=10000,\n           mh_nblocks=2, mh_jscale=0.6, mh_drop=0.5, bayesian_irf, irf=16) y pi R;"));
+  step(st,'Bayesian impulse responses to a policy shock',lines([r.irf_y],Q(r.irf_y.length),{band:[r.irf_y_lo,r.irf_y_hi]})+legend('output: posterior mean')+`<p>Shaded: 90% highest posterior density band. A contractionary policy shock lowers output, with the uncertainty from the whole posterior, not only the mode.</p>`);
+  const i1=r.names.indexOf('psi1');
+  later(st,()=>finish('EST',`the posterior mean of the inflation response psi1 is ${fmt(r.post_mean[i1],2)} [${fmt(r.q05[i1],2)}, ${fmt(r.q95[i1],2)}]; max R-hat ${fmt(Math.max(...r.rhat),3)}.`,Math.max(...r.rhat)>1.1?'Some R-hat exceeds 1.1: run longer chains before reporting.':'The chains in this example are short so the page can be rebuilt quickly; a paper should use longer chains (several hundred thousand draws) and report convergence diagnostics.','MED'))}},
+ {k:'MED',meta:'U.S. data · 5 observables',title:'Medium-scale New Keynesian model',desc:'Capital, habits, investment adjustment costs and indexation, estimated on five U.S. series.',run(st){const r=X.medium;
+  step(st,'Data and model',`<p>Five observables (output, consumption and investment growth, inflation, the federal funds rate) and six shocks, so the likelihood is not singular. The model adds habit formation, investment adjustment costs, variable capital and price indexation to the New Keynesian core, in the spirit of Smets and Wouters (2007).</p>`+mod(`varobs dy dc dinv pi_obs R_obs;\nestimation(datafile='us_medium_demeaned.csv', mode_compute=5, mh_replic=4000,\n           mh_nblocks=2, mh_jscale=0.25, moments_varendo);`,'medium/med.mod'),['start']);
+  gates(st,{ssnote:'steady state computed from the parameters at every draw'});
+  later(st,()=>light(['est','ID','size'],{size:'5 observables'}),-st.gap+500*D);
+  if(!r)return later(st,()=>finish('MED'));
+  const show=['h','xi_p','psi_pi','rho_R','phi_i','iota_p'].map(n=>r.names.indexOf(n)).filter(i=>i>=0);
+  step(st,'Posterior estimates',tbl(['Parameter','Prior mean','Posterior mean'],show.map(i=>[r.names[i].replace('_','​_'),fmt(r.prior_mean[i],3),fmt(r.post_mean[i],3)]))+`<p>Selected structural parameters. A posterior far from its prior means the data were informative; one that equals the prior is a warning sign (go back to the identification route).</p>`);
+  if(r.vd)step(st,'What drives output?',bars(r.vd[0],r.shocks)+`<p>Share of the variance of output explained by each shock, averaged over the posterior draws. The investment-specific shock explains more than half: a familiar warning sign in medium-scale models.</p>`);
+  later(st,()=>finish('MED',`${r.names.length} estimated parameters on five observables; habits h = ${fmt(r.post_mean[r.names.indexOf('h')],2)}, Calvo ξ<sub>p</sub> = ${fmt(r.post_mean[r.names.indexOf('xi_p')],2)} (prices fixed for about ${Math.round(1/(1-r.post_mean[r.names.indexOf('xi_p')]))} quarters, a symptom of the missing wage rigidity).`,'The chains in this example are short so the page can be rebuilt quickly; a medium-scale model needs long chains and careful convergence checks before the results are reported.','EST'))}},
+ {k:'OPT',meta:'Calibrated NK · cost-push shocks',title:'Optimal monetary policy',desc:'Commitment, discretion and an optimised Taylor rule, compared by the central bank’s loss.',run(st){const r=X.optimal;
+  step(st,'The policy problem',`<p>The central bank minimises a quadratic loss in inflation and the output gap subject to the New Keynesian Phillips curve and IS curve. One file, three solutions: <code>ramsey_model</code> (commitment), <code>discretionary_policy</code> and <code>osr</code> (the best rule of the form <i>i = φ<sub>π</sub>π + φ<sub>x</sub>x</i>).</p>`+mod(`planner_objective pi^2 + lambda*x^2;\n@#if POL == 1\n  ramsey_model(planner_discount=0.99, instruments=(i));\n@#elseif POL == 2\n  discretionary_policy(instruments=(i), irf=20);\n@#else\n  osr_params phi_pi phi_x;  osr;\n@#endif`,'optimal/opt.mod'),['start']);
+  gates(st,{ssnote:'zero steady state'});
+  later(st,()=>light(['pol']),-st.gap+500*D);
+  step(st,'Losses and volatilities',tbl(['Policy','Loss','sd output gap','sd inflation','sd policy rate'],r.names.map((n,i)=>[n,fmt(r.loss[i],4),fmt(r.sdx[i],3),fmt(r.sdpi[i],3),fmt(r.sdi[i],3)]))+`<p>Discretion raises the loss by ${fmt(100*(r.loss[1]/r.loss[0]-1),0)}% relative to commitment: the stabilisation bias. The optimised simple rule hits the upper bound on φ<sub>π</sub> (${fmt(r.coef[0],1)}) and still does worse than discretion here (+${fmt(100*(r.loss[2]/r.loss[0]-1),0)}%).</p>`);
+  const n=r.irf_pi[0].length;
+  step(st,'Inflation after a cost-push shock',lines(r.irf_pi,Q(n))+legend(...r.names)+`<p>Under commitment inflation undershoots after the first quarter: promising future restraint lowers expected inflation today, so the price level returns to where it started.</p>`);
+  later(st,()=>finish('OPT',`commitment loss ${fmt(r.loss[0],4)}, discretion ${fmt(r.loss[1],4)}, optimised rule ${fmt(r.loss[2],4)}.`,'',  'NK'))}},
+ {k:'ZLB',meta:'Calibrated NK · deep demand shock',title:'The zero lower bound with OccBin',desc:'How much deeper is a recession when the policy rate cannot fall below zero?',run(st){const r=X.zlb,n=r.x_occ.length;
+  step(st,'Two regimes',`<p>The same New Keynesian model, with the Taylor rule replaced by <i>i = 0</i> (in levels) whenever the rule would ask for a negative rate. Each equation that changes gets a tag for the slack and the binding regime, and <code>occbin_constraints</code> states when to switch.</p>`+mod(`[name='policy', relax='zlb']\ni = phi_pi*pi + phi_x*x;\n[name='policy', bind='zlb']\ni = ilb;\nend;\noccbin_constraints;\n  name 'zlb'; bind i < ilb; relax i > ilb;\nend;\nocc bin_setup; occbin_solver(simul_periods=40);`.replace('occ bin','occbin'),'zlb/zlb.mod'),['start']);
+  gates(st,{ssnote:'linear model; the bound is ilb in deviations from steady state'});
+  later(st,()=>light(['nl','kind'],{kind:'A bound'}),-st.gap+500*D);
+  step(st,'A deep demand shock: linear against OccBin',lines([r.i_lin,r.i_occ],Q(n),{hline:r.ilb})+legend('policy rate, linear','policy rate, OccBin')+lines([r.x_lin,r.x_occ],Q(n))+legend('output gap, linear','output gap, OccBin')+`<p>The linear solution lets the rate fall to ${fmt(r.i_lin[0],2)} (dashed line: the bound). With the bound imposed, the rate stays at it for ${r.nb} quarters and the output gap falls to ${fmt(r.x_occ[0],2)}% instead of ${fmt(r.x_lin[0],2)}%: ${fmt(r.x_occ[0]/r.x_lin[0],1)} times deeper.</p>`);
+  later(st,()=>finish('ZLB',`${r.nb} quarters at the bound; output gap trough ${fmt(r.x_occ[0],2)}% against ${fmt(r.x_lin[0],2)}% in the linear solution.`,'',  'HO'))}},
+ {k:'HO',meta:'Calibrated RBC · second order',title:'Risk, precautionary saving and welfare',desc:'What does uncertainty do to average capital and to welfare? A question a linear solution cannot answer.',run(st){const r=X.higher,n=r.up.length;
+  step(st,'Welfare in the model',`<p>The RBC model with a welfare recursion <i>W = u(c, h) + βE W(+1)</i> added as an equation, solved at second order with pruning. At second order the solution has a constant term that depends on the variance of the shocks: the risk adjustment.</p>`+mod(`W = log(exp(c)) + psi*log(1 - exp(h)) + beta*W(+1);\n...\nstoch_simul(order=2, pruning, irf=40);`,'higher/rbc2.mod'),['start']);
+  gates(st,{ssnote:'the same steady state as the first-order model'});
+  later(st,()=>light(['nl','kind'],{kind:'Risk and welfare'}),-st.gap+500*D);
+  step(st,'Risk-adjusted means',tbl(['Variable','Deterministic steady state','Mean at second order','Difference'],['output','consumption','capital','hours'].map((v,i)=>[v,fmt(r.ss[i],4),fmt(r.mean2[i],4),fmt(100*(r.mean2[i]-r.ss[i]),3)+'%']))+`<p>With uncertainty, households hold ${fmt(100*(r.mean2[2]-r.ss[2]),3)}% more capital on average: precautionary saving. The welfare cost of business cycles is ${fmt(r.welfare_cost,3)}% of consumption: negative, a small gain, because hours and capital respond to productivity and households exploit the good times.</p>`);
+  step(st,'Asymmetry: a positive against a negative shock',lines([r.up,r.down],Q(n))+legend('output after +3 sd shock','minus output after −3 sd shock')+`<p>The two lines almost coincide (${fmt(r.up[1],2)}% against ${fmt(r.down[1],2)}%): in this model asymmetry is virtually nil. Second-order terms matter for averages and welfare, not for the shape of impulse responses.</p>`);
+  later(st,()=>finish('HO',`precautionary capital +${fmt(100*(r.mean2[2]-r.ss[2]),3)}%; welfare cost of fluctuations ${fmt(r.welfare_cost,3)}% of consumption.`,'',  'ZLB'))}}
+];
+function initExamples(){EX.forEach(x=>{const b=el('button','',`<small>${esc(x.meta)}</small><b>${esc(x.title)}</b><span>${esc(x.desc)}</span>`);b.type='button';
+ b.addEventListener('click',()=>{document.querySelectorAll('.ex button').forEach(e=>e.classList.remove('sel'));b.classList.add('sel');const st=begin();x.run(st)});$('#ex').appendChild(b)})}
+
+/* ---------- mode: upload (Python in the browser) ---------- */
+let pyReady=null,csvText='',csvName='';
+function status(t){$('#status').classList.toggle('on',!!t);$('#status-text').textContent=t||''}
+function loadPy(){if(pyReady)return pyReady;pyReady=(async()=>{status('Loading Python. The first time takes about 15 seconds…');
+  await new Promise((res,rej)=>{const s=document.createElement('script');s.src=PYO+'pyodide.js';s.onload=res;s.onerror=()=>rej(new Error('Could not load Python. Check your internet connection and try again.'));document.head.appendChild(s)});
+  const py=await loadPyodide({indexURL:PYO});status('Loading pandas and statsmodels…');await py.loadPackage(['pandas','scipy','statsmodels']);py.runPython($('#py-src').textContent);return py})();
+ pyReady.catch(()=>{pyReady=null});return pyReady}
+function headerOf(text){const line=text.split(/\r?\n/).find(l=>l.trim())||'';const sep=[',',';','\t'].sort((a,b)=>line.split(b).length-line.split(a).length)[0];return line.split(sep).map(h=>h.trim().replace(/^"|"$/g,''))}
+async function loadFile(f){$('#upload-err').innerHTML='';++run;$('#steps').innerHTML='';$('#result').innerHTML='';resetTree();
+ try{if(f.size>8e6)throw new Error('The file is larger than 8 MB. Please upload a smaller CSV.');
+  csvText=await f.text();csvName=f.name;const H=headerOf(csvText);if(H.length<1)throw new Error('The file has no columns.');
+  const isDate=h=>/^(date|time|quarter|period|year|obs)$/i.test(h);
+  $('#r-obs').innerHTML=H.map(h=>`<option${isDate(h)?'':' selected'}>${esc(h)}</option>`).join('');
+  $('#r-date').innerHTML='<option value="">— none —</option>'+H.map(h=>`<option${isDate(h)?' selected':''}>${esc(h)}</option>`).join('');
+  $('#rolebox').hidden=false;status('')}
+ catch(e){$('#upload-err').innerHTML=`<div class="err">${esc(e.message||e)}</div>`}}
+async function runUpload(){$('#upload-err').innerHTML='';
+ const obs=[...$('#r-obs').selectedOptions].map(o=>o.value).filter(o=>o!==$('#r-date').value),k=Math.round(+$('#r-shocks').value);
+ try{if(!obs.length)throw new Error('Choose at least one observable.');if(!(k>=1))throw new Error('Enter the number of structural shocks in your model (a whole number, 1 or more).');
+  const py=await loadPy();status('Checking the series…');await new Promise(r=>setTimeout(r,30));
+  const R=JSON.parse(py.globals.get('check')(csvText,JSON.stringify({observables:obs,shocks:k})));status('');if(R.error)throw new Error(R.error);showData(R)}
+ catch(e){status('');$('#upload-err').innerHTML=`<div class="err">${esc(e.message||e)}</div>`}}
+function showData(R){const st=begin();
+ step(st,'Your data',`<p><b>${R.n_rows}</b> rows in ${esc(csvName)}; after transformations, <b>${R.n_obs}</b> usable periods for <b>${R.n_observables}</b> observable${R.n_observables>1?'s':''}.</p><div class="stats"><div class="stat"><b>${R.n_observables}</b><span>Observables</span></div><div class="stat"><b>${R.shocks}</b><span>Shocks</span></div><div class="stat"><b>${R.n_obs}</b><span>Periods</span></div><div class="stat"><b>${R.n_obs>=60?'OK':'Short'}</b><span>Sample length</span></div></div>`,['start']);
+ later(st,()=>light(['ss','bk','goal','est'],{}),-st.gap+400*D);
+ step(st,'Transformations and stationarity',tbl(['Series','Transformation','Mean','sd','ADF p','KPSS p','Verdict'],R.series.map(s=>[esc(s.name),s.how==='growth'?'100·Δlog (growth, %)':s.how==='diff'?'100·Δ of a log (growth, %)':'level',fmt(s.mean,3),fmt(s.sd,3),pf(s.adf_p),pf(s.kpss_p),s.verdict==='stationary'?'<span class="yes">stationary</span>':s.verdict==='non-stationary'?'<span class="no">non-stationary</span>':'unclear']))+
+  lines(R.series.slice(0,4).map(s=>s.transformed),null)+legend(...R.series.slice(0,4).map(s=>esc(s.name)))+
+  `<details class="explain"><summary>Why the observables must be stationary</summary><p>A DSGE model solved around a steady state implies stationary observables. Trending series (log GDP, the price level) are therefore entered as growth rates and matched to the first difference of a model variable; rates are entered in levels. A series that still looks non-stationary after transformation (a very persistent interest rate, for example) is often kept, but the paper should say so and check robustness with a different sample or a trend.</p></details>`);
+ const sing=R.flags.includes('singular');
+ step(st,'Can the likelihood be evaluated?',`<div class="urv"><ol><li><b>Observables against shocks.</b> ${R.n_observables} observables, ${R.shocks} shocks. ${sing?'<span class="no">More observables than shocks: the model implies an exact linear relation among the observables that the data will violate, so the likelihood is singular.</span> Add shocks (or measurement errors) or drop observables.':'<span class="yes">Not more observables than shocks: the likelihood is not singular.</span>'}</li>
+  <li><b>Sample length.</b> ${R.n_obs} periods. ${R.flags.includes('short')?'<span class="no">Under 60 quarters: posteriors will lean heavily on the priors.</span>':'<span class="yes">Enough for a small or medium model.</span>'}</li>
+  <li><b>Missing values.</b> ${R.flags.includes('missing')?'Some series have gaps. Dynare’s Kalman filter handles missing observations (NaN in the data file), but check they are genuine.':'No gaps inside the sample.'}</li></ol></div>`);
+ later(st,()=>light(['est','ID','size'],{size:R.n_observables+' observable'+(R.n_observables>1?'s':'')}),-st.gap+300*D);
+ const blob=URL.createObjectURL(new Blob([R.csv],{type:'text/csv'}));
+ step(st,'Your Dynare file: data and measurement',`<p>The demeaned data file and the lines to add to your <code>.mod</code> file. Replace the lower-case names with the model variables they correspond to.</p><pre class="mod">${esc(`// observables in dsge_observables.csv (demeaned)\nvar ${R.series.map(s=>s.name+'_obs').join(' ')};\nvarobs ${R.series.map(s=>s.name+'_obs').join(' ')};\n\nmodel;\n  ...\n${R.measurement}\nend;\n\nestimated_params;\n  // one line per parameter: name, prior shape, prior mean, prior sd\n  // e.g.  kappa, gamma_pdf, 0.3, 0.1;\n${[...Array(R.shocks).keys()].map(i=>`  stderr e${i+1}, inv_gamma_pdf, 0.5, inf;`).join('\n')}\nend;\n\n${R.estimation}`)}</pre><a class="dl" href="${blob}" download="dsge_observables.csv">Download dsge_observables.csv →</a><p class="sub" style="margin-top:8px">Sample means removed (add them back through the steady state if you prefer): ${Object.entries(R.means).map(([k,v])=>`${esc(k)} ${fmt(v,3)}`).join(' · ')}.</p>`);
+ const m=R.n_observables>=4?'MED':'EST';
+ later(st,()=>finish(m,`${R.n_observables} observable${R.n_observables>1?'s':''} and ${R.shocks} shocks${sing?' (too few shocks: fix this first)':''}.`,`${sing?'The likelihood is singular as specified. ':''}Run the identification check with these observables before estimating (identification guide).`,'ID'))}
+function initUpload(){const d=$('#drop');$('#file').addEventListener('change',e=>{e.target.files[0]&&loadFile(e.target.files[0]);e.target.value=''});
+ ['dragenter','dragover'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.add('over')}));['dragleave','drop'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove('over')}));
+ d.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];f&&loadFile(f)});$('#runUp').addEventListener('click',runUpload)}
+
+/* ---------- mode: questions ---------- */
+const QS={
+ q1:{t:'What is the model for?',o:[['Explain a mechanism','How does a shock or friction propagate? Calibrated model, impulse responses, moments','qnom',['mech']],['Estimate it with data','Parameters from data: Bayesian estimation','NO',['est','ID']],['Design policy','How should policy be set? Commitment, discretion, simple rules','OPT',['pol']],['Study a nonlinearity','A constraint that binds sometimes, risk or welfare','qnl',['nl','kind']]]},
+ qnom:{t:'Do nominal rigidities (sticky prices or wages) matter for the mechanism?',o:[['No: real mechanisms only','Productivity, capital, labour supply','RBC',['nom']],['Yes','Money, inflation, monetary policy','qopn',['nom','opn']]]},
+ qopn:{t:'Do exchange rates, trade or imported inflation matter?',o:[['No: a closed economy is enough','','NK'],['Yes: an open economy','','SOE']]},
+ qnl:{t:'What kind of nonlinearity?',o:[['A constraint that binds only sometimes','Zero lower bound, borrowing or collateral limits, capacity constraints','ZLB'],['Risk, precautionary behaviour, welfare, large shocks','Effects that depend on the variance of shocks','HO']]}};
+function ask(id,n=1){const Q=QS[id];$('#q').innerHTML=`<div class="label">Question ${n}</div><h3>${Q.t}</h3><div class="opts">${Q.o.map((o,i)=>`<button type="button" data-i="${i}">${o[0]}${o[1]?`<small>${o[1]}</small>`:''}</button>`).join('')}</div>`;
+ $('#q').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const o=Q.o[+b.dataset.i];const to=o[2];
+  if(o[3])light(G.concat(o[3]));
+  if(to==='NO')return askNO(n+1);
+  if(QS[to])return ask(to,n+1);
+  $('#q').innerHTML='<p class="sub" style="margin:0">Your answers lead to the workflow shown below.</p>';
+  finish(to,null,'',{RBC:'NK',NK:'SOE',SOE:'NK',OPT:'NK',ZLB:'HO',HO:'ZLB'}[to])}))}
+function askNO(n){$('#q').innerHTML=`<div class="label">Question ${n}</div><h3>How many observables will you estimate on, and how many structural shocks does your model have?</h3><p class="sub" style="margin:-4px 0 12px">Observables are the data series in <code>varobs</code>; shocks are the <code>varexo</code> with a variance (count measurement errors as shocks).</p><div class="nt"><label>Observables<input type="number" id="inO" min="1" step="1" placeholder="e.g. 3"></label><label>Structural shocks<input type="number" id="inS" min="1" step="1" placeholder="e.g. 3"></label><button class="btn" type="button" id="noGo">Continue →</button></div><div id="noErr"></div>`;
+ const go=()=>{const O=Math.round(+$('#inO').value),S=Math.round(+$('#inS').value);if(!(O>=1&&S>=1)){$('#noErr').innerHTML='<div class="err">Enter whole numbers, 1 or more, for both.</div>';return}
+  const m=O<=3?'EST':'MED';light(G.concat(['est','ID','size',m]),{size:O+' observable'+(O>1?'s':'')});
+  const sing=O>S;
+  $('#q').innerHTML=`<p class="sub" style="margin:0 0 6px"><b>${O} observable${O>1?'s':''}, ${S} shock${S>1?'s':''}:</b> ${sing?`<span class="no">more observables than shocks, so the likelihood is singular.</span> Add ${O-S} shock${O-S>1?'s':''} or measurement error${O-S>1?'s':''}, or drop observables, before estimating.`:`no stochastic singularity. ${O<=3?'Three observables or fewer: a small model can be estimated on them.':'Four or more observables: a medium-scale model with enough shocks to explain them.'}`}</p><p class="sub" style="margin:0">Run the identification check first, with these observables.</p>`;
+  finish(m,null,sing?`With ${O} observables and ${S} shocks the likelihood is singular.`:'',m==='EST'?'ID':'ID')};
+ $('#noGo').addEventListener('click',go);['#inO','#inS'].forEach(i=>$(i).addEventListener('keydown',e=>{if(e.key==='Enter')go()}))}
+
+/* ---------- guides, modes, init ---------- */
+function initGuides(){['RBC','NK','SOE','ID','EST','MED','OPT','ZLB','HO'].forEach(k=>{const M=MODELS[k];$('#gcards').appendChild(el('article','gcard',`<span class="tag ok">Step-by-step guide</span><h3>${M.short}</h3><p class="when">${M.when}</p><p>${M.steps.join(' · ')}</p><a href="${M.g}.html" style="font-size:12.5px">Open the ${M.short} guide →</a>`)).id='g-'+k})}
+document.addEventListener('click',e=>{const a=e.target.closest('[data-go]');if(!a)return;const c=$('#g-'+a.dataset.go);if(c){c.classList.remove('flash');void c.offsetWidth;c.classList.add('flash')}});
+function setMode(m){++run;document.querySelectorAll('.modes button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));['example','upload','ask'].forEach(x=>$('#m-'+x).hidden=x!==m);
+ $('#steps').innerHTML='';$('#result').innerHTML='';$('#upload-err').innerHTML='';status('');resetTree();document.querySelectorAll('.ex button').forEach(e=>e.classList.remove('sel'));if(m==='ask'){light(G);ask('q1')}}
+document.querySelectorAll('.modes button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+drawTree();initExamples();initUpload();initGuides();$('#year').textContent=new Date().getFullYear();
+</script>
+<script src="../assets/js/mobile-nav.js" defer></script>
+</body>
+</html>

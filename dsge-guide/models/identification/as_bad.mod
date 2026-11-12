@@ -1,0 +1,25 @@
+// The same model, but the Phillips-curve slope is written in terms of two deep parameters,
+// the Calvo probability theta and the inverse Frisch elasticity varphi, and both are estimated.
+var y pi R g z YGR INFL INT;
+varexo e_R e_g e_z;
+parameters tau theta varphi psi1 psi2 rho_R rho_g rho_z r_A;
+tau = 2;  theta = 0.75;  varphi = 1;  psi1 = 1.5;  psi2 = 0.5;  rho_R = 0.5;  rho_g = 0.8;  rho_z = 0.66;  r_A = 2;
+model(linear);
+  # beta = 1 / (1 + r_A/400);
+  # kappa = (1 - theta) * (1 - beta*theta) / theta * (tau + varphi);
+  y  = y(+1) - (1/tau) * (R - pi(+1) - z(+1)) + g - g(+1);
+  pi = beta * pi(+1) + kappa * (y - g);
+  R  = rho_R * R(-1) + (1 - rho_R) * (psi1*pi + psi2*(y - g)) + e_R;
+  g  = rho_g * g(-1) + e_g;  z = rho_z * z(-1) + e_z;
+  YGR = y - y(-1) + z;  INFL = 4 * pi;  INT = 4 * R;
+end;
+shocks; var e_R; stderr 0.4; var e_g; stderr 1; var e_z; stderr 0.5; end;
+steady;
+estimated_params;
+  tau, gamma_pdf, 2.00, 0.50;   theta, beta_pdf, 0.75, 0.05;   varphi, gamma_pdf, 1.00, 0.25;
+  psi1, gamma_pdf, 1.50, 0.25;  psi2, gamma_pdf, 0.50, 0.25;
+  rho_R, beta_pdf, 0.50, 0.20;  rho_g, beta_pdf, 0.80, 0.10;  rho_z, beta_pdf, 0.66, 0.15;
+  stderr e_R, inv_gamma_pdf, 0.4, 4;  stderr e_g, inv_gamma_pdf, 1.0, 4;  stderr e_z, inv_gamma_pdf, 0.5, 4;
+end;
+varobs YGR INFL INT;
+identification(parameter_set = prior_mean, nograph);
