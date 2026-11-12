@@ -46,8 +46,9 @@ def datasets():
     b = wd.data("mlb1")
     X["mlb1"] = b[["lsalary", "years", "games", "atbats", "runs", "hits", "hruns", "rbis", "bavg", "bb", "so", "sbases",
                    "fldperc", "yrsallst", "black", "hispan"]].dropna()
-    a = wd.data("airfare")
-    X["airfare"] = a[["lfare", "dist", "passen", "concen", "bmktshr"]].dropna()
+    inj = wd.data("injury")
+    X["injury"] = inj[["ldurat", "afchnge", "highearn", "male", "married", "hosp", "age", "lprewage", "ltotmed", "head", "neck",
+                       "upextr", "trunk", "lowback", "lowextr", "occdis", "manuf", "construc", "ky"]].dropna()
     j = wd.data("jtrain2")
     X["jtrain2"] = j[["re78", "train", "age", "educ", "black", "hisp", "married", "nodegree", "re74", "re75"]]
     g = pyreadr.read_r(str(DATA / "GrowthData.rda"))["GrowthData"].drop(columns=["intercept"]).rename(columns={"Outcome": "growth"})
@@ -70,8 +71,8 @@ EX = [  # key, group, title, meta, description, goal, treatment, instrument, B1 
      "Next-quarter inflation from four lags of inflation, unemployment, the T-bill rate, GDP growth and money growth.", "predict", None, None, None),
     ("mlb1", "Prediction", "Baseball salaries", "Players · 353 · cross-section",
      "Log salary of Major League Baseball players from career statistics (Wooldridge mlb1).", "predict", None, None, None),
-    ("airfare", "Prediction", "Airline fares", "Routes × years · 4,596 · pooled",
-     "Log fare on U.S. air routes from distance, passengers and market concentration, 1997–2000 (Wooldridge airfare).", "predict", None, None, None),
+    ("injury", "Prediction", "Time out of work after an injury", "Workers · 6,822 · cross-section",
+     "Log weeks of workers’ compensation from earnings, age, medical costs, injury type and a benefit increase (Meyer, Viscusi and Durbin).", "predict", None, None, None),
     ("jtrain2", "Causal effect", "Job training and earnings", "Men · 445 · randomised experiment",
      "Effect of the National Supported Work programme on 1978 earnings, with eight controls (LaLonde; Wooldridge jtrain2).", "causal", "train", None,
      "training was assigned at random"),
