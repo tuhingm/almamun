@@ -23,47 +23,47 @@ local y       outcome
 local x1      treatment_or_main_regressor
 local x2      control_variable
 
-xtset \`id' \`time'
+xtset `id' `time'
 xtdescribe
-xtsum \`y' \`x1' \`x2'
+xtsum `y' `x1' `x2'
 
 * 1. Pooled OLS, fixed effects and random effects
-regress \`y' \`x1' \`x2' i.\`time', vce(cluster \`id')
+regress `y' `x1' `x2' i.`time', vce(cluster `id')
 estimates store Pooled
 
-xtreg \`y' \`x1' \`x2' i.\`time', fe vce(cluster \`id')
+xtreg `y' `x1' `x2' i.`time', fe vce(cluster `id')
 estimates store FE
 
-xtreg \`y' \`x1' \`x2' i.\`time', re vce(cluster \`id')
+xtreg `y' `x1' `x2' i.`time', re vce(cluster `id')
 estimates store RE
 
 * Breusch-Pagan LM test for random effects after RE
 xttest0
 
 * 2. Mundlak correlated random effects
-bysort \`id': egen mean_\`x1' = mean(\`x1')
-bysort \`id': egen mean_\`x2' = mean(\`x2')
-xtreg \`y' \`x1' \`x2' mean_\`x1' mean_\`x2' i.\`time', ///
-    re vce(cluster \`id')
-test mean_\`x1' mean_\`x2'
+bysort `id': egen mean_`x1' = mean(`x1')
+bysort `id': egen mean_`x2' = mean(`x2')
+xtreg `y' `x1' `x2' mean_`x1' mean_`x2' i.`time', ///
+    re vce(cluster `id')
+test mean_`x1' mean_`x2'
 estimates store CRE
 
 * 3. Dynamic panel: difference GMM
 * Treat L.y and x1 as endogenous/predetermined and instrument with
 * lagged levels dated t-2 through t-4. x2 and time dummies are assumed
 * strictly exogenous here; change classification if theory requires it.
-xtabond2 \`y' L.\`y' \`x1' \`x2' i.\`time', ///
-    gmm(L.\`y' \`x1', lag(2 4) collapse) ///
-    iv(\`x2' i.\`time') ///
+xtabond2 `y' L.`y' `x1' `x2' i.`time', ///
+    gmm(L.`y' `x1', lag(2 4) collapse) ///
+    iv(`x2' i.`time') ///
     noleveleq robust small
 estimates store DifferenceGMM
 
 * 4. System GMM: adds level-equation moments.
 * Use only if the additional initial-condition / mean-stationarity
 * restrictions are defensible.
-xtabond2 \`y' L.\`y' \`x1' \`x2' i.\`time', ///
-    gmm(L.\`y' \`x1', lag(2 4) collapse) ///
-    iv(\`x2' i.\`time') ///
+xtabond2 `y' L.`y' `x1' `x2' i.`time', ///
+    gmm(L.`y' `x1', lag(2 4) collapse) ///
+    iv(`x2' i.`time') ///
     twostep robust small
 estimates store SystemGMM
 
