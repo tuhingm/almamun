@@ -9,7 +9,7 @@ Only <head> metadata changes; nothing visible on the page itself.
   - Descriptions: Google shows about 155-160 characters. Longer ones are cut at the last full sentence that fits,
     or at a word boundary.
   - The WebPage name/description in the JSON-LD and og:/twitter:description follow the same text. og:title and
-    twitter:title are left alone: link previews on LinkedIn, Facebook and X keep the full title with the course name.
+    twitter:title keep the full page name and end with the course or guide name (the author's name is dropped).
 Safe to run repeatedly.
 """
 import html, json, pathlib, re
@@ -97,6 +97,14 @@ for f in files:
         if new != old:
             s = s.replace(m.group(0), f"<title>{new}</title>", 1)
             s = jsonld(s, old, new)
+    # Link previews (LinkedIn, Facebook, X) end with the course or guide name, not the author:
+    # "Lecture 2: Money in General Equilibrium | Monetary Economics". The post already shows who shared it.
+    for attr, key in (("property", "og:title"), ("name", "twitter:title")):
+        ot = get(s, attr, key)
+        if ot and len(ot.split(" | ")) >= 3 and "Al Mamun" in ot.split(" | ")[-1]:
+            nt = " | ".join(ot.split(" | ")[:-1])
+            s = put(s, attr, key, nt)
+            s = s.replace(f'content="Preview card: {ot}"', f'content="Preview card: {nt}"')
     d = get(s, "name", "description")
     if d:
         new = fx.get("desc") or fit_desc(html.unescape(d))
