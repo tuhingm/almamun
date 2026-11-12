@@ -10,6 +10,7 @@
    ssc install xtcips
    ssc install xtwest
    ssc install xtpmg
+   ssc install xthst
 **********************************************************************/
 
 clear all
@@ -44,13 +45,16 @@ xtreg `y' `x1' `x2' `x3' mean_`x1' mean_`x2' mean_`x3' ///
 test mean_`x1' mean_`x2' mean_`x3'
 estimates store CRE
 
-* 2. Cross-sectional dependence (xtcd2 is distributed with xtdcce2)
+* 2. Slope homogeneity (Pesaran-Yamagata delta test)
+xthst `y' `x1' `x2' `x3'
+
+* 3. Cross-sectional dependence (xtcd2 is distributed with xtdcce2)
 xtcd2 `y'
 xtcd2 `x1'
 xtcd2 `x2'
 xtcd2 `x3'
 
-* 3. Pesaran CIPS: requires balanced panel data
+* 4. Pesaran CIPS: requires balanced panel data
 xtcips `y',  maxlags(2) bglags(1)
 xtcips `x1', maxlags(2) bglags(1)
 xtcips `x2', maxlags(2) bglags(1)
@@ -58,18 +62,18 @@ xtcips `x3', maxlags(2) bglags(1)
 * Add trend only when the deterministic specification warrants it:
 * xtcips `y', maxlags(2) bglags(1) trend
 
-* 4. Cointegration: run only after establishing suitable I(1) properties
+* 5. Cointegration: run only after establishing suitable I(1) properties
 xtcointtest pedroni `y' `x1' `x2' `x3'
 xtcointtest westerlund `y' `x1' `x2' `x3', demean
 * User-written Westerlund ECM test with bootstrap inference:
 * xtwest `y' `x1' `x2' `x3', lags(1 2) leads(0 1) ///
 *     constant bootstrap(400)
 
-* 5. PMG-ARDL benchmark: common long-run coefficients
+* 6. PMG-ARDL benchmark: common long-run coefficients
 xtpmg D.`y' D.`x1' D.`x2' D.`x3', ///
     lr(L.`y' `x1' `x2' `x3') ec(ec_pmg) replace pmg
 
-* 6. Mean Group and CCE / CS-ARDL using xtdcce2
+* 7. Mean Group and CCE / CS-ARDL using xtdcce2
 xtdcce2 `y' L.`y' `x1' `x2' `x3', nocrosssectional
 xtdcce2 `y' `x1' `x2' `x3', ///
     crosssectional(`y' `x1' `x2' `x3') cr_lags(0)
