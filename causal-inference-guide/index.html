@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0033A0">
-<meta name="description" content="An applied causal-inference research guide covering DiD, staggered adoption, event studies, synthetic controls, generalized synthetic control, synthetic DiD, interrupted time series, structural breaks, RDD, IV and matching.">
+<meta name="description" content="An applied causal-inference research guide covering DiD, staggered adoption, event studies, synthetic controls, generalized synthetic control, structural-break interventions, RDD and IV.">
 <title>Causal Inference Research Guide | Tuhin G. M. Al Mamun</title>
 <link rel="canonical" href="https://tuhingm.github.io/almamun/causal-inference-guide/">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
@@ -54,82 +54,6 @@ footer{background:var(--navy2);color:#c3d0e4;padding:20px 0;font-size:10px}.foot
 <article class="method"><div class="tag">03 · Dynamic effects</div><h3>Event-study DiD</h3><p>Trace effects relative to treatment time and inspect pre-treatment coefficients. In staggered designs use an estimator robust to heterogeneous treatment effects.</p><div class="eq">\(Y_{it}=\alpha_i+\lambda_t+\sum_{k\ne -1}\beta_k 1[t-G_i=k]+\varepsilon_{it}\)</div><ul><li>Assess pre-treatment coefficients jointly and substantively.</li><li>Use appropriate cohort-time aggregation.</li><li>Do not treat insignificant leads as proof of parallel trends.</li></ul></article>
 <article class="method"><div class="tag">04 · Donor-pool counterfactual</div><h3>Synthetic Control (SCM)</h3><p>Construct a weighted combination of untreated donor units to approximate the treated unit's pre-intervention trajectory.</p><div class="eq">\(\hat{Y}_{1t}(0)=\sum_{j=2}^{J+1}w_jY_{jt},\quad w_j\ge0,\;\sum_jw_j=1\)</div><ul><li>Strong pre-treatment fit and credible donor pool.</li><li>Placebo-in-space and placebo-in-time analyses.</li><li>Check donor contamination and extrapolation.</li></ul></article>
 <article class="method"><div class="tag">05 · Interactive fixed effects</div><h3>Generalized Synthetic Control (GSC)</h3><p>Xu's generalized SCM uses an interactive fixed-effects structure to estimate latent common factors and construct untreated potential outcomes.</p><div class="eq">\(Y_{it}(0)=X'_{it}\beta+\lambda_i' f_t+\varepsilon_{it}\)</div><ul><li>Useful with multiple treated units and latent common factors.</li><li>Requires suitable untreated observations to estimate factors.</li><li>Assess factor rank and pre-treatment fit.</li></ul></article>
-<article class="method"><div class="tag">06 · Weighted DiD and SCM</div><h3>Synthetic DiD (SDID)</h3><p>Combines unit and time weighting with a DiD comparison. Useful when treated and control units differ in pre-treatment outcome paths.</p><div class="eq">\(\hat\tau_{SDID}=\text{weighted DiD contrast}\)</div><ul><li>Estimate unit and time weights from pre-treatment data.</li><li>Inspect weight concentration and pre-fit.</li><li>Use inference appropriate to the number of treated units and panel structure.</li></ul></article>
-<article class="method"><div class="tag">07 · Single intervention series</div><h3>Interrupted Time Series (ITS)</h3><p>Estimate immediate level and slope changes after a known intervention in a sufficiently long time series.</p><div class="eq">\(Y_t=\beta_0+\beta_1t+\beta_2D_t+\beta_3(t-T_0)D_t+u_t\)</div><ul><li>Model seasonality, serial correlation and concurrent interventions.</li><li>Check alternative intervention dates and trend forms.</li><li>A comparison series strengthens the design when available.</li></ul></article>
 <article class="method"><div class="tag">06 · Structural break</div><h3>Intervention dummies and break models</h3><p>Pulse, step and slope-change dummies represent a hypothesized break. Break tests can locate unknown changes; causal interpretation requires an intervention-based counterfactual.</p><div class="eq">\(Y_t=\alpha+\beta t+\delta_1D_t+\delta_2(t-T_0)D_t+u_t\)</div><ul><li>Known break: intervention dummy / segmented regression.</li><li>Unknown break: Bai–Perron or single-break tests as diagnostics.</li><li>Distinguish a statistical break from a causal policy effect.</li></ul></article>
 <article class="method"><div class="tag">07 · Threshold assignment</div><h3>Regression Discontinuity (RDD)</h3><p>Exploit discontinuous treatment assignment at a known cutoff in a running variable.</p><div class="eq">\(\tau_{RD}=\lim_{r\downarrow c}E[Y\mid R=r]-\lim_{r\uparrow c}E[Y\mid R=r]\)</div><ul><li>Continuity of potential outcomes at the cutoff.</li><li>Check sorting/manipulation and covariate continuity.</li><li>Report bandwidth and polynomial sensitivity; local linear is a standard baseline.</li></ul></article>
 <article class="method"><div class="tag">08 · Exogenous instrument</div><h3>Instrumental Variables (IV / 2SLS)</h3><p>Use an instrument that shifts endogenous treatment but affects the outcome only through treatment, under the specified design.</p><div class="eq">\(D_i=Z_i'\pi+X_i'\gamma+v_i,\quad Y_i=\tau\hat D_i+X_i'\beta+u_i\)</div><ul><li>Relevance, exclusion and independence.</li><li>Weak-instrument-robust inference where needed.</li><li>For binary treatment, interpret LATE under monotonicity.</li></ul></article>
-<article class="method"><div class="tag">11 · Selection adjustment</div><h3>Matching, IPW and doubly robust methods</h3><p>Adjust for selection on observed covariates using propensity scores, inverse-probability weights or outcome/treatment models.</p><div class="eq">\(ATT=E[Y(1)-Y(0)\mid D=1]\)</div><ul><li>Conditional exchangeability and overlap.</li><li>Assess balance after weighting/matching.</li><li>Doubly robust estimators combine treatment and outcome models.</li></ul></article>
-</div></section>
-
-<section class="section" id="code"><div class="section-head"><div><div class="eyebrow">Implementation patterns</div><h2>Python and Stata starting points</h2></div><p>These are compact templates. Replace variable names and verify package syntax/version against your installed release before estimation.</p></div>
-<div class="resource-grid">
-<article class="resource"><h3>Python · DiD with unit and time effects</h3><p>Two-way fixed-effects baseline for a conventional common-timing design. Use a staggered-adoption estimator instead when treatment timing or effects vary across cohorts.</p><details><summary>Show Python template</summary><pre>import statsmodels.formula.api as smf
-
-# df: unit, year, outcome, treated, post
-df["did"] = df["treated"] * df["post"]
-fit = smf.ols(
-    "outcome ~ did + C(unit) + C(year)",
-    data=df
-).fit(
-    cov_type="cluster",
-    cov_kwds={"groups": df["unit"]}
-)
-print(fit.summary())</pre></details></article>
-<article class="resource"><h3>Stata · conventional and staggered DiD</h3><p>Stata's built-in commands support standard and heterogeneous DiD workflows. For staggered timing, report group-time effects and aggregation choices.</p><details><summary>Show Stata template</summary><pre>* Conventional DiD
-xtset unit year
-gen did = treated * post
-xtreg outcome did i.year, fe vce(cluster unit)
-
-* Staggered adoption (built-in; treatment timing gvar)
-* gvar = first treatment year; 0 for never treated
-xthdidregress aipw (outcome covariates) ///
-    (treatment), group(unit) time(year)</pre></details></article>
-<article class="resource"><h3>Stata · Callaway–Sant'Anna</h3><p>Community-contributed implementation for group-time ATT. Confirm the control-group definition and aggregation used in the paper.</p><details><summary>Show Stata template</summary><pre>ssc install csdid, replace
-xtset unit year
-csdid outcome covariates, ivar(unit) time(year) ///
-    gvar(first_treat_year) notyet method(dripw)
-estat event
-estat simple
-estat group</pre></details></article>
-<article class="resource"><h3>Stata · structural break / ITS</h3><p>Segmented regression with level and slope changes. Add seasonal terms and model serial correlation as required by the data frequency.</p><details><summary>Show Stata template</summary><pre>tsset year
-gen time = year - year[1]
-gen post = year >= intervention_year
-gen post_time = (year - intervention_year) * post
-newey outcome time post post_time, lag(4)</pre></details></article>
-<article class="resource"><h3>Stata · RDD and IV</h3><p>Specialized commands provide bandwidth selection and robust bias-corrected RDD inference; standard 2SLS is shown separately.</p><details><summary>Show Stata template</summary><pre>ssc install rdrobust, replace
-rdrobust outcome running_variable, c(0)
-
-* 2SLS
-ivregress 2sls outcome controls ///
-    (treatment = instrument), vce(robust)
-estat firststage
-estat endogenous</pre></details></article>
-<article class="resource"><h3>R / Stata ecosystem · SCM and GSC</h3><p>Use estimators designed for synthetic counterfactuals rather than treating a generic fixed-effects regression as a substitute.</p><ul><li>SCM: R <code>Synth</code>; Stata <code>synth</code>.</li><li>GSC: R <code>gsynth</code> (Xu).</li><li>Staggered event studies: R <code>did</code>, <code>fixest</code>; Stata <code>eventstudyinteract</code> or <code>csdid</code>.</li></ul></article>
-</div>
-<div class="note"><b>Interpretation rule:</b> A statistically significant post dummy or detected structural break is not, by itself, a causal estimate. The causal claim depends on the counterfactual design, treatment assignment, timing, assumptions and inference procedure.</div>
-</section>
-
-<section class="section"><div class="section-head"><div><div class="eyebrow">Recommended workflow</div><h2>Minimum reporting checklist</h2></div></div><div class="resource"><ul><li>Define treatment, control, timing, exposure, unit of assignment and target estimand.</li><li>Write the potential-outcomes or structural identifying assumptions explicitly.</li><li>Explain the comparison group/donor pool and treatment contamination risk.</li><li>Show pre-treatment fit or trends and report diagnostics appropriate to the design.</li><li>Use inference at the treatment-assignment level; address few clusters where relevant.</li><li>Report dynamic and subgroup effects without data-driven specification search.</li><li>Include placebo, sensitivity, alternative comparison groups and specification checks.</li><li>State limitations on external validity and the population to which the estimate applies.</li></ul></div></section>
-</main>
-<footer><div class="wrap foot"><span><b>Tuhin G. M. Al Mamun</b> · Applied Econometrics and Causal Inference</span><span><a href="../panel-data-guide/index.html">Panel-Data Guide</a> · <a href="../research-guide/index.html">Time-Series Guide</a> · <a href="../index.html">Home</a></span></div></footer>
-<script>
-(()=>{
-const $=id=>document.getElementById(id);
-$("recommend").addEventListener("click",()=>{
- const a=$("assignment").value,t=$("timing").value,u=$("units").value,d=$("data").value,p=$("pre").value,x=$("treatment").value;
- let title="",why=[],checks=[],warning="";
- if(a==="cutoff"||u==="threshold"){title="Regression Discontinuity Design (RDD)";why=["Treatment assignment changes discontinuously at a known running-variable cutoff.","The target is a local treatment effect at the threshold."];checks=["Plot treatment probability and outcome against the running variable.","Test for manipulation and covariate discontinuities.","Report local-linear estimates, bandwidth sensitivity and robust bias-corrected inference."];warning="The continuity assumption is local to the cutoff; the estimate need not generalize to units far from it."}
- else if(a==="instrument"){title="Instrumental Variables / 2SLS";why=["The proposed instrument supplies variation in treatment that is not explained by the endogenous treatment process.","The estimand may be a LATE for compliers under additional assumptions."];checks=["Defend relevance, exclusion and independence from the outcome disturbance.","Report first-stage strength and weak-IV-robust inference where appropriate.","State the complier population and monotonicity assumption if interpreting LATE."];warning="An instrument is not valid merely because the first stage is statistically significant."}
- else if(a==="single"||t==="singlebreak"||d==="ts"){title="Structural-break intervention model with level and/or trend shifts";why=["A known policy or event date can be represented by a step dummy and a post-break trend interaction.","The model estimates a change in the outcome level and/or trajectory relative to the pre-intervention trend."];checks=["Define the intervention date ex ante where possible.","Model seasonality, serial correlation and concurrent shocks.","Use placebo dates, alternative trend forms and stability checks.","Distinguish an estimated statistical break from a causal policy effect."];warning="A dummy-variable break model is not automatically causal: causal interpretation requires a credible counterfactual and no coincident confounding intervention."}
- else if(t==="staggered"){title="Staggered-adoption DiD: group-time ATT or interaction-weighted event study";why=["Treatment is adopted at different times across units.","Conventional TWFE can combine comparisons with problematic weights when effects vary across cohorts or over event time."];checks=["Use Callaway–Sant'Anna group-time ATT, Sun–Abraham interaction-weighted event study, imputation or a suitable two-stage estimator.","Define never-treated or not-yet-treated controls.","Plot cohort/event-time effects and assess pre-treatment dynamics.","Report aggregation weights and inference clustered at the assignment level."];warning="Do not interpret the conventional TWFE coefficient as a general ATT without establishing the restrictions that make it valid."}
- else if(u==="one"||a==="single"){title="Synthetic Control or Generalized Synthetic Control";why=["A single or small number of treated aggregate units calls for an explicit donor-pool counterfactual.","SCM constructs a weighted donor unit; GSC uses interactive fixed effects to model latent common factors."];checks=["Show pre-treatment outcome fit and predictor balance.","Check donor pool contamination and weight concentration.","Run placebo-in-space/time and sensitivity to donor composition.","For GSC, justify factor rank and inspect untreated observations."];warning="SCM and GSC are related but not interchangeable; select according to the number of treated units, panel structure and pre-treatment fit."}
- 
- else if(x==="dose"){title="Continuous-treatment causal design";why=["Treatment varies in intensity rather than only as a binary indicator.","The dose-response estimand and treatment assignment mechanism must be defined."];checks=["Specify generalized propensity-score or dose-response framework, or an IV design for endogenous dose.","Check overlap across the treatment-intensity distribution.","Consider nonlinear dose response and pre-treatment confounding."];warning="A linear coefficient on treatment intensity is not automatically a causal marginal effect."}
- else {title="Conventional DiD with an event-study specification";why=["There are treated and comparison units with a common adoption date.","Panel data and several pre-treatment periods support a parallel-trends assessment."];checks=["Define ATT and treatment/control groups precisely.","Plot group-specific pre-treatment outcomes and event-time coefficients.","Use unit and time effects with assignment-level clustered inference.","Test sensitivity to controls, trends, anticipation and sample composition."];warning="If treatment timing is actually staggered, switch to a staggered-adoption estimator rather than relying on conventional TWFE."}
- const list=arr=>"<ul>"+arr.map(s=>"<li>"+s+"</li>").join("")+"</ul>";
- $("output").innerHTML="<h3>"+title+"</h3><b>Why this pathway?</b>"+list(why)+"<b>Required diagnostics</b>"+list(checks)+"<div class='warning'>"+warning+"</div><p><b>Design recorded:</b> "+[a,t,u,d,p,x].join(" · ")+"</p>";
-});
-})();
-</script>
-</body></html>
