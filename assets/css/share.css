@@ -1,0 +1,14 @@
+/* Share bar at the end of every page (assets/js/share.js). Self-contained colours so it fits every page layout. */
+.share-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:34px 0 26px;padding:16px 0 0;border-top:1px solid #dbe3f0;font-family:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;clear:both}
+.share-bar .share-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#5b6884;margin-right:4px}
+.share-bar .share-btn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 13px;border:1px solid #d3dcec;border-radius:999px;background:#fff;color:#1b2a4a;font:600 12.5px "DM Sans",system-ui,sans-serif;text-decoration:none;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+.share-bar .share-btn svg{width:15px;height:15px;fill:currentColor;flex:none}
+.share-bar .share-btn:hover,.share-bar .share-btn:focus-visible{border-color:#0033a0;color:#0033a0;background:#f3f6fc;text-decoration:none}
+.share-bar .share-btn:focus-visible{outline:2px solid #0033a0;outline-offset:2px}
+.share-bar .share-li:hover{color:#0a66c2;border-color:#0a66c2}
+.share-bar .share-fb:hover{color:#1877f2;border-color:#1877f2}
+.share-bar .share-x:hover{color:#000;border-color:#000}
+.share-bar .share-btn.ok{color:#1f7a4d;border-color:#1f7a4d;background:#f0f8f3}
+@media (max-width:560px){.share-bar .share-label{width:100%;margin-bottom:2px}.share-bar .share-btn span{display:none}.share-bar .share-btn{width:40px;height:40px;padding:0;justify-content:center}.share-bar .share-btn svg{width:17px;height:17px}.share-bar .share-ln.ok span{display:none}}
+@media print{.share-bar{display:none}}
+.share-wrap{max-width:1180px;margin:0 auto;padding:0 22px}
