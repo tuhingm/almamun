@@ -2,6 +2,7 @@
 """Fit page titles and meta descriptions to what search results display. Run last, after site_polish.py and og_tags.py.
 
 Only <head> metadata changes; nothing visible on the page itself.
+  - Homepage: rel=me links to the profiles listed in the Person's sameAs (ORCID, Scholar, LinkedIn, ...).
   - Titles: Google shows about 60 characters. Long titles keep the page name first and drop the parts that do not
     fit: first the course/guide name, then the shortened author name ("Tuhin Al Mamun"). A page name that is itself
     longer than 60 characters is kept whole.
@@ -110,6 +111,13 @@ for f in files:
             for attr, key in (("property", "og:description"), ("name", "twitter:description")):
                 if get(s, attr, key) == d:
                     s = put(s, attr, key, new)
+    if rel == "index.html" and 'rel="me"' not in s:
+        # rel="me" links to the profiles in the Person's sameAs: they tell search engines and profile sites
+        # that these accounts and this website belong to the same person.
+        m = re.search(r'"sameAs":\s*(\[[^\]]*\])', s)
+        if m:
+            links = "".join(f'<link rel="me" href="{html.escape(u, quote=True)}">' for u in json.loads(m.group(1)))
+            s = s.replace("</head>", links + "\n</head>", 1)
     if s != orig:
         f.write_text(s)
         changed += 1

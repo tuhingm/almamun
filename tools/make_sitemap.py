@@ -33,6 +33,10 @@ for p in pages:
     rel = p.relative_to(ROOT).as_posix()
     url = SITE + (rel[:-len("index.html")] if rel.endswith("index.html") else rel)
     rows.append(f"  <url><loc>{url}</loc><lastmod>{lastmod(p)}</lastmod><priority>{priority(rel)}</priority></url>")
+# The CV linked from every page: a PDF titled with the full name, useful for name searches.
+cv = ROOT / "Tuhin Al Mamun_CV.pdf"
+if cv.exists():
+    rows.append(f"  <url><loc>{SITE}Tuhin%20Al%20Mamun_CV.pdf</loc><lastmod>{lastmod(cv)}</lastmod><priority>0.8</priority></url>")
 (ROOT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n'
                                   '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "\n".join(rows) + "\n</urlset>\n")
-print(f"sitemap.xml: {len(rows)} pages")
+print(f"sitemap.xml: {len(rows)} URLs")
