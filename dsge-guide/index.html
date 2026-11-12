@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0033A0">
+<meta name="description" content="A Dynare-only practical guide to building, solving, estimating and evaluating empirical DSGE models for macroeconomic research.">
+<title>DSGE Research Guide | Dynare | Tuhin G. M. Al Mamun</title>
+<link rel="canonical" href="https://tuhingm.github.io/almamun/dsge-guide/">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<style>
+:root{--navy:#0033a0;--deep:#00205b;--ink:#1b2437;--muted:#55617a;--paper:#f3f5fa;--line:#d5dcea;--sky:#9fd3f0;--tint:#e3eaf7}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.7 "DM Sans",sans-serif}a{color:inherit;text-decoration:none}.wrap{width:min(1120px,calc(100% - 36px));margin:auto}
+header{background:var(--navy);color:#fff}.nav{min-height:66px;display:flex;align-items:center;justify-content:space-between;gap:15px}.brand{font:800 15px Manrope}.brand b{color:var(--sky)}nav{display:flex;gap:18px;flex-wrap:wrap;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#e4ecf8}
+.hero{padding:54px 0 45px;color:white;background:radial-gradient(circle at 85% 12%,#6ec1e445,transparent 29%),linear-gradient(120deg,#0033a0,#00205b)}.kicker,.eyebrow{font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--sky)}h1{font:800 clamp(34px,5vw,52px)/1.1 Manrope;letter-spacing:-1.5px;margin:12px 0}.lead{max-width:850px;color:#d6e2f6;margin:0}.meta{display:flex;gap:20px;flex-wrap:wrap;margin-top:18px;color:#c5d4ea;font-size:11px}.meta strong{color:#fff}
+main{padding:32px 0 70px}.intro{max-width:900px;color:#4b5870;font-size:13px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:20px}.card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:19px;box-shadow:0 5px 18px #00205b0b;min-width:0}.card h2{font:800 19px Manrope;margin:0 0 8px}.card h3{font:800 15px Manrope;margin:0 0 7px}.card p,.card li{font-size:12px;color:var(--muted)}.card ul{padding-left:18px}.section{margin-top:38px}.section-head{border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:14px}.section-head h2{font:800 22px Manrope;margin:4px 0}.section-head p{font-size:12px;color:var(--muted);margin:0}.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.step{background:white;border:1px solid var(--line);border-radius:11px;padding:15px}.step b{display:block;color:var(--navy);font:800 12px Manrope;margin-bottom:5px}.step p{font-size:11px;color:var(--muted);margin:0}
+pre{overflow:auto;background:#111c36;color:#e4ecfa;border-radius:9px;padding:15px;font:11px/1.6 ui-monospace,Consolas,monospace}code{font-family:ui-monospace,Consolas,monospace}.eq{overflow-x:auto;background:#f6f8fd;border:1px solid #e1e8f3;border-radius:8px;padding:10px 13px;margin:9px 0;font-size:13px}.callout{background:#eaf0fa;border:1px solid #d1def0;border-radius:10px;padding:14px 17px;margin-top:14px;font-size:11px;color:#46546d}.tag{display:inline-block;background:var(--tint);color:var(--navy);padding:3px 8px;border-radius:30px;font-size:9px;font-weight:800;margin:2px}
+footer{background:var(--deep);color:#c3d0e4;padding:20px 0;font-size:10px}
+@media(max-width:760px){.grid,.steps{grid-template-columns:1fr}.nav{padding:10px 0}.hero{padding:40px 0}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav"><a class="brand" href="../index.html">TGM <b>AL MAMUN</b></a><nav><a href="../index.html">Home</a><a href="../teaching/index.html">Teaching</a><a href="../research-guide/index.html">Time-Series Guide</a><a href="../panel-data-guide/index.html">Panel-Data Guide</a><a href="../causal-inference-guide/index.html">Causal Inference</a></nav></div></header>
+<section class="hero"><div class="wrap"><div class="kicker">Structural Macroeconometrics · Dynare Workflow</div><h1>DSGE Research Guide</h1><p class="lead">A practical workflow for developing, solving, estimating and evaluating empirical Dynamic Stochastic General Equilibrium models. All computational examples and implementation workflows in this guide use Dynare.</p><div class="meta"><span><strong>Dynare only</strong> computational environment</span><span>Model development · Bayesian estimation · Policy analysis</span></div></div></section>
+<main class="wrap">
+<p class="intro">This is a research-oriented companion to the DSGE material in Monetary Economics. The monetary-economics lectures develop economic theory; this guide focuses on turning a structural model into a transparent, reproducible empirical paper using Dynare and its native model, estimation and reporting commands.</p>
+<div class="grid">
+<section class="card"><div class="eyebrow">Scope</div><h2>What this guide covers</h2><ul><li>Structural equations and equilibrium conditions.</li><li>Steady states, model diagnostics and solution.</li><li>Calibration and Bayesian estimation.</li><li>Impulse responses and shock decompositions.</li><li>Model comparison, sensitivity and policy experiments.</li><li>Replication-ready Dynare project organization.</li></ul></section>
+<section class="card"><div class="eyebrow">Software boundary</div><h2>One implementation environment</h2><p>Every code example, model file and computational workflow is written for <strong>Dynare</strong>. No separate MATLAB, Python, Julia or R implementation track is included. Dynare runs as a preprocessor and computational platform within its supported host environment.</p><span class="tag">.mod files</span><span class="tag">Dynare commands</span><span class="tag">Dynare output</span></section>
+</div>
+<section class="section"><div class="section-head"><div class="eyebrow">Research workflow</div><h2>From economic question to empirical DSGE paper</h2><p>Follow the sequence; do not begin Bayesian estimation before the model's equilibrium and solution properties are checked.</p></div>
+<div class="steps">
+<div class="step"><b>01 · Research question</b><p>Define the policy or macroeconomic mechanism, target variables, sample and empirical contribution.</p></div>
+<div class="step"><b>02 · Model structure</b><p>Specify agents, optimization problems, constraints, market clearing and exogenous shock processes.</p></div>
+<div class="step"><b>03 · Equilibrium system</b><p>Derive first-order conditions and express the model as a coherent nonlinear system.</p></div>
+<div class="step"><b>04 · Steady state</b><p>Derive analytical steady-state relationships where possible; implement and verify them in Dynare.</p></div>
+<div class="step"><b>05 · Solution diagnostics</b><p>Run model checks, inspect eigenvalues and verify the Blanchard–Kahn conditions.</p></div>
+<div class="step"><b>06 · Calibration</b><p>Document parameter sources, units, targets and the distinction between calibrated and estimated parameters.</p></div>
+<div class="step"><b>07 · Bayesian estimation</b><p>Define observables, measurement equations, priors, likelihood settings and MCMC configuration.</p></div>
+<div class="step"><b>08 · Empirical results</b><p>Report posterior estimates, credible intervals, convergence diagnostics, IRFs and shock decompositions.</p></div>
+<div class="step"><b>09 · Evaluation</b><p>Assess fit, compare specifications, test prior and parameter sensitivity, and report limitations.</p></div>
+</div></section>
+<section class="section"><div class="section-head"><div class="eyebrow">Dynare model implementation</div><h2>Baseline New Keynesian model file</h2><p>A compact illustrative three-equation model. It is a teaching template, not a calibrated or estimated empirical specification.</p></div>
+<div class="card"><h3>1. Declare variables and parameters</h3><pre>var y pi i;
+varexo e_r e_g;
+parameters beta sigma kappa rho_i phi_pi phi_y;
+
+beta   = 0.99;
+sigma  = 1.00;
+kappa  = 0.10;
+rho_i  = 0.80;
+phi_pi = 1.50;
+phi_y  = 0.125;</pre>
+<h3>2. Specify equilibrium conditions and shocks</h3><pre>model;
+  y = y(+1) - (1/sigma)*(i-pi(+1)) + e_g;
+  pi = beta*pi(+1) + kappa*y;
+  i = rho_i*i(-1) + (1-rho_i)*(phi_pi*pi+phi_y*y) + e_r;
+end;
+
+shocks;
+  var e_r; stderr 0.0025;
+  var e_g; stderr 0.0100;
+end;</pre>
+<h3>3. Solve and generate model moments</h3><pre>steady;
+check;
+model_diagnostics;
+stoch_simul(order=1, irf=20) y pi i;</pre>
+<div class="callout">The template uses zero steady states for the log-deviation variables and illustrative parameter values. A paper-specific model must derive its own steady state, measurement system, shock processes and parameterization.</div></div>
+</section>
+<section class="section"><div class="section-head"><div class="eyebrow">Bayesian estimation</div><h2>Dynare estimation block</h2><p>For empirical estimation, add observed data series and measurement equations that map model variables into the units and transformations of the dataset.</p></div>
+<div class="card"><h3>Illustrative estimation syntax</h3><pre>varobs y_obs pi_obs i_obs;
+
+estimated_params;
+  sigma,     1.00, 0.10, 5.00, gamma_pdf, 1.00, 0.25;
+  kappa,     0.10, 0.01, 1.00, beta_pdf,  0.10, 0.05;
+  rho_i,     0.80, 0.01, 0.99, beta_pdf, 0.80, 0.10;
+  phi_pi,    1.50, 1.01, 4.00, normal_pdf, 1.50, 0.25;
+  phi_y,     0.125,0.00, 1.00, normal_pdf, 0.125,0.05;
+  stderr e_r, 0.0025, 0.0001, 0.05, inv_gamma_pdf, 0.0025, 0.001;
+  stderr e_g, 0.0100, 0.0001, 0.10, inv_gamma_pdf, 0.0100, 0.005;
+end_params;
+
+estimation(
+  datafile=macro_data,
+  first_obs=1,
+  nobs=200,
+  mode_compute=6,
+  mh_replic=20000,
+  mh_nblocks=2,
+  mh_jscale=0.30,
+  bayesian_irf
+);</pre>
+<div class="callout">This block is a syntax scaffold, not a ready-to-run estimation file: define the observable variables and measurement equations, ensure all estimated parameters enter the model, and verify prior support and data transformations. Set sample options to match the actual dataset.</div></div>
+</section>
+<section class="section"><div class="section-head"><div class="eyebrow">Results and reporting</div><h2>Required empirical outputs</h2></div>
+<div class="grid">
+<div class="card"><h3>Estimation and diagnostics</h3><ul><li>Prior and posterior parameter distributions.</li><li>Posterior mode and marginal likelihood.</li><li>MCMC trace plots, acceptance rates and convergence checks.</li><li>Steady-state and solution diagnostics.</li><li>Data transformations and measurement equations.</li></ul></div>
+<div class="card"><h3>Structural interpretation</h3><ul><li>Impulse responses with uncertainty bands.</li><li>Forecast error variance decomposition.</li><li>Historical shock decomposition.</li><li>Smoothed shocks and state estimates.</li><li>Counterfactual policy simulations.</li></ul></div>
+<div class="card"><h3>Dynare commands to learn</h3><p><code>var</code>, <code>varexo</code>, <code>parameters</code>, <code>model</code>, <code>steady</code>, <code>steady_state_model</code>, <code>check</code>, <code>model_diagnostics</code>, <code>stoch_simul</code>, <code>estimated_params</code>, <code>estimation</code>, <code>shock_decomposition</code>, <code>forecast</code>.</p></div>
+<div class="card"><h3>Paper organization</h3><ol><li>Research question and contribution.</li><li>Model environment and derivation.</li><li>Calibration and data.</li><li>Estimation strategy and priors.</li><li>Baseline results and diagnostics.</li><li>Robustness and policy counterfactuals.</li></ol></div>
+</div></section>
+<section class="section"><div class="section-head"><div class="eyebrow">Replication standard</div><h2>Recommended project structure</h2></div><div class="card"><pre>dsge-project/
+  main_model.mod
+  steady_state.mod
+  measurement_equations.mod
+  estimation.mod
+  macro_data.xlsx
+  README.md
+  output/
+    posterior/
+    irfs/
+    shock_decomposition/
+    tables/
+    figures/</pre><p>Keep the submitted replication package self-contained. Record the Dynare version, data source, sample dates, transformations, random seeds where applicable, estimation settings and all model-file dependencies.</p></div></section>
+<div class="callout"><strong>Research standard:</strong> A DSGE paper should make the mapping from economic theory to the solved model, observed data, likelihood and reported policy conclusions fully auditable. Dynare code should reproduce every reported table and figure.</div>
+</main>
+<footer><div class="wrap">© 2026 Tuhin G. M. Al Mamun · DSGE Research Guide · Dynare implementation</div></footer>
+</body></html>
