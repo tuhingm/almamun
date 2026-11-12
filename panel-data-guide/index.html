@@ -71,6 +71,7 @@ footer{background:var(--navy2);color:#c3d0e4;padding:22px 0;font-size:10px}.foot
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 @media(max-width:650px){.brand{white-space:nowrap;margin-right:12px}header nav{gap:9px;font-size:8px;letter-spacing:.06em;line-height:1.35;text-align:left}}
 /* panel-specific additions */
+.nt{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.nt label{display:flex;flex-direction:column;gap:5px;font-size:11px;font-weight:700;color:var(--muted);flex:1 1 150px}.nt input{font:600 15px 'DM Sans',sans-serif;padding:10px 12px;border:1px solid var(--line);border-radius:9px;color:var(--ink);background:#fff}.nt input:focus{outline:2px solid #0033a055;border-color:var(--navy)}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}.stat{background:#f8fafe;border:1px solid #e6ebf4;border-radius:9px;padding:9px 10px}.stat b{display:block;font:800 18px Manrope;color:var(--navy)}.stat span{font-size:10px;color:var(--muted)}
 .band svg{display:block;width:100%;height:120px}.band .area{fill:#0033a01a;stroke:none}.band .mean{fill:none;stroke:var(--navy);stroke-width:2}.band .unit{fill:none;stroke:#9aa9c4;stroke-width:.9;opacity:.7}
 .legend{font-size:10.5px;color:var(--muted);margin-top:4px}.legend i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin:0 5px 0 10px;background:var(--navy)}.legend i.a{height:8px;background:#0033a01a}.legend i.u{background:#9aa9c4;height:1.5px}
@@ -966,13 +967,26 @@ function initUpload(){const d=$('#drop');$('#file').addEventListener('change',e=
 /* ---------- mode: questions ---------- */
 let QA={};
 const QS={
- q1:{t:'What is the shape of your panel: how many units (N) and how many periods per unit (T)?',o:[['Many units, few periods','N ≥ '+GMMN+' and T < '+LONGT+': households, workers, firms','qd',['start','nt'],'N','large'],['Few units, few periods','N < '+GMMN+' and T < '+LONGT,'qd',['start','nt'],'N','small'],['Many periods, '+FEWN+' or more units','T ≥ '+LONGT+' and N ≥ '+FEWN+': countries, states, industries','qcd',['start','nt']],['Many periods, fewer than '+FEWN+' units','T ≥ '+LONGT+' and N < '+FEWN,'TS']]},
  qd:{t:'Does your model include a lagged dependent variable, or regressors that respond to past shocks to the outcome?',o:[['Yes','A dynamic model, for example employment depends on last year’s employment','DYN'],['No, a static model','','qh',['start','nt','dyn','st']]]},
  qh:{t:'What did the F test, the Breusch–Pagan LM test and the Hausman (or Mundlak) test show?',o:[['No significant unit effects','Neither the F test nor the LM test rejects','POLS'],['Unit effects, but Hausman / Mundlak does not reject','The effects are uncorrelated with the regressors','RE'],['Hausman / Mundlak rejects','The effects are correlated with the regressors','FE']]},
  qcd:{t:'Did the Pesaran CD test on the residuals find cross-sectional dependence?',o:[['Yes, the units are dependent','Common shocks: use CIPS for unit roots','qur',['start','nt','cd'],'cd',1],['No dependence','Fisher-ADF or IPS unit-root tests are valid','qur',['start','nt','cd'],'cd',0]]},
  qur:{t:'What did your panel unit-root tests show?',o:[['All variables are stationary in levels','All I(0)','qsl',['start','nt','cd','ur','i0','sl']],['All variables are stationary only after first differencing','All I(1)','qco',['start','nt','cd','ur','i1','co'],'ur','i1'],['A mix: some I(0), some I(1)','None is I(2)','LR',null,'ur','mix'],['At least one variable needs differencing twice','Some I(2)','I2']]},
  qsl:{t:'Did the slope-homogeneity (Pesaran–Yamagata Δ) test reject?',o:[['No, the slopes can be pooled','','FEDK'],['Yes, the slopes are heterogeneous','','MG']]},
  qco:{t:'Does a panel cointegration test (Kao, Pedroni or Westerlund) find a long-run relationship?',o:[['Yes, the variables are cointegrated','','LR'],['No cointegration','','DIFF']]}};
+function askNT(){
+ $('#q').innerHTML=`<div class="label">Question 1</div><h3>How large is your panel?</h3><p class="sub" style="margin:-4px 0 12px">Enter the number of units (countries, firms, people…) and the number of time periods per unit. For an unbalanced panel, use the typical (median) number of periods.</p>
+ <div class="nt"><label>Number of units (N)<input type="number" id="inN" min="2" step="1" inputmode="numeric" placeholder="e.g. 140"></label><label>Periods per unit (T)<input type="number" id="inT" min="2" step="1" inputmode="numeric" placeholder="e.g. 8"></label><button class="btn" type="button" id="ntGo">Continue →</button></div><div id="ntErr"></div>`;
+ const go=()=>{const N=Math.round(+$('#inN').value),T=Math.round(+$('#inT').value);
+  if(!(N>=2&&T>=2)){$('#ntErr').innerHTML='<div class="err">Enter whole numbers of at least 2 for both N and T.</div>';return}
+  QA.N=N>=GMMN?'large':'small';
+  const kind=T<LONGT?(N>=GMMN?'a short panel with many units, a typical micro panel':'a short panel with few units'):(N>=FEWN?'a long panel with enough units for the macro-panel tests':'a long panel with very few units');
+  const next=T<LONGT?'qd':(N>=FEWN?'qcd':'TS');
+  const note=`<p class="sub" style="margin:0 0 14px"><b>N = ${N}, T = ${T}:</b> ${kind}.</p>`;
+  light(['start','nt'],{nt:`N = ${N}, T = ${T}`});
+  if(next==='TS'){$('#q').innerHTML=note+'<p class="sub" style="margin:0">Your answers lead to the estimator shown below.</p>';finish('TS',null);return}
+  ask(next,2);$('#q').insertAdjacentHTML('afterbegin',note)};
+ $('#ntGo').addEventListener('click',go);['#inN','#inT'].forEach(i=>$(i).addEventListener('keydown',e=>{if(e.key==='Enter')go()}));
+}
 function ask(id,n=1){const Q=QS[id];$('#q').innerHTML=`<div class="label">Question ${n}</div><h3>${Q.t}</h3><div class="opts">${Q.o.map((o,i)=>`<button type="button" data-i="${i}">${o[0]}${o[1]?`<small>${o[1]}</small>`:''}</button>`).join('')}</div>`;
  $('#q').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const o=Q.o[+b.dataset.i];let to=o[2];if(o[4])QA[o[4]]=o[5];
   if(to==='LR')to=QA.cd?'CSARDL':'PMG';if(to==='DYN')to=QA.N==='small'?'LSDVC':'GMM';
@@ -982,7 +996,7 @@ function ask(id,n=1){const Q=QS[id];$('#q').innerHTML=`<div class="label">Questi
 function initGuides(){Object.entries(MODELS).filter(([k])=>GUIDE[k]).forEach(([k,M])=>{$('#gcards').appendChild(el('article','gcard',`<span class="tag ok">Step-by-step guide</span><h3>${M.short}</h3><p class="when">${M.when}</p><p>${M.steps.slice(0,5).join(' · ')} …</p><a href="${GUIDE[k]}.html" style="font-size:12.5px">Open the ${M.short} guide →</a>${M.lec.map(l=>`<a href="${l[0]}">${l[1]} →</a>`).join('')}`)).id='g-'+k})}
 document.addEventListener('click',e=>{const a=e.target.closest('[data-go]');if(!a)return;const c=$('#g-'+a.dataset.go);if(c){c.classList.remove('flash');void c.offsetWidth;c.classList.add('flash')}});
 function setMode(m){++run;QA={};document.querySelectorAll('.modes button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));['example','upload','ask'].forEach(x=>$('#m-'+x).hidden=x!==m);
- $('#steps').innerHTML='';$('#result').innerHTML='';$('#upload-err').innerHTML='';status('');resetTree();document.querySelectorAll('.ex button').forEach(e=>e.classList.remove('sel'));if(m==='ask'){light(['start']);ask('q1')}}
+ $('#steps').innerHTML='';$('#result').innerHTML='';$('#upload-err').innerHTML='';status('');resetTree();document.querySelectorAll('.ex button').forEach(e=>e.classList.remove('sel'));if(m==='ask'){light(['start']);askNT()}}
 document.querySelectorAll('.modes button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
 drawTree();initExamples();initUpload();initGuides();$('#year').textContent=new Date().getFullYear();
 </script>
