@@ -20,7 +20,7 @@ from linearmodels.panel import PooledOLS, RandomEffects, PanelOLS, FirstDifferen
 def fit_wagepan():
     raw = wd.data("wagepan").copy().sort_values(["nr", "year"])
     panel = raw.set_index(["nr", "year"])
-    year_dummies = " + ".join(f"d81{i}" for i in range(1, 8))
+    year_dummies = " + ".join(f"d8{i}" for i in range(1, 8))
     clustered = {"cov_type": "clustered", "cluster_entity": True}
 
     pooled = PooledOLS.from_formula(
