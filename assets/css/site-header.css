@@ -1,7 +1,7 @@
 /* Site-wide top menu. One header for every page; loaded last so it wins over page styles.
    Markup (written by tools/site_polish.py):
    <header class="site-header"><div class="wrap nav"><a class="brand">TGM <span>AL MAMUN</span></a>
-   <button id="menu">Menu</button><nav id="nav">…links…</nav></div></header> */
+   <button id="menu">Menu</button><nav id="nav">…8 links…</nav></div></header> */
 header.site-header{position:sticky;top:0;z-index:50;background:rgba(0,51,160,.98);color:#fff;border:0;box-shadow:0 3px 18px #001b5030;margin:0;padding:0;-webkit-backdrop-filter:none;backdrop-filter:none}
 header.site-header .nav{width:min(1160px,calc(100% - 44px));height:72px;margin:0 auto;padding:0;display:flex;align-items:center;justify-content:space-between;gap:20px;position:relative;flex-wrap:nowrap}
 header.site-header .brand{font:800 15px/1 Manrope,'DM Sans',sans-serif;letter-spacing:.06em;color:#fff;text-decoration:none;white-space:nowrap;margin:0;flex:0 0 auto}
@@ -14,14 +14,14 @@ header.site-header nav#nav a:hover:after,header.site-header nav#nav a.current:af
 header.site-header #menu{display:none;flex:0 0 auto;background:transparent;color:#fff;border:1px solid #ffffff66;border-radius:7px;padding:7px 14px;font:700 12px/1.2 'DM Sans',sans-serif;letter-spacing:.04em;cursor:pointer;margin:0}
 header.site-header #menu:focus-visible,header.site-header nav#nav a:focus-visible{outline:2px solid #6EC1E4;outline-offset:3px}
 
-/* Medium screens: tighten spacing so all ten links stay on one line. */
-@media (max-width:1320px){
+/* Medium screens: tighten spacing so all eight links stay on one line. */
+@media (max-width:1180px){
   header.site-header nav#nav{gap:16px}
   header.site-header nav#nav a{letter-spacing:.06em}
 }
 
 /* Tablets and phones: the same dropdown menu on every page. */
-@media (max-width:1180px){
+@media (max-width:1040px){
   header.site-header .nav{height:64px;width:calc(100% - 34px)}
   header.site-header #menu{display:block}
   header.site-header nav#nav{display:none;position:absolute;top:64px;left:-17px;right:-17px;z-index:60;flex-direction:column;align-items:stretch;gap:0;background:#0033A0;padding:8px 22px 14px;max-height:calc(100vh - 64px);overflow-y:auto;box-shadow:0 10px 22px rgba(0,20,61,.28);border-top:1px solid #ffffff22}
@@ -34,6 +34,6 @@ header.site-header #menu:focus-visible,header.site-header nav#nav a:focus-visibl
 /* Keep in-page anchors and sticky side panels clear of the sticky menu. */
 html{scroll-padding-top:88px}
 .side,.toc,.sidecard{top:90px}
-@media (max-width:1180px){html{scroll-padding-top:76px}}
+@media (max-width:1040px){html{scroll-padding-top:76px}}
 
 @media print{header.site-header{display:none!important}}
