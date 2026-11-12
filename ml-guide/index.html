@@ -477,7 +477,7 @@ const C={MINTS:50,SMALLN:100,GAIN:5,HIGHR:0.8,BIGN:1000,FEWCTRL:10,WEAKF:10,OVLO
 const PYO='https://cdn.jsdelivr.net/pyodide/v0.27.2/full/';
 const L='../teaching/econometrics/lectures/', S='../teaching/statistics/lectures/';
 const ALLG={LASSO:'lasso',RIDGE:'ridge',ENET:'enet',RF:'rf',XGB:'xgb',PLR:'dml-plr',IRM:'dml-irm',PLIV:'dml-iv',CF:'causal-forest'};
-const READY=["dml-plr", "enet", "lasso", "rf", "ridge", "xgb"];   // guide pages already written; the others show as in preparation
+const READY=["causal-forest", "dml-irm", "dml-iv", "dml-plr", "enet", "lasso", "rf", "ridge", "xgb"];   // guide pages already written; the others show as in preparation
 const GUIDE=Object.fromEntries(Object.entries(ALLG).filter(([k,v])=>READY.includes(v)));
 const LEC={reg:[L+'02-ols-inference.html','Lecture 02: OLS inference'],ovb:[L+'03-functional-form-ovb.html','Lecture 03: Functional form and omitted variables'],glm:[S+'09-regression-glm.html','Lecture 09: Regression and GLMs'],ts:[L+'09-time-series.html','Lecture 09: Time-series foundations'],ur:[L+'10-unit-roots-breaks.html','Lecture 10: Unit roots and breaks'],iv:[L+'05-endogeneity-iv.html','Lecture 05: Endogeneity and IV'],ci:[L+'13-causal-inference.html','Lecture 13: Causal inference']};
 const MODELS={
