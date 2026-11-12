@@ -23,7 +23,7 @@ FIXED = {
     "research-guide/index.html": dict(title="Time-Series Model Selection Guide | Tuhin Al Mamun"),
     "teaching/index.html": dict(desc="Free courses in advanced macroeconomics, monetary economics, econometrics, "
                                      "statistics, calculus and finance: lecture notes, problem sets and code."),
-    "index.html": dict(desc="Tuhin G. M. Al Mamun (Tuhin Al Mamun), Ph.D.: economist working on monetary and fiscal policy, "
+    "index.html": dict(title="Tuhin Al Mamun, Ph.D. (Tuhin G. M. Al Mamun) | Economist", desc="Tuhin G. M. Al Mamun (Tuhin Al Mamun), Ph.D.: economist working on monetary and fiscal policy, "
                             "HANK and DSGE models, environmental economics and econometrics."),
     "panel-data-guide/index.html": dict(desc="Interactive tool for choosing a panel model: test your panel and see whether "
                                              "pooled OLS, fixed or random effects, GMM, PMG or CS-ARDL fits, with guides."),
