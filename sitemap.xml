@@ -1,183 +1,184 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://tuhingm.github.io/almamun/causal-inference-guide/did.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/causal-inference-guide/gsc.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/causal-inference-guide/</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/causal-inference-guide/its.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/causal-inference-guide/iv.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/causal-inference-guide/rdd.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/causal-inference-guide/scm.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/causal-inference-guide/staggered.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/estimation.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/higher.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/identification.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/medium.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/nk.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/optimal.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/rbc.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/soe.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/zlb.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/</loc><lastmod>2026-11-12</lastmod><priority>1.0</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/causal-inference-guide/did.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/causal-inference-guide/gsc.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/causal-inference-guide/</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/causal-inference-guide/its.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/causal-inference-guide/iv.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/causal-inference-guide/rdd.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/causal-inference-guide/scm.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/causal-inference-guide/staggered.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/estimation.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/higher.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/identification.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/medium.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/nk.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/optimal.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/rbc.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/soe.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/zlb.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/</loc><lastmod>2026-11-13</lastmod><priority>1.0</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/ml-guide/causal-forest.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/ml-guide/dml-irm.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/ml-guide/dml-iv.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/ml-guide/dml-plr.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/ml-guide/enet.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/ml-guide/enet.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/ml-guide/</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/ml-guide/lasso.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/ml-guide/rf.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/ml-guide/ridge.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/ml-guide/xgb.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/csardl.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/diff.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/fe.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/fedk.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/gmm.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/lectures/macro-panel-econometrics.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/mg.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/pmg.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/pols.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/re.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/research-guide/ardl.html</loc><lastmod>2026-11-12</lastmod><priority>0.8</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/research-guide/gmm.html</loc><lastmod>2026-11-12</lastmod><priority>0.8</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/research-guide/</loc><lastmod>2026-11-12</lastmod><priority>0.9</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/research-guide/nardl.html</loc><lastmod>2026-11-12</lastmod><priority>0.8</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/research-guide/ols.html</loc><lastmod>2026-11-12</lastmod><priority>0.8</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/research-guide/var.html</loc><lastmod>2026-11-12</lastmod><priority>0.8</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/research-guide/vecm.html</loc><lastmod>2026-11-12</lastmod><priority>0.8</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/ml-guide/lasso.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/ml-guide/rf.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/ml-guide/ridge.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/ml-guide/xgb.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/csardl.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/diff.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/fe.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/fedk.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/gmm.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/lectures/macro-panel-econometrics.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/mg.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/pmg.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/pols.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/re.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/research-guide/ardl.html</loc><lastmod>2026-11-13</lastmod><priority>0.8</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/research-guide/gmm.html</loc><lastmod>2026-11-13</lastmod><priority>0.8</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/research-guide/</loc><lastmod>2026-11-13</lastmod><priority>0.9</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/research-guide/nardl.html</loc><lastmod>2026-11-13</lastmod><priority>0.8</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/research-guide/ols.html</loc><lastmod>2026-11-13</lastmod><priority>0.8</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/research-guide/var.html</loc><lastmod>2026-11-13</lastmod><priority>0.8</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/research-guide/vecm.html</loc><lastmod>2026-11-13</lastmod><priority>0.8</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/calendar.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/examinations.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/</loc><lastmod>2026-11-12</lastmod><priority>0.8</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lecture-notes.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/01-dynamic-household.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/02-production-investment.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/03-solow-ramsey.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/04-rbc.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/05-nominal-rigidities.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/06-three-equation-nk.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/07-monetary-policy.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/08-fiscal-debt.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/09-open-economy.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/10-dsge-solution-methods.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/11-dsge-estimation.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/12-heterogeneous-agents.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/13-hank-distribution.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/14-empirical-policy.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/problem-sets-solutions.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/</loc><lastmod>2026-11-13</lastmod><priority>0.8</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lecture-notes.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/01-dynamic-household.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/02-production-investment.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/03-solow-ramsey.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/04-rbc.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/05-nominal-rigidities.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/06-three-equation-nk.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/07-monetary-policy.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/08-fiscal-debt.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/09-open-economy.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/10-dsge-solution-methods.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/11-dsge-estimation.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/12-heterogeneous-agents.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/13-hank-distribution.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/lectures/14-empirical-policy.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/problem-sets-solutions.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/readings.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/advanced-macroeconomics/syllabus.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/calendar.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/examinations.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/</loc><lastmod>2026-11-12</lastmod><priority>0.8</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lecture-notes.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/01-limits-continuity.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/02-sequences-series.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/03-differentiation.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/04-taylor-convexity-optimization.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/05-integration-fundamental-theorem.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/06-multivariable-functions-limits.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/07-partial-derivatives-chain-rule.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/08-hessian-multivariate-optimization.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/09-lagrange-multipliers.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/10-kkt-inequality-constraints.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/11-implicit-inverse-function-theorems.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/12-multiple-integrals-jacobians.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/13-differential-equations-dynamics.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/14-difference-equations-discrete-dynamics.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/problem-sets-solutions.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/01-limits-continuity.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/02-sequences-series.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/03-differentiation.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/04-taylor-convexity-optimization.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/05-integration-fundamental-theorem.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/06-multivariable-functions-limits.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/07-partial-derivatives-chain-rule.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/08-hessian-multivariate-optimization.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/09-lagrange-multipliers.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/10-kkt-inequality-constraints.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/11-implicit-inverse-function-theorems.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/12-multiple-integrals-jacobians.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/13-differential-equations-dynamics.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/lectures/14-difference-equations-discrete-dynamics.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/problem-sets-solutions.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/readings.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/calculus/syllabus.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/calendar.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/examinations.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/</loc><lastmod>2026-11-12</lastmod><priority>0.8</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lecture-notes.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/01-probability-regression.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/02-ols-inference.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/03-functional-form-ovb.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/04-heteroskedasticity-robust-inference.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/05-endogeneity-iv.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/06-simultaneous-equations.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/07-panel-data.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/08-dynamic-panels.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/09-time-series.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/10-unit-roots-breaks.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/11-var-svar.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/12-cointegration-ardl.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/13-causal-inference.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/14-research-replication.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/01-probability-regression.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/02-ols-inference.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/03-functional-form-ovb.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/04-heteroskedasticity-robust-inference.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/05-endogeneity-iv.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/06-simultaneous-equations.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/07-panel-data.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/08-dynamic-panels.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/09-time-series.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/10-unit-roots-breaks.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/11-var-svar.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/12-cointegration-ardl.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/13-causal-inference.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/lectures/14-research-replication.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/outline.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/problem-sets-solutions.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/problem-sets-solutions.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/readings.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/econometrics/syllabus.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/finance/calendar.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/finance/examinations.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/</loc><lastmod>2026-11-12</lastmod><priority>0.8</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/</loc><lastmod>2026-11-13</lastmod><priority>0.8</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lecture-notes.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/01-returns-risk.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/02-expected-utility.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/03-portfolio-theory.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/04-capm-factors.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/05-arbitrage-sdf.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/06-fixed-income.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/07-duration-term-structure.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/08-derivatives.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/09-capital-budgeting.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/10-capital-structure.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/11-market-efficiency.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/12-banking.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/13-risk-management.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/14-behavioral-finance.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/15-financial-econometrics.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/problem-sets-solutions.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/01-returns-risk.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/02-expected-utility.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/03-portfolio-theory.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/04-capm-factors.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/05-arbitrage-sdf.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/06-fixed-income.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/07-duration-term-structure.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/08-derivatives.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/09-capital-budgeting.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/10-capital-structure.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/11-market-efficiency.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/12-banking.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/13-risk-management.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/14-behavioral-finance.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/lectures/15-financial-econometrics.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/finance/problem-sets-solutions.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/finance/readings.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/finance/syllabus.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/</loc><lastmod>2026-11-12</lastmod><priority>0.9</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/calendar.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/examinations.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/</loc><lastmod>2026-11-12</lastmod><priority>0.8</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lecture-notes.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/01-money-inflation-facts.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/02-money-general-equilibrium.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/03-classical-monetary-model.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/04-price-wage-setting.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/05-basic-new-keynesian.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/06-optimal-monetary-policy.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/07-policy-rules-frameworks.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/08-small-open-economy.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/09-financial-frictions.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/10-zlb-unconventional-policy.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/11-monetary-fiscal-interactions.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/12-hank-monetary-transmission.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/13-bayesian-estimation.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/14-identifying-monetary-shocks.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/15-central-banking-practice.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/outline.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/problem-sets-solutions.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/readings.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/syllabus.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/</loc><lastmod>2026-11-13</lastmod><priority>0.9</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/calendar.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/examinations.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/</loc><lastmod>2026-11-13</lastmod><priority>0.8</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lecture-notes.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/01-money-inflation-facts.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/02-money-general-equilibrium.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/03-classical-monetary-model.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/04-price-wage-setting.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/05-basic-new-keynesian.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/06-optimal-monetary-policy.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/07-policy-rules-frameworks.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/08-small-open-economy.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/09-financial-frictions.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/10-zlb-unconventional-policy.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/11-monetary-fiscal-interactions.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/12-hank-monetary-transmission.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/13-bayesian-estimation.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/14-identifying-monetary-shocks.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/lectures/15-central-banking-practice.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/outline.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/problem-sets-solutions.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/readings.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/monetary-economics/syllabus.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/calendar.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/examinations.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/</loc><lastmod>2026-11-12</lastmod><priority>0.8</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lecture-notes.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/01-probability-models.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/02-distributions-multivariate.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/03-sampling-asymptotics.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/04-point-estimation.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/05-interval-testing.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/06-bayesian-inference.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/07-experimental-design.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/08-anova-multiple-comparisons.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/09-regression-glm.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/10-nonparametric.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/11-power-sample-size.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/12-mixed-models.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/13-multivariate.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/14-reproducible-statistics.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/01-probability-models.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/02-distributions-multivariate.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/03-sampling-asymptotics.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/04-point-estimation.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/05-interval-testing.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/06-bayesian-inference.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/07-experimental-design.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/08-anova-multiple-comparisons.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/09-regression-glm.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/10-nonparametric.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/11-power-sample-size.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/12-mixed-models.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/13-multivariate.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/lectures/14-reproducible-statistics.html</loc><lastmod>2026-11-13</lastmod><priority>0.6</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/outline.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/problem-sets-solutions.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/problem-sets-solutions.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/readings.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/syllabus.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/working-papers/</loc><lastmod>2026-11-12</lastmod><priority>0.9</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/Tuhin%20Al%20Mamun_CV.pdf</loc><lastmod>2026-11-12</lastmod><priority>0.8</priority></url>
 </urlset>
