@@ -108,6 +108,24 @@
   "sub": "Nonlinearity: an occasionally binding constraint. Step-by-step guide with Dynare code and real output."
  },
  {
+  "out": "assets/og/ml-guide/causal-forest.jpg",
+  "kicker": "Machine Learning Guide · Model guide",
+  "title": "Causal Forest",
+  "sub": "Effects that differ across people, N ≥ 2,000. Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/ml-guide/dml-irm.jpg",
+  "kicker": "Machine Learning Guide · Model guide",
+  "title": "Double Machine Learning: Interactive Model",
+  "sub": "Binary treatment, many or nonlinear controls. Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/ml-guide/dml-iv.jpg",
+  "kicker": "Machine Learning Guide · Model guide",
+  "title": "Double Machine Learning with an Instrument (DML-IV)",
+  "sub": "Endogenous treatment, valid instrument. Step-by-step guide with Python code and real output."
+ },
+ {
   "out": "assets/og/ml-guide/dml-plr.jpg",
   "kicker": "Machine Learning Guide · Model guide",
   "title": "Double Machine Learning: Partially Linear Model",

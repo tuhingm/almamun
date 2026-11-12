@@ -45,3 +45,16 @@ python3 tools/make_sitemap.py
 | `assets/css/site-header.css` | the one menu style for every page (desktop row; dropdown below 1040px) |
 | `tools/site_polish.py` | menu markup, name variants for search (`ALT_NAMES`), structured data |
 | `tools/og_cards_site.json` | preview cards for the panel, causal-inference and DSGE guide pages (written by `site_polish.py`) |
+
+## Machine Learning Guide (`ml-guide/`)
+```bash
+pip install numpy pandas scipy statsmodels scikit-learn xgboost doubleml econml linearmodels wooldridge pyreadr
+python3 tools/ml_selector/build_ml.py            # tool page + example data (add --rerun to recompute the cached checks)
+python3 tools/ml_selector/build_ml_guides.py     # the nine method pages (or name some: lasso rf dml-plr ...)
+```
+| Path | Purpose |
+|---|---|
+| `tools/ml_selector/ml_analysis.py` | decision engine (rules A1–A5, B1–B5 and their cut-offs); also runs in the browser via Pyodide |
+| `tools/ml_selector/template.html`, `app.js` | the interactive tool page |
+| `tools/ml_selector/guides/*.md` | method pages; every python block is executed and its output inserted |
+| `tools/ml_selector/data/` | downloaded source data and cached check results (not committed) |
