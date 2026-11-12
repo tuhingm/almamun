@@ -8,7 +8,7 @@ which cache previews fetch the current image. Safe to run repeatedly.
 import html, pathlib, re
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-VERSION = "3"
+VERSION = "4"
 EXTRA = re.compile(r'\s*<meta (?:property|name)="(?:og:image:alt|og:image:type|og:image:secure_url|twitter:title|twitter:description|twitter:image|twitter:image:alt)" content="[^"]*">')
 n = 0
 for f in sorted(ROOT.rglob("*.html")):

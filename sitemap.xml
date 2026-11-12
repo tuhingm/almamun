@@ -1,6 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://tuhingm.github.io/almamun/causal-inference-guide/did.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/causal-inference-guide/gsc.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/causal-inference-guide/</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/causal-inference-guide/its.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/causal-inference-guide/iv.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/causal-inference-guide/rdd.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/causal-inference-guide/scm.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/causal-inference-guide/staggered.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/estimation.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/higher.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/identification.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/medium.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/nk.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/optimal.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/rbc.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/soe.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/dsge-guide/zlb.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/</loc><lastmod>2026-11-12</lastmod><priority>1.0</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/csardl.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/diff.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/fe.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/fedk.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/gmm.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/lectures/macro-panel-econometrics.html</loc><lastmod>2026-11-12</lastmod><priority>0.6</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/mg.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/pmg.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/pols.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/re.html</loc><lastmod>2026-11-12</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/research-guide/ardl.html</loc><lastmod>2026-11-12</lastmod><priority>0.8</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/research-guide/gmm.html</loc><lastmod>2026-11-12</lastmod><priority>0.8</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/research-guide/</loc><lastmod>2026-11-12</lastmod><priority>0.9</priority></url>

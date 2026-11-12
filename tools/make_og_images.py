@@ -22,9 +22,11 @@ cards += [
          sub="Six full course sites with lecture notes, coding exercises, problem sets and exams.",
          tags=["Econometrics", "Statistics", "Calculus", "Macroeconomics", "Finance", "Monetary"]),
 ]
-_g = ROOT / "tools" / "model_selector" / "guide_cards.json"
-if _g.exists():
-    cards += json.loads(_g.read_text())
+for _g in (ROOT / "tools" / "model_selector" / "guide_cards.json", ROOT / "tools" / "og_cards_site.json"):
+    if _g.exists():
+        cards += json.loads(_g.read_text())
+if os.environ.get("OG_ONLY"):  # comma-separated path prefixes, e.g. OG_ONLY=assets/og/dsge-guide
+    cards = [c for c in cards if c["out"].startswith(tuple(os.environ["OG_ONLY"].split(",")))]
 FONTS = os.environ.get("OG_FONT_CSS")
 HTML = """<html><head>{HEAD}<style>
 /* Designed for centre-cropping: phone apps often show only the middle 630x630 square, so all text lives there. */
