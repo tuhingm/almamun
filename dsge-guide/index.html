@@ -20,9 +20,10 @@ pre{overflow:auto;background:#111c36;color:#e4ecfa;border-radius:9px;padding:15p
 footer{background:var(--deep);color:#c3d0e4;padding:20px 0;font-size:10px}
 @media(max-width:760px){.grid,.steps{grid-template-columns:1fr}.nav{padding:10px 0}.hero{padding:40px 0}}
 </style>
+<link rel="stylesheet" href="../assets/css/mobile-nav.css">
 </head>
 <body>
-<header><div class="wrap nav"><a class="brand" href="../index.html">TGM <b>AL MAMUN</b></a><nav aria-label="Main navigation"><a href="../index.html">Home</a><a href="../teaching/index.html">Teaching Courses</a><a href="../working-papers/index.html">Working Papers</a><a href="../research-guide/index.html">Time-Series Guide</a><a href="../panel-data-guide/index.html">Panel-Data Guide</a><a href="../causal-inference-guide/index.html">Causal Inference</a><a href="../dsge-guide/index.html" class="current" aria-current="page">DSGE Guide</a><a href="../Tuhin%20Al%20Mamun_CV.pdf">CV</a></nav></div></header>
+<header><div class="wrap nav"><a class="brand" href="../index.html">TGM <b>AL MAMUN</b></a><button id="menu" type="button" aria-expanded="false" aria-controls="nav">Menu</button><nav id="nav" aria-label="Main navigation"><a href="../index.html">Home</a><a href="../teaching/index.html">Teaching Courses</a><a href="../working-papers/index.html">Working Papers</a><a href="../research-guide/index.html">Time-Series Guide</a><a href="../panel-data-guide/index.html">Panel-Data Guide</a><a href="../causal-inference-guide/index.html">Causal Inference</a><a href="../dsge-guide/index.html" class="current" aria-current="page">DSGE Guide</a><a href="../Tuhin%20Al%20Mamun_CV.pdf">CV</a></nav></div></header>
 <section class="hero"><div class="wrap"><div class="kicker">Structural Macroeconometrics · Dynare Workflow</div><h1>DSGE Research Guide</h1><p class="lead">A practical workflow for developing, solving, estimating and evaluating empirical Dynamic Stochastic General Equilibrium models. All computational examples and implementation workflows in this guide use Dynare.</p><div class="meta"><span><strong>Dynare only</strong> computational environment</span><span>Model development · Bayesian estimation · Policy analysis</span></div></div></section>
 <main class="wrap">
 <p class="intro">This is a research-oriented companion to the DSGE material in Monetary Economics. The monetary-economics lectures develop economic theory; this guide focuses on turning a structural model into a transparent, reproducible empirical paper using Dynare and its native model, estimation and reporting commands.</p>
@@ -117,4 +118,5 @@ estimation(
 <div class="callout"><strong>Research standard:</strong> A DSGE paper should make the mapping from economic theory to the solved model, observed data, likelihood and reported policy conclusions fully auditable. Dynare code should reproduce every reported table and figure.</div>
 </main>
 <footer><div class="wrap">© 2026 Tuhin G. M. Al Mamun · DSGE Research Guide · Dynare implementation</div></footer>
+<script src="../assets/js/mobile-nav.js" defer></script>
 </body></html>
