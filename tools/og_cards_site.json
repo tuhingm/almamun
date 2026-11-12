@@ -108,6 +108,12 @@
   "sub": "Nonlinearity: an occasionally binding constraint. Step-by-step guide with Dynare code and real output."
  },
  {
+  "out": "assets/og/ml-guide/index.jpg",
+  "kicker": "Machine Learning Guide",
+  "title": "Which machine-learning method fits your data?",
+  "sub": "LASSO, ridge, elastic net, random forest, XGBoost or double machine learning, chosen by tests on your data."
+ },
+ {
   "out": "assets/og/panel-data-guide/csardl.jpg",
   "kicker": "Panel Data Guide · Model guide",
   "title": "Cross-Sectionally Augmented ARDL",
