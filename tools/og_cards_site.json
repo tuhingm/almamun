@@ -138,6 +138,12 @@
   "sub": "Linear, many small effects. Step-by-step guide with Python code and real output."
  },
  {
+  "out": "assets/og/ml-guide/xgb.jpg",
+  "kicker": "Machine Learning Guide · Model guide",
+  "title": "Gradient Boosting (XGBoost)",
+  "sub": "Nonlinear, at least 1,000 observations. Step-by-step guide with Python code and real output."
+ },
+ {
   "out": "assets/og/panel-data-guide/csardl.jpg",
   "kicker": "Panel Data Guide · Model guide",
   "title": "Cross-Sectionally Augmented ARDL",
