@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 from oes_api.main import app
 
