@@ -9,6 +9,7 @@
    ssc install xtdcce2
    ssc install xtcips
    ssc install xtwest
+   ssc install xtpmg
 **********************************************************************/
 
 clear all
