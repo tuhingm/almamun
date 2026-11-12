@@ -1,59 +1,1287 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0033A0">
-<meta name="description" content="An applied causal-inference research guide covering DiD, staggered adoption, event studies, generalized synthetic control, structural-break interventions, RDD and IV.">
+<meta name="description" content="An interactive design-selection tool for causal inference in economics and finance: test your data and find out whether difference-in-differences, staggered DiD, generalized synthetic control, synthetic control, interrupted time series, regression discontinuity or instrumental variables fits.">
 <title>Causal Inference Research Guide | Tuhin G. M. Al Mamun</title>
 <link rel="canonical" href="https://tuhingm.github.io/almamun/causal-inference-guide/">
-<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml"><link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},options:{skipHtmlTags:['script','noscript','style','textarea','pre','code']}};</script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 <style>
-:root{--navy:#0033a0;--navy2:#00205b;--ink:#1b2437;--muted:#55617a;--paper:#f3f5fa;--line:#d5dcea;--sky:#9fd3f0;--tint:#e3eaf7;--green:#0f7a4f;--amber:#a05a00}
-*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:18px}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.7 "DM Sans",sans-serif}a{color:inherit;text-decoration:none}button,select{font:inherit;cursor:pointer}.wrap{width:min(1160px,calc(100% - 38px));margin:auto}
-header{background:var(--navy);color:#fff}.nav{min-height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{font:800 15px Manrope;white-space:nowrap}.brand b{color:var(--sky)}nav{display:flex;gap:18px;flex-wrap:wrap;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#e4ecf8}nav a:hover{color:var(--sky)}
-.hero{padding:54px 0 46px;color:#fff;background:radial-gradient(circle at 85% 12%,#6ec1e445,transparent 29%),linear-gradient(120deg,#0033a0,#00205b)}.kicker,.eyebrow{font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--sky)}h1{font:800 clamp(34px,5vw,52px)/1.1 Manrope;letter-spacing:-1.6px;margin:12px 0}.lead{max-width:850px;color:#d6e2f6;margin:0}.meta{display:flex;gap:22px;flex-wrap:wrap;margin-top:20px;color:#c5d4ea;font-size:11px}.meta strong{color:#fff}
-main{padding:30px 0 75px}.intro{max-width:900px;font-size:13px;color:#4b5870}.grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(270px,.75fr);gap:18px;align-items:start;margin-top:20px}.panel,.method,.resource{background:#fff;border:1px solid var(--line);border-radius:13px;padding:20px;box-shadow:0 5px 18px #00205b0b;min-width:0}.panel h2,.section-head h2{font:800 20px Manrope;margin:0 0 5px}.sub{font-size:12px;color:var(--muted);margin:0 0 15px}.fields{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}.field{display:grid;gap:5px}.field label{font-size:10px;font-weight:800;color:#53617a}.field select{width:100%;border:1px solid #cbd5e5;border-radius:8px;padding:9px;background:#fff;color:var(--ink);font-size:12px}.btn{border:0;border-radius:8px;background:var(--navy);color:#fff;padding:10px 15px;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-top:14px}.output{margin-top:15px;padding:16px;border:1px solid #cbd8ec;background:#f7f9fd;border-radius:10px;font-size:12px}.output h3{font:800 16px Manrope;margin:0 0 7px;color:var(--navy)}.output ul{padding-left:18px;margin:7px 0}.output .warning{margin-top:10px;padding:10px;background:#fff3df;border:1px solid #f0d7a8;border-radius:8px;color:#704800}
-.aside{position:sticky;top:15px}.aside ol{padding-left:19px;margin:8px 0;font-size:11px;color:#4c5a72}.aside li{padding:4px 0}.pill{display:inline-block;background:var(--tint);color:var(--navy);padding:3px 8px;border-radius:30px;font-size:9px;font-weight:800;margin:2px}
-.section{margin-top:40px}.section-head{display:flex;justify-content:space-between;align-items:end;gap:16px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:15px}.section-head p{font-size:12px;color:var(--muted);max-width:530px;margin:0}.methods{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.method{padding:17px}.method .tag{font-size:9px;color:var(--navy);font-weight:800;letter-spacing:.1em;text-transform:uppercase}.method h3{font:800 15px Manrope;margin:5px 0}.method p,.method li{font-size:11px;color:var(--muted);line-height:1.6}.method ul{padding-left:16px;margin:7px 0}.eq{overflow-x:auto;background:#f6f8fd;border:1px solid #e1e8f3;border-radius:8px;padding:10px 12px;margin:9px 0;font-size:12px}
-.resource-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}.resource h3{font:800 15px Manrope;margin:0 0 7px}.resource p,.resource li{font-size:11px;color:var(--muted)}.resource pre{white-space:pre;overflow:auto;background:#111c36;color:#e4ecfa;border-radius:9px;padding:13px;font:10px/1.55 ui-monospace,Consolas,monospace}.resource summary{cursor:pointer;color:var(--navy);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
-.note{background:#eaf0fa;border:1px solid #d1def0;border-radius:10px;padding:14px 17px;margin-top:18px;font-size:11px;color:#46546d}
-footer{background:var(--navy2);color:#c3d0e4;padding:20px 0;font-size:10px}.foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
-@media(max-width:850px){.grid{grid-template-columns:1fr}.aside{position:static}.methods{grid-template-columns:repeat(2,1fr)}}@media(max-width:580px){.wrap{width:calc(100% - 28px)}.nav{padding:10px 0}.methods,.resource-grid,.fields{grid-template-columns:1fr}.section-head{display:block}.hero{padding:40px 0}.panel,.method,.resource{padding:15px}}
-@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+:root{--navy:#0033a0;--navy2:#00205b;--ink:#1b2437;--muted:#55617a;--paper:#f3f5fa;--white:#fff;--line:#d5dcea;--sky:#9fd3f0;--sky2:#6ec1e4;--tint:#e3eaf7;--ok:#0f7a4f;--warn:#a05a00}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:25px}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.7 "DM Sans",sans-serif}a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer}.wrap{width:min(1120px,calc(100% - 44px));margin:auto}
+header{background:rgba(0,51,160,.98);color:white;border-bottom:1px solid #ffffff22}.nav{height:72px;display:flex;align-items:center;justify-content:space-between}.brand{font:800 15px Manrope}.brand b{color:var(--sky)}nav{display:flex;gap:25px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#e3ecf8}nav a:hover,nav a.current{color:var(--sky)}
+.hero{background:radial-gradient(circle at 85% 12%,#6ec1e445,transparent 29%),linear-gradient(120deg,#0033a0,#00205b);color:white;padding:60px 0 52px}.kicker{font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--sky)}h1{font:800 clamp(34px,5vw,50px)/1.12 Manrope;letter-spacing:-1.7px;margin:12px 0 14px}.lead{max-width:760px;color:#d0dcf0;margin:0;font-size:15px}.meta{display:flex;gap:22px;flex-wrap:wrap;margin-top:22px;color:#c5d4ea;font-size:11px}.meta strong{color:white}
+main{padding:34px 0 80px}
+.modes{display:flex;gap:8px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:14px;padding:7px;box-shadow:0 5px 18px rgba(0,32,91,.06)}
+.modes button{flex:1 1 180px;border:0;background:transparent;border-radius:10px;padding:13px 14px;text-align:left;color:var(--ink);transition:background .2s,color .2s,transform .2s}
+.modes button b{display:block;font:800 14px Manrope}.modes button span{font-size:11px;color:var(--muted)}
+.modes button:hover{background:#f3f6fc}.modes button[aria-pressed=true]{background:var(--navy);color:#fff;transform:translateY(-1px);box-shadow:0 6px 16px #0033a040}.modes button[aria-pressed=true] span{color:#cfe0fa}
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:22px;margin-top:22px;align-items:start}
+.panel{min-width:0;background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:0 5px 18px rgba(0,32,91,.06)}
+.panel h2{font:800 18px Manrope;margin:0 0 4px;letter-spacing:-.3px}.panel>p.sub{font-size:12px;color:var(--muted);margin:0 0 16px}
+.label{font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#7f8aa1}
+.ex{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.ex button{border:1px solid var(--line);background:#fff;border-radius:11px;padding:14px;text-align:left;transition:transform .2s,box-shadow .2s,border-color .2s}
+.ex button:hover{transform:translateY(-3px);box-shadow:0 12px 26px rgba(0,32,91,.12);border-color:#b9c9e6}.ex button.sel{border-color:var(--navy);box-shadow:0 0 0 2px #0033a030}
+.ex b{display:block;font:700 13.5px/1.35 Manrope;margin:5px 0 4px}.ex small{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--navy)}.ex span{font-size:11px;color:var(--muted);line-height:1.5;display:block}
+.drop{border:2px dashed #b9c9e6;border-radius:12px;padding:26px;text-align:center;background:#f8fafe;transition:background .2s,border-color .2s}.drop.over{background:var(--tint);border-color:var(--navy)}
+.btn{display:inline-flex;align-items:center;gap:6px;background:var(--navy);color:#fff;border:0;border-radius:8px;padding:11px 16px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;transition:transform .2s,box-shadow .2s}.btn:hover{transform:translateY(-2px);box-shadow:0 8px 18px #0033a040}
+.btn.ghost{background:#fff;color:var(--navy);border:1px solid #b9c9e6}.btn[disabled]{opacity:.55;cursor:default;transform:none;box-shadow:none}
+.hint{font-size:11.5px;color:var(--muted);margin:12px 0 0}.hint a{color:var(--navy);font-weight:700}
+.status{display:none;align-items:center;gap:10px;font-size:12px;color:var(--navy);font-weight:600;margin-top:14px}.status.on{display:flex}.spin{width:16px;height:16px;border:2px solid #b9c9e6;border-top-color:var(--navy);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.err{background:#fdf0ee;border:1px solid #f0c5bd;color:#8a2a17;border-radius:9px;padding:11px 14px;font-size:12px;margin-top:14px}
+.q{margin-top:6px}.q h3{font:700 15.5px/1.45 Manrope;margin:6px 0 12px}.opts{display:grid;gap:8px}.opts button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:12px 14px;text-align:left;font-size:13px;transition:background .2s,border-color .2s,transform .2s}.opts button:hover{background:#f3f6fc;border-color:var(--navy);transform:translateX(4px)}.opts small{display:block;color:var(--muted);font-size:11px}
+.step{border-top:1px solid #e6ebf4;padding:18px 0 4px;margin-top:18px;opacity:0;transform:translateY(16px);transition:opacity .55s ease,transform .55s cubic-bezier(.2,.7,.2,1)}.step.in{opacity:1;transform:none}
+.step h3{font:800 14.5px Manrope;margin:3px 0 10px}.step p{font-size:12.5px;color:#434f66;margin:8px 0}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:11.5px}th{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#7f8aa1;text-align:right;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}td{padding:7px 8px;border-bottom:1px solid #edf1f7;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}th:first-child,td:first-child{text-align:left;font-weight:600}
+.tag{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.06em;padding:3px 8px;border-radius:30px;background:var(--tint);color:var(--navy)}.tag.i1{background:#fff1d6;color:var(--warn)}.tag.i2{background:#fde3df;color:#8a2a17}.tag.ok{background:#dcf3e8;color:var(--ok)}
+.sparks{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.spark{border:1px solid #e6ebf4;border-radius:9px;padding:9px 10px}.spark b{font-size:11px}.spark svg{display:block;width:100%;height:44px;margin-top:4px}.spark path{fill:none;stroke:var(--navy);stroke-width:1.4;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.4s ease}.step.in .spark path{stroke-dashoffset:0}
+.explain{background:#f6f8fd;border:1px solid #dfe6f3;border-radius:10px;padding:13px 16px;margin:0 0 14px}.explain summary{font:800 12.5px Manrope;cursor:pointer;color:var(--navy)}.explain p{font-size:12.5px;margin:9px 0 0}.explain ul{margin:8px 0 0;padding-left:18px;font-size:12.5px;color:#434f66}.explain li{margin:4px 0}
+.urv{border:1px solid #e6ebf4;border-radius:11px;padding:14px 16px;margin:10px 0}.urv-head{display:flex;justify-content:space-between;align-items:center;gap:10px}.urv-head b{font:800 13.5px Manrope}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}.pair div{background:#f8fafe;border-radius:8px;padding:7px 9px}.pair small{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#7f8aa1}.pair svg{display:block;width:100%;height:52px;margin-top:3px}.pair path{fill:none;stroke:var(--navy);stroke-width:1.3}.pair line{stroke:#c46000;stroke-width:1;stroke-dasharray:4 3}
+.urv ol{margin:6px 0 0;padding:0;list-style:none;font-size:12.5px;color:#434f66}.urv li{padding:6px 0;border-top:1px solid #edf1f7}.urv li b{color:var(--ink)}.urv .v{margin-top:8px;font-size:12.5px;font-weight:600;color:var(--navy)}
+.yes{color:var(--ok);font-weight:700}.no{color:var(--warn);font-weight:700}
+@media(max-width:480px){.pair{grid-template-columns:1fr}}
+details.code{margin:10px 0 0}details.code summary{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--navy);cursor:pointer}pre{background:#111c36;color:#e3ebfa;border-radius:9px;padding:13px 15px;font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow-x:auto;margin:8px 0 0}
+.side{position:sticky;top:18px}
+.tree svg{display:block;width:100%;height:auto}.tree .n rect{fill:#fff;stroke:#c3d0e6;stroke-width:1.2;transition:fill .35s,stroke .35s}.tree .n text{font:600 13px "DM Sans",sans-serif;fill:#41506a;text-anchor:middle;dominant-baseline:central;transition:fill .35s}
+.tree .n.leaf rect{fill:#f3f6fc}.tree .n.leaf text{font:800 14px Manrope,sans-serif}.tree #n-I2 text{font-size:12px}
+.tree .e{fill:none;stroke:#c9d4e8;stroke-width:1.4}.tree .e{transition:stroke .45s ease,stroke-width .45s ease}.tree .e.hl{stroke:var(--navy);stroke-width:2.8}
+.tree .el{font:700 11px "DM Sans",sans-serif;fill:#8793ab;text-anchor:middle}
+.tree .n.on rect{fill:var(--tint);stroke:var(--navy)}.tree .n.on text{fill:var(--navy)}.tree .n.leaf.on rect{fill:var(--navy);stroke:var(--navy);animation:pop .5s ease}.tree .n.leaf.on text{fill:#fff}.tree .n.alt rect{stroke:var(--navy);stroke-dasharray:4 3}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.12)}100%{transform:scale(1)}}.tree .n{transform-box:fill-box;transform-origin:center}
+.trail{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:14px;min-height:28px}.trail span{font-size:10.5px;font-weight:700;padding:5px 10px;border-radius:30px;background:var(--tint);color:var(--navy);animation:rise .4s ease both}.trail span.final{background:var(--navy);color:#fff}.trail i{color:#9aa6bd;font-style:normal;font-size:11px}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.result{margin-top:22px;border-radius:16px;padding:26px;color:#fff;background:radial-gradient(circle at 88% 10%,#6ec1e455,transparent 34%),linear-gradient(120deg,#0033a0,#00205b);box-shadow:0 18px 40px rgba(0,32,91,.25);animation:rise .6s cubic-bezier(.2,.7,.2,1) both}
+.result .label{color:var(--sky)}.result h2{font:800 clamp(30px,5vw,44px)/1.1 Manrope;letter-spacing:-1.2px;margin:8px 0 10px}.result p{color:#d6e2f6;font-size:13.5px;margin:0 0 12px;max-width:820px}
+.result ul{margin:6px 0 16px;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:7px}.result li{font-size:11px;font-weight:600;padding:6px 11px;border:1px solid #ffffff44;border-radius:30px;background:#ffffff14}
+.result .acts{display:flex;gap:10px;flex-wrap:wrap}.result .btn{background:#fff;color:var(--navy)}.result .btn.ghost{background:transparent;color:#fff;border:1px solid #ffffff77}
+.result .caution{background:#ffffff18;border:1px solid #ffffff33;border-radius:10px;padding:11px 14px;font-size:12px;color:#eef4ff;margin:0 0 14px}
+.guides{margin-top:46px}.guides-head{display:flex;justify-content:space-between;align-items:end;gap:20px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:16px}.guides h2{font:800 22px Manrope;margin:4px 0 0;letter-spacing:-.4px}.guides-head p{font-size:12px;color:var(--muted);margin:0;max-width:430px}
+.gcards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.gcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;box-shadow:0 5px 18px rgba(0,32,91,.06);transition:transform .25s,box-shadow .25s,border-color .25s;scroll-margin-top:20px}.gcard:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(0,32,91,.13);border-color:#b9c9e6}.gcard.flash{animation:flash 1.6s ease}@keyframes flash{0%,60%{box-shadow:0 0 0 3px #0033a055}100%{box-shadow:0 5px 18px rgba(0,32,91,.06)}}
+.gcard h3{font:800 17px Manrope;margin:6px 0 4px}.gcard .when{font-size:11.5px;color:var(--navy);font-weight:700;margin:0 0 8px}.gcard p{font-size:11.5px;color:var(--muted);margin:0 0 12px;line-height:1.6}.gcard a{display:block;font-size:11.5px;font-weight:700;color:var(--navy);margin-top:5px}.gcard a:hover{text-decoration:underline}
+.note{font-size:11.5px;color:#4a586f;background:var(--tint);border:1px solid #cfdaf0;border-radius:9px;padding:14px 18px;margin-top:26px}
+footer{background:var(--navy2);color:#c3d0e4;padding:22px 0;font-size:10px}.foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.foot b{color:#fff}
+[hidden]{display:none!important}
+@media(max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}.side{position:static}.tree svg{display:none}.tree .sub2{display:none}.gcards{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.wrap{width:calc(100% - 34px)}.nav{height:65px}nav{gap:11px;font-size:8.5px}.hero{padding:44px 0 38px}.ex{grid-template-columns:1fr}.gcards{grid-template-columns:1fr}.panel{padding:17px}.guides-head{display:block}.result{padding:20px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+@media(max-width:650px){.brand{white-space:nowrap;margin-right:12px}header nav{gap:9px;font-size:8px;letter-spacing:.06em;line-height:1.35;text-align:left}}
+/* causal-specific additions */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}.stat{background:#f8fafe;border:1px solid #e6ebf4;border-radius:9px;padding:9px 10px}.stat b{display:block;font:800 18px Manrope;color:var(--navy)}.stat span{font-size:10px;color:var(--muted)}
+.chart svg{display:block;width:100%;height:auto;background:#fbfcfe;border:1px solid #e6ebf4;border-radius:9px}.chart .ax{stroke:#c9d4e8;stroke-width:1}.chart .zero{stroke:#8793ab;stroke-width:1;stroke-dasharray:3 3}.chart .tv{stroke:#c46000;stroke-width:1.4;stroke-dasharray:5 4}
+.chart .s0{fill:none;stroke:var(--navy);stroke-width:2}.chart .s1{fill:none;stroke:#c46000;stroke-width:2;stroke-dasharray:6 4}.chart .s2{fill:none;stroke:#9aa9c4;stroke-width:1.6}
+.chart .pt{fill:var(--navy)}.chart .pt.pre{fill:#8793ab}.chart .ci{stroke:var(--navy);stroke-width:1.4}.chart .ci.pre{stroke:#8793ab}.chart .dot{fill:#0033a0aa}.chart .fit{stroke:#c46000;stroke-width:2.4}.chart .bar{fill:#0033a033}.chart text{font:600 10px "DM Sans",sans-serif;fill:#7f8aa1}
+.legend{font-size:10.5px;color:var(--muted);margin-top:4px}.legend i{display:inline-block;width:16px;height:3px;vertical-align:middle;margin:0 5px 0 10px;background:var(--navy)}.legend i.b{background:#c46000}.legend i.c{background:#9aa9c4}
+.roles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}.roles label{display:flex;flex-direction:column;gap:4px;font-size:11px;font-weight:700;color:var(--muted)}.roles select,.roles input{font:500 13px "DM Sans",sans-serif;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}.roles select[multiple]{height:84px}.roles .full{grid-column:1/-1}.roles small{font-weight:500}
+.nt{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.nt label{display:flex;flex-direction:column;gap:5px;font-size:11px;font-weight:700;color:var(--muted);flex:1 1 150px}.nt input{font:600 15px 'DM Sans',sans-serif;padding:10px 12px;border:1px solid var(--line);border-radius:9px;color:var(--ink);background:#fff}
+.tree .el{font-size:10.5px}.tree .n text{font-size:12.5px}.tree .n.leaf text{font-size:13px}
+.gcards.extra{margin-top:14px}
+@media(max-width:650px){.stats{grid-template-columns:repeat(2,1fr)}.roles{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <header><div class="wrap nav"><a class="brand" href="../index.html">TGM <b>AL MAMUN</b></a><nav aria-label="Main navigation"><a href="../index.html">Home</a><a href="../teaching/index.html">Teaching Courses</a><a href="../working-papers/index.html">Working Papers</a><a href="../research-guide/index.html">Time-Series Guide</a><a href="../panel-data-guide/index.html">Panel-Data Guide</a><a href="../causal-inference-guide/index.html" class="current" aria-current="page">Causal Inference</a><a href="../dsge-guide/index.html">DSGE Guide</a><a href="../Tuhin%20Al%20Mamun_CV.pdf">CV</a></nav></div></header>
-<section class="hero"><div class="wrap"><div class="kicker">Applied Econometrics · Identification and Policy Evaluation</div><h1>Causal Inference Research Guide</h1><p class="lead">Choose an identification strategy from the assignment mechanism, treatment timing, comparison units, outcome structure and available variation. This guide covers conventional and staggered DiD, event studies and generalized synthetic control, structural-break interventions, RDD and IV.</p><div class="meta"><span><strong>7</strong> method families</span><span><strong>3</strong> counterfactual frameworks</span><span>Panel · Time series · Quasi-experimental</span></div></div></section>
+<section class="hero"><div class="wrap"><div class="kicker">Empirical Research Guide · Causal Inference</div><h1>Which causal design fits your data?</h1><p class="lead">A causal estimate is only as good as its source of variation. Test a real dataset, upload your own, or enter what you know about your design, and follow the path to the method your paper needs, with the diagnostics a referee will ask for.</p><div class="meta"><span><strong>7</strong> design guides</span><span><strong>7</strong> real example datasets</span><span>Python · statsmodels</span></div></div></section>
 <main class="wrap">
-<p class="intro">The estimand and identification argument determine the method. A regression specification is not causal merely because it contains fixed effects, a post-treatment dummy or a statistically significant coefficient. Start with the source of treatment variation and define the counterfactual explicitly.</p>
+<div class="modes" role="group" aria-label="Choose how to start">
+<button type="button" data-mode="example" aria-pressed="true"><b>Try a real example</b><span>See the full sequence on real data</span></button>
+<button type="button" data-mode="upload" aria-pressed="false"><b>Use my own data</b><span>Upload a CSV; checks run in your browser</span></button>
+<button type="button" data-mode="ask" aria-pressed="false"><b>I know my design</b><span>Answer a few questions</span></button>
+</div>
 <div class="grid">
-<section class="panel">
-<h2>Find an appropriate identification pathway</h2><p class="sub">Answer the design questions. The output is a shortlist and the assumptions you must defend—not an automatic proof of identification.</p>
-<div class="fields">
-<div class="field"><label for="assignment">How is treatment assigned?</label><select id="assignment"><option value="groups">Treated and comparison units</option><option value="single">One/few treated aggregate units</option><option value="cutoff">Assignment determined by a cutoff</option><option value="instrument">Instrument or external source of variation</option></select></div>
-<div class="field"><label for="timing">Treatment timing</label><select id="timing"><option value="common">Same adoption date</option><option value="staggered">Different adoption dates</option><option value="singlebreak">One intervention date / structural break</option><option value="continuous">Continuous treatment intensity</option></select></div>
-<div class="field"><label for="units">Comparison structure</label><select id="units"><option value="many">Many treated and untreated units</option><option value="one">One treated unit with available comparison data</option><option value="none">No untreated comparison group</option><option value="threshold">Observations around a threshold</option></select></div>
-<div class="field"><label for="data">Data structure</label><select id="data"><option value="panel">Panel data</option><option value="ts">Single or aggregate time series</option><option value="cross">Cross-section / repeated cross-section</option></select></div>
-<div class="field"><label for="pre">Pre-treatment periods</label><select id="pre"><option value="many">Several pre-treatment periods</option><option value="few">Only one or two pre-periods</option><option value="none">No pre-treatment observations</option></select></div>
-<div class="field"><label for="treatment">Treatment exposure</label><select id="treatment"><option value="binary">Binary treatment</option><option value="dose">Continuous dose / intensity</option></select></div>
-</div>
-<button class="btn" id="recommend">Build identification pathway</button>
-<div id="output" class="output" aria-live="polite"><h3>Start with the assignment mechanism</h3><p>Choose the design features above and generate a pathway. You can then compare candidate estimators in the method library below.</p></div>
+<section class="panel" id="work" aria-live="polite">
+ <div id="m-example">
+  <h2>Choose a dataset</h2><p class="sub">Seven real datasets from well-known studies. Each one leads to a different design.</p>
+  <div class="ex" id="ex"></div>
+ </div>
+ <div id="m-upload" hidden>
+  <h2>Upload your data</h2><p class="sub">A CSV with one row per observation (for a panel, one row per unit and period). After loading, tell the tool which column plays which role.</p>
+  <div class="drop" id="drop"><p style="margin:0 0 12px;font-size:13px">Drop a CSV file here, or</p><label class="btn">Choose file<input type="file" id="file" accept=".csv,text/csv,text/plain" hidden></label></div>
+  <div id="rolebox" hidden>
+   <div class="roles">
+    <label class="full">Outcome<select id="r-outcome"></select></label>
+    <label>Treatment<small>0/1 indicator, or the endogenous variable for IV</small><select id="r-treat"></select></label>
+    <label>Unit identifier<small>for panels (state, firm, person)</small><select id="r-unit"></select></label>
+    <label>Time variable<small>year, quarter, date</small><select id="r-time"></select></label>
+    <label>Running variable<small>for a cutoff design</small><select id="r-running"></select></label>
+    <label>Cutoff<small>value of the running variable</small><input id="r-cutoff" type="number" step="any" placeholder="e.g. 0"></label>
+    <label>Instrument(s)<small>for IV; Ctrl/⌘-click for several</small><select id="r-instruments" multiple></select></label>
+    <label class="full">Control variables (IV only, optional)<select id="r-controls" multiple></select></label>
+   </div>
+   <p class="hint">Which roles you fill decides the design family: a <b>running variable and cutoff</b> → regression discontinuity; an <b>instrument</b> → IV; a <b>treatment and time variable</b> (with or without units) → a design for a policy that starts at a point in time. The file is analysed on your own device and is not uploaded anywhere.</p>
+   <button class="btn" type="button" id="runUp" style="margin-top:12px">Run the analysis</button>
+  </div>
+  <p class="hint">Format examples: <a href="examples/castle.csv" download>castle.csv</a> (staggered policy), <a href="examples/close_elections.csv" download>close_elections.csv</a> (cutoff), <a href="examples/card.csv" download>card.csv</a> (instrument).</p>
+  <div class="status" id="status"><span class="spin"></span><span id="status-text"></span></div>
+  <div id="upload-err"></div>
+ </div>
+ <div id="m-ask" hidden>
+  <h2>Answer from what you know</h2><p class="sub">Use this if you know your design and have run the diagnostics. If you have not, choose “Use my own data” and the checks are run and explained for you.</p>
+  <div class="q" id="q"></div>
+ </div>
+ <div id="steps"></div>
 </section>
-<aside class="panel aside"><div class="eyebrow">Identification workflow</div><h2>Design before estimation</h2><ol><li>Define the treatment, unit of assignment, exposure date and target population.</li><li>Specify the estimand: ATE, ATT, group-time ATT, local effect, or unit-level treatment effect.</li><li>Construct the counterfactual and state the identifying assumptions.</li><li>Choose an estimator compatible with treatment timing and data structure.</li><li>Diagnose pre-trends, overlap, comparison fit, manipulation or instrument strength as relevant.</li><li>Report uncertainty, dynamic effects, sensitivity and placebo analyses.</li></ol><div><span class="pill">Potential outcomes</span><span class="pill">Counterfactuals</span><span class="pill">Treatment effects</span><span class="pill">Policy evaluation</span></div></aside>
+<aside class="side">
+ <div class="panel tree"><div class="label">Decision path</div><p class="sub sub2" style="font-size:12px;color:var(--muted);margin:2px 0 8px">The path lights up as the evidence comes in.</p><div id="tree"></div><div class="trail" id="trail"></div></div>
+</aside>
 </div>
+<div id="result"></div>
 
-<section class="section" id="methods"><div class="section-head"><div><div class="eyebrow">Method library</div><h2>Identification strategies and estimators</h2></div><p>Methods are grouped by their source of identifying variation. Related estimators are not interchangeable: they can target different treatment effects and rely on different assumptions.</p></div>
-<div class="methods">
-<article class="method"><div class="tag">01 · Difference-in-Differences</div><h3>Conventional DiD</h3><p>Two-group, two-period or multi-period design with a common treatment date. The canonical estimand is the ATT.</p><div class="eq">\(Y_{it}=\alpha_i+\lambda_t+\tau(D_i\times Post_t)+X'_{it}\beta+\varepsilon_{it}\)</div><ul><li>Parallel trends absent treatment.</li><li>No anticipation and stable treatment composition.</li><li>Cluster inference at the treatment-assignment level.</li></ul></article>
-<article class="method"><div class="tag">02 · Staggered adoption</div><h3>Staggered DiD</h3><p>Units adopt treatment in different periods. Estimate group-time effects rather than relying mechanically on a conventional TWFE coefficient.</p><div class="eq">\(ATT(g,t)=E[Y_t(1)-Y_t(0)\mid G=g]\)</div><ul><li>Callaway–Sant’Anna group-time ATT.</li><li>Sun–Abraham interaction-weighted event study.</li><li>Imputation and two-stage DiD estimators.</li></ul></article>
-<article class="method"><div class="tag">03 · Dynamic effects</div><h3>Event-study DiD</h3><p>Trace effects relative to treatment time and inspect pre-treatment coefficients. In staggered designs use an estimator robust to heterogeneous treatment effects.</p><div class="eq">\(Y_{it}=\alpha_i+\lambda_t+\sum_{k\ne -1}\beta_k 1[t-G_i=k]+\varepsilon_{it}\)</div><ul><li>Assess pre-treatment coefficients jointly and substantively.</li><li>Use appropriate cohort-time aggregation.</li><li>Do not treat insignificant leads as proof of parallel trends.</li></ul></article>
+<section class="guides" id="guides"><div class="guides-head"><div><div class="label">Design guides</div><h2>Seven routes to a finished paper</h2></div><p>Each guide takes one real dataset through estimation, diagnostic tests and writing, with Python code, real output and sample text for the paper.</p></div>
+<div class="gcards" id="gcards"></div></section>
+<div class="note"><b>How the tool decides.</b> The design follows from the source of variation, which you declare through the column roles; the data then decide among the designs in that family. With a <b>running variable and a cutoff</b>, the tool estimates a local linear regression discontinuity with the Imbens–Kalyanaraman bandwidth and checks manipulation (McCrary density test), covariate continuity, placebo cutoffs and bandwidth sensitivity; if the treatment is not fully determined by the cutoff, the design is fuzzy. With an <b>instrument</b>, it compares OLS and 2SLS and reports the first-stage F statistic (below 10 signals a weak instrument), the weak-instrument-robust Anderson–Rubin test and an endogeneity test. With a <b>treatment that starts at a point in time</b>, the number of treated units decides: with 3 or fewer, a synthetic control if at least 5 untreated units are available and an interrupted time series otherwise; with more, an event study tests for parallel pre-trends (leads −5 to −2, cluster bootstrap), sending designs that fail to generalized synthetic control, and the others to DiD (one adoption date) or a heterogeneity-robust staggered DiD (several dates). These rules organise the evidence; they do not establish identification, which rests on the argument for the source of variation.</div>
+</main>
+<footer><div class="wrap foot"><span><b>Tuhin G. M. Al Mamun, Ph.D.</b> · Causal Inference Research Guide</span><span><a href="../research-guide/index.html">Time-Series Guide</a> · <a href="../panel-data-guide/index.html">Panel-Data Guide</a> · © <span id="year"></span></span></div></footer>
 
-<article class="method"><div class="tag">04 · Interactive fixed effects</div><h3>Generalized Synthetic Control (GSC)</h3><p>Xu's generalized SCM uses an interactive fixed-effects structure to estimate latent common factors and construct untreated potential outcomes.</p><div class="eq">\(Y_{it}(0)=X'_{it}\beta+\lambda_i' f_t+\varepsilon_{it}\)</div><ul><li>Useful with multiple treated units and latent common factors.</li><li>Requires suitable untreated observations to estimate factors.</li><li>Assess factor rank and pre-treatment fit.</li></ul></article>
-<article class="method"><div class="tag">05 · Structural break</div><h3>Intervention dummies and break models</h3><p>Pulse, step and slope-change dummies represent a hypothesized break. Break tests can locate unknown changes; causal interpretation requires an intervention-based counterfactual.</p><div class="eq">\(Y_t=\alpha+\beta t+\delta_1D_t+\delta_2(t-T_0)D_t+u_t\)</div><ul><li>Known break: intervention dummy / segmented regression.</li><li>Unknown break: Bai–Perron or single-break tests as diagnostics.</li><li>Distinguish a statistical break from a causal policy effect.</li></ul></article>
-<article class="method"><div class="tag">06 · Threshold assignment</div><h3>Regression Discontinuity (RDD)</h3><p>Exploit discontinuous treatment assignment at a known cutoff in a running variable.</p><div class="eq">\(\tau_{RD}=\lim_{r\downarrow c}E[Y\mid R=r]-\lim_{r\uparrow c}E[Y\mid R=r]\)</div><ul><li>Continuity of potential outcomes at the cutoff.</li><li>Check sorting/manipulation and covariate continuity.</li><li>Report bandwidth and polynomial sensitivity; local linear is a standard baseline.</li></ul></article>
-<article class="method"><div class="tag">07 · Exogenous instrument</div><h3>Instrumental Variables (IV / 2SLS)</h3><p>Use an instrument that shifts endogenous treatment but affects the outcome only through treatment, under the specified design.</p><div class="eq">\(D_i=Z_i'\pi+X_i'\gamma+v_i,\quad Y_i=\tau\hat D_i+X_i'\beta+u_i\)</div><ul><li>Relevance, exclusion and independence.</li><li>Weak-instrument-robust inference where needed.</li><li>For binary treatment, interpret LATE under monotonicity.</li></ul></article>
+<script type="text/plain" id="py-src">"""Design selection and diagnostics for the Causal Inference Research Guide.
+
+analyze(csv_text, roles_json) reads a CSV and a JSON dict of column roles:
+    outcome (required), treat, unit, time, running, cutoff, instruments (list), controls (list)
+and identifies the research design from the roles and the data:
+
+* running variable and cutoff                  -> regression discontinuity (sharp, or fuzzy if treat is given and
+                                                  not determined by the cutoff): local linear estimate with the
+                                                  Imbens-Kalyanaraman bandwidth, McCrary density test, covariate
+                                                  continuity, placebo cutoffs and bandwidth sensitivity
+* instrument(s)                                -> instrumental variables: OLS vs 2SLS, first-stage F,
+                                                  Anderson-Rubin test, endogeneity test, Hansen J if overidentified
+* treatment varying over time (unit and time) -> the number of treated units, the comparison units and the timing
+                                                  decide: interrupted time series, synthetic control, DiD with a
+                                                  common date, or staggered DiD; an event-study pre-trend test
+                                                  sends designs with non-parallel pre-trends to generalized
+                                                  synthetic control (interactive fixed effects)
+
+Returns a JSON string. The same file runs in the browser (Pyodide) for uploaded data and offline for the examples.
+All estimators are written out in NumPy / SciPy so they run without extra packages.
+"""
+import io, json, math, warnings
+import numpy as np
+import pandas as pd
+
+FEW_TREATED = 3      # this many treated units or fewer: synthetic control / interrupted time series
+MIN_DONORS = 5       # synthetic control needs at least this many untreated comparison units
+BOOT = 199           # bootstrap replications (cluster bootstrap over units)
+
+
+def _f(x, nd=4):
+    try:
+        x = float(x)
+    except Exception:
+        return None
+    return None if not np.isfinite(x) else round(x, nd)
+
+
+def _ncdf(z):
+    return 0.5 * math.erfc(-z / math.sqrt(2))
+
+
+def _p2(z):
+    return 2 * (1 - _ncdf(abs(z)))
+
+
+def _chi2_sf(x, df):
+    from scipy.stats import chi2
+    return float(chi2.sf(x, df))
+
+
+def _f_sf(x, d1, d2):
+    from scipy.stats import f
+    return float(f.sf(x, d1, d2))
+
+
+def _ols(y, X, w=None):
+    if w is not None:
+        sw = np.sqrt(w)
+        Xw, yw = X * sw[:, None], y * sw
+    else:
+        Xw, yw = X, y
+    XtX_inv = np.linalg.pinv(Xw.T @ Xw)
+    b = XtX_inv @ (Xw.T @ yw)
+    return b, y - X @ b, XtX_inv
+
+
+def _hc1(X, e, XtX_inv, w=None):
+    n, k = X.shape
+    s = X * (e * (w if w is not None else 1.0))[:, None]
+    return XtX_inv @ (s.T @ s) @ XtX_inv * n / max(n - k, 1)
+
+
+def _cluster(X, e, XtX_inv, g):
+    n, k = X.shape
+    G = len(np.unique(g))
+    order = np.argsort(g, kind="stable")
+    Xs, es, gs = X[order], e[order], g[order]
+    cut = np.flatnonzero(np.diff(gs)) + 1
+    meat = np.zeros((k, k))
+    for Xg, eg in zip(np.split(Xs, cut), np.split(es, cut)):
+        s = Xg.T @ eg
+        meat += np.outer(s, s)
+    c = (G / (G - 1)) * ((n - 1) / max(n - k, 1)) if G > 1 else 1.0
+    return c * XtX_inv @ meat @ XtX_inv
+
+
+def _err(msg):
+    return json.dumps({"error": msg})
+
+
+# ================================================================ reading
+
+def _read(csv_text, roles):
+    try:
+        raw = pd.read_csv(io.StringIO(csv_text), sep=None, engine="python")
+    except Exception as e:
+        return None, f"Could not read the file as CSV ({e})."
+    raw.columns = [str(c).strip() for c in raw.columns]
+    need = [roles.get(k) for k in ("outcome", "treat", "unit", "time", "running") if roles.get(k)]
+    need += list(roles.get("instruments") or []) + list(roles.get("controls") or [])
+    miss = [c for c in need if c not in raw.columns]
+    if miss:
+        return None, "Column(s) not found in the file: " + ", ".join(miss)
+    if not roles.get("outcome"):
+        return None, "Choose the outcome variable."
+    return raw, None
+
+
+def _time_order(s):
+    t = pd.to_numeric(s, errors="coerce")
+    if t.notna().all():
+        return t.astype(float), "numeric"
+    d = pd.to_datetime(s, errors="coerce")
+    if d.notna().all():
+        return (d - d.min()).dt.days.astype(float), "date"
+    return s.astype(str).map({v: i for i, v in enumerate(sorted(s.astype(str).unique()))}).astype(float), "text"
+
+
+# ================================================================ regression discontinuity
+
+def _ll_fit(x, y, h, c=0.0, extra=None):
+    """Local linear regression on both sides of c with a triangular kernel; returns jump, robust se, n used."""
+    xc = x - c
+    w = np.clip(1 - np.abs(xc) / h, 0, None)
+    m = w > 0
+    xc, y, w = xc[m], y[m], w[m]
+    D = (xc >= 0).astype(float)
+    X = np.column_stack([np.ones(len(xc)), D, xc, D * xc])
+    if extra is not None:
+        X = np.column_stack([X, extra[m]])
+    if len(y) < X.shape[1] + 5 or D.sum() < 3 or (1 - D).sum() < 3:
+        return None, None, int(m.sum())
+    b, e, I = _ols(y, X, w)
+    V = _hc1(X, e, I, w)
+    return float(b[1]), float(math.sqrt(max(V[1, 1], 0))), int(m.sum())
+
+
+def _ik_bandwidth(x, y, c=0.0):
+    """Imbens and Kalyanaraman (2012) MSE-optimal bandwidth for local linear RD with a triangular kernel."""
+    x = x - c
+    N = len(x)
+    sx = np.std(x, ddof=1)
+    h1 = 1.84 * sx * N ** (-1 / 5)
+    L, R = (x < 0) & (x >= -h1), (x >= 0) & (x <= h1)
+    if L.sum() < 5 or R.sum() < 5:
+        return None
+    s2l, s2r = np.var(y[L], ddof=1), np.var(y[R], ddof=1)
+    fc = (L.sum() + R.sum()) / (2 * N * h1)
+    ml, mr = np.median(x[x < 0]), np.median(x[x >= 0])
+    W = (x >= ml) & (x <= mr)
+    Xc = np.column_stack([np.ones(W.sum()), (x[W] >= 0), x[W], x[W] ** 2, x[W] ** 3])
+    b, _, _ = _ols(y[W], Xc)
+    m3 = 6 * b[4]
+    if abs(m3) < 1e-12:
+        m3 = 1e-12
+    Nl, Nr = (x < 0).sum(), (x >= 0).sum()
+    h2l = 3.56 * (s2l / (fc * m3 ** 2)) ** (1 / 7) * Nl ** (-1 / 7)
+    h2r = 3.56 * (s2r / (fc * m3 ** 2)) ** (1 / 7) * Nr ** (-1 / 7)
+    def m2(side, h2):
+        S = (x < 0) & (x >= -h2) if side == "l" else (x >= 0) & (x <= h2)
+        if S.sum() < 6:
+            return 0.0, int(S.sum())
+        bb, _, _ = _ols(y[S], np.column_stack([np.ones(S.sum()), x[S], x[S] ** 2]))
+        return 2 * bb[2], int(S.sum())
+    m2l, nl2 = m2("l", h2l)
+    m2r, nr2 = m2("r", h2r)
+    rl = 2160 * s2l / (max(nl2, 1) * h2l ** 4)
+    rr = 2160 * s2r / (max(nr2, 1) * h2r ** 4)
+    h = 3.4375 * ((s2l + s2r) / (fc * ((m2r - m2l) ** 2 + rl + rr))) ** (1 / 5) * N ** (-1 / 5)
+    return float(h)
+
+
+def _plot_mask(x):
+    """Exclude extreme mass points (e.g. vote shares of exactly 0 or 1) and the outer 2% from plots only."""
+    x = np.asarray(x, float)
+    keep = np.ones(len(x), bool)
+    for v in (x.min(), x.max()):
+        if (x == v).mean() > 0.01:
+            keep &= x != v
+    q = np.quantile(x[keep], [0.02, 0.98])
+    return keep & (x >= q[0]) & (x <= q[1])
+
+
+def _mccrary(x, c=0.0):
+    """McCrary (2008) density discontinuity test: log difference of the density just right and left of c."""
+    x = np.asarray(x, float) - c
+    n = len(x)
+    b = 2 * np.std(x, ddof=1) * n ** (-1 / 2)
+    lo, hi = np.floor(x.min() / b) * b, np.ceil(x.max() / b) * b
+    edges = np.arange(lo, hi + b / 2, b)
+    if len(edges) < 8:
+        return None
+    cnt, _ = np.histogram(x, edges)
+    mid = (edges[:-1] + edges[1:]) / 2
+    fy = cnt / (n * b)
+    # rule-of-thumb bandwidth from a 4th-order polynomial on each side
+    hs = []
+    for side in (mid < 0, mid >= 0):
+        if side.sum() < 6:
+            return None
+        P = np.column_stack([mid[side] ** k for k in range(5)])
+        bb, e, _ = _ols(fy[side], P)
+        f2 = 2 * bb[2] + 6 * bb[3] * mid[side] + 12 * bb[4] * mid[side] ** 2
+        s2 = float(e @ e) / max(side.sum() - 5, 1)
+        rng = mid[side].max() - mid[side].min()
+        hs.append(3.348 * (s2 * rng / max(float((f2 ** 2).sum()), 1e-12)) ** (1 / 5))
+    h = float(np.mean(hs))
+    def side_fit(S):
+        xs, ys = mid[S], fy[S]
+        w = np.clip(1 - np.abs(xs) / h, 0, None)
+        k = w > 0
+        if k.sum() < 3:
+            return None
+        bb, _, _ = _ols(ys[k], np.column_stack([np.ones(k.sum()), xs[k]]), w[k])
+        return float(bb[0])
+    fl, fr = side_fit(mid < 0), side_fit(mid >= 0)
+    if not fl or not fr or fl <= 0 or fr <= 0:
+        return None
+    theta = math.log(fr) - math.log(fl)
+    se = math.sqrt((1 / (n * h)) * (24 / 5) * (1 / fr + 1 / fl))
+    pm = _plot_mask(x + c)
+    lo_, hi_ = (x + c)[pm].min() - c, (x + c)[pm].max() - c
+    sel = (mid >= lo_) & (mid <= hi_)
+    hist = dict(mid=[_f(v + c, 5) for v in mid[sel]], f=[_f(v, 6) for v in fy[sel]])
+    return dict(theta=_f(theta, 3), se=_f(se, 3), z=_f(theta / se, 2), p=_f(_p2(theta / se), 4), h=_f(h, 4), hist=hist)
+
+
+def _rdd(df, roles):
+    y, r = roles["outcome"], roles["running"]
+    c = float(roles.get("cutoff") or 0)
+    tr = roles.get("treat")
+    cols = [y, r] + ([tr] if tr else [])
+    d = df[cols + [k for k in df.columns if k not in cols]].copy()
+    d[cols] = d[cols].apply(pd.to_numeric, errors="coerce")
+    d = d.dropna(subset=cols)
+    x, Y = d[r].to_numpy(float), d[y].to_numpy(float)
+    if (x < c).sum() < 20 or (x >= c).sum() < 20:
+        return {"error": "The RD design needs at least 20 observations on each side of the cutoff."}
+    out = {"design": "RDD", "n": int(len(d)), "running": r, "cutoff": c, "outcome": y,
+           "n_left": int((x < c).sum()), "n_right": int((x >= c).sum())}
+    h = _ik_bandwidth(x, Y, c)
+    if h is None or not np.isfinite(h) or h <= 0:
+        h = 1.0 * np.std(x) * len(x) ** (-1 / 5)
+    out["h"] = _f(h, 4)
+    # sharp or fuzzy
+    fuzzy = False
+    if tr:
+        D = pd.to_numeric(d[tr], errors="coerce").to_numpy(float)
+        sharp_rule = (x >= c).astype(float)
+        agree = np.nanmean(D == sharp_rule)
+        agree_rev = np.nanmean(D == 1 - sharp_rule)
+        fuzzy = max(agree, agree_rev) < 0.99
+        out["treat_agree"] = _f(max(agree, agree_rev), 3)
+    out["fuzzy"] = bool(fuzzy)
+    est, se, nn = _ll_fit(x, Y, h, c)
+    out["rd"] = dict(est=_f(est), se=_f(se), z=_f(est / se if se else None, 2), p=_f(_p2(est / se) if se else None, 4), n=nn)
+    if fuzzy:
+        fs, fse, _ = _ll_fit(x, D, h, c)
+        out["first_stage"] = dict(est=_f(fs), se=_f(fse), z=_f(fs / fse if fse else None, 2))
+        if fs and abs(fs) > 1e-8:
+            # local Wald estimate with a delta-method standard error (ignoring the covariance of the two jumps)
+            w = est / fs
+            sew = abs(w) * math.sqrt((se / est) ** 2 + (fse / fs) ** 2) if est else se / abs(fs)
+            out["wald"] = dict(est=_f(w), se=_f(sew), p=_f(_p2(w / sew), 4))
+    # bandwidth sensitivity
+    sens = []
+    for mlt in (0.5, 0.75, 1.0, 1.5, 2.0):
+        e2, s2, n2 = _ll_fit(x, Y, h * mlt, c)
+        sens.append(dict(mult=mlt, h=_f(h * mlt, 4), est=_f(e2), se=_f(s2), n=n2))
+    out["sensitivity"] = sens
+    # placebo cutoffs at the medians on each side (using only that side's data)
+    pl = []
+    for side, S in (("left", x < c), ("right", x >= c)):
+        pc = float(np.median(x[S]))
+        e2, s2, _ = _ll_fit(x[S], Y[S], h, pc)
+        pl.append(dict(side=side, cutoff=_f(pc, 4), est=_f(e2), se=_f(s2), p=_f(_p2(e2 / s2) if s2 else None, 4)))
+    out["placebo"] = pl
+    out["density"] = _mccrary(x, c)
+    # covariate continuity: every other numeric column
+    cov = []
+    skip = set(cols) | set(roles.get("instruments") or [])
+    for k in d.columns:
+        if k in skip:
+            continue
+        v = pd.to_numeric(d[k], errors="coerce").to_numpy(float)
+        ok = np.isfinite(v)
+        if ok.mean() < 0.8 or np.nanstd(v) == 0 or len(np.unique(v[ok])) < 2:
+            continue
+        e2, s2, _ = _ll_fit(x[ok], v[ok], h, c)
+        if s2:
+            cov.append(dict(var=k, est=_f(e2), se=_f(s2), p=_f(_p2(e2 / s2), 4)))
+    out["covariates"] = cov[:8]
+    # binned scatter for the plot
+    keep = _plot_mask(x)
+    nb = 20
+    bins = []
+    for S in (keep & (x < c), keep & (x >= c)):
+        if S.sum() < nb:
+            continue
+        edges = np.quantile(x[S], np.linspace(0, 1, nb + 1))
+        idx = np.clip(np.searchsorted(edges, x[S], side="right") - 1, 0, nb - 1)
+        for k in range(nb):
+            m = idx == k
+            if m.any():
+                bins.append([_f(x[S][m].mean(), 5), _f(Y[S][m].mean(), 5)])
+    out["bins"] = bins
+    # fitted local linear lines within the bandwidth
+    fit = []
+    for sgn in (-1, 1):
+        S = ((x - c) * sgn >= 0) & (np.abs(x - c) <= h)
+        if S.sum() > 3:
+            bb, _, _ = _ols(Y[S], np.column_stack([np.ones(S.sum()), x[S] - c]), np.clip(1 - np.abs(x[S] - c) / h, 0, None))
+            ends = [c, c + sgn * h]
+            fit.append([[_f(e, 5), _f(bb[0] + bb[1] * (e - c), 5)] for e in ends])
+    out["fit"] = fit
+    flags = []
+    if out["density"] and out["density"]["p"] is not None and out["density"]["p"] < 0.05:
+        flags.append("density")
+    if any(cv["p"] is not None and cv["p"] < 0.05 for cv in cov):
+        flags.append("covariates")
+    out["flags"] = flags
+    out["model"] = "RDD"
+    return out
+
+
+# ================================================================ instrumental variables
+
+def _iv(df, roles):
+    y, dvar = roles["outcome"], roles.get("treat")
+    Z = list(roles.get("instruments") or [])
+    W = [c for c in (roles.get("controls") or []) if c not in (y, dvar, *Z)]
+    if not dvar:
+        return {"error": "For an IV design, choose the treatment (endogenous) variable as well as the instrument."}
+    cols = [y, dvar] + Z + W
+    d = df[cols].apply(pd.to_numeric, errors="coerce").dropna()
+    n = len(d)
+    if n < 30:
+        return {"error": f"Only {n} complete rows were found; IV needs many more."}
+    Y, D = d[y].to_numpy(float), d[dvar].to_numpy(float)
+    Zm, Wm = d[Z].to_numpy(float), (d[W].to_numpy(float) if W else np.zeros((n, 0)))
+    C = np.column_stack([np.ones(n), Wm])
+    k = C.shape[1]
+    out = {"design": "IV", "n": int(n), "outcome": y, "treat": dvar, "instruments": Z, "controls": W}
+    # OLS
+    X = np.column_stack([D, C])
+    b, e, I = _ols(Y, X)
+    V = _hc1(X, e, I)
+    out["ols"] = dict(est=_f(b[0]), se=_f(math.sqrt(V[0, 0])))
+    # first stage
+    F1 = np.column_stack([Zm, C])
+    g, v, I1 = _ols(D, F1)
+    V1 = _hc1(F1, v, I1)
+    q = len(Z)
+    gz, Vz = g[:q], V1[:q, :q]
+    Fst = float(gz @ np.linalg.pinv(Vz) @ gz) / q
+    out["first_stage"] = dict(coefs=[dict(var=z, est=_f(gz[i]), se=_f(math.sqrt(Vz[i, i]))) for i, z in enumerate(Z)],
+                              F=_f(Fst, 2), p=_f(_f_sf(Fst, q, n - F1.shape[1]), 4), partial_r2=None)
+    # partial R2 of the instruments
+    _, v0, _ = _ols(D, C)
+    out["first_stage"]["partial_r2"] = _f(1 - float(v @ v) / float(v0 @ v0), 4)
+    # 2SLS
+    Dhat = F1 @ g
+    Xh = np.column_stack([Dhat, C])
+    Xs = np.column_stack([D, C])
+    Ih = np.linalg.pinv(Xh.T @ Xh)
+    bs = Ih @ (Xh.T @ Y)
+    es = Y - Xs @ bs
+    Vs = _hc1(Xh, es, Ih)
+    out["tsls"] = dict(est=_f(bs[0]), se=_f(math.sqrt(Vs[0, 0])), p=_f(_p2(bs[0] / math.sqrt(Vs[0, 0])), 4))
+    # reduced form
+    rf, er, Ir = _ols(Y, F1)
+    Vr = _hc1(F1, er, Ir)
+    out["reduced_form"] = [dict(var=z, est=_f(rf[i]), se=_f(math.sqrt(Vr[i, i]))) for i, z in enumerate(Z)]
+    # endogeneity: control-function test
+    Xc = np.column_stack([D, C, v])
+    bc, ec, Ic = _ols(Y, Xc)
+    Vc = _hc1(Xc, ec, Ic)
+    tcf = bc[-1] / math.sqrt(Vc[-1, -1])
+    out["endog"] = dict(t=_f(tcf, 2), p=_f(_p2(tcf), 4))
+    # Anderson-Rubin test of beta = 0 and a 95% confidence set by grid
+    def ar_stat(b0):
+        yy = Y - b0 * D
+        a, ea, Ia = _ols(yy, F1)
+        Va = _hc1(F1, ea, Ia)
+        return float(a[:q] @ np.linalg.pinv(Va[:q, :q]) @ a[:q]) / q
+    ar0 = ar_stat(0.0)
+    out["ar"] = dict(F=_f(ar0, 2), p=_f(_f_sf(ar0, q, n - F1.shape[1]), 4))
+    se2 = math.sqrt(Vs[0, 0])
+    grid = np.linspace(bs[0] - 8 * se2, bs[0] + 8 * se2, 401)
+    from scipy.stats import f as fdist
+    crit = float(fdist.ppf(0.95, q, n - F1.shape[1]))
+    acc = [g0 for g0 in grid if ar_stat(g0) <= crit]
+    if acc:
+        bounded = acc[0] > grid[0] and acc[-1] < grid[-1]
+        out["ar"]["ci"] = [_f(acc[0]), _f(acc[-1])]
+        out["ar"]["bounded"] = bool(bounded)
+    # overidentification
+    if q > 1:
+        a, ej, Ij = _ols(es, F1)
+        J = n * (1 - float(ej @ ej) / float(((es - es.mean()) ** 2).sum()))
+        out["overid"] = dict(J=_f(J, 2), df=q - 1, p=_f(_chi2_sf(J, q - 1), 4))
+    out["weak"] = bool(Fst < 10)
+    out["flags"] = (["weak"] if Fst < 10 else [])
+    out["model"] = "IV"
+    return out
+
+
+# ================================================================ designs over time
+
+def _prep_panel(df, roles):
+    y, tr, u, t = roles["outcome"], roles.get("treat"), roles.get("unit"), roles.get("time")
+    if not tr or not t:
+        return None, "For a policy that starts at a point in time, choose the treatment indicator and the time variable."
+    d = df[[c for c in (u, t, y, tr) if c]].copy()
+    if not u:
+        d["_unit"] = "all"; u = "_unit"
+    d[y] = pd.to_numeric(d[y], errors="coerce")
+    d[tr] = pd.to_numeric(d[tr], errors="coerce")
+    d = d.dropna(subset=[y, tr, t])
+    tt, kind = _time_order(d[t])
+    d["_t"] = tt
+    periods = sorted(d["_t"].unique())
+    d["_ti"] = d["_t"].map({p: i for i, p in enumerate(periods)}).astype(int)
+    labels = d.drop_duplicates("_ti").set_index("_ti")[t].sort_index().astype(str).tolist()
+    d["_u"] = d[u].astype(str)
+    if d.duplicated(["_u", "_ti"]).any():
+        return None, "Some unit appears more than once in the same period. Each unit-period must be one row."
+    d["_d"] = (d[tr] > 0).astype(int)
+    d = d.sort_values(["_u", "_ti"]).reset_index(drop=True)
+    return dict(d=d, y=y, labels=labels, T=len(periods), unit=roles.get("unit"), time=t, treat=tr), None
+
+
+def _adoption(d):
+    g = d[d["_d"] == 1].groupby("_u")["_ti"].min()
+    units = d["_u"].unique()
+    G = pd.Series(np.inf, index=units)
+    G.loc[g.index] = g.values
+    # absorbing? (once treated, stays treated)
+    after = d.merge(G.rename("_g"), left_on="_u", right_index=True)
+    switch_off = bool(((after["_ti"] >= after["_g"]) & (after["_d"] == 0)).any())
+    return G, switch_off
+
+
+def _att_gt(d, y, G, base="universal"):
+    """Callaway-Sant'Anna style group-time ATTs with the never-treated (or, if none, not-yet-treated) units as controls,
+    universal base period g-1. Returns dict (g, t) -> att and the group sizes."""
+    W = d.pivot(index="_u", columns="_ti", values=y)
+    T = W.shape[1]
+    never = G.index[~np.isfinite(G.values)]
+    groups = sorted(set(G[np.isfinite(G.values)].astype(int)))
+    res, size = {}, {}
+    for g in groups:
+        if g < 1:
+            continue
+        gu = G.index[G.values == g]
+        size[g] = len(gu)
+        for t in range(T):
+            if t == g - 1:
+                continue
+            if len(never):
+                cu = never
+            else:
+                cu = G.index[G.values > max(t, g - 1)]
+            if len(cu) == 0:
+                continue
+            a = W.loc[gu, t] - W.loc[gu, g - 1]
+            b = W.loc[cu, t] - W.loc[cu, g - 1]
+            if a.notna().sum() == 0 or b.notna().sum() == 0:
+                continue
+            res[(g, t)] = float(a.mean() - b.mean())
+    return res, size
+
+
+def _event_agg(res, size, emin=-5, emax=5):
+    agg = {}
+    for (g, t), v in res.items():
+        e = t - g
+        if e < emin or e > emax:
+            continue
+        agg.setdefault(e, []).append((v, size[g]))
+    out = {e: sum(v * w for v, w in L) / sum(w for _, w in L) for e, L in agg.items()}
+    post = [(v, size[g]) for (g, t), v in res.items() if t >= g]
+    overall = sum(v * w for v, w in post) / sum(w for _, w in post) if post else None
+    return out, overall
+
+
+def _twfe(d, y):
+    codes_u, _ = pd.factorize(d["_u"])
+    codes_t = d["_ti"].to_numpy()
+    nu, nt = codes_u.max() + 1, codes_t.max() + 1
+    yv = d[y].to_numpy(float); D = d["_d"].to_numpy(float)
+    # within transformation for two-way FE on a possibly unbalanced panel: dummies for time, demean by unit
+    T = (codes_t[:, None] == np.arange(1, nt)[None, :]).astype(float)
+    def dm(a):
+        a = np.asarray(a, float)
+        if a.ndim == 1:
+            return a - (np.bincount(codes_u, a, nu) / np.bincount(codes_u, minlength=nu))[codes_u]
+        return np.column_stack([dm(a[:, j]) for j in range(a.shape[1])])
+    X = np.column_stack([dm(D), dm(T)])
+    b, e, I = _ols(dm(yv), X)
+    V = _cluster(X, e, I, codes_u)
+    return float(b[0]), float(math.sqrt(max(V[0, 0], 0)))
+
+
+def _did(P, G, staggered):
+    d, y = P["d"], P["y"]
+    res, size = _att_gt(d, y, G)
+    if not res:
+        return {"error": "Could not form any comparison between treated and untreated units."}
+    ev, overall = _event_agg(res, size)
+    # cluster bootstrap over units
+    rng = np.random.default_rng(12345)
+    units = d["_u"].unique()
+    by = {u: g for u, g in d.groupby("_u")}
+    es = sorted(ev)
+    boots_e, boots_o = [], []
+    for _ in range(BOOT):
+        pick = rng.choice(units, len(units), replace=True)
+        parts = []
+        for j, u0 in enumerate(pick):
+            g = by[u0].copy(); g["_u"] = f"{u0}#{j}"; parts.append(g)
+        db = pd.concat(parts, ignore_index=True)
+        Gb = pd.Series([G[u0] for u0 in pick], index=[f"{u0}#{j}" for j, u0 in enumerate(pick)])
+        if not np.isfinite(Gb.values).any() or np.isfinite(Gb.values).all() and not staggered:
+            continue
+        rb, sb = _att_gt(db, y, Gb)
+        if not rb:
+            continue
+        eb, ob = _event_agg(rb, sb)
+        boots_e.append([eb.get(e, np.nan) for e in es]); boots_o.append(ob)
+    B = np.array(boots_e, float)
+    se_e = np.nanstd(B, axis=0, ddof=1)
+    se_o = float(np.nanstd(np.array(boots_o, float), ddof=1))
+    out = {"event": [dict(e=int(e), est=_f(ev[e]), se=_f(s)) for e, s in zip(es, se_e)],
+           "att": dict(est=_f(overall), se=_f(se_o), p=_f(_p2(overall / se_o) if se_o else None, 4))}
+    # joint pre-trend test on the leads e = -5..-2 (the event window; e = -1 is the base period)
+    pre = [i for i, e in enumerate(es) if e <= -2]
+    if pre:
+        v = np.array([ev[es[i]] for i in pre])
+        Bp = B[:, pre]
+        Bp = Bp[~np.isnan(Bp).any(axis=1)]
+        if len(Bp) > len(pre) + 5:
+            S = np.cov(Bp.T, ddof=1).reshape(len(pre), len(pre))
+            W = float(v @ np.linalg.pinv(S) @ v)
+            out["pretrend"] = dict(stat=_f(W, 2), df=len(pre), p=_f(_chi2_sf(W, len(pre)), 4))
+    if "pretrend" not in out:
+        out["pretrend"] = None
+    tw, tws = _twfe(d, y)
+    out["twfe"] = dict(est=_f(tw), se=_f(tws), p=_f(_p2(tw / tws) if tws else None, 4))
+    return out
+
+
+def _gsc(P, G, rmax=4):
+    """Generalized synthetic control (Xu 2017) without covariates: Y(0)_it = a_i + xi_t + l_i' f_t. Factors are
+    estimated on the never-treated units; each treated unit's loadings on its pre-treatment periods. r by leave-one-out
+    cross-validation on the treated units' pre-treatment periods. Standard errors by bootstrapping units."""
+    d, y = P["d"], P["y"]
+    W = d.pivot(index="_ti", columns="_u", values=y)
+    ctrl = [u for u in W.columns if not np.isfinite(G[u])]
+    trt = [u for u in W.columns if np.isfinite(G[u])]
+    Yc = W[ctrl].to_numpy(float)
+    if np.isnan(Yc).any() or len(ctrl) < 5:
+        return None
+    T = Yc.shape[0]
+
+    def factors(Yc, r):
+        a = Yc.mean(0)
+        R = Yc - a
+        xi = R.mean(1)
+        R = R - xi[:, None]
+        if r == 0:
+            return a, xi, np.zeros((T, 0))
+        for _ in range(30):
+            U, s, Vt = np.linalg.svd(R, full_matrices=False)
+            F = U[:, :r] * math.sqrt(T)
+            L = (R.T @ F) / T
+            E = Yc - a - xi[:, None] - F @ L.T
+            # refresh a and xi given the factor part
+            Z = Yc - F @ L.T
+            a = Z.mean(0); xi = (Z - a).mean(1)
+            R = Yc - a - xi[:, None]
+        return a, xi, F
+
+    def fit_unit(yv, xi, F, pre, drop=None):
+        idx = [t for t in pre if t != drop]
+        X = np.column_stack([np.ones(len(idx)), F[idx]])
+        b, *_ = np.linalg.lstsq(X, yv[idx] - xi[idx], rcond=None)
+        return lambda tt: b[0] + F[tt] @ b[1:] + xi[tt]
+
+    def cv(r):
+        a, xi, F = factors(Yc, r)
+        errs = []
+        for u in trt:
+            yv = W[u].to_numpy(float); g = int(G[u]); pre = [t for t in range(g) if np.isfinite(yv[t])]
+            if len(pre) <= r + 2:
+                return np.inf
+            for t0 in pre:
+                f = fit_unit(yv, xi, F, pre, drop=t0)
+                errs.append((yv[t0] - f(t0)) ** 2)
+        return float(np.mean(errs))
+
+    scores = {r: cv(r) for r in range(rmax + 1)}
+    r = min(scores, key=scores.get)
+
+    def estimate(Wm, Gm, trt_u, ctrl_u):
+        Yc_ = Wm[ctrl_u].to_numpy(float)
+        a, xi, F = factors(Yc_, r) if Yc_.shape[1] > r + 1 else (None, None, None)
+        if F is None:
+            return None
+        gaps = {}
+        for u in trt_u:
+            yv = Wm[u].to_numpy(float); g = int(Gm[u]); pre = [t for t in range(g) if np.isfinite(yv[t])]
+            if len(pre) <= r + 1:
+                continue
+            f = fit_unit(yv, xi, F, pre)
+            for t in range(T):
+                if np.isfinite(yv[t]):
+                    gaps.setdefault(t - g, []).append(yv[t] - f(t))
+        ev = {e: float(np.mean(v)) for e, v in gaps.items()}
+        post = [v for e, L in gaps.items() if e >= 0 for v in L]
+        return ev, (float(np.mean(post)) if post else None)
+
+    base = estimate(W, G, trt, ctrl)
+    if base is None:
+        return None
+    ev, att = base
+    # bootstrap units
+    rng = np.random.default_rng(7)
+    be, bo = [], []
+    for _ in range(BOOT):
+        cs = list(rng.choice(ctrl, len(ctrl), replace=True)); ts = list(rng.choice(trt, len(trt), replace=True))
+        cols, Gb, tl, cl = {}, {}, [], []
+        for j, u in enumerate(cs):
+            k = f"c{j}"; cols[k] = W[u]; Gb[k] = np.inf; cl.append(k)
+        for j, u in enumerate(ts):
+            k = f"t{j}"; cols[k] = W[u]; Gb[k] = G[u]; tl.append(k)
+        r_ = estimate(pd.DataFrame(cols), pd.Series(Gb), tl, cl)
+        if r_ is None:
+            continue
+        be.append(r_[0]); bo.append(r_[1])
+    es = sorted(ev)
+    se_e = [float(np.nanstd([b.get(e, np.nan) for b in be], ddof=1)) for e in es]
+    se_o = float(np.nanstd(np.array(bo, float), ddof=1))
+    pre_rmspe = math.sqrt(np.mean([ev[e] ** 2 for e in es if e < 0])) if any(e < 0 for e in es) else None
+    return dict(r=int(r), cv={str(k): _f(v, 5) for k, v in scores.items()}, att=dict(est=_f(att), se=_f(se_o), p=_f(_p2(att / se_o) if se_o else None, 4)),
+                event=[dict(e=int(e), est=_f(ev[e]), se=_f(s)) for e, s in zip(es, se_e) if -10 <= e <= 10], pre_rmspe=_f(pre_rmspe))
+
+
+def _synth_weights(y1, Y0):
+    """Nonnegative weights summing to one that minimise ||y1 - Y0 w||, via NNLS with a heavily weighted adding-up row."""
+    from scipy.optimize import nnls
+    k = 1e3 * max(1.0, float(np.abs(Y0).max()))
+    A = np.vstack([Y0, k * np.ones((1, Y0.shape[1]))])
+    b = np.concatenate([y1, [k]])
+    w, _ = nnls(A, b)
+    return w / w.sum() if w.sum() > 0 else w
+
+
+def _scm(P, G):
+    d, y = P["d"], P["y"]
+    W = d.pivot(index="_ti", columns="_u", values=y)
+    donors = [u for u in W.columns if not np.isfinite(G[u]) and W[u].notna().all()]
+    trt = [u for u in W.columns if np.isfinite(G[u])]
+    T = W.shape[0]
+    units = []
+    for u in trt:
+        g = int(G[u])
+        if g < 3 or W[u].isna().any():
+            continue
+        Y0 = W[donors].to_numpy(float)
+        y1 = W[u].to_numpy(float)
+        w = _synth_weights(y1[:g], Y0[:g])
+        synth = Y0 @ w
+        gap = y1 - synth
+        pre = math.sqrt(np.mean(gap[:g] ** 2)); post = math.sqrt(np.mean(gap[g:] ** 2))
+        # placebo in space: each donor in turn as the treated unit, the other donors as its pool
+        ratios = []
+        for j, dj in enumerate(donors):
+            others = [k for k in range(len(donors)) if k != j]
+            wj = _synth_weights(Y0[:g, j], Y0[:g][:, others])
+            gj = Y0[:, j] - Y0[:, others] @ wj
+            pr = math.sqrt(np.mean(gj[:g] ** 2)); po = math.sqrt(np.mean(gj[g:] ** 2))
+            ratios.append(po / pr if pr > 0 else np.nan)
+        ratio = post / pre if pre > 0 else np.nan
+        rank = 1 + sum(1 for r_ in ratios if np.isfinite(r_) and r_ >= ratio)
+        top = sorted([(donors[k], float(w[k])) for k in range(len(donors)) if w[k] > 0.005], key=lambda z: -z[1])[:8]
+        units.append(dict(unit=u, g=g, g_label=P["labels"][g], weights=[dict(unit=k, w=_f(v, 3)) for k, v in top],
+                          actual=[_f(v) for v in y1], synth=[_f(v) for v in synth], gap=[_f(v) for v in gap],
+                          pre_rmspe=_f(pre), post_rmspe=_f(post), ratio=_f(ratio, 2), att=_f(float(np.mean(gap[g:]))),
+                          perm_p=_f(rank / (len(ratios) + 1), 4), n_placebo=len(ratios),
+                          mean_pre=_f(float(np.mean(y1[:g])))))
+    return dict(units=units, donors=len(donors)) if units else None
+
+
+def _its(P, G):
+    d, y = P["d"], P["y"]
+    if d["_u"].nunique() > 1:
+        tu = [u for u in d["_u"].unique() if np.isfinite(G[u])]
+        s = d[d["_u"].isin(tu)].groupby("_ti")[y].mean()
+        g = int(min(G[u] for u in tu))
+    else:
+        s = d.set_index("_ti")[y].sort_index()
+        g = int(G.iloc[0])
+    T = len(s)
+    if g < 8 or T - g < 4:
+        return {"error": "Interrupted time series needs at least 8 periods before and 4 after the intervention."}
+    yv = s.to_numpy(float)
+    t = np.arange(T, dtype=float)
+    D = (t >= g).astype(float)
+    # seasonality: if the time labels look monthly or quarterly
+    labs = P["labels"]
+    tv = pd.to_numeric(pd.Series(labs), errors="coerce")
+    season = None
+    if tv.notna().all():
+        frac = np.round((tv - np.floor(tv)) * 12).astype(int) % 12
+        if frac.nunique() == 12:
+            season = frac.to_numpy()
+        elif np.round((tv - np.floor(tv)) * 4).astype(int).nunique() == 4 and frac.nunique() == 4:
+            season = np.round((tv - np.floor(tv)) * 4).astype(int).to_numpy()
+    X = [np.ones(T), t, D, (t - g) * D]
+    names = ["const", "trend", "level change", "slope change"]
+    if season is not None:
+        for k in sorted(set(season))[1:]:
+            X.append((season == k).astype(float)); names.append(f"season {k}")
+    X = np.column_stack(X)
+    b, e, I = _ols(yv, X)
+    # Newey-West standard errors
+    L = int(math.floor(4 * (T / 100) ** (2 / 9))) + 1
+    def nw(X, e, I):
+        S = (X * e[:, None]).T @ (X * e[:, None])
+        for l in range(1, L + 1):
+            G_ = (X[l:] * e[l:, None]).T @ (X[:-l] * e[:-l, None])
+            S += (1 - l / (L + 1)) * (G_ + G_.T)
+        return I @ S @ I
+    V = nw(X, e, I)
+    coefs = [dict(var=n, est=_f(b[i]), se=_f(math.sqrt(max(V[i, i], 0))), p=_f(_p2(b[i] / math.sqrt(V[i, i])) if V[i, i] > 0 else None, 4)) for i, n in enumerate(names)]
+    # counterfactual: pre-period model extended
+    pre = X[:g][:, [0, 1] + list(range(4, X.shape[1]))]
+    bp, _, _ = _ols(yv[:g], pre)
+    cf = X[:, [0, 1] + list(range(4, X.shape[1]))] @ bp
+    # residual autocorrelation (Durbin-Watson, Ljung-Box at lag 12 or T/4)
+    dw = float(np.sum(np.diff(e) ** 2) / np.sum(e ** 2))
+    # placebo interventions at earlier dates (pre-period only)
+    plac = []
+    for gp in (g // 2, (2 * g) // 3):
+        if gp < 6 or g - gp < 4:
+            continue
+        tp = t[:g]; Dp = (tp >= gp).astype(float)
+        Xp = [np.ones(g), tp, Dp, (tp - gp) * Dp] + ([(season[:g] == k).astype(float) for k in sorted(set(season))[1:]] if season is not None else [])
+        Xp = np.column_stack(Xp)
+        bb, ee, II = _ols(yv[:g], Xp)
+        VV = nw(Xp, ee, II)
+        plac.append(dict(at=labs[gp], est=_f(bb[2]), se=_f(math.sqrt(VV[2, 2])), p=_f(_p2(bb[2] / math.sqrt(VV[2, 2])), 4)))
+    out = dict(g=g, g_label=labs[g], T=T, series=[_f(v) for v in yv], counterfactual=[_f(v) for v in cf], labels=labs,
+               coefs=coefs, seasonal=season is not None, dw=_f(dw, 3), nw_lags=L, placebo=plac,
+               mean_pre=_f(float(yv[:g].mean())), avg_effect=_f(float(np.mean(yv[g:] - cf[g:]))))
+    return out
+
+
+def _over_time(df, roles):
+    P, err = _prep_panel(df, roles)
+    if err:
+        return {"error": err}
+    d, y = P["d"], P["y"]
+    G, switch_off = _adoption(d)
+    n_units = int(len(G)); treated = [u for u in G.index if np.isfinite(G[u])]
+    n_tr = len(treated); n_never = n_units - n_tr
+    if n_tr == 0:
+        return {"error": "No observation has the treatment switched on. The treatment column should be 1 for treated unit-periods and 0 otherwise."}
+    if any(G[u] == 0 for u in treated) and all(G[u] == 0 for u in treated):
+        return {"error": "Every treated unit is treated from the first period, so there are no pre-treatment observations to build a counterfactual from."}
+    adopt = sorted(set(int(G[u]) for u in treated))
+    out = {"design": "TIME", "n": int(len(d)), "N": n_units, "T": P["T"], "n_treated": n_tr, "n_never": n_never,
+           "adoption": [P["labels"][g] for g in adopt], "n_cohorts": len(adopt), "switch_off": switch_off,
+           "outcome": y, "first": P["labels"][0], "last": P["labels"][-1], "has_unit": bool(roles.get("unit"))}
+    # chart: treated and untreated means
+    m = d.assign(_grp=np.where(np.isfinite(G.reindex(d["_u"]).values), "treated", "untreated")).groupby(["_grp", "_ti"])[y].mean().unstack(0)
+    out["means"] = {k: [_f(v) for v in m[k].reindex(range(P["T"])).values] for k in m.columns}
+    out["labels"] = P["labels"]
+    out["g0"] = adopt[0]
+    if n_units == 1 or (n_tr <= FEW_TREATED and n_never < MIN_DONORS):
+        out["route"] = "few_none"
+        r = _its(P, G)
+        if "error" in r:
+            return r
+        out["its"] = r
+        out["model"] = "ITS"
+        return out
+    if n_tr <= FEW_TREATED:
+        out["route"] = "few_donors"
+        r = _scm(P, G)
+        if r is None:
+            return {"error": "Synthetic control needs a balanced panel for the treated and comparison units and at least 3 pre-treatment periods."}
+        out["scm"] = r
+        out["model"] = "SCM"
+        return out
+    staggered = len(adopt) > 1
+    out["route"] = "many"
+    out["timing"] = "staggered" if staggered else "common"
+    r = _did(P, G, staggered)
+    if "error" in r:
+        return r
+    out["did"] = r
+    pt = r.get("pretrend")
+    fail = pt is not None and pt["p"] is not None and pt["p"] < 0.05
+    out["pretrend_fail"] = bool(fail)
+    if fail:
+        g = _gsc(P, G)
+        if g is not None:
+            out["gsc"] = g
+        out["model"] = "GSC"
+    else:
+        out["model"] = "STAG" if staggered else "DID"
+    return out
+
+
+# ================================================================ main entry point
+
+def analyze(csv_text, roles_json):
+    warnings.simplefilter("ignore")
+    roles = json.loads(roles_json) if isinstance(roles_json, str) else dict(roles_json)
+    raw, err = _read(csv_text, roles)
+    if err:
+        return _err(err)
+    try:
+        if roles.get("running"):
+            if roles.get("cutoff") in (None, ""):
+                return _err("Enter the cutoff value of the running variable.")
+            r = _rdd(raw, roles)
+        elif roles.get("instruments"):
+            r = _iv(raw, roles)
+        else:
+            r = _over_time(raw, roles)
+    except Exception as e:  # report rather than crash the page
+        return _err(f"The analysis failed: {e}")
+    if "error" in r:
+        return _err(r["error"])
+    r["roles"] = roles
+    return json.dumps(r)
+
+
+# ---------------------------------------------------------------- public helpers for your own scripts
+def rd_estimate(x, y, cutoff=0.0, h=None):
+    """Local linear RD estimate with a triangular kernel; bandwidth by Imbens-Kalyanaraman if h is None."""
+    x, y = np.asarray(x, float), np.asarray(y, float)
+    h = h or _ik_bandwidth(x, y, cutoff)
+    est, se, n = _ll_fit(x, y, h, cutoff)
+    return dict(est=est, se=se, h=h, n=n)
+
+
+def mccrary_test(x, cutoff=0.0):
+    """McCrary (2008) test for a discontinuity in the density of the running variable at the cutoff."""
+    r = _mccrary(np.asarray(x, float), cutoff)
+    if r:
+        r.pop("hist", None)
+    return r
+
+
+def synth_weights(y_treated_pre, Y_donors_pre):
+    """Synthetic control weights: nonnegative, summing to one, matching the pre-treatment outcome path."""
+    return _synth_weights(np.asarray(y_treated_pre, float), np.asarray(Y_donors_pre, float))
+
+
+def event_study(df, unit, time, y, treat):
+    """Event-study estimates relative to adoption (base period -1), never-treated controls, cluster-bootstrap errors,
+    a joint test of the leads -5..-2, the heterogeneity-robust ATT and the two-way fixed-effects estimate."""
+    P, err = _prep_panel(df, dict(outcome=y, treat=treat, unit=unit, time=time))
+    if err:
+        raise ValueError(err)
+    G, _ = _adoption(P["d"])
+    return _did(P, G, len(set(G[np.isfinite(G.values)])) > 1)
+
+
+def gsc(df, unit, time, y, treat):
+    """Generalized synthetic control (interactive fixed effects, Xu 2017): number of factors chosen by
+    cross-validation, ATT and event-time effects with bootstrap standard errors, pre-treatment fit."""
+    P, err = _prep_panel(df, dict(outcome=y, treat=treat, unit=unit, time=time))
+    if err:
+        raise ValueError(err)
+    G, _ = _adoption(P["d"])
+    return _gsc(P, G)
+</script>
+<script>
+const EXAMPLES=[{"key":"castle_2007","title":"Castle Doctrine laws of 2007","meta":"States × years · 2000–2010","desc":"Log homicide rate in the 13 states that passed a stand-your-ground law in 2007 and the states that never did (Cheng and Hoekstra 2013).","file":"examples/castle_2007.csv","result":{"design":"TIME","n":462,"N":42,"T":11,"n_treated":13,"n_never":29,"adoption":["2007"],"n_cohorts":1,"switch_off":false,"outcome":"l_homicide","first":"2000","last":"2010","has_unit":true,"means":{"treated":[1.7868,1.7898,1.7551,1.8067,1.8025,1.7754,1.87,1.9112,1.8049,1.7368,1.6717],"untreated":[1.2381,1.2386,1.2437,1.2535,1.2544,1.2829,1.2695,1.2584,1.2486,1.1154,1.0903]},"labels":["2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010"],"g0":7,"route":"many","timing":"common","did":{"event":[{"e":-5,"est":-0.089,"se":0.0903},{"e":-4,"est":-0.0473,"se":0.0953},{"e":-3,"est":-0.0524,"se":0.0646},{"e":-2,"est":-0.108,"se":0.0525},{"e":0,"est":0.0523,"se":0.0449},{"e":1,"est":-0.0442,"se":0.0561},{"e":2,"est":0.0209,"se":0.0583},{"e":3,"est":-0.0192,"se":0.0477}],"att":{"est":0.0024,"se":0.0357,"p":0.9456},"pretrend":{"stat":5.18,"df":4,"p":0.2689},"twfe":{"est":0.0593,"se":0.0771,"p":0.4423}},"pretrend_fail":false,"model":"DID","roles":{"outcome":"l_homicide","treat":"castle_law","unit":"state","time":"year"}}},{"key":"castle","title":"Castle Doctrine laws, all adopters","meta":"States × years · 2000–2010","desc":"Log homicide rate; 21 states passed stand-your-ground laws between 2005 and 2009, at different dates.","file":"examples/castle.csv","result":{"design":"TIME","n":550,"N":50,"T":11,"n_treated":21,"n_never":29,"adoption":["2006","2007","2008","2009","2010"],"n_cohorts":5,"switch_off":false,"outcome":"l_homicide","first":"2000","last":"2010","has_unit":true,"means":{"treated":[1.5869,1.6419,1.5845,1.6789,1.6658,1.6702,1.7268,1.7515,1.6617,1.658,1.5575],"untreated":[1.2381,1.2386,1.2437,1.2535,1.2544,1.2829,1.2695,1.2584,1.2486,1.1154,1.0903]},"labels":["2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010"],"g0":6,"route":"many","timing":"staggered","did":{"event":[{"e":-5,"est":-0.1049,"se":0.071},{"e":-4,"est":-0.0404,"se":0.0724},{"e":-3,"est":-0.0393,"se":0.0497},{"e":-2,"est":-0.0972,"se":0.0454},{"e":0,"est":0.0143,"se":0.0652},{"e":1,"est":0.0146,"se":0.0416},{"e":2,"est":0.0332,"se":0.0521},{"e":3,"est":0.0009,"se":0.0448},{"e":4,"est":0.2322,"se":0.0413}],"att":{"est":0.0194,"se":0.038,"p":0.6096},"pretrend":{"stat":8.51,"df":4,"p":0.0745},"twfe":{"est":0.0694,"se":0.0558,"p":0.2137}},"pretrend_fail":false,"model":"STAG","roles":{"outcome":"l_homicide","treat":"castle_law","unit":"state","time":"year"}}},{"key":"castle_murder","title":"Castle Doctrine laws and murder","meta":"States × years · 2000–2010","desc":"Log murder rate from police reports, the same staggered laws; a case where the pre-trends are not parallel.","file":"examples/castle_murder.csv","result":{"design":"TIME","n":550,"N":50,"T":11,"n_treated":21,"n_never":29,"adoption":["2006","2007","2008","2009","2010"],"n_cohorts":5,"switch_off":false,"outcome":"l_murder","first":"2000","last":"2010","has_unit":true,"means":{"treated":[1.4337,1.5574,1.4924,1.5684,1.6191,1.621,1.6713,1.701,1.625,1.6274,1.5242],"untreated":[1.2095,1.2148,1.2267,1.2095,1.2239,1.2677,1.2396,1.2433,1.2345,1.1065,1.0973]},"labels":["2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010"],"g0":6,"route":"many","timing":"staggered","did":{"event":[{"e":-5,"est":-0.1337,"se":0.0743},{"e":-4,"est":-0.0545,"se":0.0662},{"e":-3,"est":-0.0201,"se":0.0489},{"e":-2,"est":-0.0938,"se":0.0446},{"e":0,"est":0.022,"se":0.0633},{"e":1,"est":0.0299,"se":0.0454},{"e":2,"est":0.0416,"se":0.0546},{"e":3,"est":-0.0117,"se":0.0537},{"e":4,"est":0.2146,"se":0.0457}],"att":{"est":0.0251,"se":0.0405,"p":0.5351},"pretrend":{"stat":11.27,"df":4,"p":0.0237},"twfe":{"est":0.0928,"se":0.0557,"p":0.0955}},"pretrend_fail":true,"gsc":{"r":1,"cv":{"0":0.05038,"1":0.04571,"2":0.05784,"3":0.06724,"4":null},"att":{"est":0.0211,"se":0.082,"p":0.7972},"event":[{"e":-10,"est":-0.4023,"se":0.153},{"e":-9,"est":-0.0233,"se":0.1198},{"e":-8,"est":-0.2554,"se":0.1196},{"e":-7,"est":-0.0062,"se":0.0419},{"e":-6,"est":0.0008,"se":0.0333},{"e":-5,"est":-0.0185,"se":0.0375},{"e":-4,"est":0.0589,"se":0.0318},{"e":-3,"est":0.0715,"se":0.0377},{"e":-2,"est":-0.0423,"se":0.0393},{"e":-1,"est":0.0431,"se":0.0465},{"e":0,"est":0.071,"se":0.0652},{"e":1,"est":0.0054,"se":0.0997},{"e":2,"est":0.0246,"se":0.1039},{"e":3,"est":-0.0579,"se":0.1165},{"e":4,"est":0.3273,"se":0.1126}],"pre_rmspe":0.155},"model":"GSC","roles":{"outcome":"l_murder","treat":"castle_law","unit":"state","time":"year"}}},{"key":"texas","title":"Texas prison expansion","meta":"States × years · 1985–2000","desc":"Black male prisoners; Texas greatly expanded its prison capacity in 1993, and no other state did (Cunningham).","file":"examples/texas.csv","result":{"design":"TIME","n":816,"N":51,"T":16,"n_treated":1,"n_never":50,"adoption":["1993"],"n_cohorts":1,"switch_off":false,"outcome":"bmprison","first":"1985","last":"2000","has_unit":true,"means":{"treated":[14828.0,15207.0,15780.0,16956.0,19366.0,22634.0,23249.0,27568.0,29260.0,40451.0,55602.0,55810.0,58393.0,59709.0,60785.0,61861.0],"untreated":[3789.04,4129.92,4409.18,4872.16,5598.42,6098.23,6560.48,6971.66,7450.92,8021.64,8419.76,8741.7,9087.26,9464.58,9614.64,9673.52]},"labels":["1985","1986","1987","1988","1989","1990","1991","1992","1993","1994","1995","1996","1997","1998","1999","2000"],"g0":8,"route":"few_donors","scm":{"units":[{"unit":"Texas","g":8,"g_label":"1993","weights":[{"unit":"Florida","w":0.373},{"unit":"New York","w":0.355},{"unit":"Illinois","w":0.272}],"actual":[14828.0,15207.0,15780.0,16956.0,19366.0,22634.0,23249.0,27568.0,29260.0,40451.0,55602.0,55810.0,58393.0,59709.0,60785.0,61861.0],"synth":[13946.0759,15487.4267,16053.443,17420.948,20184.0831,22538.3835,24052.9611,25701.3126,28584.1851,30036.581,31504.9019,31612.755,31988.5563,33135.9344,33943.0327,32959.5479],"gap":[881.9241,-280.4267,-273.443,-464.948,-818.0831,95.6165,-803.9611,1866.6874,675.8149,10414.419,24097.0981,24197.245,26404.4437,26573.0656,26841.9673,28901.4521],"pre_rmspe":862.8916,"post_rmspe":23005.9809,"ratio":26.66,"att":21013.1882,"perm_p":0.1765,"n_placebo":50,"mean_pre":19448.5}],"donors":50},"model":"SCM","roles":{"outcome":"bmprison","treat":"expansion","unit":"state","time":"year"}}},{"key":"seatbelt","title":"UK seatbelt law","meta":"Monthly · 1969–1984 · one series","desc":"Car drivers killed or seriously injured; wearing front seatbelts became compulsory in February 1983.","file":"examples/seatbelt.csv","result":{"design":"TIME","n":192,"N":1,"T":192,"n_treated":1,"n_never":0,"adoption":["1983.0833"],"n_cohorts":1,"switch_off":false,"outcome":"deaths","first":"1969.0","last":"1984.9167","has_unit":false,"means":{"treated":[1687.0,1508.0,1507.0,1385.0,1632.0,1511.0,1559.0,1630.0,1579.0,1653.0,2152.0,2148.0,1752.0,1765.0,1717.0,1558.0,1575.0,1520.0,1805.0,1800.0,1719.0,2008.0,2242.0,2478.0,2030.0,1655.0,1693.0,1623.0,1805.0,1746.0,1795.0,1926.0,1619.0,1992.0,2233.0,2192.0,2080.0,1768.0,1835.0,1569.0,1976.0,1853.0,1965.0,1689.0,1778.0,1976.0,2397.0,2654.0,2097.0,1963.0,1677.0,1941.0,2003.0,1813.0,2012.0,1912.0,2084.0,2080.0,2118.0,2150.0,1608.0,1503.0,1548.0,1382.0,1731.0,1798.0,1779.0,1887.0,2004.0,2077.0,2092.0,2051.0,1577.0,1356.0,1652.0,1382.0,1519.0,1421.0,1442.0,1543.0,1656.0,1561.0,1905.0,2199.0,1473.0,1655.0,1407.0,1395.0,1530.0,1309.0,1526.0,1327.0,1627.0,1748.0,1958.0,2274.0,1648.0,1401.0,1411.0,1403.0,1394.0,1520.0,1528.0,1643.0,1515.0,1685.0,2000.0,2215.0,1956.0,1462.0,1563.0,1459.0,1446.0,1622.0,1657.0,1638.0,1643.0,1683.0,2050.0,2262.0,1813.0,1445.0,1762.0,1461.0,1556.0,1431.0,1427.0,1554.0,1645.0,1653.0,2016.0,2207.0,1665.0,1361.0,1506.0,1360.0,1453.0,1522.0,1460.0,1552.0,1548.0,1827.0,1737.0,1941.0,1474.0,1458.0,1542.0,1404.0,1522.0,1385.0,1641.0,1510.0,1681.0,1938.0,1868.0,1726.0,1456.0,1445.0,1456.0,1365.0,1487.0,1558.0,1488.0,1684.0,1594.0,1850.0,1998.0,2079.0,1494.0,1057.0,1218.0,1168.0,1236.0,1076.0,1174.0,1139.0,1427.0,1487.0,1483.0,1513.0,1357.0,1165.0,1282.0,1110.0,1297.0,1185.0,1222.0,1284.0,1444.0,1575.0,1737.0,1763.0]},"labels":["1969.0","1969.0833","1969.1667","1969.25","1969.3333","1969.4167","1969.5","1969.5833","1969.6667","1969.75","1969.8333","1969.9167","1970.0","1970.0833","1970.1667","1970.25","1970.3333","1970.4167","1970.5","1970.5833","1970.6667","1970.75","1970.8333","1970.9167","1971.0","1971.0833","1971.1667","1971.25","1971.3333","1971.4167","1971.5","1971.5833","1971.6667","1971.75","1971.8333","1971.9167","1972.0","1972.0833","1972.1667","1972.25","1972.3333","1972.4167","1972.5","1972.5833","1972.6667","1972.75","1972.8333","1972.9167","1973.0","1973.0833","1973.1667","1973.25","1973.3333","1973.4167","1973.5","1973.5833","1973.6667","1973.75","1973.8333","1973.9167","1974.0","1974.0833","1974.1667","1974.25","1974.3333","1974.4167","1974.5","1974.5833","1974.6667","1974.75","1974.8333","1974.9167","1975.0","1975.0833","1975.1667","1975.25","1975.3333","1975.4167","1975.5","1975.5833","1975.6667","1975.75","1975.8333","1975.9167","1976.0","1976.0833","1976.1667","1976.25","1976.3333","1976.4167","1976.5","1976.5833","1976.6667","1976.75","1976.8333","1976.9167","1977.0","1977.0833","1977.1667","1977.25","1977.3333","1977.4167","1977.5","1977.5833","1977.6667","1977.75","1977.8333","1977.9167","1978.0","1978.0833","1978.1667","1978.25","1978.3333","1978.4167","1978.5","1978.5833","1978.6667","1978.75","1978.8333","1978.9167","1979.0","1979.0833","1979.1667","1979.25","1979.3333","1979.4167","1979.5","1979.5833","1979.6667","1979.75","1979.8333","1979.9167","1980.0","1980.0833","1980.1667","1980.25","1980.3333","1980.4167","1980.5","1980.5833","1980.6667","1980.75","1980.8333","1980.9167","1981.0","1981.0833","1981.1667","1981.25","1981.3333","1981.4167","1981.5","1981.5833","1981.6667","1981.75","1981.8333","1981.9167","1982.0","1982.0833","1982.1667","1982.25","1982.3333","1982.4167","1982.5","1982.5833","1982.6667","1982.75","1982.8333","1982.9167","1983.0","1983.0833","1983.1667","1983.25","1983.3333","1983.4167","1983.5","1983.5833","1983.6667","1983.75","1983.8333","1983.9167","1984.0","1984.0833","1984.1667","1984.25","1984.3333","1984.4167","1984.5","1984.5833","1984.6667","1984.75","1984.8333","1984.9167"],"g0":169,"route":"few_none","its":{"g":169,"g_label":"1983.0833","T":192,"series":[1687.0,1508.0,1507.0,1385.0,1632.0,1511.0,1559.0,1630.0,1579.0,1653.0,2152.0,2148.0,1752.0,1765.0,1717.0,1558.0,1575.0,1520.0,1805.0,1800.0,1719.0,2008.0,2242.0,2478.0,2030.0,1655.0,1693.0,1623.0,1805.0,1746.0,1795.0,1926.0,1619.0,1992.0,2233.0,2192.0,2080.0,1768.0,1835.0,1569.0,1976.0,1853.0,1965.0,1689.0,1778.0,1976.0,2397.0,2654.0,2097.0,1963.0,1677.0,1941.0,2003.0,1813.0,2012.0,1912.0,2084.0,2080.0,2118.0,2150.0,1608.0,1503.0,1548.0,1382.0,1731.0,1798.0,1779.0,1887.0,2004.0,2077.0,2092.0,2051.0,1577.0,1356.0,1652.0,1382.0,1519.0,1421.0,1442.0,1543.0,1656.0,1561.0,1905.0,2199.0,1473.0,1655.0,1407.0,1395.0,1530.0,1309.0,1526.0,1327.0,1627.0,1748.0,1958.0,2274.0,1648.0,1401.0,1411.0,1403.0,1394.0,1520.0,1528.0,1643.0,1515.0,1685.0,2000.0,2215.0,1956.0,1462.0,1563.0,1459.0,1446.0,1622.0,1657.0,1638.0,1643.0,1683.0,2050.0,2262.0,1813.0,1445.0,1762.0,1461.0,1556.0,1431.0,1427.0,1554.0,1645.0,1653.0,2016.0,2207.0,1665.0,1361.0,1506.0,1360.0,1453.0,1522.0,1460.0,1552.0,1548.0,1827.0,1737.0,1941.0,1474.0,1458.0,1542.0,1404.0,1522.0,1385.0,1641.0,1510.0,1681.0,1938.0,1868.0,1726.0,1456.0,1445.0,1456.0,1365.0,1487.0,1558.0,1488.0,1684.0,1594.0,1850.0,1998.0,2079.0,1494.0,1057.0,1218.0,1168.0,1236.0,1076.0,1174.0,1139.0,1427.0,1487.0,1483.0,1513.0,1357.0,1165.0,1282.0,1110.0,1297.0,1185.0,1222.0,1284.0,1444.0,1575.0,1737.0,1763.0],"counterfactual":[1870.5736,1692.4136,1730.3421,1616.8421,1755.5564,1711.2707,1788.0564,1803.1279,1831.485,1977.1279,2193.9136,2323.1993,1849.1583,1670.9983,1708.9269,1595.4269,1734.1412,1689.8554,1766.6412,1781.7126,1810.0697,1955.7126,2172.4983,2301.784,1827.743,1649.583,1687.5116,1574.0116,1712.7259,1668.4402,1745.2259,1760.2973,1788.6544,1934.2973,2151.083,2280.3687,1806.3278,1628.1677,1666.0963,1552.5963,1691.3106,1647.0249,1723.8106,1738.882,1767.2392,1912.882,2129.6677,2258.9535,1784.9125,1606.7525,1644.681,1531.181,1669.8953,1625.6096,1702.3953,1717.4668,1745.8239,1891.4668,2108.2525,2237.5382,1763.4972,1585.3372,1623.2658,1509.7658,1648.4801,1604.1943,1680.9801,1696.0515,1724.4086,1870.0515,2086.8372,2216.1229,1742.0819,1563.9219,1601.8505,1488.3505,1627.0648,1582.7791,1659.5648,1674.6362,1702.9934,1848.6362,2065.4219,2194.7076,1720.6667,1542.5066,1580.4352,1466.9352,1605.6495,1561.3638,1638.1495,1653.2209,1681.5781,1827.2209,2044.0066,2173.2924,1699.2514,1521.0914,1559.0199,1445.5199,1584.2342,1539.9485,1616.7342,1631.8057,1660.1628,1805.8057,2022.5914,2151.8771,1677.8361,1499.6761,1537.6047,1424.1047,1562.819,1518.5332,1595.319,1610.3904,1638.7475,1784.3904,2001.1761,2130.4618,1656.4208,1478.2608,1516.1894,1402.6894,1541.4037,1497.118,1573.9037,1588.9751,1617.3323,1762.9751,1979.7608,2109.0465,1635.0056,1456.8456,1494.7741,1381.2741,1519.9884,1475.7027,1552.4884,1567.5598,1595.917,1741.5598,1958.3456,2087.6313,1613.5903,1435.4303,1473.3588,1359.8588,1498.5731,1454.2874,1531.0731,1546.1446,1574.5017,1720.1446,1936.9303,2066.216,1592.175,1414.015,1451.9436,1338.4436,1477.1579,1432.8721,1509.6579,1524.7293,1553.0864,1698.7293,1915.515,2044.8007,1570.7597,1392.5997,1430.5283,1317.0283,1455.7426,1411.4569,1488.2426,1503.314,1531.6712,1677.314,1894.0997,2023.3854,1549.3445,1371.1845,1409.113,1295.613,1434.3273,1390.0416,1466.8273,1481.8987,1510.2559,1655.8987,1872.6845,2001.9702],"labels":["1969.0","1969.0833","1969.1667","1969.25","1969.3333","1969.4167","1969.5","1969.5833","1969.6667","1969.75","1969.8333","1969.9167","1970.0","1970.0833","1970.1667","1970.25","1970.3333","1970.4167","1970.5","1970.5833","1970.6667","1970.75","1970.8333","1970.9167","1971.0","1971.0833","1971.1667","1971.25","1971.3333","1971.4167","1971.5","1971.5833","1971.6667","1971.75","1971.8333","1971.9167","1972.0","1972.0833","1972.1667","1972.25","1972.3333","1972.4167","1972.5","1972.5833","1972.6667","1972.75","1972.8333","1972.9167","1973.0","1973.0833","1973.1667","1973.25","1973.3333","1973.4167","1973.5","1973.5833","1973.6667","1973.75","1973.8333","1973.9167","1974.0","1974.0833","1974.1667","1974.25","1974.3333","1974.4167","1974.5","1974.5833","1974.6667","1974.75","1974.8333","1974.9167","1975.0","1975.0833","1975.1667","1975.25","1975.3333","1975.4167","1975.5","1975.5833","1975.6667","1975.75","1975.8333","1975.9167","1976.0","1976.0833","1976.1667","1976.25","1976.3333","1976.4167","1976.5","1976.5833","1976.6667","1976.75","1976.8333","1976.9167","1977.0","1977.0833","1977.1667","1977.25","1977.3333","1977.4167","1977.5","1977.5833","1977.6667","1977.75","1977.8333","1977.9167","1978.0","1978.0833","1978.1667","1978.25","1978.3333","1978.4167","1978.5","1978.5833","1978.6667","1978.75","1978.8333","1978.9167","1979.0","1979.0833","1979.1667","1979.25","1979.3333","1979.4167","1979.5","1979.5833","1979.6667","1979.75","1979.8333","1979.9167","1980.0","1980.0833","1980.1667","1980.25","1980.3333","1980.4167","1980.5","1980.5833","1980.6667","1980.75","1980.8333","1980.9167","1981.0","1981.0833","1981.1667","1981.25","1981.3333","1981.4167","1981.5","1981.5833","1981.6667","1981.75","1981.8333","1981.9167","1982.0","1982.0833","1982.1667","1982.25","1982.3333","1982.4167","1982.5","1982.5833","1982.6667","1982.75","1982.8333","1982.9167","1983.0","1983.0833","1983.1667","1983.25","1983.3333","1983.4167","1983.5","1983.5833","1983.6667","1983.75","1983.8333","1983.9167","1984.0","1984.0833","1984.1667","1984.25","1984.3333","1984.4167","1984.5","1984.5833","1984.6667","1984.75","1984.8333","1984.9167"],"coefs":[{"var":"const","est":1872.0622,"se":65.5845,"p":0.0},{"var":"trend","est":-1.7784,"se":0.4086,"p":0.0},{"var":"level change","est":-300.6662,"se":41.2889,"p":0.0},{"var":"slope change","est":6.8711,"se":2.1248,"p":0.0012},{"var":"season 1","est":-179.8594,"se":44.4263,"p":0.0001},{"var":"season 2","est":-128.3774,"se":43.7999,"p":0.0034},{"var":"season 3","est":-240.6454,"se":46.6706,"p":0.0},{"var":"season 4","est":-102.4133,"se":51.9946,"p":0.0489},{"var":"season 5","est":-157.2438,"se":54.3433,"p":0.0038},{"var":"season 6","est":-80.6993,"se":58.0514,"p":0.1645},{"var":"season 7","est":-64.9048,"se":55.9878,"p":0.2463},{"var":"season 8","est":-11.1728,"se":62.3701,"p":0.8578},{"var":"season 9","est":129.1218,"se":60.6735,"p":0.0333},{"var":"season 10","est":329.6038,"se":42.2158,"p":0.0},{"var":"season 11","est":447.1483,"se":46.6,"p":0.0}],"seasonal":true,"dw":0.928,"nw_lags":5,"placebo":[{"at":"1976.0","est":-153.609,"se":89.9538,"p":0.0877},{"at":"1978.3333","est":15.1371,"se":57.5345,"p":0.7925}],"mean_pre":1717.7515,"avg_effect":-224.5888},"model":"ITS","roles":{"outcome":"deaths","treat":"law","time":"time"}}},{"key":"close_elections","title":"Close U.S. House elections","meta":"Elections · 1946–1995","desc":"ADA liberal-voting score of the winner, by the Democratic vote share; a Democrat wins above 0.5 (Lee, Moretti and Butler 2004).","file":"examples/close_elections.csv","result":{"design":"RDD","n":13566,"running":"demvoteshare","cutoff":0.5,"outcome":"score","n_left":5471,"n_right":8095,"h":0.1084,"treat_agree":1.0,"fuzzy":false,"rd":{"est":46.7369,"se":1.273,"z":36.71,"p":0.0,"n":4961},"sensitivity":[{"mult":0.5,"h":0.0542,"est":46.2416,"se":1.8197,"n":2575},{"mult":0.75,"h":0.0813,"est":46.3463,"se":1.469,"n":3806},{"mult":1.0,"h":0.1084,"est":46.7369,"se":1.273,"n":4961},{"mult":1.5,"h":0.1625,"est":47.1595,"se":1.0474,"n":7318},{"mult":2.0,"h":0.2167,"est":47.5731,"se":0.9239,"n":9231}],"placebo":[{"side":"left","cutoff":0.3835,"est":2.3362,"se":1.2655,"p":0.0649},{"side":"right","cutoff":0.687,"est":3.6257,"se":1.7934,"p":0.0432}],"density":{"theta":-0.018,"se":0.058,"z":-0.3,"p":0.7629,"h":0.1165,"hist":{"mid":[0.23789,0.24183,0.24577,0.24971,0.25366,0.2576,0.26154,0.26548,0.26942,0.27336,0.2773,0.28125,0.28519,0.28913,0.29307,0.29701,0.30095,0.30489,0.30884,0.31278,0.31672,0.32066,0.3246,0.32854,0.33249,0.33643,0.34037,0.34431,0.34825,0.35219,0.35613,0.36008,0.36402,0.36796,0.3719,0.37584,0.37978,0.38373,0.38767,0.39161,0.39555,0.39949,0.40343,0.40737,0.41132,0.41526,0.4192,0.42314,0.42708,0.43102,0.43496,0.43891,0.44285,0.44679,0.45073,0.45467,0.45861,0.46256,0.4665,0.47044,0.47438,0.47832,0.48226,0.4862,0.49015,0.49409,0.49803,0.50197,0.50591,0.50985,0.5138,0.51774,0.52168,0.52562,0.52956,0.5335,0.53744,0.54139,0.54533,0.54927,0.55321,0.55715,0.56109,0.56504,0.56898,0.57292,0.57686,0.5808,0.58474,0.58868,0.59263,0.59657,0.60051,0.60445,0.60839,0.61233,0.61627,0.62022,0.62416,0.6281,0.63204,0.63598,0.63992,0.64387,0.64781,0.65175,0.65569,0.65963,0.66357,0.66751,0.67146,0.6754,0.67934,0.68328,0.68722,0.69116,0.69511,0.69905,0.70299,0.70693,0.71087,0.71481,0.71875,0.7227,0.72664,0.73058,0.73452,0.73846,0.7424,0.74634,0.75029,0.75423,0.75817,0.76211,0.76605,0.76999,0.77394,0.77788,0.78182,0.78576,0.7897,0.79364,0.79758,0.80153,0.80547,0.80941,0.81335,0.81729,0.82123,0.82518,0.82912,0.83306,0.837,0.84094,0.84488,0.84882,0.85277,0.85671,0.86065],"f":[0.579757,0.374037,0.467546,0.598459,0.785478,0.71067,0.561056,0.71067,0.897689,0.673267,0.748074,1.028602,0.878987,0.878987,1.178217,0.916391,0.635863,0.841583,0.654565,1.383937,0.935093,1.365235,1.589657,1.477446,1.589657,1.383937,1.683167,1.51485,1.383937,1.739272,1.627061,1.458744,1.570956,1.440043,1.851483,1.739272,1.851483,1.51485,1.552254,1.589657,1.440043,1.21562,1.51485,1.570956,1.627061,1.944993,1.832781,1.795378,1.645763,2.356433,1.757974,1.72057,2.038502,1.926291,1.589657,2.057204,1.645763,1.982396,1.477446,1.757974,1.683167,1.888887,1.926291,1.477446,2.262924,1.645763,1.645763,1.589657,1.496148,1.589657,1.926291,1.907589,2.262924,1.739272,1.533552,1.926291,1.701868,1.458744,1.81408,1.589657,1.365235,1.402639,1.30913,1.570956,1.701868,1.627061,1.327831,1.533552,1.570956,1.440043,1.963694,1.421341,1.140813,1.795378,1.72057,1.963694,2.206818,1.30913,1.103409,1.851483,1.196919,1.346533,1.421341,1.589657,1.888887,1.346533,1.81408,1.496148,1.776676,1.421341,1.30913,1.870185,1.140813,1.907589,1.196919,1.253024,1.589657,1.81408,1.30913,1.440043,1.608359,1.383937,1.496148,1.645763,1.178217,1.346533,1.028602,1.047304,1.402639,1.365235,0.953794,1.178217,0.916391,1.290428,0.561056,0.748074,0.729372,0.673267,0.80418,0.523652,0.822881,0.635863,0.392739,0.617161,0.766776,0.411441,0.673267,0.392739,0.355335,0.673267,0.392739,0.448844,0.635863,0.317931,0.392739,0.542354,0.336633,0.168317,0.579757]}},"covariates":[{"var":"lagdemvoteshare","est":0.0285,"se":0.0075,"p":0.0002}],"bins":[[0.25158,21.37313],[0.27767,19.84028],[0.29811,18.47876],[0.31764,19.57633],[0.33083,18.38402],[0.34292,18.62433],[0.35476,14.88936],[0.36668,17.35187],[0.3775,14.74705],[0.38876,19.79367],[0.40162,14.01439],[0.41322,16.34299],[0.42357,17.61637],[0.43304,18.98765],[0.44309,16.0794],[0.45303,16.80813],[0.46324,16.6564],[0.474,15.12563],[0.48438,14.94344],[0.49436,20.12798],[0.50728,65.77711],[0.51976,62.05502],[0.53205,64.91886],[0.54548,63.36798],[0.56087,66.29874],[0.57573,65.34098],[0.59046,62.41523],[0.60507,63.88971],[0.61761,64.11612],[0.63314,64.98212],[0.64822,64.1039],[0.66228,67.37078],[0.67709,60.99752],[0.69252,65.18295],[0.70749,65.56653],[0.72298,68.83971],[0.74084,64.56156],[0.76134,64.13825],[0.79198,65.14292],[0.83464,66.07443]],"fit":[[[0.5,17.4361],[0.39164,15.83471]],[[0.5,64.173],[0.60836,64.85627]]],"flags":["covariates"],"model":"RDD","roles":{"outcome":"score","treat":"democrat","running":"demvoteshare","cutoff":0.5}}},{"key":"card","title":"Returns to schooling","meta":"Cross-section · 3,010 men, 1976","desc":"Log wage and years of education, instrumented by growing up near a four-year college (Card 1995).","file":"examples/card.csv","result":{"design":"IV","n":3003,"outcome":"lwage","treat":"educ","instruments":["nearc4"],"controls":["black","smsa","south","married","exper"],"ols":{"est":0.0712,"se":0.0036},"first_stage":{"coefs":[{"var":"nearc4","est":0.3273,"se":0.0805}],"F":16.52,"p":0.0,"partial_r2":0.0052},"tsls":{"est":0.1242,"se":0.0492,"p":0.0116},"reduced_form":[{"var":"nearc4","est":0.0406,"se":0.0161}],"endog":{"t":-1.13,"p":0.2587},"ar":{"F":6.34,"p":0.0119,"ci":[0.0316,0.2541],"bounded":true},"weak":false,"flags":[],"model":"IV","roles":{"outcome":"lwage","treat":"educ","instruments":["nearc4"],"controls":["black","smsa","south","married","exper"]}}}];
+const FEW=3, DONORS=5;
+const PYO='https://cdn.jsdelivr.net/pyodide/v0.27.2/full/';
+const L='../teaching/econometrics/lectures/';
+const LEC={ci:[L+'13-causal-inference.html','Lecture 13: Causal inference'],iv:[L+'05-endogeneity-iv.html','Lecture 05: Endogeneity and IV'],pa:[L+'07-panel-data.html','Lecture 07: Panel data'],ur:[L+'10-unit-roots-breaks.html','Lecture 10: Breaks']};
+const GUIDE={DID:'did',STAG:'staggered',GSC:'gsc',SCM:'scm',ITS:'its',RDD:'rdd',IV:'iv'};
+const MODELS={
+ DID:{name:'Difference-in-differences',short:'DiD',when:'Many treated units, one adoption date',why:'Many units are treated at the same date and others never are, and the event study shows no differential trends before treatment. The untreated units’ change over time then estimates what would have happened to the treated units without treatment.',steps:['Define treated, control and the adoption date','Two-way fixed effects with clustered errors','Event study: leads and lags','Joint test of the pre-treatment coefficients','Placebo outcomes and dates','Sensitivity to violations of parallel trends'],lec:[LEC.ci,LEC.pa]},
+ STAG:{name:'Staggered difference-in-differences',short:'Staggered DiD',when:'Many treated units, several adoption dates',why:'Units adopt the policy at different dates. With effects that change over time or differ across cohorts, the conventional two-way fixed-effects estimate uses already-treated units as controls and can be badly biased. Heterogeneity-robust estimators (Callaway and Sant’Anna; Sun and Abraham; imputation) compare each cohort only with clean controls.',steps:['Adoption cohorts and clean controls','Group-time ATT(g, t)','Event-study aggregation','Pre-trend test on the leads','Compare with two-way fixed effects','Never-treated vs not-yet-treated controls'],lec:[LEC.ci]},
+ GSC:{name:'Generalized synthetic control',short:'GSC',when:'Many treated units, pre-trends not parallel',why:'The event study rejects parallel pre-trends, so plain DiD is not credible. Generalized synthetic control (Xu 2017) models the untreated outcome with unit and time effects plus latent factors with unit-specific loadings, which lets treated and control units follow different trends, and imputes each treated unit’s counterfactual.',steps:['Estimate factors on the control units','Choose the number of factors by cross-validation','Fit loadings on pre-treatment periods','Pre-treatment fit (placebo gaps)','ATT and dynamic effects with bootstrap errors','Compare with DiD and staggered DiD'],lec:[LEC.ci]},
+ SCM:{name:'Synthetic control',short:'Synthetic control',when:'One or a few treated units, many comparison units',why:'Only one or a few units are treated, so averaging over treated units is impossible and DiD inference fails. The synthetic control method builds a weighted combination of untreated units that reproduces the treated unit’s pre-treatment path, and uses it as the counterfactual.',steps:['Donor pool and pre-treatment period','Weights: nonnegative, summing to one','Pre-treatment fit (RMSPE)','Gap between actual and synthetic','Placebo-in-space permutation inference','Leave-one-out and in-time placebos'],lec:[LEC.ci]},
+ ITS:{name:'Interrupted time series',short:'ITS',when:'One treated series, no comparison units',why:'There is no untreated comparison group, so the counterfactual must come from the treated series’ own pre-treatment path. A segmented regression estimates the level and slope change at the intervention date, with seasonality and serial correlation handled explicitly.',steps:['Pre-treatment trend and seasonality','Level and slope change at the intervention','Newey–West standard errors','Residual autocorrelation','Placebo intervention dates','Rule out coinciding events'],lec:[LEC.ur,LEC.ci]},
+ RDD:{name:'Regression discontinuity',short:'RDD',when:'Treatment assigned by a cutoff',why:'Treatment is determined, fully or partly, by whether a running variable crosses a known cutoff. Units just above and just below the cutoff are comparable, so the jump in the outcome at the cutoff estimates the effect of treatment there.',steps:['Plot the data around the cutoff','Local linear estimate, data-driven bandwidth','McCrary density test (manipulation)','Covariate continuity','Bandwidth sensitivity and placebo cutoffs','Fuzzy design: first stage and local Wald'],lec:[LEC.ci]},
+ IV:{name:'Instrumental variables',short:'IV',when:'An instrument shifts the treatment',why:'The treatment is endogenous, but a variable that shifts it is available and, under the exclusion restriction, affects the outcome only through the treatment. Two-stage least squares uses only the variation in treatment driven by the instrument.',steps:['Argue relevance, exclusion and independence','First stage and its F statistic','2SLS against OLS','Weak-instrument-robust inference (Anderson–Rubin)','Endogeneity and overidentification tests','Interpret as a local average treatment effect'],lec:[LEC.iv,LEC.ci]}
+};
+const $=s=>document.querySelector(s), el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches, D=reduce?0:1;
+const fmt=(v,d=3)=>v==null?'–':Number(v).toFixed(d), pf=p=>p==null?'–':(p<0.001?'<0.001':p.toFixed(3));
+const rej=p=>p!=null&&p<0.05;
+let run=0;
+
+/* ---------- decision tree ---------- */
+const N={start:[380,26,116,'Your design'],as:[380,92,200,'How is treatment assigned?'],
+ cut:[80,160,92,'A cutoff'],rdc:[80,236,128,'Density, balance'],RDD:[80,312,64,'RDD',1],
+ ins:[215,160,108,'An instrument'],fs:[215,236,110,'First stage'],IV:[215,312,52,'IV',1],
+ ot:[540,160,146,'Policy over time'],ntr:[540,226,136,'Treated units?'],few:[400,292,96,'One or few'],many:[640,292,70,'Many'],
+ cmp:[400,352,116,'Donor pool?'],SCM:[350,412,62,'SCM',1],ITS:[452,412,52,'ITS',1],
+ pre:[640,352,164,'Parallel pre-trends?'],tim:[575,412,86,'Timing'],GSC:[715,412,58,'GSC',1],DID:[528,472,58,'DiD',1],STAG:[640,472,120,'Staggered DiD',1]};
+const E=[['start','as'],['as','cut'],['as','ins'],['as','ot'],['cut','rdc'],['rdc','RDD'],['ins','fs'],['fs','IV'],['ot','ntr'],['ntr','few','≤ '+FEW],['ntr','many','> '+FEW],
+ ['few','cmp'],['cmp','SCM','yes'],['cmp','ITS','no'],['many','pre'],['pre','tim','yes'],['pre','GSC','no'],['tim','DID','one date'],['tim','STAG','several']];
+const TL={start:'Your design',as:'Assignment',cut:'Cutoff',rdc:'Density and balance',ins:'Instrument',fs:'First stage',ot:'Policy over time',ntr:'Treated units',few:'One or few treated',many:'Many treated',cmp:'Donor pool?',pre:'Pre-trends',tim:'Adoption timing'};
+function pathTo(m){const S=['start','as'];
+ if(m==='RDD')return S.concat(['cut','rdc','RDD']);if(m==='IV')return S.concat(['ins','fs','IV']);
+ if(m==='SCM'||m==='ITS')return S.concat(['ot','ntr','few','cmp',m]);if(m==='GSC')return S.concat(['ot','ntr','many','pre','GSC']);
+ return S.concat(['ot','ntr','many','pre','tim',m])}
+function drawTree(){
+ const H=16;let s='<svg viewBox="0 0 760 500" role="img" aria-label="Decision tree from research design to method">';
+ for(const [a,b,lab] of E){const A=N[a],B=N[b];let d,lx,ly;
+  if(A[1]===B[1]){const r=B[0]>A[0];d=r?`M${A[0]+A[2]/2} ${A[1]}H${B[0]-B[2]/2}`:`M${A[0]-A[2]/2} ${A[1]}H${B[0]+B[2]/2}`;lx=(A[0]+B[0])/2;ly=A[1]-6}
+  else{const my=(A[1]+B[1])/2;d=`M${A[0]} ${A[1]+H}V${my}H${B[0]}V${B[1]-H}`;lx=A[0]===B[0]?A[0]+18:(A[0]+B[0])/2;ly=A[0]===B[0]?my+4:my-5}
+  s+=`<path class="e" id="e-${a}-${b}" pathLength="1" d="${d}"/>`;if(lab)s+=`<text class="el" x="${lx}" y="${ly}">${lab}</text>`}
+ for(const k in N){const [x,y,w,t,leaf]=N[k];s+=`<g class="n${leaf?' leaf':''}" id="n-${k}"><rect x="${x-w/2}" y="${y-H}" width="${w}" height="${2*H}" rx="${leaf?16:8}"/><text x="${x}" y="${y}">${t}</text></g>`}
+ $('#tree').innerHTML=s+'</svg>';
+}
+let lit=new Set(),tEnd=0;
+function resetTree(){lit=new Set();tEnd=0;document.querySelectorAll('.tree .on,.tree .hl,.tree .alt').forEach(e=>e.classList.remove('on','hl','alt'));$('#trail').innerHTML=''}
+function light(path,labels={},final=true){
+ const my=run,now=performance.now();let at=Math.max(now,tEnd);
+ path.forEach((id,i)=>{if(lit.has(id))return;lit.add(id);const wait=at-now;at+=380*D;
+  setTimeout(()=>{if(my!==run)return;const n=$('#n-'+id);n&&n.classList.add('on');if(i>0){const e=document.getElementById(`e-${path[i-1]}-${id}`);e&&e.classList.add('hl')}
+   const t=$('#trail');if(t.children.length)t.appendChild(el('i','','→'));const isLeaf=!!MODELS[id];t.appendChild(el('span',isLeaf&&final?'final':'',esc(labels[id]||(MODELS[id]?MODELS[id].short:TL[id])||id)))},wait)});
+ tEnd=at;return at-now;
+}
+
+/* ---------- charts ---------- */
+const W_=520,H_=220,PL=46,PR=10,PT=10,PB=26;
+function frame(xs,ys,opt={}){const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys),ry=(y1-y0)||1,rx=(x1-x0)||1;
+ const sx=x=>PL+(x-x0)/rx*(W_-PL-PR),sy=y=>PT+(1-(y-(y0-ry*.06))/(ry*1.12))*(H_-PT-PB);
+ let g=`<line class="ax" x1="${PL}" x2="${W_-PR}" y1="${H_-PB}" y2="${H_-PB}"/><line class="ax" x1="${PL}" x2="${PL}" y1="${PT}" y2="${H_-PB}"/>`;
+ [y0,(y0+y1)/2,y1].forEach(v=>{g+=`<text x="${PL-5}" y="${sy(v)+3}" text-anchor="end">${Math.abs(v)>=1000?Math.round(v):(+v.toPrecision(3))}</text>`});
+ if(opt.xl)opt.xl.forEach(([v,l])=>{g+=`<text x="${sx(v)}" y="${H_-PB+14}" text-anchor="middle">${esc(l)}</text>`});
+ if(opt.zero&&y0<0&&y1>0)g+=`<line class="zero" x1="${PL}" x2="${W_-PR}" y1="${sy(0)}" y2="${sy(0)}"/>`;
+ if(opt.vline!=null)g+=`<line class="tv" x1="${sx(opt.vline)}" x2="${sx(opt.vline)}" y1="${PT}" y2="${H_-PB}"/>`;
+ return {sx,sy,g}}
+const svg=g=>`<div class="chart"><svg viewBox="0 0 ${W_} ${H_}" preserveAspectRatio="xMidYMid meet">${g}</svg></div>`;
+function lines(series,labels,vline,cls=['s0','s1','s2']){const n=labels.length,xs=[...Array(n).keys()],ys=[].concat(...series.map(s=>s.filter(v=>v!=null)));
+ const step=Math.max(1,Math.ceil(n/6)),xl=xs.filter(i=>i%step===0).map(i=>[i,labels[i]]);
+ const F=frame(xs,ys,{xl,vline});let g=F.g;
+ series.forEach((s,k)=>{let d='',pen=false;s.forEach((v,i)=>{if(v==null){pen=false;return}d+=(pen?'L':'M')+F.sx(i).toFixed(1)+' '+F.sy(v).toFixed(1);pen=true});g+=`<path class="${cls[k]}" d="${d}"/>`});
+ return svg(g)}
+function eventPlot(ev){const xs=ev.map(e=>e.e),ys=[].concat(...ev.map(e=>[e.est-1.96*(e.se||0),e.est+1.96*(e.se||0),0]));
+ const F=frame(xs.concat([-1]),ys,{xl:xs.concat([-1]).sort((a,b)=>a-b).map(e=>[e,String(e)]),zero:true,vline:-0.5});let g=F.g;
+ const pts=ev.concat([{e:-1,est:0,se:0}]);pts.forEach(e=>{const pre=e.e<0;if(e.se)g+=`<line class="ci${pre?' pre':''}" x1="${F.sx(e.e)}" x2="${F.sx(e.e)}" y1="${F.sy(e.est-1.96*e.se)}" y2="${F.sy(e.est+1.96*e.se)}"/>`;g+=`<circle class="pt${pre?' pre':''}" cx="${F.sx(e.e)}" cy="${F.sy(e.est)}" r="3.4"/>`});
+ return svg(g)+'<div class="legend">Periods relative to adoption (−1 is the base period). Bars: 95% confidence intervals.</div>'}
+function rdPlot(R){const b=R.bins,xs=b.map(p=>p[0]).concat([R.cutoff]),ys=b.map(p=>p[1]).concat(...R.fit.map(f=>f.map(p=>p[1])));
+ const F=frame(xs,ys,{vline:R.cutoff,xl:[[Math.min(...xs),String(+Math.min(...xs).toPrecision(3))],[R.cutoff,'cutoff '+R.cutoff],[Math.max(...xs),String(+Math.max(...xs).toPrecision(3))]]});let g=F.g;
+ b.forEach(p=>{g+=`<circle class="dot" cx="${F.sx(p[0])}" cy="${F.sy(p[1])}" r="3"/>`});R.fit.forEach(f=>{g+=`<line class="fit" x1="${F.sx(f[0][0])}" y1="${F.sy(f[0][1])}" x2="${F.sx(f[1][0])}" y2="${F.sy(f[1][1])}"/>`});
+ return svg(g)+'<div class="legend">Dots: averages of the outcome in bins of the running variable. Lines: local linear fits within the bandwidth.</div>'}
+function histPlot(h,c){const xs=h.mid,ys=h.f.concat([0]);const F=frame(xs,ys,{vline:c,xl:[[xs[0],String(+xs[0].toPrecision(3))],[c,'cutoff'],[xs[xs.length-1],String(+xs[xs.length-1].toPrecision(3))]]});let g=F.g;
+ const bw=(F.sx(xs[1])-F.sx(xs[0]))*.9;xs.forEach((x,i)=>{g+=`<rect class="bar" x="${F.sx(x)-bw/2}" y="${F.sy(h.f[i])}" width="${bw}" height="${Math.max(0,F.sy(0)-F.sy(h.f[i]))}"/>`});return svg(g)}
+
+/* ---------- results ---------- */
+const code=c=>`<details class="code"><summary>Python code for this step</summary><pre>${esc(c)}</pre></details>`;
+function addStep(n,title,html,delay){const s=el('div','step',`<div class="label">Step ${n}</div><h3>${title}</h3>${html}`);$('#steps').appendChild(s);const my=run;setTimeout(()=>{if(my!==run)return;s.classList.add('in');if(n>1&&!reduce)s.scrollIntoView({behavior:'smooth',block:'nearest'})},delay);return s}
+const pyList=a=>'['+a.map(v=>JSON.stringify(v)).join(', ')+']';
+function show(R,label){
+ const my=++run;$('#steps').innerHTML='';$('#result').innerHTML='';resetTree();
+ const st={my,t:150,gap:900*D,k:1};
+ light(['start','as']);
+ if(R.design==='RDD')return showRDD(R,label,st);
+ if(R.design==='IV')return showIV(R,label,st);
+ return showTime(R,label,st);
+}
+function later(st,f,extra=0){const my=st.my;setTimeout(()=>{if(my!==run)return;f()},st.t+extra)}
+
+function showRDD(R,label,st){const r=R.roles;
+ addStep(st.k++,'The design: a cutoff',`<p><b>${R.n}</b> observations${label?' · '+esc(label):''}. Outcome: <b>${esc(R.outcome)}</b>. Running variable: <b>${esc(R.running)}</b>, cutoff <b>${R.cutoff}</b>. ${R.n_left} observations below and ${R.n_right} at or above the cutoff.</p>
+ <p>${R.fuzzy?`The treatment indicator <b>${esc(r.treat)}</b> agrees with the cutoff rule for only ${fmt(R.treat_agree*100,1)}% of observations, so the design is <b>fuzzy</b>: crossing the cutoff changes the probability of treatment, not treatment itself.`:'Treatment switches on exactly at the cutoff (a <b>sharp</b> design), so the jump in the outcome at the cutoff is the treatment effect there.'}</p>`,st.t);st.t+=st.gap;
+ later(st,()=>light(['start','as','cut']),-st.gap+300*D);
+ const e=R.rd;
+ addStep(st.k++,'The discontinuity',`<details class="explain" open><summary>How a regression discontinuity estimates an effect</summary><p>Units just below and just above the cutoff are alike in everything except treatment, as long as they cannot precisely choose which side they fall on. The tool fits a straight line on each side of the cutoff, using only observations within a <b>bandwidth</b> and giving more weight to those closest to it (triangular kernel). The gap between the two lines at the cutoff is the estimate. The bandwidth is the Imbens–Kalyanaraman MSE-optimal choice.</p></details>
+ ${rdPlot(R)}
+ <div class="urv"><ol><li><b>Jump in ${esc(R.outcome)} at the cutoff.</b> ${fmt(e.est)} (robust s.e. ${fmt(e.se)}), p-value ${pf(e.p)}, using ${e.n} observations within the bandwidth h = ${fmt(R.h,4)}. ${rej(e.p)?'<span class="yes">p &lt; 0.05: a significant discontinuity.</span>':'<span class="no">p ≥ 0.05: no significant discontinuity.</span>'}</li>
+ ${R.fuzzy&&R.first_stage?`<li><b>First stage: jump in the treatment probability.</b> ${fmt(R.first_stage.est)} (s.e. ${fmt(R.first_stage.se)}).</li><li><b>Fuzzy RD (local Wald) estimate</b> = outcome jump ÷ treatment jump = ${fmt(R.wald&&R.wald.est)} (s.e. ${fmt(R.wald&&R.wald.se)}).</li>`:''}</ol></div>`+code(`from causal_tests import rd_estimate      # implementations/causal_tests.py\n\nprint(rd_estimate(df["${R.running}"], df["${R.outcome}"], cutoff=${R.cutoff}))`),st.t);st.t+=st.gap;
+ addStep(st.k++,'Bandwidth sensitivity',`<div class="tw"><table><tr><th>Bandwidth</th><th>h</th><th>Estimate</th><th>s.e.</th><th>Obs.</th></tr>${R.sensitivity.map(s=>`<tr><td>${s.mult}×</td><td>${fmt(s.h,4)}</td><td>${fmt(s.est)}</td><td>${fmt(s.se)}</td><td>${s.n}</td></tr>`).join('')}</table></div><p>A narrower bandwidth reduces bias but uses fewer observations; a wider one is more precise but leans on observations far from the cutoff. A credible RD estimate is stable across this range.</p>`,st.t);st.t+=st.gap;
+ const dn=R.density;
+ addStep(st.k++,'Manipulation and covariate balance',`<details class="explain" open><summary>Why these checks decide whether the design is credible</summary><ul><li><b>McCrary density test.</b> If units can sort just above (or below) the cutoff, the density of the running variable jumps there and the units on the two sides are no longer comparable. Null hypothesis: no jump in the density.</li><li><b>Covariate continuity.</b> Characteristics determined before treatment should not jump at the cutoff. Each row runs the same RD with a covariate as the outcome.</li><li><b>Placebo cutoffs.</b> At points where nothing happens, there should be no jump.</li></ul></details>
+ ${dn?histPlot(dn.hist,R.cutoff)+`<div class="urv"><ol><li><b>McCrary test.</b> Log difference in density = ${fmt(dn.theta)} (s.e. ${fmt(dn.se)}), p-value ${pf(dn.p)}. ${rej(dn.p)?'<span class="no">p &lt; 0.05: the density jumps at the cutoff, a sign of sorting.</span>':'<span class="yes">p ≥ 0.05: no evidence of manipulation.</span>'}</li></ol></div>`:'<p>The density test could not be computed for this running variable.</p>'}
+ ${R.covariates.length?`<div class="tw"><table><tr><th>Covariate</th><th>Jump</th><th>s.e.</th><th>p-value</th></tr>${R.covariates.map(c=>`<tr><td>${esc(c.var)}</td><td>${fmt(c.est)}</td><td>${fmt(c.se)}</td><td>${pf(c.p)}${rej(c.p)?' ⚠':''}</td></tr>`).join('')}</table></div>`:'<p>No other numeric columns to test for continuity.</p>'}
+ <div class="tw"><table><tr><th>Placebo cutoff</th><th>Jump</th><th>s.e.</th><th>p-value</th></tr>${R.placebo.map(p=>`<tr><td>${p.side} median (${fmt(p.cutoff,3)})</td><td>${fmt(p.est)}</td><td>${fmt(p.se)}</td><td>${pf(p.p)}</td></tr>`).join('')}</table></div>`+code(`from causal_tests import mccrary_test, rd_estimate\n\nprint(mccrary_test(df["${R.running}"], cutoff=${R.cutoff}))\nfor cov in ["..."]:   # covariates fixed before treatment\n    print(cov, rd_estimate(df["${R.running}"], df[cov], cutoff=${R.cutoff}))`),st.t);
+ later(st,()=>light(['start','as','cut','rdc']),300*D);st.t+=st.gap;
+ later(st,()=>finish('RDD',R));
+}
+
+function showIV(R,label,st){
+ addStep(st.k++,'The design: an instrument',`<p><b>${R.n}</b> observations${label?' · '+esc(label):''}. Outcome <b>${esc(R.outcome)}</b>, endogenous treatment <b>${esc(R.treat)}</b>, instrument${R.instruments.length>1?'s':''} <b>${R.instruments.map(esc).join(', ')}</b>${R.controls.length?', controls: '+R.controls.map(esc).join(', '):''}.</p><details class="explain" open><summary>What an instrument must do</summary><ul><li><b>Relevance:</b> it shifts the treatment. Testable: the first stage.</li><li><b>Exclusion:</b> it affects the outcome only through the treatment. Not testable; it must be argued.</li><li><b>Independence:</b> it is as good as randomly assigned, given the controls. Not testable; it must be argued.</li></ul></details>`,st.t);st.t+=st.gap;
+ later(st,()=>light(['start','as','ins']),-st.gap+300*D);
+ const fs=R.first_stage;
+ addStep(st.k++,'First stage: is the instrument relevant?',`<div class="tw"><table><tr><th>Instrument</th><th>Effect on ${esc(R.treat)}</th><th>s.e.</th></tr>${fs.coefs.map(c=>`<tr><td>${esc(c.var)}</td><td>${fmt(c.est,4)}</td><td>${fmt(c.se,4)}</td></tr>`).join('')}</table></div>
+ <div class="urv"><ol><li><b>First-stage F statistic (robust)</b> = ${fmt(fs.F,2)}; partial R² = ${fmt(fs.partial_r2,4)}. ${fs.F>=10?'<span class="yes">F ≥ 10: not weak by the Staiger–Stock rule of thumb.</span>':'<span class="no">F &lt; 10: a weak instrument. 2SLS is biased towards OLS and its standard errors are unreliable.</span>'} ${fs.F>=10&&fs.F<104.7?'For t-tests with correct size, Lee et al. (2022) require F above 104.7; otherwise rely on the Anderson–Rubin test below.':''}</li></ol></div>`+code(`import statsmodels.api as sm\n\nX1 = sm.add_constant(df[${pyList(R.instruments.concat(R.controls))}])\nfirst = sm.OLS(df["${R.treat}"], X1).fit(cov_type="HC1")\nprint(first.f_test(" = ".join(${JSON.stringify(R.instruments)}) + " = 0"))`),st.t);st.t+=st.gap;
+ later(st,()=>light(['start','as','ins','fs']),-st.gap+300*D);
+ addStep(st.k++,'2SLS against OLS',`<div class="tw"><table><tr><th>Estimator</th><th>Effect of ${esc(R.treat)}</th><th>s.e.</th></tr><tr><td>OLS</td><td>${fmt(R.ols.est,4)}</td><td>${fmt(R.ols.se,4)}</td></tr><tr><td>2SLS</td><td>${fmt(R.tsls.est,4)}</td><td>${fmt(R.tsls.se,4)}</td></tr></table></div>
+ <p>2SLS uses only the part of the variation in ${esc(R.treat)} that the instrument creates. It is far less precise than OLS: here the standard error is ${fmt(R.tsls.se/R.ols.se,1)} times larger. ${R.tsls.p!=null?`The 2SLS estimate has p-value ${pf(R.tsls.p)}.`:''}</p>`+code(`from linearmodels.iv import IV2SLS\n\niv = IV2SLS(df["${R.outcome}"], sm.add_constant(df[${pyList(R.controls)}]), df["${R.treat}"], df[${pyList(R.instruments)}]).fit(cov_type="robust")\nprint(iv.summary)`),st.t);st.t+=st.gap;
+ const ar=R.ar,en=R.endog,ov=R.overid;
+ addStep(st.k++,'Weak-instrument-robust inference and specification tests',`<div class="urv"><ol><li><b>Anderson–Rubin test</b> of no effect: F = ${fmt(ar.F,2)}, p-value ${pf(ar.p)}. Its size is correct however weak the instrument. ${ar.ci?`95% AR confidence set: [${fmt(ar.ci[0],4)}, ${fmt(ar.ci[1],4)}]${ar.bounded?'':' (unbounded within the search range)'}.`:''}</li>
+ <li><b>Endogeneity test</b> (control function, robust): t = ${fmt(en.t,2)}, p-value ${pf(en.p)}. ${rej(en.p)?'OLS and 2SLS differ significantly: the treatment is endogenous.':'No significant difference between OLS and 2SLS: OLS is not rejected, but the test has little power when 2SLS is imprecise.'}</li>
+ ${ov?`<li><b>Hansen J overidentification test:</b> χ²(${ov.df}) = ${fmt(ov.J,2)}, p-value ${pf(ov.p)}. ${rej(ov.p)?'The instruments disagree: at least one is invalid.':'No evidence against the instruments’ validity (as a group).'}</li>`:'<li>With one instrument the model is exactly identified, and the exclusion restriction cannot be tested.</li>'}</ol></div>`,st.t);
+ st.t+=st.gap;later(st,()=>finish('IV',R));
+}
+
+function showTime(R,label,st){
+ const nt=R.n_treated;
+ addStep(st.k++,'The design: a policy over time',`<p><b>${R.n}</b> observations${label?' · '+esc(label):''}: ${R.has_unit?`<b>${R.N}</b> units over <b>${R.T}</b> periods (${esc(R.first)}–${esc(R.last)})`:`one series of <b>${R.T}</b> periods`}. Outcome: <b>${esc(R.outcome)}</b>.</p>
+ <div class="stats"><div class="stat"><b>${nt}</b><span>Treated units</span></div><div class="stat"><b>${R.n_never}</b><span>Never treated</span></div><div class="stat"><b>${R.n_cohorts}</b><span>Adoption date${R.n_cohorts>1?'s':''}</span></div><div class="stat"><b>${R.T}</b><span>Periods</span></div></div>
+ ${lines([R.means.treated,R.means.untreated||[]].filter(s=>s.length),R.labels,R.g0-0.5)}<div class="legend"><i></i>treated units (mean)${R.means.untreated?'<i class="b"></i>never-treated units (mean)':''} · dashed vertical line: first adoption</div>
+ <p>${R.route==='many'?`With ${nt} treated units, effects can be averaged across units and compared with untreated units: the difference-in-differences family applies. ${R.n_cohorts>1?`Units adopt at ${R.n_cohorts} different dates (${R.adoption.map(esc).join(', ')}).`:`All adopt at the same date (${esc(R.adoption[0])}).`}`:R.route==='few_donors'?`Only ${nt} treated unit${nt>1?'s':''}, so averaging over treated units is not possible, but ${R.n_never} untreated units can serve as a donor pool for a synthetic control.`:`Only ${nt} treated unit${nt>1?'s':''} and ${R.n_never} untreated comparison units: too few to build a comparison group. The counterfactual must come from the treated series’ own history.`}${R.switch_off?' <b>⚠ The treatment switches off for some units.</b> The tool uses the first adoption date; designs with reversals need different estimators.':''}</p>`,st.t);
+ later(st,()=>light(['start','as','ot','ntr',R.route==='many'?'many':'few'],{ntr:nt+' treated'}),300*D);st.t+=st.gap;
+ if(R.route==='few_none')return showITS(R,st);
+ if(R.route==='few_donors')return showSCM(R,st);
+ const Dd=R.did,pt=Dd.pretrend;
+ addStep(st.k++,'Event study: are the pre-trends parallel?',`<details class="explain" open><summary>Why the leads come first</summary><p>Difference-in-differences assumes that, without the policy, treated and untreated units would have followed parallel paths. That cannot be checked after treatment, but it can before: the estimated “effects” in the periods <i>before</i> adoption (the leads) should be close to zero. The event study estimates the effect for each period relative to adoption, comparing each adoption cohort only with never-treated units (Callaway–Sant’Anna, base period −1), with standard errors from a cluster bootstrap over units.</p></details>
+ ${eventPlot(Dd.event)}
+ <div class="urv"><ol><li><b>Joint test that the leads −5 to −2 are zero.</b> ${pt?`χ²(${pt.df}) = ${fmt(pt.stat,2)}, p-value ${pf(pt.p)}. ${rej(pt.p)?'<span class="no">p &lt; 0.05: the pre-trends are not parallel.</span> Plain DiD is not credible here.':'<span class="yes">p ≥ 0.05: no evidence of diverging pre-trends.</span> Not proof of parallel trends, but no evidence against them.'}`:'Not enough pre-treatment periods to test.'}</li></ol></div>`+code(`from causal_tests import event_study       # implementations/causal_tests.py\n\nprint(event_study(df, unit="${R.roles.unit}", time="${R.roles.time}", y="${R.outcome}", treat="${R.roles.treat}"))`),st.t);
+ later(st,()=>light(['start','as','ot','ntr','many','pre']),300*D);st.t+=st.gap;
+ if(R.model==='GSC'){const G=R.gsc;
+  if(G)addStep(st.k++,'Generalized synthetic control',`<p>Because the pre-trends are not parallel, the tool models the untreated outcome with latent common factors that each unit can load on differently: <i>Y(0)<sub>it</sub> = α<sub>i</sub> + ξ<sub>t</sub> + λ<sub>i</sub>′f<sub>t</sub></i>. The factors are estimated on the never-treated units, each treated unit’s loadings on its own pre-treatment periods, and the number of factors by cross-validation: <b>r = ${G.r}</b>.</p>${eventPlot(G.event)}
+  <div class="urv"><ol><li><b>ATT</b> = ${fmt(G.att.est,4)} (bootstrap s.e. ${fmt(G.att.se,4)}), p-value ${pf(G.att.p)}.</li><li><b>Pre-treatment fit:</b> the gaps before adoption are the placebo effects; their root mean square is ${fmt(G.pre_rmspe,4)}.</li><li>For comparison, the DiD estimate was ${fmt(Dd.att.est,4)} (s.e. ${fmt(Dd.att.se,4)}).</li></ol></div>`,st.t),st.t+=st.gap;
+  return later(st,()=>finish('GSC',R,R.timing==='staggered'?'STAG':'DID'))}
+ later(st,()=>light(['start','as','ot','ntr','many','pre','tim']),300*D);
+ if(R.model==='STAG')addStep(st.k++,'Staggered adoption: robust estimate against two-way fixed effects',`<details class="explain" open><summary>Why two-way fixed effects can mislead with staggered adoption</summary><p>The conventional TWFE regression of the outcome on a treatment dummy with unit and year effects is a weighted average of all possible 2×2 comparisons, including comparisons that use <b>already-treated units as controls</b>. If effects change over time, those comparisons subtract part of the effect, and some weights can even be negative (Goodman-Bacon 2021). The robust estimator compares each cohort only with never-treated units and then averages.</p></details>
+  <div class="tw"><table><tr><th>Estimator</th><th>ATT</th><th>s.e.</th><th>p-value</th></tr><tr><td>Heterogeneity-robust (Callaway–Sant’Anna)</td><td>${fmt(Dd.att.est,4)}</td><td>${fmt(Dd.att.se,4)}</td><td>${pf(Dd.att.p)}</td></tr><tr><td>Two-way fixed effects</td><td>${fmt(Dd.twfe.est,4)}</td><td>${fmt(Dd.twfe.se,4)}</td><td>${pf(Dd.twfe.p)}</td></tr></table></div><p>${Math.abs(Dd.att.est-Dd.twfe.est)>Math.abs(Dd.att.se)?'The two estimates differ by more than one standard error. Either TWFE is contaminated by comparisons with already-treated units, or the two handle a pre-trend differently: TWFE uses all pre-treatment years as its baseline, the robust estimator only the year before adoption. The guide shows how to tell which (an imputation estimator separates the two).':'The two estimates are close here, but only the robust one is valid if effects differ across cohorts or over time.'}</p>`,st.t);
+ else addStep(st.k++,'The DiD estimate',`<div class="tw"><table><tr><th>Estimator</th><th>ATT</th><th>s.e.</th><th>p-value</th></tr><tr><td>Two-way fixed effects (clustered by unit)</td><td>${fmt(Dd.twfe.est,4)}</td><td>${fmt(Dd.twfe.se,4)}</td><td>${pf(Dd.twfe.p)}</td></tr><tr><td>Event-study average of post periods (base −1)</td><td>${fmt(Dd.att.est,4)}</td><td>${fmt(Dd.att.se,4)}</td><td>${pf(Dd.att.p)}</td></tr></table></div><p>With a single adoption date and no evidence against parallel trends, the two-way fixed-effects regression is the standard DiD estimator. It compares the average change in the treated units with the average change in the untreated units across all pre- and post-treatment periods; the event-study average uses only the last pre-treatment period as its base, so the two can differ when pre-treatment years are noisy.</p>`,st.t);
+ st.t+=st.gap;later(st,()=>finish(R.model,R));
+}
+function showSCM(R,st){const u=R.scm.units[0];
+ addStep(st.k++,'Synthetic control: weights and pre-treatment fit',`<p>The synthetic ${esc(u.unit)} is a weighted average of untreated units, with weights chosen so that it tracks ${esc(u.unit)}’s outcome before ${esc(u.g_label)} as closely as possible. Weights are nonnegative and sum to one, so the counterfactual is an interpolation, not an extrapolation.</p>
+ <div class="tw"><table><tr><th>Donor</th><th>Weight</th></tr>${u.weights.map(w=>`<tr><td>${esc(w.unit)}</td><td>${fmt(w.w,3)}</td></tr>`).join('')}</table></div>
+ ${lines([u.actual,u.synth],R.labels,u.g-0.5)}<div class="legend"><i></i>${esc(u.unit)}<i class="b"></i>synthetic ${esc(u.unit)}</div>
+ <p>Pre-treatment root mean squared prediction error (RMSPE): ${fmt(u.pre_rmspe)}, against a pre-treatment mean of ${fmt(u.mean_pre)}. ${R.scm.units.length>1?`(${R.scm.units.length} treated units; the first is shown.)`:''}</p>`+code(`from causal_tests import synth_weights     # implementations/causal_tests.py\n\nW = df.pivot(index="${R.roles.time}", columns="${R.roles.unit}", values="${R.outcome}")\npre = W.index < W.index[${u.g}]\ndonors = [c for c in W.columns if c != "${u.unit}"]   # untreated units only\nw = synth_weights(W.loc[pre, "${u.unit}"], W.loc[pre, donors])\nprint(dict(zip(donors, w.round(3))))`),st.t);
+ later(st,()=>light(['start','as','ot','ntr','few','cmp']),300*D);st.t+=st.gap;
+ addStep(st.k++,'Effect and placebo inference',`${lines([u.gap],R.labels,u.g-0.5)}<div class="legend"><i></i>gap: actual minus synthetic</div>
+ <div class="urv"><ol><li><b>Average effect after ${esc(u.g_label)}</b>: ${fmt(u.att)} (post-treatment gap).</li><li><b>Post/pre RMSPE ratio</b> = ${fmt(u.ratio,2)}. A large ratio means the gap after treatment is large relative to how well the synthetic control fit before.</li><li><b>Placebo-in-space test.</b> The same method is applied to each of the ${u.n_placebo} donor units as if it had been treated. ${esc(u.unit)}’s ratio ranks such that the permutation p-value is ${pf(u.perm_p)}. ${u.perm_p<=0.1?'<span class="yes">Few placebo units show a gap as large: the effect is unlikely to be chance.</span>':'<span class="no">Several placebo units show gaps as large: the effect is not clearly distinguishable from chance.</span>'}</li></ol></div>`,st.t);
+ st.t+=st.gap;later(st,()=>finish('SCM',R));
+}
+function showITS(R,st){const I=R.its,c=I.coefs;
+ addStep(st.k++,'Segmented regression around the intervention',`<p>The model fits the pre-intervention trend${I.seasonal?' and seasonal pattern':''} and estimates a <b>level change</b> and a <b>slope change</b> at ${esc(I.g_label)}. Standard errors are Newey–West (${I.nw_lags} lags), robust to serial correlation.</p>
+ ${lines([I.series,I.counterfactual],I.labels,I.g-0.5)}<div class="legend"><i></i>observed<i class="b"></i>counterfactual: pre-intervention model extended</div>
+ <div class="tw"><table><tr><th>Term</th><th>Estimate</th><th>s.e.</th><th>p-value</th></tr>${c.slice(0,4).map(x=>`<tr><td>${esc(x.var)}</td><td>${fmt(x.est)}</td><td>${fmt(x.se)}</td><td>${pf(x.p)}</td></tr>`).join('')}</table></div>
+ <p>Average gap between observed and counterfactual after the intervention: ${fmt(I.avg_effect)} (pre-intervention mean ${fmt(I.mean_pre)}).</p>`,st.t);
+ later(st,()=>light(['start','as','ot','ntr','few','cmp']),300*D);st.t+=st.gap;
+ addStep(st.k++,'Diagnostics: autocorrelation and placebo dates',`<div class="urv"><ol><li><b>Durbin–Watson</b> = ${fmt(I.dw,2)}. ${I.dw<1.5?'Values well below 2 indicate positive autocorrelation, which the Newey–West errors allow for; consider modelling it (ARIMA errors).':'No strong first-order autocorrelation.'}</li>${I.placebo.map(p=>`<li><b>Placebo intervention at ${esc(p.at)}</b> (pre-period data only): level change ${fmt(p.est)}, p-value ${pf(p.p)}. ${rej(p.p)?'<span class="no">A significant “effect” where there was no intervention: other events move this series too.</span>':'<span class="yes">No significant effect, as expected.</span>'}</li>`).join('')}</ol></div><p>With no comparison group, an ITS estimate is only as good as the argument that nothing else changed at the same date.</p>`,st.t);
+ st.t+=st.gap;later(st,()=>finish('ITS',R));
+}
+
+function evidence(R,m){if(!R)return '';
+ if(m==='RDD')return `The outcome jumps by ${fmt(R.rd.est)} at the cutoff (p ${pf(R.rd.p)}).${R.fuzzy&&R.wald?` Fuzzy design: local Wald estimate ${fmt(R.wald.est)}.`:''}`;
+ if(m==='IV')return `2SLS estimate ${fmt(R.tsls.est,4)} against OLS ${fmt(R.ols.est,4)}; first-stage F = ${fmt(R.first_stage.F,1)}.`;
+ const Dd=R.did;
+ if(m==='DID')return `${R.n_treated} units adopt at the same date; the leads are jointly insignificant (p ${pf(Dd.pretrend&&Dd.pretrend.p)}); TWFE ATT = ${fmt(Dd.twfe.est,4)} (s.e. ${fmt(Dd.twfe.se,4)}).`;
+ if(m==='STAG')return `${R.n_treated} units adopt at ${R.n_cohorts} dates; the leads are jointly insignificant (p ${pf(Dd.pretrend&&Dd.pretrend.p)}); robust ATT = ${fmt(Dd.att.est,4)} against TWFE ${fmt(Dd.twfe.est,4)}.`;
+ if(m==='GSC')return `The event-study leads reject parallel pre-trends (p ${pf(Dd.pretrend.p)}).${R.gsc?` GSC with ${R.gsc.r} factor${R.gsc.r===1?'':'s'}: ATT = ${fmt(R.gsc.att.est,4)} (s.e. ${fmt(R.gsc.att.se,4)}).`:''}`;
+ if(m==='SCM'){const u=R.scm.units[0];return `${R.n_treated} treated unit${R.n_treated>1?'s':''} and ${R.n_never} donors; post/pre RMSPE ratio ${fmt(u.ratio,1)}, permutation p-value ${pf(u.perm_p)}.`}
+ if(m==='ITS'){const c=R.its.coefs;return `Level change at ${esc(R.its.g_label)}: ${fmt(c[2].est)} (p ${pf(c[2].p)}); slope change ${fmt(c[3].est)}.`}
+ return ''}
+function cautionFor(R,m){if(!R)return '';const c=[];
+ if(m==='RDD'){if(R.flags.includes('density'))c.push('The McCrary test finds a jump in the density at the cutoff: units may be sorting, which undermines the comparison.');if(R.flags.includes('covariates'))c.push('At least one covariate jumps at the cutoff. Check whether it is determined before treatment and whether a narrower bandwidth removes the imbalance; report estimates with covariates.')}
+ if(m==='IV'&&R.weak)c.push('The first-stage F is below 10: the instrument is weak. Report Anderson–Rubin confidence sets rather than 2SLS t-tests.');
+ if(m==='IV'&&!R.weak&&R.first_stage.F<104.7)c.push('With F below 104.7, conventional 2SLS t-tests can over-reject (Lee et al. 2022); report the Anderson–Rubin confidence set alongside.');
+ if((m==='DID'||m==='STAG')&&R.did.pretrend&&R.did.pretrend.p<0.1)c.push('The pre-trend test is close to rejecting. Report a sensitivity analysis for violations of parallel trends (Rambachan and Roth 2023).');
+ if(m==='SCM'&&R.scm.units[0].perm_p>0.1)c.push('The permutation p-value is above 0.10: the estimated effect is not clearly larger than the gaps of placebo units.');
+ if(m==='ITS'&&R.its.placebo.some(p=>p.p<0.05))c.push('A placebo date shows a significant break: other events move this series, so the attribution to the intervention needs a strong argument.');
+ if(R.switch_off)c.push('The treatment switches off for some units; estimators for non-absorbing treatments are needed.');
+ return c.length?`<div class="caution"><b>Check before you write.</b> ${c.join(' ')}</div>`:''}
+function finish(m,R,alt){const my=run,M=MODELS[m];const d=light(pathTo(m));if(alt){const a=$('#n-'+alt);a&&a.classList.add('alt')}
+ setTimeout(()=>{if(my!==run)return;const ev=evidence(R,m);
+  $('#result').innerHTML=`<div class="result"><div class="label">Recommended design</div><h2>${M.name}</h2><p>${M.why}${ev?' <b>In this data:</b> '+ev:''}</p>${cautionFor(R,m)}<div class="label" style="margin-bottom:6px">What the paper needs</div><ul>${M.steps.map(s=>`<li>${s}</li>`).join('')}</ul><div class="acts"><a class="btn" href="${GUIDE[m]}.html">Go to the ${M.short} guide →</a>${M.lec.map(l=>`<a class="btn ghost" href="${l[0]}">${l[1]} →</a>`).join('')}${alt?`<a class="btn ghost" href="#g-${alt}" data-go="${alt}">Compare: ${MODELS[alt].short}</a>`:''}${R?'':'<button class="btn ghost" type="button" id="again">Start over</button>'}</div></div>`;
+  $('#result').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});const ag=$('#again');ag&&ag.addEventListener('click',()=>setMode('ask'))},d+250*D)}
+
+/* ---------- mode: examples ---------- */
+function initExamples(){EXAMPLES.forEach(x=>{const b=el('button','',`<small>${esc(x.meta)}</small><b>${esc(x.title)}</b><span>${esc(x.desc)}</span>`);b.type='button';
+ b.addEventListener('click',()=>{document.querySelectorAll('.ex button').forEach(e=>e.classList.remove('sel'));b.classList.add('sel');show(x.result,x.title)});$('#ex').appendChild(b)})}
+
+/* ---------- mode: upload (Python in the browser) ---------- */
+let pyReady=null,csvText='',csvName='';
+function status(t){$('#status').classList.toggle('on',!!t);$('#status-text').textContent=t||''}
+function loadPy(){if(pyReady)return pyReady;pyReady=(async()=>{status('Loading Python. The first time takes about 15 seconds…');
+  await new Promise((res,rej)=>{const s=document.createElement('script');s.src=PYO+'pyodide.js';s.onload=res;s.onerror=()=>rej(new Error('Could not load Python. Check your internet connection and try again.'));document.head.appendChild(s)});
+  const py=await loadPyodide({indexURL:PYO});status('Loading pandas, SciPy and statsmodels…');await py.loadPackage(['pandas','scipy','statsmodels']);py.runPython($('#py-src').textContent);return py})();
+ pyReady.catch(()=>{pyReady=null});return pyReady}
+function headerOf(text){const line=text.split(/\r?\n/).find(l=>l.trim())||'';const sep=[',',';','\t'].sort((a,b)=>line.split(b).length-line.split(a).length)[0];return line.split(sep).map(h=>h.trim().replace(/^"|"$/g,''))}
+async function loadFile(f){$('#upload-err').innerHTML='';$('#steps').innerHTML='';$('#result').innerHTML='';++run;resetTree();
+ try{if(f.size>8e6)throw new Error('The file is larger than 8 MB. Please upload a smaller CSV.');
+  csvText=await f.text();csvName=f.name;const H=headerOf(csvText);if(H.length<2)throw new Error('The file needs at least two columns.');
+  const opt=(blank)=>(blank?`<option value="">${blank}</option>`:'')+H.map(h=>`<option>${esc(h)}</option>`).join('');
+  $('#r-outcome').innerHTML=opt('');['treat','unit','time','running'].forEach(k=>$('#r-'+k).innerHTML=opt('— none —'));$('#r-instruments').innerHTML=opt();$('#r-controls').innerHTML=opt();
+  const low=H.map(h=>h.toLowerCase()),pick=(k,names)=>{const i=low.findIndex(h=>names.includes(h));if(i>=0)$('#r-'+k).value=H[i]};
+  pick('unit',['id','unit','state','country','firm','county','city','school','person','sid']);pick('time',['year','time','period','date','quarter','month']);
+  $('#rolebox').hidden=false;status('')}
+ catch(e){$('#upload-err').innerHTML=`<div class="err">${esc(e.message||e)}</div>`}}
+async function runUpload(){$('#upload-err').innerHTML='';$('#steps').innerHTML='';$('#result').innerHTML='';++run;resetTree();
+ const v=k=>$('#r-'+k).value,multi=k=>[...$('#r-'+k).selectedOptions].map(o=>o.value);
+ const roles={outcome:v('outcome'),treat:v('treat')||null,unit:v('unit')||null,time:v('time')||null,running:v('running')||null,cutoff:$('#r-cutoff').value===''?null:+$('#r-cutoff').value,instruments:multi('instruments'),controls:multi('controls')};
+ try{if(!roles.outcome)throw new Error('Choose the outcome variable.');
+  if(!roles.running&&!roles.instruments.length&&!(roles.treat&&roles.time))throw new Error('Choose a running variable and cutoff (cutoff design), an instrument (IV), or a treatment and a time variable (policy over time).');
+  const py=await loadPy();status('Running the checks on your data…');await new Promise(r=>setTimeout(r,30));
+  const R=JSON.parse(py.globals.get('analyze')(csvText,JSON.stringify(roles)));status('');if(R.error)throw new Error(R.error);show(R,csvName)}
+ catch(e){status('');$('#upload-err').innerHTML=`<div class="err">${esc(e.message||e)}</div>`}}
+function initUpload(){const d=$('#drop');$('#file').addEventListener('change',e=>{e.target.files[0]&&loadFile(e.target.files[0]);e.target.value=''});
+ ['dragenter','dragover'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.add('over')}));['dragleave','drop'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove('over')}));
+ d.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];f&&loadFile(f)});$('#runUp').addEventListener('click',runUpload)}
+
+/* ---------- mode: questions ---------- */
+let QA={};
+const QS={
+ q1:{t:'How is treatment assigned?',o:[['By a cutoff in a running variable','For example a test score, an income threshold, an election margin','qrd',['start','as','cut']],['Through an instrument','A variable that shifts the treatment but affects the outcome only through it','qfs',['start','as','ins']],['A policy that starts at a point in time','Some units are treated from a date onwards (or one unit or region is)','NT',['start','as','ot']]]},
+ qrd:{t:'Are the McCrary density test and the covariate-continuity checks passed?',o:[['Yes, no sign of sorting or imbalance','','RDD',['start','as','cut','rdc']],['No, or not yet checked','The design is still RDD, but credibility depends on these checks','RDDc',['start','as','cut','rdc']]]},
+ qfs:{t:'What is the first-stage F statistic of the excluded instrument(s)?',o:[['10 or more','Not weak by the rule of thumb','IV',['start','as','ins','fs']],['Below 10','A weak instrument','IVw',['start','as','ins','fs']]]},
+ qpt:{t:'Do the event-study leads (pre-treatment coefficients) show parallel trends?',o:[['Yes, the leads are jointly insignificant','','qtim',['start','as','ot','ntr','many','pre','tim']],['No, treated and untreated units diverge before treatment','','GSC']]},
+ qtim:{t:'Do all treated units adopt the policy at the same date?',o:[['Yes, one adoption date','','DID'],['No, adoption is staggered','','STAG']]}};
+function askNT(n){$('#q').innerHTML=`<div class="label">Question ${n}</div><h3>How many units are treated, and how many untreated comparison units do you have?</h3><p class="sub" style="margin:-4px 0 12px">For a single time series with no comparison group, enter 1 and 0.</p><div class="nt"><label>Treated units<input type="number" id="inT" min="1" step="1" placeholder="e.g. 21"></label><label>Untreated comparison units<input type="number" id="inC" min="0" step="1" placeholder="e.g. 29"></label><button class="btn" type="button" id="ntGo">Continue →</button></div><div id="ntErr"></div>`;
+ const go=()=>{const T=Math.round(+$('#inT').value),C=Math.round(+$('#inC').value);if(!(T>=1&&C>=0&&$('#inC').value!=='')){$('#ntErr').innerHTML='<div class="err">Enter whole numbers: at least 1 treated unit, and 0 or more comparison units.</div>';return}
+  const note=`<p class="sub" style="margin:0 0 14px"><b>${T} treated, ${C} comparison units:</b> `;light(['start','as','ot','ntr',T<=FEW?'few':'many'],{ntr:T+' treated'});
+  if(T<=FEW){const m=C>=DONORS?'SCM':'ITS';light(['start','as','ot','ntr','few','cmp']);$('#q').innerHTML=note+(m==='SCM'?`too few treated units to average over, but enough donors (${DONORS} or more) for a synthetic control.</p>`:`too few treated units and too few donors (fewer than ${DONORS}): the counterfactual must come from the treated series itself.</p>`)+'<p class="sub" style="margin:0">Your answers lead to the design shown below.</p>';finish(m,null);return}
+  ask('qpt',n+1);$('#q').insertAdjacentHTML('afterbegin',note+'enough treated units for the difference-in-differences family.</p>')};
+ $('#ntGo').addEventListener('click',go);['#inT','#inC'].forEach(i=>$(i).addEventListener('keydown',e=>{if(e.key==='Enter')go()}))}
+function ask(id,n=1){const Q=QS[id];$('#q').innerHTML=`<div class="label">Question ${n}</div><h3>${Q.t}</h3><div class="opts">${Q.o.map((o,i)=>`<button type="button" data-i="${i}">${o[0]}${o[1]?`<small>${o[1]}</small>`:''}</button>`).join('')}</div>`;
+ $('#q').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const o=Q.o[+b.dataset.i];let to=o[2];o[3]&&light(o[3]);
+  if(to==='NT')return askNT(n+1);
+  if(QS[to])return ask(to,n+1);
+  const map={RDDc:'RDD',IVw:'IV'},m=map[to]||to;
+  $('#q').innerHTML='<p class="sub" style="margin:0">Your answers lead to the design shown below.</p>'+(to==='RDDc'?'<p class="sub" style="margin:8px 0 0"><b>Run the McCrary and covariate checks before relying on the estimate.</b></p>':to==='IVw'?'<p class="sub" style="margin:8px 0 0"><b>With a weak instrument, report Anderson–Rubin confidence sets rather than 2SLS t-tests.</b></p>':'');
+  finish(m,null,m==='DID'||m==='STAG'?'GSC':m==='GSC'?'STAG':null)}))}
+
+/* ---------- guides, modes, init ---------- */
+function initGuides(){Object.entries(MODELS).forEach(([k,M])=>{$('#gcards').appendChild(el('article','gcard',`<span class="tag ok">Step-by-step guide</span><h3>${M.short}</h3><p class="when">${M.when}</p><p>${M.steps.slice(0,5).join(' · ')} …</p><a href="${GUIDE[k]}.html" style="font-size:12.5px">Open the ${M.short} guide →</a>${M.lec.map(l=>`<a href="${l[0]}">${l[1]} →</a>`).join('')}`)).id='g-'+k})}
+document.addEventListener('click',e=>{const a=e.target.closest('[data-go]');if(!a)return;const c=$('#g-'+a.dataset.go);if(c){c.classList.remove('flash');void c.offsetWidth;c.classList.add('flash')}});
+function setMode(m){++run;QA={};document.querySelectorAll('.modes button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));['example','upload','ask'].forEach(x=>$('#m-'+x).hidden=x!==m);
+ $('#steps').innerHTML='';$('#result').innerHTML='';$('#upload-err').innerHTML='';status('');resetTree();document.querySelectorAll('.ex button').forEach(e=>e.classList.remove('sel'));if(m==='ask'){light(['start']);ask('q1')}}
+document.querySelectorAll('.modes button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+drawTree();initExamples();initUpload();initGuides();$('#year').textContent=new Date().getFullYear();
+</script>
+</body>
+</html>
