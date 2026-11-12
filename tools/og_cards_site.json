@@ -232,23 +232,5 @@
   "kicker": "Panel Data Guide · Model guide",
   "title": "Random Effects",
   "sub": "Unit effects present, uncorrelated with the regressors. Step-by-step guide with Python code and real output."
- },
- {
-  "out": "assets/og/ai-agent-guide/extend.jpg",
-  "kicker": "AI Agent Guide · Extend",
-  "title": "Build your own version",
-  "sub": "Fork the repository, describe your economy, add models with tests that can fail."
- },
- {
-  "out": "assets/og/ai-agent-guide/index.jpg",
-  "kicker": "AI Agent Guide",
-  "title": "Let an AI agent run your econometric workflow",
-  "sub": "The open-source MaRCo@BIS framework, plus a country-neutral copy with regime-switching, threshold and cointegration models."
- },
- {
-  "out": "assets/og/ai-agent-guide/models.jpg",
-  "kicker": "AI Agent Guide · Models",
-  "title": "Models in the dictionary",
-  "sub": "Canonical specifications the agent can run, and which are checked against their papers."
  }
 ]
