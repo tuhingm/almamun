@@ -53,6 +53,20 @@ ex["produc"] = (pd.DataFrame({"state": pr.state, "year": pr.year, "log_gsp": np.
                 "Log gross state product, public capital, private capital and employment, and the unemployment rate (Munnell).")
 
 (OUT / "examples").mkdir(parents=True, exist_ok=True)
+
+# extra data and helper files used by the step-by-step estimator guides (build_panel_guides.py)
+import shutil
+L = rdata("LaborSupply")
+pd.DataFrame({"id": L.id, "year": L.year, "lnhr": L.lnhr, "lnwg": L.lnwg, "kids": L.kids, "age": L.age, "disab": L.disab}
+             ).to_csv(OUT / "examples" / "laborsupply.csv", index=False)
+M = rdata("macro")
+M[["country", "year", "gdp", "unem", "capmob", "trade"]].rename(columns={"gdp": "gdp_growth"}).round(6).to_csv(OUT / "examples" / "garrett.csv", index=False)
+S = rdata("SumHes")
+S[["country", "year", "pop", "gdp", "sr"]].to_csv(OUT / "examples" / "growth_saving.csv", index=False)
+g[["state", "year", "price", "pop", "pop16", "cpi", "ndi", "sales", "pimin"]].to_csv(OUT / "examples" / "cigar_raw.csv", index=False)
+w[["nr", "year", "lwage", "union", "married", "exper", "expersq", "hours", "educ", "black", "hisp"]].to_csv(OUT / "examples" / "wagepan_full.csv", index=False)
+shutil.copy(HERE / "panel_estimators.py", OUT / "examples" / "panel_estimators.py")
+shutil.copy(ROOT / "research-guide" / "examples" / "diff_gmm.py", OUT / "examples" / "diff_gmm.py")
 examples = []
 for key, (df, title, meta, desc) in ex.items():
     path = OUT / "examples" / f"{key}.csv"
@@ -67,7 +81,8 @@ css = ts[ts.index("<style>") + 7: ts.index("</style>")].strip()
 tpl = (HERE / "template.html").read_text()
 page = (tpl.replace("/*TS_CSS*/", css).replace("#RESOURCES#", (HERE / "resources.html").read_text())
         .replace("/*EXAMPLES*/", json.dumps(examples, ensure_ascii=False, separators=(",", ":")))
-        .replace("#LONGT#", str(pa.LONG_T)).replace("#PYSRC#", src.replace("</script", "<\\/script")))
+        .replace("#LONGT#", str(pa.LONG_T)).replace("#GMMN#", str(pa.GMM_N)).replace("#FEWN#", str(pa.FEW_N)).replace("#PYSRC#", src.replace("</script", "<\\/script")))
 (OUT / "index.html").write_text(page)
 (OUT / "implementations" / "panel_tests.py").write_text(src)
+(OUT / "examples" / "panel_tests.py").write_text(src)
 print("wrote panel-data-guide/index.html", len(page) // 1024, "KB")
