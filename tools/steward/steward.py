@@ -337,7 +337,8 @@ def main():
     if a.fix:
         site = Site()
         fixed += fix_og(site)
-        for name, cmd in (("author's note", ["python3", "tools/author_note.py"]), ("sitemap", ["python3", "tools/make_sitemap.py"])):
+        for name, cmd in (("author's note", ["python3", "tools/author_note.py"]), ("sitemap", ["python3", "tools/make_sitemap.py"]),
+                          ("ask-box script", ["python3", "tools/site_ai/inject.py"]), ("ask-box index", ["python3", "tools/site_ai/build_index.py"])):
             if (ROOT / cmd[1]).exists():
                 before = subprocess.run(["git", "status", "--porcelain"], cwd=ROOT, capture_output=True, text=True).stdout
                 ok, last = run(cmd)
