@@ -6,7 +6,7 @@
   window.__siteAskLoaded = true;
   var BASE = new URL(".", script.src).href;                    // .../assets/ai/
   var SITE = new URL("../../", BASE).href;                      // site root
-  var ISSUES = "https://github.com/tuhingm/almamun/issues/new";
+  var MAIL = "mailto:tuhin.hnu@gmail.com";
   var EXAMPLES = ["Which model do I use for non-stationary series?", "How do I run a threshold regression?", "What is Open Econometric Systems?"];
   var idx = null, loading = null, S = null;
 
@@ -95,9 +95,8 @@
       hits.forEach(function (h, i) { out.appendChild(card(h, q, i === 0)); });
       var more = el("p", "ask-more");
       var a = el("a", "", "Not what you wanted? Send this question to the author.");
-      a.href = ISSUES + "?title=" + encodeURIComponent("Question: " + q.slice(0, 80)) + "&body=" + encodeURIComponent("Question from the site search box:\n\n" + q + "\n\nPage: " + location.href);
-      a.target = "_blank"; a.rel = "noopener";
-      more.appendChild(a); out.appendChild(more);
+      a.href = MAIL + "?subject=" + encodeURIComponent("Question from your website: " + q.slice(0, 80)) + "&body=" + encodeURIComponent("Question from the site search box:\n\n" + q + "\n\nPage: " + location.href);
+            more.appendChild(a); out.appendChild(more);
       out.scrollTop = 0;
     });
   }
