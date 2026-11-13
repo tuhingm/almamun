@@ -32,7 +32,7 @@ NAV = [("Home", "index.html", ""), ("Teaching Courses", "teaching/index.html", "
        ("Causal Inference", "causal-inference-guide/index.html", "causal-inference-guide"),
        ("DSGE", "dsge-guide/index.html", "dsge-guide"), ("Machine Learning", "ml-guide/index.html", "ml-guide"),
        ("Bayesian", "bayesian-guide/index.html", "bayesian-guide"), ("Markov Switching", "markov-guide/index.html", "markov-guide"),
-       ("Open Econometric Systems", "oes/index.html", "oes"), ("CV", "Tuhin%20Al%20Mamun_CV.pdf", None)]
+       ("Open Econometric Systems", "oes/index.html", "oes")]
 SECTION = {"teaching": "Teaching Courses", "working-papers": "Working Papers",
            "research-guide": "Empirical Research Guide (Time Series)", "panel-data-guide": "Panel Data Research Guide",
            "causal-inference-guide": "Causal Inference Research Guide", "dsge-guide": "DSGE Research Guide",
