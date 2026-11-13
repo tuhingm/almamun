@@ -15,8 +15,9 @@ import pandas as pd
 
 from . import bayes, causal, markov, ml, panel, pvar, statespace_var, timeseries
 from .core import OESError, read_csv, time_order
+from .report import frame, plot, show, summary, tables
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
 # field helpers -------------------------------------------------------------------------------------------------
 def col(key, label, required=True, help=""):
@@ -236,7 +237,9 @@ MODELS += [
          fields=[cols("y", "Observed VAR variables (policy variable last)"), cols("x", "Informational series (for the factors)"), TIME,
                  num("factors", "Number of factors", 2), num("lags", "Lags", 2),
                  sel("prior", "Prior", [["nw", "Normal-Wishart"], ["minnesota", "Minnesota"], ["inw", "Independent Normal-Wishart"], ["nd", "Normal-diffuse"]], "nw"),
-                 num("lambda1", "Overall tightness lambda1", 0.1), num("horizon", "IRF horizon", 20)] + DRAWS,
+                 num("lambda1", "Overall tightness lambda1", 0.1),
+                 num("delta", "Prior mean of own first lag of the observed variables (1 = random walk; one or a comma list)", 0),
+                 num("horizon", "IRF horizon", 20)] + DRAWS,
          example=dict(file=OX + "us_macro.csv", spec=dict(y=["inflation", "unemp", "tbilrate"], time="date", factors=2,
                                                           x=["gdp_growth", "cons_growth", "inv_growth", "gov_growth", "income_growth", "m1_growth"]))),
     dict(id="mabvar", group="Bayesian", name="Mean-adjusted (steady-state) BVAR", guide=None, fn=bayes.mabvar,
