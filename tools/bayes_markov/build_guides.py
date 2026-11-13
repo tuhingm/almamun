@@ -28,6 +28,14 @@ SECTIONS = {
                    order=["ms-ar", "ms-regression", "ms-var", "ms-panel-var"],
                    data=["oes/examples/hamilton_gnp.csv", "oes/examples/fedfunds.csv", "oes/examples/us_macro.csv",
                          "panel-data-guide/examples/garrett.csv"]),
+    # local projections: two more guides in the existing Time-Series and Panel-Data guides (hubs are built by their own tools)
+    "lp": dict(folder="time-series-guide", name="Empirical Research Guide (Time Series)", short="Time-Series Guide",
+               order=["ols", "ardl", "nardl", "var", "vecm", "gmm", "lp"], static=dict(ols="OLS", ardl="ARDL", nardl="NARDL", var="VAR", vecm="VECM", gmm="2SLS / GMM"),
+               data=[]),
+    "plp": dict(folder="panel-data-guide", name="Panel Data Research Guide", short="Panel-Data Guide",
+                order=["pols", "re", "fe", "gmm", "fedk", "mg", "diff", "pmg", "csardl", "plp"],
+                static=dict(pols="Pooled OLS", re="Random effects", fe="Fixed effects", gmm="GMM", fedk="FE-DK", mg="MG / CCE", diff="Δ model", pmg="PMG", csardl="CS-ARDL"),
+                data=[]),
 }
 BLOCK = re.compile(r"```python( norun)?\n(.*?)\n```", re.S)
 
@@ -97,7 +105,7 @@ def build(key, slug, metas):
         return f'<h2 id="s{n}"><span class="stepno">Step {n}</span>{m.group(1)}</h2>'
     page = re.sub(r"<h2[^>]*>(.*?)</h2>", h2, page)
     oes = f'<p class="oes-run"><a href="../oes/index.html#{meta["oes"]}">Run this model on your own data in Open Econometric Systems →</a></p>' if meta.get("oes") else ""
-    others = "".join(f'<a class="{"cur" if s == slug else ""}" href="{s}.html">{metas[s]["short"]}</a>' for s in S["order"] if s in metas)
+    others = "".join(f'<a class="{"cur" if s == slug else ""}" href="{s}.html">{(metas[s]["short"] if s in metas else S["static"][s])}</a>' for s in S["order"] if s in metas or s in S.get("static", {}))
     tpl = (HERE / "guide_template.html").read_text()
     for k, v in dict(TITLE=meta["title"], SHORT=meta["short"], WHEN=meta["when"], DATA=meta["data"], LEAD=meta["lead"], SLUG=slug,
                      TOOLS=meta.get("tools", "Python · OES engine · statsmodels"), STEPS=str(n), TOC="".join(toc), BODY=oes + page, OTHERS=others,

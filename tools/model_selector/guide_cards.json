@@ -64,5 +64,16 @@
 "Real output",
 "How to write it"
 ]
+},
+{
+"out": "assets/og/time-series-guide-lp.jpg",
+"kicker": "Empirical Research Guide · Model guide",
+"title": "Local Projections (Impulse Responses)",
+"sub": "The dynamic response to a shock, h periods ahead. U.S. credit spread and industrial production, monthly, 1985–2019",
+"tags": [
+"Python code",
+"Real output",
+"How to write it"
+]
 }
 ]

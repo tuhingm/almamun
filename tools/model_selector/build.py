@@ -55,7 +55,7 @@ for key, (df, title, meta, desc) in ex.items():
     examples.append(dict(key=key, title=title, meta=meta, desc=desc, file=f"examples/{key}.csv", result=r))
 
 tpl = (HERE / "template.html").read_text()
-guides = [p.stem for p in (HERE / "guides").glob("*.md")]
+guides = [p.stem for p in (HERE / "guides").glob("*.md")] + ["lp"]
 page = tpl.replace("/*GUIDES*/[]", json.dumps(guides)).replace("/*EXAMPLES*/", json.dumps(examples, ensure_ascii=False)).replace("#PYSRC#", (HERE / "analysis.py").read_text())
 (OUT / "index.html").write_text(page)
 print("wrote time-series-guide/index.html", len(page) // 1024, "KB")

@@ -306,6 +306,12 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/panel-data-guide/plp.jpg",
+  "kicker": "Panel Data Guide · Model guide",
+  "title": "Panel Local Projections",
+  "sub": "You want the dynamic response of an outcome to a shock in a panel of units, horizon by horizon, with unit fixed effects.…"
+ },
+ {
   "out": "assets/og/panel-data-guide/pmg.jpg",
   "kicker": "Panel Data Guide · Model guide",
   "title": "Panel ARDL: Pooled Mean Group",

@@ -19,7 +19,7 @@ cards += [
          sub="Test your data and follow the path to OLS, VAR, VECM, ARDL, NARDL or GMM. Real examples and Python code.",
          tags=["Unit-root tests", "Cointegration", "Model selection", "Python"]),
     dict(out="assets/og/oes/index.jpg", kicker="Open Econometric Systems", title="Run every model on your data",
-         sub="44 models: the four research guides plus Bayesian VARs and Markov switching, free in your browser.",
+         sub="46 models: the four research guides plus Bayesian VARs and Markov switching, free in your browser.",
          tags=["Time series", "Panel data", "Causal inference", "Machine learning"]),
     dict(out="assets/og/teaching.jpg", kicker="Teaching portfolio", title="Courses & Learning Resources",
          sub="Six full course sites with lecture notes, coding exercises, problem sets and exams.",

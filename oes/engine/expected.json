@@ -7,7 +7,7 @@
   "col": "Coef.",
   "value": 0.715022,
   "rtol": 0.001,
-  "seconds": 0.2,
+  "seconds": 0.3,
   "summary": {
    "label": "R-squared",
    "value": 0.2048
@@ -21,7 +21,7 @@
   "col": "I(0) bound",
   "value": 2.457,
   "rtol": 0.001,
-  "seconds": 0.1,
+  "seconds": 0.2,
   "summary": {
    "label": "Bounds F",
    "value": 8.179
@@ -49,7 +49,7 @@
   "col": "AIC",
   "value": -16.8539,
   "rtol": 0.001,
-  "seconds": 0.3,
+  "seconds": 0.1,
   "summary": {
    "label": "AIC",
    "value": -17.2258
@@ -83,6 +83,20 @@
    "value": 57.63
   }
  },
+ "lp": {
+  "nobs": 414,
+  "table_index": 0,
+  "table": "Impulse response by horizon",
+  "row": "0",
+  "col": "Response",
+  "value": -0.059574,
+  "rtol": 0.001,
+  "seconds": 0.2,
+  "summary": {
+   "label": "Shock std. dev.",
+   "value": 0.1688
+  }
+ },
  "pols": {
   "nobs": 630,
   "table_index": 0,
@@ -105,7 +119,7 @@
   "col": "Coef.",
   "value": 0.080002,
   "rtol": 0.001,
-  "seconds": 1.5,
+  "seconds": 2.6,
   "summary": {
    "label": "Within R-squared",
    "value": 0.0216
@@ -119,7 +133,7 @@
   "col": "Coef.",
   "value": 7.351593,
   "rtol": 0.001,
-  "seconds": 1.4,
+  "seconds": 2.8,
   "summary": {
    "label": "sigma2 unit effect",
    "value": 0.0254
@@ -161,7 +175,7 @@
   "col": "Coef.",
   "value": 0.686225,
   "rtol": 0.001,
-  "seconds": 0.0
+  "seconds": 0.1
  },
  "mg": {
   "nobs": 3125,
@@ -171,7 +185,7 @@
   "col": "Coef.",
   "value": 0.345675,
   "rtol": 0.001,
-  "seconds": 0.3
+  "seconds": 0.7
  },
  "pmg": {
   "nobs": 1380,
@@ -195,7 +209,21 @@
   "col": "Coef.",
   "value": 0.144108,
   "rtol": 0.001,
-  "seconds": 0.4
+  "seconds": 0.8
+ },
+ "plp": {
+  "nobs": 1242,
+  "table_index": 0,
+  "table": "Impulse response by horizon",
+  "row": "0",
+  "col": "Response",
+  "value": -0.019222,
+  "rtol": 0.001,
+  "seconds": 0.1,
+  "summary": {
+   "label": "Peak response",
+   "value": -0.0369
+  }
  },
  "did": {
   "nobs": 462,
@@ -205,7 +233,7 @@
   "col": "Coef.",
   "value": 0.0024,
   "rtol": 0.001,
-  "seconds": 1.9,
+  "seconds": 3.0,
   "summary": {
    "label": "ATT",
    "value": 0.0024
@@ -219,7 +247,7 @@
   "col": "Coef.",
   "value": 0.0194,
   "rtol": 0.001,
-  "seconds": 4.8,
+  "seconds": 8.5,
   "summary": {
    "label": "ATT",
    "value": 0.0194
@@ -233,7 +261,7 @@
   "col": "Coef.",
   "value": 1872.0622,
   "rtol": 0.001,
-  "seconds": 0.1,
+  "seconds": 0.0,
   "summary": {
    "label": "Pre-period mean",
    "value": 1717.7515
@@ -247,7 +275,7 @@
   "col": "Coef.",
   "value": 0.1242,
   "rtol": 0.001,
-  "seconds": 0.2,
+  "seconds": 0.1,
   "summary": {
    "label": "2SLS estimate",
    "value": 0.1242
@@ -289,7 +317,7 @@
   "col": "Coef.",
   "value": 0.0211,
   "rtol": 0.001,
-  "seconds": 0.8,
+  "seconds": 1.2,
   "summary": {
    "label": "ATT",
    "value": 0.0211
@@ -303,7 +331,7 @@
   "col": "Test RMSE",
   "value": 9.2658,
   "rtol": 0.05,
-  "seconds": 2.5,
+  "seconds": 1.0,
   "summary": {
    "label": "CV RMSE (training)",
    "value": 10.359
@@ -317,7 +345,7 @@
   "col": "Test RMSE",
   "value": 0.4054,
   "rtol": 0.05,
-  "seconds": 0.5,
+  "seconds": 0.7,
   "summary": {
    "label": "CV RMSE (training)",
    "value": 0.3402
@@ -331,7 +359,7 @@
   "col": "Test RMSE",
   "value": 3.5496,
   "rtol": 0.05,
-  "seconds": 1.5,
+  "seconds": 1.7,
   "summary": {
    "label": "CV RMSE (training)",
    "value": 2.712
@@ -345,7 +373,7 @@
   "col": "Test RMSE",
   "value": 0.6518,
   "rtol": 0.05,
-  "seconds": 4.7,
+  "seconds": 5.1,
   "summary": {
    "label": "CV RMSE (training)",
    "value": 0.649
@@ -359,7 +387,7 @@
   "col": "Test RMSE",
   "value": 0.9811,
   "rtol": 0.05,
-  "seconds": 12.1,
+  "seconds": 4.3,
   "summary": {
    "label": "CV RMSE (training)",
    "value": 0.9936
@@ -373,7 +401,7 @@
   "col": "Coef.",
   "value": -0.049038,
   "rtol": 0.05,
-  "seconds": 6.1,
+  "seconds": 5.7,
   "summary": {
    "label": "Estimate",
    "value": -0.0359
@@ -387,7 +415,7 @@
   "col": "Coef.",
   "value": 8629.22613,
   "rtol": 0.05,
-  "seconds": 26.4,
+  "seconds": 26.1,
   "summary": {
    "label": "Estimate",
    "value": 8629.2261
@@ -401,7 +429,7 @@
   "col": "Coef.",
   "value": 13446.618386,
   "rtol": 0.05,
-  "seconds": 23.7,
+  "seconds": 23.9,
   "summary": {
    "label": "Estimate",
    "value": 13446.6184
@@ -415,7 +443,7 @@
   "col": "Coef.",
   "value": 8629.22613,
   "rtol": 0.05,
-  "seconds": 21.4,
+  "seconds": 24.2,
   "summary": {
    "label": "ATE",
    "value": 8629.2261
@@ -443,7 +471,7 @@
   "col": "ADF level, constant: p",
   "value": 0.2934,
   "rtol": 0.05,
-  "seconds": 0.2,
+  "seconds": 0.4,
   "summary": {
    "label": "lambda1",
    "value": 0.1
@@ -457,7 +485,7 @@
   "col": "ADF level, constant: p",
   "value": 0.0271,
   "rtol": 0.05,
-  "seconds": 0.3,
+  "seconds": 0.4,
   "summary": {
    "label": "Variance explained",
    "value": 0.605
@@ -471,7 +499,7 @@
   "col": "ADF level, constant: p",
   "value": 0.0,
   "rtol": 0.05,
-  "seconds": 0.5,
+  "seconds": 0.7,
   "summary": {
    "label": "Steady state of gdp_growth",
    "value": 3.1088
@@ -485,7 +513,7 @@
   "col": "Statistic",
   "value": 131.35,
   "rtol": 0.05,
-  "seconds": 0.0
+  "seconds": 0.1
  },
  "tvpvar": {
   "nobs": 160,
@@ -495,7 +523,7 @@
   "col": "ADF level, constant: p",
   "value": 0.0271,
   "rtol": 0.05,
-  "seconds": 16.3,
+  "seconds": 24.0,
   "summary": {
    "label": "kQ",
    "value": 0.01
@@ -509,7 +537,7 @@
   "col": "ADF level, constant: p",
   "value": 0.0271,
   "rtol": 0.05,
-  "seconds": 2.5,
+  "seconds": 3.9,
   "summary": {
    "label": "Last volatility: inflation",
    "value": 4.5728
@@ -523,7 +551,7 @@
   "col": "Mean",
   "value": 0.231313,
   "rtol": 0.05,
-  "seconds": 13.1
+  "seconds": 19.7
  },
  "tvar": {
   "nobs": 200,
@@ -533,7 +561,7 @@
   "col": "ADF level, constant: p",
   "value": 0.0,
   "rtol": 0.05,
-  "seconds": 0.3,
+  "seconds": 0.4,
   "summary": {
    "label": "Threshold",
    "value": 6.6467
@@ -547,7 +575,7 @@
   "col": "ADF level, constant: p",
   "value": 0.2934,
   "rtol": 0.001,
-  "seconds": 0.8,
+  "seconds": 1.1,
   "summary": {
    "label": "Log-likelihood",
    "value": -508.636
@@ -561,7 +589,7 @@
   "col": "ADF level, constant: p",
   "value": 0.0,
   "rtol": 0.001,
-  "seconds": 7.7,
+  "seconds": 11.8,
   "summary": {
    "label": "Log-likelihood",
    "value": -181.263
@@ -575,7 +603,7 @@
   "col": "ADF level, constant: p",
   "value": 0.0,
   "rtol": 0.001,
-  "seconds": 1.4,
+  "seconds": 2.2,
   "summary": {
    "label": "Log-likelihood",
    "value": -937.439
@@ -589,7 +617,7 @@
   "col": "ADF level, constant: p",
   "value": 0.0573,
   "rtol": 0.001,
-  "seconds": 1.4,
+  "seconds": 2.0,
   "summary": {
    "label": "Log-likelihood",
    "value": -985.409
