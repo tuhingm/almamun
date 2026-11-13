@@ -25,7 +25,7 @@ TEXT = {
                "I prepared them from my training, research and teaching in economics. "
                "The theory and methods are standard, and the sources are listed in each lecture's readings."),
 }
-GUIDES = ["research-guide", "panel-data-guide", "causal-inference-guide", "ml-guide",
+GUIDES = ["time-series-guide", "panel-data-guide", "causal-inference-guide", "ml-guide",
           "bayesian-guide", "markov-guide", "dsge-guide"]
 
 

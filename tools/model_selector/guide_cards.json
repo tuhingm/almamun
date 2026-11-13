@@ -1,6 +1,6 @@
 [
 {
-"out": "assets/og/research-guide-ols.jpg",
+"out": "assets/og/time-series-guide-ols.jpg",
 "kicker": "Empirical Research Guide · Model guide",
 "title": "OLS Regression",
 "sub": "All variables stationary in levels. U.S. stock returns and the economy, monthly, 1985–2019",
@@ -11,7 +11,7 @@
 ]
 },
 {
-"out": "assets/og/research-guide-var.jpg",
+"out": "assets/og/time-series-guide-var.jpg",
 "kicker": "Empirical Research Guide · Model guide",
 "title": "VAR in First Differences",
 "sub": "All variables I(1), no cointegration. U.S. stock prices and industrial production, monthly, 1985–2019",
@@ -22,7 +22,7 @@
 ]
 },
 {
-"out": "assets/og/research-guide-vecm.jpg",
+"out": "assets/og/time-series-guide-vecm.jpg",
 "kicker": "Empirical Research Guide · Model guide",
 "title": "Vector Error-Correction Model",
 "sub": "All variables I(1), cointegrated. U.S. 10-year and 1-year Treasury yields, quarterly, 1960–2019",
@@ -33,7 +33,7 @@
 ]
 },
 {
-"out": "assets/og/research-guide-ardl.jpg",
+"out": "assets/og/time-series-guide-ardl.jpg",
 "kicker": "Empirical Research Guide · Model guide",
 "title": "ARDL Bounds-Testing Model",
 "sub": "A mix of I(0) and I(1) variables. U.S. 10-year Treasury yield, inflation, GDP growth and unemployment, quarterly, 1960–2019",
@@ -44,7 +44,7 @@
 ]
 },
 {
-"out": "assets/og/research-guide-nardl.jpg",
+"out": "assets/og/time-series-guide-nardl.jpg",
 "kicker": "Empirical Research Guide · Model guide",
 "title": "Nonlinear ARDL (NARDL)",
 "sub": "I(0) and I(1) variables, with asymmetric effects. U.S. Baa corporate bond yield and federal funds rate, monthly, 1985–2019",
@@ -55,7 +55,7 @@
 ]
 },
 {
-"out": "assets/og/research-guide-gmm.jpg",
+"out": "assets/og/time-series-guide-gmm.jpg",
 "kicker": "Empirical Research Guide · Model guide",
 "title": "2SLS and GMM",
 "sub": "Endogenous regressors that need instruments. U.S. policy rule, quarterly, 1979–2007; UK firm employment panel, 1976–1984",

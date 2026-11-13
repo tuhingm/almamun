@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Build the step-by-step model guides in research-guide/ from tools/model_selector/guides/*.md.
+"""Build the step-by-step model guides in time-series-guide/ from tools/model_selector/guides/*.md.
 
 Each guide is Markdown with a short header (key: value lines, then ---). Every ```python block is executed, in order and
-in one shared namespace, from the research-guide/examples folder; its printed output and any matplotlib figure are
+in one shared namespace, from the time-series-guide/examples folder; its printed output and any matplotlib figure are
 inserted under the code, so every number on the page is produced by the code shown. Use ```python norun for code that
 is shown but not executed. usage: python3 tools/model_selector/build_guides.py [slug ...]
 """
@@ -10,7 +10,7 @@ import contextlib, html, io, json, os, pathlib, re, sys, warnings
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
-OUT = ROOT / "research-guide"
+OUT = ROOT / "time-series-guide"
 sys.path.insert(0, str(ROOT / "tools"))
 from build_courses import md_to_html  # same Markdown and math settings as the course sites
 
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     for s in todo:
         build(s, metas)
     (HERE / "guide_cards.json").write_text(json.dumps(
-        [dict(out=f"assets/og/research-guide-{s}.jpg", kicker="Empirical Research Guide · Model guide", title=m["title"],
+        [dict(out=f"assets/og/time-series-guide-{s}.jpg", kicker="Empirical Research Guide · Model guide", title=m["title"],
               sub=m["when"] + ". " + m["data"], tags=["Python code", "Real output", "How to write it"]) for s, m in metas.items()],
         ensure_ascii=False, indent=0))
 

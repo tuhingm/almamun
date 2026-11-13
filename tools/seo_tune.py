@@ -20,7 +20,7 @@ BRAND_FULL, BRAND = "Tuhin G. M. Al Mamun", "Tuhin Al Mamun"
 
 # Pages whose wording is set here because the generated one misses the search terms people use.
 FIXED = {
-    "research-guide/index.html": dict(title="Time-Series Model Selection Guide | Tuhin Al Mamun"),
+    "time-series-guide/index.html": dict(title="Time-Series Model Selection Guide | Tuhin Al Mamun"),
     "teaching/index.html": dict(desc="Free courses in advanced macroeconomics, monetary economics, econometrics, "
                                      "statistics, calculus and finance: lecture notes, problem sets and code."),
     "index.html": dict(title="Tuhin Al Mamun, Ph.D. (Tuhin G. M. Al Mamun) | Economist", desc="Tuhin G. M. Al Mamun (Tuhin Al Mamun), Ph.D.: economist working on monetary and fiscal policy, "

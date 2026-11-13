@@ -78,7 +78,7 @@ def build(key):
             f'<div class="meta"><span><strong>{len(json.loads(json.dumps(C["examples"], default=str)))}</strong> real example datasets</span><span>Tests run in your browser</span><span>Python · statsmodels</span></div></div></section>\n')
     body = (HERE / "body.html").read_text().replace("#EXSUB#", C["exsub"]).replace("#GH#", C["gh"]).replace("#NOTE#", C["note"])
     foot = (f'<footer><div class="wrap foot"><span><b>Tuhin G. M. Al Mamun, Ph.D.</b> · {C["name"]}</span>'
-            f'<span><a href="../research-guide/index.html">Time-Series Guide</a> · © <span id="year"></span></span></div></footer>\n')
+            f'<span><a href="../time-series-guide/index.html">Time-Series Guide</a> · © <span id="year"></span></span></div></footer>\n')
     js = ((HERE / C["jsfile"]).read_text() + "\n" + (HERE / "common.js").read_text())
     page = (head + hero + body + foot +
             f'<script type="text/plain" id="py-src">{(HERE / "bm_analysis.py").read_text()}</script>\n<script>\nconst EXAMPLES={json.dumps(examples, default=float, separators=(",", ":"))};\n{js}</script>\n</body>\n</html>\n')

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build research-guide/index.html: prepares the real example datasets, runs the analysis on each, and fills the template."""
+"""Build time-series-guide/index.html: prepares the real example datasets, runs the analysis on each, and fills the template."""
 import json, pathlib, sys
 import numpy as np, pandas as pd
 
@@ -8,7 +8,7 @@ ROOT = HERE.parents[1]
 sys.path.insert(0, str(HERE))
 from analysis import analyze
 
-OUT = ROOT / "research-guide"
+OUT = ROOT / "time-series-guide"
 (OUT / "examples").mkdir(parents=True, exist_ok=True)
 m = pd.read_csv(ROOT / "teaching/monetary-economics/data/us_monthly.csv")
 m["date"] = m.year.astype(str) + "-" + m.month.astype(str).str.zfill(2)
@@ -58,7 +58,7 @@ tpl = (HERE / "template.html").read_text()
 guides = [p.stem for p in (HERE / "guides").glob("*.md")]
 page = tpl.replace("/*GUIDES*/[]", json.dumps(guides)).replace("/*EXAMPLES*/", json.dumps(examples, ensure_ascii=False)).replace("#PYSRC#", (HERE / "analysis.py").read_text())
 (OUT / "index.html").write_text(page)
-print("wrote research-guide/index.html", len(page) // 1024, "KB")
+print("wrote time-series-guide/index.html", len(page) // 1024, "KB")
 
 import subprocess as _sp, sys as _sys, pathlib as _pl
 _sp.run([_sys.executable, str(_pl.Path(__file__).resolve().parents[2] / "tools" / "og_tags.py")], check=True)  # complete preview tags

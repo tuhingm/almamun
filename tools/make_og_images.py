@@ -15,7 +15,7 @@ cards += [
     dict(out="assets/og/working-papers.jpg", kicker="Research portfolio · 2023–present", title="Working Papers",
          sub="Fifteen manuscripts on decarbonization, energy, inflation, monetary institutions and macro-finance.",
          tags=["Climate & energy", "Inflation", "Monetary institutions", "Macro-finance"]),
-    dict(out="assets/og/research-guide.jpg", kicker="Empirical Research Guide", title="Which model fits your data?",
+    dict(out="assets/og/time-series-guide.jpg", kicker="Empirical Research Guide", title="Which model fits your data?",
          sub="Test your data and follow the path to OLS, VAR, VECM, ARDL, NARDL or GMM. Real examples and Python code.",
          tags=["Unit-root tests", "Cointegration", "Model selection", "Python"]),
     dict(out="assets/og/oes/index.jpg", kicker="Open Econometric Systems", title="Run every model on your data",

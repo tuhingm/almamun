@@ -27,19 +27,19 @@ SAME_AS = ["https://orcid.org/0009-0005-0275-6922",
 # (label, target, section folder or None)
 NAV = [("Home", "index.html", ""), ("Teaching Courses", "teaching/index.html", "teaching"),
        ("Working Papers", "working-papers/index.html", "working-papers"),
-       ("Time Series", "research-guide/index.html", "research-guide"),
+       ("Time Series", "time-series-guide/index.html", "time-series-guide"),
        ("Panel Data", "panel-data-guide/index.html", "panel-data-guide"),
        ("Causal Inference", "causal-inference-guide/index.html", "causal-inference-guide"),
        ("DSGE", "dsge-guide/index.html", "dsge-guide"), ("Machine Learning", "ml-guide/index.html", "ml-guide"),
        ("Bayesian", "bayesian-guide/index.html", "bayesian-guide"), ("Markov Switching", "markov-guide/index.html", "markov-guide"),
        ("Open Econometric Systems", "oes/index.html", "oes")]
 SECTION = {"teaching": "Teaching Courses", "working-papers": "Working Papers",
-           "research-guide": "Empirical Research Guide (Time Series)", "panel-data-guide": "Panel Data Research Guide",
+           "time-series-guide": "Time-Series Research Guide", "panel-data-guide": "Panel Data Research Guide",
            "causal-inference-guide": "Causal Inference Research Guide", "dsge-guide": "DSGE Research Guide",
            "ml-guide": "Machine Learning Research Guide", "oes": "Open Econometric Systems",
            "bayesian-guide": "Bayesian Research Guide", "markov-guide": "Markov-Switching Research Guide"}
 KICKER = {"panel-data-guide": "Panel Data Research Guide", "causal-inference-guide": "Causal Inference Research Guide",
-          "dsge-guide": "DSGE Research Guide", "research-guide": "Empirical Research Guide",
+          "dsge-guide": "DSGE Research Guide", "time-series-guide": "Time-Series Research Guide",
           "ml-guide": "Machine Learning Research Guide", "bayesian-guide": "Bayesian Research Guide",
           "markov-guide": "Markov-Switching Research Guide"}
 CARD_KICKER = {"panel-data-guide": "Panel Data Guide", "causal-inference-guide": "Causal Inference Guide",

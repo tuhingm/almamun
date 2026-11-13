@@ -243,7 +243,7 @@ Here \(\eta_i\) is a fixed effect for each unit and \(\lambda_t\) a year effect.
 The example is the one the method was developed on: employment in 140 UK manufacturing firms, 1976–1984, from Arellano and Bond (1991). The question is **how persistent is firm employment, and how does it respond to wages and capital?**
 
 ```python
-from diff_gmm import diff_gmm          # helper file: research-guide/examples/diff_gmm.py
+from diff_gmm import diff_gmm          # helper file: time-series-guide/examples/diff_gmm.py
 import statsmodels.formula.api as smf
 
 raw = pd.read_csv("employment.csv")

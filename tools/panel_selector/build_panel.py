@@ -66,7 +66,7 @@ S[["country", "year", "pop", "gdp", "sr"]].to_csv(OUT / "examples" / "growth_sav
 g[["state", "year", "price", "pop", "pop16", "cpi", "ndi", "sales", "pimin"]].to_csv(OUT / "examples" / "cigar_raw.csv", index=False)
 w[["nr", "year", "lwage", "union", "married", "exper", "expersq", "hours", "educ", "black", "hisp"]].to_csv(OUT / "examples" / "wagepan_full.csv", index=False)
 shutil.copy(HERE / "panel_estimators.py", OUT / "examples" / "panel_estimators.py")
-shutil.copy(ROOT / "research-guide" / "examples" / "diff_gmm.py", OUT / "examples" / "diff_gmm.py")
+shutil.copy(ROOT / "time-series-guide" / "examples" / "diff_gmm.py", OUT / "examples" / "diff_gmm.py")
 examples = []
 for key, (df, title, meta, desc) in ex.items():
     path = OUT / "examples" / f"{key}.csv"
