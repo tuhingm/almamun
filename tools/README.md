@@ -34,6 +34,7 @@ table in `syllabus.md`, the readings from each lecture's `## Reading` section.
 Every page shares one top menu, link-preview tags and search metadata. After running any page builder, run:
 
 ```bash
+python3 tools/author_note.py     # author's note on every guide, lecture, course and OES page
 python3 tools/site_polish.py      # same menu on every page, missing preview tags, author/robots, JSON-LD + breadcrumbs
 python3 tools/make_og_images.py   # preview images (needs Playwright; OG_ONLY=assets/og/dsge-guide renders a subset)
 python3 tools/og_tags.py          # completes og:/twitter: tags; bump VERSION to refresh cached previews
