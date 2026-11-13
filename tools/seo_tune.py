@@ -31,6 +31,10 @@ FIXED = {
                                                    "DiD, synthetic control, RDD, IV or interrupted time series fits, with guides."),
     "dsge-guide/index.html": dict(desc="Interactive DSGE workflow tool with Dynare: RBC, New Keynesian and open-economy models, "
                                        "Bayesian estimation, identification, optimal policy, OccBin."),
+    "bayesian-guide/index.html": dict(desc="Choosing a Bayesian VAR: BVAR, FAVAR, steady-state, panel, time-varying, stochastic-volatility, "
+                                          "mixed-frequency and threshold models, with step-by-step guides."),
+    "markov-guide/index.html": dict(desc="Choosing a Markov-switching model: Hamilton regime model, regression, VAR and panel VAR, "
+                                         "with regime dating, tests and step-by-step guides."),
     "ml-guide/index.html": dict(desc="Choosing a machine-learning method in economics: LASSO, ridge, random forest, "
                                      "XGBoost, double machine learning or causal forests, with step-by-step guides."),
 }

@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/bayes-reg.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/bvar.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/favar.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/mixed-frequency.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/panel-var.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/steady-state.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/sv-var.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/threshold-var.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/tvp-var.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/causal-inference-guide/did.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/causal-inference-guide/gsc.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/causal-inference-guide/</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
@@ -19,6 +29,11 @@
   <url><loc>https://tuhingm.github.io/almamun/dsge-guide/soe.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/dsge-guide/zlb.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/</loc><lastmod>2026-11-13</lastmod><priority>1.0</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/markov-guide/</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/markov-guide/ms-ar.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/markov-guide/ms-panel-var.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/markov-guide/ms-regression.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/markov-guide/ms-var.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/ml-guide/causal-forest.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/ml-guide/dml-irm.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/ml-guide/dml-iv.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
@@ -181,5 +196,5 @@
   <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/readings.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/teaching/statistics/syllabus.html</loc><lastmod>2026-11-13</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/working-papers/</loc><lastmod>2026-11-13</lastmod><priority>0.9</priority></url>
-  <url><loc>https://tuhingm.github.io/almamun/Tuhin%20Al%20Mamun_CV.pdf</loc><lastmod>2026-11-13</lastmod><priority>0.8</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/Tuhin%20Al%20Mamun_CV.pdf</loc><lastmod>2026-11-12</lastmod><priority>0.8</priority></url>
 </urlset>
