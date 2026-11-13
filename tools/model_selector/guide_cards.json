@@ -97,5 +97,27 @@
 "Real output",
 "How to write it"
 ]
+},
+{
+"out": "assets/og/time-series-guide-tar.jpg",
+"kicker": "Empirical Research Guide · Model guide",
+"title": "Threshold Regression (TAR / SETAR)",
+"sub": "Abrupt regime changes at an estimated level, with a bootstrap test. U.S. inflation, quarterly",
+"tags": [
+"Python code",
+"Real output",
+"How to write it"
+]
+},
+{
+"out": "assets/og/time-series-guide-str.jpg",
+"kicker": "Empirical Research Guide · Model guide",
+"title": "Smooth-Transition Regression (LSTAR / ESTAR)",
+"sub": "Coefficients that move gradually with a state variable. U.S. monetary policy rule, quarterly",
+"tags": [
+"Python code",
+"Real output",
+"How to write it"
+]
 }
 ]

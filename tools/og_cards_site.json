@@ -327,7 +327,7 @@
   "out": "assets/og/panel-data-guide/pthresh.jpg",
   "kicker": "Panel Data Guide · Model guide",
   "title": "Panel Threshold Regression (Hansen)",
-  "sub": "The effect of a regressor may differ above and below a threshold in another variable, and you want to estimate where the…"
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/panel-data-guide/re.jpg",
