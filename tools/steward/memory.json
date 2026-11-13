@@ -1,0 +1,134 @@
+{
+ "issues": {
+  "headings|./|1 pages skip a heading level (for example h1 to h3); fine if it is the house style, but screen readers prefer an unbroken outline": {
+   "check": "headings",
+   "first_date": "2026-11-14",
+   "first_run": 1,
+   "last_run": 1,
+   "message": "1 pages skip a heading level (for example h1 to h3); fine if it is the house style, but screen readers prefer an unbroken outline",
+   "open": true,
+   "page": "./",
+   "runs_seen": 1,
+   "severity": "note"
+  },
+  "headings|teaching/|132 pages skip a heading level (for example h1 to h3); fine if it is the house style, but screen readers prefer an unbroken outline": {
+   "check": "headings",
+   "first_date": "2026-11-14",
+   "first_run": 1,
+   "last_run": 1,
+   "message": "132 pages skip a heading level (for example h1 to h3); fine if it is the house style, but screen readers prefer an unbroken outline",
+   "open": true,
+   "page": "teaching/",
+   "runs_seen": 1,
+   "severity": "note"
+  },
+  "title|teaching/advanced-macroeconomics/lectures/05-nominal-rigidities.html|title is 82 characters; search results cut it near 60": {
+   "check": "title",
+   "first_date": "2026-11-14",
+   "first_run": 1,
+   "last_run": 1,
+   "message": "title is 82 characters; search results cut it near 60",
+   "open": true,
+   "page": "teaching/advanced-macroeconomics/lectures/05-nominal-rigidities.html",
+   "runs_seen": 1,
+   "severity": "note"
+  },
+  "title|teaching/advanced-macroeconomics/lectures/07-monetary-policy.html|title is 76 characters; search results cut it near 60": {
+   "check": "title",
+   "first_date": "2026-11-14",
+   "first_run": 1,
+   "last_run": 1,
+   "message": "title is 76 characters; search results cut it near 60",
+   "open": true,
+   "page": "teaching/advanced-macroeconomics/lectures/07-monetary-policy.html",
+   "runs_seen": 1,
+   "severity": "note"
+  },
+  "title|teaching/advanced-macroeconomics/lectures/11-dsge-estimation.html|title is 81 characters; search results cut it near 60": {
+   "check": "title",
+   "first_date": "2026-11-14",
+   "first_run": 1,
+   "last_run": 1,
+   "message": "title is 81 characters; search results cut it near 60",
+   "open": true,
+   "page": "teaching/advanced-macroeconomics/lectures/11-dsge-estimation.html",
+   "runs_seen": 1,
+   "severity": "note"
+  },
+  "title|teaching/calculus/lectures/04-taylor-convexity-optimization.html|title is 76 characters; search results cut it near 60": {
+   "check": "title",
+   "first_date": "2026-11-14",
+   "first_run": 1,
+   "last_run": 1,
+   "message": "title is 76 characters; search results cut it near 60",
+   "open": true,
+   "page": "teaching/calculus/lectures/04-taylor-convexity-optimization.html",
+   "runs_seen": 1,
+   "severity": "note"
+  },
+  "title|teaching/econometrics/lectures/02-ols-inference.html|title is 92 characters; search results cut it near 60": {
+   "check": "title",
+   "first_date": "2026-11-14",
+   "first_run": 1,
+   "last_run": 1,
+   "message": "title is 92 characters; search results cut it near 60",
+   "open": true,
+   "page": "teaching/econometrics/lectures/02-ols-inference.html",
+   "runs_seen": 1,
+   "severity": "note"
+  },
+  "title|teaching/econometrics/lectures/07-panel-data.html|title is 76 characters; search results cut it near 60": {
+   "check": "title",
+   "first_date": "2026-11-14",
+   "first_run": 1,
+   "last_run": 1,
+   "message": "title is 76 characters; search results cut it near 60",
+   "open": true,
+   "page": "teaching/econometrics/lectures/07-panel-data.html",
+   "runs_seen": 1,
+   "severity": "note"
+  },
+  "title|teaching/econometrics/lectures/11-var-svar.html|title is 81 characters; search results cut it near 60": {
+   "check": "title",
+   "first_date": "2026-11-14",
+   "first_run": 1,
+   "last_run": 1,
+   "message": "title is 81 characters; search results cut it near 60",
+   "open": true,
+   "page": "teaching/econometrics/lectures/11-var-svar.html",
+   "runs_seen": 1,
+   "severity": "note"
+  },
+  "title|teaching/econometrics/lectures/13-causal-inference.html|title is 83 characters; search results cut it near 60": {
+   "check": "title",
+   "first_date": "2026-11-14",
+   "first_run": 1,
+   "last_run": 1,
+   "message": "title is 83 characters; search results cut it near 60",
+   "open": true,
+   "page": "teaching/econometrics/lectures/13-causal-inference.html",
+   "runs_seen": 1,
+   "severity": "note"
+  },
+  "title|teaching/finance/lectures/13-risk-management.html|title is 82 characters; search results cut it near 60": {
+   "check": "title",
+   "first_date": "2026-11-14",
+   "first_run": 1,
+   "last_run": 1,
+   "message": "title is 82 characters; search results cut it near 60",
+   "open": true,
+   "page": "teaching/finance/lectures/13-risk-management.html",
+   "runs_seen": 1,
+   "severity": "note"
+  }
+ },
+ "runs": [
+  {
+   "date": "2026-11-14",
+   "errors": 0,
+   "notes": 11,
+   "pages": 210,
+   "warnings": 0
+  }
+ ]
+}
