@@ -3,19 +3,19 @@
   "out": "assets/og/bayesian-guide/bayes-reg.jpg",
   "kicker": "Bayesian Guide · Model guide",
   "title": "Bayesian Linear Regression with a g-Prior",
-  "sub": "A cross-section regression where you want posterior probabilities, prior information or model comparison. Step-by-step guide with…"
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/bayesian-guide/bvar.jpg",
   "kicker": "Bayesian Guide · Model guide",
   "title": "Bayesian VAR with Minnesota and Normal-Wishart Priors",
-  "sub": "A VAR with many coefficients and a short sample. Step-by-step guide with Python code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/bayesian-guide/favar.jpg",
   "kicker": "Bayesian Guide · Model guide",
   "title": "Factor-Augmented VAR (FAVAR)",
-  "sub": "A VAR that should use information from many macro series without adding them all as variables. Step-by-step guide with Python…"
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/bayesian-guide/index.jpg",
@@ -27,37 +27,37 @@
   "out": "assets/og/bayesian-guide/mixed-frequency.jpg",
   "kicker": "Bayesian Guide · Model guide",
   "title": "Mixed-Frequency BVAR: Nowcasting Quarterly GDP with Monthly Data",
-  "sub": "Quarterly GDP and monthly indicators that arrive earlier, for nowcasting or for a model at the monthly frequency. Step-by-step…"
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code and more."
  },
  {
   "out": "assets/og/bayesian-guide/panel-var.jpg",
   "kicker": "Bayesian Guide · Model guide",
   "title": "Panel VAR: Six Estimators for Heterogeneous Countries",
-  "sub": "A VAR for many countries, regions or firms with short time series. Step-by-step guide with Python code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/bayesian-guide/steady-state.jpg",
   "kicker": "Bayesian Guide · Model guide",
   "title": "Mean-Adjusted (Steady-State) Bayesian VAR",
-  "sub": "Medium- and long-horizon forecasts, or any VAR where you know something about the long-run means. Step-by-step guide with Python…"
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/bayesian-guide/sv-var.jpg",
   "kicker": "Bayesian Guide · Model guide",
   "title": "Stochastic-Volatility VAR (SV-VAR)",
-  "sub": "Shocks that were large in some periods and small in others, as in the Great Moderation. Step-by-step guide with Python code and…"
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/bayesian-guide/threshold-var.jpg",
   "kicker": "Bayesian Guide · Model guide",
   "title": "Bayesian Threshold VAR",
-  "sub": "Dynamics that differ when an observed variable, such as inflation, is above or below a threshold. Step-by-step guide with Python…"
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/bayesian-guide/tvp-var.jpg",
   "kicker": "Bayesian Guide · Model guide",
   "title": "Time-Varying Parameter VAR (TVP-VAR)",
-  "sub": "You suspect the transmission of shocks has changed over the sample. Step-by-step guide with Python code and real output."
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/causal-inference-guide/did.jpg",
@@ -177,25 +177,25 @@
   "out": "assets/og/markov-guide/ms-ar.jpg",
   "kicker": "Markov-Switching Guide · Model guide",
   "title": "Markov-Switching Autoregression (Hamilton)",
-  "sub": "A single series whose mean shifts between expansion-like and recession-like states that you do not observe. Step-by-step guide…"
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/markov-guide/ms-panel-var.jpg",
   "kicker": "Markov-Switching Guide · Model guide",
   "title": "Markov-Switching Panel VAR",
-  "sub": "A panel of countries or units that share the same unobserved regimes, such as a global slowdown that hits every country at once.…"
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/markov-guide/ms-regression.jpg",
   "kicker": "Markov-Switching Guide · Model guide",
   "title": "Markov-Switching Regression",
-  "sub": "A regression whose intercept, slopes or error variance shift between hidden regimes, such as a Phillips curve in calm and…"
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/markov-guide/ms-var.jpg",
   "kicker": "Markov-Switching Guide · Model guide",
   "title": "Markov-Switching VAR",
-  "sub": "Several macro variables whose means, volatility or dynamics shift between hidden regimes, such as calm and turbulent periods.…"
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/ml-guide/causal-forest.jpg",

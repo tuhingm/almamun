@@ -1,0 +1,35 @@
+<main class="wrap">
+<div class="modes" role="group" aria-label="Choose how to start">
+<button type="button" data-mode="example" aria-pressed="true"><b>Try a real example</b><span>See the tests and the choice on real data</span></button>
+<button type="button" data-mode="upload" aria-pressed="false"><b>Use my own data</b><span>Upload a CSV; tests run in your browser</span></button>
+<button type="button" data-mode="ask" aria-pressed="false"><b>I have my test results</b><span>Answer a few questions</span></button>
+</div>
+<div class="grid">
+<section class="panel" id="work" aria-live="polite">
+ <div id="m-example">
+  <h2>Choose a dataset</h2><p class="sub">#EXSUB#</p>
+  <div class="ex" id="ex"></div>
+ </div>
+ <div id="m-upload" hidden>
+  <h2>Upload your data</h2><p class="sub">A CSV with a header row. Time series: one row per period, the date first. Panel: one row per unit and period, with the unit identifier and the date. Mixed frequencies: leave the low-frequency variable empty in the periods where it is not observed.</p>
+  <div class="drop" id="drop"><p style="margin:0 0 12px;font-size:13px">Drop a CSV file here, or</p><label class="btn">Choose file<input type="file" id="file" accept=".csv,text/csv,text/plain" hidden></label></div>
+  <p class="hint">Your file is analysed on your own device and is not uploaded anywhere. Transform your variables first (logs, growth rates, real values) as your paper requires.</p>
+  <div id="opts" hidden></div>
+  <div class="status" id="status"><span class="spin"></span><span id="status-text"></span></div>
+  <div id="upload-err"></div>
+ </div>
+ <div id="m-ask" hidden>
+  <h2>Answer from your own results</h2><p class="sub">Use this if you have already run the tests. If you have not, choose “Use my own data” and the tests are run and explained for you.</p>
+  <div class="q" id="q"></div>
+ </div>
+ <div id="steps"></div>
+</section>
+<aside class="side">
+ <div class="panel tree"><div class="label">Decision path</div><p class="sub sub2" style="font-size:12px;color:var(--muted);margin:2px 0 8px">The path lights up as the evidence comes in. Each fork is a question the tests answer.</p><div id="tree"></div><div class="trail" id="trail"></div></div>
+</aside>
+</div>
+<div id="result"></div>
+<section class="guides" id="guides"><div class="guides-head"><div><div class="label">Method guides</div><h2>#GH#</h2></div><p>Each guide takes one real dataset through pre-estimation tests, estimation, diagnostics, robustness and sample text for the paper, with Python code and real output.</p></div>
+<div class="gcards" id="gcards"></div></section>
+<div class="note"><b>How the tool decides.</b> #NOTE#</div>
+</main>

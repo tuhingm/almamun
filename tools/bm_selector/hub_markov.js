@@ -1,0 +1,45 @@
+const HUB={key:'markov',vb:'0 0 880 330',known:false,
+GUIDE:{MSAR:'ms-ar',MSREG:'ms-regression',MSVAR:'ms-var',MSPVAR:'ms-panel-var'},
+MODELS:{
+ MSAR:{name:'Markov-switching autoregression (Hamilton)',short:'MS-AR',when:'One series whose mean or variance shifts between states',why:'You have a single time series, and the question is whether it moves between hidden states (expansions and recessions, calm and turbulent periods). The Hamilton model lets the mean, and optionally the variance, depend on the state, and gives you smoothed probabilities of each state in every period.',steps:['Make the series stationary','Test one regime against two','Estimate and read the transition matrix','Date the regimes and compare with a reference','Check for a collapsed regime','Write up the regimes and durations']},
+ MSREG:{name:'Markov-switching regression',short:'MS regression',when:'A regression whose intercept, slopes or variance shift',why:'You have a dependent variable and regressors, and the relationship may change between states. Letting the intercept, the slopes or the error variance switch shows which part of the relationship differs between regimes (a Phillips-curve level shift is not the same as a slope change).',steps:['Estimate the linear regression first','Choose what is allowed to switch','Test regimes against the linear model','Compare switching slopes with a common slope','Regime dates and durations','Write up the regimes']},
+ MSVAR:{name:'Markov-switching VAR',short:'MS-VAR',when:'Several variables switch together',why:'Several variables share the same hidden regime: their means, volatilities or dynamics shift at the same dates. A Markov-switching VAR (MSI, MSIH or MSIAH) estimates one regime path for the whole system and lets the intercepts, covariance or coefficients depend on it.',steps:['Select the lag order','Choose the MSI, MSIH or MSIAH form','Test the number of regimes','Regime-specific means and covariances','Check that the regime labels do not depend on the lag order','Write up the system']},
+ MSPVAR:{name:'Markov-switching panel VAR',short:'MS panel VAR',when:'Countries share the same regimes',why:'A panel of countries whose business cycles or volatility move together through a small number of global regimes. The model estimates one shared regime path from the whole panel, which is more precise than country-by-country models and makes the common episodes visible.',steps:['Prepare the panel and demean by unit','Choose the number of shared regimes','Estimate the panel regime path','Leave-one-country-out agreement','Fragile episodes','Write up the shared regimes']},
+ TVAR:{name:'Bayesian threshold VAR',short:'Threshold VAR',href:'../bayesian-guide/threshold-var.html',when:'The regime is defined by an observed variable',why:'The regime is not hidden: it is defined by whether an observed variable (inflation, the interest rate, a spread) is above or below a threshold. A threshold VAR estimates that threshold directly. It is covered in the Bayesian Guide.',steps:['Choose the threshold variable','Estimate the threshold','Compare one and two regimes','Regime-dependent responses','Check regime sizes','Write up the nonlinearity test']},
+ TR:{name:'Transform the data first',short:'Transform',when:'The series is I(1) in levels',why:'Markov-switching models assume a stationary series in each regime. A trending or I(1) series in levels will be split into regimes that simply follow the trend, which are not economic regimes.',steps:['Take growth rates (the first difference of the logs) or a gap from trend','Run the unit-root tests again on the transformed series','Choose the Markov-switching model for the transformed data'],noGuide:true}},
+N:{start:[440,26,110,'Your data'],s0:[440,92,130,'Stationary?'],TR:[700,92,138,'Transform first',1],q1:[440,160,150,'Regime observed?'],TVAR:[700,160,160,'Bayes threshold VAR',1],q2:[440,228,140,'Data structure'],
+ MSAR:[140,296,86,'MS-AR',1],MSREG:[290,296,130,'MS regression',1],MSVAR:[470,296,92,'MS-VAR',1],MSPVAR:[650,296,130,'MS panel VAR',1]},
+E:[['start','s0'],['s0','TR','no, I(1)'],['s0','q1','yes'],['q1','TVAR','yes, observed'],['q1','q2','no, hidden'],['q2','MSAR','one series'],['q2','MSREG','regression'],['q2','MSVAR','several series'],['q2','MSPVAR','panel']],
+TL:{start:'Your data',s0:'Stationary?',q1:'Regime observed?',q2:'Data structure'},
+first:'s0',
+QS:{
+ s0:{t:'Are your series stationary: growth rates, changes or gaps rather than trending levels?',o:[['Yes, stationary','Growth rates, returns, inflation, a rate with no trend','q1'],['No, they trend or have unit roots','Levels of GDP, prices, a trending index','TR']]},
+ q1:{t:'Is the regime defined by a variable you observe, for example inflation above 4%, or is it hidden?',o:[['Hidden: I want the data to date the regimes','Expansions and recessions, calm and turbulent periods','q2'],['Observed: a variable above or below a threshold','','TVAR']]},
+ q2:{t:'What is the structure of your data?',o:[['One series','GDP growth, an interest rate','MSAR'],['A regression with a dependent variable and regressors','The intercept, slopes or variance may shift','MSREG'],['Several series that shift together','A system of macro variables','MSVAR'],['A panel of countries that share the same regimes','A global slowdown or common volatility regime','MSPVAR']]}}};
+
+function decide(F,o){
+ const f=flags(F),why=[],cau=[],e=esc,ms=F.ms;
+ const nobs=F.reg?F.reg.n:(F.periods||F.rows);
+ if(f.nonstat){const bad=Object.entries(F.stationarity).filter(([k,v])=>/I\(1\)/.test(v.order)).map(([k])=>'<code>'+e(k)+'</code>');
+  why.push(`${bad.join(', ')} ${bad.length>1?'have':'has'} a unit root in levels (ADF does not reject, but does after one difference).`);
+  why.push('A Markov-switching model on a trending series splits it into regimes that follow the trend. Transform first, then run this selector again.');
+  return {m:'TR',why,cau,alt:null}}
+ if(f.thr&&!F.unit&&F.aim!=='regression'&&!f.hidden){
+  why.push(`The dynamics differ above and below ${f.thr.threshold!=null?f.thr.threshold.toFixed(2)+' ':''}of <code>${e(f.thr.v)}</code> (sup-LR ${f.thr.supLR.toFixed(1)}, bootstrap p ${pf(f.thr.p)}), and a hidden-regime model does not add clear evidence. The regime looks observed.`);
+  return {m:'TVAR',why,cau,alt:null}}
+ let m,alt=null;
+ if(F.unit){m='MSPVAR';why.push(`A unit column (<code>${e(F.unit)}</code>) with ${F.unit_count} units over ${F.periods} periods: a panel, so one regime path is estimated for all units together.`);
+  if(F.unit_count<5)cau.push('Few units: a shared regime path rests on very few countries. Check leave-one-out agreement.')}
+ else if(F.aim==='regression'){m='MSREG';why.push(`One dependent variable, <code>${e(F.reg.y)}</code>, with ${F.reg.k} regressors: a regression whose intercept, slopes or error variance may shift between states.`);alt='MSAR'}
+ else if(F.n_series===1){m='MSAR';why.push(`One series, <code>${e(F.vars[0])}</code>: an autoregression whose mean (and variance) depend on a hidden state.`)}
+ else{m='MSVAR';why.push(`${F.n_series} series that may shift together: a VAR whose regime path is shared by all of them.`);alt='MSAR';
+  if(F.n_series>4)cau.push(`${F.n_series} variables with regime-specific parameters is a lot for a sample of ${nobs}. Use two or three variables or restrict what switches (MSI or MSIH rather than MSIAH).`)}
+ if(ms){
+  const strong=ms.lr>14;
+  why.push(`Regime evidence for <code>${e(F.y)}</code>: a two-regime model gives LR ${ms.lr.toFixed(1)}; the Garcia critical value is about 14, so ${strong?'linearity is rejected':'linearity is <b>not</b> rejected on this criterion'}. AIC ${ms.aic_ms.toFixed(0)} (switching) against ${ms.aic_linear.toFixed(0)} (one regime); BIC ${ms.bic_ms.toFixed(0)} against ${ms.bic_linear.toFixed(0)}.`);
+  if(!strong)cau.push('The likelihood-ratio statistic does not exceed the critical value, so the data do not clearly support two regimes. Markov-switching models can still date useful episodes (the Hamilton GNP example matches NBER recessions), but report the test honestly and show that the dates are not an artefact of noise.');
+  if(ms.min_share<0.05||ms.min_regime<8)cau.push(`One regime holds only ${ms.min_regime} of ${ms.n} periods (${(100*ms.min_share).toFixed(0)}%). That is a collapsed regime: it is fitting a handful of outliers, not a state. Use fewer parameters or one regime.`);
+ }
+ if(nobs<80)cau.push(`Only ${nobs} observations: regime parameters will be imprecise, and a two-regime model may not be identified. Consider a smaller model.`);
+ if(f.volBest&&!why.some(w=>/volatil/i.test(w)))cau.push('Volatility changes over the sample; allow the variance to switch (MSIH rather than MSI).');
+ return {m,why,cau,alt}}
