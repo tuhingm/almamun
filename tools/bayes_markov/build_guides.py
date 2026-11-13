@@ -30,10 +30,10 @@ SECTIONS = {
                          "panel-data-guide/examples/garrett.csv"]),
     # local projections: two more guides in the existing Time-Series and Panel-Data guides (hubs are built by their own tools)
     "lp": dict(folder="time-series-guide", name="Empirical Research Guide (Time Series)", short="Time-Series Guide",
-               order=["ols", "ardl", "nardl", "var", "vecm", "gmm", "lp"], static=dict(ols="OLS", ardl="ARDL", nardl="NARDL", var="VAR", vecm="VECM", gmm="2SLS / GMM"),
+               order=["ols", "ardl", "nardl", "var", "vecm", "gmm", "lp", "svar", "bp"], static=dict(ols="OLS", ardl="ARDL", nardl="NARDL", var="VAR", vecm="VECM", gmm="2SLS / GMM"),
                data=[]),
     "plp": dict(folder="panel-data-guide", name="Panel Data Research Guide", short="Panel-Data Guide",
-                order=["pols", "re", "fe", "gmm", "fedk", "mg", "diff", "pmg", "csardl", "plp"],
+                order=["pols", "re", "fe", "gmm", "fedk", "mg", "diff", "pmg", "csardl", "plp", "pthresh"],
                 static=dict(pols="Pooled OLS", re="Random effects", fe="Fixed effects", gmm="GMM", fedk="FE-DK", mg="MG / CCE", diff="Δ model", pmg="PMG", csardl="CS-ARDL"),
                 data=[]),
 }

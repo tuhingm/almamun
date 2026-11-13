@@ -75,5 +75,27 @@
 "Real output",
 "How to write it"
 ]
+},
+{
+"out": "assets/og/time-series-guide-svar.jpg",
+"kicker": "Empirical Research Guide · Model guide",
+"title": "Structural VAR",
+"sub": "Shocks identified by Cholesky, long-run or proxy restrictions. U.S. output and unemployment, quarterly",
+"tags": [
+"Python code",
+"Real output",
+"How to write it"
+]
+},
+{
+"out": "assets/og/time-series-guide-bp.jpg",
+"kicker": "Empirical Research Guide · Model guide",
+"title": "Structural Breaks (Bai–Perron)",
+"sub": "Estimate how many breaks and when, with confidence intervals. U.S. inflation, quarterly",
+"tags": [
+"Python code",
+"Real output",
+"How to write it"
+]
 }
 ]

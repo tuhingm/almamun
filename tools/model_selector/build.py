@@ -40,6 +40,13 @@ ex["money"] = (e, "Money, prices and output", "Quarterly, 1960–2019 · U.S.",
 M2 = m[(m.year >= 1970) & (m.year <= 2019)]
 pd.DataFrame({"date": M2.date, "baa_yield": M2.baa, "fedfunds": M2.ffr}).to_csv(OUT / "examples" / "passthrough.csv", index=False)
 
+# data for the proxy-SVAR section of the SVAR guide: policy rates, output, prices, credit spread and a high-frequency monetary shock (Jarocinski-Karadi)
+_s = pd.read_csv(ROOT / "teaching/monetary-economics/data/mp_shocks_monthly.csv")
+_p = m.merge(_s, on=["year", "month"])
+_p = _p[(_p.year >= 1990) & (_p.year <= 2019)]
+pd.DataFrame({"date": _p.date, "ffr": _p.ffr, "gs1": _p.gs1, "log_ip": 100 * np.log(_p.indpro), "log_cpi": 100 * np.log(_p.cpi),
+              "credit_spread": _p.baa - _p.gs10, "mp_shock": _p.jk_mp}).round(5).to_csv(OUT / "examples" / "monetary_proxy.csv", index=False)
+
 # data for the 2SLS / GMM guide: federal funds rate, 4-quarter GDP-deflator inflation and the HP-filtered output gap
 from statsmodels.tsa.filters.hp_filter import hpfilter
 T = q[(q.t >= 1959) & (q.t < 2020)].copy()
@@ -55,7 +62,7 @@ for key, (df, title, meta, desc) in ex.items():
     examples.append(dict(key=key, title=title, meta=meta, desc=desc, file=f"examples/{key}.csv", result=r))
 
 tpl = (HERE / "template.html").read_text()
-guides = [p.stem for p in (HERE / "guides").glob("*.md")] + ["lp"]
+guides = [p.stem for p in (HERE / "guides").glob("*.md")] + ["lp", "svar", "bp"]
 page = tpl.replace("/*GUIDES*/[]", json.dumps(guides)).replace("/*EXAMPLES*/", json.dumps(examples, ensure_ascii=False)).replace("#PYSRC#", (HERE / "analysis.py").read_text())
 (OUT / "index.html").write_text(page)
 print("wrote time-series-guide/index.html", len(page) // 1024, "KB")

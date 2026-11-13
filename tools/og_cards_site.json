@@ -309,7 +309,7 @@
   "out": "assets/og/panel-data-guide/plp.jpg",
   "kicker": "Panel Data Guide · Model guide",
   "title": "Panel Local Projections",
-  "sub": "You want the dynamic response of an outcome to a shock in a panel of units, horizon by horizon, with unit fixed effects.…"
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
   "out": "assets/og/panel-data-guide/pmg.jpg",
@@ -322,6 +322,12 @@
   "kicker": "Panel Data Guide · Model guide",
   "title": "Pooled OLS",
   "sub": "Short panel, no significant unit effects. Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/panel-data-guide/pthresh.jpg",
+  "kicker": "Panel Data Guide · Model guide",
+  "title": "Panel Threshold Regression (Hansen)",
+  "sub": "The effect of a regressor may differ above and below a threshold in another variable, and you want to estimate where the…"
  },
  {
   "out": "assets/og/panel-data-guide/re.jpg",
