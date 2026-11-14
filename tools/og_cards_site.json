@@ -42,6 +42,12 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/bayesian-guide/sign-bvar.jpg",
+  "kicker": "Bayesian Guide · Model guide",
+  "title": "Sign-Restricted Bayesian VAR",
+  "sub": "You want a structural shock identified by theory-based sign restrictions on the responses, without a causal ordering.…"
+ },
+ {
   "out": "assets/og/bayesian-guide/steady-state.jpg",
   "kicker": "Bayesian Guide · Model guide",
   "title": "Mean-Adjusted (Steady-State) Bayesian VAR",
