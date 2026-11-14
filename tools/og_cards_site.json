@@ -60,6 +60,12 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/causal-inference-guide/bartik.jpg",
+  "kicker": "Causal Inference Guide · Model guide",
+  "title": "Shift-share (Bartik) instrumental variables",
+  "sub": "Regions differ in their exposure (initial shares) to common industry-level shocks, and you want to instrument a regional change…"
+ },
+ {
   "out": "assets/og/causal-inference-guide/did.jpg",
   "kicker": "Causal Inference Guide · Model guide",
   "title": "Difference-in-Differences",

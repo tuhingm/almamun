@@ -31,6 +31,12 @@ EXTRA = {
                  steps=["Estimand and assumptions", "Propensity score", "Overlap and covariate balance", "Matching, IPW, regression adjustment and AIPW", "Trimming and omitted-confounder sensitivity"],
                  lec=[],
                  q=("Treatment was not randomised, but I observe what drives selection", "Matching, IPW and doubly robust estimation")),
+    "bartik": dict(key="BARTIK", short="Shift-share IV",
+                 name="Shift-share (Bartik) instrumental variables", when="Regions differ in exposure to common industry shocks through initial shares",
+                 why="Instrument a regional change with the exposure-weighted sum of national shocks. Show the first stage, compare OLS and 2SLS, and add what a modern shift-share paper needs: Rotemberg weights, exposure-robust standard errors, shock balance and pre-trend checks, and leave-one-out sensitivity.",
+                 steps=["Identification logic: shares or shocks", "Build the instrument and look at the first stage", "OLS against 2SLS", "Rotemberg weights", "Exposure-robust inference", "Pre-trend, balance and leave-one-out checks"],
+                 lec=[],
+                 q=("Regions differ in exposure to common industry shocks", "Shift-share (Bartik) instrumental variables")),
 }
 
 
