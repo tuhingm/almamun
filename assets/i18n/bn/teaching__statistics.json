@@ -354,5 +354,6 @@
   "6. Confidence intervals and testing": "৬. কনফিডেন্স ইন্টারভ্যাল ও টেস্টিং",
   "7. Bayesian inference": "৭. বেইজিয়ান অনুমান",
   "8. Experimental design": "৮. পরীক্ষামূলক নকশা",
-  "9. ANOVA and multiple comparisons": "৯. ANOVA ও একাধিক তুলনা"
+  "9. ANOVA and multiple comparisons": "৯. ANOVA ও একাধিক তুলনা",
+  "html:The first term is average within-condition uncertainty; the second is variation explained by differences in conditional means.": "প্রথম পদটি শর্তাধীন গড়ের ভেতরের গড় অনিশ্চয়তা; দ্বিতীয় পদটি শর্তাধীন গড়ের পার্থক্য দ্বারা ব্যাখ্যাত বৈচিত্র্য।"
 }
