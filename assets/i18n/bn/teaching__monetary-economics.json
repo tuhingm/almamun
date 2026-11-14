@@ -293,5 +293,21 @@
   "Before you begin": "শুরু করার আগে",
   "Step-by-step": "ধাপে ধাপে",
   "Interpretation and intuition": "ব্যাখ্যা ও অন্তর্দৃষ্টি",
-  "Practical implementation": "ব্যবহারিক বাস্তবায়ন"
+  "Practical implementation": "ব্যবহারিক বাস্তবায়ন",
+  "html:Know the long-run relation between money and inflation and the short-run facts about monetary transmission that any model must explain. Understand the quantity equation, money demand and the opportunity cost of money, and why central banks moved from monetary aggregates to interest rates.": "অর্থ ও মুদ্রাস্ফীতির দীর্ঘমেয়াদি সম্পর্ক এবং মুদ্রানীতি সঞ্চালনের স্বল্পমেয়াদি তথ্য বোঝা। পরিমাণ সমীকরণ, অর্থের চাহিদা, অর্থ ধারণের সুযোগব্যয় এবং কেন্দ্রীয় ব্যাংক কেন মুদ্রার পরিমাণ থেকে সুদের হারে সরে এসেছে তা বোঝা।",
+  "html:Explain why intrinsically useless money is valued, and build the two workhorse ways of putting money into a dynamic general-equilibrium model: money in the utility function and cash in advance. Derive superneutrality, the Friedman rule and the welfare cost of inflation.": "অন্তর্নিহিত মূল্যহীন অর্থ কেন মূল্যবান হয় তা ব্যাখ্যা, ডায়নামিক জেনারেল ইকুইলিব্রিয়াম মডেলে অর্থ অন্তর্ভুক্তির দুটি প্রচলিত পদ্ধতি—utility function-এ money এবং cash-in-advance—গঠন এবং superneutrality, Friedman rule ও মুদ্রাস্ফীতির কল্যাণ-ব্যয় নির্ণয় করতে পারা।",
+  "html:Solve a monetary model with flexible prices, show monetary neutrality, and study how the price level is determined under money-supply rules and interest-rate rules. Understand price-level indeterminacy under an interest-rate peg and the role of the Taylor principle. Implement the model in Dynare.": "নমনীয় মূল্যসহ মুদ্রা মডেল সমাধান, মুদ্রার নিরপেক্ষতা প্রদর্শন, অর্থ সরবরাহ ও সুদের হার নিয়মে মূল্যস্তর কীভাবে নির্ধারিত হয় তা বিশ্লেষণ; সুদের হার স্থির রাখলে মূল্যস্তরের অনির্ধারিততা ও Taylor principle-এর ভূমিকা বোঝা এবং Dynare-এ মডেল বাস্তবায়ন।",
+  "html:Derive the New Keynesian Phillips curve from Calvo price setting step by step, relate its slope to the frequency of price changes and to real rigidities, and extend the framework to sticky wages. Confront the model with micro evidence on price setting and macro evidence on the Phillips curve.": "Calvo মূল্য নির্ধারণ থেকে ধাপে ধাপে New Keynesian Phillips curve নির্ণয়, এর ঢালকে মূল্য পরিবর্তনের ঘনত্ব ও বাস্তব কঠোরতার সঙ্গে সম্পর্কিত করা এবং sticky wage-এ কাঠামো সম্প্রসারণ; মূল্য নির্ধারণের মাইক্রো ও Phillips curve-এর ম্যাক্রো প্রমাণ দিয়ে মডেল যাচাই করতে পারা।",
+  "html:Assemble the canonical three-equation New Keynesian model, define the natural rate and the output gap, derive the closed-form responses to monetary and technology shocks, and characterise determinacy under interest-rate rules. Solve and simulate the model in Dynare.": "প্রচলিত তিন-সমীকরণের নিউ কেইনসিয়ান মডেল গঠন, natural rate ও output gap সংজ্ঞায়িত, মুদ্রানীতি ও প্রযুক্তিগত শকের closed-form প্রতিক্রিয়া নির্ণয় এবং সুদের হার নিয়মে determinacy বিশ্লেষণ; Dynare-এ মডেল সমাধান ও সিমুলেশন করতে পারা।",
+  "html:Derive the welfare-based loss function of the New Keynesian model, characterise optimal policy under discretion and under commitment, and explain the divine coincidence, inflation bias and stabilization bias. Compare optimal policy with simple rules.": "নিউ কেইনসিয়ান মডেলের কল্যাণভিত্তিক ক্ষতি ফাংশন নির্ণয়, discretion ও commitment-এর অধীনে সর্বোত্তম নীতি বিশ্লেষণ, divine coincidence, inflation bias ও stabilization bias ব্যাখ্যা এবং সর্বোত্তম নীতির সঙ্গে সরল নিয়মের তুলনা করতে পারা।",
+  "html:Interpret Taylor rules as descriptions of and prescriptions for policy, estimate them, and understand their pitfalls. Compare strict and flexible inflation targeting, price-level targeting, average-inflation targeting and nominal-GDP targeting, and analyse them in a New Keynesian model.": "Taylor rule-কে নীতির বর্ণনা ও নির্দেশনা হিসেবে ব্যাখ্যা ও প্রাক্কলন, এর সীমাবদ্ধতা বোঝা; কঠোর ও নমনীয় মুদ্রাস্ফীতি লক্ষ্য, মূল্যস্তর লক্ষ্য, গড় মুদ্রাস্ফীতি লক্ষ্য ও নামমাত্র GDP লক্ষ্য তুলনা এবং নিউ কেইনসিয়ান মডেলে বিশ্লেষণ করতে পারা।",
+  "The quantity equation": "অর্থের পরিমাণ সমীকরণ",
+  "Why model money explicitly?": "অর্থকে স্পষ্টভাবে মডেল করার কারণ",
+  "Money in the utility function": "ইউটিলিটি ফাংশনে অর্থ",
+  "Households and firms": "পরিবার ও প্রতিষ্ঠান",
+  "Monopolistic competition": "একচেটিয়া প্রতিযোগিতা",
+  "Calvo pricing": "Calvo মূল্য নির্ধারণ",
+  "The model": "মডেল",
+  "The welfare loss": "কল্যাণ-ক্ষতি",
+  "The Taylor rule": "টেইলর নিয়ম"
 }
