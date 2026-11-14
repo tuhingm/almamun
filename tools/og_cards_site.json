@@ -270,6 +270,12 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/panel-data-guide/dpthresh.jpg",
+  "kicker": "Panel Data Guide · Model guide",
+  "title": "Dynamic Panel Threshold Regression",
+  "sub": "The effect of a regressor changes above and below a threshold, and the model includes the lagged dependent variable. Step-by-step…"
+ },
+ {
   "out": "assets/og/panel-data-guide/fe.jpg",
   "kicker": "Panel Data Guide · Model guide",
   "title": "Fixed Effects",

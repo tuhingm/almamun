@@ -19,6 +19,12 @@ EXTRA = {
                  steps=["Unit and year effects", "Where the variation is", "Cluster-robust standard errors", "Wild cluster bootstrap", "Placebo test of the standard errors", "Staggered treatment warning"],
                  lec=[["../teaching/econometrics/lectures/07-panel-data.html", "Lecture 07: Static panels"]],
                  q=("I have a fixed-effects model and want correct standard errors", "Clustered, two-way clustered and wild bootstrap inference")),
+    "dpthresh": dict(key="DPTH", short="Dynamic threshold",
+                 name="Dynamic panel threshold regression", when="A regime change in the slope, with a lagged dependent variable",
+                 why="Persistence calls for a lagged dependent variable, and then the usual panel threshold estimator is biased in short panels. First-differencing removes the unit effect, lagged levels instrument the lagged change, and the threshold is found by a grid search over the IV residual sum of squares, tested with a bootstrap.",
+                 steps=["Nickell bias and the IV approach", "Grid search for the threshold", "Bootstrap test and interval", "Regime slopes with AR(2) and Hansen tests", "Robustness: trimming, threshold variable, instruments"],
+                 lec=[["../teaching/econometrics/lectures/08-dynamic-panels.html", "Lecture 08: Dynamic panels"]],
+                 q=("I want a threshold effect in a model with a lagged dependent variable", "Dynamic panel threshold regression")),
 }
 
 
