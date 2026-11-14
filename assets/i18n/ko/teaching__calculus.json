@@ -402,5 +402,6 @@
   "6. Confidence intervals and testing": "6. 신뢰구간과 가설검정",
   "7. Bayesian inference": "7. 베이지안 추론",
   "8. Experimental design": "8. 실험설계",
-  "9. ANOVA and multiple comparisons": "9. 분산분석과 다중비교"
+  "9. ANOVA and multiple comparisons": "9. 분산분석과 다중비교",
+  "html:Plot functions with removable and jump discontinuities. Compare numerical limits at decreasing step sizes with analytic limits; explain why numerical evidence is not a proof.": "제거가능 불연속과 점프 불연속이 있는 함수를 그래프로 나타내라. 간격을 줄여가며 수치적 극한과 해석적 극한을 비교하고, 수치적 증거가 왜 증명이 아닌지 설명하라."
 }
