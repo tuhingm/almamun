@@ -14,10 +14,11 @@ import numpy as np
 import pandas as pd
 
 from . import bayes, bayes_extra, breaks, causal, causal_extra, lp, markov, ml, panel, pthreshold, pvar, smooth, statespace_var, svar, tar, timeseries, ts_extra
+from . import panel_extra
 from .core import OESError, read_csv, time_order
 from .report import frame, plot, show, summary, tables
 
-__version__ = "1.3.0"
+__version__ = "1.4.0"
 
 # field helpers -------------------------------------------------------------------------------------------------
 def col(key, label, required=True, help=""):
@@ -439,6 +440,28 @@ MODELS += [
          example=dict(file=OX + "wavelet_us.csv", spec=dict(x="infl", y="m2", time="date", pmin=16, pmax=256, sims=60))),
 ]
 
+MODELS += [
+    dict(id="twfe", group="Panel data", name="Two-way fixed effects: clustering, wild bootstrap, placebo", guide="panel-data-guide/twfe.html", fn=panel_extra.twfe,
+         fields=[col("y", "Dependent variable"), cols("x", "Regressors (the first is tested with the bootstrap)"), UNIT, PTIME, num("boot", "Wild cluster bootstrap draws", 499), num("placebo", "Placebo experiment draws (0 = skip)", 200), num("seed", "Random seed", 0)],
+         example=dict(file=PD + "cigar.csv", spec=dict(y="log_sales", x=["log_price", "log_income"], unit="state", time="year", boot=299, placebo=100))),
+    dict(id="dpthresh", group="Panel data", name="Dynamic panel threshold regression", guide="panel-data-guide/dpthresh.html", fn=panel_extra.dpthresh,
+         fields=[col("y", "Dependent variable (its lag is a regressor)"), col("x", "Regressor with a threshold effect"), cols("controls", "Controls (no threshold)", required=False), UNIT, PTIME,
+                 col("tvar", "Threshold variable (blank = the regressor); its lag is used", required=False), num("trim", "Trimming share", 0.15), num("grid", "Grid points", 71), num("boot", "Bootstrap draws (threshold test)", 99), num("seed", "Random seed", 0)],
+         example=dict(file=PD + "laborsupply.csv", spec=dict(y="lnhr", x="lnwg", controls=["kids"], unit="id", time="year", boot=49))),
+    dict(id="pcoint", group="Panel data", name="Panel cointegration tests (Kao, Westerlund-type, CIPS)", guide="panel-data-guide/pcoint.html", fn=panel_extra.pcoint,
+         fields=[col("y", "Dependent variable"), cols("x", "Regressors"), UNIT, PTIME, num("sims", "Simulation replications", 200), num("seed", "Random seed", 0)],
+         example=dict(file=PD + "gasoline.csv", spec=dict(y="lgaspcar", x=["lincomep", "lrpmg", "lcarpcap"], unit="country", time="year", sims=100))),
+    dict(id="pquant", group="Panel data", name="Panel quantile regression (pooled, Canay, MM-QR)", guide="panel-data-guide/pquant.html", fn=panel_extra.pquant,
+         fields=[col("y", "Dependent variable"), cols("x", "Regressors"), UNIT, PTIME, sel("time_effects", "Period dummies", [["yes", "Yes"], ["no", "No"]], "yes"),
+                 num("taus", "Quantiles (comma-separated, at least three)", "0.1,0.25,0.5,0.75,0.9"), num("boot", "Bootstrap replications (over units)", 100), num("seed", "Random seed", 0)],
+         example=dict(file=PD + "wagepan_full.csv", spec=dict(y="lwage", x=["union", "married", "expersq"], unit="nr", time="year", boot=30))),
+    dict(id="spatial", group="Panel data", name="Spatial panel models (SAR, SEM, SDM)", guide="panel-data-guide/spatial.html", fn=panel_extra.spatial,
+         fields=[col("y", "Dependent variable"), cols("x", "Regressors"), UNIT, PTIME, col("neighbours", "Neighbour list column (unit names separated by ;)", required=False, help="Same list on every row of a unit"),
+                 col("lat", "Latitude (alternative to the neighbour list)", required=False), col("lon", "Longitude (alternative to the neighbour list)", required=False),
+                 num("knn", "Nearest neighbours (coordinates only)", 5), num("sims", "Simulation draws for the effects", 500), num("seed", "Random seed", 0)],
+         example=dict(file=OX + "produc_nb.csv", spec=dict(y="log_gsp", x=["log_pcap", "log_pc", "log_emp", "unemp"], unit="state", time="year", neighbours="neighbours"))),
+]
+
 BY_ID = {m["id"]: m for m in MODELS}
 GROUPS = ["Time series", "Panel data", "Causal inference", "Machine learning", "Bayesian", "Markov switching"]
 
@@ -451,7 +474,7 @@ def packages(model_id):
     return ["scikit-learn", "xgboost"] if model_id == "xgb" else ["scikit-learn"]
 
 
-SLOW = {"dml_irm", "dml_iv", "causal_forest", "staggered", "tvpvar", "mfbvar", "svvar", "hier_panel", "sign_bvar", "ms_tvtp", "eventstudy", "sdid", "matching", "bartik", "arima", "garch", "quantile", "cointegration", "wavelet"}
+SLOW = {"dml_irm", "dml_iv", "causal_forest", "staggered", "tvpvar", "mfbvar", "svvar", "hier_panel", "sign_bvar", "ms_tvtp", "eventstudy", "sdid", "matching", "bartik", "arima", "garch", "quantile", "cointegration", "wavelet", "twfe", "dpthresh", "pcoint", "pquant", "spatial"}
 
 
 def catalog():

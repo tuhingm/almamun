@@ -866,5 +866,71 @@
    "label": "Share significant",
    "value": 0.143
   }
+ },
+ "twfe": {
+  "nobs": 1380,
+  "table_index": 0,
+  "table": "Variance shares",
+  "row": "log_sales",
+  "col": "Between units",
+  "value": 0.677,
+  "rtol": 0.001,
+  "seconds": 0.1,
+  "summary": {
+   "label": "Coefficient on log_price",
+   "value": -1.0349
+  }
+ },
+ "dpthresh": {
+  "nobs": 3724,
+  "table_index": 0,
+  "table": "Persistence under three estimators",
+  "row": "Pooled OLS",
+  "col": "Coefficient on lagged lnhr",
+  "value": 0.476,
+  "rtol": 0.001,
+  "seconds": 1.0,
+  "summary": {
+   "label": "Threshold",
+   "value": 2.79
+  }
+ },
+ "pcoint": {
+  "nobs": 342,
+  "table_index": 0,
+  "table": "Panel unit-root tests",
+  "row": "lgaspcar",
+  "col": "CIPS level",
+  "value": -1.378,
+  "rtol": 0.001,
+  "seconds": 0.9,
+  "summary": {
+   "label": "Kao p",
+   "value": 0.0452
+  }
+ },
+ "pquant": {
+  "nobs": 4360,
+  "table_index": 0,
+  "table": "Coefficient on union by quantile",
+  "row": "Pooled quantile regression",
+  "col": "Quantile",
+  "value": 0.1,
+  "rtol": 0.001,
+  "seconds": 12.7
+ },
+ "spatial": {
+  "nobs": 816,
+  "table_index": 0,
+  "table": "Spatial weights",
+  "row": "Units",
+  "col": "Value",
+  "value": 48,
+  "rtol": 0.001,
+  "seconds": 0.1,
+  "summary": {
+   "label": "SAR rho",
+   "value": 0.196
+  }
  }
 }
