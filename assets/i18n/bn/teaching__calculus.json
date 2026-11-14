@@ -400,5 +400,6 @@
   "6. Confidence intervals and testing": "৬. কনফিডেন্স ইন্টারভ্যাল ও টেস্টিং",
   "7. Bayesian inference": "৭. বেইজিয়ান অনুমান",
   "8. Experimental design": "৮. পরীক্ষামূলক নকশা",
-  "9. ANOVA and multiple comparisons": "৯. ANOVA ও একাধিক তুলনা"
+  "9. ANOVA and multiple comparisons": "৯. ANOVA ও একাধিক তুলনা",
+  "html:Plot functions with removable and jump discontinuities. Compare numerical limits at decreasing step sizes with analytic limits; explain why numerical evidence is not a proof.": "রিমুভেবল ও জাম্প ডিসকন্টিনিউটি-সহ ফাংশনের গ্রাফ আঁকুন। ক্রমহ্রাসমান ধাপের আকারে সংখ্যাগত সীমা ও বিশ্লেষণাত্মক সীমা তুলনা করুন; সংখ্যাগত প্রমাণ কেন গাণিতিক প্রমাণ নয় তা ব্যাখ্যা করুন।"
 }
