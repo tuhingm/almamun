@@ -301,7 +301,7 @@
   "Step-by-step": "단계별 설명",
   "Interpretation and intuition": "해석과 직관",
   "Practical implementation": "실제 구현",
-  "html:Measure simple and log returns; distinguish arithmetic and geometric performance; quantify risk and explain the role of stochastic discounting.": "단순수익률과 로그수익률을 측정하고 산술평균 및 기하평균 성과를 구분하며 위험을 계량화하고 확률적 할인요인의 역할을 설명한다.",
+  "html:Measure simple and log returns; distinguish arithmetic and geometric performance; quantify risk and explain the role of stochastic discounting.": "단순수익률과 로그수익률을 측정하고, 산술수익률과 기하수익률을 구분한다. 위험을 정량화하고 확률적 할인요인의 역할을 설명한다.",
   "html:Represent uncertainty with probability distributions; derive expected utility and certainty equivalents; understand risk aversion and downside risk.": "확률분포로 불확실성을 표현하고 기대효용과 확실성등가를 유도하며 위험회피와 하방위험을 이해한다.",
   "html:Derive minimum-variance portfolios and efficient frontiers; understand diversification, tangency portfolios, and estimation sensitivity.": "최소분산 포트폴리오와 효율적 투자선을 유도하고 분산투자, 접점 포트폴리오 및 추정 민감도를 이해한다.",
   "html:Derive CAPM implications; estimate beta and alpha; interpret factor models and distinguish systematic from idiosyncratic risk.": "CAPM의 함의를 유도하고 베타와 알파를 추정하며 요인모형을 해석하고 체계적 위험과 고유위험을 구분한다.",
@@ -345,7 +345,7 @@
   "Assessment methods": "평가 방법",
   "Weekly schedule": "주별 일정",
   "Assignments: Problem Sets and Solutions": "과제: 문제 세트와 해답",
-  "html:An asset rises from 100 to 108 and pays a distribution of 2. Its total simple return is 10%. Calculate its log return and compare the two measures.": "자산 가격이 100에서 108로 상승하고 2의 분배금을 지급한다. 총 단순수익률은 10%이다. 로그수익률을 계산하고 두 측정치를 비교하라.",
+  "html:An asset rises from 100 to 108 and pays a distribution of 2. Its total simple return is 10%. Calculate its log return and compare the two measures.": "একটি সম্পদের মূল্য ১০০ থেকে ১০৮-এ বৃদ্ধি পায় এবং ২ একক লভ্যাংশ দেয়। এর মোট সরল রিটার্ন ১০%। লগ রিটার্ন গণনা করে দুটি পরিমাপের তুলনা করুন।",
   "html:Load adjusted price data, compute simple and log returns, annualize means and volatility under an explicitly stated frequency assumption, and compare arithmetic and geometric annualized performance. Check missing dates and corporate-action treatment.": "সমন্বিত মূল্য ডেটা লোড করুন, simple ও log return গণনা করুন, স্পষ্টভাবে উল্লেখিত frequency assumption-এর অধীনে গড় ও volatility annualize করুন এবং arithmetic ও geometric annualized performance তুলনা করুন। অনুপস্থিত তারিখ ও corporate-action treatment পরীক্ষা করুন।",
   "html:Daily returns are far from normal: excess kurtosis is about 8, and there were 32 days with moves beyond four standard deviations, where a normal distribution predicts 0.3. The three worst days all fell in autumn 2008. Returns themselves have small (slightly negative) autocorrelations, but squared returns are strongly autocorrelated: large moves cluster in time. Returns are close to unpredictable; risk is highly predictable. This is the motivation for GARCH models (Lectures 13 and 15) and for fat-tailed risk measures.": "일별 수익률은 정규분포와 크게 다르다. 초과첨도는 약 8이며, 정규분포에서는 0.3일로 예상되는 4 표준편차 초과 움직임이 32일 발생했다. 가장 큰 세 번의 하락은 모두 2008년 가을에 집중되었다. 수익률 자체의 자기상관은 작고 약간 음수이지만, 제곱수익률은 강한 자기상관을 보인다. 큰 변동이 시간적으로 군집한다는 뜻이다. 수익률 자체는 예측하기 어렵지만 위험은 상당히 예측 가능하다. 이것이 GARCH 모형(강의 13 및 15)과 두꺼운 꼬리 위험측정의 동기이다."
 }
