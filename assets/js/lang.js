@@ -85,16 +85,34 @@
     });
   }
 
+  // Nested pages inherit dictionaries from their parent sections. For example,
+  // teaching/econometrics/lecture-01 inherits teaching__econometrics.json,
+  // then applies any lecture-specific dictionary on top.
+  var dictionarySlugs = [];
+  var parentSlug = slug;
+  while (parentSlug) {
+    dictionarySlugs.unshift(parentSlug);
+    var separator = parentSlug.lastIndexOf('__');
+    if (separator < 0) break;
+    parentSlug = parentSlug.slice(0, separator);
+  }
+
   Promise.all([
-    fetchDictionary(pageUrl, true),
-    fetchDictionary(commonUrl, true)
-  ]).then(function (dictionaries) {
-    var dictionary = Object.assign({}, dictionaries[1], dictionaries[0]);
+    fetchDictionary(commonUrl, true),
+    Promise.all(dictionarySlugs.map(function (part) {
+      return fetchDictionary(new URL(part + '.json', translationRoot), true);
+    }))
+  ]).then(function (results) {
+    var dictionary = Object.assign({}, results[0]);
+    results[1].forEach(function (part) {
+      Object.assign(dictionary, part);
+    });
     applyTranslations(dictionary);
     document.documentElement.dataset.translationStatus =
-      Object.keys(dictionaries[0]).length ? 'page-dictionary-loaded' : 'common-only';
-    if (!Object.keys(dictionaries[0]).length) {
-      console.warn('[i18n] Missing page dictionary:', pageUrl.pathname);
+      results[1].some(function (part) { return Object.keys(part).length > 0; })
+        ? 'local-dictionaries-loaded' : 'common-only';
+    if (!results[1].some(function (part) { return Object.keys(part).length > 0; })) {
+      console.warn('[i18n] No page or parent dictionary found for:', slug);
     }
   }).catch(function (error) {
     document.documentElement.dataset.translationStatus = 'dictionary-error';
