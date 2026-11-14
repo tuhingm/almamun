@@ -33,5 +33,17 @@
 "How the tool decides.": "도구가 판단하는 방식.",
 "A series is treated as stationary, I(0), if the ADF test rejects a unit root in levels at 5%; as I(1) if it rejects only after first differencing. The KPSS test is reported as a cross-check, and the tool warns you when the two disagree. When every series is I(1), the Johansen trace test decides between VAR and VECM. These are standard rules, but tests have low power in short samples and can be distorted by structural breaks, so treat the result as a starting point and justify the choice in your paper.": "수준변수에서 ADF 검정이 5% 수준에서 단위근을 기각하면 정상(I(0))으로, 1차 차분 후에야 기각하면 I(1)로 봅니다. KPSS 검정은 교차 확인용으로 함께 보고하며, 두 검정이 어긋나면 도구가 경고합니다. 모든 계열이 I(1)이면 요한센 트레이스 검정이 VAR과 VECM 중 무엇을 쓸지 결정합니다. 이는 표준적인 규칙이지만, 표본이 짧으면 검정력이 낮고 구조변화로 왜곡될 수 있으므로 결과를 출발점으로 삼고 논문에서 선택의 근거를 밝혀야 합니다.",
 "Tuhin G. M. Al Mamun, Ph.D.": "투힌 G. M. 알 마문 박사",
-"· Empirical Research Guide": "· 실증연구 가이드"
+"· Empirical Research Guide": "· 실증연구 가이드",
+"Stock returns and the economy": "주식 수익률과 경제",
+"Monthly, 1985–2019 · U.S.": "월별, 1985–2019 · 미국",
+"S&P 500 return, industrial production growth, change in the federal funds rate, change in the Baa–Treasury credit spread.": "S&P 500 수익률, 산업생산 증가율, 연방기금금리 변화, Baa–국채 신용스프레드 변화.",
+"Stock prices and industrial production": "주가와 산업생산",
+"Log S&P 500 index and log industrial production.": "로그 S&P 500 지수와 로그 산업생산.",
+"Short and long interest rates": "단기 및 장기 금리",
+"Quarterly, 1960–2019 · U.S.": "분기별, 1960–2019 · 미국",
+"10-year and 1-year Treasury yields.": "10년물 및 1년물 국채 수익률.",
+"What moves the 10-year yield?": "10년물 수익률을 움직이는 것은?",
+"10-year Treasury yield, GDP-deflator inflation, real GDP growth and the unemployment rate.": "10년물 국채 수익률, GDP 디플레이터 인플레이션, 실질 GDP 성장률, 실업률.",
+"Money, prices and output": "통화, 물가, 산출",
+"Log GDP deflator, log M2 money stock and log real GDP.": "로그 GDP 디플레이터, 로그 M2 통화량, 로그 실질 GDP."
 }
