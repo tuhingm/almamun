@@ -16,7 +16,8 @@ OUT = ROOT / "panel-data-guide"
 sys.path.insert(0, str(ROOT / "tools"))
 from build_courses import md_to_html  # same Markdown and math settings as the course sites
 
-ORDER = ["pols", "re", "fe", "gmm", "fedk", "mg", "diff", "pmg", "csardl"]
+ORDER = ["pols", "re", "fe", "gmm", "fedk", "mg", "diff", "pmg", "csardl", "plp", "pthresh", "twfe", "dpthresh", "pcoint", "pquant", "spatial"]
+STATIC = dict(plp="Panel LP", pthresh="Panel threshold")   # built by tools/bayes_markov/build_guides.py
 BLOCK = re.compile(r"```python( norun)?\n(.*?)\n```", re.S)
 
 
@@ -80,7 +81,7 @@ def build(slug, metas):
         toc.append(f'<a href="#s{n}"><span>{n:02d}</span>{title}</a>')
         return f'<h2 id="s{n}"><span class="stepno">Step {n}</span>{m.group(1)}</h2>'
     page = re.sub(r"<h2[^>]*>(.*?)</h2>", h2, page)
-    others = "".join(f'<a class="{"cur" if s == slug else ""}" href="{s}.html">{metas[s]["short"]}</a>' for s in ORDER if s in metas)
+    others = "".join(f'<a class="{"cur" if s == slug else ""}" href="{s}.html">{(metas[s]["short"] if s in metas else STATIC[s])}</a>' for s in ORDER if s in metas or s in STATIC)
     tpl = (HERE / "guide_template.html").read_text()
     for k, v in dict(TITLE=meta["title"], SHORT=meta["short"], WHEN=meta["when"], DATA=meta["data"], LEAD=meta["lead"], SLUG=slug,
                      STEPS=str(n), TOC="".join(toc), BODY=page, OTHERS=others).items():

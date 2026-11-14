@@ -334,5 +334,11 @@
   "kicker": "Panel Data Guide · Model guide",
   "title": "Random Effects",
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
+ },
+ {
+  "out": "assets/og/panel-data-guide/twfe.jpg",
+  "kicker": "Panel Data Guide · Model guide",
+  "title": "Two-Way Fixed Effects with Clustered Standard Errors",
+  "sub": "Unit and time effects are both needed and errors are correlated within units or across units. Step-by-step guide with Python code…"
  }
 ]
