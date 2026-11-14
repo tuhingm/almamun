@@ -1,0 +1,19 @@
+{
+"Markov Guide | Tuhin G. M. Al Mamun": "마르코프 가이드 | 투힌 G. M. 알 마문",
+"Empirical Research Guide · Markov-Switching Models": "실증연구 가이드 · 마르코프 국면전환 모형",
+"Which Markov-switching model fits your data?": "내 데이터에는 어떤 마르코프 국면전환 모형이 맞을까요?",
+"The right Markov-switching model depends on whether your series are stationary, whether the regime is observed or hidden, and how your data are structured. Test a real dataset, upload your own, or enter your test results, and follow the decision tree to the model your paper needs.": "알맞은 마르코프 국면전환 모형은 계열이 정상인지, 국면이 관측되는지 숨겨져 있는지, 데이터가 어떤 구조인지에 따라 정해집니다. 실제 데이터셋으로 검정해 보거나, 직접 데이터를 올리거나, 검정 결과를 입력하고, 의사결정 나무를 따라 논문에 필요한 모형까지 가 보세요.",
+"real example datasets": "개 실제 예제 데이터",
+"Tests run in your browser": "검정은 브라우저에서 실행됩니다",
+"See the tests and the choice on real data": "실제 데이터로 검정과 선택 과정 보기",
+"Five real datasets. Each one leads to a different outcome, including the case where Markov switching is the wrong tool.": "실제 데이터셋 5개. 각각 서로 다른 결론으로 이어지며, 마르코프 국면전환이 맞지 않는 경우도 포함됩니다.",
+"Upload your data": "데이터 업로드",
+"A CSV with a header row. Time series: one row per period, the date first. Panel: one row per unit and period, with the unit identifier and the date. Mixed frequencies: leave the low-frequency variable empty in the periods where it is not observed.": "머리글 행이 있는 CSV입니다. 시계열은 기간마다 한 행, 날짜를 맨 앞에 둡니다. 패널은 개체와 기간마다 한 행으로 개체 식별자와 날짜를 넣습니다. 혼합주기 자료는 저빈도 변수가 관측되지 않는 기간에는 비워 두세요.",
+"Your file is analysed on your own device and is not uploaded anywhere. Transform your variables first (logs, growth rates, real values) as your paper requires.": "파일은 사용자의 기기에서만 분석되며 어디에도 업로드되지 않습니다. 논문에서 필요한 대로 변수를 먼저 변환(로그, 성장률, 실질값)해 두세요.",
+"Use this if you have already run the tests. If you have not, choose “Use my own data” and the tests are run and explained for you.": "검정을 이미 해 보셨다면 이 방법을 쓰세요. 아직이라면 “내 데이터 사용”을 선택하면 검정을 대신 실행하고 설명해 드립니다.",
+"The path lights up as the evidence comes in. Each fork is a question the tests answer.": "증거가 나오는 대로 경로에 불이 들어옵니다. 갈림길 하나하나는 검정이 답하는 질문입니다.",
+"Method guides": "방법 가이드",
+"Each guide takes one real dataset through pre-estimation tests, estimation, diagnostics, robustness and sample text for the paper, with Python code and real output.": "각 가이드는 실제 데이터셋 하나를 추정 전 검정, 추정, 진단, 강건성, 논문에 쓸 예시 문장까지 이끌며, Python 코드와 실제 출력을 함께 제공합니다.",
+"Markov-switching models need stationary series, so trending levels are sent back for transformation. If an observed variable above or below a threshold defines the regime, the threshold VAR (Bayesian Guide) is the better tool. Otherwise the structure decides: one series (MS-AR), a regression (MS regression), several series (MS-VAR) or a panel (panel MS-VAR). The page also reports the evidence for regimes: the likelihood-ratio statistic of a two-regime model against one regime, compared with the Garcia critical value of about 14, the AIC and BIC of both models, and the share of periods in the smaller regime, which flags a collapsed regime. These are screening numbers from a simple two-regime fit with no autoregressive terms and a switching variance, so they can differ from the full test in each guide (the Hamilton GNP guide, with AR(4) and a switching mean only, does not reject linearity at the Garcia value). The guide for each model covers its own test.": "마르코프 국면전환 모형은 정상 계열이 필요하므로, 추세가 있는 수준 변수는 변환하도록 되돌려 보냅니다. 관측되는 변수가 임계값보다 높은지 낮은지로 국면이 정해진다면 임계 VAR(베이지안 가이드)이 더 알맞은 도구입니다. 그렇지 않으면 구조가 결정합니다. 계열 하나(MS-AR), 회귀(MS 회귀), 계열 여러 개(MS-VAR), 패널(패널 MS-VAR)입니다. 이 페이지는 국면의 존재에 대한 증거도 보고합니다. 2국면 모형 대 1국면 모형의 우도비 통계량(가르시아(Garcia) 임계값 약 14와 비교), 두 모형의 AIC와 BIC, 작은 국면에 속하는 기간의 비중(국면이 붕괴되었는지 알려 줌)입니다. 이는 자기회귀항 없이 분산이 전환되는 단순 2국면 적합에서 나온 선별용 수치이므로 각 가이드의 완전한 검정과 다를 수 있습니다(AR(4)에 평균만 전환되는 해밀턴 GNP 가이드는 가르시아 값에서 선형성을 기각하지 못합니다). 각 모형의 가이드가 자체 검정을 다룹니다.",
+"· Markov Guide": "· 마르코프 가이드"
+}
