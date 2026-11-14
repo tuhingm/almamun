@@ -70,7 +70,7 @@ footer{background:var(--navy2);color:#c3d0e4;padding:22px 0;font-size:10px}.foot
 <section class="hero"><div class="wrap"><div class="crumbs"><a href="index.html">Markov Guide</a><span>/</span>Method guide</div><div class="kicker">Regimes are hidden, but you think an observed variable changes the probability of moving between them (a policy rate, a spread, a confidence index)</div><h1>Markov Switching with Time-Varying Transition Probabilities</h1><p class="lead">Use this guide when you want the data to date hidden regimes (expansions and recessions) and you also want to ask what makes the economy switch. A Markov-switching model with time-varying transition probabilities (Filardo 1994; Diebold, Lee and Weinbach 1994) lets the probability of staying in or leaving a regime depend on an observed variable through a logit. The guide estimates a constant-probability model first, then the model in which the previous quarter's change in the federal funds rate moves the probabilities, tests it against the constant-probability model with a likelihood-ratio test and a permutation test, compares the regime dates with the NBER dates, and checks the sensitivity to the driver and to the specification. Sample text is given for each part of the paper.</p><div class="meta"><span><strong>8</strong> steps</span><span>Data: <strong>U.S. quarterly GNP growth (Hamilton 1989) and the federal funds rate, 1954Q3–1984Q4, with NBER recession dates for comparison</strong></span><span>Python · statsmodels</span></div><aside class="author-note" aria-label="Author's note"><span class="an-label">Author's note</span><p>The decision path, the choice of tests and diagnostics, and the inference design in this guide are my own. I built them from my training and research in econometrics, and I implemented and checked every step myself in Python. The estimators are standard methods from the literature, cited where they are used.</p><span class="an-sign">— Tuhin G. M. Al Mamun, Ph.D.</span></aside></div></section>
 <main class="wrap"><div class="lay">
 <aside class="toc" aria-label="Steps in this guide"><span class="label">Steps</span><a href="#s1"><span>01</span>The question and the model</a><a href="#s2"><span>02</span>Load the data and estimate the constant-probability model</a><a href="#s3"><span>03</span>Estimate the model with time-varying transition probabilities</a><a href="#s4"><span>04</span>What the driver does to the probabilities</a><a href="#s5"><span>05</span>Regime dates against the NBER dates</a><a href="#s6"><span>06</span>Is the time variation real? A permutation test</a><a href="#s7"><span>07</span>Robustness: the driver, the variance and the starting values</a><a href="#s8"><span>08</span>What to report in the paper</a></aside>
-<article><h2 id="s1"><span class="stepno">Step 1</span>The question and the model</h2>
+<article><p class="oes-run"><a href="../oes/index.html#ms_tvtp">Run this model on your own data in Open Econometric Systems →</a></p><h2 id="s1"><span class="stepno">Step 1</span>The question and the model</h2>
 <p><strong>Does a monetary tightening raise the probability that the economy slides into the low-growth regime?</strong> Hamilton's (1989) model lets GNP growth have a different mean and variance in two hidden states, with constant transition probabilities. The time-varying version lets the probabilities depend on a variable <span class="arithmatex">\(z_{t-1}\)</span> that is known when the quarter begins:</p>
 <div class="arithmatex">\[
 y_t\mid s_t=k\sim N(\mu_k,\sigma_k^2),\qquad
@@ -157,7 +157,7 @@ p[1-&gt;0].tvtp0 -5.024    1.638  -3.068  0.002
 p[0-&gt;0].tvtp1  0.770    0.396   1.947  0.052
 p[1-&gt;0].tvtp1  5.162    2.389   2.161  0.031
 const[0]       0.047    0.172   0.273  0.785
-const[1]       1.295    0.111  11.655  0.000
+const[1]       1.295    0.111  11.656  0.000
 sigma2[0]      1.008    0.219   4.598  0.000
 sigma2[1]      0.510    0.113   4.495  0.000
 
@@ -243,7 +243,7 @@ LRs = np.array(LRs)
 print(f&quot;Likelihood-ratio statistic with the true driver: {LR:.2f}&quot;)
 print(f&quot;Shuffled driver ({len(LRs)} fits): mean {LRs.mean():.2f}, 95th percentile {np.percentile(LRs, 95):.2f}, maximum {LRs.max():.2f}&quot;)
 print(f&quot;Permutation p-value: {(np.sum(LRs &gt;= LR) + 1) / (len(LRs) + 1):.3f}; asymptotic chi-square(2) p-value: {stats.chi2.sf(LR, 2):.4f}&quot;)</code></pre><div class="cell-label out-l">Output</div><pre class="out">Likelihood-ratio statistic with the true driver: 14.46
-Shuffled driver (200 fits): mean 3.83, 95th percentile 9.67, maximum 16.30
+Shuffled driver (200 fits): mean 3.95, 95th percentile 9.65, maximum 16.20
 Permutation p-value: 0.020; asymptotic chi-square(2) p-value: 0.0007</pre></div>
 <div class="read">
 <p><strong>How to read it</strong></p>

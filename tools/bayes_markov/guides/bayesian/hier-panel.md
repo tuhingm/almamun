@@ -3,6 +3,7 @@ short: Hierarchical panel
 when: A panel where effects differ across countries or groups, some groups have little data, and you want partial pooling instead of a single slope or one regression per group
 data: 14 OECD countries, 1966–1990 (Garrett 1998): GDP growth, trade openness and unemployment, 350 observations
 tools: Python · numpy
+oes: hier_panel
 lead: Use this guide when you believe that the effect of a variable differs across countries, but each country has too few observations to estimate its own slope reliably. A hierarchical (multilevel) model estimates a slope for each country and also the distribution those slopes are drawn from, so that noisy country estimates are shrunk towards the common mean by an amount the data choose. The guide builds the Gibbs sampler, checks convergence, compares pooled, fixed-effects, separate and hierarchical estimates, tests out-of-sample prediction, and checks the sensitivity to the prior on the spread of slopes. Sample text is given for each part of the paper.
 ---
 

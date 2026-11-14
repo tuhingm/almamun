@@ -18,13 +18,17 @@ import sys
 import time
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-src = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else ROOT.parent / "open-econometric-systems") / "oes-engine" / "oes_engine"
+LOCAL = "--local" in sys.argv      # engine already edited in place in oes/engine: only rebuild catalog.json and expected.json
+ONLY = next((a.split("=", 1)[1].split(",") for a in sys.argv if a.startswith("--only=")), None)   # run the examples of these models only and merge into expected.json
+args = [a for a in sys.argv[1:] if a != "--local" and not a.startswith("--only=")]
+src = pathlib.Path(args[0] if args else ROOT.parent / "open-econometric-systems") / "oes-engine" / "oes_engine"
 dst = ROOT / "oes" / "engine" / "oes_engine"
 dst.mkdir(parents=True, exist_ok=True)
-for f in dst.glob("*.py"):
-    f.unlink()
-for f in sorted(src.glob("*.py")):
-    shutil.copy(f, dst / f.name)
+if not LOCAL:
+    for f in dst.glob("*.py"):
+        f.unlink()
+    for f in sorted(src.glob("*.py")):
+        shutil.copy(f, dst / f.name)
 print("engine files:", ", ".join(sorted(f.name for f in dst.glob("*.py"))))
 
 sys.dont_write_bytecode = True
@@ -33,8 +37,10 @@ import oes_engine as E  # noqa: E402
 
 (ROOT / "oes/engine/catalog.json").write_text(json.dumps({"version": E.__version__, "models": E.catalog()}, separators=(",", ":")))
 
-expected = {}
+expected = json.loads((ROOT / "oes/engine/expected.json").read_text()) if ONLY else {}
 for m in E.MODELS:
+    if ONLY and m["id"] not in ONLY:
+        continue
     ex = m["example"]
     spec = dict(ex["spec"], ops=ex.get("ops", []))
     t = time.time()

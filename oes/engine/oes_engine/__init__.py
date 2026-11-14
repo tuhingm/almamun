@@ -13,11 +13,11 @@ import warnings
 import numpy as np
 import pandas as pd
 
-from . import bayes, breaks, causal, lp, markov, ml, panel, pthreshold, pvar, smooth, statespace_var, svar, tar, timeseries
+from . import bayes, bayes_extra, breaks, causal, lp, markov, ml, panel, pthreshold, pvar, smooth, statespace_var, svar, tar, timeseries
 from .core import OESError, read_csv, time_order
 from .report import frame, plot, show, summary, tables
 
-__version__ = "1.2.0"
+__version__ = "1.3.0"
 
 # field helpers -------------------------------------------------------------------------------------------------
 def col(key, label, required=True, help=""):
@@ -375,6 +375,30 @@ MODELS += [
          example=dict(file=PD + "garrett.csv", spec=dict(vars=["gdp_growth", "unem"], unit="country", time="year", lags=1, switching="MSIH"))),
 ]
 
+MODELS += [
+    dict(id="blp", group="Bayesian", name="Bayesian local projections", guide="bayesian-guide/blp.html", fn=bayes_extra.blp,
+         fields=[col("y", "Response variable"), col("shock", "Shock variable"), cols("contemp", "Contemporaneous controls (ordered before the shock)", required=False), TIME,
+                 num("lags", "Lags of every variable", 4), num("horizon", "Horizon", 16), num("s0", "Prior sd of the first response (blank = automatic)", ""),
+                 num("tau", "Smoothness tau (blank = marginal likelihood)", ""), num("seed", "Random seed", 0)],
+         example=dict(file=OX + "us_macro.csv", spec=dict(y="unemp", shock="tbilrate", contemp=["inflation"], time="date", lags=4, horizon=16))),
+    dict(id="sign_bvar", group="Bayesian", name="Sign-restricted Bayesian VAR", guide="bayesian-guide/sign-bvar.html", fn=bayes_extra.sign_bvar,
+         fields=[cols("vars", "Variables"), col("shock_var", "Variable that rises on impact after the shock"), cols("neg", "Variables restricted to fall", required=False),
+                 cols("pos", "Other variables restricted to rise", required=False), TIME, num("lags", "Lags", 4), num("restrict_horizon", "Restriction horizon (periods)", 4),
+                 num("lambda1", "Overall tightness lambda1", 0.2), num("horizon", "IRF horizon", 20), num("draws", "Posterior draws", 1000), num("seed", "Random seed", 0)],
+         example=dict(file=OX + "us_macro.csv", spec=dict(vars=["gdp_growth", "inflation", "m1_growth", "tbilrate"], shock_var="tbilrate", neg=["inflation", "m1_growth"], time="date", draws=500))),
+    dict(id="hier_panel", group="Bayesian", name="Hierarchical panel regression", guide="bayesian-guide/hier-panel.html", fn=bayes_extra.hier_panel,
+         fields=[col("y", "Dependent variable"), col("x", "Variable with a unit-specific slope"), cols("controls", "Controls (common slopes)", required=False), UNIT, col("time", "Time identifier (optional)", required=False),
+                 num("chains", "Chains", 2), num("iters", "Iterations per chain", 3000), num("burn", "Burn-in", 1000),
+                 num("scale_slope", "Half-Cauchy scale, spread of slopes", 1), num("scale_intercept", "Half-Cauchy scale, spread of intercepts", 5)],
+         example=dict(file=PD + "garrett.csv", spec=dict(y="gdp_growth", x="trade", controls=["unem"], unit="country", time="year", iters=2500, burn=800))),
+    dict(id="ms_tvtp", group="Markov switching", name="Markov switching with time-varying probabilities", guide="markov-guide/ms-tvtp.html", fn=bayes_extra.ms_tvtp,
+         fields=[col("y", "Dependent variable"), cols("driver", "Driver(s) of the transition probabilities"), TIME,
+                 sel("lag_driver", "Lag the driver one period", [["yes", "Yes (known at the start of the period)"], ["no", "No"]], "yes"),
+                 sel("switching_variance", "Switching variance", [["yes", "Yes"], ["no", "No"]], "yes"),
+                 col("reference", "Reference 0/1 series, e.g. recession dates (optional)", required=False, help="Compared with the estimated regimes")],
+         example=dict(file=OX + "gnp_fedfunds.csv", spec=dict(y="gnp_growth", driver=["d_fedfunds"], time="date", reference="nber_recession"))),
+]
+
 BY_ID = {m["id"]: m for m in MODELS}
 GROUPS = ["Time series", "Panel data", "Causal inference", "Machine learning", "Bayesian", "Markov switching"]
 
@@ -387,7 +411,7 @@ def packages(model_id):
     return ["scikit-learn", "xgboost"] if model_id == "xgb" else ["scikit-learn"]
 
 
-SLOW = {"dml_irm", "dml_iv", "causal_forest", "staggered", "tvpvar", "mfbvar", "svvar"}
+SLOW = {"dml_irm", "dml_iv", "causal_forest", "staggered", "tvpvar", "mfbvar", "svvar", "hier_panel", "sign_bvar", "ms_tvtp"}
 
 
 def catalog():

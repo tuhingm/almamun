@@ -3,6 +3,7 @@ short: Sign-restricted BVAR
 when: You want a structural shock identified by theory-based sign restrictions on the responses, without a causal ordering
 data: U.S. quarterly GDP growth, inflation, M1 growth and the 3-month T-bill rate, 1959–2009 (monetary policy shock)
 tools: Python · numpy · statsmodels
+oes: sign_bvar
 lead: Use this guide when you can say how some variables must respond to a shock (a monetary tightening raises the rate and lowers inflation and money growth) but cannot defend a recursive ordering. Sign restrictions identify a set of structural models, not one, so the guide estimates a Bayesian VAR with a Minnesota-type prior, draws rotations that satisfy the restrictions, reports the responses with credible sets, measures how informative the restrictions are, and checks how the answer depends on the restriction horizon and on the prior. Sample text is given for each part of the paper.
 ---
 

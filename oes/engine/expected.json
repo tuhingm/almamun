@@ -688,5 +688,61 @@
    "label": "Log-likelihood",
    "value": -985.409
   }
+ },
+ "blp": {
+  "nobs": 202,
+  "table_index": 0,
+  "table": "Impulse response: local projection and Bayesian posterior",
+  "row": "1",
+  "col": "LP estimate",
+  "value": -0.03336,
+  "rtol": 0.05,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Smoothness tau",
+   "value": 0.0619
+  }
+ },
+ "sign_bvar": {
+  "nobs": 202,
+  "table_index": 0,
+  "table": "Impulse responses to the identified shock (one standard deviation, rate normalised to rise on impact)",
+  "row": "gdp_growth, horizon 0",
+  "col": "Median",
+  "value": 0.830932,
+  "rtol": 0.05,
+  "seconds": 0.6,
+  "summary": {
+   "label": "Acceptance rate",
+   "value": 0.0701
+  }
+ },
+ "hier_panel": {
+  "nobs": 350,
+  "table_index": 0,
+  "table": "Hyper-parameters and common coefficients",
+  "row": "Average slope on trade",
+  "col": "Mean",
+  "value": -0.035506,
+  "rtol": 0.05,
+  "seconds": 3.9,
+  "summary": {
+   "label": "Average slope",
+   "value": -0.0355
+  }
+ },
+ "ms_tvtp": {
+  "nobs": 120,
+  "table_index": 0,
+  "table": "Regime parameters (time-varying probabilities)",
+  "row": "p[0->0].tvtp0",
+  "col": "Estimate",
+  "value": 5.023908,
+  "rtol": 0.001,
+  "seconds": 2.5,
+  "summary": {
+   "label": "Log-likelihood",
+   "value": -161.3
+  }
  }
 }

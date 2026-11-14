@@ -3,6 +3,7 @@ short: MS with TVTP
 when: Regimes are hidden, but you think an observed variable changes the probability of moving between them (a policy rate, a spread, a confidence index)
 data: U.S. quarterly GNP growth (Hamilton 1989) and the federal funds rate, 1954Q3–1984Q4, with NBER recession dates for comparison
 tools: Python · statsmodels
+oes: ms_tvtp
 lead: Use this guide when you want the data to date hidden regimes (expansions and recessions) and you also want to ask what makes the economy switch. A Markov-switching model with time-varying transition probabilities (Filardo 1994; Diebold, Lee and Weinbach 1994) lets the probability of staying in or leaving a regime depend on an observed variable through a logit. The guide estimates a constant-probability model first, then the model in which the previous quarter's change in the federal funds rate moves the probabilities, tests it against the constant-probability model with a likelihood-ratio test and a permutation test, compares the regime dates with the NBER dates, and checks the sensitivity to the driver and to the specification. Sample text is given for each part of the paper.
 ---
 

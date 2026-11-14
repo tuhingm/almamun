@@ -3,6 +3,7 @@ short: Bayesian LP
 when: You want impulse responses without a full VAR, with smoother, more precise estimates at long horizons and probability statements about them
 data: U.S. quarterly inflation, unemployment and the 3-month T-bill rate, 1959–2009 (monetary policy shock by recursive identification)
 tools: Python · numpy · statsmodels
+oes: blp
 lead: Use this guide when you want the robustness of local projections (one regression per horizon, no assumption that the VAR is correctly specified) but find their impulse responses noisy at long horizons. A Bayesian local projection puts a prior on how much the response can change from one horizon to the next, which shrinks the erratic part of the estimate towards a smooth path and gives posterior probabilities. The guide builds the local projections, compares them with a VAR, adds the smoothness prior with its tightness chosen by the data, reports posterior bands and probabilities, and checks the sensitivity to the prior and to the lag length. Sample text is given for each part of the paper.
 ---
 

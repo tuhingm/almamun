@@ -143,9 +143,9 @@ def sign_bvar(df, spec):
     rows = []
     for j, v in enumerate(vars_):
         for h in hsel:
-            rows.append([v, h, f(med[h, j]), f(lo[h, j]), f(hi[h, j]), f(lo9[h, j]), f(hi9[h, j]), f((ir[:, h, j] > 0).mean(), 3)])
+            rows.append([f"{v}, horizon {h}", f(med[h, j]), f(lo[h, j]), f(hi[h, j]), f(lo9[h, j]), f(hi9[h, j]), f((ir[:, h, j] > 0).mean(), 3)])
     tabs = [table("Impulse responses to the identified shock (one standard deviation, rate normalised to rise on impact)",
-                  ["Variable", "Horizon", "Median", "68% low", "68% high", "90% low", "90% high", "P(> 0)"], rows,
+                  ["Variable and horizon", "Median", "68% low", "68% high", "90% low", "90% high", "P(> 0)"], rows,
                   "Bands pool uncertainty about the reduced-form parameters and about the rotation; the pointwise median is not the response of a single model (Fry and Pagan 2011)."),
             table("Identification", ["Item", "Value"], [["Restrictions (signs for the first " + str(K) + " horizons)", ", ".join(f"{vars_[j]} {'+' if s > 0 else '-'}" for j, s in signs.items())],
                                                        ["Retained responses", len(keep)], ["Posterior draws with an admissible rotation", f(parok / nd, 3)], ["Share of rotations accepted", f(len(keep) / tried, 4)]])]
@@ -247,9 +247,9 @@ def ms_tvtp(df, spec):
     if not drv:
         raise OESError("Choose at least one variable that drives the transition probabilities.")
     distinct([y], drv)
-    d, labels = _series_frame(df, spec, [y] + drv)
-    lag = str(spec.get("lag_driver", "yes")).lower() in ("yes", "true", "1"); sv = str(spec.get("switching_variance", "yes")).lower() in ("yes", "true", "1")
     ref = spec.get("reference") if spec.get("reference") not in (None, "") else None
+    d, labels = _series_frame(df, spec, [y] + drv + ([ref] if ref else []))
+    lag = str(spec.get("lag_driver", "yes")).lower() in ("yes", "true", "1"); sv = str(spec.get("switching_variance", "yes")).lower() in ("yes", "true", "1")
     Z = d[drv].copy()
     if lag:
         Z = Z.shift(1)
