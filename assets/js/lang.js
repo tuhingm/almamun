@@ -55,17 +55,17 @@
     function walk(el) {
       if (skip(el)) return;
       if (el.children.length && D['html:' + norm(el.textContent)] !== undefined) { el.innerHTML = D['html:' + norm(el.textContent)]; return; }
-      ATTR.forEach(function (a) { var v = el.getAttribute && el.getAttribute(a); if (v && D[norm(v)] !== undefined) el.setAttribute(a, D[norm(v)]); });
+      ATTR.forEach(function (a) { var v = el.getAttribute && el.getAttribute(a); if (v && D[norm(v)] !== undefined && D[norm(v)] !== v) el.setAttribute(a, D[norm(v)]); });
       for (var n = el.firstChild; n; n = n.nextSibling) {
         if (n.nodeType === 3) {
           var k = norm(n.nodeValue);
-          if (k && D[k] !== undefined) n.nodeValue = (/^\s/.test(n.nodeValue) ? ' ' : '') + D[k] + (/\s$/.test(n.nodeValue) ? ' ' : '');
+          if (k && D[k] !== undefined && D[k] !== k) n.nodeValue = (/^\s/.test(n.nodeValue) ? ' ' : '') + D[k] + (/\s$/.test(n.nodeValue) ? ' ' : '');
         } else if (n.nodeType === 1) walk(n);
       }
     }
     function all() {
       busy = true; walk(document.body);
-      var t = norm(document.title); if (D[t] !== undefined) document.title = D[t];
+      var t = norm(document.title); if (D[t] !== undefined && D[t] !== t) document.title = D[t];
       busy = false;
     }
     all();
