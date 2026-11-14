@@ -14,5 +14,20 @@
 "Each guide takes one real dataset through pre-estimation tests, estimation, diagnostics, robustness and sample text for the paper, with Python code and real output.": "각 가이드는 실제 데이터셋 하나를 추정 전 검정, 추정, 진단, 강건성, 논문에 쓸 예시 문장까지 이끌며, Python 코드와 실제 출력을 함께 제공합니다.",
 "Panels go to the panel VAR; a regression equation to Bayesian regression; a series observed at mixed frequencies to the mixed-frequency BVAR; 15 or more indicators to the FAVAR. For a set of macro series the tool checks whether the series are stationary and, if they are not I(1) in levels, tests three kinds of nonlinearity on a VAR(1): changing volatility (variance ratio, Levene and ARCH tests), unstable coefficients (CUSUM and sup-F) and a threshold (a bootstrap sup-LR test). The strongest rejection (p < 0.01 for volatility, p < 0.05 for the others) decides between the stochastic-volatility, time-varying-parameter and threshold VAR; if none rejects, a constant-parameter Bayesian VAR is adequate. A two-regime Markov-switching fit with LR above about 14 sends you to the Markov-Switching Guide. The tests are screening devices on a VAR(1) and do not replace the diagnostics inside each guide.": "패널은 패널 VAR로, 회귀식은 베이지안 회귀로, 혼합주기로 관측된 계열은 혼합주기 BVAR로, 지표가 15개 이상이면 FAVAR로 갑니다. 거시 계열 묶음에 대해서는 계열이 정상인지 점검하고, 수준에서 I(1)이 아니라면 VAR(1)에서 세 가지 비선형성을 검정합니다. 변동성 변화(분산비, 르벤(Levene), ARCH 검정), 불안정한 계수(CUSUM과 sup-F), 임계(부트스트랩 sup-LR 검정)입니다. 가장 강한 기각(변동성은 p < 0.01, 나머지는 p < 0.05)이 확률변동성 VAR, 시변모수 VAR, 임계 VAR 중 무엇을 쓸지 정하며, 어느 것도 기각되지 않으면 상수모수 베이지안 VAR로 충분합니다. 2국면 마르코프 국면전환 적합의 LR이 약 14를 넘으면 마르코프 국면전환 가이드로 안내합니다. 이 검정들은 VAR(1)에서의 선별 도구일 뿐, 각 가이드 안의 진단을 대신하지 않습니다.",
 "· Bayesian Guide": "· 베이지안 가이드",
-"Bayesian Guide | Tuhin G. M. Al Mamun": "베이지안 가이드 | 투힌 G. M. 알 마문"
+"Bayesian Guide | Tuhin G. M. Al Mamun": "베이지안 가이드 | 투힌 G. M. 알 마문",
+"Growth, inflation and the T-bill rate": "성장, 인플레이션, 단기국채 금리",
+"U.S. macro": "미국 거시",
+"Quarterly U.S. series. The tests ask whether volatility or coefficients change.": "미국 분기 시계열. 검정은 변동성이나 계수가 변하는지를 묻는다.",
+"Money, income and interest rates in levels": "수준변수로 본 통화, 소득, 금리",
+"U.S. money demand": "미국 화폐수요",
+"Trending series: what the selector does when the variables are I(1).": "추세가 있는 시계열: 변수가 I(1)일 때 선택기가 하는 일.",
+"Monthly indicators and quarterly GDP": "월별 지표와 분기 GDP",
+"Mixed frequency": "혼합 주기",
+"One variable is observed far less often than the others.": "한 변수가 다른 변수들보다 훨씬 드물게 관측된다.",
+"14 countries, 25 years": "14개국, 25년",
+"Panel of countries": "국가 패널",
+"A panel: one VAR for all the countries.": "패널: 모든 국가에 하나의 VAR.",
+"Log wages and 14 regressors": "로그 임금과 14개 설명변수",
+"Cross-section": "횡단면",
+"A single regression equation: is the prior needed?": "단일 회귀식: 사전분포가 필요한가?"
 }

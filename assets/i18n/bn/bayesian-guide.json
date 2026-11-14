@@ -14,5 +14,20 @@
 "Each guide takes one real dataset through pre-estimation tests, estimation, diagnostics, robustness and sample text for the paper, with Python code and real output.": "প্রতিটি নির্দেশিকা একটি বাস্তব ডেটাসেট ধরে প্রাক-প্রাক্কলন পরীক্ষা, প্রাক্কলন, ডায়াগনস্টিক, দৃঢ়তা যাচাই ও গবেষণাপত্রের নমুনা লেখা পর্যন্ত নিয়ে যায়—সঙ্গে Python কোড ও বাস্তব আউটপুট।",
 "Panels go to the panel VAR; a regression equation to Bayesian regression; a series observed at mixed frequencies to the mixed-frequency BVAR; 15 or more indicators to the FAVAR. For a set of macro series the tool checks whether the series are stationary and, if they are not I(1) in levels, tests three kinds of nonlinearity on a VAR(1): changing volatility (variance ratio, Levene and ARCH tests), unstable coefficients (CUSUM and sup-F) and a threshold (a bootstrap sup-LR test). The strongest rejection (p < 0.01 for volatility, p < 0.05 for the others) decides between the stochastic-volatility, time-varying-parameter and threshold VAR; if none rejects, a constant-parameter Bayesian VAR is adequate. A two-regime Markov-switching fit with LR above about 14 sends you to the Markov-Switching Guide. The tests are screening devices on a VAR(1) and do not replace the diagnostics inside each guide.": "প্যানেল যায় প্যানেল VAR-এ; রিগ্রেশন সমীকরণ বেইজিয়ান রিগ্রেশনে; মিশ্র ফ্রিকোয়েন্সিতে পর্যবেক্ষিত সিরিজ মিক্সড-ফ্রিকোয়েন্সি BVAR-এ; ১৫টি বা তার বেশি নির্দেশক FAVAR-এ। এক গুচ্ছ সামষ্টিক সিরিজের জন্য টুলটি দেখে সিরিজগুলো স্টেশনারি কি না, আর লেভেলে I(1) না হলে VAR(1)-এ তিন ধরনের অরৈখিকতা পরীক্ষা করে: পরিবর্তনশীল অস্থিরতা (ভ্যারিয়েন্স রেশিও, লেভিন ও ARCH পরীক্ষা), অস্থিতিশীল সহগ (CUSUM ও sup-F) এবং থ্রেশহোল্ড (বুটস্ট্র্যাপ sup-LR পরীক্ষা)। সবচেয়ে শক্তিশালী বাতিলকরণ (অস্থিরতার জন্য p < ০.০১, বাকিগুলোর জন্য p < ০.০৫) ঠিক করে স্টোক্যাস্টিক-ভোলাটিলিটি, টাইম-ভেরিয়িং-প্যারামিটার, না থ্রেশহোল্ড VAR হবে; কোনোটি বাতিল না হলে ধ্রুবক-প্যারামিটার বেইজিয়ান VAR-ই যথেষ্ট। দুই-রেজিমের মার্কভ-সুইচিং ফিটে LR প্রায় ১৪-এর বেশি হলে আপনাকে মার্কভ-সুইচিং নির্দেশিকায় পাঠানো হয়। পরীক্ষাগুলো VAR(1)-এ বাছাইয়ের হাতিয়ার মাত্র; প্রতিটি নির্দেশিকার ভেতরের ডায়াগনস্টিকের বিকল্প নয়।",
 "· Bayesian Guide": "· বেইজিয়ান নির্দেশিকা",
-"Bayesian Guide | Tuhin G. M. Al Mamun": "বেইজিয়ান নির্দেশিকা | তুহিন জি. এম. আল মামুন"
+"Bayesian Guide | Tuhin G. M. Al Mamun": "বেইজিয়ান নির্দেশিকা | তুহিন জি. এম. আল মামুন",
+"Growth, inflation and the T-bill rate": "প্রবৃদ্ধি, মুদ্রাস্ফীতি ও টি-বিল রেট",
+"U.S. macro": "মার্কিন সামষ্টিক অর্থনীতি",
+"Quarterly U.S. series. The tests ask whether volatility or coefficients change.": "মার্কিন ত্রৈমাসিক সিরিজ। পরীক্ষাগুলো দেখে অস্থিরতা বা সহগ বদলায় কি না।",
+"Money, income and interest rates in levels": "লেভেলে মুদ্রা, আয় ও সুদের হার",
+"U.S. money demand": "মার্কিন মুদ্রার চাহিদা",
+"Trending series: what the selector does when the variables are I(1).": "ট্রেন্ডযুক্ত সিরিজ: চলকগুলো I(1) হলে সিলেক্টর কী করে।",
+"Monthly indicators and quarterly GDP": "মাসিক সূচক ও ত্রৈমাসিক জিডিপি",
+"Mixed frequency": "মিশ্র ফ্রিকোয়েন্সি",
+"One variable is observed far less often than the others.": "একটি চলক অন্যগুলোর চেয়ে অনেক কম ঘনঘন পর্যবেক্ষণ করা হয়।",
+"14 countries, 25 years": "১৪টি দেশ, ২৫ বছর",
+"Panel of countries": "দেশভিত্তিক প্যানেল",
+"A panel: one VAR for all the countries.": "একটি প্যানেল: সব দেশের জন্য একটিই VAR।",
+"Log wages and 14 regressors": "মজুরির লগ ও ১৪টি রিগ্রেসর",
+"Cross-section": "ক্রস-সেকশন",
+"A single regression equation: is the prior needed?": "একটিমাত্র রিগ্রেশন সমীকরণ: প্রায়র কি দরকার?"
 }
