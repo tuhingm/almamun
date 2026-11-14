@@ -312,6 +312,12 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/panel-data-guide/pcoint.jpg",
+  "kicker": "Panel Data Guide · Model guide",
+  "title": "Panel Cointegration Tests",
+  "sub": "Non-stationary panel variables that may share a long-run relation (demand, growth, convergence). Step-by-step guide with Python…"
+ },
+ {
   "out": "assets/og/panel-data-guide/plp.jpg",
   "kicker": "Panel Data Guide · Model guide",
   "title": "Panel Local Projections",

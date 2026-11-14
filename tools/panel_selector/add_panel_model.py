@@ -25,6 +25,12 @@ EXTRA = {
                  steps=["Nickell bias and the IV approach", "Grid search for the threshold", "Bootstrap test and interval", "Regime slopes with AR(2) and Hansen tests", "Robustness: trimming, threshold variable, instruments"],
                  lec=[["../teaching/econometrics/lectures/08-dynamic-panels.html", "Lecture 08: Dynamic panels"]],
                  q=("I want a threshold effect in a model with a lagged dependent variable", "Dynamic panel threshold regression")),
+    "pcoint": dict(key="PCOINT", short="Panel cointegration",
+                 name="Panel cointegration tests (Kao, Pedroni-type, Westerlund)", when="Non-stationary panel variables with a possible long-run relation",
+                 why="The variables are integrated of order one and theory says they share a long-run relation. Residual-based tests (Kao, Pedroni) and error-correction tests (Westerlund) have different nulls and power, and cross-sectional dependence can distort them, so report several, with simulated critical values in short panels. Then estimate the long-run slopes by DOLS or FMOLS.",
+                 steps=["Panel unit roots that allow common shocks", "Kao and Pedroni-type residual tests", "Westerlund error-correction test", "Cross-sectional dependence and demeaned tests", "Long-run estimates by DOLS"],
+                 lec=[["lectures/macro-panel-econometrics.html", "Macro-panel lecture"]],
+                 q=("My variables are non-stationary and may share a long-run relation", "Panel cointegration tests")),
 }
 
 
