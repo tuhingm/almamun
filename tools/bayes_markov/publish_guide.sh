@@ -4,7 +4,6 @@ set -e
 cd "$(dirname "$0")/../.."
 python3 tools/bayes_markov/build_guides.py "$1" "$2"
 python3 tools/bayes_markov/add_guide.py "$1"
-python3 tools/bayes_markov/build_hubs.py "$1"
 python3 tools/author_note.py
 python3 tools/site_polish.py
 python3 tools/share_buttons.py
