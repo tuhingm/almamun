@@ -130,5 +130,16 @@
 "Real output",
 "How to write it"
 ]
+},
+{
+"out": "assets/og/time-series-guide-garch.jpg",
+"kicker": "Empirical Research Guide · Model guide",
+"title": "GARCH, EGARCH, GJR-GARCH and DCC",
+"sub": "Volatility that changes over time, or correlations between series that move. U.S. stock returns and the Korean won, monthly, 1981–2025",
+"tags": [
+"Python code",
+"Real output",
+"How to write it"
+]
 }
 ]

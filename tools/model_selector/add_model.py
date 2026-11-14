@@ -91,8 +91,24 @@ def patch_others(slug):
         p.write_text(s[:j] + link + s[j:])
 
 
+def add_card(slug):
+    """Append the link-preview card of the guide to tools/model_selector/guide_cards.json (idempotent)."""
+    import json
+    f = HERE / "guide_cards.json"
+    cards = json.loads(f.read_text())
+    out = f"assets/og/time-series-guide-{slug}.jpg"
+    if any(c["out"] == out for c in cards):
+        return
+    head = (ROOT / "tools" / "bayes_markov" / "guides" / "lp" / f"{slug}.md").read_text().split("\n---\n", 1)[0]
+    meta = {k.strip(): v.strip() for k, v in (l.split(":", 1) for l in head.strip().splitlines())}
+    cards.append(dict(out=out, kicker="Empirical Research Guide · Model guide", title=meta["title"], sub=meta["when"] + ". " + meta["data"],
+                      tags=["Python code", "Real output", "How to write it"]))
+    f.write_text(json.dumps(cards, ensure_ascii=False, indent=0))
+
+
 def main():
     for slug in sys.argv[1:]:
+        add_card(slug)
         for f in (HERE / "template.html", TS / "index.html"):
             patch_tool(f, slug)
         patch_guides_list(TS / "index.html", slug)
