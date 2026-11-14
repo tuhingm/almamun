@@ -45,5 +45,12 @@
 "Tuhin G. M. Al Mamun, Ph.D.": "ড. তুহিন জি. এম. আল মামুন",
 "Drop a CSV file here, or": "এখানে একটি CSV ফাইল ছেড়ে দিন, অথবা",
 "Python · statsmodels": "Python · statsmodels",
-"The decision path, the choice of tests and diagnostics, and the inference design in this guide are my own. I built them from my training and research in econometrics, and I implemented and checked every step myself in Python. The estimators are standard methods from the literature, cited where they are used.": "এই নির্দেশিকার সিদ্ধান্ত-পথ, পরীক্ষা ও ডায়াগনস্টিক বাছাই এবং অনুমানের নকশা আমার নিজের। অর্থমিতিতে আমার প্রশিক্ষণ ও গবেষণা থেকে এগুলো তৈরি করেছি, এবং প্রতিটি ধাপ নিজে Python-এ বাস্তবায়ন ও যাচাই করেছি। এস্টিমেটরগুলো সাহিত্যের আদর্শ পদ্ধতি; যেখানে ব্যবহার হয়েছে সেখানেই সূত্র উল্লেখ আছে।"
+"The decision path, the choice of tests and diagnostics, and the inference design in this guide are my own. I built them from my training and research in econometrics, and I implemented and checked every step myself in Python. The estimators are standard methods from the literature, cited where they are used.": "এই নির্দেশিকার সিদ্ধান্ত-পথ, পরীক্ষা ও ডায়াগনস্টিক বাছাই এবং অনুমানের নকশা আমার নিজের। অর্থমিতিতে আমার প্রশিক্ষণ ও গবেষণা থেকে এগুলো তৈরি করেছি, এবং প্রতিটি ধাপ নিজে Python-এ বাস্তবায়ন ও যাচাই করেছি। এস্টিমেটরগুলো সাহিত্যের আদর্শ পদ্ধতি; যেখানে ব্যবহার হয়েছে সেখানেই সূত্র উল্লেখ আছে।",
+"Time-Series Guide": "টাইম-সিরিজ নির্দেশিকা",
+"Panel-Data Guide": "প্যানেল-ডেটা নির্দেশিকা",
+"Causal Inference Guide": "কার্যকারণ অনুমান নির্দেশিকা",
+"Bayesian Guide": "বেইজিয়ান নির্দেশিকা",
+"Markov-Switching Guide": "মার্কভ-সুইচিং নির্দেশিকা",
+"DSGE Guide": "DSGE নির্দেশিকা",
+"Machine Learning Guide": "মেশিন লার্নিং নির্দেশিকা"
 }
