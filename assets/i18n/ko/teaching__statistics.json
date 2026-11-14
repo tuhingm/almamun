@@ -358,5 +358,8 @@
   "7. Bayesian inference": "7. 베이지안 추론",
   "8. Experimental design": "8. 실험설계",
   "9. ANOVA and multiple comparisons": "9. 분산분석과 다중비교",
-  "html:The first term is average within-condition uncertainty; the second is variation explained by differences in conditional means.": "첫 번째 항은 조건부 평균적 불확실성이고, 두 번째 항은 조건부 평균의 차이로 설명되는 변동이다."
+  "html:The first term is average within-condition uncertainty; the second is variation explained by differences in conditional means.": "첫 번째 항은 조건부 평균적 불확실성이고, 두 번째 항은 조건부 평균의 차이로 설명되는 변동이다.",
+  "html:How does a probability model translate uncertainty about outcomes into quantities that can be estimated and tested?": "확률모형은 결과에 관한 불확실성을 어떻게 추정하고 검정할 수 있는 양으로 변환하는가?",
+  "html:A density is not itself a probability at a point. The support and normalization condition must always be stated.": "확률밀도함수의 특정 점에서의 값 자체는 확률이 아니다. 지지집합과 정규화 조건을 항상 명시해야 한다.",
+  "html:This separates explained variation due to the binary regressor from average conditional residual variation.": "이를 통해 이진 설명변수에 의해 설명되는 변동과 평균적인 조건부 잔차 변동을 구분한다."
 }
