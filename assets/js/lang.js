@@ -34,6 +34,12 @@
   function changeLanguage(language) {
     try { localStorage.setItem(STORAGE_KEY, language); } catch (error) {}
     clearGoogleTranslateCookie();
+    // The homepage has crawlable, server-rendered language landing pages.
+    // Send homepage language selections to those stable locale URLs.
+    if (slug === 'home' && language !== 'en') {
+      location.href = new URL(language + '/', base).href;
+      return;
+    }
     location.reload();
   }
 
