@@ -295,5 +295,11 @@
   "3. The bootstrap": "3. 부트스트랩",
   "4. Multiple testing and specification robustness": "4. 다중검정과 모형 설정의 강건성",
   "5. Reporting standards": "5. 보고 기준",
-  "6. Replication packages": "6. 재현 패키지"
+  "6. Replication packages": "6. 재현 패키지",
+  "html:This is a decomposition, not a model: it holds for any joint distribution with a finite first moment.": "이는 모형이 아니라 분해식이다. 유한한 일차 적률을 갖는 모든 결합분포에서 성립한다.",
+  "html:Three facts follow, and they are worth memorizing.": "다음 세 가지 사실이 도출되며, 반드시 기억해 둘 필요가 있다.",
+  "html:The literature uses several different \"linear regression models\". They are nested, and it pays to keep them separate.": "문헌에서는 서로 다른 여러 종류의 ‘선형회귀모형’을 사용한다. 이 모형들은 서로 포함 관계에 있으므로 구분해서 이해해야 한다.",
+  "html:A common error is to treat a statement in the bottom row as if it followed from the rows above it. It does not: no amount of statistical structure turns a projection coefficient into a causal effect.": "흔한 오류는 아래쪽 행의 명제가 위쪽 행의 명제들로부터 도출된다고 간주하는 것이다. 그렇지 않다. 어떤 통계적 구조를 추가하더라도 투영계수가 자동으로 인과효과가 되지는 않는다.",
+  "html:Every property of OLS is a property of this expression.": "OLS의 모든 성질은 이 표현식의 성질에서 나온다.",
+  "html:An estimate without a standard error is not a result. Lecture 1 characterized what OLS estimates; this lecture asks how precisely. There are two routes to inference. The exact route assumes normal errors and delivers \\(t\\) and \\(F\\) distributions that hold for every \\(n\\). The asymptotic route drops normality and homoskedasticity and relies on large-sample approximations. Modern applied work uses the asymptotic route almost exclusively, but the exact theory explains where the familiar formulas and degrees-of-freedom corrections come from.": "표준오차가 없는 추정치는 완전한 실증 결과가 아니다. 1강에서는 OLS가 무엇을 추정하는지 규명했고, 이번 강의에서는 그 추정의 정밀도를 다룬다. 추론에는 두 가지 접근법이 있다. 정확 추론은 오차의 정규성을 가정하며 모든 표본크기에서 성립하는 \\(t\\) 및 \\(F\\) 분포를 제공한다. 점근적 추론은 정규성과 등분산성 가정을 완화하고 대표본 근사에 의존한다. 현대의 실증연구는 거의 전적으로 점근적 접근법을 사용하지만, 정확 이론은 익숙한 공식과 자유도 보정의 근거를 설명한다."
 }
