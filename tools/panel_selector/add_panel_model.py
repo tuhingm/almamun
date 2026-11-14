@@ -37,6 +37,12 @@ EXTRA = {
                  steps=["Mean benchmarks: pooled and fixed effects", "Pooled, Canay and MM-QR estimators", "Bootstrap over units", "Test of equal effects across quantiles", "Compare the methods"],
                  lec=[["../teaching/econometrics/lectures/07-panel-data.html", "Lecture 07: Static panels"]],
                  q=("I want effects at different quantiles of the outcome", "Panel quantile regression")),
+    "spatial": dict(key="SPATIAL", short="Spatial panel",
+                 name="Spatial panel models (SAR, SEM, SDM)", when="Neighbouring units are related, and you can define who is a neighbour",
+                 why="Units that share borders, markets or shocks are not independent. Test the residuals of the non-spatial model (Moran's I, Lagrange-multiplier tests), estimate the spatial lag, error and Durbin models by maximum likelihood with unit and time effects, choose among them with likelihood-ratio tests, and report direct and indirect (spillover) effects, not the raw coefficients.",
+                 steps=["Define the weights matrix", "Moran's I and LM tests", "SAR, SEM and SDM by ML", "Likelihood-ratio tests", "Direct, indirect and total effects", "Robustness: other weights, fixed effects"],
+                 lec=[["lectures/macro-panel-econometrics.html", "Macro-panel lecture"]],
+                 q=("Neighbouring units affect each other (spatial spillovers)", "Spatial lag, error and Durbin panel models")),
 }
 
 

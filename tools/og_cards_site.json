@@ -354,6 +354,12 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/panel-data-guide/spatial.jpg",
+  "kicker": "Panel Data Guide · Model guide",
+  "title": "Spatial Panel Models (SAR, SEM, SDM)",
+  "sub": "Outcomes of neighbouring units are related (spillovers, common regional shocks), and you can define who is a neighbour.…"
+ },
+ {
   "out": "assets/og/panel-data-guide/twfe.jpg",
   "kicker": "Panel Data Guide · Model guide",
   "title": "Two-Way Fixed Effects with Clustered Standard Errors",
