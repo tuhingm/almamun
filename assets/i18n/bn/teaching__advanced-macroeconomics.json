@@ -314,5 +314,22 @@
   "Price-setting environment": "মূল্য নির্ধারণের পরিবেশ",
   "Reset-price condition": "পুনর্নির্ধারিত মূল্যের শর্ত",
   "Core system": "মূল সিস্টেম",
-  "Policy rules": "নীতিনিয়ম"
+  "Policy rules": "নীতিনিয়ম",
+  "html:Derive debt dynamics; distinguish primary deficits from total deficits; analyze fiscal multipliers, sustainability, and Ricardian equivalence.": "ঋণগতিবিদ্যা নির্ণয়, প্রাইমারি ঘাটতি ও মোট ঘাটতির পার্থক্য, ফিসকাল মাল্টিপ্লায়ার, টেকসইতা এবং রিকার্ডিয়ান সমতুল্যতা বিশ্লেষণ করতে পারা।",
+  "html:Interpret balance-of-payments accounts; derive uncovered interest parity; analyze exchange-rate regimes and external shocks.": "ব্যালান্স অব পেমেন্টস হিসাব ব্যাখ্যা, আনকভার্ড ইন্টারেস্ট প্যারিটি নির্ণয় এবং বিনিময় হার ব্যবস্থা ও বহিঃস্থ শক বিশ্লেষণ করতে পারা।",
+  "html:Compute deterministic steady states; linearize equilibrium conditions; understand rational-expectations solution and Blanchard–Kahn conditions.": "ডিটারমিনিস্টিক স্টেডি স্টেট গণনা, সাম্যশর্ত লিনিয়ারাইজ এবং র‍্যাশনাল এক্সপেকটেশন সমাধান ও Blanchard–Kahn শর্ত বোঝা।",
+  "html:Connect a solved DSGE model to observables; construct a likelihood; estimate parameters; assess identification and posterior fit.": "সমাধানকৃত DSGE মডেলকে পর্যবেক্ষণযোগ্য চলকের সঙ্গে যুক্ত, likelihood গঠন, প্যারামিটার প্রাক্কলন এবং শনাক্তকরণ ও posterior fit মূল্যায়ন করতে পারা।",
+  "html:Formulate household dynamic programming under idiosyncratic risk; derive policy functions and stationary distributions; define aggregate equilibrium.": "ব্যক্তিগত ঝুঁকির অধীনে পরিবারের ডায়নামিক প্রোগ্রামিং গঠন, পলিসি ফাংশন ও স্থিতিশীল বণ্টন নির্ণয় এবং সামগ্রিক সাম্য সংজ্ঞায়িত করতে পারা।",
+  "html:Understand how household heterogeneity changes aggregate policy transmission; formulate continuous-time HJB and Kolmogorov forward equations; interpret sequence-space methods.": "পরিবারের বৈচিত্র্য কীভাবে সামগ্রিক নীতি-সঞ্চালন বদলায় তা বোঝা, continuous-time HJB ও Kolmogorov forward equation গঠন এবং sequence-space পদ্ধতি ব্যাখ্যা করতে পারা।",
+  "html:Design a transparent quantitative macroeconomic application; distinguish calibration from estimation; evaluate mechanisms, welfare, and robustness.": "স্বচ্ছ পরিমাণগত সামষ্টিক অর্থনৈতিক প্রয়োগ নকশা, ক্যালিব্রেশন ও প্রাক্কলনের পার্থক্য এবং মেকানিজম, কল্যাণ ও রোবাস্টনেস মূল্যায়ন করতে পারা।",
+  "Government budget constraint": "সরকারি বাজেট সীমাবদ্ধতা",
+  "External accounts": "বহিঃখাতের হিসাব",
+  "Exchange rates": "বিনিময় হার",
+  "General equilibrium system": "সাধারণ সাম্যব্যবস্থা",
+  "Measurement system": "পরিমাপ ব্যবস্থা",
+  "Household problem": "পরিবারের সমস্যা",
+  "Heterogeneous-agent New Keynesian structure": "বৈচিত্র্যময় পরিবারের নিউ কেইনসিয়ান কাঠামো",
+  "Continuous-time household problem": "অবিচ্ছিন্ন-সময়ের পারিবারিক সমস্যা",
+  "Research design": "গবেষণা-নকশা",
+  "Calibration and estimation": "ক্যালিব্রেশন ও প্রাক্কলন"
 }
