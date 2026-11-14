@@ -299,5 +299,20 @@
   "Before you begin": "শুরু করার আগে",
   "Step-by-step": "ধাপে ধাপে",
   "Interpretation and intuition": "ব্যাখ্যা ও অন্তর্দৃষ্টি",
-  "Practical implementation": "ব্যবহারিক বাস্তবায়ন"
+  "Practical implementation": "ব্যবহারিক বাস্তবায়ন",
+  "html:Derive household optimality conditions in discrete time; distinguish budget feasibility from optimality; interpret the Euler equation, borrowing constraints, and transversality.": "বিচ্ছিন্ন সময়ে পরিবারের অপ্টিমালিটি শর্ত নির্ণয়, বাজেটের সম্ভাব্যতা ও অপ্টিমালিটির পার্থক্য, Euler equation, ঋণগ্রহণের সীমাবদ্ধতা এবং transversality ব্যাখ্যা করতে পারা।",
+  "html:Derive factor demands, the capital Euler equation, and Tobin's q; understand depreciation, adjustment costs, and investment dynamics.": "ফ্যাক্টর ডিমান্ড, মূলধনের Euler equation এবং Tobin's q নির্ণয়; অবচয়, সমন্বয় ব্যয় ও বিনিয়োগের গতিবিদ্যা বোঝা।",
+  "html:Derive the Solow steady state, golden-rule capital, and Ramsey saddle path; distinguish exogenous saving from optimal saving.": "Solow steady state, golden-rule capital ও Ramsey saddle path নির্ণয় এবং বহির্জাত সঞ্চয় ও সর্বোত্তম সঞ্চয়ের পার্থক্য করতে পারা।",
+  "html:Construct a real business cycle (RBC) model; derive equilibrium conditions; understand calibration, shock propagation, and impulse responses.": "রিয়েল বিজনেস সাইকেল (RBC) মডেল গঠন, সাম্যশর্ত নির্ণয় এবং ক্যালিব্রেশন, শক বিস্তার ও ইমপালস রেসপন্স বোঝা।",
+  "html:Derive the firm's reset-price problem under Calvo pricing; interpret the New Keynesian Phillips curve and its slope.": "Calvo pricing-এর অধীনে প্রতিষ্ঠানের reset-price সমস্যা নির্ণয় এবং New Keynesian Phillips curve ও এর ঢাল ব্যাখ্যা করতে পারা।",
+  "html:Combine the dynamic IS relation, Phillips curve, and monetary-policy rule; analyze equilibrium responses to demand, supply, and policy shocks.": "ডায়নামিক IS সম্পর্ক, Phillips curve ও মুদ্রানীতি নিয়ম একত্র করা এবং চাহিদা, সরবরাহ ও নীতিগত শকের সাম্য প্রতিক্রিয়া বিশ্লেষণ করতে পারা।",
+  "html:Evaluate policy rules and optimal policy; distinguish commitment from discretion; analyze the effective lower bound and forward guidance.": "নীতিনিয়ম ও সর্বোত্তম নীতি মূল্যায়ন, commitment ও discretion-এর পার্থক্য এবং effective lower bound ও forward guidance বিশ্লেষণ করতে পারা।",
+  "Environment": "অর্থনৈতিক পরিবেশ",
+  "Technology and static optimization": "প্রযুক্তি ও স্থিতিশীল অপ্টিমাইজেশন",
+  "Solow model": "সোলো মডেল",
+  "Household and firm": "পরিবার ও প্রতিষ্ঠান",
+  "Price-setting environment": "মূল্য নির্ধারণের পরিবেশ",
+  "Reset-price condition": "পুনর্নির্ধারিত মূল্যের শর্ত",
+  "Core system": "মূল সিস্টেম",
+  "Policy rules": "নীতিনিয়ম"
 }
