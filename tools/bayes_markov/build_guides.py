@@ -21,7 +21,7 @@ from build_courses import md_to_html  # noqa: E402
 
 SECTIONS = {
     "bayesian": dict(folder="bayesian-guide", name="Bayesian Research Guide", short="Bayesian Guide",
-                     order=["bvar", "bayes-reg", "favar", "steady-state", "panel-var", "tvp-var", "sv-var", "mixed-frequency", "threshold-var"],
+                     order=["bvar", "bayes-reg", "favar", "steady-state", "panel-var", "tvp-var", "sv-var", "mixed-frequency", "threshold-var", "blp"],
                      data=["time-series-guide/examples/money.csv", "oes/examples/us_macro.csv", "oes/examples/mixed_frequency.csv",
                            "panel-data-guide/examples/garrett.csv", "ml-guide/examples/wage2.csv"]),
     "markov": dict(folder="markov-guide", name="Markov-Switching Research Guide", short="Markov Guide",

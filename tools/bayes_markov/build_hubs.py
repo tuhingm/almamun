@@ -28,7 +28,8 @@ HUBS = {
                ("Relationships drift slowly over time (the effect of policy changes across decades)", "Time-varying parameter VAR", "tvp-var"),
                ("The size of shocks changes over time (the Great Moderation, 2008, 2020)", "Stochastic-volatility VAR", "sv-var"),
                ("Monthly indicators arrive before quarterly GDP and you want a nowcast", "Mixed-frequency BVAR", "mixed-frequency"),
-               ("Dynamics differ above and below a threshold of a variable you observe (inflation, the interest rate)", "Bayesian threshold VAR", "threshold-var")],
+               ("Dynamics differ above and below a threshold of a variable you observe (inflation, the interest rate)", "Bayesian threshold VAR", "threshold-var"),
+               ("Impulse responses without trusting a VAR, but smoother and with probability statements", "Bayesian local projections", "blp")],
         other=("The regimes are <b>hidden</b> rather than defined by an observed variable?", "Use the <a href=\"../markov-guide/index.html\">Markov-Switching Guide</a>.")),
     "markov": dict(
         title="Which Markov-switching model fits your data?",
@@ -95,7 +96,7 @@ def build(key):
             f'<div class="hubhead"><span class="label">Method guides</span><h2>{n} routes to a finished paper</h2>'
             f'<p>Each guide takes one real dataset through pre-estimation tests, estimation, regime or convergence checks, diagnostics, robustness, and sample text for the paper.</p></div>'
             f'<div class="cards">{cards}</div>'
-            f'<div class="runbox"><p>Every model in this guide runs in your browser on your own CSV file, with the same code and the same numbers as the guides. No installation and no server.</p>'
+            f'<div class="runbox"><p>Most models in this guide run in your browser on your own CSV file, with the same code and the same numbers as the guides. No installation and no server.</p>'
             f'<a href="../oes/index.html">Open Econometric Systems →</a></div></article></main>')
     (folder / "index.html").write_text(head + hero + body + foot)
     print(f"{key}: hub written ({n} guides, steps {steps})")

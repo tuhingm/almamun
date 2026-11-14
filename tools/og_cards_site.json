@@ -6,6 +6,12 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/bayesian-guide/blp.jpg",
+  "kicker": "Bayesian Guide · Model guide",
+  "title": "Bayesian Local Projections",
+  "sub": "You want impulse responses without a full VAR, with smoother, more precise estimates at long horizons and probability statements…"
+ },
+ {
   "out": "assets/og/bayesian-guide/bvar.jpg",
   "kicker": "Bayesian Guide · Model guide",
   "title": "Bayesian VAR with Minnesota and Normal-Wishart Priors",
