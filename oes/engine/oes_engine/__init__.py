@@ -13,7 +13,7 @@ import warnings
 import numpy as np
 import pandas as pd
 
-from . import bayes, bayes_extra, breaks, causal, causal_extra, lp, markov, ml, panel, pthreshold, pvar, smooth, statespace_var, svar, tar, timeseries
+from . import bayes, bayes_extra, breaks, causal, causal_extra, lp, markov, ml, panel, pthreshold, pvar, smooth, statespace_var, svar, tar, timeseries, ts_extra
 from .core import OESError, read_csv, time_order
 from .report import frame, plot, show, summary, tables
 
@@ -417,6 +417,28 @@ MODELS += [
          example=dict(file=CE + "shiftshare.csv", spec=dict(y="dy", x="dx", shares=["share_%d" % i for i in range(1, 61)], shocks="0.0488,-0.0333,-0.1236,0.0050,-0.0012,0.0200,0.1599,-0.0827,0.1836,-0.0420,-0.0827,0.1521,0.1407,0.0583,0.0484,-0.0651,0.1687,-0.0155,0.0787,-0.0534,-0.0304,-0.0182,0.1980,0.0610,0.0978,-0.0517,-0.0176,0.0100,-0.0759,0.0436,0.0152,0.0930,0.0000,-0.0198,0.1069,-0.0313,0.0109,0.0365,-0.0230,-0.0143,0.1044,-0.1253,0.0507,-0.1275,0.1389,-0.2460,-0.0570,-0.1034,0.0927,0.0241,-0.0149,0.0479,0.3004,-0.0136,-0.0935,0.0754,-0.0107,0.0125,-0.1818,0.0238"))),
 ]
 
+MODELS += [
+    dict(id="arima", group="Time series", name="ARIMA / SARIMA with forecast evaluation", guide="time-series-guide/arima.html", fn=ts_extra.arima,
+         fields=[col("y", "Series"), TIME, sel("d", "Differencing order d", [["auto", "Automatic (ADF)"], ["0", "0"], ["1", "1"], ["2", "2"]], "auto"),
+                 num("max_p", "Largest p in the grid", 3), num("max_q", "Largest q in the grid", 3), num("season", "Seasonal period (0 = none)", 0),
+                 sel("sdiff", "Seasonal differencing", [["no", "No"], ["yes", "Yes"]], "no"), num("holdout", "Hold-out periods", 12)],
+         example=dict(file=OX + "pce_inflation.csv", spec=dict(y="infl", time="date", d="0", max_p=2, max_q=2, holdout=24))),
+    dict(id="garch", group="Time series", name="GARCH, GJR and EGARCH volatility models", guide="time-series-guide/garch.html", fn=ts_extra.garch,
+         fields=[col("y", "Return series"), TIME, sel("model", "Reported model", [["best", "Lowest BIC"], ["GARCH, t", "GARCH, t"], ["GJR, t", "GJR, t"], ["EGARCH, t", "EGARCH, t"],
+                                                                                 ["GJR, skewed t", "GJR, skewed t"], ["EGARCH, skewed t", "EGARCH, skewed t"]], "best")],
+         example=dict(file=OX + "markets.csv", spec=dict(y="sp500_return", time="date"))),
+    dict(id="quantile", group="Time series", name="Quantile regression (growth at risk)", guide="time-series-guide/quantile.html", fn=ts_extra.quantile,
+         fields=[col("y", "Dependent variable"), cols("x", "Explanatory variables"), TIME, num("taus", "Quantiles (comma-separated)", "0.05,0.25,0.5,0.75,0.95"),
+                 num("boot", "Bootstrap replications", 200), num("block", "Block length (1 = pairs bootstrap)", 8), num("seed", "Random seed", 0)],
+         example=dict(file=OX + "growth_risk.csv", spec=dict(y="growth_next4", x=["spread", "term", "growth"], time="date", boot=100, block=8))),
+    dict(id="cointegration", group="Time series", name="Cointegration tests (Engle-Granger, Johansen, Gregory-Hansen)", guide="time-series-guide/cointegration.html", fn=ts_extra.cointegration,
+         fields=[col("y", "Dependent variable"), cols("x", "Regressors"), TIME, num("sims", "Simulation replications (break test critical values)", 100), num("seed", "Random seed", 0)],
+         example=dict(file=OX + "taylor.csv", spec=dict(y="fedfunds", x=["inflation"], time="date", sims=60))),
+    dict(id="wavelet", group="Time series", name="Wavelet coherence", guide="time-series-guide/wavelet.html", fn=ts_extra.wavelet,
+         fields=[col("x", "First series"), col("y", "Second series"), TIME, num("pmin", "Shortest period", 16), num("pmax", "Longest period", ""), num("sims", "Simulation replications", 100), num("seed", "Random seed", 0)],
+         example=dict(file=OX + "wavelet_us.csv", spec=dict(x="infl", y="m2", time="date", pmin=16, pmax=256, sims=60))),
+]
+
 BY_ID = {m["id"]: m for m in MODELS}
 GROUPS = ["Time series", "Panel data", "Causal inference", "Machine learning", "Bayesian", "Markov switching"]
 
@@ -429,7 +451,7 @@ def packages(model_id):
     return ["scikit-learn", "xgboost"] if model_id == "xgb" else ["scikit-learn"]
 
 
-SLOW = {"dml_irm", "dml_iv", "causal_forest", "staggered", "tvpvar", "mfbvar", "svvar", "hier_panel", "sign_bvar", "ms_tvtp", "eventstudy", "sdid", "matching", "bartik"}
+SLOW = {"dml_irm", "dml_iv", "causal_forest", "staggered", "tvpvar", "mfbvar", "svvar", "hier_panel", "sign_bvar", "ms_tvtp", "eventstudy", "sdid", "matching", "bartik", "arima", "garch", "quantile", "cointegration", "wavelet"}
 
 
 def catalog():

@@ -800,5 +800,71 @@
    "label": "First-stage F",
    "value": 487.4
   }
+ },
+ "arima": {
+  "nobs": 420,
+  "table_index": 0,
+  "table": "Unit-root tests",
+  "row": "level",
+  "col": "ADF stat",
+  "value": -3.563,
+  "rtol": 0.001,
+  "seconds": 1.1,
+  "summary": {
+   "label": "Hold-out RMSE ratio vs random walk",
+   "value": 0.825
+  }
+ },
+ "garch": {
+  "nobs": 527,
+  "table_index": 0,
+  "table": "Tests for time-varying volatility",
+  "row": "ARCH LM (1 lags)",
+  "col": "Statistic",
+  "value": 8.8621,
+  "rtol": 0.001,
+  "seconds": 6.3,
+  "summary": {
+   "label": "Persistence",
+   "value": 0.882
+  }
+ },
+ "quantile": {
+  "nobs": 243,
+  "table_index": 0,
+  "table": "Quantile regression coefficients",
+  "row": "const",
+  "col": "Quantile",
+  "value": 0.05,
+  "rtol": 0.001,
+  "seconds": 4.1
+ },
+ "cointegration": {
+  "nobs": 240,
+  "table_index": 1,
+  "table": "Engle-Granger test",
+  "row": "fedfunds on the regressors",
+  "col": "Statistic",
+  "value": -2.048,
+  "rtol": 0.001,
+  "seconds": 1.3,
+  "summary": {
+   "label": "Engle-Granger p",
+   "value": 0.503
+  }
+ },
+ "wavelet": {
+  "nobs": 720,
+  "table_index": 0,
+  "table": "Coherence by period",
+  "row": "16",
+  "col": "Mean coherence",
+  "value": 0.766,
+  "rtol": 0.001,
+  "seconds": 0.4,
+  "summary": {
+   "label": "Share significant",
+   "value": 0.143
+  }
  }
 }
