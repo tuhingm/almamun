@@ -96,6 +96,12 @@
   "sub": "An instrument shifts the treatment. Step-by-step guide with Python code and real output."
  },
  {
+  "out": "assets/og/causal-inference-guide/matching.jpg",
+  "kicker": "Causal Inference Guide · Model guide",
+  "title": "Matching, inverse-probability weighting and doubly robust estimation",
+  "sub": "Treatment is not randomly assigned, but you observe the covariates that drive selection into it (selection on observables).…"
+ },
+ {
   "out": "assets/og/causal-inference-guide/rdd.jpg",
   "kicker": "Causal Inference Guide · Model guide",
   "title": "Regression Discontinuity",

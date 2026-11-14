@@ -25,6 +25,12 @@ EXTRA = {
                  steps=["Design and comparison pool", "DiD and synthetic control on the same data", "Unit and time weights", "Placebo inference", "Regularisation, in-time placebo and scale"],
                  lec=[],
                  q=("I have one treated unit and want to combine DiD with synthetic control", "Synthetic difference-in-differences")),
+    "matching": dict(key="MATCH", short="Matching / IPW / DR",
+                 name="Matching, IPW and doubly robust estimation", when="Treatment is not randomised but the covariates driving selection are observed",
+                 why="You believe that, conditional on observed covariates, treated and untreated units are comparable. Build the propensity score, check overlap and balance, and compare matching, inverse-probability weighting, regression adjustment and the doubly robust estimator, with bootstrap standard errors and a sensitivity analysis for an omitted confounder.",
+                 steps=["Estimand and assumptions", "Propensity score", "Overlap and covariate balance", "Matching, IPW, regression adjustment and AIPW", "Trimming and omitted-confounder sensitivity"],
+                 lec=[],
+                 q=("Treatment was not randomised, but I observe what drives selection", "Matching, IPW and doubly robust estimation")),
 }
 
 
