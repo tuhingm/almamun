@@ -315,5 +315,22 @@
   "Price-setting environment": "가격설정 환경",
   "Reset-price condition": "가격 재설정 조건",
   "Core system": "핵심 시스템",
-  "Policy rules": "정책 규칙"
+  "Policy rules": "정책 규칙",
+  "html:Derive debt dynamics; distinguish primary deficits from total deficits; analyze fiscal multipliers, sustainability, and Ricardian equivalence.": "부채 동학을 유도하고 기초재정수지 적자와 총재정적자를 구분하며 재정승수, 지속가능성 및 리카도 대등성을 분석한다.",
+  "html:Interpret balance-of-payments accounts; derive uncovered interest parity; analyze exchange-rate regimes and external shocks.": "국제수지 계정을 해석하고 비보장 이자율평가를 유도하며 환율제도와 대외충격을 분석한다.",
+  "html:Compute deterministic steady states; linearize equilibrium conditions; understand rational-expectations solution and Blanchard–Kahn conditions.": "결정론적 정상상태를 계산하고 균형조건을 선형화하며 합리적 기대 해와 블랜차드-칸 조건을 이해한다.",
+  "html:Connect a solved DSGE model to observables; construct a likelihood; estimate parameters; assess identification and posterior fit.": "해결된 DSGE 모형을 관측변수와 연결하고 우도를 구성하며 모수를 추정하고 식별 및 사후 적합도를 평가한다.",
+  "html:Formulate household dynamic programming under idiosyncratic risk; derive policy functions and stationary distributions; define aggregate equilibrium.": "개별위험하에서 가계 동적계획법을 정식화하고 정책함수와 정상분포를 유도하며 총량균형을 정의한다.",
+  "html:Understand how household heterogeneity changes aggregate policy transmission; formulate continuous-time HJB and Kolmogorov forward equations; interpret sequence-space methods.": "가계 이질성이 총량적 정책전달을 어떻게 변화시키는지 이해하고 연속시간 HJB 및 콜모고로프 전방방정식을 정식화하며 시퀀스 스페이스 방법을 해석한다.",
+  "html:Design a transparent quantitative macroeconomic application; distinguish calibration from estimation; evaluate mechanisms, welfare, and robustness.": "투명한 정량 거시경제 응용을 설계하고 보정과 추정을 구분하며 메커니즘, 후생 및 강건성을 평가한다.",
+  "Government budget constraint": "정부 예산제약",
+  "External accounts": "대외계정",
+  "Exchange rates": "환율",
+  "General equilibrium system": "일반균형 시스템",
+  "Measurement system": "측정 시스템",
+  "Household problem": "가계 문제",
+  "Heterogeneous-agent New Keynesian structure": "이질적 가계 뉴케인지언 구조",
+  "Continuous-time household problem": "연속시간 가계 문제",
+  "Research design": "연구설계",
+  "Calibration and estimation": "보정과 추정"
 }
