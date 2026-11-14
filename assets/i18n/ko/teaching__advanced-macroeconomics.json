@@ -301,7 +301,7 @@
   "Step-by-step": "단계별 설명",
   "Interpretation and intuition": "해석과 직관",
   "Practical implementation": "실제 구현",
-  "html:Derive household optimality conditions in discrete time; distinguish budget feasibility from optimality; interpret the Euler equation, borrowing constraints, and transversality.": "이산시간에서 가계의 최적조건을 유도하고 예산제약의 실현 가능성과 최적성을 구분하며 오일러 방정식, 차입제약 및 횡단성 조건을 해석한다.",
+  "html:Derive household optimality conditions in discrete time; distinguish budget feasibility from optimality; interpret the Euler equation, borrowing constraints, and transversality.": "이산시간 모형에서 가계의 최적조건을 도출하고, 예산제약의 충족과 최적성을 구분한다. 오일러 방정식, 차입제약, 횡단성 조건을 해석한다.",
   "html:Derive factor demands, the capital Euler equation, and Tobin's q; understand depreciation, adjustment costs, and investment dynamics.": "요소수요, 자본 오일러 방정식 및 토빈의 q를 유도하고 감가상각, 조정비용 및 투자동학을 이해한다.",
   "html:Derive the Solow steady state, golden-rule capital, and Ramsey saddle path; distinguish exogenous saving from optimal saving.": "솔로우 정상상태, 황금률 자본 및 램지 안장경로를 유도하고 외생적 저축과 최적 저축을 구분한다.",
   "html:Construct a real business cycle (RBC) model; derive equilibrium conditions; understand calibration, shock propagation, and impulse responses.": "실물경기변동(RBC) 모형을 구성하고 균형조건을 유도하며 보정, 충격 전파 및 충격반응을 이해한다.",
@@ -360,5 +360,5 @@
   "9. ANOVA and multiple comparisons": "9. 분산분석과 다중비교",
   "html:Under uncertainty, the expectation applies to marginal utility times the gross return; it cannot generally be separated into products of expectations.": "불확실성하에서는 한계효용과 총수익률의 곱에 기댓값을 적용해야 하며, 일반적으로 이를 기댓값의 곱으로 분리할 수 없다.",
   "html:Iterating the flow budget forward gives the present-value lifetime resource constraint, subject to a terminal condition. A standard transversality condition is": "흐름 예산제약을 미래로 반복 대입하면 종단조건하에서 현재가치 기준의 생애 자원제약을 얻는다. 표준적인 횡단성 조건은 다음과 같다.",
-  "html:Implement a finite-horizon household problem. Discretize assets, solve by backward induction, and compare policy functions with and without a borrowing limit. Report grid convergence, Euler-equation errors, and the share of states at the constraint.": "유한기간 가계문제를 구현하라. 자산을 이산화하고 역방향 귀납법으로 풀며 차입제약이 있는 경우와 없는 경우의 정책함수를 비교하라. 격자 수렴, 오일러 방정식 오차 및 제약에 놓인 상태의 비율을 보고하라."
+  "html:Implement a finite-horizon household problem. Discretize assets, solve by backward induction, and compare policy functions with and without a borrowing limit. Report grid convergence, Euler-equation errors, and the share of states at the constraint.": "유한기간 가계 문제를 구현한다. 자산을 이산화하고 역방향 귀납법으로 풀며, 차입한도가 있는 경우와 없는 경우의 정책함수를 비교한다. 격자 수렴성, 오일러 방정식 오차, 제약에 걸리는 상태의 비중을 보고한다."
 }
