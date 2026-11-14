@@ -355,5 +355,8 @@
   "7. Bayesian inference": "৭. বেইজিয়ান অনুমান",
   "8. Experimental design": "৮. পরীক্ষামূলক নকশা",
   "9. ANOVA and multiple comparisons": "৯. ANOVA ও একাধিক তুলনা",
-  "html:The first term is average within-condition uncertainty; the second is variation explained by differences in conditional means.": "প্রথম পদটি শর্তাধীন গড়ের ভেতরের গড় অনিশ্চয়তা; দ্বিতীয় পদটি শর্তাধীন গড়ের পার্থক্য দ্বারা ব্যাখ্যাত বৈচিত্র্য।"
+  "html:The first term is average within-condition uncertainty; the second is variation explained by differences in conditional means.": "প্রথম পদটি শর্তাধীন গড়ের ভেতরের গড় অনিশ্চয়তা; দ্বিতীয় পদটি শর্তাধীন গড়ের পার্থক্য দ্বারা ব্যাখ্যাত বৈচিত্র্য।",
+  "html:How does a probability model translate uncertainty about outcomes into quantities that can be estimated and tested?": "একটি সম্ভাব্যতা মডেল ফলাফল-সংক্রান্ত অনিশ্চয়তাকে কীভাবে অনুমান ও পরীক্ষাযোগ্য পরিমাপে রূপান্তর করে?",
+  "html:A density is not itself a probability at a point. The support and normalization condition must always be stated.": "কোনো বিন্দুতে ঘনত্বের মান নিজে কোনো সম্ভাবনা নয়। সমর্থন ক্ষেত্র এবং স্বাভাবিকীকরণের শর্ত সবসময় উল্লেখ করতে হবে।",
+  "html:This separates explained variation due to the binary regressor from average conditional residual variation.": "এটি দ্বিমাত্রিক ব্যাখ্যাকারী চলকের কারণে ব্যাখ্যাত পরিবর্তনশীলতাকে গড় শর্তাধীন অবশিষ্ট পরিবর্তনশীলতা থেকে পৃথক করে।"
 }
