@@ -296,7 +296,7 @@
   "Interpretation and intuition": "해석과 직관",
   "Practical implementation": "실제 구현",
   "html:Define probability spaces and random variables; derive expectations and moments; work with conditional distributions; distinguish independence from zero correlation; apply iterated expectations and the law of total variance.": "확률공간과 확률변수를 정의하고 기댓값과 적률을 유도하며 조건부 분포를 다루고 독립성과 무상관을 구분하며 반복기댓값 법칙과 전체분산 법칙을 적용한다.",
-  "html:Derive moments of standard distributions; transform random variables using Jacobians; obtain joint, marginal, and conditional distributions; interpret covariance matrices and multivariate normality.": "표준분포의 적률을 유도하고 야코비안으로 확률변수를 변환하며 결합·주변·조건부 분포를 구하고 공분산 행렬과 다변량 정규성을 해석한다.",
+  "html:Derive moments of standard distributions; transform random variables using Jacobians; obtain joint, marginal, and conditional distributions; interpret covariance matrices and multivariate normality.": "주요 확률분포의 적률을 도출하고 야코비안을 이용해 확률변수를 변환한다. 결합·주변·조건부 분포를 구하고 공분산 행렬과 다변량 정규성을 해석한다.",
   "html:Distinguish sampling distributions from population distributions; apply LLN, CLT, Slutsky, continuous mapping, and delta methods; understand bootstrap approximation.": "표본분포와 모집단분포를 구분하고 대수의 법칙, 중심극한정리, 슬럿스키 정리, 연속사상정리 및 델타 방법을 적용하며 부트스트랩 근사를 이해한다.",
   "html:Construct method-of-moments and maximum-likelihood estimators; derive score and information; distinguish unbiasedness, consistency, and efficiency; apply invariance and asymptotic theory.": "적률법 및 최대우도 추정량을 구성하고 스코어와 정보를 유도하며 불편성·일치성·효율성을 구분하고 불변성과 점근이론을 적용한다.",
   "html:Construct confidence intervals; formulate tests; derive size and power; interpret p-values; understand likelihood-ratio, Wald, and score tests; distinguish statistical and practical significance.": "신뢰구간을 구성하고 검정을 설정하며 크기와 검정력을 유도하고 p값을 해석하며 우도비·왈드·스코어 검정을 이해하고 통계적 유의성과 실질적 중요성을 구분한다.",
@@ -361,5 +361,6 @@
   "html:The first term is average within-condition uncertainty; the second is variation explained by differences in conditional means.": "첫 번째 항은 조건부 평균적 불확실성이고, 두 번째 항은 조건부 평균의 차이로 설명되는 변동이다.",
   "html:How does a probability model translate uncertainty about outcomes into quantities that can be estimated and tested?": "확률모형은 결과에 관한 불확실성을 어떻게 추정하고 검정할 수 있는 양으로 변환하는가?",
   "html:A density is not itself a probability at a point. The support and normalization condition must always be stated.": "확률밀도함수의 특정 점에서의 값 자체는 확률이 아니다. 지지집합과 정규화 조건을 항상 명시해야 한다.",
-  "html:This separates explained variation due to the binary regressor from average conditional residual variation.": "이를 통해 이진 설명변수에 의해 설명되는 변동과 평균적인 조건부 잔차 변동을 구분한다."
+  "html:This separates explained variation due to the binary regressor from average conditional residual variation.": "이를 통해 이진 설명변수에 의해 설명되는 변동과 평균적인 조건부 잔차 변동을 구분한다.",
+  "html:For a one-to-one vector transformation, multiply the original density by the absolute determinant of the inverse Jacobian. For non-monotone scalar transformations, sum over all inverse branches. The support must be transformed as well as the density.": "일대일 벡터 변환에서는 원래 밀도에 역야코비안 행렬식의 절댓값을 곱한다. 단조적이지 않은 스칼라 변환에서는 모든 역함수 가지에 대해 합산한다. 밀도뿐 아니라 지지집합도 함께 변환해야 한다."
 }
