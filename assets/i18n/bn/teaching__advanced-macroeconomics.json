@@ -356,5 +356,8 @@
   "6. Confidence intervals and testing": "৬. কনফিডেন্স ইন্টারভ্যাল ও টেস্টিং",
   "7. Bayesian inference": "৭. বেইজিয়ান অনুমান",
   "8. Experimental design": "৮. পরীক্ষামূলক নকশা",
-  "9. ANOVA and multiple comparisons": "৯. ANOVA ও একাধিক তুলনা"
+  "9. ANOVA and multiple comparisons": "৯. ANOVA ও একাধিক তুলনা",
+  "html:Under uncertainty, the expectation applies to marginal utility times the gross return; it cannot generally be separated into products of expectations.": "অনিশ্চয়তার অধীনে প্রত্যাশিত মান প্রান্তিক উপযোগ ও মোট রিটার্নের গুণফলের ওপর প্রযোজ্য; সাধারণভাবে এটিকে পৃথক প্রত্যাশিত মানের গুণফল হিসেবে লেখা যায় না।",
+  "html:Iterating the flow budget forward gives the present-value lifetime resource constraint, subject to a terminal condition. A standard transversality condition is": "প্রবাহ বাজেট সীমাবদ্ধতাকে ভবিষ্যতের দিকে বারবার প্রতিস্থাপন করলে একটি terminal condition-এর অধীনে বর্তমান-মূল্যের জীবনকালীন সম্পদ সীমাবদ্ধতা পাওয়া যায়। প্রচলিত transversality condition হলো",
+  "html:Implement a finite-horizon household problem. Discretize assets, solve by backward induction, and compare policy functions with and without a borrowing limit. Report grid convergence, Euler-equation errors, and the share of states at the constraint.": "একটি সসীম-মেয়াদি পারিবারিক সমস্যা বাস্তবায়ন করুন। সম্পদকে বিচ্ছিন্ন করে backward induction দিয়ে সমাধান করুন এবং ঋণসীমা থাকা ও না-থাকার ক্ষেত্রে policy function তুলনা করুন। grid convergence, Euler equation error এবং সীমাবদ্ধতায় থাকা state-এর অনুপাত রিপোর্ট করুন।"
 }
