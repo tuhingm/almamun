@@ -36,11 +36,14 @@ def patch_tool(path, slug):
     e = EXTRA[slug]; k = e["key"]
     s = path.read_text()
     if f"\n {k}:{{name:" in s:
+        if f"{k}:{js(slug)}" not in s:
+            s = re.sub(r"(const GUIDE=\{[^}]*)\};", lambda m: m.group(1) + f",{k}:{js(slug)}}};", s, count=1)
+            path.write_text(s)
         return False
     lec = "[" + ",".join(f"[{js(a)},{js(b)}]" for a, b in e["lec"]) + "]"
     steps = "[" + ",".join(js(x) for x in e["steps"]) + "]"
     s = s.replace("\n};\nconst $=s=>document", f",\n {k}:{{name:{js(e['name'])},short:{js(e['short'])},when:{js(e['when'])},why:{js(e['why'])},steps:{steps},lec:{lec}}}\n}};\nconst $=s=>document", 1)
-    s = s.replace("PTH:'pthresh'};", f"PTH:'pthresh',{k}:{js(slug)}}};", 1)
+    s = re.sub(r"(const GUIDE=\{[^}]*)\};", lambda m: m.group(1) + f",{k}:{js(slug)}}};", s, count=1)
     first = "goal:[" not in s
     if first:
         s = s.replace("TS:[792,92,112,'Time series',1],", "TS:[792,92,112,'Time series',1],goal:[250,92,136,'Another goal?',1],", 1)

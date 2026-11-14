@@ -79,7 +79,7 @@ const EXAMPLES=/*EXAMPLES*/;
 const LONGT=#LONGT#, GMMN=#GMMN#, FEWN=#FEWN#;
 const PYO='https://cdn.jsdelivr.net/pyodide/v0.27.2/full/';
 const L='../teaching/econometrics/lectures/', ML='lectures/macro-panel-econometrics.html';
-const GUIDE={POLS:'pols',RE:'re',FE:'fe',GMM:'gmm',FEDK:'fedk',MG:'mg',DIFF:'diff',PMG:'pmg',CSARDL:'csardl',PLP:'plp',PTH:'pthresh',TWFE:'twfe'};
+const GUIDE={POLS:'pols',RE:'re',FE:'fe',GMM:'gmm',FEDK:'fedk',MG:'mg',DIFF:'diff',PMG:'pmg',CSARDL:'csardl',PLP:'plp',PTH:'pthresh',TWFE:'twfe',DPTH:'dpthresh'};
 const LEC={st:[L+'07-panel-data.html','Lecture 07: Static panels'],dy:[L+'08-dynamic-panels.html','Lecture 08: Dynamic panels'],mp:[ML,'Macro-panel lecture'],ur:[L+'10-unit-roots-breaks.html','Lecture: Unit roots'],co:[L+'12-cointegration-ardl.html','Lecture: Cointegration and ARDL']};
 const MODELS={
  POLS:{name:'Pooled OLS with clustered errors',short:'Pooled OLS',when:'Short panel, no significant unit effects',why:'Neither the F test nor the Breusch–Pagan LM test finds unit-specific effects, so pooling the observations is defensible. Standard errors must still be clustered by unit, because observations on the same unit are not independent.',steps:['Pooled OLS with time effects','Cluster standard errors by unit','F test for unit effects','Breusch–Pagan LM test','Wooldridge test for serial correlation','Robustness: FE estimates'],lec:[LEC.st]},
