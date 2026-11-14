@@ -152,5 +152,16 @@
 "Real output",
 "How to write it"
 ]
+},
+{
+"out": "assets/og/time-series-guide-cointegration.jpg",
+"kicker": "Empirical Research Guide · Model guide",
+"title": "Cointegration Tests",
+"sub": "Two or more trending series may share a long-run relation, possibly with a structural break. U.S. federal funds rate and inflation, quarterly, 1960–2019",
+"tags": [
+"Python code",
+"Real output",
+"How to write it"
+]
 }
 ]
