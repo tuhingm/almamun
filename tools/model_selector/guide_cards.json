@@ -141,5 +141,16 @@
 "Real output",
 "How to write it"
 ]
+},
+{
+"out": "assets/og/time-series-guide-quantile.jpg",
+"kicker": "Empirical Research Guide · Model guide",
+"title": "Quantile Regression",
+"sub": "The effect of a regressor may differ across the distribution of the outcome (risk, growth at risk). U.S. real GDP growth over the next four quarters and financial conditions, quarterly, 1959–2019",
+"tags": [
+"Python code",
+"Real output",
+"How to write it"
+]
 }
 ]
