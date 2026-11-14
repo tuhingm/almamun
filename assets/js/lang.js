@@ -16,6 +16,11 @@
 
   function readLanguage() {
     try {
+      var requested = new URLSearchParams(location.search).get('lang');
+      if (LANGS.some(function (item) { return item[0] === requested; })) {
+        localStorage.setItem(STORAGE_KEY, requested);
+        return requested;
+      }
       var value = localStorage.getItem(STORAGE_KEY);
       return LANGS.some(function (item) { return item[0] === value; }) ? value : 'en';
     } catch (error) {
