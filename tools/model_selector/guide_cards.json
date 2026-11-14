@@ -119,5 +119,16 @@
 "Real output",
 "How to write it"
 ]
+},
+{
+"out": "assets/og/time-series-guide-arima.jpg",
+"kicker": "Empirical Research Guide · Model guide",
+"title": "ARIMA and Seasonal ARIMA (SARIMA)",
+"sub": "One series, and the goal is to describe its dynamics or forecast it. U.S. monthly PCE inflation (annualised), 1985–2019",
+"tags": [
+"Python code",
+"Real output",
+"How to write it"
+]
 }
 ]
