@@ -66,6 +66,12 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/causal-inference-guide/eventstudy.jpg",
+  "kicker": "Causal Inference Guide · Model guide",
+  "title": "Event Study and Pre-Trend Sensitivity",
+  "sub": "You need dynamic effects around a policy, a valid test of pre-trends, and a way to judge how much a pre-trend would change the…"
+ },
+ {
   "out": "assets/og/causal-inference-guide/gsc.jpg",
   "kicker": "Causal Inference Guide · Model guide",
   "title": "Generalized Synthetic Control",

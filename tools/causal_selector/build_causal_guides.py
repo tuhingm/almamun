@@ -16,7 +16,7 @@ OUT = ROOT / "causal-inference-guide"
 sys.path.insert(0, str(ROOT / "tools"))
 from build_courses import md_to_html  # same Markdown and math settings as the course sites
 
-ORDER = ["did", "staggered", "gsc", "scm", "its", "rdd", "iv"]
+ORDER = ["did", "staggered", "gsc", "scm", "its", "rdd", "iv", "eventstudy", "sdid", "matching", "bartik"]
 BLOCK = re.compile(r"```python( norun)?\n(.*?)\n```", re.S)
 
 
