@@ -304,5 +304,21 @@
   "Before you begin": "시작하기 전에",
   "Step-by-step": "단계별 설명",
   "Interpretation and intuition": "해석과 직관",
-  "Practical implementation": "실제 구현"
+  "Practical implementation": "실제 구현",
+  "html:Know the long-run relation between money and inflation and the short-run facts about monetary transmission that any model must explain. Understand the quantity equation, money demand and the opportunity cost of money, and why central banks moved from monetary aggregates to interest rates.": "화폐와 인플레이션의 장기 관계 및 모든 모형이 설명해야 하는 통화정책 전달의 단기적 사실을 이해한다. 수량방정식, 화폐수요, 화폐의 기회비용, 중앙은행이 통화량 지표에서 금리로 전환한 이유를 이해한다.",
+  "html:Explain why intrinsically useless money is valued, and build the two workhorse ways of putting money into a dynamic general-equilibrium model: money in the utility function and cash in advance. Derive superneutrality, the Friedman rule and the welfare cost of inflation.": "내재적 가치가 없는 화폐가 가치 있게 되는 이유를 설명하고, 동태적 일반균형모형에 화폐를 도입하는 두 가지 표준 방법인 효용함수 내 화폐와 선불현금 제약을 구성한다. 초중립성, 프리드먼 규칙 및 인플레이션의 후생비용을 유도한다.",
+  "html:Solve a monetary model with flexible prices, show monetary neutrality, and study how the price level is determined under money-supply rules and interest-rate rules. Understand price-level indeterminacy under an interest-rate peg and the role of the Taylor principle. Implement the model in Dynare.": "가격이 유연한 통화모형을 풀고 화폐중립성을 보이며 통화공급 규칙과 금리 규칙하에서 물가수준이 어떻게 결정되는지 연구한다. 금리 고정하에서 물가수준의 비결정성과 테일러 원칙의 역할을 이해하고 Dynare에서 모형을 구현한다.",
+  "html:Derive the New Keynesian Phillips curve from Calvo price setting step by step, relate its slope to the frequency of price changes and to real rigidities, and extend the framework to sticky wages. Confront the model with micro evidence on price setting and macro evidence on the Phillips curve.": "칼보 가격설정에서 뉴케인지언 필립스 곡선을 단계별로 유도하고 그 기울기를 가격변경 빈도 및 실질경직성과 연결하며 경직적 임금으로 확장한다. 가격설정의 미시적 증거와 필립스 곡선의 거시적 증거를 통해 모형을 검토한다.",
+  "html:Assemble the canonical three-equation New Keynesian model, define the natural rate and the output gap, derive the closed-form responses to monetary and technology shocks, and characterise determinacy under interest-rate rules. Solve and simulate the model in Dynare.": "표준 3방정식 뉴케인지언 모형을 구성하고 자연이자율과 산출갭을 정의하며 통화 및 기술충격에 대한 폐쇄형 반응을 유도하고 금리규칙하의 결정성을 규명한다. Dynare에서 모형을 풀고 시뮬레이션한다.",
+  "html:Derive the welfare-based loss function of the New Keynesian model, characterise optimal policy under discretion and under commitment, and explain the divine coincidence, inflation bias and stabilization bias. Compare optimal policy with simple rules.": "뉴케인지언 모형의 후생기반 손실함수를 유도하고 재량 및 약속하의 최적정책을 규명하며 신성한 일치, 인플레이션 편향 및 안정화 편향을 설명한다. 최적정책을 단순 규칙과 비교한다.",
+  "html:Interpret Taylor rules as descriptions of and prescriptions for policy, estimate them, and understand their pitfalls. Compare strict and flexible inflation targeting, price-level targeting, average-inflation targeting and nominal-GDP targeting, and analyse them in a New Keynesian model.": "테일러 규칙을 정책의 기술이자 처방으로 해석하고 추정하며 한계를 이해한다. 엄격·유연 인플레이션 목표제, 물가수준 목표제, 평균 인플레이션 목표제 및 명목 GDP 목표제를 비교하고 뉴케인지언 모형에서 분석한다.",
+  "The quantity equation": "화폐수량 방정식",
+  "Why model money explicitly?": "화폐를 명시적으로 모형화하는 이유",
+  "Money in the utility function": "효용함수 내 화폐",
+  "Households and firms": "가계와 기업",
+  "Monopolistic competition": "독점적 경쟁",
+  "Calvo pricing": "칼보 가격설정",
+  "The model": "모형",
+  "The welfare loss": "후생 손실",
+  "The Taylor rule": "테일러 규칙"
 }
