@@ -24,6 +24,12 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/bayesian-guide/hier-panel.jpg",
+  "kicker": "Bayesian Guide · Model guide",
+  "title": "Bayesian Hierarchical Panel Regression",
+  "sub": "A panel where effects differ across countries or groups, some groups have little data, and you want partial pooling instead of a…"
+ },
+ {
   "out": "assets/og/bayesian-guide/index.jpg",
   "kicker": "Bayesian Guide",
   "title": "Which Bayesian VAR fits your question?",

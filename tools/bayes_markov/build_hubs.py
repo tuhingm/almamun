@@ -30,7 +30,8 @@ HUBS = {
                ("Monthly indicators arrive before quarterly GDP and you want a nowcast", "Mixed-frequency BVAR", "mixed-frequency"),
                ("Dynamics differ above and below a threshold of a variable you observe (inflation, the interest rate)", "Bayesian threshold VAR", "threshold-var"),
                ("Impulse responses without trusting a VAR, but smoother and with probability statements", "Bayesian local projections", "blp"),
-               ("You can sign the responses to a shock (rate up, inflation down) but cannot defend a recursive ordering", "Sign-restricted Bayesian VAR", "sign-bvar")],
+               ("You can sign the responses to a shock (rate up, inflation down) but cannot defend a recursive ordering", "Sign-restricted Bayesian VAR", "sign-bvar"),
+               ("A panel where effects differ across countries or groups and some groups have little data", "Hierarchical (multilevel) panel regression", "hier-panel")],
         other=("The regimes are <b>hidden</b> rather than defined by an observed variable?", "Use the <a href=\"../markov-guide/index.html\">Markov-Switching Guide</a>.")),
     "markov": dict(
         title="Which Markov-switching model fits your data?",
