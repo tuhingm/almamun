@@ -306,7 +306,7 @@
   "Interpretation and intuition": "해석과 직관",
   "Practical implementation": "실제 구현",
   "html:Use epsilon-delta definitions; evaluate limits; distinguish pointwise values from limiting behavior; establish continuity; apply the intermediate and extreme value theorems.": "엡실론-델타 정의를 사용하고 극한을 계산하며, 함수의 점별 값과 극한 거동을 구분한다. 연속성을 확립하고 중간값 정리와 최대·최소 정리를 적용한다.",
-  "html:Define convergence rigorously; use monotone convergence and Cauchy criteria; test infinite series; distinguish absolute and conditional convergence; analyze power series.": "수렴을 엄밀하게 정의하고, 단조수렴 및 코시 판정법을 사용하며, 무한급수를 판정하고, 절대수렴과 조건수렴을 구분하며, 멱급수를 분석한다.",
+  "html:Define convergence rigorously; use monotone convergence and Cauchy criteria; test infinite series; distinguish absolute and conditional convergence; analyze power series.": "수렴을 엄밀하게 정의하고 단조수렴 정리와 코시 판정법을 사용한다. 무한급수의 수렴성을 판정하고 절대수렴과 조건수렴을 구분하며 멱급수를 분석한다.",
   "html:Derive derivatives from first principles; apply differentiation rules; use mean value theorems; interpret marginal effects, elasticities, and comparative rates.": "미분을 정의에서 유도하고 미분법칙을 적용하며 평균값 정리를 사용하고 한계효과, 탄력성 및 변화율을 해석한다.",
   "html:Derive Taylor approximations; classify stationary points; use convexity; solve economic optimization problems and interpret first- and second-order conditions.": "테일러 근사를 유도하고 정지점을 분류하며 볼록성을 활용하고 경제적 최적화 문제를 풀어 1차 및 2차 조건을 해석한다.",
   "html:Define the Riemann integral; connect antiderivatives and accumulated area; apply substitution and integration by parts; evaluate improper integrals and interpret economic accumulation.": "리만 적분을 정의하고 부정적분과 누적 면적의 관계를 설명하며 치환적분과 부분적분을 적용하고 이상적분을 계산하여 경제적 누적량을 해석한다.",
@@ -403,5 +403,6 @@
   "7. Bayesian inference": "7. 베이지안 추론",
   "8. Experimental design": "8. 실험설계",
   "9. ANOVA and multiple comparisons": "9. 분산분석과 다중비교",
-  "html:Plot functions with removable and jump discontinuities. Compare numerical limits at decreasing step sizes with analytic limits; explain why numerical evidence is not a proof.": "অপসারণযোগ্য ও লাফ বিচ্ছিন্নতাযুক্ত ফাংশনের গ্রাফ আঁকুন। ক্রমহ্রাসমান ধাপের আকারে সংখ্যাগত সীমাকে বিশ্লেষণাত্মক সীমার সঙ্গে তুলনা করুন এবং ব্যাখ্যা করুন কেন সংখ্যাগত প্রমাণ কোনো গাণিতিক প্রমাণ নয়।"
+  "html:Plot functions with removable and jump discontinuities. Compare numerical limits at decreasing step sizes with analytic limits; explain why numerical evidence is not a proof.": "অপসারণযোগ্য ও লাফ বিচ্ছিন্নতাযুক্ত ফাংশনের গ্রাফ আঁকুন। ক্রমহ্রাসমান ধাপের আকারে সংখ্যাগত সীমাকে বিশ্লেষণাত্মক সীমার সঙ্গে তুলনা করুন এবং ব্যাখ্যা করুন কেন সংখ্যাগত প্রমাণ কোনো গাণিতিক প্রমাণ নয়।",
+  "html:Every monotone increasing sequence bounded above converges to its supremum. Every monotone decreasing sequence bounded below converges to its infimum. This result is useful for recursive sequences and iterative economic processes.": "위로 유계인 모든 단조증가 수열은 상한으로 수렴한다. 아래로 유계인 모든 단조감소 수열은 하한으로 수렴한다. 이 결과는 점화수열과 반복적 경제 과정의 분석에 유용하다."
 }
