@@ -744,5 +744,61 @@
    "label": "Log-likelihood",
    "value": -161.3
   }
+ },
+ "eventstudy": {
+  "nobs": 550,
+  "table_index": 0,
+  "table": "Event-study coefficients (reference period: the year before adoption)",
+  "row": "-5",
+  "col": "Conventional TWFE",
+  "value": -0.138574,
+  "rtol": 0.001,
+  "seconds": 4.5,
+  "summary": {
+   "label": "Pre-trend Wald p-value",
+   "value": 0.0266
+  }
+ },
+ "sdid": {
+  "nobs": 816,
+  "table_index": 0,
+  "table": "Estimates and placebo inference",
+  "row": "Difference-in-differences",
+  "col": "Effect",
+  "value": 29779.75875,
+  "rtol": 0.001,
+  "seconds": 20.2,
+  "summary": {
+   "label": "Synthetic DiD effect",
+   "value": 19477.121
+  }
+ },
+ "matching": {
+  "nobs": 3003,
+  "table_index": 0,
+  "table": "Treatment-effect estimates",
+  "row": "Matching (1 nearest neighbour), ATT",
+  "col": "Estimate",
+  "value": 0.30343,
+  "rtol": 0.001,
+  "seconds": 1.1,
+  "summary": {
+   "label": "AIPW ATE",
+   "value": 0.3763
+  }
+ },
+ "bartik": {
+  "nobs": 600,
+  "table_index": 0,
+  "table": "Estimates",
+  "row": "OLS",
+  "col": "Coefficient",
+  "value": 0.999715,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "First-stage F",
+   "value": 487.4
+  }
  }
 }

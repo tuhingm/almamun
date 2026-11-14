@@ -13,7 +13,7 @@ import warnings
 import numpy as np
 import pandas as pd
 
-from . import bayes, bayes_extra, breaks, causal, lp, markov, ml, panel, pthreshold, pvar, smooth, statespace_var, svar, tar, timeseries
+from . import bayes, bayes_extra, breaks, causal, causal_extra, lp, markov, ml, panel, pthreshold, pvar, smooth, statespace_var, svar, tar, timeseries
 from .core import OESError, read_csv, time_order
 from .report import frame, plot, show, summary, tables
 
@@ -399,6 +399,24 @@ MODELS += [
          example=dict(file=OX + "gnp_fedfunds.csv", spec=dict(y="gnp_growth", driver=["d_fedfunds"], time="date", reference="nber_recession"))),
 ]
 
+CE = "oes/examples/"
+MODELS += [
+    dict(id="eventstudy", group="Causal inference", name="Event study (Sun-Abraham) with pre-trend sensitivity", guide="causal-inference-guide/eventstudy.html", fn=causal_extra.eventstudy,
+         fields=[col("y", "Outcome"), UNIT, PTIME, col("treat", "Treatment indicator (0/1, stays 1 once treated)"), num("pre", "Pre-treatment periods", 5), num("post", "Post-treatment periods", 3),
+                 num("boot", "Bootstrap replications (over units)", 150), num("seed", "Random seed", 0)],
+         example=dict(file=CI + "castle_murder.csv", spec=dict(y="l_murder", unit="state", time="year", treat="castle_law", pre=5, post=3, boot=100))),
+    dict(id="sdid", group="Causal inference", name="Synthetic difference-in-differences", guide="causal-inference-guide/sdid.html", fn=causal_extra.sdid,
+         fields=[col("y", "Outcome"), UNIT, PTIME, col("treat", "Treatment indicator (0/1, common adoption period)"), num("placebos", "Placebo draws (several treated units)", 100), num("seed", "Random seed", 0)],
+         example=dict(file=CI + "texas.csv", spec=dict(y="bmprison", unit="state", time="year", treat="expansion"))),
+    dict(id="matching", group="Causal inference", name="Matching, IPW and doubly robust estimation", guide="causal-inference-guide/matching.html", fn=causal_extra.matching,
+         fields=[col("y", "Outcome"), col("treat", "Treatment indicator (0/1)"), cols("x", "Covariates"), num("boot", "Bootstrap replications", 200), num("seed", "Random seed", 0)],
+         example=dict(file=CE + "card_college.csv", spec=dict(y="lwage", treat="college", x=["black", "smsa", "south", "married", "exper", "exper2"], boot=100))),
+    dict(id="bartik", group="Causal inference", name="Shift-share (Bartik) instrumental variables", guide="causal-inference-guide/bartik.html", fn=causal_extra.bartik,
+         fields=[col("y", "Outcome"), col("x", "Endogenous variable"), cols("shares", "Initial industry shares (one column per industry)"), num("shocks", "Industry shocks (comma-separated, in the order of the share columns)", ""),
+                 cols("controls", "Controls", required=False)],
+         example=dict(file=CE + "shiftshare.csv", spec=dict(y="dy", x="dx", shares=["share_%d" % i for i in range(1, 61)], shocks="0.0488,-0.0333,-0.1236,0.0050,-0.0012,0.0200,0.1599,-0.0827,0.1836,-0.0420,-0.0827,0.1521,0.1407,0.0583,0.0484,-0.0651,0.1687,-0.0155,0.0787,-0.0534,-0.0304,-0.0182,0.1980,0.0610,0.0978,-0.0517,-0.0176,0.0100,-0.0759,0.0436,0.0152,0.0930,0.0000,-0.0198,0.1069,-0.0313,0.0109,0.0365,-0.0230,-0.0143,0.1044,-0.1253,0.0507,-0.1275,0.1389,-0.2460,-0.0570,-0.1034,0.0927,0.0241,-0.0149,0.0479,0.3004,-0.0136,-0.0935,0.0754,-0.0107,0.0125,-0.1818,0.0238"))),
+]
+
 BY_ID = {m["id"]: m for m in MODELS}
 GROUPS = ["Time series", "Panel data", "Causal inference", "Machine learning", "Bayesian", "Markov switching"]
 
@@ -411,7 +429,7 @@ def packages(model_id):
     return ["scikit-learn", "xgboost"] if model_id == "xgb" else ["scikit-learn"]
 
 
-SLOW = {"dml_irm", "dml_iv", "causal_forest", "staggered", "tvpvar", "mfbvar", "svvar", "hier_panel", "sign_bvar", "ms_tvtp"}
+SLOW = {"dml_irm", "dml_iv", "causal_forest", "staggered", "tvpvar", "mfbvar", "svvar", "hier_panel", "sign_bvar", "ms_tvtp", "eventstudy", "sdid", "matching", "bartik"}
 
 
 def catalog():
