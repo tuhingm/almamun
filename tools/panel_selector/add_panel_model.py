@@ -31,6 +31,12 @@ EXTRA = {
                  steps=["Panel unit roots that allow common shocks", "Kao and Pedroni-type residual tests", "Westerlund error-correction test", "Cross-sectional dependence and demeaned tests", "Long-run estimates by DOLS"],
                  lec=[["lectures/macro-panel-econometrics.html", "Macro-panel lecture"]],
                  q=("My variables are non-stationary and may share a long-run relation", "Panel cointegration tests")),
+    "pquant": dict(key="PQUANT", short="Panel quantile",
+                 name="Panel quantile regression (Canay, MM-QR)", when="Effects that differ across the outcome distribution, with unit effects",
+                 why="The mean hides who gains and who loses. Quantile regression gives effects at the bottom and the top of the distribution, but unit effects must be handled: pooled quantile regression ignores them, Canay's two-step estimator removes them with a location shift and MM-QR uses a location-scale model. Use a bootstrap over units and test whether the coefficients differ across quantiles.",
+                 steps=["Mean benchmarks: pooled and fixed effects", "Pooled, Canay and MM-QR estimators", "Bootstrap over units", "Test of equal effects across quantiles", "Compare the methods"],
+                 lec=[["../teaching/econometrics/lectures/07-panel-data.html", "Lecture 07: Static panels"]],
+                 q=("I want effects at different quantiles of the outcome", "Panel quantile regression")),
 }
 
 

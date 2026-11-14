@@ -336,6 +336,12 @@
   "sub": "Short panel, no significant unit effects. Step-by-step guide with Python code and real output."
  },
  {
+  "out": "assets/og/panel-data-guide/pquant.jpg",
+  "kicker": "Panel Data Guide · Model guide",
+  "title": "Panel Quantile Regression",
+  "sub": "The effect of a regressor differs across the distribution of the outcome, and units have permanent differences. Step-by-step…"
+ },
+ {
   "out": "assets/og/panel-data-guide/pthresh.jpg",
   "kicker": "Panel Data Guide · Model guide",
   "title": "Panel Threshold Regression (Hansen)",
