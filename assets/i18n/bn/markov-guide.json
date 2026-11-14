@@ -15,5 +15,19 @@
 "Method guides": "পদ্ধতি নির্দেশিকা",
 "Each guide takes one real dataset through pre-estimation tests, estimation, diagnostics, robustness and sample text for the paper, with Python code and real output.": "প্রতিটি নির্দেশিকা একটি বাস্তব ডেটাসেট ধরে প্রাক-প্রাক্কলন পরীক্ষা, প্রাক্কলন, ডায়াগনস্টিক, দৃঢ়তা যাচাই ও গবেষণাপত্রের নমুনা লেখা পর্যন্ত নিয়ে যায়—সঙ্গে Python কোড ও বাস্তব আউটপুট।",
 "Markov-switching models need stationary series, so trending levels are sent back for transformation. If an observed variable above or below a threshold defines the regime, the threshold VAR (Bayesian Guide) is the better tool. Otherwise the structure decides: one series (MS-AR), a regression (MS regression), several series (MS-VAR) or a panel (panel MS-VAR). The page also reports the evidence for regimes: the likelihood-ratio statistic of a two-regime model against one regime, compared with the Garcia critical value of about 14, the AIC and BIC of both models, and the share of periods in the smaller regime, which flags a collapsed regime. These are screening numbers from a simple two-regime fit with no autoregressive terms and a switching variance, so they can differ from the full test in each guide (the Hamilton GNP guide, with AR(4) and a switching mean only, does not reject linearity at the Garcia value). The guide for each model covers its own test.": "মার্কভ-সুইচিং মডেলে স্টেশনারি সিরিজ দরকার, তাই প্রবণতাযুক্ত লেভেলগুলো রূপান্তরের জন্য ফেরত পাঠানো হয়। কোনো পর্যবেক্ষিত চলক থ্রেশহোল্ডের ওপরে বা নিচে থাকাই যদি রেজিম ঠিক করে, তবে থ্রেশহোল্ড VAR (বেইজিয়ান নির্দেশিকা) আরও ভালো হাতিয়ার। নইলে কাঠামো ঠিক করে দেয়: একটি সিরিজ (MS-AR), একটি রিগ্রেশন (MS রিগ্রেশন), একাধিক সিরিজ (MS-VAR) বা একটি প্যানেল (প্যানেল MS-VAR)। পাতাটি রেজিমের পক্ষে প্রমাণও জানায়: এক রেজিমের বিপরীতে দুই-রেজিম মডেলের সম্ভাবনা-অনুপাত পরিসংখ্যান (গার্সিয়ার ক্রিটিক্যাল মান প্রায় ১৪-এর সঙ্গে তুলনা), দুই মডেলের AIC ও BIC, এবং ছোট রেজিমে থাকা সময়কালের অংশ—যা ধসে পড়া রেজিমের ইঙ্গিত দেয়। এগুলো স্বয়ংসংশ্লিষ্ট পদ ছাড়া এবং পরিবর্তনশীল ভ্যারিয়েন্সসহ একটি সরল দুই-রেজিম ফিট থেকে পাওয়া বাছাইয়ের সংখ্যা, তাই প্রতিটি নির্দেশিকার পূর্ণ পরীক্ষা থেকে এগুলো ভিন্ন হতে পারে (শুধু AR(4) ও পরিবর্তনশীল গড়সহ হ্যামিল্টন GNP নির্দেশিকা গার্সিয়ার মানে রৈখিকতা বাতিল করে না)। প্রতিটি মডেলের নির্দেশিকা নিজস্ব পরীক্ষা আলোচনা করে।",
-"· Markov Guide": "· মার্কভ নির্দেশিকা"
+"· Markov Guide": "· মার্কভ নির্দেশিকা",
+"U.S. GNP growth": "মার্কিন জিএনপি প্রবৃদ্ধি",
+"One series": "একটি সিরিজ",
+"Hamilton's data: does one series switch between expansion and recession?": "Hamilton-এর ডেটা: একটি সিরিজ কি সম্প্রসারণ ও মন্দার মধ্যে বদলায়?",
+"Hamilton’s data: does one series switch between expansion and recession?": "Hamilton-এর ডেটা: একটি সিরিজ কি সম্প্রসারণ ও মন্দার মধ্যে বদলায়?",
+"Inflation on unemployment and money growth": "বেকারত্ব ও মুদ্রা প্রবৃদ্ধির ওপর মুদ্রাস্ফীতি",
+"Regression": "রিগ্রেশন",
+"A regression whose level, slopes or variance might switch.": "এমন একটি রিগ্রেশন যার স্তর, ঢাল বা ভেদাঙ্ক বদলাতে পারে।",
+"Several series": "একাধিক সিরিজ",
+"Do three variables share one regime path?": "তিনটি চলক কি একই রেজিম-পথ ভাগ করে?",
+"GDP growth in 14 countries": "১৪টি দেশের জিডিপি প্রবৃদ্ধি",
+"Do the countries share the same regimes?": "দেশগুলো কি একই রেজিম ভাগ করে?",
+"The federal funds rate": "ফেডারেল ফান্ডস রেট",
+"Trending levels": "ট্রেন্ডযুক্ত লেভেল",
+"A series in levels: the case where Markov switching is the wrong first step.": "লেভেলে একটি সিরিজ: যেখানে মার্কভ সুইচিং ভুল প্রথম ধাপ।"
 }
