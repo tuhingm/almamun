@@ -234,6 +234,12 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/markov-guide/ms-tvtp.jpg",
+  "kicker": "Markov-Switching Guide · Model guide",
+  "title": "Markov Switching with Time-Varying Transition Probabilities",
+  "sub": "Regimes are hidden, but you think an observed variable changes the probability of moving between them (a policy rate, a spread, a…"
+ },
+ {
   "out": "assets/og/markov-guide/ms-var.jpg",
   "kicker": "Markov-Switching Guide · Model guide",
   "title": "Markov-Switching VAR",

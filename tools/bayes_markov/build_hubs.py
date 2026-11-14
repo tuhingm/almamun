@@ -41,7 +41,8 @@ HUBS = {
         table=[("One series (GDP growth, an interest rate) whose mean shifts between states", "Markov-switching autoregression (Hamilton)", "ms-ar"),
                ("A regression whose intercept, slopes or error variance shift between states", "Markov-switching regression", "ms-regression"),
                ("Several variables whose means, volatilities or dynamics shift together", "Markov-switching VAR", "ms-var"),
-               ("A panel of countries that share the same regimes (a global slowdown)", "Markov-switching panel VAR", "ms-panel-var")],
+               ("A panel of countries that share the same regimes (a global slowdown)", "Markov-switching panel VAR", "ms-panel-var"),
+               ("Hidden regimes, and an observed variable (a policy rate, a spread) that changes the probability of switching", "Markov switching with time-varying transition probabilities", "ms-tvtp")],
         other=("The regime is <b>observed</b> (a variable above or below a threshold)?", "Use the <a href=\"../bayesian-guide/threshold-var.html\">Bayesian threshold VAR</a>.")),
 }
 
