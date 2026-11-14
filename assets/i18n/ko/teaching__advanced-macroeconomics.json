@@ -300,5 +300,20 @@
   "Before you begin": "시작하기 전에",
   "Step-by-step": "단계별 설명",
   "Interpretation and intuition": "해석과 직관",
-  "Practical implementation": "실제 구현"
+  "Practical implementation": "실제 구현",
+  "html:Derive household optimality conditions in discrete time; distinguish budget feasibility from optimality; interpret the Euler equation, borrowing constraints, and transversality.": "이산시간에서 가계의 최적조건을 유도하고 예산제약의 실현 가능성과 최적성을 구분하며 오일러 방정식, 차입제약 및 횡단성 조건을 해석한다.",
+  "html:Derive factor demands, the capital Euler equation, and Tobin's q; understand depreciation, adjustment costs, and investment dynamics.": "요소수요, 자본 오일러 방정식 및 토빈의 q를 유도하고 감가상각, 조정비용 및 투자동학을 이해한다.",
+  "html:Derive the Solow steady state, golden-rule capital, and Ramsey saddle path; distinguish exogenous saving from optimal saving.": "솔로우 정상상태, 황금률 자본 및 램지 안장경로를 유도하고 외생적 저축과 최적 저축을 구분한다.",
+  "html:Construct a real business cycle (RBC) model; derive equilibrium conditions; understand calibration, shock propagation, and impulse responses.": "실물경기변동(RBC) 모형을 구성하고 균형조건을 유도하며 보정, 충격 전파 및 충격반응을 이해한다.",
+  "html:Derive the firm's reset-price problem under Calvo pricing; interpret the New Keynesian Phillips curve and its slope.": "칼보 가격설정하에서 기업의 재설정가격 문제를 유도하고 뉴케인지언 필립스 곡선과 그 기울기를 해석한다.",
+  "html:Combine the dynamic IS relation, Phillips curve, and monetary-policy rule; analyze equilibrium responses to demand, supply, and policy shocks.": "동태적 IS 관계, 필립스 곡선 및 통화정책 규칙을 결합하고 수요·공급·정책 충격에 대한 균형반응을 분석한다.",
+  "html:Evaluate policy rules and optimal policy; distinguish commitment from discretion; analyze the effective lower bound and forward guidance.": "정책규칙과 최적정책을 평가하고 약속과 재량을 구분하며 실효하한과 선제적 안내를 분석한다.",
+  "Environment": "경제 환경",
+  "Technology and static optimization": "기술과 정태적 최적화",
+  "Solow model": "솔로우 모형",
+  "Household and firm": "가계와 기업",
+  "Price-setting environment": "가격설정 환경",
+  "Reset-price condition": "가격 재설정 조건",
+  "Core system": "핵심 시스템",
+  "Policy rules": "정책 규칙"
 }
