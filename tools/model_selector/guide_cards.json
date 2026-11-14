@@ -163,5 +163,16 @@
 "Real output",
 "How to write it"
 ]
+},
+{
+"out": "assets/og/time-series-guide-wavelet.jpg",
+"kicker": "Empirical Research Guide · Model guide",
+"title": "Wavelet Coherence",
+"sub": "The link between two series may differ by time horizon and change over time (money and inflation, markets, business cycles). U.S. money (M2) growth and CPI inflation, monthly, 1960–2019",
+"tags": [
+"Python code",
+"Real output",
+"How to write it"
+]
 }
 ]
