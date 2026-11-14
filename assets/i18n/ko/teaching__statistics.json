@@ -362,5 +362,6 @@
   "html:How does a probability model translate uncertainty about outcomes into quantities that can be estimated and tested?": "확률모형은 결과에 관한 불확실성을 어떻게 추정하고 검정할 수 있는 양으로 변환하는가?",
   "html:A density is not itself a probability at a point. The support and normalization condition must always be stated.": "확률밀도함수의 특정 점에서의 값 자체는 확률이 아니다. 지지집합과 정규화 조건을 항상 명시해야 한다.",
   "html:This separates explained variation due to the binary regressor from average conditional residual variation.": "이를 통해 이진 설명변수에 의해 설명되는 변동과 평균적인 조건부 잔차 변동을 구분한다.",
-  "html:For a one-to-one vector transformation, multiply the original density by the absolute determinant of the inverse Jacobian. For non-monotone scalar transformations, sum over all inverse branches. The support must be transformed as well as the density.": "일대일 벡터 변환에서는 원래 밀도에 역야코비안 행렬식의 절댓값을 곱한다. 단조적이지 않은 스칼라 변환에서는 모든 역함수 가지에 대해 합산한다. 밀도뿐 아니라 지지집합도 함께 변환해야 한다."
+  "html:For a one-to-one vector transformation, multiply the original density by the absolute determinant of the inverse Jacobian. For non-monotone scalar transformations, sum over all inverse branches. The support must be transformed as well as the density.": "일대일 벡터 변환에서는 원래 밀도에 역야코비안 행렬식의 절댓값을 곱한다. 단조적이지 않은 스칼라 변환에서는 모든 역함수 가지에 대해 합산한다. 밀도뿐 아니라 지지집합도 함께 변환해야 한다.",
+  "html:Simulate binomial, Poisson, gamma, and multivariate normal data. Compare empirical and theoretical moments, and visualize how covariance changes the geometry of bivariate normal samples.": "이항분포, 포아송분포, 감마분포 및 다변량 정규분포 자료를 모의 생성한다. 표본 적률과 이론적 적률을 비교하고 공분산이 이변량 정규표본의 기하학적 형태를 어떻게 바꾸는지 시각화한다."
 }
