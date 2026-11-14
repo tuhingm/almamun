@@ -19,6 +19,12 @@ EXTRA = {
                  steps=["Event time and cohort coverage", "Conventional event study", "Sun–Abraham interaction-weighted estimator", "Pre-trend test and its power", "Sensitivity to violations of parallel trends"],
                  lec=[],
                  q=("I want dynamic effects around a policy and a check on pre-trends", "Event study with Sun–Abraham and sensitivity analysis")),
+    "sdid": dict(key="SDID", short="Synthetic DiD",
+                 name="Synthetic difference-in-differences", when="One or a few treated units; neither parallel trends nor a perfect synthetic-control fit is credible alone",
+                 why="The treated unit differs in level from the comparison pool and the pre-treatment fit is imperfect. Synthetic DiD reweights comparison units and pre-treatment periods and then runs a weighted DiD, so it allows level differences and gives some protection against non-parallel trends. Compare it with DiD and synthetic control, and use placebo inference.",
+                 steps=["Design and comparison pool", "DiD and synthetic control on the same data", "Unit and time weights", "Placebo inference", "Regularisation, in-time placebo and scale"],
+                 lec=[],
+                 q=("I have one treated unit and want to combine DiD with synthetic control", "Synthetic difference-in-differences")),
 }
 
 

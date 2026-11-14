@@ -108,6 +108,12 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/causal-inference-guide/sdid.jpg",
+  "kicker": "Causal Inference Guide · Model guide",
+  "title": "Synthetic Difference-in-Differences",
+  "sub": "One or a few treated units; neither parallel trends (DiD) nor a perfect pre-treatment fit (synthetic control) is credible alone.…"
+ },
+ {
   "out": "assets/og/causal-inference-guide/staggered.jpg",
   "kicker": "Causal Inference Guide · Model guide",
   "title": "Staggered Difference-in-Differences",
