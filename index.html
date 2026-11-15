@@ -38,6 +38,27 @@ footer{background:var(--deep);color:#c5d2e7;padding:27px 0 15px}.footer-grid{dis
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 
 #profile .about-grid p a{color:var(--blue);font-weight:600;text-decoration:underline;text-decoration-color:#b9c9e6;text-underline-offset:2px}#profile .about-grid p a:hover{text-decoration-color:var(--blue)}
+
+/* OES feature block */
+.oes-section-head{align-items:end;margin-bottom:38px}
+.oes-section-head .kicker{letter-spacing:.2em}
+.oes-main-card{display:grid;grid-template-columns:134px minmax(0,1fr);gap:26px;align-items:start;padding:31px 32px 34px;background:linear-gradient(115deg,#f8faff,#fff);box-shadow:0 12px 34px rgba(0,32,91,.07)}
+.oes-logo{width:134px;height:136px;border-radius:16px;background:linear-gradient(145deg,#0033a0,#00205b);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 12px 24px rgba(0,32,91,.16);margin-top:0}
+.oes-logo strong{font:800 40px/1 Manrope,sans-serif;letter-spacing:.03em}
+.oes-logo span{font:500 9px/1.8 'DM Sans',sans-serif;letter-spacing:.11em;text-align:center;margin-top:10px}
+.oes-main-content .number{font-size:10px;letter-spacing:.16em}
+.oes-main-content h3{font-size:24px;margin:7px 0 10px}
+.oes-main-content p{font-size:13px;line-height:1.9;color:var(--muted);margin:0 0 16px}
+.oes-tags{display:flex;gap:10px;flex-wrap:wrap;margin:17px 0 20px}
+.oes-tags span{font:800 9px Manrope,sans-serif;color:var(--blue);background:#e8effb;border-radius:24px;padding:8px 13px}
+.oes-links{display:flex;gap:24px;flex-wrap:wrap}
+.oes-links a{font-size:11px;font-weight:800;color:var(--blue);text-decoration:underline;text-underline-offset:4px}
+.oes-documentation{margin-top:30px;padding:29px 30px;background:#f2f5fb;box-shadow:none}
+.oes-documentation h3{font-size:20px;margin:8px 0 9px}
+.oes-documentation p{font-size:12px;color:var(--muted);margin:0 0 15px}
+.oes-documentation blockquote{margin:0 0 15px;padding:15px 17px;background:#fff;border-left:3px solid var(--blue);font-size:11px;color:var(--muted)}
+.oes-documentation .btn{font-size:10px}
+@media(max-width:650px){.oes-main-card{grid-template-columns:1fr;padding:22px;gap:20px}.oes-logo{width:112px;height:114px}.oes-main-content h3{font-size:21px}.oes-documentation{padding:22px}.oes-tags{gap:7px}.oes-tags span{font-size:8px}}
 </style>
 <style id="motion">
 /* ---- motion layer: additive only, design unchanged ---- */
@@ -87,21 +108,31 @@ nav a{position:relative}nav a:after{content:"";position:absolute;left:0;right:0;
 
 <div class="view-only" data-view-content="econ" aria-hidden="false">
 <section class="white" id="software-projects"><div class="wrap">
-<div class="section-head"><div><div class="kicker">RESEARCH SOFTWARE &amp; OPEN TOOLS</div><h2>Research software and projects</h2></div><p class="section-intro">Open-source computational tools developed to support applied econometric research and empirical practice.</p></div>
-<article class="card">
-<div><div class="number">FOUNDER &amp; DEVELOPER</div><h3 style="font-size:22px;margin:9px 0 12px">Open Econometric Systems (OES)</h3>
-<p style="font-size:12px;color:var(--muted);margin:0 0 14px">An open-source, browser-based econometric platform bringing together 69 econometric and statistical models across six methodological categories: Time Series, Panel Data, Causal Inference, Machine Learning, Bayesian Econometrics, and Markov Switching.</p>
-<p style="font-size:12px;color:var(--muted);margin:0 0 18px">OES executes its Python estimation engine in the browser through Pyodide and WebAssembly. Data analysis is performed locally in the browser rather than through an OES estimation API.</p>
-<div class="actions">
-<a class="btn btn-blue" href="https://tuhingm.github.io/almamun/oes/" target="_blank" rel="noopener">Open OES Platform ↗</a>
-<a class="btn btn-outline" style="border-color:var(--line);color:var(--blue)" href="https://github.com/tuhingm/open-econometric-systems" target="_blank" rel="noopener">GitHub Repository ↗</a>
-</div></div>
-<aside style="border-top:1px solid var(--line);padding:18px 0 0;margin-top:18px">
-<div class="kicker">TECHNICAL DOCUMENTATION</div><h3 style="font-size:15px;margin:9px 0 8px">OES Reference Manual, Version 1.4</h3>
-<p style="font-size:11px;color:var(--muted);margin:0 0 13px">Al Mamun, T. G. M. (2026). <em>OES Technical Documentation</em>, No. 1.</p>
-<a href="https://tuhingm.github.io/almamun/oes/OES_Reference_Manual_v1.4.pdf" target="_blank" rel="noopener" style="color:var(--blue);font-size:11px;font-weight:800">Read Reference Manual (PDF) ↗</a><br>
-<a href="https://tuhingm.github.io/almamun/oes/reference-manual-v1.4.html" target="_blank" rel="noopener" style="color:var(--blue);font-size:11px;font-weight:800">Publication details ↗</a>
-</aside>
+<div class="section-head oes-section-head">
+  <div><div class="kicker">RESEARCH SOFTWARE · OPEN-SOURCE DEVELOPMENT</div><h2>Research Software &amp; Projects</h2></div>
+  <p class="section-intro">Open computational tools developed to support applied econometric research and reproducible analysis.</p>
+</div>
+<article class="card oes-main-card">
+  <div class="oes-logo" aria-label="Open Econometric Systems logo">
+    <strong>OES</strong><span>OPEN ECONOMETRIC<br>SYSTEMS</span>
+  </div>
+  <div class="oes-main-content">
+    <div class="number">FOUNDER &amp; DEVELOPER</div>
+    <h3>Open Econometric Systems (OES)</h3>
+    <p>An open-source, browser-based econometric platform that brings a broad collection of statistical and econometric methods into one computational environment. Estimation runs locally in the browser through Python and Pyodide (WebAssembly).</p>
+    <div class="oes-tags"><span>69 MODELS</span><span>6 METHODOLOGICAL GROUPS</span><span>IN-BROWSER COMPUTATION</span></div>
+    <div class="oes-links">
+      <a href="https://tuhingm.github.io/almamun/oes/" target="_blank" rel="noopener">Open OES platform ↗</a>
+      <a href="https://github.com/tuhingm/open-econometric-systems" target="_blank" rel="noopener">GitHub repository ↗</a>
+    </div>
+  </div>
+</article>
+<article class="card oes-documentation">
+  <div class="kicker">TECHNICAL DOCUMENTATION · 2026</div>
+  <h3>OES Reference Manual, Version 1.4</h3>
+  <p>The technical reference for the platform's model catalogue, computational architecture, and implementation.</p>
+  <blockquote>Al Mamun, T. G. M. (2026). <em>Open Econometric Systems (OES): Reference Manual, Version 1.4.</em> OES Technical Documentation, No. 1.</blockquote>
+  <a class="btn btn-blue" href="https://tuhingm.github.io/almamun/oes/OES_Reference_Manual_v1.4.pdf" target="_blank" rel="noopener">Read Reference Manual (PDF) ↗</a>
 </article>
 </div></section>
 <section id="jmp" class="white"><div class="wrap">
