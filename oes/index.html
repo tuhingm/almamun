@@ -49,6 +49,9 @@ pre.code{background:#0f1b33;color:#dce6f7;border-radius:10px;padding:14px 16px;f
 .info{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}.info div{background:#f5f7fc;border:1px solid #e1e7f1;border-radius:10px;padding:14px;font-size:13px;color:#41506a}.info b{display:block;color:var(--ink);font-family:Manrope;margin-bottom:4px}
 footer{background:#00205b;color:#dce7f6;padding:25px 0;font-size:12px}footer .foot{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}footer a{color:#9fd3f0}
 @media(max-width:700px){section.step{padding:18px 16px}.grid2{grid-template-columns:1fr}.opform{grid-template-columns:1fr}.hero{padding:40px 0 36px}.charts{grid-template-columns:1fr}}
+
+.citation-box{overflow-wrap:anywhere}.citation-box p{line-height:1.75}
+#s-cite .sub strong{color:var(--ink)}
 </style>
 <link rel="stylesheet" href="../assets/css/mobile-nav.css">
 <link rel="stylesheet" href="../assets/css/site-header.css">
@@ -125,7 +128,33 @@ footer{background:#00205b;color:#dce7f6;padding:25px 0;font-size:12px}footer .fo
 <div><b>Large files</b>Everything runs on your computer, so very large datasets and the forest-based methods take longer. Fewer trees or folds speed them up.</div>
 </div>
 </section>
-</main>
+
+<section class="step" id="s-cite" aria-labelledby="cite-title">
+  <span class="stepno">Research use · Attribution</span>
+  <h2 id="cite-title">How to cite OES</h2>
+  <p class="sub">If you use Open Econometric Systems for estimation, statistical analysis, data processing, or other computational work reported in a scholarly output, please cite the platform. This helps readers identify the software and acknowledge its developer.</p>
+  <h3>APA 7th edition</h3>
+  <div class="citation-box" style="background:#f5f7fc;border:1px solid #e1e7f1;border-radius:9px;padding:14px 16px;margin:10px 0">
+    <p id="oes-apa" style="margin:0;font-size:13px">Al Mamun, T. G. M. (2026). <i>Open Econometric Systems (OES)</i> (Version 1.4.0) [Computer software]. https://tuhingm.github.io/almamun/oes/</p>
+  </div>
+  <div class="row" style="margin:10px 0 14px">
+    <button class="btn" id="copy-oes-citation" type="button">Copy APA citation</button>
+    <span class="hint" id="oes-copy-status" role="status" aria-live="polite"></span>
+  </div>
+  <div class="grid2">
+    <div>
+      <h3>In-text citation</h3>
+      <p class="sub" style="margin-bottom:4px"><strong>Parenthetical:</strong> (Al Mamun, 2026)</p>
+      <p class="sub"><strong>Narrative:</strong> Al Mamun (2026)</p>
+    </div>
+    <div>
+      <h3>Suggested methodology statement</h3>
+      <p class="sub">“The econometric estimations and statistical computations were conducted using Open Econometric Systems (OES; Al Mamun, 2026).”</p>
+    </div>
+  </div>
+  <p class="hint" style="margin:8px 0 0">Developer: Tuhin G. M. Al Mamun. Please cite the software version used in your analysis. OES is free to use; this citation request supports scholarly attribution and does not replace the terms of the applicable software licence.</p>
+</section>
+\n</main>
 <footer><div class="wrap foot"><span><b>Tuhin G. M. Al Mamun, Ph.D.</b> · Open Econometric Systems</span><span><a href="https://github.com/tuhingm/open-econometric-systems" target="_blank" rel="noopener">Source code</a> · © <span id="year"></span></span></div></footer>
 <script>
 (() => {
@@ -459,5 +488,28 @@ fetch("engine/catalog.json", {cache: "no-cache"}).then(r => r.json()).then(c => 
 <script src="../assets/js/mobile-nav.js" defer></script>
 <script src="../assets/js/share.js" defer></script>
 <script defer src="../assets/ai/ask.js" data-site-ask></script>
-<script src="../assets/js/lang.js" defer></script></body>
+<script src="../assets/js/lang.js" defer></script>
+<script>
+(() => {
+  const button = document.getElementById("copy-oes-citation");
+  const citation = document.getElementById("oes-apa");
+  const status = document.getElementById("oes-copy-status");
+  if (!button || !citation || !status) return;
+  button.addEventListener("click", async () => {
+    const text = citation.innerText.replace(/\\s+/g, " ").trim();
+    try {
+      await navigator.clipboard.writeText(text);
+      status.textContent = "APA citation copied.";
+    } catch (error) {
+      const range = document.createRange();
+      range.selectNodeContents(citation);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      status.textContent = "Select and copy the highlighted citation.";
+    }
+  });
+})();
+</script>
+\n</body>
 </html>
