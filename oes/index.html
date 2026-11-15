@@ -130,29 +130,27 @@ footer{background:#00205b;color:#dce7f6;padding:25px 0;font-size:12px}footer .fo
 </section>
 
 <section class="step" id="s-cite" aria-labelledby="cite-title">
-  <span class="stepno">Research use · Attribution</span>
-  <h2 id="cite-title">How to cite OES</h2>
-  <p class="sub">If you use Open Econometric Systems for estimation, statistical analysis, data processing, or other computational work reported in a scholarly output, please cite the platform. This helps readers identify the software and acknowledge its developer.</p>
-  <h3>APA 7th edition</h3>
+  <span class="stepno">Research use · Citation</span>
+  <h2 id="cite-title">Citing OES in your research</h2>
+  <p class="sub">You should cite Open Econometric Systems (OES) if you use it in your research. The recommended way to do this is to cite the present reference manual, as follows:</p>
   <div class="citation-box" style="background:#f5f7fc;border:1px solid #e1e7f1;border-radius:9px;padding:14px 16px;margin:10px 0">
-    <p id="oes-apa" style="margin:0;font-size:13px">Al Mamun, T. G. M. (2026). <i>Open Econometric Systems (OES)</i> (Version 1.4.0) [Computer software]. https://tuhingm.github.io/almamun/oes/</p>
+    <p id="oes-reference" style="margin:0;font-size:13px;line-height:1.75">Tuhin G. M. Al Mamun (2026), “Open Econometric Systems (OES): Reference Manual, Version 1.4,” OES Technical Documentation, 1, Open Econometric Systems.</p>
   </div>
+  <h3>For convenience, you can copy and paste the following into your BibTeX file:</h3>
+  <pre class="code" id="oes-bibtex">@TechReport{AlMamun2026,
+  author      = {Al Mamun, Tuhin G. M.},
+  title       = {Open Econometric Systems (OES): Reference Manual, Version 1.4},
+  year        = {2026},
+  institution = {Open Econometric Systems},
+  type        = {OES Technical Documentation},
+  number      = {1},
+}</pre>
   <div class="row" style="margin:10px 0 14px">
-    <button class="btn" id="copy-oes-citation" type="button">Copy APA citation</button>
+    <button class="btn" id="copy-oes-bibtex" type="button">Copy BibTeX</button>
+    <button class="btn2" id="copy-oes-reference" type="button">Copy reference</button>
     <span class="hint" id="oes-copy-status" role="status" aria-live="polite"></span>
   </div>
-  <div class="grid2">
-    <div>
-      <h3>In-text citation</h3>
-      <p class="sub" style="margin-bottom:4px"><strong>Parenthetical:</strong> (Al Mamun, 2026)</p>
-      <p class="sub"><strong>Narrative:</strong> Al Mamun (2026)</p>
-    </div>
-    <div>
-      <h3>Suggested methodology statement</h3>
-      <p class="sub">“The econometric estimations and statistical computations were conducted using Open Econometric Systems (OES; Al Mamun, 2026).”</p>
-    </div>
-  </div>
-  <p class="hint" style="margin:8px 0 0">Developer: Tuhin G. M. Al Mamun. Please cite the software version used in your analysis. OES is free to use; this citation request supports scholarly attribution and does not replace the terms of the applicable software licence.</p>
+  <p class="hint" style="margin:8px 0 0">If you want to give a URL, use the OES website: https://tuhingm.github.io/almamun/oes/. Citing the OES Reference Manual in your research helps acknowledge the platform and its development.</p>
 </section>
 \n</main>
 <footer><div class="wrap foot"><span><b>Tuhin G. M. Al Mamun, Ph.D.</b> · Open Econometric Systems</span><span><a href="https://github.com/tuhingm/open-econometric-systems" target="_blank" rel="noopener">Source code</a> · © <span id="year"></span></span></div></footer>
@@ -511,5 +509,17 @@ fetch("engine/catalog.json", {cache: "no-cache"}).then(r => r.json()).then(c => 
   });
 })();
 </script>
-\n</body>
+\n<script>
+(() => {
+  const status = document.getElementById("oes-copy-status");
+  const copy = async (id, label) => {
+    const el = document.getElementById(id);
+    if (!el || !status) return;
+    try { await navigator.clipboard.writeText(el.innerText.trim()); status.textContent = label + " copied."; }
+    catch (error) { status.textContent = "Copy unavailable in this browser. Select the text and copy it manually."; }
+  };
+  document.getElementById("copy-oes-bibtex")?.addEventListener("click", () => copy("oes-bibtex", "BibTeX"));
+  document.getElementById("copy-oes-reference")?.addEventListener("click", () => copy("oes-reference", "Reference"));
+})();
+</script>\n</body>
 </html>
