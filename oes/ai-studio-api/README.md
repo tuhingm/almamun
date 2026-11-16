@@ -4,7 +4,7 @@ This Worker connects the OES AI Studio frontend to Gemini and the GitHub reposit
 
 ## What it does
 
-- Authenticates the owner through GitHub OAuth Device Flow.
+- Authenticates only the repository owner account `@tuhingm` through GitHub OAuth Device Flow.
 - Reads selected OES source files from the repository.
 - Sends the user's instruction and selected source context to the Gemini API.
 - Returns proposed complete file replacements for review in the browser.
@@ -39,7 +39,7 @@ This Worker connects the OES AI Studio frontend to Gemini and the GitHub reposit
 ## Security and publishing model
 
 - Gemini and GitHub credentials stay in Cloudflare secrets/KV, never in browser JavaScript.
-- GitHub authorization requests only the `public_repo` scope for this public repository.
+- GitHub authorization requests only the `public_repo` scope for this public repository, and the Worker rejects any GitHub account other than `@tuhingm`.
 - Source access is restricted to `oes/` and `assets/` files.
 - Gemini output is path-validated and size-limited.
 - Approved changes are committed on a new branch and opened as a pull request for review.
