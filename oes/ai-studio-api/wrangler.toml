@@ -1,0 +1,10 @@
+name = "oes-ai-studio-api"
+main = "src/index.js"
+compatibility_date = "2026-11-17"
+
+[[kv_namespaces]]
+binding = "OES_SESSIONS"
+id = "REPLACE_WITH_YOUR_CLOUDFLARE_KV_NAMESPACE_ID"
+
+[vars]
+GEMINI_MODEL = "gemini-3.8-flash"
