@@ -121,11 +121,10 @@ async function generate(body, token, env) {
     if (total > MAX_TOTAL_CHARS) throw new Error("Selected source files exceed the context limit. Select fewer files.");
     files.push(f);
   }
-  const history = Array.isArray(body.history) ? body.history.slice(-8).map(m => ({
-    role: m.role === "model" ? "model" : "user",
-    parts: [{ text: String(m.text || "").slice(0, 12000) }]
-  })) : [];
-  const context = files.map(f => "===== FILE: " + f.path + " =====\n" + f.content).join("\n\n");
+  const history = Array.isArray(body.history) ? body.history.slice(-8).map(m =>
+    (m.role === "model" ? "GEMINI" : "USER") + ": " + String(m.text || "").slice(0, 12000)
+  ).join("\\n\\n") : "";
+  const context = files.map(f => "===== FILE: " + f.path + " =====\\n" + f.content).join("\\n\\n");
   const system = [
     "You are the principal software engineer for Open Econometric Systems (OES), a browser-based scientific econometrics platform.",
     "Work against the supplied real repository files. Preserve existing working behavior, model definitions, estimator mathematics, browser-side computation, accessibility, SEO and visual identity.",
@@ -134,36 +133,26 @@ async function generate(body, token, env) {
     "For every changed file, return its COMPLETE replacement content, not a diff. Do not include unchanged files. Do not create paths outside oes/ and assets/.",
     "If the instruction is ambiguous or required source files are missing, return files: [] and explain exactly what is needed in message.",
     "Do not output markdown fences or any text outside the JSON object."
-  ].join("\n");
-  const userText = "USER INSTRUCTION:\n" + prompt + "\n\nCURRENT REPOSITORY FILES:\n" + context;
-  const contents = [...history, { role: "user", parts: [{ text: userText }] }];
-  const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + (env.GEMINI_MODEL || DEFAULT_MODEL) + ":generateContent", {
+  ].join("\\n");
+  const userText = (history ? "RECENT CONVERSATION:\\n" + history + "\\n\\n" : "") +
+    "USER INSTRUCTION:\\n" + prompt + "\\n\\nCURRENT REPOSITORY FILES:\\n" + context;
+  const res = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
     method: "POST",
     headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
     body: JSON.stringify({
-      systemInstruction: { parts: [{ text: system }] },
-      contents,
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: "OBJECT",
-          properties: {
-            message: { type: "STRING" },
-            files: { type: "ARRAY", items: { type: "OBJECT", properties: {
-              path: { type: "STRING" }, content: { type: "STRING" }, reason: { type: "STRING" }
-            }, required: ["path", "content", "reason"] } }
-          },
-          required: ["message", "files"]
-        }
-      }
+      model: env.GEMINI_MODEL || DEFAULT_MODEL,
+      system_instruction: system,
+      input: userText,
+      store: false
     })
   });
   const raw = await res.text();
   let result;
   try { result = JSON.parse(raw); } catch { throw new Error("Gemini returned an unreadable response: " + raw.slice(0, 500)); }
   if (!res.ok) throw new Error("Gemini API " + res.status + ": " + (result.error && result.error.message || raw.slice(0, 400)));
-  const textPart = result.candidates && result.candidates[0] && result.candidates[0].content && result.candidates[0].content.parts
-    ? result.candidates[0].content.parts.map(p => p.text || "").join("") : "";
+  const textPart = (result.steps || []).filter(s => s.type === "model_output")
+    .flatMap(s => s.content || []).filter(p => p.type === "text").map(p => p.text || "").join("") ||
+    result.output_text || "";
   let output;
   try { output = JSON.parse(textPart); } catch { throw new Error("Gemini response was not valid structured JSON."); }
   if (!Array.isArray(output.files)) output.files = [];
