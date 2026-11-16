@@ -123,8 +123,8 @@ async function generate(body, token, env) {
   }
   const history = Array.isArray(body.history) ? body.history.slice(-8).map(m =>
     (m.role === "model" ? "GEMINI" : "USER") + ": " + String(m.text || "").slice(0, 12000)
-  ).join("\\n\\n") : "";
-  const context = files.map(f => "===== FILE: " + f.path + " =====\\n" + f.content).join("\\n\\n");
+  ).join("\n\n") : "";
+  const context = files.map(f => "===== FILE: " + f.path + " =====\n" + f.content).join("\n\n");
   const system = [
     "You are the principal software engineer for Open Econometric Systems (OES), a browser-based scientific econometrics platform.",
     "Work against the supplied real repository files. Preserve existing working behavior, model definitions, estimator mathematics, browser-side computation, accessibility, SEO and visual identity.",
@@ -133,9 +133,9 @@ async function generate(body, token, env) {
     "For every changed file, return its COMPLETE replacement content, not a diff. Do not include unchanged files. Do not create paths outside oes/ and assets/.",
     "If the instruction is ambiguous or required source files are missing, return files: [] and explain exactly what is needed in message.",
     "Do not output markdown fences or any text outside the JSON object."
-  ].join("\\n");
-  const userText = (history ? "RECENT CONVERSATION:\\n" + history + "\\n\\n" : "") +
-    "USER INSTRUCTION:\\n" + prompt + "\\n\\nCURRENT REPOSITORY FILES:\\n" + context;
+  ].join("\n");
+  const userText = (history ? "RECENT CONVERSATION:\n" + history + "\n\n" : "") +
+    "USER INSTRUCTION:\n" + prompt + "\n\nCURRENT REPOSITORY FILES:\n" + context;
   const res = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
     method: "POST",
     headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
