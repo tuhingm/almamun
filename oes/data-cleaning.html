@@ -143,5 +143,13 @@ $("download").addEventListener("click",()=>{if(!current)return;const cols=Object
 $("report").addEventListener("click",()=>{if(!current)return;const report={application:"OES Data Cleaning Lab",created_at:new Date().toISOString(),source_file:fileName,original_rows:original.length,cleaned_rows:current.length,original_missing_cells:countMissing(original),remaining_missing_cells:countMissing(current),operations:audit,notes:["Original upload was not modified.","No automatic imputation, winsorization or outlier deletion was performed.","Duplicate entity-time keys, if present, are reported and not automatically removed."]};download(fileName+"_cleaning_report.json",JSON.stringify(report,null,2),"application/json");});
 })();
 </script>
+
+<script>
+// Keep the Data Cleaning Lab navigation free of repository/source links.
+document.querySelectorAll('header nav a').forEach(link => {
+  const label = (link.textContent || '').trim().toLowerCase();
+  if (label.includes('source code') || label.includes('source') || /github\\.com/i.test(link.href)) link.remove();
+});
+</script>
 </body>
 </html>
