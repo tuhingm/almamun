@@ -55,4 +55,4 @@ This Worker connects the OES AI Studio frontend to Gemini and the GitHub reposit
 - `POST /api/ai/edit`
 - `POST /api/repo/pull-request`
 
-The default model is `gemini-3.8-flash`; override with the Worker variable `GEMINI_MODEL`.
+The Worker calls the Gemini Interactions API (the recommended interface for new agentic workflows), uses `store: false` for stateless requests, and defaults to `gemini-3.8-flash`. Override the model with the Worker variable `GEMINI_MODEL`.
