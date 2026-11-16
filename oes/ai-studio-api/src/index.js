@@ -187,7 +187,7 @@ async function createPullRequest(body, token) {
   const parentSha = baseRef.object.sha;
   const parentCommit = await github("/repos/" + OWNER + "/" + REPO + "/git/commits/" + parentSha, token);
   const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z").toLowerCase();
-  const branch = "oes-ai-studio/" + stamp;
+  const branch = "oes-ai-studio-" + stamp;
   await github("/repos/" + OWNER + "/" + REPO + "/git/refs", token, {
     method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ref: "refs/heads/" + branch, sha: parentSha })
@@ -208,7 +208,7 @@ async function createPullRequest(body, token) {
     method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ message: "OES AI Studio: " + String(body.title || "AI-assisted update").slice(0, 100), tree: tree.sha, parents: [parentSha] })
   });
-  await github("/repos/" + OWNER + "/" + REPO + "/git/refs/heads/" + encodeURIComponent(branch).replace(/%2F/g, "%2F"), token, {
+  await github("/repos/" + OWNER + "/" + REPO + "/git/refs/heads/" + encodeURIComponent(branch), token, {
     method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sha: commit.sha })
   });
   const pr = await github("/repos/" + OWNER + "/" + REPO + "/pulls", token, {
