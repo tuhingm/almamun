@@ -147,7 +147,8 @@ function buildAIMetadata(){
  const columns=cols.slice(0,300).map(name=>{
   const values=rows.map(r=>r[name]),present=values.filter(v=>!missing(v)),nums=present.map(safeNumber);
   const numeric=present.length>0&&nums.every(v=>v!==null);
-  return {name:String(name).slice(0,100),type:inferType(values),missing:values.length-present.length,unique:new Set(present.map(v=>String(v))).size,min:numeric?Math.min(...nums):null,max:numeric?Math.max(...nums):null};
+  const bounds=numeric?nums.reduce((a,v)=>({min:Math.min(a.min,v),max:Math.max(a.max,v)}),{min:Infinity,max:-Infinity}):null;
+  return {name:String(name).slice(0,100),type:inferType(values),missing:values.length-present.length,unique:new Set(present.map(v=>String(v))).size,min:bounds?bounds.min:null,max:bounds?bounds.max:null};
  });
  return {rows:rows.length,columnCount:cols.length,duplicateRows:duplicateCount(rows,cols),columns};
 }
