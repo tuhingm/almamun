@@ -85,9 +85,12 @@ async function pollDeviceAuth(body, env) {
   });
   const data = await res.json();
   if (data.access_token) {
+    const user = await github("/user", data.access_token);
+    if (!user.login || user.login.toLowerCase() !== OWNER.toLowerCase()) {
+      return { authorized: false, error: "access_denied", message: "Only the repository owner account @" + OWNER + " can connect to this AI workspace." };
+    }
     const sid = Array.from(crypto.getRandomValues(new Uint8Array(24))).map(b => b.toString(16).padStart(2, "0")).join("");
     await env.OES_SESSIONS.put("session:" + sid, data.access_token, { expirationTtl: 604800 });
-    const user = await github("/user", data.access_token);
     return { authorized: true, session: sid, user: user.login };
   }
   return { authorized: false, error: data.error || "authorization_pending", message: data.error_description || "" };
