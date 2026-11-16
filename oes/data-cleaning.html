@@ -116,18 +116,17 @@ function updateResults(before,after,log){
  renderPreview(after);$("results").classList.remove("hidden");
 }
 function applyCleaning(){
- if(!original)return;let rows=cloneRows(original),cols=Object.keys(rows[0]||{}),log=[];
+ if(!original)return;let rows=cloneRows(original),cols=Object.keys(rows[0]||{}),log=[],renameMap={};
  const add=(action,result)=>log.push({action,result});
  if($("trim").checked){let n=0;for(const r of rows)for(const c of cols)if(typeof r[c]==="string"&&r[c]!==r[c].trim()){r[c]=r[c].trim();n++;}add("Trim leading/trailing whitespace",n+" cells changed");}
  if($("blank").checked){let n=0;for(const r of rows)for(const c of cols)if(typeof r[c]==="string"&&r[c].trim()===""){r[c]=null;n++;}add("Normalize blank cells",n+" cells converted to missing");}
  if($("types").checked){let converted=0;for(const c of cols){const vals=rows.map(r=>r[c]).filter(v=>!missing(v));if(vals.length&&vals.every(v=>typeof v==="number"||safeNumber(v)!==null)&&vals.some(v=>typeof v==="string")){for(const r of rows)if(!missing(r[c]))r[c]=safeNumber(r[c]);converted++;}}add("Convert numeric-looking columns",converted+" columns converted");}
  fillMissingValues(rows,cols,add);
- if($("headers").checked){const used=new Set(),map={};for(const c of cols)map[c]=normalizeHeader(c,used);rows=rows.map(r=>{const o={};for(const c of cols)o[map[c]]=r[c];return o;});const changed=cols.filter(c=>map[c]!==c).length;cols=Object.values(map);add("Standardize variable names",changed+" column names changed");}
+ if($("headers").checked){const used=new Set();for(const c of cols)renameMap[c]=normalizeHeader(c,used);rows=rows.map(r=>{const o={};for(const c of cols)o[renameMap[c]]=r[c];return o;});const changed=cols.filter(c=>renameMap[c]!==c).length;cols=Object.values(renameMap);add("Standardize variable names",changed+" column names changed");}
  if($("duplicates").checked){const before=rows.length,seen=new Set();rows=rows.filter(r=>{const k=JSON.stringify(cols.map(c=>r[c]??null));if(seen.has(k))return false;seen.add(k);return true;});add("Remove exact duplicate rows",(before-rows.length)+" rows removed");}
  if($("dropmissing").checked){const before=rows.length;rows=rows.filter(r=>cols.every(c=>!missing(r[c])));add("Drop rows with missing values",(before-rows.length)+" rows removed");}
  const id=$("idcol").value,time=$("timecol").value;
- const mapName=c=>$("headers").checked?normalizeHeader(c,new Set()):c;
- const idName=$("headers").checked?normalizeHeader(id,new Set()):id,timeName=$("headers").checked?normalizeHeader(time,new Set()):time;
+ const idName=renameMap[id]||id,timeName=renameMap[time]||time;
  if(id&&time){const keys=rows.map(r=>JSON.stringify([r[idName],r[timeName]]));const d=keys.length-new Set(keys).size;add("Duplicate entity-time keys",d?d+" duplicate keys detected (not removed)":"None detected");}
  current=rows;audit=log;updateResults(original,current,audit);showStatus("cleanstatus","Cleaning completed. Review the audit trail before downloading.");
 }
