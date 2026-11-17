@@ -19,7 +19,7 @@
     state.filtered = items;
     $("dsCatalogCount").textContent = items.length.toLocaleString() + " indicators shown";
     $("dsCatalog").innerHTML = items.slice(0, 120).map((x, i) =>
-      '<label class="ds-catalog-item"><input type="checkbox" data-catalog-index="' + i + '" aria-label="Select ' + esc(x.title) + '"><span><b>' + esc(x.title) + '</b><small>' + esc(x.id) + ' · ' + esc(x.topic) + ' · ' + esc(x.unit) + ' · ' + esc(x.source || "World Bank") + '</small></span><button type="button" class="btn secondary ds-add" data-add-index="' + i + '">Add</button></label>'
+      '<div class="ds-catalog-item"><input type="checkbox" data-catalog-index="' + i + '" aria-label="Select ' + esc(x.title) + '"><span><b>' + esc(x.title) + '</b><small>' + esc(x.id) + ' · ' + esc(x.topic) + ' · ' + esc(x.unit) + ' · ' + esc(x.source || "World Bank") + '</small></span><button type="button" class="btn secondary ds-add" data-add-index="' + i + '">Add</button></div>'
     ).join("") || '<p class="sub">No indicators match this search.</p>';
   }
   function applyCatalogFilters() {
