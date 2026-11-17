@@ -284,7 +284,7 @@ function exportCleaningCode(language){
   if(cfg.flags.dropEmptyColumns)L.push("* Drop all-missing variables manually after inspection.");
   L.push('export delimited using "cleaned_output.csv", replace');
  }
- L=L.map(line=>line.split(String.fromCharCode(92)+"n").join(String.fromCharCode(10))); const ext=language==="python"?"py":language==="r"?"R":"do";
+ const formattedLines=L.map(line=>line.split(String.fromCharCode(92)+"n").join(String.fromCharCode(10)));L.length=0;L.push(...formattedLines); const ext=language==="python"?"py":language==="r"?"R":"do";
  download(fileName+"_cleaning_pipeline."+ext,L.join("\n\n"),"text/plain;charset=utf-8");
 }
 
