@@ -98,15 +98,18 @@
     const first = unpackPage(await fetchJson(firstUrl));
     const pages = Math.max(1, Number(first.meta && first.meta.pages) || 1);
     const rows = first.rows.slice();
+    const urls = [firstUrl];
     notify(onProgress, label + ": page 1 of " + pages, { page: 1, pages, count: rows.length });
     const lastPage = opts.preview ? 1 : pages;
     for (let page = 2; page <= lastPage; page++) {
       await sleep(120);
-      const next = unpackPage(await fetchJson(urlForPage(page)));
+      const pageUrl = urlForPage(page);
+      const next = unpackPage(await fetchJson(pageUrl));
+      urls.push(pageUrl);
       rows.push(...next.rows);
       notify(onProgress, label + ": page " + page + " of " + pages, { page, pages, count: rows.length });
     }
-    return { rows, meta: first.meta, pages, url: firstUrl };
+    return { rows, meta: first.meta, pages, url: firstUrl, urls };
   }
   function isAggregate(country) {
     return !!(country && country.region && country.region.id === "NA");
@@ -198,18 +201,19 @@
       for (const item of series) {
         for (const batch of batches) {
           const codes = batch.map(e => String(e.code || e).trim()).filter(Boolean);
+          if (codes.length !== batch.length) throw new Error("One or more selected World Bank entity codes are invalid.");
           const countryPath = codes.join(";");
           const urlForPage = page => {
-            const u = new URL(WB_BASE + "/country/" + encodeURIComponent(countryPath) + "/indicator/" + encodeURIComponent(item.id));
+            const u = new URL(WB_BASE + "/country/" + countryPath + "/indicator/" + encodeURIComponent(item.id));
             u.searchParams.set("format", "json");
             u.searchParams.set("date", start + ":" + end);
-            u.searchParams.set("per_page", opts.preview ? "100" : "1000");
+            u.searchParams.set("per_page", opts.preview ? "30" : "1000");
             u.searchParams.set("page", String(page));
             if (item.source_id) u.searchParams.set("source", item.source_id);
             return u.toString();
           };
           const result = await fetchAllPages(urlForPage, opts.onProgress, "Fetching " + item.id, { preview: !!opts.preview });
-          requests.push({ series_id: item.id, url: result.url, pages: result.pages, preview: !!opts.preview });
+          requests.push({ series_id: item.id, url: result.url, urls: result.urls, pages: result.pages, preview: !!opts.preview });
           for (const row of result.rows) {
             const entityCode = row.countryiso3code || (row.country && row.country.id) || "";
             const selectedEntity = entityMap.get(entityCode) || entityMap.get(row.country && row.country.id) || {};
@@ -239,7 +243,7 @@
         series: series.map(s => ({ id: s.id, title: s.title, unit: s.unit, topic: s.topic, source: s.source, source_id: s.source_id })),
         entities: entities.map(e => ({ code: e.code || e, name: e.name || e, aggregate: !!e.aggregate })),
         requests,
-        query_urls: requests.map(x => x.url),
+        query_urls: requests.flatMap(x => x.urls),
         warnings,
         preview: !!opts.preview,
         frequency_note: "Frequency is not supplied in the World Bank indicator catalog response; inspect observation periods before combining with other providers.",
