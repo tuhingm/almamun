@@ -226,6 +226,7 @@
               series_id: row.indicator && row.indicator.id ? row.indicator.id : item.id,
               value: row.value === undefined ? null : row.value
             });
+            if (records.length > 500000) throw new Error("This request exceeds the 500,000-observation browser safety limit. Narrow the countries, indicators, or year range and retry.");
           }
           completed++;
           notify(opts.onProgress, "Completed " + completed + " of " + (series.length * batches.length) + " World Bank series/entity batches", { completed, total: series.length * batches.length, records: records.length });
