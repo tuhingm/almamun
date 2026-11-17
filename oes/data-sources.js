@@ -192,7 +192,7 @@
       if (!series.length) throw new Error("Add at least one World Bank indicator to the basket.");
       if (!entities.length) throw new Error("Select at least one country or aggregate.");
       if (!Number.isInteger(start) || !Number.isInteger(end) || start > end) throw new Error("Enter a valid start and end year.");
-      const records = [], requests = [], warnings = [];
+      const records = [], requests = [], warnings = [], observationStatus = {};
       const entityMap = new Map(entities.map(e => [String(e.code || e), e]));
       const batchSize = 25;
       const batches = [];
@@ -216,6 +216,8 @@
           requests.push({ series_id: item.id, url: result.url, urls: result.urls, pages: result.pages, preview: !!opts.preview });
           for (const row of result.rows) {
             const entityCode = row.countryiso3code || (row.country && row.country.id) || "";
+            const obsStatus = row.obs_status || "";
+            if (obsStatus) observationStatus[obsStatus] = (observationStatus[obsStatus] || 0) + 1;
             const selectedEntity = entityMap.get(entityCode) || entityMap.get(row.country && row.country.id) || {};
             records.push({
               entity: row.country && row.country.value ? row.country.value : (selectedEntity.name || entityCode),
@@ -231,9 +233,11 @@
         }
         if (opts.preview && records.length >= (opts.maxRows || 25)) break;
       }
+      if (records.length > 500000) throw new Error("This request exceeds the 500,000-observation browser safety limit. Narrow the countries, indicators, or year range and retry.");
       const selectedAggregates = entities.filter(e => e.aggregate);
       if (selectedAggregates.length) warnings.push("The selection includes World Bank regional or income-group aggregates. Do not mix them with individual countries without an explicit analytical reason.");
       if (records.some(r => r.value === null)) warnings.push("Some observations are null. Latest-year values may be incomplete or not yet reported.");
+      if (observationStatus.F) warnings.push(observationStatus.F + " observations carry World Bank status F (forecast). Check observation status before treating these as observed values.");
       const metadata = {
         provider: "World Bank",
         provider_id: "worldbank",
@@ -245,12 +249,14 @@
         requests,
         query_urls: requests.flatMap(x => x.urls),
         warnings,
+        observation_status_counts: observationStatus,
         preview: !!opts.preview,
         frequency_note: "Frequency is not supplied in the World Bank indicator catalog response; inspect observation periods before combining with other providers.",
         license: "Default World Bank dataset terms are CC BY 4.0 unless the relevant indicator or source metadata specifies otherwise.",
         attribution: "The World Bank: " + series.map(s => s.title + " (" + s.id + ")").join("; ") + ". Data retrieved through the World Bank Indicators API.",
         records: records.length
       };
+      metadata.citation = this.citation(metadata);
       return { records, metadata };
     },
     citation(meta) {
