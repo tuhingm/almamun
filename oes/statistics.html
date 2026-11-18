@@ -60,51 +60,6 @@
     }
     .wrap { width: min(1160px, calc(100% - 44px)); max-width: none; margin: 0 auto; padding: 0; }
 
-    /* Division Sub-Navigation */
-    .oes-subnav {
-      background: #ffffff;
-      border-bottom: 1px solid var(--border);
-      padding: 10px 0;
-      font-size: 0.9rem;
-    }
-    .oes-subnav .wrap {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-    .division-pills { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-    .div-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 14px;
-      border-radius: 999px;
-      text-decoration: none;
-      font-weight: 600;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      background: #fff;
-      transition: all 0.15s ease;
-    }
-    .div-pill:hover { border-color: var(--navy); color: var(--navy); }
-    .div-pill.active {
-      background: var(--navy);
-      color: #ffffff;
-      border-color: var(--navy);
-    }
-    .badge-count {
-      font-size: 0.75rem;
-      padding: 1px 7px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.2);
-    }
-    .div-pill:not(.active) .badge-count {
-      background: var(--navy-soft);
-      color: var(--navy);
-    }
-
     /* Hero Banner */
     .hero {
       background: linear-gradient(135deg, #001f66 0%, #0033A0 60%, #0b4fd4 100%);
@@ -474,7 +429,6 @@
     }
 
     /* OES shared workspace language: consistent with the Econometrics Division */
-    .oes-subnav { border-color: var(--border); }
     .hero { padding: 34px 0 30px; }
     .hero-eyebrow { color: #bfdbfe; }
     .hero h1, .card-title { letter-spacing: -0.025em; }
@@ -549,16 +503,6 @@
     </nav>
   </div>
 </header>
-
-<div class="oes-subnav">
-  <div class="wrap">
-    <div class="division-pills">
-      <a class="div-pill" href="index.html">Econometrics Division <span class="badge-count">69 Methods</span></a>
-      <a class="div-pill active" href="statistics.html" aria-current="page">Statistics Division <span class="badge-count">31 Methods</span></a>
-    </div>
-    <div style="font-weight:700; color:var(--navy);">Total Platform Registry: 100 Distinct Methods · Pyodide v0.27.2 WebAssembly</div>
-  </div>
-</div>
 
 <section class="hero">
   <div class="wrap">
