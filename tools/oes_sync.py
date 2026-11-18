@@ -21,15 +21,24 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 LOCAL = "--local" in sys.argv      # engine already edited in place in oes/engine: only rebuild catalog.json and expected.json
 ONLY = next((a.split("=", 1)[1].split(",") for a in sys.argv if a.startswith("--only=")), None)   # run the examples of these models only and merge into expected.json
 args = [a for a in sys.argv[1:] if a != "--local" and not a.startswith("--only=")]
-src = pathlib.Path(args[0] if args else ROOT.parent / "open-econometric-systems") / "oes-engine" / "oes_engine"
+engine_root = pathlib.Path(args[0] if args else ROOT.parent / "open-econometric-systems")
+src = engine_root / "oes-engine" / "oes_engine"
 dst = ROOT / "oes" / "engine" / "oes_engine"
 dst.mkdir(parents=True, exist_ok=True)
+statistics_src = src / "statistics_division.py"
+statistics_dst = ROOT / "oes" / "engine" / "statistics_division.py"
 if not LOCAL:
     for f in dst.glob("*.py"):
         f.unlink()
     for f in sorted(src.glob("*.py")):
         shutil.copy(f, dst / f.name)
+    if not statistics_src.is_file():
+        raise SystemExit(f"Statistics Division engine not found: {statistics_src}")
+    shutil.copy2(statistics_src, statistics_dst)
+elif not statistics_dst.is_file():
+    raise SystemExit(f"--local requested but Statistics Division engine is missing: {statistics_dst}")
 print("engine files:", ", ".join(sorted(f.name for f in dst.glob("*.py"))))
+print("statistics division engine:", statistics_dst.name)
 
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(dst.parent))

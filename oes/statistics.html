@@ -1,0 +1,1676 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0033A0">
+  <title>Statistics Division (31 Methods) — Open Econometric Systems | Tuhin G. M. Al Mamun</title>
+  <meta name="description" content="Open Econometric Systems (OES) Statistics Division: 31 browser-native statistical methods across ANOVA, Nonparametric, Multivariate, Survival, Mixed-Effects, Resampling, and Meta-Analysis with OMVP validation.">
+  <meta name="author" content="Tuhin G. M. Al Mamun">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+  <link rel="canonical" href="https://tuhingm.github.io/almamun/oes/statistics.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Tuhin Al Mamun, Ph.D.">
+  <meta property="og:title" content="Statistics Division | Open Econometric Systems">
+  <meta property="og:description" content="31 browser-native statistical methods across seven categories, with estimation, diagnostics, and reproducibility checks.">
+  <meta property="og:url" content="https://tuhingm.github.io/almamun/oes/statistics.html">
+  <meta name="twitter:card" content="summary">
+
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../assets/css/mobile-nav.css">
+  <link rel="stylesheet" href="../assets/css/site-header.css">
+  <link rel="stylesheet" href="../assets/css/share.css">
+  <link rel="stylesheet" href="../assets/css/author-note.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+  <style>
+    :root {
+      --navy: #0033a0;
+      --navy-dark: #00205b;
+      --navy-soft: #e3eaf7;
+      --ink: #1b2437;
+      --muted: #55617a;
+      --border: #d5dcea;
+      --bg: #f3f5fa;
+      --card: #ffffff;
+      --ok: #0f7a4f;
+      --ok-bg: #eaf6ef;
+      --warn: #a05a00;
+      --err: #a12a2a;
+      --sky: #9fd3f0;
+      --sky2: #6ec1e4;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.7;
+    }
+    .wrap { width: min(1160px, calc(100% - 44px)); max-width: none; margin: 0 auto; padding: 0; }
+
+    /* Division Sub-Navigation */
+    .oes-subnav {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 10px 0;
+      font-size: 0.9rem;
+    }
+    .oes-subnav .wrap {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .division-pills { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .div-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: #fff;
+      transition: all 0.15s ease;
+    }
+    .div-pill:hover { border-color: var(--navy); color: var(--navy); }
+    .div-pill.active {
+      background: var(--navy);
+      color: #ffffff;
+      border-color: var(--navy);
+    }
+    .badge-count {
+      font-size: 0.75rem;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.2);
+    }
+    .div-pill:not(.active) .badge-count {
+      background: var(--navy-soft);
+      color: var(--navy);
+    }
+
+    /* Hero Banner */
+    .hero {
+      background: linear-gradient(135deg, #001f66 0%, #0033A0 60%, #0b4fd4 100%);
+      color: #ffffff;
+      padding: 36px 0 32px;
+    }
+    .hero-eyebrow {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #bfdbfe;
+      margin-bottom: 8px;
+    }
+    .hero h1 {
+      font-family: 'Manrope', sans-serif;
+      font-size: clamp(1.65rem, 3vw, 2.35rem);
+      font-weight: 800;
+      margin: 0 0 10px;
+      line-height: 1.2;
+    }
+    .hero p {
+      margin: 0 0 18px;
+      max-width: 860px;
+      color: #e2e8f0;
+      font-size: 0.98rem;
+    }
+    .hero-metrics {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .metric-chip {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 0.84rem;
+      font-weight: 600;
+    }
+
+    /* Main Workspace Grid */
+    .workspace {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 24px;
+      padding: 26px 0 48px;
+      align-items: start;
+    }
+    @media (max-width: 960px) {
+      .workspace { grid-template-columns: 1fr; }
+    }
+
+    /* Sidebar Catalog */
+    .sidebar {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      position: sticky;
+      top: 16px;
+      max-height: calc(100vh - 32px);
+      overflow-y: auto;
+    }
+    .search-box {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      margin-bottom: 14px;
+    }
+    .search-box:focus { outline: 2px solid var(--navy); border-color: var(--navy); }
+    .cat-group { margin-bottom: 14px; }
+    .cat-title {
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--navy);
+      padding: 4px 6px;
+      background: var(--navy-soft);
+      border-radius: 6px;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .method-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 7px;
+      padding: 7px 9px;
+      font-family: inherit;
+      font-size: 0.86rem;
+      font-weight: 500;
+      color: var(--ink);
+      cursor: pointer;
+      margin-bottom: 2px;
+      transition: all 0.12s ease;
+    }
+    .method-btn:hover { background: #f1f5f9; }
+    .method-btn.active {
+      background: var(--navy-soft);
+      border-color: #bfd3f8;
+      color: var(--navy);
+      font-weight: 700;
+    }
+    .method-code {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--muted);
+      background: #f1f5f9;
+      padding: 1px 6px;
+      border-radius: 4px;
+      flex-shrink: 0;
+      margin-left: 6px;
+    }
+    .method-btn.active .method-code {
+      background: var(--navy);
+      color: #fff;
+    }
+
+    /* Main Panel Cards */
+    .panel-stack { display: flex; flex-direction: column; gap: 20px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+    }
+    .card-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 14px;
+      margin-bottom: 16px;
+    }
+    .card-title {
+      margin: 0;
+      font-family: 'Manrope', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--ink);
+    }
+    .cat-badge {
+      display: inline-block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--navy);
+      background: var(--navy-soft);
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 6px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+      margin-bottom: 16px;
+    }
+    .tab-btn {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 7px 14px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: var(--navy);
+      color: #ffffff;
+      border-color: var(--navy);
+    }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    /* Math & Assumptions Box */
+    .math-box {
+      background: #f8fafc;
+      border-left: 4px solid var(--navy);
+      border-radius: 0 8px 8px 0;
+      padding: 14px 16px;
+      margin: 12px 0;
+      overflow-x: auto;
+    }
+    .assump-list {
+      margin: 8px 0 0;
+      padding-left: 20px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    /* Controls & Forms */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .field label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .field input, .field select, textarea.csv-editor {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      background: #fff;
+    }
+    textarea.csv-editor {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.82rem;
+      min-height: 140px;
+      resize: vertical;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-top: 12px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+    }
+    .btn-primary { background: var(--navy); color: #fff; }
+    .btn-primary:hover { background: var(--navy-dark); }
+    .btn-secondary { background: #fff; border-color: var(--border); color: var(--ink); }
+    .btn-secondary:hover { border-color: var(--navy); color: var(--navy); }
+    .btn-omvp { background: var(--ok); color: #fff; }
+    .btn-omvp:hover { background: #0d5c56; }
+
+    /* Status Pill */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: var(--navy-soft);
+      color: var(--navy);
+      margin-top: 12px;
+    }
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--navy);
+      display: inline-block;
+    }
+    .status-bar.ready { background: var(--ok-bg); color: var(--ok); }
+    .status-bar.ready .status-dot { background: var(--ok); }
+    .status-bar.error { background: #fef2f2; color: var(--err); }
+    .status-bar.error .status-dot { background: var(--err); }
+
+    /* Results Table & KPIs */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .kpi-card {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .kpi-label { font-size: 0.75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+    .kpi-val { font-size: 1.08rem; font-weight: 800; color: var(--navy); margin-top: 2px; }
+
+    .table-wrap { overflow-x: auto; margin-top: 10px; }
+    table.res-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.86rem;
+    }
+    table.res-table th {
+      background: #f1f5f9;
+      color: var(--ink);
+      font-weight: 700;
+      text-align: left;
+      padding: 9px 10px;
+      border-bottom: 2px solid var(--border);
+    }
+    table.res-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      font-variant-numeric: tabular-nums;
+    }
+    table.res-table tr:hover td { background: #f8fafc; }
+
+    .diag-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 14px;
+      font-size: 0.85rem;
+    }
+    .plot-box {
+      width: 100%;
+      min-height: 360px;
+      margin-top: 16px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    pre.code-block {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      overflow-x: auto;
+      line-height: 1.5;
+    }
+
+    footer.site-footer {
+      border-top: 1px solid var(--border);
+      background: #fff;
+      padding: 24px 0;
+      font-size: 0.86rem;
+      color: var(--muted);
+    }
+
+    /* OES shared workspace language: consistent with the Econometrics Division */
+    .oes-subnav { border-color: var(--border); }
+    .hero { padding: 34px 0 30px; }
+    .hero-eyebrow { color: #bfdbfe; }
+    .hero h1, .card-title { letter-spacing: -0.025em; }
+    .workspace { gap: 22px; padding: 24px 0 48px; }
+    .sidebar, .card { border-color: var(--border); border-radius: 14px; box-shadow: 0 2px 8px rgba(27,36,55,.045); }
+    .sidebar { top: 18px; }
+    .card { padding: 22px; }
+    .search-box, .field input, .field select, textarea.csv-editor {
+      border-color: var(--border); border-radius: 8px; color: var(--ink);
+    }
+    .search-box:focus, .field input:focus, .field select:focus, textarea.csv-editor:focus {
+      outline: 2px solid rgba(0,51,160,.18); border-color: var(--navy);
+    }
+    .method-btn { border-radius: 8px; }
+    .method-btn:hover { background: #f3f6fc; }
+    .tab-btn { border-radius: 8px; }
+    .btn { border-radius: 8px; }
+    .btn-primary { background: var(--navy); }
+    .btn-primary:hover { background: var(--navy-dark); }
+    .workflow-shell { background: #fff; border-bottom: 1px solid var(--border); }
+    .workflow { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; padding:16px 0; }
+    .workflow-step { min-width:0; padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:#fff; }
+    .workflow-step span { display:inline-grid; place-items:center; width:25px; height:25px; margin-right:7px; border-radius:50%; background:var(--navy-soft); color:var(--navy); font-size:.72rem; font-weight:800; }
+    .workflow-step strong { color:var(--ink); font-size:.88rem; }
+    .workflow-step small { display:block; margin:5px 0 0 33px; color:var(--muted); font-size:.72rem; line-height:1.35; }
+    .dataset-help { margin:7px 0 10px; color:var(--muted); font-size:.82rem; }
+    .dataset-info { margin:8px 0; color:var(--muted); font-size:.82rem; font-weight:600; }
+    .drop-zone { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; min-height:76px; margin-top:10px; padding:14px; border:1.5px dashed #9aaccb; border-radius:10px; background:#f8faff; color:var(--navy); text-align:center; cursor:pointer; transition:background .15s,border-color .15s; }
+    .drop-zone span { color:var(--muted); font-size:.78rem; }
+    .drop-zone.dragover, .drop-zone:focus { outline:none; border-color:var(--navy); background:#edf3ff; }
+    .dataset-preview { max-height:300px; overflow:auto; border:1px solid var(--border); border-radius:9px; }
+    .dataset-preview table { width:100%; border-collapse:collapse; font-size:.8rem; white-space:nowrap; }
+    .dataset-preview th { position:sticky; top:0; z-index:1; padding:8px 10px; background:#eaf0fa; color:var(--ink); text-align:left; border-bottom:1px solid var(--border); }
+    .dataset-preview td { padding:7px 10px; border-bottom:1px solid #e8edf5; font-variant-numeric:tabular-nums; }
+    .dataset-preview tr:nth-child(even) td { background:#fafbfd; }
+    .dataset-preview-note { padding:8px 10px; color:var(--muted); font-size:.76rem; }
+    @media (max-width: 900px) {
+      .workflow { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .workflow-step:last-child { grid-column:1/-1; }
+    }
+    @media (max-width: 560px) {
+      .wrap { width:calc(100% - 28px); }
+      .workflow { grid-template-columns:1fr 1fr; gap:7px; }
+      .workflow-step { padding:9px; }
+      .workflow-step small { font-size:.68rem; }
+      .card { padding:16px; }
+      .hero { padding:28px 0 24px; }
+    }
+
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap nav">
+    <a class="brand" href="../index.html" aria-label="Tuhin G. M. Al Mamun — home">
+      TGM <span>AL MAMUN</span>
+    </a>
+    <button id="menu" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
+    <nav id="nav" aria-label="Main navigation">
+      <a href="../index.html">Home</a>
+      <a href="../teaching/index.html">Teaching Courses</a>
+      <a href="../working-papers/index.html">Working Papers</a>
+      <a href="../time-series-guide/index.html">Time Series</a>
+      <a href="../panel-data-guide/index.html">Panel Data</a>
+      <a href="../causal-inference-guide/index.html">Causal Inference</a>
+      <a href="../dsge-guide/index.html">DSGE</a>
+      <a href="../ml-guide/index.html">Machine Learning</a>
+      <a href="../bayesian-guide/index.html">Bayesian</a>
+      <a href="../markov-guide/index.html">Markov Switching</a>
+      <a href="../oes/index.html" class="current" aria-current="page">Open Econometric Systems</a>
+    </nav>
+  </div>
+</header>
+
+<div class="oes-subnav">
+  <div class="wrap">
+    <div class="division-pills">
+      <a class="div-pill" href="index.html">Econometrics Division <span class="badge-count">69 Methods</span></a>
+      <a class="div-pill active" href="statistics.html" aria-current="page">Statistics Division <span class="badge-count">31 Methods</span></a>
+    </div>
+    <div style="font-weight:700; color:var(--navy);">Total Platform Registry: 100 Distinct Methods · Pyodide v0.27.2 WebAssembly</div>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-eyebrow">Open Econometric Systems (OES) · Dedicated Statistics Division</div>
+    <h1>Statistical Computing &amp; Validation Workbench (31 Methods)</h1>
+    <p>
+      Browser-native scientific computing across 7 statistical domains: Analysis of Variance, Nonparametric Statistics,
+      Multivariate Analysis, Survival Analysis, Mixed-Effects &amp; Longitudinal Modeling, Resampling &amp; Power Simulation, and Meta-Analysis.
+      Every estimator executes directly in Python (NumPy, SciPy, statsmodels) via WebAssembly with live OES Method Validation Protocol (OMVP) verification.
+    </p>
+    <div class="hero-metrics">
+      <span class="metric-chip">7 Statistical Categories</span>
+      <span class="metric-chip">31 Distinct Estimators (IDs: stat_*)</span>
+      <span class="metric-chip">Zero Server Dependencies</span>
+      <span class="metric-chip">Live OMVP Monte Carlo Suite</span>
+    </div>
+  </div>
+</section>
+
+<section class="workflow-shell">
+  <div class="wrap workflow" aria-label="Statistics Division workflow">
+    <div class="workflow-step"><span>01</span><strong>Method</strong><small>Select a statistical method</small></div>
+    <div class="workflow-step"><span>02</span><strong>Data</strong><small>Load, edit, and preview CSV</small></div>
+    <div class="workflow-step"><span>03</span><strong>Specification</strong><small>Set variables and options</small></div>
+    <div class="workflow-step"><span>04</span><strong>Estimation</strong><small>Run in the browser</small></div>
+    <div class="workflow-step"><span>05</span><strong>Results</strong><small>Inspect and export outputs</small></div>
+  </div>
+</section>
+
+<main class="wrap workspace">
+  <!-- Left Navigation: 7 Categories / 31 Methods -->
+  <aside class="sidebar" aria-label="Statistics Division Method Catalog">
+    <input id="methodSearch" class="search-box" type="search" placeholder="Filter 31 statistical methods…" aria-label="Filter statistical methods">
+    <div id="catalogTree"></div>
+  </aside>
+
+  <!-- Right Workbench -->
+  <div class="panel-stack">
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <span id="activeCat" class="cat-badge">Category A · Analysis of Variance</span>
+          <h2 id="activeTitle" class="card-title">One-Way ANOVA</h2>
+        </div>
+        <div id="methodCodeBadge" class="metric-chip" style="background:var(--navy-soft); color:var(--navy); border-color:#bfd3f8;">
+          ID: stat_anova1 (A1)
+        </div>
+      </div>
+
+      <p id="activeDesc" style="margin-top:0; color:var(--muted);"></p>
+
+      <div class="tabs" role="tablist">
+        <button class="tab-btn active" data-tab="tab-estimate" type="button">1. Estimation &amp; Data Studio</button>
+        <button class="tab-btn" data-tab="tab-theory" type="button">2. Mathematical Formulation &amp; Assumptions</button>
+        <button class="tab-btn" data-tab="tab-omvp" type="button">3. OMVP Validation &amp; Technical Report</button>
+        <button class="tab-btn" data-tab="tab-code" type="button">4. Reproducible Python Code</button>
+      </div>
+
+      <!-- TAB 1: ESTIMATION & DATA STUDIO -->
+      <div id="tab-estimate" class="tab-pane active">
+        <div id="specControls" class="form-grid"></div>
+
+        <div class="field">
+          <label for="csvInput">Dataset (CSV Format — Built-in Empirical Benchmark Loaded; Paste or Upload Custom CSV)</label>
+          <textarea id="csvInput" class="csv-editor" spellcheck="false" aria-describedby="datasetHelp"></textarea>
+          <p id="datasetHelp" class="dataset-help">Edit the CSV directly, upload a file, or drop it below. The preview refreshes as the data changes.</p>
+          <div id="statisticsDatasetInfo" class="dataset-info" aria-live="polite"></div>
+          <div id="statisticsDrop" class="drop-zone" role="button" tabindex="0" aria-label="Drop a CSV file here or press Enter to choose a file">
+            <strong>Drop a CSV file here</strong>
+            <span>or use Upload CSV above · .csv · up to 60 MB</span>
+          </div>
+          <div id="statisticsDatasetPreview" class="table-wrap dataset-preview" hidden></div>
+        </div>
+
+        <div class="btn-row">
+          <button id="btnRun" class="btn btn-primary" type="button">▶ Run Statistical Estimation</button>
+          <button id="btnResetData" class="btn btn-secondary" type="button">↺ Reload Reference Dataset</button>
+          <label class="btn btn-secondary" style="cursor:pointer;">
+            📂 Upload CSV
+            <input id="fileUpload" type="file" accept=".csv,text/csv" style="display:none;">
+          </label>
+          <button id="btnExportCsv" class="btn btn-secondary" type="button" disabled>⬇ Export Results CSV</button>
+        </div>
+
+        <div id="workerStatus" class="status-bar">
+          <span class="status-dot"></span>
+          <span id="statusText">Initializing isolated Pyodide v0.27.2 Statistics Worker…</span>
+        </div>
+      </div>
+
+      <!-- TAB 2: MATHEMATICAL FORMULATION & ASSUMPTIONS -->
+      <div id="tab-theory" class="tab-pane">
+        <h3 style="margin:0 0 8px; font-size:1.05rem;">Formal Mathematical Specification &amp; Objective / Test Statistic</h3>
+        <div id="mathFormula" class="math-box"></div>
+        <h3 style="margin:16px 0 6px; font-size:1.05rem;">Statistical Assumptions, Regularity &amp; Numerical Notes</h3>
+        <ul id="assumpList" class="assump-list"></ul>
+      </div>
+
+      <!-- TAB 3: OMVP VALIDATION & TECHNICAL REPORT -->
+      <div id="tab-omvp" class="tab-pane">
+        <p style="margin-top:0; font-size:0.92rem; color:var(--muted);">
+          Execute the <strong>OES Method Validation Protocol (OMVP)</strong> live in your browser for the active estimator.
+          Runs numerical-finiteness and standardized numeric-matrix conditioning checks, seeded Monte Carlo replications,
+          repeat-seed reproducibility, and malformed-input guards. The report records the actual SciPy/statsmodels
+          runtime versions; it does not claim independent cross-package parity tests for every method.
+        </p>
+        <div class="form-grid" style="max-width:440px;">
+          <div class="field">
+            <label for="omvpReps">Monte Carlo Replications (B)</label>
+            <select id="omvpReps">
+              <option value="100">100 Replications (Fast Check ~1s)</option>
+              <option value="250" selected>250 Replications (Standard Browser OMVP)</option>
+              <option value="500">500 Replications (High-Precision Coverage)</option>
+            </select>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button id="btnRunOmvp" class="btn btn-omvp" type="button">✓ Execute Live OMVP Validation</button>
+          <button id="btnDownloadReport" class="btn btn-secondary" type="button" disabled>⬇ Download Technical Report (.md)</button>
+        </div>
+        <div id="omvpOutput" style="margin-top:16px;"></div>
+      </div>
+
+      <!-- TAB 4: REPRODUCIBLE PYTHON CODE -->
+      <div id="tab-code" class="tab-pane">
+        <p style="margin-top:0; font-size:0.9rem; color:var(--muted);">
+          Standalone Python script reproducing the exact estimation call executed in the OES Statistics Division engine:
+        </p>
+        <pre id="repCode" class="code-block"></pre>
+      </div>
+    </section>
+
+    <!-- RESULTS CARD -->
+    <section id="resultsCard" class="card" style="display:none;">
+      <div class="card-header">
+        <div>
+          <span class="cat-badge" style="background:var(--ok-bg); color:var(--ok);">Verified Browser Computation</span>
+          <h3 id="resHeading" class="card-title" style="font-size:1.2rem;">Estimation Results</h3>
+        </div>
+        <div id="resTiming" style="font-size:0.84rem; font-weight:700; color:var(--muted);"></div>
+      </div>
+
+      <div id="kpiGrid" class="kpi-grid"></div>
+
+      <div class="table-wrap">
+        <table class="res-table">
+          <thead>
+            <tr>
+              <th>Parameter / Component</th>
+              <th>Estimate / SS</th>
+              <th>Std. Error / MS</th>
+              <th>Test Statistic</th>
+              <th>df</th>
+              <th>p-value</th>
+              <th>95% CI Low / Aux</th>
+              <th>95% CI High</th>
+            </tr>
+          </thead>
+          <tbody id="resTableBody"></tbody>
+        </table>
+      </div>
+
+      <div id="diagGrid" class="diag-grid"></div>
+      <div id="plotContainer" class="plot-box"></div>
+    </section>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap" style="display:flex; flex-wrap:wrap; justify-content:space-between; gap:12px;">
+    <div><strong>Open Econometric Systems (OES)</strong> — Statistics Division (31 Methods) + Econometrics Division (69 Methods) = 100 Methods</div>
+    <div>© 2026 Tuhin G. M. Al Mamun, Ph.D. · Client-Side Pyodide WebAssembly Architecture</div>
+  </div>
+</footer>
+
+<script src="../assets/js/mobile-nav.js"></script>
+<script>
+const VERSION = "1.0.1";
+
+/* Complete Metadata, Mathematical Formulations, Assumptions & Reference Datasets for all 31 Methods */
+const METHODS = [
+  // CATEGORY A: ANALYSIS OF VARIANCE (6)
+  {
+    id: "stat_anova1", code: "A1", cat: "Analysis of Variance", name: "One-Way ANOVA",
+    desc: "Partitions total variance across k independent treatment groups using F-ratio inference, accompanied by Brown–Forsythe Levene heteroskedasticity diagnostics, Alexander–Govern robust F-test, and Shapiro–Wilk residual normality checks.",
+    latex: String.raw`F = \frac{SS_{\text{between}} / (k - 1)}{SS_{\text{within}} / (N - k)} \sim F_{k-1,\, N-k}, \qquad \eta^2 = \frac{SS_{\text{between}}}{SS_{\text{total}}}, \qquad \omega^2 = \frac{SS_{\text{between}} - (k-1)MS_{\text{within}}}{SS_{\text{total}} + MS_{\text{within}}}`,
+    assumptions: [
+      "Independent random sampling across and within all k factor levels.",
+      "Conditional normality of group residuals ε_ij ~ N(0, σ²) (assessed via Shapiro–Wilk W).",
+      "Homoskedasticity across groups σ₁² = … = σ_k² (assessed via median-centered Levene test; Alexander–Govern reported alongside)."
+    ],
+    fields: [
+      {key: "y", label: "Outcome Variable (y)", default: "outcome"},
+      {key: "group", label: "Grouping Factor", default: "group"}
+    ],
+    csv: "outcome,group\n12.4,Control\n11.8,Control\n13.1,Control\n12.0,Control\n11.5,Control\n12.9,Control\n14.8,Dose_Low\n15.3,Dose_Low\n14.1,Dose_Low\n15.9,Dose_Low\n14.6,Dose_Low\n15.2,Dose_Low\n18.2,Dose_High\n17.6,Dose_High\n19.1,Dose_High\n18.5,Dose_High\n17.9,Dose_High\n18.8,Dose_High"
+  },
+  {
+    id: "stat_anova2", code: "A2", cat: "Analysis of Variance", name: "Two-Way ANOVA",
+    desc: "Estimates orthogonal or unbalanced two-factor main effects and interaction effects via Type I, II, or III Sums of Squares, partial eta-squared, and Breusch–Pagan homoskedasticity diagnostics.",
+    latex: String.raw`Y_{ijk} = \mu + \alpha_i + \beta_j + (\alpha\beta)_{ij} + \varepsilon_{ijk}, \qquad \eta_p^2 = \frac{SS_{\text{effect}}}{SS_{\text{effect}} + SS_{\text{error}}}`,
+    assumptions: [
+      "Independent observations across factorial cells.",
+      "Gaussian error structure ε_ijk ~ N(0, σ²) with constant cell variance.",
+      "Type III Sums of Squares used by default to handle unbalanced factorial designs."
+    ],
+    fields: [
+      {key: "y", label: "Outcome Variable (y)", default: "growth"},
+      {key: "factor1", label: "Factor A", default: "supplement"},
+      {key: "factor2", label: "Factor B", default: "dose"},
+      {key: "ss_type", label: "SS Type (1, 2, or 3)", default: "3"}
+    ],
+    csv: "growth,supplement,dose\n4.2,VC,Low\n11.5,VC,Low\n7.3,VC,Low\n5.8,VC,Low\n16.5,VC,Med\n15.2,VC,Med\n17.3,VC,Med\n14.9,VC,Med\n23.6,VC,High\n26.7,VC,High\n25.5,VC,High\n24.1,VC,High\n15.2,OJ,Low\n21.5,OJ,Low\n17.6,OJ,Low\n14.5,OJ,Low\n19.7,OJ,Med\n23.3,OJ,Med\n21.2,OJ,Med\n20.0,OJ,Med\n25.5,OJ,High\n26.4,OJ,High\n24.8,OJ,High\n27.3,OJ,High"
+  },
+  {
+    id: "stat_rm_anova", code: "A3", cat: "Analysis of Variance", name: "Repeated Measures ANOVA",
+    desc: "Models longitudinal within-subject variance across k repeated conditions with automatic Greenhouse–Geisser and Huynh–Feldt sphericity epsilon degree-of-freedom corrections.",
+    latex: String.raw`Y_{ij} = \mu + \pi_i + \tau_j + \varepsilon_{ij}, \qquad \hat{\varepsilon}_{GG} = \frac{[\operatorname{tr}(PSP)]^2}{(k-1)\operatorname{tr}((PSP)^2)}`,
+    assumptions: [
+      "Subjects are randomly sampled and measured across all k repeated conditions.",
+      "Compound symmetry / sphericity of difference variances (violations corrected via ε_GG and ε_HF).",
+      "Multivariate normality of repeated measurement vectors."
+    ],
+    fields: [
+      {key: "conditions", label: "Condition Columns (comma-separated)", default: "T1_Base,T2_Week2,T3_Week4,T4_Week8"}
+    ],
+    csv: "T1_Base,T2_Week2,T3_Week4,T4_Week8\n45,50,55,58\n42,46,52,54\n48,51,58,60\n50,55,61,63\n44,49,54,57\n46,52,57,59\n41,45,50,53\n49,54,60,62\n47,51,56,58\n43,48,53,55"
+  },
+  {
+    id: "stat_ancova", code: "A4", cat: "Analysis of Variance", name: "Analysis of Covariance (ANCOVA)",
+    desc: "Evaluates treatment group differences controlling for continuous baseline covariates via Type III SS, including an explicit F-test for homogeneity of regression slopes.",
+    latex: String.raw`Y_{ij} = \mu + \alpha_i + \beta (X_{ij} - \bar{X}_{\cdot\cdot}) + \varepsilon_{ij}, \qquad H_0^{\text{parallel}}: \beta_1 = \dots = \beta_k`,
+    assumptions: [
+      "Linearity between covariate(s) X and response Y within each treatment group.",
+      "Homogeneity of regression slopes across groups (tested via Group × Covariate interaction).",
+      "Covariate measured without error and independent of treatment assignment."
+    ],
+    fields: [
+      {key: "y", label: "Outcome (y)", default: "post_score"},
+      {key: "group", label: "Group Factor", default: "arm"},
+      {key: "covariates", label: "Covariates (comma-separated)", default: "pre_score"}
+    ],
+    csv: "post_score,arm,pre_score\n68,Control,52\n72,Control,56\n65,Control,49\n74,Control,58\n70,Control,54\n66,Control,50\n78,Treatment,51\n83,Treatment,55\n76,Treatment,48\n86,Treatment,59\n81,Treatment,53\n79,Treatment,50"
+  },
+  {
+    id: "stat_manova", code: "A5", cat: "Analysis of Variance", name: "Multivariate ANOVA (MANOVA)",
+    desc: "Simultaneously tests group mean vector differences across p correlated dependent variables using Wilks' Lambda, Pillai's Trace, Hotelling–Lawley Trace, and Roy's Largest Root.",
+    latex: String.raw`\Lambda_{\text{Wilks}} = \frac{|\mathbf{E}|}{|\mathbf{H} + \mathbf{E}|} = \prod_{j=1}^s \frac{1}{1 + \lambda_j}, \qquad V_{\text{Pillai}} = \operatorname{tr}\!\left[\mathbf{H}(\mathbf{H}+\mathbf{E})^{-1}\right]`,
+    assumptions: [
+      "Independent observations across groups.",
+      "Multivariate normality of the p-dimensional response vector within each group.",
+      "Equality of within-group covariance matrices Σ₁ = … = Σ_k."
+    ],
+    fields: [
+      {key: "y_vars", label: "Dependent Variables (comma-separated)", default: "sepal_len,sepal_wid,petal_len"},
+      {key: "group", label: "Grouping Factor", default: "species"}
+    ],
+    csv: "sepal_len,sepal_wid,petal_len,species\n5.1,3.5,1.4,setosa\n4.9,3.0,1.4,setosa\n4.7,3.2,1.3,setosa\n5.0,3.6,1.4,setosa\n5.4,3.9,1.7,setosa\n7.0,3.2,4.7,versicolor\n6.4,3.2,4.5,versicolor\n6.9,3.1,4.9,versicolor\n5.5,2.3,4.0,versicolor\n6.5,2.8,4.6,versicolor\n6.3,3.3,6.0,virginica\n5.8,2.7,5.1,virginica\n7.1,3.0,5.9,virginica\n6.3,2.9,5.6,virginica\n6.5,3.0,5.8,virginica"
+  },
+  {
+    id: "stat_mancova", code: "A6", cat: "Analysis of Variance", name: "Multivariate ANCOVA (MANCOVA)",
+    desc: "Extends MANOVA by adjusting joint multivariate response vectors for continuous covariates, reporting multivariate F-approximations for both treatment and covariate matrices.",
+    latex: String.raw`\mathbf{Y} = \mathbf{X}_G \mathbf{B}_G + \mathbf{X}_C \mathbf{B}_C + \mathbf{E}, \qquad \Lambda = \frac{|\mathbf{E}|}{|\mathbf{H}_G + \mathbf{E}|}`,
+    assumptions: [
+      "Multivariate normal conditional residual vectors ε_i ~ N_p(0, Σ).",
+      "Homogeneity of multivariate regression slopes across factor levels.",
+      "Positive definite error cross-product matrix E (N - k - q > p)."
+    ],
+    fields: [
+      {key: "y_vars", label: "Dependent Variables", default: "y1,y2"},
+      {key: "group", label: "Group Factor", default: "group"},
+      {key: "covariates", label: "Covariates", default: "cov"}
+    ],
+    csv: "y1,y2,group,cov\n5.2,3.4,A,10.1\n4.8,3.1,A,9.5\n5.5,3.6,A,11.0\n5.0,3.2,A,9.8\n6.8,4.2,B,10.2\n6.4,3.9,B,9.4\n7.1,4.5,B,11.2\n6.6,4.0,B,9.9\n8.1,5.1,C,10.0\n7.7,4.8,C,9.6\n8.4,5.4,C,11.1\n7.9,4.9,C,9.7"
+  },
+
+  // CATEGORY B: NONPARAMETRIC STATISTICS (5)
+  {
+    id: "stat_mann_whitney", code: "B1", cat: "Nonparametric Statistics", name: "Mann–Whitney U Test",
+    desc: "Distribution-free two-sample rank-sum test evaluating stochastic dominance P(X > Y), reporting Hodges–Lehmann median location shift, rank-biserial correlation, and AUC.",
+    latex: String.raw`U_1 = R_1 - \frac{n_1(n_1 + 1)}{2}, \qquad \hat{\Delta}_{HL} = \operatorname{median}_{i,j}(X_i - Y_j), \qquad r_{rb} = 1 - \frac{2U}{n_1 n_2}`,
+    assumptions: [
+      "Independent observations both within and between the two samples.",
+      "At least ordinal measurement scale for the response variable.",
+      "Under pure shift alternative, distributions share similar shape."
+    ],
+    fields: [
+      {key: "y", label: "Numeric Variable", default: "value"},
+      {key: "group", label: "Binary Group Column", default: "group"}
+    ],
+    csv: "value,group\n14.2,Placebo\n15.1,Placebo\n13.8,Placebo\n16.4,Placebo\n14.9,Placebo\n22.0,Placebo\n15.3,Placebo\n18.7,Active\n21.4,Active\n19.5,Active\n23.1,Active\n20.8,Active\n24.6,Active\n19.9,Active"
+  },
+  {
+    id: "stat_wilcoxon", code: "B2", cat: "Nonparametric Statistics", name: "Wilcoxon Signed-Rank Test",
+    desc: "Nonparametric paired-sample test of symmetric location shift around zero, computing exact Walsh-average Hodges–Lehmann pseudomedian and rank-biserial effect size.",
+    latex: String.raw`W^+ = \sum_{i: D_i > 0} \operatorname{rank}(|D_i|), \qquad \hat{\theta}_{HL} = \operatorname{median}_{i \le j}\left(\frac{D_i + D_j}{2}\right)`,
+    assumptions: [
+      "Paired observations (X_i, Y_i) are mutually independent across subjects.",
+      "Distribution of paired differences D_i = X_i - Y_i is symmetric around its median."
+    ],
+    fields: [
+      {key: "x1", label: "Condition 1 Column", default: "before"},
+      {key: "x2", label: "Condition 2 Column", default: "after"}
+    ],
+    csv: "before,after\n125,118\n132,121\n128,124\n140,129\n136,130\n122,120\n145,131\n130,122\n138,127\n129,125"
+  },
+  {
+    id: "stat_kruskal", code: "B3", cat: "Nonparametric Statistics", name: "Kruskal–Wallis Test",
+    desc: "Nonparametric k-sample extension of the Mann–Whitney test comparing group mean ranks with tie-corrected chi-square inference and ordinal epsilon-squared effect size.",
+    latex: String.raw`H = \frac{12}{N(N+1)} \sum_{i=1}^k \frac{R_i^2}{n_i} - 3(N+1), \qquad \varepsilon^2 = \frac{H}{(N^2 - 1)/(N + 1)}`,
+    assumptions: [
+      "Independent samples across all k groups.",
+      "At least ordinal response measurement; tie correction applied automatically."
+    ],
+    fields: [
+      {key: "y", label: "Response Variable", default: "score"},
+      {key: "group", label: "Group Variable", default: "method"}
+    ],
+    csv: "score,method\n62,MethodA\n65,MethodA\n59,MethodA\n68,MethodA\n61,MethodA\n74,MethodB\n78,MethodB\n71,MethodB\n80,MethodB\n75,MethodB\n85,MethodC\n89,MethodC\n82,MethodC\n91,MethodC\n87,MethodC"
+  },
+  {
+    id: "stat_friedman", code: "B4", cat: "Nonparametric Statistics", name: "Friedman Test",
+    desc: "Nonparametric randomized complete block / repeated-measures rank test across k treatments, reporting Kendall's coefficient of concordance W.",
+    latex: String.raw`Q = \frac{12}{Nk(k+1)} \sum_{j=1}^k R_j^2 - 3N(k+1) \stackrel{a}{\sim} \chi^2_{k-1}, \qquad W = \frac{Q}{N(k-1)}`,
+    assumptions: [
+      "Observations are mutually independent across the N blocks/subjects.",
+      "Within each block, observations can be ranked unambiguously across the k conditions."
+    ],
+    fields: [
+      {key: "conditions", label: "Condition Columns (comma-separated)", default: "Rater1,Rater2,Rater3,Rater4"}
+    ],
+    csv: "Rater1,Rater2,Rater3,Rater4\n3.1,4.2,5.0,4.8\n2.8,3.9,4.7,4.5\n3.5,4.4,5.2,5.0\n2.9,3.7,4.5,4.4\n3.3,4.1,4.9,4.7\n3.0,4.0,4.8,4.6\n3.4,4.3,5.1,4.9\n2.7,3.8,4.6,4.3"
+  },
+  {
+    id: "stat_kendall", code: "B5", cat: "Nonparametric Statistics", name: "Kendall's Tau Correlation",
+    desc: "Computes tie-adjusted Kendall's τ-b and τ-c rank concordance coefficients alongside asymptotic standard errors, 95% confidence intervals, and Spearman's ρ benchmark.",
+    latex: String.raw`\tau_b = \frac{N_c - N_d}{\sqrt{(N_0 - N_1)(N_0 - N_2)}}, \qquad \operatorname{SE}(\tau_b) \approx \sqrt{\frac{2(2n+5)}{9n(n-1)}}`,
+    assumptions: [
+      "Bivariate pairs (X_i, Y_i) are independently sampled.",
+      "Variables are measured on at least an ordinal scale."
+    ],
+    fields: [
+      {key: "x", label: "Variable X", default: "rank_x"},
+      {key: "y", label: "Variable Y", default: "rank_y"}
+    ],
+    csv: "rank_x,rank_y\n1.2,2.1\n2.5,3.0\n3.1,2.8\n4.0,4.5\n5.2,5.1\n6.1,6.8\n7.0,6.5\n8.3,8.9\n9.1,9.0\n10.4,10.8"
+  },
+
+  // CATEGORY C: MULTIVARIATE STATISTICAL ANALYSIS (6)
+  {
+    id: "stat_pca", code: "C1", cat: "Multivariate Statistical Analysis", name: "Principal Component Analysis (PCA)",
+    desc: "Orthogonal Singular Value Decomposition (SVD) of standardized or raw feature matrices with Kaiser eigenvalue retention, variance explained, and Bartlett's sphericity test.",
+    latex: String.raw`\mathbf{X}_c = \mathbf{U}\mathbf{\Sigma}\mathbf{V}^\top, \qquad \lambda_j = \frac{\sigma_j^2}{n - 1}, \qquad \chi^2_{\text{Bartlett}} = -\left(n - 1 - \frac{2p+5}{6}\right)\ln|\mathbf{R}|`,
+    assumptions: [
+      "Linear relationships among continuous variables.",
+      "Non-identity correlation matrix (verified via Bartlett's sphericity p < 0.05)."
+    ],
+    fields: [
+      {key: "vars", label: "Numeric Features (comma-separated)", default: "x1,x2,x3,x4"}
+    ],
+    csv: "x1,x2,x3,x4\n2.5,2.4,0.5,0.7\n0.5,0.7,2.2,2.1\n2.2,2.9,0.8,0.9\n1.9,2.2,1.1,1.0\n3.1,3.0,0.4,0.5\n2.3,2.7,0.9,0.8\n2.0,1.6,1.5,1.4\n1.0,1.1,2.8,2.6\n1.5,1.6,2.1,2.0\n1.1,0.9,3.0,2.9"
+  },
+  {
+    id: "stat_efa", code: "C2", cat: "Multivariate Statistical Analysis", name: "Exploratory Factor Analysis (EFA)",
+    desc: "Principal Axis Factoring (PAF) with iterative communality estimation, orthogonal Varimax rotation, and Kaiser–Meyer–Olkin (KMO) sampling adequacy index.",
+    latex: String.raw`\mathbf{R} - \mathbf{\Psi} = \mathbf{\Lambda}\mathbf{\Lambda}^\top, \qquad \text{KMO} = \frac{\sum_{i\neq j} r_{ij}^2}{\sum_{i\neq j} r_{ij}^2 + \sum_{i\neq j} p_{ij}^2}`,
+    assumptions: [
+      "Common factor structure underlies observed item covariances.",
+      "Adequate sampling suitability (KMO >= 0.60 recommended)."
+    ],
+    fields: [
+      {key: "vars", label: "Observed Indicators (p >= 3)", default: "item1,item2,item3,item4,item5"}
+    ],
+    csv: "item1,item2,item3,item4,item5\n4.1,4.3,3.9,1.2,1.4\n4.8,4.6,4.5,1.5,1.3\n2.1,2.3,2.0,4.2,4.4\n1.9,2.0,1.8,4.6,4.5\n3.5,3.7,3.4,2.8,2.9\n4.4,4.2,4.1,1.6,1.5\n2.2,2.4,2.1,4.0,4.1\n3.9,4.0,3.8,2.0,2.1\n2.5,2.6,2.4,3.8,3.9\n4.6,4.5,4.3,1.4,1.2"
+  },
+  {
+    id: "stat_cfa", code: "C3", cat: "Multivariate Statistical Analysis", name: "Confirmatory Factor Analysis (CFA)",
+    desc: "Maximum Likelihood covariance structure estimation with marker-variable identification, inverse-Hessian standard errors, and global SEM fit indices (χ², CFI, TLI, RMSEA).",
+    latex: String.raw`F_{ML} = \ln|\mathbf{\Sigma}(\theta)| + \operatorname{tr}\!\left(\mathbf{S}\mathbf{\Sigma}(\theta)^{-1}\right) - \ln|\mathbf{S}| - p, \qquad \text{RMSEA} = \sqrt{\frac{\max(\chi^2 - df, 0)}{df(N - 1)}}`,
+    assumptions: [
+      "Multivariate normality of observed continuous indicators.",
+      "Model identification via unit loading constraint (λ₁ = 1) and positive error variances ψ_j > 0."
+    ],
+    fields: [
+      {key: "vars", label: "Latent Factor Indicators (p >= 3)", default: "ind1,ind2,ind3,ind4"}
+    ],
+    csv: "ind1,ind2,ind3,ind4\n5.1,4.9,5.2,4.8\n6.2,6.0,6.4,5.9\n4.3,4.1,4.5,4.2\n7.1,6.9,7.0,6.8\n5.8,5.6,5.9,5.7\n4.9,4.8,5.0,4.7\n6.5,6.4,6.6,6.3\n5.4,5.2,5.5,5.3\n6.0,5.9,6.1,5.8\n4.6,4.5,4.7,4.4\n6.8,6.7,6.9,6.6\n5.2,5.0,5.3,5.1"
+  },
+  {
+    id: "stat_lda", code: "C4", cat: "Multivariate Statistical Analysis", name: "Linear Discriminant Analysis (LDA)",
+    desc: "Solves the generalized eigenvalue problem S_W⁻¹ S_B to find canonical linear discriminant axes maximizing between-class to within-class variance separation.",
+    latex: String.raw`\mathbf{S}_W^{-1}\mathbf{S}_B \mathbf{w} = \lambda \mathbf{w}, \qquad \delta_k(\mathbf{x}) = \mathbf{x}^\top \mathbf{\Sigma}^{-1}\boldsymbol{\mu}_k - \frac{1}{2}\boldsymbol{\mu}_k^\top \mathbf{\Sigma}^{-1}\boldsymbol{\mu}_k + \ln \pi_k`,
+    assumptions: [
+      "Multivariate normal class-conditional predictor distributions.",
+      "Homoscedastic within-class covariance matrix Σ across all k classes."
+    ],
+    fields: [
+      {key: "x_vars", label: "Predictor Variables", default: "f1,f2,f3"},
+      {key: "group", label: "Target Class Column", default: "class"}
+    ],
+    csv: "f1,f2,f3,class\n5.1,3.5,1.4,A\n4.9,3.0,1.4,A\n4.7,3.2,1.3,A\n5.0,3.6,1.4,A\n7.0,3.2,4.7,B\n6.4,3.2,4.5,B\n6.9,3.1,4.9,B\n6.5,2.8,4.6,B\n6.3,3.3,6.0,C\n5.8,2.7,5.1,C\n7.1,3.0,5.9,C\n6.5,3.0,5.8,C"
+  },
+  {
+    id: "stat_cca", code: "C5", cat: "Multivariate Statistical Analysis", name: "Canonical Correlation Analysis (CCA)",
+    desc: "Extracts maximally correlated linear combinations between two multivariate variable sets X and Y with Wilks' Lambda Rao-F significance testing.",
+    latex: String.raw`\rho_k = \max_{\mathbf{a}_k, \mathbf{b}_k} \operatorname{Corr}(\mathbf{X}\mathbf{a}_k, \mathbf{Y}\mathbf{b}_k), \qquad \Lambda_m = \prod_{j=m}^s (1 - \rho_j^2)`,
+    assumptions: [
+      "Linear associations between variable sets X and Y.",
+      "Full column rank in both X and Y (N > p + q + 1)."
+    ],
+    fields: [
+      {key: "x_vars", label: "Variable Set X", default: "x1,x2"},
+      {key: "y_vars", label: "Variable Set Y", default: "y1,y2"}
+    ],
+    csv: "x1,x2,y1,y2\n1.2,2.3,1.5,2.6\n2.4,3.1,2.7,3.4\n3.1,4.2,3.3,4.5\n1.8,2.7,2.0,2.9\n4.2,5.1,4.5,5.4\n3.6,4.8,3.9,5.0\n2.9,3.5,3.1,3.8\n4.8,5.9,5.0,6.1\n1.5,2.1,1.7,2.4\n3.9,4.6,4.2,4.9"
+  },
+  {
+    id: "stat_ca", code: "C6", cat: "Multivariate Statistical Analysis", name: "Correspondence Analysis (CA)",
+    desc: "Performs SVD on standardized Pearson residuals of two-way contingency tables to decompose total chi-square inertia into principal geometric dimensions.",
+    latex: String.raw`\mathbf{S} = \mathbf{D}_r^{-1/2}(\mathbf{P} - \mathbf{r}\mathbf{c}^\top)\mathbf{D}_c^{-1/2} = \mathbf{U}\mathbf{\Sigma}\mathbf{V}^\top, \qquad \Phi^2 = \frac{\chi^2}{N} = \sum_k \sigma_k^2`,
+    assumptions: [
+      "Non-negative contingency counts across mutually exclusive row and column categories.",
+      "At least 2 row categories and 2 column categories."
+    ],
+    fields: [
+      {key: "row_var", label: "Row Categorical Variable", default: "education"},
+      {key: "col_var", label: "Column Categorical Variable", default: "preference"}
+    ],
+    csv: "education,preference\nHS,Low\nHS,Low\nHS,Mid\nBA,Mid\nBA,Mid\nBA,High\nMA,High\nMA,High\nMA,Mid\nPhD,High\nPhD,High\nPhD,High"
+  },
+
+  // CATEGORY D: SURVIVAL ANALYSIS (5)
+  {
+    id: "stat_km", code: "D1", cat: "Survival Analysis", name: "Kaplan–Meier Estimator",
+    desc: "Nonparametric product-limit survival function estimator under right-censoring with Greenwood variance standard errors, median survival quantiles, and Mantel–Cox log-rank test.",
+    latex: String.raw`\hat{S}(t) = \prod_{t_i \le t} \left(1 - \frac{d_i}{n_i}\right), \qquad \widehat{\operatorname{Var}}[\hat{S}(t)] = \hat{S}(t)^2 \sum_{t_i \le t} \frac{d_i}{n_i(n_i - d_i)}`,
+    assumptions: [
+      "Non-informative right censoring (censoring mechanism independent of failure time).",
+      "Strictly positive survival durations t_i > 0."
+    ],
+    fields: [
+      {key: "time", label: "Duration / Time Column", default: "time"},
+      {key: "event", label: "Event Indicator (1=Event, 0=Censored)", default: "event"},
+      {key: "group", label: "Group for Log-Rank Test (Optional)", default: "arm"}
+    ],
+    csv: "time,event,arm\n4.2,1,Control\n6.5,1,Control\n8.1,0,Control\n9.4,1,Control\n11.2,1,Control\n12.0,0,Control\n7.5,1,Treatment\n10.8,0,Treatment\n13.4,1,Treatment\n15.6,0,Treatment\n17.2,1,Treatment\n19.5,0,Treatment"
+  },
+  {
+    id: "stat_cox_ph", code: "D2", cat: "Survival Analysis", name: "Cox Proportional Hazards Model",
+    desc: "Semiparametric partial likelihood regression estimating log-hazard ratios and hazard ratios exp(β) with Breslow tie handling and Schoenfeld residual proportional-hazards check.",
+    latex: String.raw`h(t \mid \mathbf{X}_i) = h_0(t)\exp(\mathbf{X}_i^\top \boldsymbol{\beta}), \qquad L_p(\boldsymbol{\beta}) = \prod_{i: \delta_i = 1} \frac{\exp(\mathbf{X}_i^\top \boldsymbol{\beta})}{\sum_{j \in R(t_i)} \exp(\mathbf{X}_j^\top \boldsymbol{\beta})}`,
+    assumptions: [
+      "Proportional hazards across time (covariate effects multiply baseline hazard h₀(t) constantly).",
+      "Non-informative censoring conditional on covariates X."
+    ],
+    fields: [
+      {key: "time", label: "Survival Time", default: "time"},
+      {key: "event", label: "Event Indicator (1/0)", default: "event"},
+      {key: "x_vars", label: "Covariates (comma-separated)", default: "trt,age"}
+    ],
+    csv: "time,event,trt,age\n3.5,1,0,62\n5.1,1,0,58\n6.8,0,0,54\n8.2,1,0,67\n9.5,1,0,61\n11.0,0,0,55\n7.2,1,1,60\n10.4,1,1,65\n12.8,0,1,52\n14.5,1,1,59\n16.1,0,1,56\n18.3,0,1,51"
+  },
+  {
+    id: "stat_aft", code: "D3", cat: "Survival Analysis", name: "Accelerated Failure Time (AFT) Model",
+    desc: "Parametric log-linear time-to-event MLE directly modeling time acceleration factors exp(β) under Weibull, Exponential, or Log-Normal error distributions.",
+    latex: String.raw`\ln T_i = \mathbf{X}_i^\top \boldsymbol{\beta} + \sigma \varepsilon_i, \qquad S(t \mid \mathbf{X}_i) = S_0\!\left(t \exp(-\mathbf{X}_i^\top \boldsymbol{\beta})\right)`,
+    assumptions: [
+      "Covariates act multiplicatively on survival time (time ratio = exp(β)).",
+      "Correct parametric specification of baseline error distribution ε_i."
+    ],
+    fields: [
+      {key: "time", label: "Survival Time", default: "time"},
+      {key: "event", label: "Event Indicator (1/0)", default: "event"},
+      {key: "x_vars", label: "Covariates", default: "trt,age"},
+      {key: "distribution", label: "Distribution (weibull/exponential/lognormal)", default: "weibull"}
+    ],
+    csv: "time,event,trt,age\n3.5,1,0,62\n5.1,1,0,58\n6.8,0,0,54\n8.2,1,0,67\n9.5,1,0,61\n11.0,0,0,55\n7.2,1,1,60\n10.4,1,1,65\n12.8,0,1,52\n14.5,1,1,59\n16.1,0,1,56\n18.3,0,1,51"
+  },
+  {
+    id: "stat_fine_gray", code: "D4", cat: "Survival Analysis", name: "Fine–Gray Competing Risks Model",
+    desc: "Estimates subdistribution hazard ratios (sHR) for the Cumulative Incidence Function (CIF) in the presence of competing events using Inverse Probability of Censoring Weighting (IPCW).",
+    latex: String.raw`\lambda_1^{\text{sub}}(t \mid \mathbf{X}) = \lambda_{10}(t)\exp(\mathbf{X}^\top \boldsymbol{\beta}), \qquad w_{ij}(t_i) = \frac{\hat{G}(t_i)}{\hat{G}(\min(t_i, t_j))}`,
+    assumptions: [
+      "Event coding: 0 = right-censored, 1 = primary event of interest, 2 = competing risk event.",
+      "Independent censoring distribution G(t) estimated via Kaplan–Meier."
+    ],
+    fields: [
+      {key: "time", label: "Time to First Event", default: "time"},
+      {key: "event", label: "Status (0=Cens, 1=Primary, 2=Competing)", default: "status"},
+      {key: "x_vars", label: "Covariates", default: "trt,risk_score"}
+    ],
+    csv: "time,status,trt,risk_score\n2.4,1,0,1.2\n3.8,2,0,0.8\n5.1,1,0,1.5\n6.4,0,0,0.5\n7.9,2,0,1.1\n4.5,1,1,1.3\n6.9,2,1,0.9\n8.8,1,1,1.0\n10.2,0,1,0.4\n11.5,2,1,0.7\n12.6,0,1,0.6\n9.3,1,0,1.4"
+  },
+  {
+    id: "stat_param_surv", code: "D5", cat: "Survival Analysis", name: "Parametric Survival Models (Weibull/Exp/LogNormal)",
+    desc: "Simultaneously fits Weibull, Exponential, and Log-Normal maximum likelihood survival specifications on identical covariates and ranks functional fit via AIC and BIC.",
+    latex: String.raw`\ell(\boldsymbol{\beta}, \sigma) = \sum_{i=1}^n \left[ \delta_i \ln f(t_i \mid \mathbf{X}_i) + (1 - \delta_i)\ln S(t_i \mid \mathbf{X}_i) \right]`,
+    assumptions: [
+      "Right-censored positive duration data with parametric hazard shape.",
+      "Information criteria (AIC/BIC) compare non-nested parametric families."
+    ],
+    fields: [
+      {key: "time", label: "Survival Time", default: "time"},
+      {key: "event", label: "Event Indicator (1/0)", default: "event"},
+      {key: "x_vars", label: "Covariates", default: "trt,age"}
+    ],
+    csv: "time,event,trt,age\n3.5,1,0,62\n5.1,1,0,58\n6.8,0,0,54\n8.2,1,0,67\n9.5,1,0,61\n11.0,0,0,55\n7.2,1,1,60\n10.4,1,1,65\n12.8,0,1,52\n14.5,1,1,59\n16.1,0,1,56\n18.3,0,1,51"
+  },
+
+  // CATEGORY E: MIXED-EFFECTS & LONGITUDINAL STATISTICS (4)
+  {
+    id: "stat_lmm", code: "E1", cat: "Mixed-Effects and Longitudinal Statistics", name: "Linear Mixed-Effects Model (LMM)",
+    desc: "Estimates hierarchical fixed effects and cluster random-intercept variance components via REML or ML, reporting conditional Intraclass Correlation (ICC).",
+    latex: String.raw`\mathbf{y}_i = \mathbf{X}_i\boldsymbol{\beta} + \mathbf{Z}_i\mathbf{u}_i + \boldsymbol{\varepsilon}_i, \qquad \mathbf{u}_i \sim N(\mathbf{0}, \mathbf{G}), \qquad \text{ICC} = \frac{\sigma_u^2}{\sigma_u^2 + \sigma_e^2}`,
+    assumptions: [
+      "Random effects u_i and within-cluster errors ε_ij are mutually independent and Gaussian.",
+      "REML provides unbiased variance component estimates in finite samples."
+    ],
+    fields: [
+      {key: "y", label: "Outcome Variable", default: "reaction"},
+      {key: "group", label: "Cluster / Subject ID", default: "subject"},
+      {key: "x_vars", label: "Fixed Predictors", default: "days"}
+    ],
+    csv: "reaction,subject,days\n249.5,S1,0\n258.7,S1,1\n250.8,S1,2\n321.4,S1,3\n222.7,S2,0\n205.3,S2,1\n202.9,S2,2\n238.9,S2,3\n199.1,S3,0\n194.3,S3,1\n234.3,S3,2\n253.8,S3,3\n271.2,S4,0\n285.4,S4,1\n298.1,S4,2\n315.6,S4,3"
+  },
+  {
+    id: "stat_glmm", code: "E2", cat: "Mixed-Effects and Longitudinal Statistics", name: "Generalized Linear Mixed Model (GLMM)",
+    desc: "Integrates out cluster-level Gaussian random intercepts using 15-point Gauss–Hermite quadrature to obtain exact marginal maximum likelihood estimates for Binomial and Poisson outcomes.",
+    latex: String.raw`g(\mathbb{E}[Y_{ij} \mid u_i]) = \mathbf{x}_{ij}^\top\boldsymbol{\beta} + u_i, \qquad L(\boldsymbol{\beta}, \sigma_u) = \prod_{i=1}^M \int_{-\infty}^{\infty} \prod_{j=1}^{n_i} f(y_{ij} \mid \boldsymbol{\beta}, u_i)\phi(u_i; 0, \sigma_u^2)\,du_i`,
+    assumptions: [
+      "Conditional independence of longitudinal/clustered responses given random effect u_i.",
+      "Gaussian random-intercept distribution u_i ~ N(0, σ_u²)."
+    ],
+    fields: [
+      {key: "y", label: "Binary / Count Outcome", default: "outcome"},
+      {key: "group", label: "Cluster ID", default: "clinic"},
+      {key: "x_vars", label: "Predictors", default: "trt,visit"},
+      {key: "family", label: "Family (binomial / poisson)", default: "binomial"}
+    ],
+    csv: "outcome,clinic,trt,visit\n0,C1,0,1\n0,C1,0,2\n1,C1,0,3\n1,C2,1,1\n1,C2,1,2\n1,C2,1,3\n0,C3,0,1\n1,C3,0,2\n0,C3,0,3\n0,C4,1,1\n1,C4,1,2\n1,C4,1,3\n0,C5,0,1\n0,C5,0,2\n0,C5,0,3\n1,C6,1,1\n1,C6,1,2\n1,C6,1,3"
+  },
+  {
+    id: "stat_gee", code: "E3", cat: "Mixed-Effects and Longitudinal Statistics", name: "Generalized Estimating Equations (GEE)",
+    desc: "Population-averaged marginal longitudinal regression supporting Exchangeable, AR(1), Independence, and Unstructured working correlations with Liang–Zeger sandwich standard errors and QIC.",
+    latex: String.raw`\sum_{i=1}^M \mathbf{D}_i^\top \mathbf{V}_i(\alpha)^{-1}\left(\mathbf{y}_i - \boldsymbol{\mu}_i(\boldsymbol{\beta})\right) = \mathbf{0}, \qquad \widehat{\operatorname{Cov}}(\hat{\boldsymbol{\beta}}) = \mathbf{B}^{-1}\mathbf{M}\mathbf{B}^{-1}`,
+    assumptions: [
+      "Correct specification of the marginal mean link g(μ_ij) = x_ij'β.",
+      "Consistent point estimates and sandwich SEs even if working correlation R(α) is misspecified."
+    ],
+    fields: [
+      {key: "y", label: "Response Variable", default: "y"},
+      {key: "group", label: "Cluster ID", default: "id"},
+      {key: "x_vars", label: "Predictors", default: "x1,time"},
+      {key: "cov_struct", label: "Working Corr (exchangeable/ar1/independence)", default: "exchangeable"}
+    ],
+    csv: "y,id,x1,time\n10.2,1,0,1\n11.4,1,0,2\n12.1,1,0,3\n14.5,2,1,1\n16.2,2,1,2\n17.8,2,1,3\n9.8,3,0,1\n10.5,3,0,2\n11.3,3,0,3\n15.1,4,1,1\n16.9,4,1,2\n18.4,4,1,3"
+  },
+  {
+    id: "stat_icc", code: "E4", cat: "Mixed-Effects and Longitudinal Statistics", name: "Intraclass Correlation Coefficient (ICC)",
+    desc: "Computes the full Shrout–Fleiss (1979) reliability taxonomy: ICC(1,1), ICC(2,1) absolute agreement, ICC(3,1) consistency, ICC(2,k), and ICC(3,k) / Cronbach's alpha with exact F-intervals.",
+    latex: String.raw`\text{ICC}(2,1) = \frac{MS_B - MS_E}{MS_B + (k-1)MS_E + \frac{k}{n}(MS_J - MS_E)}, \qquad \text{ICC}(3,1) = \frac{MS_B - MS_E}{MS_B + (k-1)MS_E}`,
+    assumptions: [
+      "n targets rated independently by k judges/instruments across columns.",
+      "Two-way random/mixed variance decomposition without missing cells."
+    ],
+    fields: [
+      {key: "raters", label: "Rater / Measurement Columns", default: "Judge1,Judge2,Judge3,Judge4"}
+    ],
+    csv: "Judge1,Judge2,Judge3,Judge4\n9,2,5,8\n6,1,3,2\n8,4,6,8\n7,1,2,6\n10,5,6,9\n6,2,4,7"
+  },
+
+  // CATEGORY F: RESAMPLING & STATISTICAL SIMULATION (3)
+  {
+    id: "stat_bootstrap", code: "F1", cat: "Resampling and Statistical Simulation", name: "Bootstrap Inference (Percentile & BCa)",
+    desc: "Nonparametric i.i.d. resampling computing bootstrap standard errors, finite-sample bias estimates, percentile 95% CIs, and Efron's second-order accurate BCa confidence intervals.",
+    latex: String.raw`\hat{\theta}^*_{(b)} = T(\mathbf{X}^*_{(b)}), \qquad \alpha_1 = \Phi\!\left(\hat{z}_0 + \frac{\hat{z}_0 + z_{\alpha/2}}{1 - \hat{a}(\hat{z}_0 + z_{\alpha/2})}\right)`,
+    assumptions: [
+      "Empirical distribution function F_n is a consistent plug-in estimator of population F.",
+      "Smooth functional T(F) for BCa jackknife acceleration validity."
+    ],
+    fields: [
+      {key: "y", label: "Target Numeric Variable", default: "return_pct"},
+      {key: "statistic", label: "Estimator (mean/median/std/iqr)", default: "mean"},
+      {key: "B", label: "Bootstrap Replications (B)", default: "2000"}
+    ],
+    csv: "return_pct\n1.2\n-0.8\n2.4\n3.1\n-1.5\n0.9\n4.2\n1.8\n-0.3\n2.7\n1.5\n5.1\n-2.1\n1.9\n2.2"
+  },
+  {
+    id: "stat_permutation", code: "F2", cat: "Resampling and Statistical Simulation", name: "Permutation Inference",
+    desc: "Exact Monte Carlo randomization test shuffling treatment labels B times under exchangeability, reporting Phipson–Smyth finite-sample corrected exact p-values.",
+    latex: String.raw`p_{\text{perm}} = \frac{1 + \sum_{b=1}^B \mathbb{I}\left(|T(\mathbf{y}_{\pi_b})| \ge |T(\mathbf{y}_{\text{obs}})|\right)}{B + 1}`,
+    assumptions: [
+      "Exchangeability of observations across treatment groups under the sharp null hypothesis H₀."
+    ],
+    fields: [
+      {key: "y", label: "Outcome Variable", default: "score"},
+      {key: "group", label: "Binary Group Column", default: "group"},
+      {key: "B", label: "Random Permutations (B)", default: "5000"}
+    ],
+    csv: "score,group\n12.1,A\n13.4,A\n11.8,A\n14.0,A\n12.5,A\n16.2,B\n17.8,B\n15.9,B\n18.4,B\n17.1,B"
+  },
+  {
+    id: "stat_power", code: "F3", cat: "Resampling and Statistical Simulation", name: "Statistical Power and Sample Size Analysis",
+    desc: "Computes exact analytical non-central t power curves and minimum required sample sizes per arm across standardized Cohen's d effect sizes and Type I error thresholds.",
+    latex: String.raw`1 - \beta = 1 - F_{t,\,\nu,\,\delta}(t_{1-\alpha/2,\,\nu}) + F_{t,\,\nu,\,\delta}(-t_{1-\alpha/2,\,\nu}), \qquad \delta = d\sqrt{\frac{n}{2}}`,
+    assumptions: [
+      "Two-sided independent-groups comparison with standardized effect size d = (μ₁ - μ₂)/σ."
+    ],
+    fields: [
+      {key: "effect_size", label: "Standardized Effect Size (Cohen's d)", default: "0.50"},
+      {key: "alpha", label: "Significance Level (α)", default: "0.05"},
+      {key: "target_power", label: "Target Statistical Power (1 - β)", default: "0.80"}
+    ],
+    csv: "note\nAnalytical non-central t power calculation (adjust parameters above)"
+  },
+
+  // CATEGORY G: META-ANALYSIS (2)
+  {
+    id: "stat_meta_fe", code: "G1", cat: "Meta-Analysis", name: "Fixed-Effect Meta-Analysis",
+    desc: "Inverse-variance weighted synthesis across k independent studies assuming a single homogeneous true effect size θ, accompanied by Cochran's Q and Higgins' I² heterogeneity diagnostics.",
+    latex: String.raw`\hat{\theta}_{FE} = \frac{\sum_{i=1}^k w_i y_i}{\sum_{i=1}^k w_i}, \quad w_i = \frac{1}{\sigma_i^2}, \qquad Q = \sum_{i=1}^k w_i(y_i - \hat{\theta}_{FE})^2, \quad I^2 = \max\!\left(0, \frac{Q-(k-1)}{Q}\right)`,
+    assumptions: [
+      "All k studies estimate a single common true effect θ (homogeneity).",
+      "Known within-study sampling variances v_i = SE_i²."
+    ],
+    fields: [
+      {key: "effect", label: "Study Effect Size (y_i)", default: "log_rr"},
+      {key: "se", label: "Standard Error (SE_i)", default: "se"},
+      {key: "study", label: "Study Label Column", default: "trial"}
+    ],
+    csv: "trial,log_rr,se\nAronson_1948,-0.89,0.32\nFerguson_1949,-1.59,0.44\nRosenthal_1960,-1.35,0.64\nHart_1977,-1.44,0.19\nFrimodt_1973,-0.22,0.23\nStein_1953,-0.79,0.08\nVandiviere_1973,-1.62,0.47\nTPT_Madras_1980,0.01,0.06"
+  },
+  {
+    id: "stat_meta_re", code: "G2", cat: "Meta-Analysis", name: "Random-Effects Meta-Analysis",
+    desc: "Estimates between-study heterogeneity variance τ² via both Restricted Maximum Likelihood (REML) and DerSimonian–Laird, computing pooled random-effects estimates, 95% prediction intervals, and Egger's funnel asymmetry test.",
+    latex: String.raw`y_i \sim N(\theta, \sigma_i^2 + \tau^2), \qquad \hat{\theta}_{RE} = \frac{\sum_{i=1}^k w_i^* y_i}{\sum_{i=1}^k w_i^*}, \qquad w_i^* = \frac{1}{\sigma_i^2 + \hat{\tau}^2_{REML}}`,
+    assumptions: [
+      "True study effects θ_i are drawn from a superpopulation N(θ, τ²).",
+      "Egger's regression tests small-study publication bias (k >= 3)."
+    ],
+    fields: [
+      {key: "effect", label: "Study Effect Size (y_i)", default: "log_rr"},
+      {key: "se", label: "Standard Error (SE_i)", default: "se"},
+      {key: "study", label: "Study Label Column", default: "trial"}
+    ],
+    csv: "trial,log_rr,se\nAronson_1948,-0.89,0.32\nFerguson_1949,-1.59,0.44\nRosenthal_1960,-1.35,0.64\nHart_1977,-1.44,0.19\nFrimodt_1973,-0.22,0.23\nStein_1953,-0.79,0.08\nVandiviere_1973,-1.62,0.47\nTPT_Madras_1980,0.01,0.06"
+  }
+];
+
+/* Worker Management (Matching OES Worker Protocol) */
+let worker = null, ready = false, jobs = 0;
+const pending = {};
+let currentMethod = METHODS[0];
+let lastResult = null;
+let lastOmvpReport = null;
+
+const statusBar = document.getElementById("workerStatus");
+const statusText = document.getElementById("statusText");
+
+function setStatus(msg, state = "loading") {
+  statusBar.className = "status-bar" + (state === "ready" ? " ready" : state === "error" ? " error" : "");
+  statusText.textContent = msg;
+}
+
+function getWorker() {
+  if (worker) return worker;
+  worker = new Worker("statistics-worker.js?v=" + VERSION);
+
+  worker.onmessage = e => {
+    const m = e.data;
+    if (m.type === "status") {
+      setStatus(m.text, "loading");
+      return;
+    }
+    if (m.type === "ready") {
+      ready = true;
+      setStatus(`Pyodide Engine Ready (v${m.version}) — 31 Statistical Methods Loaded`, "ready");
+      return;
+    }
+    if (m.type === "error" && (m.job === undefined || m.job === null)) {
+      setStatus(`Worker initialization failed: ${m.error}`, "error");
+      Object.values(pending).forEach(p => p.reject(new Error(m.error)));
+      Object.keys(pending).forEach(k => delete pending[k]);
+      return;
+    }
+    const p = pending[m.job];
+    if (!p) return;
+    delete pending[m.job];
+    if (m.type === "result") {
+      setStatus(`Completed in ${m.seconds.toFixed(2)}s`, "ready");
+      p.resolve(m);
+    } else {
+      setStatus(`Error: ${m.error}`, "error");
+      p.reject(new Error(m.error));
+    }
+  };
+
+  worker.onerror = event => {
+    const message = event.message || "Unknown Web Worker error.";
+    setStatus(`Worker error: ${message}`, "error");
+    Object.values(pending).forEach(p => p.reject(new Error(message)));
+    Object.keys(pending).forEach(k => delete pending[k]);
+  };
+
+  worker.postMessage({cmd: "init", version: VERSION});
+  return worker;
+}
+
+function callWorker(payload) {
+  const job = ++jobs;
+  return new Promise((resolve, reject) => {
+    pending[job] = {resolve, reject};
+    getWorker().postMessage({...payload, job, version: VERSION});
+  });
+}
+
+/* Build Sidebar Tree */
+function renderCatalog(filter = "") {
+  const tree = document.getElementById("catalogTree");
+  tree.innerHTML = "";
+  const q = filter.trim().toLowerCase();
+  const categories = [...new Set(METHODS.map(m => m.cat))];
+
+  categories.forEach(cat => {
+    const items = METHODS.filter(m =>
+      m.cat === cat && (!q || m.name.toLowerCase().includes(q) || m.id.includes(q) || m.cat.toLowerCase().includes(q))
+    );
+    if (!items.length) return;
+
+    const grp = document.createElement("div");
+    grp.className = "cat-group";
+    grp.innerHTML = `<div class="cat-title"><span>${cat}</span><span>${items.length}</span></div>`;
+
+    items.forEach(m => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "method-btn" + (m.id === currentMethod.id ? " active" : "");
+      btn.innerHTML = `<span>${m.name}</span><span class="method-code">${m.code}</span>`;
+      btn.onclick = () => selectMethod(m);
+      grp.appendChild(btn);
+    });
+    tree.appendChild(grp);
+  });
+}
+
+function selectMethod(m) {
+  currentMethod = m;
+  renderCatalog(document.getElementById("methodSearch").value);
+
+  document.getElementById("activeCat").textContent = `Category ${m.code[0]} · ${m.cat}`;
+  document.getElementById("activeTitle").textContent = m.name;
+  document.getElementById("methodCodeBadge").textContent = `ID: ${m.id} (${m.code})`;
+  document.getElementById("activeDesc").textContent = m.desc;
+
+  // Render KaTeX Math
+  const mathEl = document.getElementById("mathFormula");
+  if (window.katex) {
+    katex.render(m.latex, mathEl, {displayMode: true, throwOnError: false});
+  } else {
+    mathEl.textContent = m.latex;
+  }
+
+  // Render Assumptions
+  const ul = document.getElementById("assumpList");
+  ul.innerHTML = m.assumptions.map(a => `<li>${a}</li>`).join("");
+
+  // Render Dynamic Spec Controls
+  const controls = document.getElementById("specControls");
+  controls.innerHTML = "";
+  m.fields.forEach(f => {
+    const div = document.createElement("div");
+    div.className = "field";
+    div.innerHTML = `<label for="spec_${f.key}">${f.label}</label>
+      <input id="spec_${f.key}" data-key="${f.key}" type="text" value="${f.default}">`;
+    controls.appendChild(div);
+  });
+
+  // Load Reference Dataset
+  document.getElementById("csvInput").value = m.csv;
+  refreshDatasetPreview();
+  updateReplicationCode();
+  document.getElementById("omvpOutput").innerHTML = "";
+  document.getElementById("btnDownloadReport").disabled = true;
+}
+
+function readSpec() {
+  const spec = {};
+  document.querySelectorAll("#specControls input").forEach(inp => {
+    const k = inp.dataset.key;
+    const v = inp.value.trim();
+    if (v !== "") spec[k] = isNaN(v) ? v : Number(v);
+  });
+  return spec;
+}
+
+function updateReplicationCode() {
+  const specStr = JSON.stringify(readSpec(), null, 2);
+  document.getElementById("repCode").textContent =
+`# Reproducible Python Code — OES Statistics Division (${currentMethod.name})
+import json
+import statistics_division as sd
+
+with open("dataset.csv", "r", encoding="utf-8") as f:
+    csv_data = f.read()
+
+spec = ${specStr}
+result = json.loads(sd.run_json("${currentMethod.id}", csv_data, json.dumps(spec)))
+print(json.dumps(result["summary"], indent=2))`;
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, ch => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[ch]));
+}
+
+function displayValue(value) {
+  if (value === null || value === undefined) return "—";
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
+}
+
+/* Render Estimation Results & Plotly Chart */
+function renderResults(res) {
+  lastResult = res;
+  document.getElementById("resultsCard").style.display = "block";
+  document.getElementById("resHeading").textContent = res.method;
+  document.getElementById("resTiming").textContent = `Pyodide Execution: ${res.elapsed_ms} ms`;
+  document.getElementById("btnExportCsv").disabled = false;
+
+  // KPIs
+  const kpiGrid = document.getElementById("kpiGrid");
+  kpiGrid.innerHTML = Object.entries(res.summary || {}).map(([k, v]) => `
+    <div class="kpi-card">
+      <div class="kpi-label">${escapeHtml(k.replace(/_/g, " "))}</div>
+      <div class="kpi-val">${escapeHtml(displayValue(v))}</div>
+    </div>
+  `).join("");
+
+  // Parameter / Test Table
+  const tbody = document.getElementById("resTableBody");
+  tbody.innerHTML = (res.table || []).map(r => `
+    <tr>
+      <td><strong>${escapeHtml(displayValue(r.Parameter))}</strong></td>
+      <td>${escapeHtml(displayValue(r.Estimate))}</td>
+      <td>${escapeHtml(displayValue(r.Std_Error))}</td>
+      <td>${escapeHtml(displayValue(r.Statistic))}</td>
+      <td>${escapeHtml(displayValue(r.df))}</td>
+      <td>${r.p_value !== null && r.p_value !== undefined ? escapeHtml(Number(r.p_value).toExponential(3)) : "—"}</td>
+      <td>${escapeHtml(displayValue(r.CI_Low))}</td>
+      <td>${escapeHtml(displayValue(r.CI_High))}</td>
+    </tr>
+  `).join("");
+
+  // Diagnostics
+  const diagGrid = document.getElementById("diagGrid");
+  diagGrid.innerHTML = Object.entries(res.diagnostics || {}).map(([k, v]) => `
+    <div><strong>${escapeHtml(k.replace(/_/g, " "))}:</strong> ${escapeHtml(displayValue(v))}</div>
+  `).join("");
+
+  // Plotly Visualization
+  const p = res.plot;
+  const plotEl = document.getElementById("plotContainer");
+  if (!p || !window.Plotly) return;
+
+  let traces = [];
+  if (p.type === "box") {
+    traces = p.labels.map((lbl, i) => ({
+      y: p.values[i],
+      name: lbl,
+      type: "box",
+      boxmean: "sd"
+    }));
+  } else if (p.type === "bar") {
+    traces = [{
+      x: p.labels,
+      y: p.values,
+      type: "bar",
+      marker: {color: "#0033A0"}
+    }];
+  } else if (p.type === "line") {
+    traces = [{
+      x: p.x,
+      y: p.y,
+      type: "scatter",
+      mode: "lines+markers",
+      line: {color: "#0033A0", width: 2.5}
+    }];
+  } else if (p.type === "scatter") {
+    traces = [{
+      x: p.x,
+      y: p.y,
+      type: "scatter",
+      mode: "markers",
+      marker: {color: "#0033A0", size: 8, opacity: 0.8}
+    }];
+  } else if (p.type === "histogram") {
+    traces = [{
+      x: p.values,
+      type: "histogram",
+      marker: {color: "#0033A0"}
+    }];
+  }
+
+  Plotly.newPlot(plotEl, traces, {
+    title: {text: p.title, font: {family: "DM Sans, sans-serif", size: 15}},
+    margin: {t: 44, r: 24, b: 48, l: 54},
+    paper_bgcolor: "#ffffff",
+    plot_bgcolor: "#f8fafc"
+  }, {responsive: true});
+}
+
+/* Tab Switching */
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById(btn.dataset.tab).classList.add("active");
+    if (btn.dataset.tab === "tab-code") updateReplicationCode();
+  });
+});
+
+/* Dataset preview, CSV upload and drag/drop — independent of the estimation worker */
+function parsePreviewCSV(text) {
+  const rows = [];
+  let row = [], cell = "", quoted = false;
+  const src = String(text || "").replace(/^\uFEFF/, "");
+  for (let i = 0; i < src.length; i++) {
+    const ch = src[i];
+    if (quoted) {
+      if (ch === '"' && src[i + 1] === '"') { cell += '"'; i++; }
+      else if (ch === '"') quoted = false;
+      else cell += ch;
+    } else if (ch === '"') quoted = true;
+    else if (ch === ",") { row.push(cell); cell = ""; }
+    else if (ch === "\n") { row.push(cell.replace(/\r$/, "")); if (row.some(v => v.trim() !== "")) rows.push(row); row = []; cell = ""; }
+    else cell += ch;
+  }
+  row.push(cell.replace(/\r$/, ""));
+  if (row.some(v => v.trim() !== "")) rows.push(row);
+  return rows;
+}
+function refreshDatasetPreview() {
+  const input = document.getElementById("csvInput");
+  const preview = document.getElementById("statisticsDatasetPreview");
+  const info = document.getElementById("statisticsDatasetInfo");
+  const rows = parsePreviewCSV(input.value);
+  if (!rows.length) {
+    preview.hidden = true;
+    preview.innerHTML = "";
+    info.textContent = "No dataset loaded.";
+    return;
+  }
+  const headers = rows[0];
+  const body = rows.slice(1);
+  const shown = body.slice(0, 8);
+  const escape = value => escapeHtml(value);
+  preview.innerHTML = `<table aria-label="Dataset preview"><thead><tr>${headers.map(h => `<th>${escape(h)}</th>`).join("")}</tr></thead><tbody>${shown.map(r => `<tr>${headers.map((_, i) => `<td>${escape(r[i] ?? "")}</td>`).join("")}</tr>`).join("")}</tbody></table>` +
+    (body.length > shown.length ? `<div class="dataset-preview-note">Showing 8 of ${body.length.toLocaleString()} data rows.</div>` : `<div class="dataset-preview-note">${body.length.toLocaleString()} data rows shown.</div>`);
+  preview.hidden = false;
+  info.textContent = `${headers.length} columns · ${body.length.toLocaleString()} data rows · live preview`;
+}
+function loadStatisticsCsvFile(file) {
+  if (!file) return;
+  if (!/\.csv$/i.test(file.name) && file.type !== "text/csv" && file.type !== "application/vnd.ms-excel") {
+    alert("Please choose a CSV file.");
+    return;
+  }
+  if (file.size > 60 * 1024 * 1024) {
+    alert("The CSV file exceeds the 60 MB limit.");
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = event => {
+    document.getElementById("csvInput").value = String(event.target.result || "");
+    refreshDatasetPreview();
+  };
+  reader.onerror = () => alert("The CSV file could not be read.");
+  reader.readAsText(file);
+}
+
+/* Event Listeners */
+document.getElementById("methodSearch").addEventListener("input", e => renderCatalog(e.target.value));
+
+document.getElementById("btnResetData").addEventListener("click", () => {
+  document.getElementById("csvInput").value = currentMethod.csv;
+  refreshDatasetPreview();
+});
+
+document.getElementById("fileUpload").addEventListener("change", e => {
+  loadStatisticsCsvFile(e.target.files[0]);
+  e.target.value = "";
+});
+document.getElementById("csvInput").addEventListener("input", refreshDatasetPreview);
+const statisticsDrop = document.getElementById("statisticsDrop");
+statisticsDrop.addEventListener("dragover", e => { e.preventDefault(); statisticsDrop.classList.add("dragover"); });
+statisticsDrop.addEventListener("dragleave", () => statisticsDrop.classList.remove("dragover"));
+statisticsDrop.addEventListener("drop", e => {
+  e.preventDefault();
+  statisticsDrop.classList.remove("dragover");
+  loadStatisticsCsvFile(e.dataTransfer.files[0]);
+});
+statisticsDrop.addEventListener("click", () => document.getElementById("fileUpload").click());
+statisticsDrop.addEventListener("keydown", e => {
+  if (e.key === "Enter" || e.key === " ") { e.preventDefault(); document.getElementById("fileUpload").click(); }
+});
+
+document.getElementById("btnRun").addEventListener("click", async () => {
+  try {
+    const spec = readSpec();
+    updateReplicationCode();
+    const csv = document.getElementById("csvInput").value;
+    const reply = await callWorker({
+      cmd: "run",
+      model: currentMethod.id,
+      csv,
+      spec,
+      packages: []
+    });
+    renderResults(reply.result);
+  } catch (err) {
+    alert("Estimation Error: " + err.message);
+  }
+});
+
+document.getElementById("btnExportCsv").addEventListener("click", () => {
+  if (!lastResult || !lastResult.table) return;
+  const headers = ["Parameter", "Estimate", "Std_Error", "Statistic", "df", "p_value", "CI_Low", "CI_High"];
+  const rows = [headers.join(",")].concat(
+    lastResult.table.map(r => headers.map(h => `"${r[h] ?? ""}"`).join(","))
+  );
+  const blob = new Blob([rows.join("\n")], {type: "text/csv;charset=utf-8;"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `${currentMethod.id}_results.csv`;
+  a.click();
+});
+
+document.getElementById("btnRunOmvp").addEventListener("click", async () => {
+  const outEl = document.getElementById("omvpOutput");
+  const reps = Number(document.getElementById("omvpReps").value);
+  outEl.innerHTML = `<div class="status-bar"><span class="status-dot"></span><span>Running ${reps} Monte Carlo replications &amp; benchmark checks in Pyodide…</span></div>`;
+  try {
+    const reply = await callWorker({
+      cmd: "validate",
+      model: currentMethod.id,
+      n_reps: reps,
+      packages: []
+    });
+    const rep = reply.result;
+    lastOmvpReport = rep;
+    document.getElementById("btnDownloadReport").disabled = false;
+
+    const stageRows = Object.entries(rep.stages).map(([k, v]) => `
+      <tr><td><strong>${escapeHtml(k.replace(/_/g, " "))}</strong></td><td>${escapeHtml(displayValue(v))}</td></tr>
+    `).join("");
+
+    outEl.innerHTML = `
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-label">Protocol</div><div class="kpi-val">OMVP v1.0</div></div>
+        <div class="kpi-card"><div class="kpi-label">MC Completion</div><div class="kpi-val">${rep.stages.Monte_Carlo_Completion_Rate_Pct}%</div></div>
+        <div class="kpi-card"><div class="kpi-label">MC Replications</div><div class="kpi-val">${rep.stages.Stage_3_4_Monte_Carlo_Replications_Completed} / ${rep.stages.Stage_3_4_Monte_Carlo_Replications_Requested}</div></div>
+        <div class="kpi-card"><div class="kpi-label">Validation Runtime</div><div class="kpi-val">${rep.runtime_seconds}s</div></div>
+      </div>
+      <table class="res-table">
+        <thead><tr><th>OMVP Validation Stage / Metric</th><th>Verified Result</th></tr></thead>
+        <tbody>${stageRows}</tbody>
+      </table>
+    `;
+  } catch (err) {
+    outEl.innerHTML = `<div class="status-bar error"><span class="status-dot"></span><span>OMVP Validation Error: ${escapeHtml(err.message)}</span></div>`;
+  }
+});
+
+document.getElementById("btnDownloadReport").addEventListener("click", () => {
+  if (!lastOmvpReport) return;
+  const r = lastOmvpReport;
+  const md = `# Technical Validation Report: ${r.method_name} (\`${r.model_id}\`)
+**Protocol:** ${r.protocol}
+**Platform:** Open Econometric Systems (OES) — Statistics Division
+**Runtime:** ${r.runtime_seconds}s (Pyodide v0.27.2 WebAssembly)
+
+## 1. Methodological Formulation & Assumptions
+- **Category:** ${currentMethod.cat} (${currentMethod.code})
+- **Mathematical Specification:** \`${currentMethod.latex}\`
+- **Assumptions:**
+${currentMethod.assumptions.map(a => `  - ${a}`).join("\n")}
+
+## 2. OES Method Validation Protocol (OMVP) Execution Results
+| Validation Stage / Metric | Verified Output |
+| :--- | :--- |
+${Object.entries(r.stages).map(([k, v]) => `| ${k} | ${v} |`).join("\n")}
+
+## 3. Baseline Reference Benchmark Summary
+\`\`\`json
+${JSON.stringify(r.baseline_summary, null, 2)}
+\`\`\`
+`;
+  const blob = new Blob([md], {type: "text/markdown;charset=utf-8;"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `OMVP_Report_${r.model_id}.md`;
+  a.click();
+});
+
+/* Boot */
+window.addEventListener("DOMContentLoaded", () => {
+  renderCatalog();
+  selectMethod(METHODS[0]);
+  getWorker();
+});
+</script>
+</body>
+</html>
