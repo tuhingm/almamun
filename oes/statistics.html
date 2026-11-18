@@ -35,28 +35,30 @@
 
   <style>
     :root {
-      --navy: #0033A0;
-      --navy-dark: #002270;
-      --navy-soft: #eef3fc;
-      --ink: #0f172a;
-      --muted: #475569;
-      --border: #dbe3f0;
-      --bg: #f8fafc;
+      --navy: #0033a0;
+      --navy-dark: #00205b;
+      --navy-soft: #e3eaf7;
+      --ink: #1b2437;
+      --muted: #55617a;
+      --border: #d5dcea;
+      --bg: #f3f5fa;
       --card: #ffffff;
-      --ok: #0f766e;
-      --ok-bg: #f0fdfa;
-      --warn: #b45309;
-      --err: #b91c1c;
+      --ok: #0f7a4f;
+      --ok-bg: #eaf6ef;
+      --warn: #a05a00;
+      --err: #a12a2a;
+      --sky: #9fd3f0;
+      --sky2: #6ec1e4;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: 'Manrope', 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg);
       color: var(--ink);
-      line-height: 1.6;
+      line-height: 1.7;
     }
-    .wrap { max-width: 1280px; margin: 0 auto; padding: 0 20px; }
+    .wrap { width: min(1160px, calc(100% - 44px)); max-width: none; margin: 0 auto; padding: 0; }
 
     /* Division Sub-Navigation */
     .oes-subnav {
@@ -118,7 +120,7 @@
       margin-bottom: 8px;
     }
     .hero h1 {
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Manrope', sans-serif;
       font-size: clamp(1.65rem, 3vw, 2.35rem);
       font-weight: 800;
       margin: 0 0 10px;
@@ -252,7 +254,7 @@
     }
     .card-title {
       margin: 0;
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Manrope', sans-serif;
       font-size: 1.35rem;
       font-weight: 800;
       color: var(--ink);
@@ -470,6 +472,58 @@
       font-size: 0.86rem;
       color: var(--muted);
     }
+
+    /* OES shared workspace language: consistent with the Econometrics Division */
+    .oes-subnav { border-color: var(--border); }
+    .hero { padding: 34px 0 30px; }
+    .hero-eyebrow { color: #bfdbfe; }
+    .hero h1, .card-title { letter-spacing: -0.025em; }
+    .workspace { gap: 22px; padding: 24px 0 48px; }
+    .sidebar, .card { border-color: var(--border); border-radius: 14px; box-shadow: 0 2px 8px rgba(27,36,55,.045); }
+    .sidebar { top: 18px; }
+    .card { padding: 22px; }
+    .search-box, .field input, .field select, textarea.csv-editor {
+      border-color: var(--border); border-radius: 8px; color: var(--ink);
+    }
+    .search-box:focus, .field input:focus, .field select:focus, textarea.csv-editor:focus {
+      outline: 2px solid rgba(0,51,160,.18); border-color: var(--navy);
+    }
+    .method-btn { border-radius: 8px; }
+    .method-btn:hover { background: #f3f6fc; }
+    .tab-btn { border-radius: 8px; }
+    .btn { border-radius: 8px; }
+    .btn-primary { background: var(--navy); }
+    .btn-primary:hover { background: var(--navy-dark); }
+    .workflow-shell { background: #fff; border-bottom: 1px solid var(--border); }
+    .workflow { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; padding:16px 0; }
+    .workflow-step { min-width:0; padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:#fff; }
+    .workflow-step span { display:inline-grid; place-items:center; width:25px; height:25px; margin-right:7px; border-radius:50%; background:var(--navy-soft); color:var(--navy); font-size:.72rem; font-weight:800; }
+    .workflow-step strong { color:var(--ink); font-size:.88rem; }
+    .workflow-step small { display:block; margin:5px 0 0 33px; color:var(--muted); font-size:.72rem; line-height:1.35; }
+    .dataset-help { margin:7px 0 10px; color:var(--muted); font-size:.82rem; }
+    .dataset-info { margin:8px 0; color:var(--muted); font-size:.82rem; font-weight:600; }
+    .drop-zone { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; min-height:76px; margin-top:10px; padding:14px; border:1.5px dashed #9aaccb; border-radius:10px; background:#f8faff; color:var(--navy); text-align:center; cursor:pointer; transition:background .15s,border-color .15s; }
+    .drop-zone span { color:var(--muted); font-size:.78rem; }
+    .drop-zone.dragover, .drop-zone:focus { outline:none; border-color:var(--navy); background:#edf3ff; }
+    .dataset-preview { max-height:300px; overflow:auto; border:1px solid var(--border); border-radius:9px; }
+    .dataset-preview table { width:100%; border-collapse:collapse; font-size:.8rem; white-space:nowrap; }
+    .dataset-preview th { position:sticky; top:0; z-index:1; padding:8px 10px; background:#eaf0fa; color:var(--ink); text-align:left; border-bottom:1px solid var(--border); }
+    .dataset-preview td { padding:7px 10px; border-bottom:1px solid #e8edf5; font-variant-numeric:tabular-nums; }
+    .dataset-preview tr:nth-child(even) td { background:#fafbfd; }
+    .dataset-preview-note { padding:8px 10px; color:var(--muted); font-size:.76rem; }
+    @media (max-width: 900px) {
+      .workflow { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .workflow-step:last-child { grid-column:1/-1; }
+    }
+    @media (max-width: 560px) {
+      .wrap { width:calc(100% - 28px); }
+      .workflow { grid-template-columns:1fr 1fr; gap:7px; }
+      .workflow-step { padding:9px; }
+      .workflow-step small { font-size:.68rem; }
+      .card { padding:16px; }
+      .hero { padding:28px 0 24px; }
+    }
+
   </style>
 </head>
 <body>
@@ -524,6 +578,16 @@
   </div>
 </section>
 
+<section class="workflow-shell">
+  <div class="wrap workflow" aria-label="Statistics Division workflow">
+    <div class="workflow-step"><span>01</span><strong>Method</strong><small>Select a statistical method</small></div>
+    <div class="workflow-step"><span>02</span><strong>Data</strong><small>Load, edit, and preview CSV</small></div>
+    <div class="workflow-step"><span>03</span><strong>Specification</strong><small>Set variables and options</small></div>
+    <div class="workflow-step"><span>04</span><strong>Estimation</strong><small>Run in the browser</small></div>
+    <div class="workflow-step"><span>05</span><strong>Results</strong><small>Inspect and export outputs</small></div>
+  </div>
+</section>
+
 <main class="wrap workspace">
   <!-- Left Navigation: 7 Categories / 31 Methods -->
   <aside class="sidebar" aria-label="Statistics Division Method Catalog">
@@ -559,7 +623,14 @@
 
         <div class="field">
           <label for="csvInput">Dataset (CSV Format — Built-in Empirical Benchmark Loaded; Paste or Upload Custom CSV)</label>
-          <textarea id="csvInput" class="csv-editor" spellcheck="false"></textarea>
+          <textarea id="csvInput" class="csv-editor" spellcheck="false" aria-describedby="datasetHelp"></textarea>
+          <p id="datasetHelp" class="dataset-help">Edit the CSV directly, upload a file, or drop it below. The preview refreshes as the data changes.</p>
+          <div id="statisticsDatasetInfo" class="dataset-info" aria-live="polite"></div>
+          <div id="statisticsDrop" class="drop-zone" role="button" tabindex="0" aria-label="Drop a CSV file here or press Enter to choose a file">
+            <strong>Drop a CSV file here</strong>
+            <span>or use Upload CSV above · .csv · up to 60 MB</span>
+          </div>
+          <div id="statisticsDatasetPreview" class="table-wrap dataset-preview" hidden></div>
         </div>
 
         <div class="btn-row">
@@ -1267,6 +1338,7 @@ function selectMethod(m) {
 
   // Load Reference Dataset
   document.getElementById("csvInput").value = m.csv;
+  refreshDatasetPreview();
   updateReplicationCode();
   document.getElementById("omvpOutput").innerHTML = "";
   document.getElementById("btnDownloadReport").disabled = true;
@@ -1410,19 +1482,89 @@ document.querySelectorAll(".tab-btn").forEach(btn => {
   });
 });
 
+/* Dataset preview, CSV upload and drag/drop — independent of the estimation worker */
+function parsePreviewCSV(text) {
+  const rows = [];
+  let row = [], cell = "", quoted = false;
+  const src = String(text || "").replace(/^\uFEFF/, "");
+  for (let i = 0; i < src.length; i++) {
+    const ch = src[i];
+    if (quoted) {
+      if (ch === '"' && src[i + 1] === '"') { cell += '"'; i++; }
+      else if (ch === '"') quoted = false;
+      else cell += ch;
+    } else if (ch === '"') quoted = true;
+    else if (ch === ",") { row.push(cell); cell = ""; }
+    else if (ch === "\n") { row.push(cell.replace(/\r$/, "")); if (row.some(v => v.trim() !== "")) rows.push(row); row = []; cell = ""; }
+    else cell += ch;
+  }
+  row.push(cell.replace(/\r$/, ""));
+  if (row.some(v => v.trim() !== "")) rows.push(row);
+  return rows;
+}
+function refreshDatasetPreview() {
+  const input = document.getElementById("csvInput");
+  const preview = document.getElementById("statisticsDatasetPreview");
+  const info = document.getElementById("statisticsDatasetInfo");
+  const rows = parsePreviewCSV(input.value);
+  if (!rows.length) {
+    preview.hidden = true;
+    preview.innerHTML = "";
+    info.textContent = "No dataset loaded.";
+    return;
+  }
+  const headers = rows[0];
+  const body = rows.slice(1);
+  const shown = body.slice(0, 8);
+  const escape = value => escapeHtml(value);
+  preview.innerHTML = `<table aria-label="Dataset preview"><thead><tr>${headers.map(h => `<th>${escape(h)}</th>`).join("")}</tr></thead><tbody>${shown.map(r => `<tr>${headers.map((_, i) => `<td>${escape(r[i] ?? "")}</td>`).join("")}</tr>`).join("")}</tbody></table>` +
+    (body.length > shown.length ? `<div class="dataset-preview-note">Showing 8 of ${body.length.toLocaleString()} data rows.</div>` : `<div class="dataset-preview-note">${body.length.toLocaleString()} data rows shown.</div>`);
+  preview.hidden = false;
+  info.textContent = `${headers.length} columns · ${body.length.toLocaleString()} data rows · live preview`;
+}
+function loadStatisticsCsvFile(file) {
+  if (!file) return;
+  if (!/\.csv$/i.test(file.name) && file.type !== "text/csv" && file.type !== "application/vnd.ms-excel") {
+    alert("Please choose a CSV file.");
+    return;
+  }
+  if (file.size > 60 * 1024 * 1024) {
+    alert("The CSV file exceeds the 60 MB limit.");
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = event => {
+    document.getElementById("csvInput").value = String(event.target.result || "");
+    refreshDatasetPreview();
+  };
+  reader.onerror = () => alert("The CSV file could not be read.");
+  reader.readAsText(file);
+}
+
 /* Event Listeners */
 document.getElementById("methodSearch").addEventListener("input", e => renderCatalog(e.target.value));
 
 document.getElementById("btnResetData").addEventListener("click", () => {
   document.getElementById("csvInput").value = currentMethod.csv;
+  refreshDatasetPreview();
 });
 
 document.getElementById("fileUpload").addEventListener("change", e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => { document.getElementById("csvInput").value = ev.target.result; };
-  reader.readAsText(file);
+  loadStatisticsCsvFile(e.target.files[0]);
+  e.target.value = "";
+});
+document.getElementById("csvInput").addEventListener("input", refreshDatasetPreview);
+const statisticsDrop = document.getElementById("statisticsDrop");
+statisticsDrop.addEventListener("dragover", e => { e.preventDefault(); statisticsDrop.classList.add("dragover"); });
+statisticsDrop.addEventListener("dragleave", () => statisticsDrop.classList.remove("dragover"));
+statisticsDrop.addEventListener("drop", e => {
+  e.preventDefault();
+  statisticsDrop.classList.remove("dragover");
+  loadStatisticsCsvFile(e.dataTransfer.files[0]);
+});
+statisticsDrop.addEventListener("click", () => document.getElementById("fileUpload").click());
+statisticsDrop.addEventListener("keydown", e => {
+  if (e.key === "Enter" || e.key === " ") { e.preventDefault(); document.getElementById("fileUpload").click(); }
 });
 
 document.getElementById("btnRun").addEventListener("click", async () => {
