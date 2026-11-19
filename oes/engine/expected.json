@@ -1404,5 +1404,17 @@
    "label": "Mundlak chi-squared",
    "value": 68.174
   }
+ },
+ "ife": {
+  "nobs": 1380,
+  "table_index": 0,
+  "table": "Interactive fixed effects estimates (2 factors, twoway additive effects), dependent variable: log_sales",
+  "row": "log_price",
+  "row_index": 0,
+  "col": "Coefficient",
+  "col_index": 1,
+  "value": -0.4788,
+  "rtol": 0.001,
+  "seconds": 0.1
  }
 }

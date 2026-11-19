@@ -1140,3 +1140,74 @@ def cre(df, spec):
     ch = [chart("Within and random-effects coefficients", xs, [("Fixed effects", bf[:k]), ("Random effects", br[1: 1 + k])], "", "Coefficient", kind="bar")]
     notes = ["The Mundlak test is robust to heteroskedasticity and serial correlation, unlike the classical Hausman test.", "A rejection means the random-effects estimates of the time-varying coefficients are inconsistent; use the within (CRE) estimates for them."]
     return result("cre", f"Correlated random effects: {y}", len(d), [stat("Observations", len(d)), stat("Units", N), stat("Mundlak chi-squared", Wm, 3), stat("Mundlak p-value", pm, 4)], [cre_t, cmp_t, tests, var_t], ch, notes)
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Interactive fixed effects (Bai 2009): regression with unobserved common factors that load differently on each unit
+# ---------------------------------------------------------------------------------------------------------------
+def _ife_fit(Y, Xs, r, tol=1e-9, maxit=1000):
+    T, N = Y.shape; k = len(Xs)
+    XX = np.column_stack([x.reshape(-1) for x in Xs]); b = np.linalg.lstsq(XX, Y.reshape(-1), rcond=None)[0]; fit = np.zeros_like(Y); F = np.zeros((T, 0)); L = np.zeros((N, 0))
+    for it in range(maxit):
+        E = Y - sum(b[j] * Xs[j] for j in range(k))
+        if r > 0:
+            w, V = np.linalg.eigh(E @ E.T / (N * T)); F = np.sqrt(T) * V[:, ::-1][:, :r]; L = E.T @ F / T; fit = F @ L.T
+        bn = np.linalg.lstsq(XX, (Y - fit).reshape(-1), rcond=None)[0]
+        if np.max(np.abs(bn - b)) < tol:
+            b = bn; break
+        b = bn
+    E = Y - sum(b[j] * Xs[j] for j in range(k)) - fit
+    return b, E, F, L, it + 1
+
+
+def _ife_var(Xs, E, F, L, r):
+    T, N = E.shape; k = len(Xs)
+    MF = np.eye(T) - (F @ np.linalg.solve(F.T @ F, F.T) if r else 0); ML = np.eye(N) - (L @ np.linalg.solve(L.T @ L, L.T) if r else 0)
+    Z = [MF @ x @ ML for x in Xs]; D = np.array([[float((Z[a] * Z[c]).sum()) for c in range(k)] for a in range(k)]) / (N * T)
+    s2 = float((E ** 2).sum()) / (N * T - r * (N + T) + r * r - k)
+    return s2 * np.linalg.inv(D) / (N * T)
+
+
+def _pesaran_cd(E):
+    T, N = E.shape; C = np.corrcoef(E.T); iu = np.triu_indices(N, 1)
+    return float(np.sqrt(2 * T / (N * (N - 1))) * C[iu].sum()), float(np.abs(C[iu]).mean())
+
+
+def ife(df, spec):
+    y = need(spec, "y", "dependent variable"); xs = as_list(need(spec, "x", "regressors")); distinct([y], xs)
+    d, unit, time, N, T = _panel(df, spec, [y] + xs)
+    _balanced(d, N, T, "The interactive fixed effects estimator")
+    r = int_option(spec, "factors", 2, 0, 6, "Number of factors"); eff = _choice(spec, "effects", ["twoway", "unit", "none"], "twoway", "Additive effects")
+    rmax = int_option(spec, "rmax", 5, 1, 8, "Maximum number of factors for the comparison")
+    if min(N, T) <= r + len(xs) + 2 or min(N, T) < 10:
+        raise OESError("The number of units and periods must both be at least 10 and larger than the number of factors plus regressors.")
+    piv = lambda v: d.pivot(index="_ti", columns="_u", values=v).sort_index().to_numpy(float)
+    Y = piv(y); Xs = [piv(v) for v in xs]
+    def dm(A):
+        if eff == "twoway": return A - A.mean(0, keepdims=True) - A.mean(1, keepdims=True) + A.mean()
+        if eff == "unit": return A - A.mean(0, keepdims=True)
+        return A
+    Y = dm(Y); Xs = [dm(a) for a in Xs]
+    names = d.drop_duplicates("_u").sort_values("_u")[unit].astype(str).tolist()
+    res = {}
+    for q in range(0, max(r, rmax) + 1):
+        b, E, F, L, it = _ife_fit(Y, Xs, q); V = _ife_var(Xs, E, F, L, q); res[q] = (b, E, F, L, V, it)
+    b, E, F, L, V, it = res[r]; se = np.sqrt(np.diag(V)); k = len(xs)
+    dfv = N * T - r * (N + T) + r * r - k
+    rows = [[xs[j], f(b[j], 4), f(se[j], 4), f(b[j] / se[j], 2), f(2 * stats.norm.sf(abs(b[j] / se[j])), 4)] for j in range(k)]
+    tabs = [table(f"Interactive fixed effects estimates ({r} factor{'s' if r != 1 else ''}, {eff} additive effects), dependent variable: {y}", ["Variable", "Coefficient", "Std. err.", "z", "p-value"], rows,
+                  "Standard errors are the homoskedastic asymptotic ones of Bai (2009) without bias correction; they are reliable when T and N are both large and the errors are close to independent. Check that the conclusions do not move with the number of factors.")]
+    ic = []
+    for q in range(0, max(r, rmax) + 1):
+        s2 = float((res[q][1] ** 2).sum()) / (N * T); pen = q * (N + T) / (N * T) * np.log(N * T / (N + T)); ic.append((q, s2, np.log(s2) + pen))
+    qbest = min(ic, key=lambda z: z[2])[0]
+    cd0, ac0 = _pesaran_cd(res[0][1]); cdr, acr = _pesaran_cd(E)
+    tabs.append(table("Choosing the number of factors (Bai-Ng IC_p1 on the residuals)", ["Factors", "Residual variance"] + [f"b({v})" for v in xs] + ["IC"],
+                      [[q, f(s2, 5)] + [f(res[q][0][j], 4) for j in range(k)] + [f"{c:.4f}" + (" *" if q == qbest else "")] for q, s2, c in ic], "* minimises the criterion. With no factors the estimator is the fixed-effects (two-way) regression."))
+    tabs.append(table("Cross-section dependence of the residuals (Pesaran CD)", ["Model", "CD statistic", "p-value", "Mean |pairwise correlation|"],
+                      ([["No factors", f(cd0, 2), f(2 * stats.norm.sf(abs(cd0)), 4), f(ac0, 3)]] + ([[f"{r} factor{'s' if r != 1 else ''}", f(cdr, 2), f(2 * stats.norm.sf(abs(cdr)), 4), f(acr, 3)]] if r > 0 else [])),
+                      "H0: errors are cross-sectionally independent. The CD statistic is a signed average and can stay large when the remaining correlations are of mixed sign, so look at the mean absolute correlation too."))
+    ch = [chart("Estimated common factors", [str(t) for t in sorted(d["_ti"].unique())], [(f"Factor {j + 1}", F[:, j]) for j in range(min(r, 3))], "Period", "Factor", kind="line")] if r > 0 else []
+    ch.append(chart("Coefficient by number of factors", list(range(0, max(r, rmax) + 1)), [(v, [res[q][0][j] for q in range(0, max(r, rmax) + 1)]) for j, v in enumerate(xs)], "Number of factors", "Coefficient", kind="line"))
+    notes = ["The factors and loadings are identified only up to rotation; interpret the estimated factors as a space, not as individual series.", "Bai's (2009) bias terms for heteroskedastic or serially correlated errors are not corrected."]
+    return result("ife", f"Interactive fixed effects: {y}", N * T, [stat("Units", N), stat("Periods", T), stat("Factors", r), stat("Iterations", it), stat("IC chooses", qbest)], tabs, ch, notes)
