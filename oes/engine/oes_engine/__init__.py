@@ -571,6 +571,7 @@ def run(model_id, csv_text, spec=None):
     try:
         if m.get("nodata") and not (isinstance(csv_text, str) and csv_text.strip()):
             df = pd.DataFrame({"_": [0]})
+            spec.pop("ops", None)
         else:
             df = read_csv(csv_text) if isinstance(csv_text, str) else csv_text.copy()
             df = prepare(df, spec.pop("ops", None))

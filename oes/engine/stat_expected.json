@@ -1,0 +1,494 @@
+{
+ "stat_anova1": {
+  "nobs": 30,
+  "table_index": 0,
+  "table": "Group descriptives",
+  "row": "ctrl",
+  "row_index": 0,
+  "col": "Mean",
+  "col_index": 2,
+  "value": 5.032,
+  "rtol": 0.001,
+  "seconds": 0.4,
+  "summary": {
+   "label": "F",
+   "value": 4.8461
+  }
+ },
+ "stat_anova2": {
+  "nobs": 60,
+  "table_index": 0,
+  "table": "Two-way ANOVA, type III sums of squares",
+  "row": "supp",
+  "row_index": 0,
+  "col": "Sum of squares",
+  "col_index": 1,
+  "value": 205.35,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Residual std. error",
+   "value": 3.6314
+  }
+ },
+ "stat_rm_anova": {
+  "nobs": 180,
+  "table_index": 0,
+  "table": "Condition descriptives",
+  "row": "0",
+  "row_index": 0,
+  "col": "Mean",
+  "col_index": 2,
+  "value": 256.651806,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "F",
+   "value": 18.7027
+  }
+ },
+ "stat_ancova": {
+  "nobs": 72,
+  "table_index": 0,
+  "table": "ANCOVA, type III sums of squares",
+  "row": "Treat",
+  "row_index": 0,
+  "col": "Sum of squares",
+  "col_index": 1,
+  "value": 766.272813,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Group F",
+   "value": 7.8681
+  }
+ },
+ "stat_manova": {
+  "nobs": 150,
+  "table_index": 0,
+  "table": "Multivariate tests for Species",
+  "row": "Wilks' lambda",
+  "row_index": 0,
+  "col": "Value",
+  "col_index": 1,
+  "value": 0.02344,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Wilks' lambda",
+   "value": 0.0234
+  }
+ },
+ "stat_mancova": {
+  "nobs": 69,
+  "table_index": 0,
+  "table": "Multivariate tests for group (adjusted for the covariates)",
+  "row": "Wilks' lambda",
+  "row_index": 0,
+  "col": "Value",
+  "col_index": 1,
+  "value": 0.62324,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Wilks' lambda (group)",
+   "value": 0.6232
+  }
+ },
+ "stat_mann_whitney": {
+  "nobs": 60,
+  "table_index": 0,
+  "table": "Group descriptives",
+  "row": "VC",
+  "row_index": 0,
+  "col": "Mean",
+  "col_index": 2,
+  "value": 16.963333,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "U",
+   "value": 324.5
+  }
+ },
+ "stat_wilcoxon": {
+  "nobs": 10,
+  "table_index": 0,
+  "table": "Differences",
+  "row": "Median difference",
+  "row_index": 4,
+  "col": "Value",
+  "col_index": 1,
+  "value": -1.3,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "V",
+   "value": 0.0
+  }
+ },
+ "stat_kruskal": {
+  "nobs": 116,
+  "table_index": 0,
+  "table": "Group descriptives",
+  "row": "5",
+  "row_index": 0,
+  "col": "Median",
+  "col_index": 2,
+  "value": 18.0,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "H",
+   "value": 29.2666
+  }
+ },
+ "stat_friedman": {
+  "nobs": 66,
+  "table_index": 0,
+  "table": "Condition descriptives",
+  "row": "round_out",
+  "row_index": 0,
+  "col": "Median",
+  "col_index": 2,
+  "value": 5.5,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Chi-square",
+   "value": 11.1429
+  }
+ },
+ "stat_kendall": {
+  "nobs": 32,
+  "table_index": 0,
+  "table": "Kendall's tau",
+  "row": "Tau-b (adjusted for ties)",
+  "row_index": 0,
+  "col": "Estimate",
+  "col_index": 1,
+  "value": -0.72783,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Tau-b",
+   "value": -0.7278
+  }
+ },
+ "stat_pca": {
+  "nobs": 50,
+  "table_index": 0,
+  "table": "Eigenvalues and variance explained",
+  "row": "PC1",
+  "row_index": 0,
+  "col": "Eigenvalue",
+  "col_index": 1,
+  "value": 2.48024,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "PC1 variance %",
+   "value": 62.006
+  }
+ },
+ "stat_efa": {
+  "nobs": 2617,
+  "table_index": 0,
+  "table": "Factor loadings (varimax rotation)",
+  "row": "N1",
+  "row_index": 0,
+  "col": "Factor 1",
+  "col_index": 1,
+  "value": 0.8288,
+  "rtol": 0.001,
+  "seconds": 0.1,
+  "summary": {
+   "label": "Chi-square",
+   "value": 586.989
+  }
+ },
+ "stat_cfa": {
+  "nobs": 301,
+  "table_index": 0,
+  "table": "Model fit",
+  "row": "Chi-square (N x F_ML)",
+  "row_index": 0,
+  "col": "Statistic",
+  "col_index": 1,
+  "value": 85.3055,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Chi-square",
+   "value": 85.306
+  }
+ },
+ "stat_lda": {
+  "nobs": 150,
+  "table_index": 0,
+  "table": "Discriminant functions",
+  "row": "LD1",
+  "row_index": 0,
+  "col": "Eigenvalue",
+  "col_index": 1,
+  "value": 32.19193,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Resubstitution accuracy",
+   "value": 0.98
+  }
+ },
+ "stat_cca": {
+  "nobs": 20,
+  "table_index": 0,
+  "table": "Canonical correlations and sequential tests",
+  "row": "1",
+  "row_index": 0,
+  "col": "Canonical correlation",
+  "col_index": 1,
+  "value": 0.79561,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "First canonical correlation",
+   "value": 0.7956
+  }
+ },
+ "stat_ca": {
+  "nobs": 5387,
+  "table_index": 0,
+  "table": "Dimensions: singular values and inertia",
+  "row": "1",
+  "row_index": 0,
+  "col": "Singular value (canonical correlation)",
+  "col_index": 1,
+  "value": 0.44637,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Total inertia",
+   "value": 0.23019
+  }
+ },
+ "stat_km": {
+  "nobs": 137,
+  "table_index": 0,
+  "table": "Summary by group",
+  "row": "trt = 1",
+  "row_index": 0,
+  "col": "Median survival",
+  "col_index": 4,
+  "value": 103.0,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Log-rank chi-square",
+   "value": 0.0082
+  }
+ },
+ "stat_cox": {
+  "nobs": 432,
+  "table_index": 0,
+  "table": "Cox proportional hazards coefficients",
+  "row": "fin",
+  "row_index": 0,
+  "col": "coef (log HR)",
+  "col_index": 1,
+  "value": -0.37942,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Concordance (Harrell C)",
+   "value": 0.6438
+  }
+ },
+ "stat_aft": {
+  "nobs": 432,
+  "table_index": 0,
+  "table": "Weibull accelerated failure time model",
+  "row": "(Intercept)",
+  "row_index": 0,
+  "col": "Coefficient (log time)",
+  "col_index": 1,
+  "value": 3.77377,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Log-likelihood",
+   "value": -682.041
+  }
+ },
+ "stat_finegray": {
+  "nobs": 205,
+  "table_index": 0,
+  "table": "Fine-Gray subdistribution hazard model (cause 1)",
+  "row": "age",
+  "row_index": 0,
+  "col": "coef",
+  "col_index": 1,
+  "value": 0.00593,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Score-type LR chi-square",
+   "value": 35.4135
+  }
+ },
+ "stat_parametric": {
+  "nobs": 137,
+  "table_index": 0,
+  "table": "Comparison of parametric survival distributions",
+  "row": "Weibull",
+  "row_index": 0,
+  "col": "Log-likelihood",
+  "col_index": 2,
+  "value": -726.036,
+  "rtol": 0.001,
+  "seconds": 0.0
+ },
+ "stat_lmm": {
+  "nobs": 180,
+  "table_index": 0,
+  "table": "Fixed effects",
+  "row": "(Intercept)",
+  "row_index": 0,
+  "col": "Estimate",
+  "col_index": 1,
+  "value": 251.4051,
+  "rtol": 0.001,
+  "seconds": 0.1,
+  "summary": {
+   "label": "REML criterion",
+   "value": 1743.628
+  }
+ },
+ "stat_glmm": {
+  "nobs": 56,
+  "table_index": 0,
+  "table": "Fixed effects (conditional on the group)",
+  "row": "(Intercept)",
+  "row_index": 0,
+  "col": "Estimate",
+  "col_index": 1,
+  "value": -1.39923,
+  "rtol": 0.001,
+  "seconds": 0.4,
+  "summary": {
+   "label": "Log-likelihood",
+   "value": -91.983
+  }
+ },
+ "stat_gee": {
+  "nobs": 108,
+  "table_index": 0,
+  "table": "GEE coefficients (population-average effects)",
+  "row": "(Intercept)",
+  "row_index": 0,
+  "col": "Estimate",
+  "col_index": 1,
+  "value": 17.70671,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Working correlation",
+   "value": 0.5909
+  }
+ },
+ "stat_icc": {
+  "nobs": 6,
+  "table_index": 0,
+  "table": "Intraclass correlation coefficients (Shrout and Fleiss 1979)",
+  "row": "ICC(1,1)",
+  "row_index": 0,
+  "col": "ICC",
+  "col_index": 2,
+  "value": 0.16574,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "ICC(2,1)",
+   "value": 0.2898
+  }
+ },
+ "stat_bootstrap": {
+  "nobs": 60,
+  "table_index": 0,
+  "table": "Bootstrap estimate of the median",
+  "row": "Observed statistic",
+  "row_index": 0,
+  "col": "Value",
+  "col_index": 1,
+  "value": 19.25,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Estimate",
+   "value": 19.25
+  }
+ },
+ "stat_permutation": {
+  "nobs": 60,
+  "table_index": 0,
+  "table": "Permutation test",
+  "row": "Observed statistic (VC minus OJ)",
+  "row_index": 1,
+  "col": "Value",
+  "col_index": 1,
+  "value": -3.7,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Observed statistic",
+   "value": -3.7
+  }
+ },
+ "stat_power": {
+  "nobs": 64,
+  "table_index": 0,
+  "table": "Power analysis",
+  "row": "Achieved power",
+  "row_index": 5,
+  "col": "Value",
+  "col_index": 1,
+  "value": 0.80146,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Achieved power",
+   "value": 0.8015
+  }
+ },
+ "stat_meta_fixed": {
+  "nobs": 13,
+  "table_index": 0,
+  "table": "Pooled effect",
+  "row": "Fixed-effect (common effect)",
+  "row_index": 0,
+  "col": "Estimate",
+  "col_index": 1,
+  "value": -0.43029,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Pooled effect",
+   "value": -0.4303
+  }
+ },
+ "stat_meta_random": {
+  "nobs": 13,
+  "table_index": 0,
+  "table": "Pooled effect",
+  "row": "Random-effects (REML, Hartung-Knapp-Sidik-Jonkman)",
+  "row_index": 0,
+  "col": "Estimate",
+  "col_index": 1,
+  "value": -0.71453,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Pooled effect",
+   "value": -0.7145
+  }
+ }
+}

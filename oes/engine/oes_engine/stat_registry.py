@@ -145,7 +145,7 @@ def build(col, cols, num, sel):
                 num("effect", "Effect size (d, f, r, h or w, depending on the test)", 0.5), num("n", "Sample size (per group, or total for chi-square)", 30), num("power", "Target power", 0.8), ALPHA, ALT,
                 num("k", "Number of groups (ANOVA)", 3), num("df", "Degrees of freedom (chi-square)", 2), num("ratio", "Allocation ratio, second group / first", 1),
                 num("p1", "Proportion in group 1 (two proportions; replaces the effect size)", ""), num("p2", "Proportion in group 2", "")],
-        example=dict(file=None, spec=dict(test="t_two", solve_for="n", effect=0.5, power=0.8, alpha=0.05)))
+        example=dict(file=None, spec=dict(test="t_two", solve_for="n", effect=0.5, power=0.8, alpha=0.05)), check=dict(table=0, row=-1, col=1))
     META_IN = sel("input", "Type of study data", [["binary", "Event counts in two groups"], ["means", "Means and SDs in two groups"], ["generic", "Effect size with standard error or variance"]], "generic")
     META_FIELDS = [META_IN, col("study", "Study label", required=False),
                    col("yi", "Effect size (generic input)", required=False), col("sei", "Standard error (generic input)", required=False), col("vi", "Variance (generic input, if no standard error)", required=False),
