@@ -20,6 +20,9 @@ Branch `reporting-layer`. Phase 1 is done; phases 2 to 5 have not been started.
 - One-way ANOVA (A1): 4 steps, 8 figures, 7 tables.
 - Tests: 28 in `stat-validation/tests/test_reporting.py`; full suite 205 passed. Headless Chrome ran `report-ui.js` on a real OLS report (render, CRC32 check value, PNG with pHYs chunk, ZIP).
 
+## Dedicated reports so far
+OLS, one-way ANOVA, VAR (9 steps, 10 figures). All other models: generic report (summary, tables, tests, charts, coefficient plots).
+
 ## Not done
 - Phases 2 to 5 (the other 98 models): not started. They still show only the old output.
 - Progressive display of steps for slow models: not implemented.

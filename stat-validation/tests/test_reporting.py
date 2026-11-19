@@ -523,7 +523,7 @@ def test_generic_reports(mid, ex):
     assert {k: v for k, v in with_rep.items() if k != "report"} == without
     rp = with_rep["report"]
     assert rp["steps"] and rp["methods"] and rp["limitations"]
-    if mid not in ("ols", "stat_anova1"):
+    if mid not in oes_engine.REPORTERS:
         # every engine table cell appears in the report table of the same title (first MAX_ROWS rows), unchanged
         shown = {t["title"]: t for s in rp["steps"] for t in s["tables"]}
         for t in without["tables"]:

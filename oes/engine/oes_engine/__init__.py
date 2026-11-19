@@ -595,7 +595,7 @@ def run(model_id, csv_text, spec=None):
         return {"error": f"The estimation failed: {type(e).__name__}: {e}"}
 
 
-REPORTERS = {"ols": ("rep_ols", "build"), "stat_anova1": ("rep_anova1", "build")}
+REPORTERS = {"ols": ("rep_ols", "build"), "stat_anova1": ("rep_anova1", "build"), "var": ("rep_var", "build")}
 
 
 def _attach_report(out, model_id, df, spec):
