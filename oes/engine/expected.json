@@ -1108,5 +1108,21 @@
    "label": "Log-likelihood",
    "value": -2139.2327
   }
+ },
+ "glm": {
+  "nobs": 1534,
+  "table_index": 0,
+  "table": "Coefficient estimates",
+  "row": "mrate",
+  "row_index": 1,
+  "col": "Coef.",
+  "col_index": 1,
+  "value": 0.916716,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Log-likelihood",
+   "value": -423.7189
+  }
  }
 }

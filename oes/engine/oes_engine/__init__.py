@@ -464,6 +464,13 @@ MODELS += [
                  sel("model", "Model", [["zip", "Zero-inflated Poisson"], ["zinb", "Zero-inflated negative binomial"], ["hurdle_poisson", "Poisson hurdle"], ["hurdle_nb", "Negative-binomial hurdle"]], "zinb")],
          example=dict(file=ME + "arrests.csv", spec=dict(y="narr86", x=["pcnv", "ptime86", "qemp86", "black", "hispan"], z=["pcnv", "ptime86", "qemp86", "black", "hispan"], model="zinb")),
          check=dict(table=0, row=1, col=1)),
+    dict(id="glm", group="Microeconometrics", name="Generalized linear model (fractional, gamma, quasi-likelihood)", guide="microeconometrics-guide/glm-fractional.html", fn=micro.glm,
+         fields=[col("y", "Outcome"), cols("x", "Explanatory variables"),
+                 sel("family", "Family", [["binomial", "Binomial (fractional response 0-1)"], ["gamma", "Gamma (positive, skewed)"], ["inverse_gaussian", "Inverse Gaussian"], ["poisson", "Poisson (quasi)"], ["gaussian", "Gaussian"]], "binomial"),
+                 sel("link", "Link function", [["default", "Default for the family"], ["logit", "Logit"], ["probit", "Probit"], ["cloglog", "Complementary log-log"], ["log", "Log"], ["identity", "Identity"], ["inverse", "Inverse"], ["inverse_squared", "Inverse squared"]], "default"),
+                 sel("cov", "Standard errors", [["robust", "Robust (sandwich)"], ["model", "Model-based"]], "robust")],
+         example=dict(file=ME + "pension_participation.csv", spec=dict(y="prate", x=["mrate", "ltotemp", "age", "sole"], family="binomial", link="logit")),
+         check=dict(table=0, row=1, col=1)),
 ]
 
 CE = "oes/examples/"
