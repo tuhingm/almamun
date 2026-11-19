@@ -20,3 +20,11 @@ Each reported step names the automated test that checks it against an independen
 | var | ADF p-value | statsmodels MacKinnon approximation | none independent | NOT VALIDATED (statistic is validated) |
 | var | IRF 95% bands | statsmodels asymptotic standard errors | none independent | NOT VALIDATED, stated in the report |
 | other 97 models | summary, result tables, charts, coefficient plots | engine output reproduced unchanged | test_generic_reports | formatting validated; no new statistic; no dedicated steps yet |
+
+## PCA (stat_pca) dedicated report
+5 steps (data, suitability, eigenvalues, loadings, scores), 10 figures. Tests: `stat-validation/tests/test_reporting_pca.py` (8).
+- Eigenvalues, variance ratios: numpy `eigvalsh` and sklearn `PCA` — validated.
+- Loadings, weights, scores: sklearn (up to sign) — validated.
+- Bartlett statistic and p-value, KMO: from definitions with numpy/scipy — validated.
+- Broken-stick: from its definition — validated.
+- Parallel analysis (Monte-Carlo, seeded): **NOT VALIDATED** (no reference implementation); marked in the report.

@@ -40,3 +40,8 @@ Pyodide could not be loaded here. Tested only with headless Chrome and pre-gener
 
 ## Flag
 The page footer and the Python snippet still link to a GitHub repository. This predates my work and I have not changed it; your rule says not to link to GitHub from the website.
+
+## Update
+- Dedicated reports: OLS, ANOVA (one-way), VAR, PCA. All other models use the generic report (engine's own numbers, no new statistic).
+- Fixes since PR #62: single table/figure button handler; in-page test-suite report check (PR #63).
+- Still to do: dedicated reports for the other 96 models; dataset provenance/licence record; decision on Methods/limitations text; GitHub links in footer and Python snippet (pre-existing, flagged).
