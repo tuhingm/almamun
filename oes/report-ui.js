@@ -210,7 +210,7 @@
           } finally { b.disabled = false; msg(""); }
           return;
         }
-        const host = b.closest("[data-t],[data-f],[data-p],[data-m],[data-l],.acts");
+        const host = b.closest("[data-t],[data-f],[data-p],[data-m],[data-l]");
         if (a === "refs") return flash(b, await copyText(rep.references.join("\n\n")));
         if (a === "mtxt") return flash(b, await copyText(rep.methods[+host.dataset.m]));
         if (a === "ltxt") return flash(b, await copyText(rep.limitations[+host.dataset.l]));
