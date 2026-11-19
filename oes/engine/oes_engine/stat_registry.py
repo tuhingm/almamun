@@ -1,7 +1,7 @@
 """Registry of the Statistics Division: 31 methods in seven categories, with their input fields and the example each one is
 tested on. __init__.py calls build() with the field helpers, so the models are registered like every other OES model.
 Each entry carries the category (group), a code (A1 ... G2), the guide page and a documented public example dataset."""
-from . import stat_anova, stat_nonparam
+from . import stat_anova, stat_multivariate, stat_nonparam
 
 SX = "stat-guide/examples/"
 G_ANOVA = "Analysis of variance"
@@ -64,4 +64,26 @@ def build(col, cols, num, sel):
     add(id="stat_kendall", code="B5", group=G_NONPAR, name="Kendall's tau correlation", guide="stat-guide/kendall-tau.html", fn=stat_nonparam.kendall,
         fields=[col("x", "First variable"), col("y", "Second variable"), ALT, EXACT, ALPHA],
         example=dict(file=SX + "mtcars.csv", spec=dict(x="wt", y="mpg")))
+    add(id="stat_pca", code="C1", group=G_MULTI, name="Principal component analysis (PCA)", guide="stat-guide/pca.html", fn=stat_multivariate.pca,
+        fields=[cols("vars", "Variables"), sel("basis", "Analyse the", [["correlation", "Correlation matrix (standardised variables)"], ["covariance", "Covariance matrix"]], "correlation"),
+                num("n_components", "Components to report (blank = parallel analysis)", ""), num("seed", "Random seed (parallel analysis)", 0)],
+        example=dict(file=SX + "usarrests.csv", spec=dict(vars=["Murder", "Assault", "UrbanPop", "Rape"])))
+    add(id="stat_efa", code="C2", group=G_MULTI, name="Exploratory factor analysis (EFA)", guide="stat-guide/efa.html", fn=stat_multivariate.efa,
+        fields=[cols("vars", "Variables (at least three)"), num("n_factors", "Number of factors", 2),
+                sel("rotation", "Rotation", [["varimax", "Varimax (orthogonal)"], ["promax", "Promax (oblique)"], ["oblimin", "Oblimin (oblique)"], ["none", "None"]], "varimax"), num("seed", "Random seed (parallel analysis)", 0)],
+        example=dict(file=SX + "bfi_items.csv", spec=dict(vars=["N1", "N2", "N3", "N4", "N5", "E1", "E2", "E3", "E4", "E5"], n_factors=2, rotation="varimax")))
+    add(id="stat_cfa", code="C3", group=G_MULTI, name="Confirmatory factor analysis (CFA)", guide="stat-guide/cfa.html", fn=stat_multivariate.cfa,
+        fields=[dict(key="model", label="Measurement model (one factor per line: factor =~ item1 + item2 + item3)", type="text", required=True, default="visual =~ x1 + x2 + x3\ntextual =~ x4 + x5 + x6\nspeed =~ x7 + x8 + x9", help=""),
+                sel("identification", "Scale of each factor", [["marker", "First loading fixed to 1"], ["std", "Factor variance fixed to 1"]], "marker"),
+                sel("correlated", "Factor correlations", [["yes", "Free"], ["no", "Fixed at zero"]], "yes"), ALPHA],
+        example=dict(file=SX + "holzinger_swineford.csv", spec=dict(model="visual =~ x1 + x2 + x3\ntextual =~ x4 + x5 + x6\nspeed =~ x7 + x8 + x9")))
+    add(id="stat_lda", code="C4", group=G_MULTI, name="Linear discriminant analysis (LDA)", guide="stat-guide/lda.html", fn=stat_multivariate.lda,
+        fields=[cols("vars", "Predictors"), col("group", "Class variable"), sel("priors", "Prior class probabilities", [["proportional", "Class proportions"], ["equal", "Equal"]], "proportional")],
+        example=dict(file=SX + "iris.csv", spec=dict(vars=["Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width"], group="Species")))
+    add(id="stat_cca", code="C5", group=G_MULTI, name="Canonical correlation analysis (CCA)", guide="stat-guide/cca.html", fn=stat_multivariate.cca,
+        fields=[cols("x_vars", "First variable set"), cols("y_vars", "Second variable set"), num("perms", "Permutations for the permutation test (0 = skip)", 999), num("seed", "Random seed", 0)],
+        example=dict(file=SX + "linnerud.csv", spec=dict(x_vars=["Chins", "Situps", "Jumps"], y_vars=["Weight", "Waist", "Pulse"], perms=499)))
+    add(id="stat_ca", code="C6", group=G_MULTI, name="Correspondence analysis (CA)", guide="stat-guide/correspondence-analysis.html", fn=stat_multivariate.ca,
+        fields=[col("row_var", "Row variable (a category, or the row label of a count table)"), col("col_var", "Column variable (one row per case; leave blank for a count table)", required=False), cols("counts", "Count columns (for a table that is already cross-tabulated)", required=False)],
+        example=dict(file=SX + "caith.csv", spec=dict(row_var="eye", counts=["fair", "red", "medium", "dark", "black"])))
     return M
