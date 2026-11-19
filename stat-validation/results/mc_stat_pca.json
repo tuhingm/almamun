@@ -1,0 +1,107 @@
+{
+ "model": "stat_pca",
+ "scenarios": [
+  {
+   "scenario": "First eigenvalue, equicorrelation 0.5, p=6 (truth 1+5*0.5=3.5)",
+   "model": "stat_pca",
+   "note": "",
+   "h0_true": null,
+   "results": [
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 570,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.01375,
+     "failure_reasons": {},
+     "reps_valid": 570,
+     "truth": 3.5,
+     "mean_est": 3.4937869999999998,
+     "bias": -0.006213000000000246,
+     "emp_sd": 0.3351910752981432,
+     "rmse": 0.3349545457256562,
+     "mae": 0.26722773684210527,
+     "mc_se_bias": 0.014039609191312325
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 485,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.01614,
+     "failure_reasons": {},
+     "reps_valid": 485,
+     "truth": 3.5,
+     "mean_est": 3.507959257731959,
+     "bias": 0.007959257731958935,
+     "emp_sd": 0.22849630927690476,
+     "rmse": 0.2283993487090575,
+     "mae": 0.1829355051546392,
+     "mc_se_bias": 0.010375482932808667
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 390,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.02015,
+     "failure_reasons": {},
+     "reps_valid": 390,
+     "truth": 3.5,
+     "mean_est": 3.5009438717948713,
+     "bias": 0.0009438717948713204,
+     "emp_sd": 0.1438260311188038,
+     "rmse": 0.14364462148757148,
+     "mae": 0.1155264358974359,
+     "mc_se_bias": 0.007282914186270655
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 290,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.0272,
+     "failure_reasons": {},
+     "reps_valid": 290,
+     "truth": 3.5,
+     "mean_est": 3.503197931034483,
+     "bias": 0.0031979310344829592,
+     "emp_sd": 0.09924143537185719,
+     "rmse": 0.099121781979334,
+     "mae": 0.07980386206896553,
+     "mc_se_bias": 0.005827657746401623
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 209,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.03794,
+     "failure_reasons": {},
+     "reps_valid": 209,
+     "truth": 3.5,
+     "mean_est": 3.497653779904306,
+     "bias": -0.0023462200956938517,
+     "emp_sd": 0.07037730918174454,
+     "rmse": 0.07024793232666887,
+     "mae": 0.053804210526315795,
+     "mc_se_bias": 0.004868100268898739
+    }
+   ]
+  }
+ ],
+ "env": {
+  "python": "3.13.18",
+  "numpy": "2.5.3",
+  "scipy": "1.18.1",
+  "pandas": "2.3.3",
+  "engine": "1.5.0"
+ },
+ "wall_seconds": 40.1,
+ "budget_seconds_per_cell": 8.0
+}

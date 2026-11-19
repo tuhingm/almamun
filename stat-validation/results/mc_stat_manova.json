@@ -1,0 +1,248 @@
+{
+ "model": "stat_manova",
+ "scenarios": [
+  {
+   "scenario": "H0, normal",
+   "model": "stat_manova",
+   "note": "",
+   "h0_true": true,
+   "results": [
+    {
+     "n": 60,
+     "reps_requested": 2000,
+     "reps_run": 769,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00975,
+     "failure_reasons": {},
+     "reps_valid": 769,
+     "reject_p_wilks": 0.036410923276983094,
+     "mc_se_reject_p_wilks": 0.006754584046980635,
+     "reject_p_pillai": 0.036410923276983094,
+     "mc_se_reject_p_pillai": 0.006754584046980635
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 620,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.01224,
+     "failure_reasons": {},
+     "reps_valid": 620,
+     "reject_p_wilks": 0.043548387096774194,
+     "mc_se_reject_p_wilks": 0.008196372631806422,
+     "reject_p_pillai": 0.043548387096774194,
+     "mc_se_reject_p_pillai": 0.008196372631806422
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 297,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.02612,
+     "failure_reasons": {},
+     "reps_valid": 297,
+     "reject_p_wilks": 0.030303030303030304,
+     "mc_se_reject_p_wilks": 0.009946787149845069,
+     "reject_p_pillai": 0.026936026936026935,
+     "mc_se_reject_p_pillai": 0.009394187863742565
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 127,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.06226,
+     "failure_reasons": {},
+     "reps_valid": 127,
+     "reject_p_wilks": 0.05511811023622047,
+     "mc_se_reject_p_wilks": 0.020250421238003937,
+     "reject_p_pillai": 0.05511811023622047,
+     "mc_se_reject_p_pillai": 0.020250421238003937
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 100,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.16826,
+     "failure_reasons": {},
+     "reps_valid": 100,
+     "reject_p_wilks": 0.06,
+     "mc_se_reject_p_wilks": 0.023748684174075833,
+     "reject_p_pillai": 0.06,
+     "mc_se_reject_p_pillai": 0.023748684174075833
+    }
+   ]
+  },
+  {
+   "scenario": "H0, t(3) errors (robustness)",
+   "model": "stat_manova",
+   "note": "",
+   "h0_true": true,
+   "results": [
+    {
+     "n": 60,
+     "reps_requested": 2000,
+     "reps_run": 772,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00971,
+     "failure_reasons": {},
+     "reps_valid": 772,
+     "reject_p_wilks": 0.038860103626943004,
+     "mc_se_reject_p_wilks": 0.006955632523306756,
+     "reject_p_pillai": 0.03756476683937824,
+     "mc_se_reject_p_pillai": 0.006843329562208488
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 603,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.01256,
+     "failure_reasons": {},
+     "reps_valid": 603,
+     "reject_p_wilks": 0.05804311774461028,
+     "mc_se_reject_p_wilks": 0.009522088680934874,
+     "reject_p_pillai": 0.05472636815920398,
+     "mc_se_reject_p_pillai": 0.009262291173888668
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 300,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.02587,
+     "failure_reasons": {},
+     "reps_valid": 300,
+     "reject_p_wilks": 0.023333333333333334,
+     "mc_se_reject_p_wilks": 0.008715673408461504,
+     "reject_p_pillai": 0.023333333333333334,
+     "mc_se_reject_p_pillai": 0.008715673408461504
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 136,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.05811,
+     "failure_reasons": {},
+     "reps_valid": 136,
+     "reject_p_wilks": 0.058823529411764705,
+     "mc_se_reject_p_wilks": 0.020176304134412803,
+     "reject_p_pillai": 0.058823529411764705,
+     "mc_se_reject_p_pillai": 0.020176304134412803
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 100,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.16698,
+     "failure_reasons": {},
+     "reps_valid": 100,
+     "reject_p_wilks": 0.04,
+     "mc_se_reject_p_wilks": 0.019595917942265423,
+     "reject_p_pillai": 0.03,
+     "mc_se_reject_p_pillai": 0.01705872210923198
+    }
+   ]
+  },
+  {
+   "scenario": "Power, delta=0.5",
+   "model": "stat_manova",
+   "note": "",
+   "h0_true": false,
+   "results": [
+    {
+     "n": 60,
+     "reps_requested": 2000,
+     "reps_run": 770,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00974,
+     "failure_reasons": {},
+     "reps_valid": 770,
+     "reject_p_wilks": 0.21948051948051947,
+     "mc_se_reject_p_wilks": 0.014915729562291934,
+     "reject_p_pillai": 0.21688311688311687,
+     "mc_se_reject_p_pillai": 0.014851858534893705
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 551,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.01375,
+     "failure_reasons": {},
+     "reps_valid": 551,
+     "reject_p_wilks": 0.3793103448275862,
+     "mc_se_reject_p_wilks": 0.020670872004517796,
+     "reject_p_pillai": 0.3720508166969147,
+     "mc_se_reject_p_pillai": 0.020591480913050204
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 286,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.02718,
+     "failure_reasons": {},
+     "reps_valid": 286,
+     "reject_p_wilks": 0.8356643356643356,
+     "mc_se_reject_p_wilks": 0.02191284817761752,
+     "reject_p_pillai": 0.8356643356643356,
+     "mc_se_reject_p_pillai": 0.02191284817761752
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 128,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.06221,
+     "failure_reasons": {},
+     "reps_valid": 128,
+     "reject_p_wilks": 1.0,
+     "mc_se_reject_p_wilks": 0.0,
+     "reject_p_pillai": 1.0,
+     "mc_se_reject_p_pillai": 0.0
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 100,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.16871,
+     "failure_reasons": {},
+     "reps_valid": 100,
+     "reject_p_wilks": 1.0,
+     "mc_se_reject_p_wilks": 0.0,
+     "reject_p_pillai": 1.0,
+     "mc_se_reject_p_pillai": 0.0
+    }
+   ]
+  }
+ ],
+ "env": {
+  "python": "3.13.18",
+  "numpy": "2.5.3",
+  "scipy": "1.18.1",
+  "pandas": "2.3.3",
+  "engine": "1.5.0"
+ },
+ "wall_seconds": 146.9,
+ "budget_seconds_per_cell": 8.0
+}

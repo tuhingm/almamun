@@ -1,0 +1,174 @@
+{
+ "model": "stat_power",
+ "power_vs_simulation": [
+  {
+   "test": "t_two",
+   "n": 20,
+   "engine_power": 0.3379,
+   "empirical_power": 0.3373,
+   "diff": 0.0005999999999999894,
+   "mc_se": 0.0033431176317922167
+  },
+  {
+   "test": "t_two",
+   "n": 50,
+   "engine_power": 0.6969,
+   "empirical_power": 0.6924,
+   "diff": 0.0044999999999999485,
+   "mc_se": 0.003263297718566297
+  },
+  {
+   "test": "t_two",
+   "n": 100,
+   "engine_power": 0.9404,
+   "empirical_power": 0.93955,
+   "diff": 0.0008500000000000174,
+   "mc_se": 0.0016851676103580913
+  },
+  {
+   "test": "t_two",
+   "n": 250,
+   "engine_power": 0.9999,
+   "empirical_power": 0.9997,
+   "diff": 0.00019999999999997797,
+   "mc_se": 0.0001224561145880366
+  },
+  {
+   "test": "t_one",
+   "n": 20,
+   "engine_power": 0.397,
+   "empirical_power": 0.4,
+   "diff": -0.0030000000000000027,
+   "mc_se": 0.0034641016151377548
+  },
+  {
+   "test": "t_one",
+   "n": 50,
+   "engine_power": 0.7918,
+   "empirical_power": 0.7933,
+   "diff": -0.0015000000000000568,
+   "mc_se": 0.0028633469052840943
+  },
+  {
+   "test": "t_one",
+   "n": 100,
+   "engine_power": 0.9773,
+   "empirical_power": 0.97525,
+   "diff": 0.0020499999999999963,
+   "mc_se": 0.0010985772048427013
+  },
+  {
+   "test": "t_one",
+   "n": 250,
+   "engine_power": 1.0,
+   "empirical_power": 1.0,
+   "diff": 0.0,
+   "mc_se": 0.0
+  },
+  {
+   "test": "corr",
+   "n": 20,
+   "engine_power": 0.2559,
+   "empirical_power": 0.2496,
+   "diff": 0.006300000000000028,
+   "mc_se": 0.0030602274425277605
+  },
+  {
+   "test": "corr",
+   "n": 50,
+   "engine_power": 0.5716,
+   "empirical_power": 0.57345,
+   "diff": -0.0018500000000000183,
+   "mc_se": 0.003497178130293051
+  },
+  {
+   "test": "corr",
+   "n": 100,
+   "engine_power": 0.8648,
+   "empirical_power": 0.86535,
+   "diff": -0.0005499999999999394,
+   "mc_se": 0.00241370438848671
+  },
+  {
+   "test": "corr",
+   "n": 250,
+   "engine_power": 0.9982,
+   "empirical_power": 0.99855,
+   "diff": -0.0003500000000000725,
+   "mc_se": 0.00026906295731668
+  },
+  {
+   "test": "anova",
+   "n": 20,
+   "engine_power": 0.3744,
+   "empirical_power": 0.37635,
+   "diff": -0.0019500000000000073,
+   "mc_se": 0.0034257165491324588
+  },
+  {
+   "test": "anova",
+   "n": 50,
+   "engine_power": 0.7796,
+   "empirical_power": 0.77715,
+   "diff": 0.002449999999999952,
+   "mc_se": 0.0029426848072805893
+  },
+  {
+   "test": "anova",
+   "n": 100,
+   "engine_power": 0.9781,
+   "empirical_power": 0.97995,
+   "diff": -0.0018500000000000183,
+   "mc_se": 0.0009911608724117395
+  },
+  {
+   "test": "anova",
+   "n": 250,
+   "engine_power": 1.0,
+   "empirical_power": 1.0,
+   "diff": 0.0,
+   "mc_se": 0.0
+  },
+  {
+   "test": "prop",
+   "n": 20,
+   "engine_power": 0.2556,
+   "empirical_power": 0.27615,
+   "diff": -0.020550000000000013,
+   "mc_se": 0.0031614172257074832
+  },
+  {
+   "test": "prop",
+   "n": 50,
+   "engine_power": 0.5389,
+   "empirical_power": 0.5508,
+   "diff": -0.01189999999999991,
+   "mc_se": 0.003517238689654144
+  },
+  {
+   "test": "prop",
+   "n": 100,
+   "engine_power": 0.8289,
+   "empirical_power": 0.8281,
+   "diff": 0.0008000000000000229,
+   "mc_se": 0.002667867968996967
+  },
+  {
+   "test": "prop",
+   "n": 250,
+   "engine_power": 0.9959,
+   "empirical_power": 0.9958,
+   "diff": 9.999999999998899e-05,
+   "mc_se": 0.00045729421601415325
+  }
+ ],
+ "env": {
+  "python": "3.13.18",
+  "numpy": "2.5.3",
+  "scipy": "1.18.1",
+  "pandas": "2.3.3",
+  "engine": "1.5.0"
+ },
+ "wall_seconds": 1.8,
+ "budget_seconds_per_cell": 25.0
+}

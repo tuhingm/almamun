@@ -1,0 +1,107 @@
+{
+ "model": "stat_lda",
+ "scenarios": [
+  {
+   "scenario": "CV accuracy vs Bayes accuracy Phi(1)=0.8413 (delta=2, equal priors)",
+   "model": "stat_lda",
+   "note": "",
+   "h0_true": null,
+   "results": [
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 1098,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.0068,
+     "failure_reasons": {},
+     "reps_valid": 1098,
+     "truth": 0.8413447460685429,
+     "mean_est": 0.8305100182149363,
+     "bias": -0.010834727853606618,
+     "emp_sd": 0.05385346258892218,
+     "rmse": 0.054908518617172934,
+     "mae": 0.04316592578974111,
+     "mc_se_bias": 0.001625221137486977
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 669,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.01138,
+     "failure_reasons": {},
+     "reps_valid": 669,
+     "truth": 0.8413447460685429,
+     "mean_est": 0.8386696562032884,
+     "bias": -0.002675089865254554,
+     "emp_sd": 0.03604131017254343,
+     "rmse": 0.0361135774539301,
+     "mae": 0.028468575442251943,
+     "mc_se_bias": 0.0013934375549917583
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 298,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.02623,
+     "failure_reasons": {},
+     "reps_valid": 298,
+     "truth": 0.8413447460685429,
+     "mean_est": 0.8365234899328859,
+     "bias": -0.004821256135656982,
+     "emp_sd": 0.02444249318914183,
+     "rmse": 0.024873181682333174,
+     "mae": 0.019523474067031848,
+     "mc_se_bias": 0.0014159156134815455
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 126,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.06332,
+     "failure_reasons": {},
+     "reps_valid": 126,
+     "truth": 0.8413447460685429,
+     "mean_est": 0.8402063492063492,
+     "bias": -0.0011383968621937468,
+     "emp_sd": 0.016476561515227615,
+     "rmse": 0.016450484697599986,
+     "mae": 0.013689642233102067,
+     "mc_se_bias": 0.0014678487643353963
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 100,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.1892,
+     "failure_reasons": {},
+     "reps_valid": 100,
+     "truth": 0.8413447460685429,
+     "mean_est": 0.8399299999999998,
+     "bias": -0.0014147460685430824,
+     "emp_sd": 0.01194453088998552,
+     "rmse": 0.011968567434678966,
+     "mae": 0.00907136952822516,
+     "mc_se_bias": 0.0011944530889985519
+    }
+   ]
+  }
+ ],
+ "env": {
+  "python": "3.13.18",
+  "numpy": "2.5.3",
+  "scipy": "1.18.1",
+  "pandas": "2.3.3",
+  "engine": "1.5.0"
+ },
+ "wall_seconds": 51.1,
+ "budget_seconds_per_cell": 8.0
+}

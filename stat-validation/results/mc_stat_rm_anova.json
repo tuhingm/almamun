@@ -1,0 +1,248 @@
+{
+ "model": "stat_rm_anova",
+ "scenarios": [
+  {
+   "scenario": "H0, compound symmetry",
+   "model": "stat_rm_anova",
+   "note": "",
+   "h0_true": true,
+   "results": [
+    {
+     "n": 20,
+     "reps_requested": 2000,
+     "reps_run": 1184,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.0123,
+     "failure_reasons": {},
+     "reps_valid": 1184,
+     "reject_p": 0.05320945945945946,
+     "mc_se_reject_p": 0.006522972197298772,
+     "reject_p_uncorr": 0.05320945945945946,
+     "mc_se_reject_p_uncorr": 0.006522972197298772
+    },
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 1112,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.0131,
+     "failure_reasons": {},
+     "reps_valid": 1112,
+     "reject_p": 0.044964028776978415,
+     "mc_se_reject_p": 0.006214269441218241,
+     "reject_p_uncorr": 0.044964028776978415,
+     "mc_se_reject_p_uncorr": 0.006214269441218241
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 1058,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.01378,
+     "failure_reasons": {},
+     "reps_valid": 1058,
+     "reject_p": 0.04253308128544423,
+     "mc_se_reject_p": 0.006204152695037132,
+     "reject_p_uncorr": 0.043478260869565216,
+     "mc_se_reject_p_uncorr": 0.006269612080066918
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 878,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.01662,
+     "failure_reasons": {},
+     "reps_valid": 878,
+     "reject_p": 0.06036446469248292,
+     "mc_se_reject_p": 0.008037539776955524,
+     "reject_p_uncorr": 0.06036446469248292,
+     "mc_se_reject_p_uncorr": 0.008037539776955524
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 890,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.0164,
+     "failure_reasons": {},
+     "reps_valid": 890,
+     "reject_p": 0.06629213483146068,
+     "mc_se_reject_p": 0.008339528702426378,
+     "reject_p_uncorr": 0.06629213483146068,
+     "mc_se_reject_p_uncorr": 0.008339528702426378
+    }
+   ]
+  },
+  {
+   "scenario": "H0, non-spherical AR(1) 0.85 (robustness)",
+   "model": "stat_rm_anova",
+   "note": "",
+   "h0_true": true,
+   "results": [
+    {
+     "n": 20,
+     "reps_requested": 2000,
+     "reps_run": 1186,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.0122,
+     "failure_reasons": {},
+     "reps_valid": 1186,
+     "reject_p": 0.05227655986509275,
+     "mc_se_reject_p": 0.006463265060266482,
+     "reject_p_uncorr": 0.06745362563237774,
+     "mc_se_reject_p_uncorr": 0.007282752038375745
+    },
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 1121,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.01291,
+     "failure_reasons": {},
+     "reps_valid": 1121,
+     "reject_p": 0.05263157894736842,
+     "mc_se_reject_p": 0.006669293733087027,
+     "reject_p_uncorr": 0.0695807314897413,
+     "mc_se_reject_p_uncorr": 0.007599430309596487
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 1044,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.01385,
+     "failure_reasons": {},
+     "reps_valid": 1044,
+     "reject_p": 0.05747126436781609,
+     "mc_se_reject_p": 0.007203149464147961,
+     "reject_p_uncorr": 0.07375478927203065,
+     "mc_se_reject_p_uncorr": 0.008089242438533812
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 980,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.01479,
+     "failure_reasons": {},
+     "reps_valid": 980,
+     "reject_p": 0.04183673469387755,
+     "mc_se_reject_p": 0.0063956635758568876,
+     "reject_p_uncorr": 0.05714285714285714,
+     "mc_se_reject_p_uncorr": 0.00741465392840202
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 892,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.01628,
+     "failure_reasons": {},
+     "reps_valid": 892,
+     "reject_p": 0.04820627802690583,
+     "mc_se_reject_p": 0.007172008429770725,
+     "reject_p_uncorr": 0.061659192825112105,
+     "mc_se_reject_p_uncorr": 0.008053724924707586
+    }
+   ]
+  },
+  {
+   "scenario": "Power, last condition +0.5",
+   "model": "stat_rm_anova",
+   "note": "",
+   "h0_true": false,
+   "results": [
+    {
+     "n": 20,
+     "reps_requested": 2000,
+     "reps_run": 1121,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.01298,
+     "failure_reasons": {},
+     "reps_valid": 1121,
+     "reject_p": 0.29348795718108833,
+     "mc_se_reject_p": 0.013600413758030174,
+     "reject_p_uncorr": 0.2988403211418377,
+     "mc_se_reject_p_uncorr": 0.01367178618099483
+    },
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 1058,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.01376,
+     "failure_reasons": {},
+     "reps_valid": 1058,
+     "reject_p": 0.7003780718336484,
+     "mc_se_reject_p": 0.014083488177707767,
+     "reject_p_uncorr": 0.7022684310018904,
+     "mc_se_reject_p_uncorr": 0.014057923712681147
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 1031,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.01415,
+     "failure_reasons": {},
+     "reps_valid": 1031,
+     "reject_p": 0.953443258971872,
+     "mc_se_reject_p": 0.006561594375586342,
+     "reject_p_uncorr": 0.953443258971872,
+     "mc_se_reject_p_uncorr": 0.006561594375586342
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 938,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.01557,
+     "failure_reasons": {},
+     "reps_valid": 938,
+     "reject_p": 1.0,
+     "mc_se_reject_p": 0.0,
+     "reject_p_uncorr": 1.0,
+     "mc_se_reject_p_uncorr": 0.0
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 835,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.0175,
+     "failure_reasons": {},
+     "reps_valid": 835,
+     "reject_p": 1.0,
+     "mc_se_reject_p": 0.0,
+     "reject_p_uncorr": 1.0,
+     "mc_se_reject_p_uncorr": 0.0
+    }
+   ]
+  }
+ ],
+ "env": {
+  "python": "3.13.18",
+  "numpy": "2.5.3",
+  "scipy": "1.18.1",
+  "pandas": "2.3.3",
+  "engine": "1.5.0"
+ },
+ "wall_seconds": 225.1,
+ "budget_seconds_per_cell": 15.0
+}

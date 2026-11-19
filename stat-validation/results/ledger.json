@@ -30,10 +30,10 @@
   "group": "Analysis of variance",
   "status": "Validated",
   "reason": "Compared with reference software on identical data and specifications, and checked by Monte Carlo simulation.",
-  "mc": false,
-  "reps": null,
-  "capped": null,
-  "cells": null
+  "mc": true,
+  "reps": 15328,
+  "capped": 15,
+  "cells": 15
  },
  {
   "id": "stat_ancova",
@@ -42,10 +42,10 @@
   "group": "Analysis of variance",
   "status": "Validated",
   "reason": "Compared with reference software on identical data and specifications, and checked by Monte Carlo simulation.",
-  "mc": false,
-  "reps": null,
-  "capped": null,
-  "cells": null
+  "mc": true,
+  "reps": 15265,
+  "capped": 15,
+  "cells": 15
  },
  {
   "id": "stat_manova",
@@ -54,10 +54,10 @@
   "group": "Analysis of variance",
   "status": "Validated",
   "reason": "Compared with reference software on identical data and specifications, and checked by Monte Carlo simulation.",
-  "mc": false,
-  "reps": null,
-  "capped": null,
-  "cells": null
+  "mc": true,
+  "reps": 5659,
+  "capped": 15,
+  "cells": 15
  },
  {
   "id": "stat_mancova",
@@ -66,10 +66,10 @@
   "group": "Analysis of variance",
   "status": "Validated",
   "reason": "Compared with reference software on identical data and specifications, and checked by Monte Carlo simulation.",
-  "mc": false,
-  "reps": null,
-  "capped": null,
-  "cells": null
+  "mc": true,
+  "reps": 6500,
+  "capped": 10,
+  "cells": 10
  },
  {
   "id": "stat_mann_whitney",
@@ -102,10 +102,10 @@
   "group": "Nonparametric statistics",
   "status": "Validated",
   "reason": "Compared with reference software on identical data and specifications, and checked by Monte Carlo simulation.",
-  "mc": false,
-  "reps": null,
-  "capped": null,
-  "cells": null
+  "mc": true,
+  "reps": 26939,
+  "capped": 15,
+  "cells": 15
  },
  {
   "id": "stat_friedman",
@@ -114,10 +114,10 @@
   "group": "Nonparametric statistics",
   "status": "Validated",
   "reason": "Compared with reference software on identical data and specifications, and checked by Monte Carlo simulation.",
-  "mc": false,
-  "reps": null,
-  "capped": null,
-  "cells": null
+  "mc": true,
+  "reps": 8884,
+  "capped": 15,
+  "cells": 15
  },
  {
   "id": "stat_kendall",
@@ -138,10 +138,10 @@
   "group": "Multivariate analysis",
   "status": "Validated",
   "reason": "Compared with reference software on identical data and specifications, and checked by Monte Carlo simulation.",
-  "mc": false,
-  "reps": null,
-  "capped": null,
-  "cells": null
+  "mc": true,
+  "reps": 1944,
+  "capped": 5,
+  "cells": 5
  },
  {
   "id": "stat_efa",
@@ -150,10 +150,10 @@
   "group": "Multivariate analysis",
   "status": "Validated",
   "reason": "Compared with reference software on identical data and specifications, and checked by Monte Carlo simulation.",
-  "mc": false,
-  "reps": null,
-  "capped": null,
-  "cells": null
+  "mc": true,
+  "reps": 3301,
+  "capped": 10,
+  "cells": 10
  },
  {
   "id": "stat_cfa",
@@ -174,10 +174,10 @@
   "group": "Multivariate analysis",
   "status": "Validated",
   "reason": "Compared with reference software on identical data and specifications, and checked by Monte Carlo simulation.",
-  "mc": false,
-  "reps": null,
-  "capped": null,
-  "cells": null
+  "mc": true,
+  "reps": 2291,
+  "capped": 5,
+  "cells": 5
  },
  {
   "id": "stat_cca",
@@ -186,10 +186,10 @@
   "group": "Multivariate analysis",
   "status": "Validated",
   "reason": "Compared with reference software on identical data and specifications, and checked by Monte Carlo simulation.",
-  "mc": false,
-  "reps": null,
-  "capped": null,
-  "cells": null
+  "mc": true,
+  "reps": 12954,
+  "capped": 6,
+  "cells": 10
  },
  {
   "id": "stat_ca",
@@ -198,10 +198,10 @@
   "group": "Multivariate analysis",
   "status": "Validated",
   "reason": "Compared with reference software on identical data and specifications, and checked by Monte Carlo simulation.",
-  "mc": false,
-  "reps": null,
-  "capped": null,
-  "cells": null
+  "mc": true,
+  "reps": 20000,
+  "capped": 0,
+  "cells": 10
  },
  {
   "id": "stat_km",
@@ -210,10 +210,10 @@
   "group": "Survival analysis",
   "status": "Validated",
   "reason": "Compared with reference software on identical data and specifications, and checked by Monte Carlo simulation.",
-  "mc": false,
-  "reps": null,
-  "capped": null,
-  "cells": null
+  "mc": true,
+  "reps": 13043,
+  "capped": 14,
+  "cells": 15
  },
  {
   "id": "stat_cox",
@@ -222,10 +222,10 @@
   "group": "Survival analysis",
   "status": "Validated",
   "reason": "Compared with reference software on identical data and specifications, and checked by Monte Carlo simulation.",
-  "mc": false,
-  "reps": null,
-  "capped": null,
-  "cells": null
+  "mc": true,
+  "reps": 13638,
+  "capped": 25,
+  "cells": 25
  },
  {
   "id": "stat_aft",
@@ -234,10 +234,10 @@
   "group": "Survival analysis",
   "status": "Validated",
   "reason": "Compared with reference software on identical data and specifications, and checked by Monte Carlo simulation.",
-  "mc": false,
-  "reps": null,
-  "capped": null,
-  "cells": null
+  "mc": true,
+  "reps": 5678,
+  "capped": 15,
+  "cells": 15
  },
  {
   "id": "stat_finegray",
@@ -246,10 +246,10 @@
   "group": "Survival analysis",
   "status": "Partially validated",
   "reason": "Point estimates validated (equals Cox when no competing events; simulation unbiased). Standard errors omit the censoring-weight estimation variance and no R cmprsk comparison was possible, so inference rests on simulation only.",
-  "mc": false,
-  "reps": null,
-  "capped": null,
-  "cells": null
+  "mc": true,
+  "reps": 1234,
+  "capped": 4,
+  "cells": 4
  },
  {
   "id": "stat_parametric",
@@ -258,10 +258,10 @@
   "group": "Survival analysis",
   "status": "Validated",
   "reason": "Compared with reference software on identical data and specifications, and checked by Monte Carlo simulation.",
-  "mc": false,
-  "reps": null,
-  "capped": null,
-  "cells": null
+  "mc": true,
+  "reps": 2567,
+  "capped": 15,
+  "cells": 15
  },
  {
   "id": "stat_lmm",
@@ -294,10 +294,10 @@
   "group": "Mixed-effects and longitudinal",
   "status": "Validated with a documented deviation",
   "reason": "Independence/exchangeable match statsmodels; AR(1) with estimated alpha uses a different moment estimator (see limitations); QIC follows Pan (2001) and differs from statsmodels' QIC.",
-  "mc": false,
-  "reps": null,
-  "capped": null,
-  "cells": null
+  "mc": true,
+  "reps": 13780,
+  "capped": 14,
+  "cells": 15
  },
  {
   "id": "stat_icc",
@@ -306,10 +306,10 @@
   "group": "Mixed-effects and longitudinal",
   "status": "Validated",
   "reason": "Compared with reference software on identical data and specifications, and checked by Monte Carlo simulation.",
-  "mc": false,
-  "reps": null,
-  "capped": null,
-  "cells": null
+  "mc": true,
+  "reps": 20000,
+  "capped": 0,
+  "cells": 10
  },
  {
   "id": "stat_bootstrap",
@@ -318,10 +318,10 @@
   "group": "Resampling and simulation",
   "status": "Validated",
   "reason": "Compared with reference software on identical data and specifications, and checked by Monte Carlo simulation.",
-  "mc": false,
-  "reps": null,
-  "capped": null,
-  "cells": null
+  "mc": true,
+  "reps": 28322,
+  "capped": 14,
+  "cells": 20
  },
  {
   "id": "stat_permutation",
@@ -330,10 +330,10 @@
   "group": "Resampling and simulation",
   "status": "Validated",
   "reason": "Compared with reference software on identical data and specifications, and checked by Monte Carlo simulation.",
-  "mc": false,
-  "reps": null,
-  "capped": null,
-  "cells": null
+  "mc": true,
+  "reps": 13585,
+  "capped": 15,
+  "cells": 15
  },
  {
   "id": "stat_power",
@@ -342,7 +342,7 @@
   "group": "Resampling and simulation",
   "status": "Validated",
   "reason": "Compared with reference software on identical data and specifications, and checked by Monte Carlo simulation.",
-  "mc": false,
+  "mc": true,
   "reps": null,
   "capped": null,
   "cells": null
@@ -354,10 +354,10 @@
   "group": "Meta-analysis",
   "status": "Validated, small-study tests unchecked",
   "reason": "Pooling and heterogeneity match statsmodels and metafor; Egger and Begg tests were not cross-checked.",
-  "mc": false,
-  "reps": null,
-  "capped": null,
-  "cells": null
+  "mc": true,
+  "reps": 8344,
+  "capped": 10,
+  "cells": 10
  },
  {
   "id": "stat_meta_random",
@@ -366,9 +366,9 @@
   "group": "Meta-analysis",
   "status": "Validated, small-study tests unchecked",
   "reason": "Pooled estimate, tau2 and HKSJ interval match metafor published values and statsmodels; Egger and Begg tests were not cross-checked.",
-  "mc": false,
-  "reps": null,
-  "capped": null,
-  "cells": null
+  "mc": true,
+  "reps": 6360,
+  "capped": 20,
+  "cells": 20
  }
 ]
