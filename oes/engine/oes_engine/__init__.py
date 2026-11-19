@@ -311,6 +311,10 @@ MODELS += [
     dict(id="classify", group="Machine learning", name="Classification: logit, L1 logit, random forest, boosting (ROC, calibration)", guide="ml-guide/classification.html", fn=ml_extra.classify,
          fields=[col("y", "Binary outcome (0/1)"), cols("x", "Predictors"), col("time", "Time column (time-ordered validation)", required=False), num("test_share", "Test share", 0.25), num("n_estimators", "Number of trees", 200)],
          example=dict(file=MLD + "loanapp.csv", spec=dict(y="approve", x=["white", "married", "male", "dep", "sch", "hrat", "obrat", "loanprc", "unem", "cosign", "chist", "pubrec", "mortlat1", "mortlat2", "vr"]))),
+    dict(id="interpret", group="Machine learning", name="Interpreting a machine-learning model (importance, partial dependence, interactions)", guide="ml-guide/interpretation.html", fn=ml_extra.interpret,
+         fields=[col("y", "Outcome to predict"), cols("x", "Predictors"), sel("model", "Model", [["rf", "Random forest"], ["gb", "Gradient boosting"]], "rf"), col("time", "Time column (time-ordered validation)", required=False),
+                 num("test_share", "Test share", 0.25), num("repeats", "Permutation repeats", 20), num("top", "Predictors to profile", 3)],
+         example=dict(file=MLD + "wage2.csv", spec=dict(y="lwage", x=["hours", "IQ", "KWW", "educ", "exper", "tenure", "age", "married", "black", "south", "urban", "sibs", "brthord", "meduc", "feduc"], top=3))),
 ]
 
 # ------------------------------------------------------------------ Bayesian
