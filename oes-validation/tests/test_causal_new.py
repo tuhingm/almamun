@@ -254,3 +254,55 @@ def test_lee_errors():
     with pytest.raises(causal_extra.OESError, match="0/1"): causal_extra.leebounds(bad, dict(outcome="y", treat="t", selected="s"))
     bad = d.copy(); bad.loc[bad.s == 1, "y"] = np.nan
     with pytest.raises(causal_extra.OESError, match="missing"): causal_extra.leebounds(bad, dict(outcome="y", treat="t", selected="s"))
+
+
+# ------------------------------------------------------------------ quantile treatment effects
+def _qte_sim(n=4000, shift=1.0, scale=1.0, seed=0):
+    rng = np.random.default_rng(seed); T = rng.integers(0, 2, n).astype(float); e = rng.normal(size=n)
+    return pd.DataFrame(dict(y=2 + shift * T + scale ** T * e, t=T, x=rng.normal(size=n)))
+
+
+def _qte_run(d, **kw): return causal_extra.qte(d, dict(outcome="y", treat="t", boot=150, **kw))
+
+
+def test_qte_registered():
+    m = o.BY_ID["qte"]; assert m["group"] == "Causal inference" and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+def test_qte_matches_numpy_quantiles():
+    d = _qte_sim(n=1500, seed=2); r = _qte_run(d, taus="0.25,0.5,0.9")
+    for row in r["tables"][0]["rows"]:
+        q = float(row[0]); want = np.quantile(d.y[d.t == 1], q) - np.quantile(d.y[d.t == 0], q); assert abs(float(row[3]) - want) < 1e-3
+
+
+def test_qte_location_shift_is_constant_and_equal_to_ate():
+    d = _qte_sim(n=20000, shift=1.0, seed=3); r = _qte_run(d, taus="0.1,0.5,0.9")
+    for row in r["tables"][0]["rows"]: assert abs(float(row[3]) - 1.0) < 0.12 and float(row[5]) < 1.0 < float(row[6])
+
+
+def test_qte_scale_change_rises_across_quantiles():
+    d = _qte_sim(n=20000, shift=0.0, scale=2.0, seed=4); r = _qte_run(d, taus="0.1,0.5,0.9"); e = [float(x[3]) for x in r["tables"][0]["rows"]]
+    assert e[0] < -1.0 and abs(e[1]) < 0.15 and e[2] > 1.0
+
+
+def test_qte_ks_size_and_power():
+    rej = 0
+    for k in range(40):
+        d = _qte_sim(n=200, shift=0.0, seed=100 + k); r = causal_extra.qte(d, dict(outcome="y", treat="t", boot=99, seed=k)); rej += r["summary"][3]["value"] < 0.05
+    assert rej <= 8
+    r = _qte_run(_qte_sim(n=600, shift=0.6, seed=5)); assert r["summary"][3]["value"] < 0.01
+    dom = r["tables"][-1]["rows"]; assert float(dom[1][2]) < 0.05 and float(dom[2][2]) > 0.5
+
+
+def test_qte_conditional_regression_matches_quantreg():
+    import statsmodels.api as sm
+    d = _qte_sim(n=1500, seed=6); r = _qte_run(d, taus="0.5", covariates=["x"]); row = r["tables"][1]["rows"][0]
+    m = sm.QuantReg(d.y, sm.add_constant(d[["t", "x"]])).fit(q=0.5, max_iter=5000); assert abs(float(row[1]) - m.params["t"]) < 1e-3
+
+
+def test_qte_errors():
+    d = _qte_sim(n=300)
+    for spec, msg in [(dict(outcome="y", treat="y"), "more than one role"), (dict(outcome="nope", treat="t"), "not found"), (dict(outcome="y", treat="t", taus="0.5,1.2"), "strictly between")]:
+        with pytest.raises(causal_extra.OESError, match=msg): causal_extra.qte(d, spec)
+    bad = d.copy(); bad["t"] = bad["t"] * 3
+    with pytest.raises(causal_extra.OESError, match="0/1"): causal_extra.qte(bad, dict(outcome="y", treat="t"))
