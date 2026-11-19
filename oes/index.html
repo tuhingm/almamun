@@ -4,19 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0033A0">
-<meta name="description" content="Open Econometric Systems: run 69 econometric models on your own data, free, in your browser: every model of the four research guides plus Bayesian VARs and…">
+<meta name="description" content="Open Econometric Systems: run 100 methods (69 econometric models and 31 statistical methods) on your own data, free, in your browser: every model of the four research guides plus Bayesian VARs and…">
 <title>Open Econometric Systems | Tuhin Al Mamun</title>
 <link rel="canonical" href="https://tuhingm.github.io/almamun/oes/">
 <meta property="og:locale" content="en_US">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta name="author" content="Tuhin G. M. Al Mamun">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Tuhin Al Mamun, Ph.D.">
-<meta property="og:title" content="Open Econometric Systems | Tuhin Al Mamun"><meta property="og:description" content="Open Econometric Systems: run 69 econometric models on your own data, free, in your browser: every model of the four research guides plus Bayesian VARs and…">
+<meta property="og:title" content="Open Econometric Systems | Tuhin Al Mamun"><meta property="og:description" content="Open Econometric Systems: run 100 methods (69 econometric models and 31 statistical methods) on your own data, free, in your browser: every model of the four research guides plus Bayesian VARs and…">
 <meta property="og:url" content="https://tuhingm.github.io/almamun/oes/"><meta property="og:image" content="https://tuhingm.github.io/almamun/assets/og/oes/index.jpg?v=4">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="og:image:type" content="image/jpeg"><meta property="og:image:alt" content="Preview card: Open Econometric Systems | Tuhin Al Mamun">
-<meta name="twitter:title" content="Open Econometric Systems | Tuhin Al Mamun"><meta name="twitter:description" content="Open Econometric Systems: run 69 econometric models on your own data, free, in your browser: every model of the four research guides plus Bayesian VARs and…"><meta name="twitter:image" content="https://tuhingm.github.io/almamun/assets/og/oes/index.jpg?v=4"><meta name="twitter:image:alt" content="Preview card: Open Econometric Systems | Tuhin Al Mamun">
+<meta name="twitter:title" content="Open Econometric Systems | Tuhin Al Mamun"><meta name="twitter:description" content="Open Econometric Systems: run 100 methods (69 econometric models and 31 statistical methods) on your own data, free, in your browser: every model of the four research guides plus Bayesian VARs and…"><meta name="twitter:image" content="https://tuhingm.github.io/almamun/assets/og/oes/index.jpg?v=4"><meta name="twitter:image:alt" content="Preview card: Open Econometric Systems | Tuhin Al Mamun">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml"><link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -29,6 +29,11 @@ section.step{background:#fff;border:1px solid var(--line);border-radius:14px;pad
 .stepno{display:block;font:800 10px "DM Sans";letter-spacing:.16em;text-transform:uppercase;color:var(--navy);margin-bottom:4px}
 h2{font:800 22px/1.25 Manrope;letter-spacing:-.4px;margin:0 0 6px}h3{font:800 15px Manrope;margin:18px 0 8px}.sub{color:var(--muted);font-size:13px;margin:0 0 14px}
 .tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 14px}.tabs button{border:1px solid var(--line);background:#f5f7fc;border-radius:30px;padding:7px 14px;font-size:12px;font-weight:700;color:#41506a}.tabs button[aria-pressed=true]{background:var(--navy);border-color:var(--navy);color:#fff}
+#divs{gap:10px;margin:14px 0 12px}#divs button{padding:13px 30px;font-size:16px;font-weight:800;border-radius:12px;border-width:2px;letter-spacing:.01em}#divs button .hint{font-size:13px;margin-left:6px}
+#divs button[data-d=econ]{background:#e8eefb;border-color:#0033a0;color:#0033a0}#divs button[data-d=econ][aria-pressed=true]{background:#0033a0;color:#fff;box-shadow:0 4px 12px rgba(0,51,160,.28)}
+#divs button[data-d=stat]{background:#eaf6fc;border-color:#6ec1e4;color:#00205b}#divs button[data-d=stat][aria-pressed=true]{background:#6ec1e4;border-color:#6ec1e4;color:#00205b;box-shadow:0 4px 12px rgba(110,193,228,.45)}
+#divs button[data-d=econ][aria-pressed=true] .hint{color:#dbe9ff}#divs button[data-d=stat] .hint{color:#00205b}
+#groups[data-div=stat] button[aria-pressed=true]{background:#6ec1e4;border-color:#6ec1e4;color:#00205b}#groups[data-div=stat] button[aria-pressed=true] .hint{color:#00205b}
 .models{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}.models button{text-align:left;border:1px solid var(--line);background:#fff;border-radius:10px;padding:11px 13px;font-size:13px;font-weight:700;color:var(--ink);line-height:1.35;transition:border-color .15s,background .15s}.models button:hover{border-color:var(--sky2);background:#f7fbff}.models button[aria-pressed=true]{border-color:var(--navy);background:var(--tint);color:var(--navy)}.models button small{display:block;font-weight:500;font-size:11px;color:var(--muted);margin-top:2px}
 .chosen{margin-top:14px;padding:12px 14px;border-radius:10px;background:#f5f7fc;border:1px solid #e1e7f1;font-size:13px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}.chosen a{color:var(--navy);font-weight:700;text-decoration:underline}
 .btn,.btn2{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:8px;padding:10px 16px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.btn{background:var(--navy);color:#fff}.btn2{background:#e9eef8;color:var(--navy)}.btn:disabled,.btn2:disabled{opacity:.45;cursor:not-allowed}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
@@ -57,16 +62,17 @@ footer{background:#00205b;color:#dce7f6;padding:25px 0;font-size:12px}footer .fo
 <link rel="stylesheet" href="../assets/css/site-header.css">
 <link rel="stylesheet" href="../assets/css/share.css">
 <link rel="stylesheet" href="../assets/css/author-note.css">
-<script type="application/ld+json" id="site-ld">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://tuhingm.github.io/almamun/oes/#webpage","url":"https://tuhingm.github.io/almamun/oes/","name":"Open Econometric Systems | Tuhin Al Mamun","description":"Open Econometric Systems: run 69 econometric models on your own data, free, in your browser: every model of the four research guides plus Bayesian VARs and…","isPartOf":{"@id":"https://tuhingm.github.io/almamun/#website"},"inLanguage":"en","author":{"@id":"https://tuhingm.github.io/almamun/#person"},"copyrightHolder":{"@id":"https://tuhingm.github.io/almamun/#person"},"primaryImageOfPage":{"@type":"ImageObject","url":"https://tuhingm.github.io/almamun/assets/og/oes/index.jpg"},"breadcrumb":{"@id":"https://tuhingm.github.io/almamun/oes/#breadcrumb"}},{"@type":"Person","@id":"https://tuhingm.github.io/almamun/#person","name":"Tuhin G. M. Al Mamun","alternateName":["Tuhin Al Mamun","Tuhin","Tuhin G M Al Mamun","Tuhin G.M. Al Mamun","Tuhin GM Al Mamun","T. G. M. Al Mamun","TGM Al Mamun","Al Mamun Tuhin","Tuhin Al Mamun, Ph.D.","Dr. Tuhin Al Mamun"],"givenName":"Tuhin","familyName":"Al Mamun","honorificSuffix":"Ph.D.","url":"https://tuhingm.github.io/almamun/","image":"https://tuhingm.github.io/almamun/assets/og-image.jpg","jobTitle":"Economist and Quantitative Researcher","description":"Economist and quantitative researcher working on monetary and fiscal policy, DSGE and HANK models, environmental economics and econometrics.","alumniOf":{"@type":"CollegeOrUniversity","name":"Hannam University","address":"Daejeon, South Korea"},"hasCredential":{"@type":"EducationalOccupationalCredential","credentialCategory":"degree","name":"Ph.D. in Economics","recognizedBy":{"@type":"CollegeOrUniversity","name":"Hannam University"}},"nationality":{"@type":"Country","name":"Bangladesh"},"knowsAbout":["Monetary policy","Fiscal policy","Macroeconomics","DSGE models","Heterogeneous Agent New Keynesian (HANK) models","Bayesian estimation","Econometrics","Time-series econometrics","Panel data econometrics","Causal inference","Environmental economics","Climate economics","Statistics"],"sameAs":["https://orcid.org/0009-0005-0275-6922","https://scholar.google.com/citations?user=CMV8R_0AAAAJ&hl=en","https://www.scopus.com/authid/detail.uri?authorId=59544050900","https://www.linkedin.com/in/tuhinecon/","https://sites.google.com/view/tuhin2022/profile","https://www.researchgate.net/profile/Tuhin-G-M-Al-Mamun","https://github.com/tuhingm"]},{"@type":"WebSite","@id":"https://tuhingm.github.io/almamun/#website","url":"https://tuhingm.github.io/almamun/","name":"Tuhin G. M. Al Mamun, Ph.D.","alternateName":["Tuhin Al Mamun","TGM Al Mamun"],"publisher":{"@id":"https://tuhingm.github.io/almamun/#person"},"inLanguage":"en"},{"@type":"BreadcrumbList","@id":"https://tuhingm.github.io/almamun/oes/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://tuhingm.github.io/almamun/"},{"@type":"ListItem","position":2,"name":"Open Econometric Systems","item":"https://tuhingm.github.io/almamun/oes/"}]}]}</script>
+<script type="application/ld+json" id="site-ld">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://tuhingm.github.io/almamun/oes/#webpage","url":"https://tuhingm.github.io/almamun/oes/","name":"Open Econometric Systems | Tuhin Al Mamun","description":"Open Econometric Systems: run 100 methods (69 econometric models and 31 statistical methods) on your own data, free, in your browser: every model of the four research guides plus Bayesian VARs and…","isPartOf":{"@id":"https://tuhingm.github.io/almamun/#website"},"inLanguage":"en","author":{"@id":"https://tuhingm.github.io/almamun/#person"},"copyrightHolder":{"@id":"https://tuhingm.github.io/almamun/#person"},"primaryImageOfPage":{"@type":"ImageObject","url":"https://tuhingm.github.io/almamun/assets/og/oes/index.jpg"},"breadcrumb":{"@id":"https://tuhingm.github.io/almamun/oes/#breadcrumb"}},{"@type":"Person","@id":"https://tuhingm.github.io/almamun/#person","name":"Tuhin G. M. Al Mamun","alternateName":["Tuhin Al Mamun","Tuhin","Tuhin G M Al Mamun","Tuhin G.M. Al Mamun","Tuhin GM Al Mamun","T. G. M. Al Mamun","TGM Al Mamun","Al Mamun Tuhin","Tuhin Al Mamun, Ph.D.","Dr. Tuhin Al Mamun"],"givenName":"Tuhin","familyName":"Al Mamun","honorificSuffix":"Ph.D.","url":"https://tuhingm.github.io/almamun/","image":"https://tuhingm.github.io/almamun/assets/og-image.jpg","jobTitle":"Economist and Quantitative Researcher","description":"Economist and quantitative researcher working on monetary and fiscal policy, DSGE and HANK models, environmental economics and econometrics.","alumniOf":{"@type":"CollegeOrUniversity","name":"Hannam University","address":"Daejeon, South Korea"},"hasCredential":{"@type":"EducationalOccupationalCredential","credentialCategory":"degree","name":"Ph.D. in Economics","recognizedBy":{"@type":"CollegeOrUniversity","name":"Hannam University"}},"nationality":{"@type":"Country","name":"Bangladesh"},"knowsAbout":["Monetary policy","Fiscal policy","Macroeconomics","DSGE models","Heterogeneous Agent New Keynesian (HANK) models","Bayesian estimation","Econometrics","Time-series econometrics","Panel data econometrics","Causal inference","Environmental economics","Climate economics","Statistics"],"sameAs":["https://orcid.org/0009-0005-0275-6922","https://scholar.google.com/citations?user=CMV8R_0AAAAJ&hl=en","https://www.scopus.com/authid/detail.uri?authorId=59544050900","https://www.linkedin.com/in/tuhinecon/","https://sites.google.com/view/tuhin2022/profile","https://www.researchgate.net/profile/Tuhin-G-M-Al-Mamun","https://github.com/tuhingm"]},{"@type":"WebSite","@id":"https://tuhingm.github.io/almamun/#website","url":"https://tuhingm.github.io/almamun/","name":"Tuhin G. M. Al Mamun, Ph.D.","alternateName":["Tuhin Al Mamun","TGM Al Mamun"],"publisher":{"@id":"https://tuhingm.github.io/almamun/#person"},"inLanguage":"en"},{"@type":"BreadcrumbList","@id":"https://tuhingm.github.io/almamun/oes/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://tuhingm.github.io/almamun/"},{"@type":"ListItem","position":2,"name":"Open Econometric Systems","item":"https://tuhingm.github.io/almamun/oes/"}]}]}</script>
 </head>
 <body>
 <header class="site-header"><div class="wrap nav"><a class="brand" href="../index.html" aria-label="Tuhin G. M. Al Mamun — home">TGM <span>AL MAMUN</span></a><button id="menu" type="button" aria-expanded="false" aria-controls="nav">Menu</button><nav id="nav" aria-label="Main navigation"><a href="../index.html">Home</a><a href="../teaching/index.html">Teaching Courses</a><a href="../working-papers/index.html">Working Papers</a><a href="../time-series-guide/index.html">Time Series</a><a href="../panel-data-guide/index.html">Panel Data</a><a href="../causal-inference-guide/index.html">Causal Inference</a><a href="../dsge-guide/index.html">DSGE</a><a href="../ml-guide/index.html">Machine Learning</a><a href="../bayesian-guide/index.html">Bayesian</a><a href="../markov-guide/index.html">Markov Switching</a><a href="../oes/index.html" class="current" aria-current="page">Open Econometric Systems</a></nav></div></header>
 <section class="hero"><div class="wrap"><div class="kicker">Open-source econometric workspace</div><h1>Open Econometric Systems</h1>
 <p class="lead">Every model in the Time-Series, Panel Data, Causal Inference, and Machine Learning guides is ready to run. Bayesian VAR and Markov-Switching models are also included. Choose a model and load its example dataset or upload your own CSV file. Get estimation results, diagnostic tests, statistical outputs, and charts. No installation or external software is required. Python runs directly in your browser.</p>
-<div class="meta"><span><strong id="n-models">69</strong> models</span><span><strong>6</strong> model groups</span><span>Runs in your browser: <strong>your data stays on your device</strong></span><span><strong>Free</strong> and open source</span></div><aside class="author-note" aria-label="Author's note"><span class="an-label">Author's note</span><p>The model menu, the default specifications, and the tests and inference settings in Open Econometric Systems are my own design. I built them from my training and research in econometrics, and I implemented and tested every estimator myself. The estimators are standard methods from the literature, documented in each model's guide.</p><span class="an-sign">— Tuhin G. M. Al Mamun, Ph.D.</span></aside></div></section>
+<div class="meta"><span><strong id="n-models">100</strong> methods</span><span><strong>13</strong> method groups</span><span>Runs in your browser: <strong>your data stays on your device</strong></span><span><strong>Free</strong> and open source</span></div><aside class="author-note" aria-label="Author's note"><span class="an-label">Author's note</span><p>The model menu, the default specifications, and the tests and inference settings in Open Econometric Systems are my own design. I built them from my training and research in econometrics, and I implemented and tested every estimator myself. The estimators are standard methods from the literature, documented in each model's guide.</p><span class="an-sign">— Tuhin G. M. Al Mamun, Ph.D.</span></aside></div></section>
 <main class="wrap">
 
-<section class="step" id="s-model"><span class="stepno">01 · Model</span><h2>Choose a model</h2><p class="sub">Each model links to its guide, which explains when to use it and how to write up the results. The Bayesian and Markov-switching groups have their own guides, the <a href="../bayesian-guide/index.html" style="text-decoration:underline">Bayesian Guide</a> and the <a href="../markov-guide/index.html" style="text-decoration:underline">Markov-Switching Guide</a>.</p>
+<section class="step" id="s-model"><span class="stepno">01 · Model</span><h2>Choose a model or statistical method</h2><p class="sub">Each model links to its guide, which explains when to use it and how to write up the results. The Bayesian and Markov-switching groups have their own guides, the <a href="../bayesian-guide/index.html" style="text-decoration:underline">Bayesian Guide</a> and the <a href="../markov-guide/index.html" style="text-decoration:underline">Markov-Switching Guide</a>.</p>
+<div class="tabs" id="divs" role="group" aria-label="Division"></div>
 <div class="tabs" id="groups" role="group" aria-label="Model groups"></div>
 <div class="models" id="models"></div>
 <div class="chosen" id="chosen" hidden></div>
@@ -167,6 +173,7 @@ const NUM = v => typeof v === "number" ? (Math.abs(v) >= 1e5 || (Math.abs(v) < 1
 $("year").textContent = new Date().getFullYear();
 let CAT = null, MODEL = null, GROUP = null, DATA = null, OPS = [], RESULT = null, worker = null, ready = false, jobs = 0;
 const pending = {};
+const exName = m => m.example.file ? m.example.file.split("/").pop() : "no data needed";
 
 // ----------------------------------------------------------------------------- worker
 function getWorker() {
@@ -238,27 +245,35 @@ function columns() {   // data columns plus those created by the operations
 }
 
 // ----------------------------------------------------------------------------- models
+let DIV = "econ";
+const inDiv = m => (m.division === "statistics") === (DIV === "stat");
 function renderGroups() {
-  const groups = [...new Set(CAT.models.map(m => m.group))];
-  GROUP = GROUP || groups[0];
-  $("groups").innerHTML = groups.map(g => `<button type="button" data-g="${esc(g)}" aria-pressed="${g === GROUP}">${esc(g)} <span class="hint">${CAT.models.filter(m => m.group === g).length}</span></button>`).join("");
+  const pool = CAT.models.filter(inDiv);
+  const groups = [...new Set(pool.map(m => m.group))];
+  if (!groups.includes(GROUP)) GROUP = groups[0];
+  $("divs").innerHTML = [["econ", "Econometrics", CAT.models.filter(m => m.division !== "statistics").length], ["stat", "Statistics", CAT.models.filter(m => m.division === "statistics").length]].map(d => `<button type="button" data-d="${d[0]}" data-d="${d[0]}" aria-pressed="${DIV === d[0]}">${d[1]} <span class="hint">${d[2]}</span></button>`).join("");
+  $("groups").dataset.div = DIV;
+  $("divs").querySelectorAll("button").forEach(x => x.onclick = () => { DIV = x.dataset.d; GROUP = null; renderGroups(); });
+  $("groups").innerHTML = groups.map(g => `<button type="button" data-g="${esc(g)}" aria-pressed="${g === GROUP}">${esc(g)} <span class="hint">${pool.filter(m => m.group === g).length}</span></button>`).join("");
   $("groups").querySelectorAll("button").forEach(b => b.onclick = () => { GROUP = b.dataset.g; renderGroups(); });
-  $("models").innerHTML = CAT.models.filter(m => m.group === GROUP).map(m =>
-    `<button type="button" data-id="${m.id}" aria-pressed="${MODEL && MODEL.id === m.id}">${esc(m.name)}<small>${esc(m.example.file.split("/").pop())}${m.slow ? " · slower" : ""}</small></button>`).join("");
+  $("models").innerHTML = pool.filter(m => m.group === GROUP).map(m =>
+    `<button type="button" data-id="${m.id}" aria-pressed="${MODEL && MODEL.id === m.id}">${esc(m.name)}<small>${m.code} · ${esc(exName(m))}</small></button>`).join("");
   $("models").querySelectorAll("button").forEach(b => b.onclick = () => chooseModel(b.dataset.id, true));
 }
 function chooseModel(id, scroll) {
   MODEL = CAT.models.find(m => m.id === id);
   if (!MODEL) return;
-  GROUP = MODEL.group; renderGroups();
+  DIV = MODEL.division === "statistics" ? "stat" : "econ"; GROUP = MODEL.group; renderGroups();
+  $("s-ops").hidden = DIV === "stat";
   $("chosen").hidden = false;
   $("chosen").innerHTML = `<span><b>${esc(MODEL.name)}</b> <span class="pill">${esc(MODEL.group)}</span></span>` + (MODEL.guide ? `<a href="../${MODEL.guide}">Read the guide →</a>` : `<span class="hint">No guide page for this model yet</span>`);
-  $("load-ex").disabled = false;
-  $("load-ex").textContent = "Load the guide example (" + MODEL.example.file.split("/").pop() + ")";
+  $("s-data").hidden = !!MODEL.nodata;
+  $("load-ex").disabled = !MODEL.example.file;
+  $("load-ex").textContent = MODEL.example.file ? "Load the guide example (" + exName(MODEL) + ")" : "This method needs no data";
   history.replaceState(null, "", "#" + MODEL.id);
   $("s-results").hidden = true; hideErr();
-  renderFields();
-  if (scroll) $("s-data").scrollIntoView({behavior: "smooth"});
+  renderFields(MODEL.nodata ? MODEL.example.spec : undefined);
+  if (scroll) (MODEL.nodata ? $("s-spec") : $("s-data")).scrollIntoView({behavior: "smooth"});
 }
 
 // ----------------------------------------------------------------------------- data operations
@@ -302,15 +317,16 @@ $("op-add").onclick = () => {
 // ----------------------------------------------------------------------------- specification fields
 function renderFields(preset) {
   const box = $("fields");
-  if (!MODEL || !DATA) { box.innerHTML = ""; $("run").disabled = true; $("spec-sub").textContent = !MODEL ? "Choose a model first." : "Load data first."; return; }
+  if (!MODEL || (!DATA && !MODEL.nodata)) { box.innerHTML = ""; $("run").disabled = true; $("spec-sub").textContent = !MODEL ? "Choose a method first." : "Load data first."; return; }
   const keep = preset || readSpec(true);
   $("spec-title").textContent = MODEL.name;
-  $("spec-sub").innerHTML = `Fields marked <span style="color:var(--bad)">*</span> are required.` + (MODEL.guide ? ` <a href="../${MODEL.guide}" style="color:var(--navy);text-decoration:underline">When to use this model</a>.` : "");
+  $("spec-sub").innerHTML = `Fields marked <span style="color:var(--bad)">*</span> are required.` + (MODEL.guide ? ` <a href="../${MODEL.guide}" style="color:var(--navy);text-decoration:underline">Guide and validation report</a>.` : "");
   const cols = columns();
   box.innerHTML = MODEL.fields.map(f => {
     const id = "f-" + f.key, req = f.required ? ' <span class="req">*</span>' : "";
     if (f.type === "col") return `<div class="field"><label for="${id}">${esc(f.label)}${req}</label><select id="${id}" data-k="${f.key}" data-t="col"><option value="">${f.required ? "Choose…" : "(none)"}</option>${cols.map(c => `<option>${esc(c.name)}</option>`).join("")}</select></div>`;
-    if (f.type === "cols") return `<div class="field" style="grid-column:1/-1"><span class="l">${esc(f.label)}${req} <button type="button" class="mini" data-all="${f.key}">all</button><button type="button" class="mini" data-none="${f.key}">none</button></span><div class="checks" id="${id}" data-k="${f.key}" data-t="cols">${cols.filter(c => c.numeric).map(c => `<label><input type="checkbox" value="${esc(c.name)}">${esc(c.name)}</label>`).join("")}</div></div>`;
+    if (f.type === "cols") return `<div class="field" style="grid-column:1/-1"><span class="l">${esc(f.label)}${req} <button type="button" class="mini" data-all="${f.key}">all</button><button type="button" class="mini" data-none="${f.key}">none</button></span><div class="checks" id="${id}" data-k="${f.key}" data-t="cols">${cols.filter(c => c.numeric || f.key === "factors").map(c => `<label><input type="checkbox" value="${esc(c.name)}">${esc(c.name)}</label>`).join("")}</div></div>`;
+    if (f.type === "text") return `<div class="field" style="grid-column:1/-1"><label for="${id}">${esc(f.label)}${req}</label><textarea id="${id}" data-k="${f.key}" data-t="text" rows="4" spellcheck="false">${esc(f.default || "")}</textarea></div>`;
     if (f.type === "select") return `<div class="field"><label for="${id}">${esc(f.label)}</label><select id="${id}" data-k="${f.key}" data-t="select">${f.options.map(o => `<option value="${esc(o[0])}">${esc(o[1])}</option>`).join("")}</select></div>`;
     return `<div class="field"><label for="${id}">${esc(f.label)}</label><input id="${id}" data-k="${f.key}" data-t="num" value="${esc(f.default)}" inputmode="decimal"></div>`;
   }).join("");
@@ -373,7 +389,7 @@ const showErr = m => { $("err").hidden = false; $("err").textContent = m; };
 const hideErr = () => { $("err").hidden = true; };
 
 $("run").onclick = async () => {
-  if (!MODEL || !DATA) return;
+  if (!MODEL || (!DATA && !MODEL.nodata)) return;
   hideErr();
   const spec = readSpec(); spec.ops = OPS;
   const miss = MODEL.fields.filter(f => f.required && (spec[f.key] === undefined || spec[f.key] === ""));
@@ -381,9 +397,9 @@ $("run").onclick = async () => {
   $("run").disabled = true; $("s-results").hidden = true;
   status.on(ready ? "Estimating…" : "Starting Python in your browser (first run only)…");
   try {
-    const m = await estimate(MODEL, DATA.text, spec);
+    const m = await estimate(MODEL, DATA ? DATA.text : "", spec);
     if (m.result.error) throw new Error(m.result.error);
-    RESULT = {model: MODEL, spec, data: DATA.name, out: m.result, seconds: m.seconds};
+    RESULT = {model: MODEL, spec, data: DATA ? DATA.name : "(no data)", out: m.result, seconds: m.seconds};
     renderResult();
   } catch (e) { showErr(e.message); }
   finally { status.off(); $("run").disabled = false; }
@@ -402,13 +418,40 @@ function renderResult() {
       t.rows.map(r => "<tr>" + r.map((v, j) => `<td${pcol >= 0 && j === 1 && typeof r[pcol] === "number" && r[pcol] < 0.05 ? ' class="sig"' : ""}>${esc(NUM(v))}</td>`).join("") + "</tr>").join("") +
       `</tbody></table></div>${t.note ? `<p class="tnote">${esc(t.note)}</p>` : ""}`;
   }).join("");
-  $("charts").innerHTML = out.charts.map(svgChart).join("");
+  $("charts").innerHTML = (out.forest ? forestPlot(out.forest) : "") + out.charts.map(svgChart).join("");
   $("notes").hidden = !out.notes.length;
   $("notes").innerHTML = out.notes.map(n => `<p>${esc(n)}</p>`).join("");
   $("res-guide").style.display = out.guide ? "" : "none"; if (out.guide) $("res-guide").href = "../" + out.guide;
   const s = JSON.stringify(spec, null, 1).replace(/\n\s*/g, " ");
+  if (model.division === "statistics") {
+  $("code").textContent = `# Replicate this result in Python. The engine is the folder oes/engine/oes_engine of this website\n# (engine version ${out.engine}); it needs numpy, pandas and scipy.\nimport sys; sys.path.insert(0, "oes/engine")\nimport oes_engine\n\ncsv = ${model.nodata ? '""' : `open("${RESULT.data}").read()`}\nresult = oes_engine.run("${model.id}", csv, ${s})\nfor table in result["tables"]:\n    print(table["title"])\n    for row in table["rows"]:\n        print(row)`;
+  } else {
   $("code").textContent = `# git clone https://github.com/tuhingm/open-econometric-systems\n# pip install -e open-econometric-systems/oes-engine\nimport oes_engine\n\nresult = oes_engine.run("${model.id}", open("${RESULT.data}").read(), ${s})\nfor table in result["tables"]:\n    print(table["title"])\n    for row in table["rows"]:\n        print(row)`;
+  }
   $("s-results").scrollIntoView({behavior: "smooth"});
+}
+
+function forestPlot(F) {
+  const rows = F.labels.length, rowH = 20, L = 190, R = 150, T = 34, W = 640, plotW = W - L - R, H = T + (rows + 3) * rowH + 30;
+  const lo = Math.min(...F.lo, F.pooled.lo, ...(F.pred || [])), hi = Math.max(...F.hi, F.pooled.hi, ...(F.pred || []));
+  const a = Math.min(lo, F.null), b = Math.max(hi, F.null), pad = (b - a) * 0.05 || 1;
+  const X = v => L + (v - (a - pad)) / ((b + pad) - (a - pad)) * plotW;
+  const fmt = v => NUM(+(F.log ? Math.exp(v) : v).toPrecision(3));
+  let g = `<text x="${L - 8}" y="${T - 14}" text-anchor="end" font-size="10" font-weight="700" fill="#41506a">Study</text><text x="${W - R + 10}" y="${T - 14}" font-size="10" font-weight="700" fill="#41506a">${F.log ? "Ratio" : "Effect"} [CI]    Weight</text>`;
+  g += `<line x1="${X(F.null)}" x2="${X(F.null)}" y1="${T - 6}" y2="${T + rows * rowH + 6}" stroke="#9aa6bd" stroke-dasharray="3 3"/>`;
+  const wmax = Math.max(...F.weight);
+  F.labels.forEach((lb, i) => {
+    const y = T + i * rowH + rowH / 2, s = 3 + 5 * F.weight[i] / wmax;
+    g += `<text x="${L - 8}" y="${y + 3}" text-anchor="end" font-size="10.5" fill="#1b2437">${esc(String(lb).slice(0, 28))}</text><line x1="${X(F.lo[i])}" x2="${X(F.hi[i])}" y1="${y}" y2="${y}" stroke="#41506a"/>` +
+         `<rect x="${X(F.est[i]) - s / 2}" y="${y - s / 2}" width="${s}" height="${s}" fill="#0033a0"/><text x="${W - R + 10}" y="${y + 3}" font-size="10" fill="#41506a">${fmt(F.est[i])} [${fmt(F.lo[i])}, ${fmt(F.hi[i])}]    ${F.weight[i]}%</text>`;
+  });
+  const y = T + rows * rowH + rowH, d = 7;
+  g += `<polygon points="${X(F.pooled.lo)},${y} ${X(F.pooled.est)},${y - d} ${X(F.pooled.hi)},${y} ${X(F.pooled.est)},${y + d}" fill="#d9822b"/>` +
+       `<text x="${L - 8}" y="${y + 3}" text-anchor="end" font-size="10.5" font-weight="700" fill="#1b2437">${esc(F.pooled.label.slice(0, 26))}</text><text x="${W - R + 10}" y="${y + 3}" font-size="10" font-weight="700" fill="#1b2437">${fmt(F.pooled.est)} [${fmt(F.pooled.lo)}, ${fmt(F.pooled.hi)}]</text>`;
+  if (F.pred) g += `<line x1="${X(F.pred[0])}" x2="${X(F.pred[1])}" y1="${y + rowH}" y2="${y + rowH}" stroke="#d9822b" stroke-width="2"/><text x="${L - 8}" y="${y + rowH + 3}" text-anchor="end" font-size="10.5" fill="#1b2437">Prediction interval</text><text x="${W - R + 10}" y="${y + rowH + 3}" font-size="10" fill="#41506a">[${fmt(F.pred[0])}, ${fmt(F.pred[1])}]</text>`;
+  const ticks = 5; let ax = "";
+  for (let k = 0; k <= ticks; k++) { const v = (a - pad) + ((b + pad) - (a - pad)) * k / ticks; ax += `<text x="${X(v)}" y="${H - 8}" text-anchor="middle" font-size="9.5" fill="#77849a">${fmt(v)}</text>`; }
+  return `<div class="chart" style="grid-column:1/-1;overflow:auto"><h4>Forest plot (${esc(F.measure)})</h4><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Forest plot" style="min-width:560px">${g}${ax}</svg></div>`;
 }
 const COLORS = ["#0033a0", "#d9822b", "#0f7a4f", "#a12a2a", "#6e4bb5", "#2a8fbd"];
 function svgChart(c) {
@@ -449,21 +492,21 @@ $("dl-json").onclick = () => RESULT && download(`oes_${RESULT.model.id}.json`, J
 // ----------------------------------------------------------------------------- in-browser test suite
 $("test-run").onclick = async () => {
   const btn = $("test-run"); btn.disabled = true;
-  const exp = await (await fetch("engine/expected.json?v=" + CAT.version)).json();
+  const exp = Object.assign(await (await fetch("engine/expected.json?v=" + CAT.version)).json(), await (await fetch("engine/stat_expected.json?v=" + CAT.version)).json());
   const list = CAT.models.filter(m => $("test-slow").checked || !m.slow);
   const tbl = $("test-table"); tbl.hidden = false;
-  tbl.innerHTML = `<table><thead><tr><th>Model</th><th>Group</th><th>Status</th><th>Seconds</th><th>Checked value</th><th>Browser</th><th>Reference</th></tr></thead><tbody>${list.map(m => `<tr id="t-${m.id}"><td>${esc(m.name)}</td><td>${esc(m.group)}</td><td class="test-run">waiting</td><td></td><td></td><td></td><td></td></tr>`).join("")}</tbody></table>`;
+  tbl.innerHTML = `<table><thead><tr><th>Model</th><th>Group</th><th>Status</th><th>Seconds</th><th>Checked value</th><th>Browser</th><th>Reference</th></tr></thead><tbody>${list.map(m => `<tr id="t-${m.id}"><td>${esc((m.code ? m.code + " " : "") + m.name)}</td><td>${esc(m.group)}</td><td class="test-run">waiting</td><td></td><td></td><td></td><td></td></tr>`).join("")}</tbody></table>`;
   let ok = 0, bad = 0;
   status.active = false;
   for (const m of list) {
     const tr = $("t-" + m.id), cells = tr.children, e = exp[m.id];
     cells[2].textContent = "running…";
     try {
-      const text = await (await fetch("../" + m.example.file)).text();
+      const text = m.example.file ? await (await fetch("../" + m.example.file)).text() : "";
       const r = await estimate(m, text, {...m.example.spec, ops: m.example.ops || []});
       if (r.result.error) throw new Error(r.result.error);
       const close = (a, b) => typeof a === "number" && Math.abs(a - b) <= e.rtol * Math.max(Math.abs(b), 1e-8) + 1e-6;
-      const v = r.result.tables[e.table_index].rows[0][1];
+      const v = r.result.tables[e.table_index].rows[e.row_index || 0][e.col_index || 1];
       const sv = e.summary ? (r.result.summary.find(x => x.label === e.summary.label) || {}).value : null;
       const pass = r.result.nobs === e.nobs && close(v, e.value) && (!e.summary || close(sv, e.summary.value));
       cells[2].innerHTML = pass ? '<span class="test-ok">✓ pass</span>' : '<span class="test-bad">✗ differs</span>';
@@ -473,16 +516,17 @@ $("test-run").onclick = async () => {
       cells[6].innerHTML = esc(NUM(e.value)) + (e.summary ? `<br>${esc(NUM(e.summary.value))}` : "");
       pass ? ok++ : bad++;
     } catch (err) { cells[2].innerHTML = `<span class="test-bad">✗ error</span>`; cells[4].textContent = err.message.slice(0, 120); bad++; }
-    $("test-sum").textContent = `${ok} passed, ${bad} failed of ${list.length}` + (list.length < CAT.models.length ? ` (${CAT.models.length - list.length} slow models not run)` : "");
+    $("test-sum").textContent = `${ok} passed, ${bad} failed of ${list.length}`;
   }
   btn.disabled = false;
 };
 
 // ----------------------------------------------------------------------------- start
-fetch("engine/catalog.json", {cache: "no-cache"}).then(r => r.json()).then(c => {
-  CAT = c; $("n-models").textContent = c.models.length;
+Promise.all([fetch("engine/catalog.json", {cache: "no-cache"}).then(r => r.json()), fetch("engine/stat_catalog.json", {cache: "no-cache"}).then(r => r.json())]).then(([c, sc]) => {
+  c.models = c.models.concat(sc.models); CAT = c; $("n-models").textContent = c.models.length;
   renderGroups(); renderOps(); renderOpForm(); renderFields();
   const h = location.hash.slice(1);
+  if (h === "statistics") { DIV = "stat"; GROUP = null; renderGroups(); $("s-model").scrollIntoView(); }
   if (h && c.models.some(m => m.id === h)) chooseModel(h, false);
   addEventListener("hashchange", () => { const k = location.hash.slice(1); if (CAT.models.some(m => m.id === k) && (!MODEL || MODEL.id !== k)) chooseModel(k, false); });
 }).catch(() => showErr("Could not load the model catalogue. Please reload the page."));

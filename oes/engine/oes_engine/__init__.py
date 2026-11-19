@@ -15,10 +15,11 @@ import pandas as pd
 
 from . import bayes, bayes_extra, breaks, causal, causal_extra, lp, markov, ml, panel, pthreshold, pvar, smooth, statespace_var, svar, tar, timeseries, ts_extra
 from . import panel_extra
+from . import stat_registry
 from .core import OESError, read_csv, time_order
 from .report import frame, plot, show, summary, tables
 
-__version__ = "1.4.0"
+__version__ = "1.5.0"
 
 # field helpers -------------------------------------------------------------------------------------------------
 def col(key, label, required=True, help=""):
@@ -462,7 +463,9 @@ MODELS += [
          example=dict(file=OX + "produc_nb.csv", spec=dict(y="log_gsp", x=["log_pcap", "log_pc", "log_emp", "unemp"], unit="state", time="year", neighbours="neighbours"))),
 ]
 
-BY_ID = {m["id"]: m for m in MODELS}
+STAT_MODELS = stat_registry.build(col, cols, num, sel)       # the Statistics Division: its own page, registered like every other model
+STAT_GROUPS = stat_registry.STAT_GROUPS
+BY_ID = {m["id"]: m for m in MODELS + STAT_MODELS}
 GROUPS = ["Time series", "Panel data", "Causal inference", "Machine learning", "Bayesian", "Markov switching"]
 
 
@@ -477,8 +480,10 @@ def packages(model_id):
 SLOW = {"dml_irm", "dml_iv", "causal_forest", "staggered", "tvpvar", "mfbvar", "svvar", "hier_panel", "sign_bvar", "ms_tvtp", "eventstudy", "sdid", "matching", "bartik", "arima", "garch", "quantile", "cointegration", "wavelet", "twfe", "dpthresh", "pcoint", "pquant", "spatial"}
 
 
-def catalog():
-    return [dict({k: v for k, v in m.items() if k != "fn"}, packages=packages(m["id"]), slow=m["id"] in SLOW) for m in MODELS]
+def catalog(division="econometrics"):
+    """The models of one division: "econometrics" (the OES page) or "statistics" (the Statistics Division page)."""
+    models = STAT_MODELS if division == "statistics" else MODELS
+    return [dict({k: v for k, v in m.items() if k != "fn"}, packages=packages(m["id"]), slow=m["id"] in SLOW) for m in models]
 
 
 def catalog_json():
@@ -564,8 +569,12 @@ def run(model_id, csv_text, spec=None):
     if m is None:
         return {"error": f"Unknown model {model_id}."}
     try:
-        df = read_csv(csv_text) if isinstance(csv_text, str) else csv_text.copy()
-        df = prepare(df, spec.pop("ops", None))
+        if m.get("nodata") and not (isinstance(csv_text, str) and csv_text.strip()):
+            df = pd.DataFrame({"_": [0]})
+            spec.pop("ops", None)
+        else:
+            df = read_csv(csv_text) if isinstance(csv_text, str) else csv_text.copy()
+            df = prepare(df, spec.pop("ops", None))
         if spec.get("x") == "__all__":
             used = {spec.get(k) for k in ("y", "treat", "instrument", "time", "unit")}
             spec["x"] = [c for c in df.columns if c not in used and pd.api.types.is_numeric_dtype(df[c])]

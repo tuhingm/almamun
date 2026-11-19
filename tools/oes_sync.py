@@ -25,50 +25,68 @@ engine_root = pathlib.Path(args[0] if args else ROOT.parent / "open-econometric-
 src = engine_root / "oes-engine" / "oes_engine"
 dst = ROOT / "oes" / "engine" / "oes_engine"
 dst.mkdir(parents=True, exist_ok=True)
-statistics_src = src / "statistics_division.py"
-statistics_dst = ROOT / "oes" / "engine" / "statistics_division.py"
 if not LOCAL:
     for f in dst.glob("*.py"):
         f.unlink()
     for f in sorted(src.glob("*.py")):
         shutil.copy(f, dst / f.name)
-    if not statistics_src.is_file():
-        raise SystemExit(f"Statistics Division engine not found: {statistics_src}")
-    shutil.copy2(statistics_src, statistics_dst)
-elif not statistics_dst.is_file():
-    raise SystemExit(f"--local requested but Statistics Division engine is missing: {statistics_dst}")
 print("engine files:", ", ".join(sorted(f.name for f in dst.glob("*.py"))))
-print("statistics division engine:", statistics_dst.name)
 
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(dst.parent))
 import oes_engine as E  # noqa: E402
 
 (ROOT / "oes/engine/catalog.json").write_text(json.dumps({"version": E.__version__, "models": E.catalog()}, separators=(",", ":")))
+(ROOT / "oes/engine/stat_catalog.json").write_text(json.dumps({"version": E.__version__, "models": E.catalog("statistics")}, separators=(",", ":")))
 
-expected = json.loads((ROOT / "oes/engine/expected.json").read_text()) if ONLY else {}
-for m in E.MODELS:
-    if ONLY and m["id"] not in ONLY:
-        continue
-    ex = m["example"]
-    spec = dict(ex["spec"], ops=ex.get("ops", []))
-    t = time.time()
-    r = E.run(m["id"], (ROOT / ex["file"]).read_text(), spec)
-    if "error" in r:
-        raise SystemExit(f"{m['id']}: {r['error']}")
-    # the first estimate in the output: column 2 of the first table whose first row holds a number there
-    ti = next(i for i, tb in enumerate(r["tables"]) if tb["rows"] and isinstance(tb["rows"][0][1], (int, float)))
-    tb = r["tables"][ti]
-    row = tb["rows"][0]
-    ml = m["group"] in ("Machine learning", "Bayesian")   # simulation-based: allow small cross-platform differences
-    expected[m["id"]] = {"nobs": r["nobs"], "table_index": ti, "table": tb["title"], "row": str(row[0]), "col": tb["columns"][1],
-                         "value": row[1], "rtol": 0.05 if ml else 1e-3, "seconds": round(time.time() - t, 1)}
-    # and the first non-integer statistic of the summary tiles (bounds F, R-squared, ATT, test RMSE, ...)
-    sm = next((x for x in r["summary"] if isinstance(x["value"], float)), None)
-    if sm:
-        expected[m["id"]]["summary"] = {"label": sm["label"], "value": sm["value"]}
-    print(f"{m['id']:14s} {expected[m['id']]['seconds']:5.1f}s  {row[0]} = {row[1]};  {sm and sm['label']} = {sm and sm['value']}")
-(ROOT / "oes/engine/expected.json").write_text(json.dumps(expected, indent=1))
+
+def build_expected(models, path):
+    expected = json.loads(path.read_text()) if ONLY and path.exists() else {}
+    for m in models:
+        if ONLY and m["id"] not in ONLY:
+            continue
+        ex = m["example"]
+        spec = dict(ex["spec"], ops=ex.get("ops", []))
+        t = time.time()
+        r = E.run(m["id"], (ROOT / ex["file"]).read_text() if ex.get("file") else "", spec)
+        if "error" in r:
+            raise SystemExit(f"{m['id']}: {r['error']}")
+        # the cell to check: the registry's own choice (check=dict(table, row, col)), else the first estimate in the output:
+        # the first non-integer number in the table rows (column 2 onwards), falling back to column 2 of the first numeric row
+        ck = m.get("check")
+        if ck:
+            ti, ri, ci = ck["table"], ck["row"], ck["col"]
+        else:
+            hit = None
+            for i, tb in enumerate(r["tables"]):
+                for rj, rw in enumerate(tb["rows"]):
+                    for cj in range(1, len(rw)):
+                        if isinstance(rw[cj], float):
+                            hit = (i, rj, cj)
+                            break
+                    if hit:
+                        break
+                if hit:
+                    break
+            if hit is None:
+                hit = next((i, 0, 1) for i, tb in enumerate(r["tables"]) if tb["rows"] and isinstance(tb["rows"][0][1], (int, float)))
+            ti, ri, ci = hit
+        tb = r["tables"][ti]
+        ri = ri if ri >= 0 else len(tb["rows"]) + ri
+        row = tb["rows"][ri]
+        ml = m["group"] in ("Machine learning", "Bayesian")   # simulation-based: allow small cross-platform differences
+        expected[m["id"]] = {"nobs": r["nobs"], "table_index": ti, "table": tb["title"], "row": str(row[0]), "row_index": ri, "col": tb["columns"][ci], "col_index": ci,
+                             "value": row[ci], "rtol": 0.05 if ml else 1e-3, "seconds": round(time.time() - t, 1)}
+        # and the first non-integer statistic of the summary tiles (bounds F, R-squared, ATT, test RMSE, ...)
+        sm = next((x for x in r["summary"] if isinstance(x["value"], float)), None)
+        if sm:
+            expected[m["id"]]["summary"] = {"label": sm["label"], "value": sm["value"]}
+        print(f"{m['id']:18s} {expected[m['id']]['seconds']:5.1f}s  {row[0]} [{tb['columns'][ci]}] = {row[ci]};  {sm and sm['label']} = {sm and sm['value']}")
+    path.write_text(json.dumps(expected, indent=1))
+
+
+build_expected(E.MODELS, ROOT / "oes/engine/expected.json")
+build_expected(E.STAT_MODELS, ROOT / "oes/engine/stat_expected.json")
 
 # the Web Worker loads the engine file by file: its list must match the engine
 import re

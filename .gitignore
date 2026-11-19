@@ -1,3 +1,6 @@
 __pycache__/
 *.pyc
 tools/ml_selector/data/
+stat-validation/logs/
+__pycache__/
+.pytest_cache/

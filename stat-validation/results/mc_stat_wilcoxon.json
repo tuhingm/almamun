@@ -1,0 +1,218 @@
+{
+ "model": "stat_wilcoxon",
+ "scenarios": [
+  {
+   "scenario": "H0, normal differences",
+   "model": "stat_wilcoxon",
+   "note": "",
+   "h0_true": true,
+   "results": [
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.0056,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.0475,
+     "mc_se_reject_p": 0.004756245893559331
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00377,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.044,
+     "mc_se_reject_p": 0.0045860658521220555
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.0052,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.054,
+     "mc_se_reject_p": 0.005053909377897471
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.01034,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.041,
+     "mc_se_reject_p": 0.004433903472111228
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 1289,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.03408,
+     "failure_reasons": {},
+     "reps_valid": 1289,
+     "reject_p": 0.057408844065166796,
+     "mc_se_reject_p": 0.0064792482903710605
+    }
+   ]
+  },
+  {
+   "scenario": "H0, skewed-then-centred differences (median 0)",
+   "model": "stat_wilcoxon",
+   "note": "exponential minus its median: symmetry violated, so the signed-rank null is not exactly true",
+   "h0_true": true,
+   "results": [
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00594,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.216,
+     "mc_se_reject_p": 0.00920173896608679
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00377,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.3865,
+     "mc_se_reject_p": 0.010888474411045838
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00529,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.754,
+     "mc_se_reject_p": 0.009630264793867301
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.01071,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.959,
+     "mc_se_reject_p": 0.00443390347211123
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 1271,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.03454,
+     "failure_reasons": {},
+     "reps_valid": 1271,
+     "reject_p": 0.999213217938631,
+     "mc_se_reject_p": 0.0007864724874591485
+    }
+   ]
+  },
+  {
+   "scenario": "Power, shift 0.3",
+   "model": "stat_wilcoxon",
+   "note": "",
+   "h0_true": false,
+   "results": [
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00635,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.5095,
+     "mc_se_reject_p": 0.011178321653987239
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00368,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.8315,
+     "mc_se_reject_p": 0.008369819293150838
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00529,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.9975,
+     "mc_se_reject_p": 0.001116635571706353
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.01137,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 1.0,
+     "mc_se_reject_p": 0.0
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 1232,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.03564,
+     "failure_reasons": {},
+     "reps_valid": 1232,
+     "reject_p": 1.0,
+     "mc_se_reject_p": 0.0
+    }
+   ]
+  }
+ ],
+ "env": {
+  "python": "3.12.3",
+  "numpy": "2.0.2",
+  "scipy": "1.14.1",
+  "pandas": "2.2.3",
+  "engine": "1.5.0"
+ },
+ "wall_seconds": 304.1,
+ "budget_seconds_per_cell": 45.0
+}
