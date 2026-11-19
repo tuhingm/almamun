@@ -253,12 +253,17 @@ function renderGroups() {
   if (!groups.includes(GROUP)) GROUP = groups[0];
   $("divs").innerHTML = [["econ", "Econometrics", CAT.models.filter(m => m.division !== "statistics").length], ["stat", "Statistics", CAT.models.filter(m => m.division === "statistics").length]].map(d => `<button type="button" data-d="${d[0]}" data-d="${d[0]}" aria-pressed="${DIV === d[0]}">${d[1]} <span class="hint">${d[2]}</span></button>`).join("");
   $("groups").dataset.div = DIV;
-  $("divs").querySelectorAll("button").forEach(x => x.onclick = () => { DIV = x.dataset.d; GROUP = null; renderGroups(); });
+  $("divs").querySelectorAll("button").forEach(x => x.onclick = () => { DIV = x.dataset.d; GROUP = null; renderGroups(); firstOf(GROUP); });
   $("groups").innerHTML = groups.map(g => `<button type="button" data-g="${esc(g)}" aria-pressed="${g === GROUP}">${esc(g)} <span class="hint">${pool.filter(m => m.group === g).length}</span></button>`).join("");
-  $("groups").querySelectorAll("button").forEach(b => b.onclick = () => { GROUP = b.dataset.g; renderGroups(); });
+  $("groups").querySelectorAll("button").forEach(b => b.onclick = () => { GROUP = b.dataset.g; renderGroups(); firstOf(GROUP); });
   $("models").innerHTML = pool.filter(m => m.group === GROUP).map(m =>
     `<button type="button" data-id="${m.id}" aria-pressed="${MODEL && MODEL.id === m.id}">${esc(m.name)}<small>${m.code} · ${esc(exName(m))}</small></button>`).join("");
   $("models").querySelectorAll("button").forEach(b => b.onclick = () => chooseModel(b.dataset.id, true));
+}
+// switching the division or group selects the first method there, so the specification below always matches the tab shown
+function firstOf(group) {
+  const m = CAT.models.filter(inDiv).find(x => x.group === group);
+  if (m) chooseModel(m.id, false);
 }
 function chooseModel(id, scroll) {
   MODEL = CAT.models.find(m => m.id === id);
