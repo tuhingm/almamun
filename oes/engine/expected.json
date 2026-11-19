@@ -1544,5 +1544,21 @@
    "label": "Test RMSE, super learner",
    "value": 0.6322
   }
+ },
+ "hetero": {
+  "nobs": 445,
+  "table_index": 0,
+  "table": "Best linear predictor of the effect of train on re78",
+  "row": "Average treatment effect (beta1)",
+  "row_index": 0,
+  "col": "Estimate",
+  "col_index": 1,
+  "value": 1.8218,
+  "rtol": 0.05,
+  "seconds": 2.5,
+  "summary": {
+   "label": "Treated share",
+   "value": 0.4157
+  }
  }
 }
