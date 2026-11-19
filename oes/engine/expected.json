@@ -1496,5 +1496,21 @@
    "label": "Average effect",
    "value": 1.7943
   }
+ },
+ "classify": {
+  "nobs": 1971,
+  "table_index": 0,
+  "table": "Out-of-sample classification accuracy",
+  "row": "Logit",
+  "row_index": 0,
+  "col": "AUC",
+  "col_index": 1,
+  "value": 0.7613,
+  "rtol": 0.05,
+  "seconds": 1.0,
+  "summary": {
+   "label": "Share of ones",
+   "value": 0.8762
+  }
  }
 }

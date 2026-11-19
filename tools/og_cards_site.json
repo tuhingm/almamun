@@ -360,6 +360,12 @@
   "sub": "Effects that differ across people, N ≥ 2,000. Step-by-step guide with Python code and real output."
  },
  {
+  "out": "assets/og/ml-guide/classification.jpg",
+  "kicker": "Machine Learning Guide · Model guide",
+  "title": "Classification: Logit, Penalised Logit, Random Forest and Boosting",
+  "sub": "The outcome is a yes/no event (approval, default, participation) and you want predicted probabilities, a cut-off and an honest…"
+ },
+ {
   "out": "assets/og/ml-guide/dml-irm.jpg",
   "kicker": "Machine Learning Guide · Model guide",
   "title": "Double Machine Learning: Interactive Model",
