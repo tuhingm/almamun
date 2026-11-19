@@ -389,3 +389,62 @@ def test_heckman_recovers_selection_bias_in_simulation():
 def test_heckman_errors():
     for kw, msg in [(dict(sel="kidsge6", z=["educ", "age"]), "0 and 1"), (dict(z=[]), "selection equation"), (dict(y="lwage", x=["lwage"]), "more than one role")]:
         assert msg in mroz(**kw)["error"]
+
+
+# ------------------------------------------------------------------ count models
+def visits(**kw):
+    spec = dict(o.BY_ID["count"]["example"]["spec"]); spec.update(kw)
+    return o.run("count", open(os.path.join(ME, "doctor_visits.csv")).read(), spec)
+
+
+def test_poisson_matches_independent_irls():
+    d = pd.read_csv(os.path.join(ME, "doctor_visits.csv")); xs = o.BY_ID["count"]["example"]["spec"]["x"]
+    X = sm.add_constant(d[xs]).values; y = d.mdvis.values.astype(float); b = np.zeros(X.shape[1]); b[0] = np.log(y.mean())
+    for _ in range(100):                                    # Newton-Raphson for the Poisson likelihood, written out by hand
+        mu = np.exp(X @ b); b = b + np.linalg.solve(X.T @ (X * mu[:, None]), X.T @ (y - mu))
+    r = visits(family="poisson")
+    for i, nm in enumerate(["const"] + xs):
+        assert row(r, "Coefficient", nm)[1] == pytest.approx(b[i], abs=1e-5)
+    mu = np.exp(X @ b); meat = X.T @ (X * ((y - mu) ** 2)[:, None]); bread = np.linalg.inv(X.T @ (X * mu[:, None]))
+    V = bread @ meat @ bread
+    assert row(r, "Coefficient", "disea")[2] == pytest.approx(np.sqrt(V[6, 6]), rel=1e-4)
+
+
+def test_negbin_matches_scipy_likelihood():
+    from scipy import optimize
+    d = pd.read_csv(os.path.join(ME, "doctor_visits.csv")); xs = o.BY_ID["count"]["example"]["spec"]["x"]
+    X = sm.add_constant(d[xs]).values; y = d.mdvis.values.astype(float)
+
+    def nll(t):
+        mu = np.exp(X @ t[:-1]); a = np.exp(t[-1]); r = 1 / a
+        return -stats.nbinom.logpmf(y, r, r / (r + mu)).sum()
+    r0 = optimize.minimize(nll, np.r_[np.zeros(X.shape[1]), 0], method="BFGS", options={"gtol": 1e-7, "maxiter": 2000})
+    r = visits(family="negbin")
+    assert summ(r, "Log-likelihood") == pytest.approx(-r0.fun, abs=1e-2)
+    assert summ(r, "alpha") == pytest.approx(np.exp(r0.x[-1]), rel=2e-3)
+
+
+def test_count_recovers_parameters_and_detects_overdispersion():
+    rng = np.random.default_rng(5); n = 5000
+    x = rng.normal(size=n); mu = np.exp(0.5 + 0.4 * x)
+    y_nb = rng.negative_binomial(2.0, 2.0 / (2.0 + mu))
+    y_p = rng.poisson(mu)
+    for y, over in [(y_nb, True), (y_p, False)]:
+        r = o.run("count", pd.DataFrame(dict(y=y, x=x)).to_csv(index=False), dict(y="y", x=["x"], family="negbin"))
+        assert row(r, "Coefficient", "x")[1] == pytest.approx(0.4, abs=0.05)
+        p = next(t for t in table(r, "Specification")["rows"] if t[0].startswith("Cameron"))[2]
+        assert (p < 0.01) == over
+    assert summ(r, "alpha") < 0.1                          # NB collapses to Poisson when the data are Poisson
+
+
+def test_irr_and_marginal_effect_by_hand():
+    r = visits(family="poisson"); b = row(r, "Coefficient", "disea")[1]
+    assert row(r, "Incidence", "disea")[1] == pytest.approx(np.exp(b), abs=1e-5)
+    d = pd.read_csv(os.path.join(ME, "doctor_visits.csv")); xs = o.BY_ID["count"]["example"]["spec"]["x"]
+    X = sm.add_constant(d[xs]).values; bb = np.array([row(r, "Coefficient", nm)[1] for nm in ["const"] + xs])
+    assert row(r, "Average marginal", "disea")[1] == pytest.approx((bb[6] * np.exp(X @ bb)).mean(), rel=1e-4)
+
+
+def test_count_errors():
+    for kw, msg in [(dict(y="fmde", x=["disea"]), "whole numbers"), (dict(x=[]), "at least one"), (dict(family="zip"), "must be one of")]:
+        assert msg in visits(**kw)["error"]

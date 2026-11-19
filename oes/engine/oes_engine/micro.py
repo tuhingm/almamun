@@ -778,3 +778,125 @@ def heckman(df, spec):
              "WARNING: every selection variable is also in the outcome equation. The model is then identified only by the nonlinearity of the inverse Mills ratio, which is fragile: add a variable that affects selection but not the outcome.",
              "The model assumes that the errors of the two equations are jointly normal. If rho is close to zero, selection is ignorable and OLS on the selected sample is consistent."]
     return result("heckman", f"Heckman selection model: {y}", n, summary, tabs, [ch], notes)
+
+
+def _count_pmf(mu, family, alpha, kmax):
+    ks = np.arange(kmax + 1)[:, None]
+    if family == "poisson":
+        return stats.poisson.pmf(ks, mu[None, :])
+    r = 1.0 / alpha
+    return stats.nbinom.pmf(ks, r, r / (r + mu[None, :]))
+
+
+def count(df, spec):
+    """Poisson and negative-binomial (NB2) regression for a count outcome, with incidence-rate ratios, marginal effects and dispersion tests."""
+    y = need(spec, "y", "count outcome variable")
+    xs = as_list(spec.get("x"))
+    if not xs:
+        raise OESError("Choose at least one explanatory variable.")
+    fam = _choice(spec, "family", ["poisson", "negbin"], "poisson", "The family")
+    cov = _choice(spec, "cov", ["model", "robust"], "robust", "The standard errors")
+    expo = spec.get("exposure") if spec.get("exposure") not in (None, "") else None
+    distinct(y, xs, [expo] if expo else [])
+    d = numeric(df, [y] + xs + ([expo] if expo else [])).reset_index(drop=True)
+    Y = d[y].to_numpy(float)
+    if (Y < 0).any() or not np.allclose(Y, np.round(Y)):
+        raise OESError(f"{y} must contain non-negative whole numbers (counts).")
+    if Y.sum() == 0:
+        raise OESError(f"{y} is zero for every observation.")
+    off = None
+    if expo:
+        if (d[expo] <= 0).any():
+            raise OESError("The exposure variable must be positive.")
+        off = np.log(d[expo].to_numpy(float))
+    n, k = len(d), len(xs)
+    if n < 5 * (k + 1):
+        raise OESError("Too few observations for this number of variables.")
+    X = sm.add_constant(d[xs].astype(float), has_constant="add")
+    names = list(X.columns)
+    Xn = np.asarray(X, float)
+    kw = dict(cov_type="HC0") if cov == "robust" else {}
+    try:
+        pois = sm.GLM(Y, X, family=sm.families.Poisson(), offset=off).fit(**kw)
+    except Exception as e:
+        raise OESError(f"The Poisson model could not be estimated ({e}). Check for collinear or constant variables.")
+    if fam == "poisson":
+        res, beta, V, alpha = pois, np.asarray(pois.params), np.asarray(pois.cov_params()), None
+        mu = np.asarray(pois.mu)
+        ll = float(sm.GLM(Y, X, family=sm.families.Poisson(), offset=off).fit().llf)
+        se = np.asarray(pois.bse)
+    else:
+        try:
+            m = sm.NegativeBinomial(Y, X, loglike_method="nb2", offset=off)
+            start = np.r_[np.asarray(pois.params), 0.5]
+            res = m.fit(start_params=start, method="bfgs", maxiter=2000, disp=0, **kw)
+            res = m.fit(start_params=res.params, method="newton", maxiter=200, disp=0, **kw) if False else res
+        except Exception as e:
+            raise OESError(f"The negative-binomial model did not converge ({e}).")
+        if not res.mle_retvals.get("converged", True):
+            raise OESError("The negative-binomial likelihood did not converge. Try fewer variables or rescale them.")
+        beta, alpha = np.asarray(res.params)[:-1], float(np.asarray(res.params)[-1])
+        V = np.asarray(res.cov_params())
+        se = np.sqrt(np.diag(V))
+        mu = np.exp(Xn @ beta + (off if off is not None else 0))
+        ll = float(res.llf)
+    if not np.all(np.isfinite(se)):
+        raise OESError("Standard errors could not be computed (collinear variables or perfect prediction).")
+    nb = len(beta)
+    cof = coef_table(names + (["alpha (dispersion)"] if fam == "negbin" else []), np.r_[beta, [alpha] if fam == "negbin" else []],
+                     se, dist="z", note=("Poisson" if fam == "poisson" else "Negative binomial (NB2)") + " regression; the coefficient is the change in the log expected count. "
+                     + ("Robust (sandwich) standard errors." if cov == "robust" else "Model-based standard errors."))
+    tabs = [cof]
+    # incidence-rate ratios
+    irr = np.exp(beta)
+    tabs.append(table("Incidence-rate ratios exp(b)", ["Variable", "IRR", "Std. err.", "95% CI low", "95% CI high"],
+                      [[names[i], f(irr[i]), f(irr[i] * se[i]), f(np.exp(beta[i] - 1.96 * se[i])), f(np.exp(beta[i] + 1.96 * se[i]))] for i in range(1, nb)],
+                      "An IRR of 1.10 means that a one-unit increase raises the expected count by 10%. Delta-method standard errors."))
+    # average marginal effects
+    dummy = [bool(set(d[c].unique()) <= {0, 1}) for c in xs]
+    ofs = off if off is not None else 0
+
+    def ame(b):
+        out = np.zeros(k)
+        for i in range(k):
+            if dummy[i]:
+                A1, A0 = Xn.copy(), Xn.copy(); A1[:, i + 1], A0[:, i + 1] = 1, 0
+                out[i] = (np.exp(A1 @ b + ofs) - np.exp(A0 @ b + ofs)).mean()
+            else:
+                out[i] = (b[i + 1] * np.exp(Xn @ b + ofs)).mean()
+        return out
+    am = ame(beta)
+    Vb = V[:nb, :nb]
+    J = _num_jac(ame, beta)
+    sa = np.sqrt(np.maximum(np.diag(J @ Vb @ J.T), 0))
+    tabs.append(table("Average marginal effects on the expected count", ["Variable", "dE[y]/dx", "Std. err.", "z", "p-value"],
+                      [[xs[i], f(am[i]), f(sa[i]), f(am[i] / sa[i], 4) if sa[i] > 0 else None, f(2 * stats.norm.sf(abs(am[i] / sa[i]))) if sa[i] > 0 else None] for i in range(k)],
+                      "Average of the observation-level effects. Discrete change for 0/1 variables."))
+    # dispersion diagnostics from the Poisson fit
+    mu_p = np.asarray(pois.mu)
+    pear = float(((Y - mu_p) ** 2 / mu_p).sum())
+    dev = float(pois.deviance)
+    dfr = n - (k + 1)
+    aux = ((Y - mu_p) ** 2 - Y) / mu_p
+    ct = sm.OLS(aux, mu_p).fit()                       # Cameron-Trivedi (1990) test of Var = mu against Var = mu + alpha mu^2
+    drows = [test_row("Cameron-Trivedi overdispersion test (Poisson)", float(ct.tvalues[0]), 2 * stats.norm.sf(abs(float(ct.tvalues[0]))), "H0: variance = mean (equidispersion)"),
+             ["Pearson chi-squared / df (Poisson)", f(pear / dfr), None, "about 1 under equidispersion; much larger means overdispersion"],
+             ["Deviance / df (Poisson)", f(dev / dfr), None, "about 1 under a correct Poisson model"]]
+    if fam == "negbin":
+        lr = max(2 * (ll - float(sm.GLM(Y, X, family=sm.families.Poisson(), offset=off).fit().llf)), 0.0)
+        drows.append(["LR test alpha = 0 (NB against Poisson)", f(lr, 4), f(0.5 * stats.chi2.sf(lr, 1), 4), "boundary test: the p-value is halved"])
+    drows.append(["Share of zeros: observed against predicted", f(float((Y == 0).mean())), f(float(_count_pmf(mu, fam, alpha, 0)[0].mean())),
+                  "an excess of observed zeros points to a zero-inflated or hurdle model"])
+    tabs.append(tests_table(drows))
+    kmax = int(min(max(Y.max(), 5), 10))
+    obs = [float((Y == j).mean()) for j in range(kmax)] + [float((Y >= kmax).mean())]
+    pm = _count_pmf(mu, fam, alpha, kmax - 1).mean(axis=1)
+    pred = list(pm) + [float(1 - pm.sum())]
+    ch = chart("Observed and predicted distribution of the count", [str(j) for j in range(kmax)] + [f"{kmax}+"], [("Observed", obs), ("Predicted", pred)], y, "Share of observations", kind="bar")
+    summary = [stat("Observations", n), stat("Log-likelihood", ll), stat("Mean of the count", float(Y.mean())), stat("Variance of the count", float(Y.var(ddof=1)))]
+    if fam == "negbin":
+        summary.append(stat("alpha", alpha))
+    notes = [f"{'Poisson' if fam == 'poisson' else 'Negative-binomial'} regression of {y} on {', '.join(xs)}: {n} observations; mean {Y.mean():.3g}, variance {Y.var(ddof=1):.3g}.",
+             "Poisson regression is consistent for the mean whenever the mean is correctly specified, so use robust standard errors; it is efficient only if variance equals mean. "
+             "The negative binomial adds a dispersion parameter alpha and is the standard model for overdispersed counts."]
+    return result("count", f"{'Poisson' if fam == 'poisson' else 'Negative-binomial'} regression: {y}", n, summary, tabs, [ch], notes)
