@@ -1696,3 +1696,254 @@ def ivprobit(df, spec):
              "which also gives a simple test of exogeneity. The structural coefficients depend on the scale of the error, so compare average effects, not coefficients.",
              "Valid instruments must be relevant (check the first-stage F) and excluded from the outcome equation; the exclusion cannot be tested when the model is exactly identified."]
     return result("ivprobit", f"IV probit: {y}", n, summary, tabs, [], notes)
+
+
+def _halton(n, base):
+    out = np.zeros(n)
+    for i in range(n):
+        f_, r, k = 1.0, 0.0, i + 1
+        while k > 0:
+            f_ /= base; r += f_ * (k % base); k //= base
+        out[i] = r
+    return out
+
+
+def _choice_setup(df, spec):
+    y = need(spec, "y", "chosen-alternative indicator (0/1)")
+    ident = need(spec, "id", "choice-situation identifier")
+    alt = need(spec, "alt", "alternative identifier")
+    xa = as_list(spec.get("xalt"))
+    xc = as_list(spec.get("xcase"))
+    if not xa and not xc:
+        raise OESError("Choose at least one alternative-specific variable or one case-specific variable.")
+    asc = _choice(spec, "asc", ["yes", "no"], "yes", "Alternative-specific constants")
+    distinct(y, xa, xc, [ident], [alt])
+    d = numeric(df, [y] + xa + xc, keep=[ident, alt]).reset_index(drop=True)
+    if not set(d[y].unique()) <= {0, 1}:
+        raise OESError(f"{y} must contain only 0 and 1.")
+    d["_alt"] = d[alt].astype(str)
+    levels = sorted(d["_alt"].unique())
+    if len(levels) < 2:
+        raise OESError("There must be at least two alternatives.")
+    base = spec.get("base")
+    base = str(base) if base not in (None, "") else levels[0]
+    if base not in levels:
+        raise OESError(f"The base alternative {base} is not among: {', '.join(levels)}.")
+    cid, cidx = np.unique(d[ident].astype(str), return_inverse=True)
+    N = len(cid)
+    if d.groupby(cidx)["_alt"].nunique().ne(d.groupby(cidx).size()).any():
+        raise OESError("An alternative appears twice within one choice situation.")
+    chosen = d.groupby(cidx)[y].sum()
+    if (chosen != 1).any():
+        raise OESError("Each choice situation must have exactly one chosen alternative (the indicator must sum to 1 within each identifier).")
+    J = len(levels); aj = np.array([levels.index(a) for a in d["_alt"]])
+    return dict(d=d, y=y, xa=xa, xc=xc, asc=asc == "yes", levels=levels, base=base, N=N, cidx=cidx, aj=aj, J=J, ident=ident, alt=alt)
+
+
+def _choice_arrays(S, rows=None):
+    d, cidx, aj, J, N = S["d"], S["cidx"], S["aj"], S["J"], S["N"]
+    kxa, kxc = len(S["xa"]), len(S["xc"])
+    b = S["levels"].index(S["base"])
+    others = [j for j in range(J) if j != b]
+    XA = np.zeros((N, J, kxa)); AV = np.zeros((N, J), bool); CH = np.zeros(N, int); XC = np.zeros((N, kxc))
+    XA[cidx, aj, :] = d[S["xa"]].to_numpy(float) if kxa else 0
+    AV[cidx, aj] = True
+    CH[cidx[d[S["y"]].to_numpy() == 1]] = aj[d[S["y"]].to_numpy() == 1]
+    if kxc:
+        first = d.groupby(cidx).head(1)
+        XC[cidx[first.index], :] = first[S["xc"]].to_numpy(float)
+    return XA, AV, CH, XC, b, others
+
+
+def _util(theta, XA, XC, S, b, others, draws=None, rnd=None):
+    """Utility array. Fixed parameters: [beta_xa, asc (J-1), delta (kxc x J-1)] and, for mixed logit, standard deviations of the random coefficients."""
+    N, J, kxa = XA.shape
+    kxc = XC.shape[1]
+    beta = theta[:kxa]
+    pos = kxa
+    U0 = np.zeros((N, J))
+    if S["asc"]:
+        asc = theta[pos:pos + J - 1]; pos += J - 1
+        for m, j in enumerate(others):
+            U0[:, j] += asc[m]
+    if kxc:
+        delta = theta[pos:pos + kxc * (J - 1)].reshape(kxc, J - 1); pos += kxc * (J - 1)
+        for m, j in enumerate(others):
+            U0[:, j] += XC @ delta[:, m]
+    if rnd is None:
+        return U0 + XA @ beta if kxa else U0
+    sds = theta[pos:pos + len(rnd)]
+    R = draws.shape[1]
+    U = (U0 + (XA @ beta if kxa else 0))[:, :, None] * np.ones((1, 1, R))
+    for m, k in enumerate(rnd):
+        U = U + XA[:, :, k][:, :, None] * (sds[m] * draws[:, None, :, m])
+    return U
+
+
+def _logp(U, AV):
+    Um = np.where(AV[:, :, None] if U.ndim == 3 else AV, U, -np.inf)
+    mx = Um.max(axis=1, keepdims=True)
+    e = np.exp(Um - mx)
+    return Um - mx - np.log(e.sum(axis=1, keepdims=True))
+
+
+def choice(df, spec):
+    """Discrete-choice models: conditional (McFadden) logit with case-specific variables and alternative-specific constants, and mixed logit with random coefficients."""
+    from statsmodels.tools.numdiff import approx_hess
+    from scipy import optimize
+    model = _choice(spec, "model", ["clogit", "mixed"], "clogit", "The model")
+    S = _choice_setup(df, spec)
+    XA, AV, CH, XC, b, others = _choice_arrays(S)
+    N, J, kxa = XA.shape
+    kxc = XC.shape[1]
+    levels = S["levels"]
+    rnd_names = as_list(spec.get("random"))
+    if model == "mixed":
+        if not rnd_names:
+            raise OESError("Choose at least one variable with a random coefficient.")
+        bad = [c for c in rnd_names if c not in S["xa"]]
+        if bad:
+            raise OESError("Random coefficients must be alternative-specific variables: " + ", ".join(bad))
+    rnd = [S["xa"].index(c) for c in rnd_names] if model == "mixed" else None
+    ndraw = int(float_option(spec, "draws", 100, "The number of draws")) if model == "mixed" else 0
+    if model == "mixed" and not 20 <= ndraw <= 1000:
+        raise OESError("The number of draws must be between 20 and 1000.")
+    names = list(S["xa"])
+    if S["asc"]:
+        names += [f"const: {levels[j]}" for j in others]
+    for c in S["xc"]:
+        names += [f"{c}: {levels[j]}" for j in others]
+    npar0 = len(names)
+    names_all = names + ([f"sd({c})" for c in rnd_names] if model == "mixed" else [])
+    ar = np.arange(N)
+
+    def nll_fixed(th):
+        lp = _logp(_util(th, XA, XC, S, b, others), AV)
+        return -float(lp[ar, CH].sum())
+    th0 = np.zeros(npar0)
+    r1 = optimize.minimize(nll_fixed, th0, method="BFGS", options={"gtol": 1e-8, "maxiter": 2000})
+    if not np.isfinite(r1.fun) or np.linalg.norm(r1.jac) > 1e-3 * N:
+        raise OESError("The conditional logit did not converge. Check for an alternative that is never chosen, collinear variables or very different scales.")
+    th_c = r1.x
+    try:
+        Vc = np.linalg.inv(approx_hess(th_c, nll_fixed))
+    except np.linalg.LinAlgError:
+        raise OESError("The information matrix is singular: variables are collinear or an alternative-specific constant is not identified.")
+    ll_c = -float(r1.fun)
+    # null log-likelihoods
+    ll_equal = -float(np.log(AV.sum(1)).sum())
+    shares = np.array([(CH == j).mean() for j in range(J)])
+    ll_const = float(sum((CH == j).sum() * np.log(shares[j]) for j in range(J) if shares[j] > 0))
+    if model == "clogit":
+        th, V, ll = th_c, Vc, ll_c
+        se = np.sqrt(np.maximum(np.diag(V), 0))
+    else:
+        H = np.column_stack([_halton(N * ndraw, p) for p in (2, 3, 5, 7, 11, 13, 17, 19)[:len(rnd)]])
+        draws = stats.norm.ppf(np.clip(H, 1e-6, 1 - 1e-6)).reshape(N, ndraw, len(rnd))
+        from scipy.special import logsumexp
+
+        def nll_mixed(t):
+            U = _util(t, XA, XC, S, b, others, draws, rnd)
+            lp = _logp(U, AV)                                   # N x J x R
+            lc = lp[ar, CH, :]                                  # N x R
+            return -float((logsumexp(lc, axis=1) - np.log(ndraw)).sum())
+        t0 = np.r_[th_c, np.full(len(rnd), 0.3)]
+        o1 = optimize.minimize(nll_mixed, t0, method="BFGS", options={"gtol": 1e-6, "maxiter": 1000})
+        o2 = optimize.minimize(nll_mixed, o1.x, method="BFGS", options={"gtol": 1e-7, "maxiter": 1000})
+        if not np.isfinite(o2.fun) or np.linalg.norm(o2.jac) > 1e-2 * N:
+            raise OESError("The mixed-logit likelihood did not converge. Try fewer random coefficients or more draws.")
+        try:
+            V = np.linalg.inv(approx_hess(o2.x, nll_mixed))
+        except np.linalg.LinAlgError:
+            raise OESError("The information matrix is singular: a random coefficient is not identified.")
+        if np.any(np.diag(V) <= 0):
+            raise OESError("The information matrix is not positive definite: reduce the number of random coefficients.")
+        th, ll = o2.x, -float(o2.fun)
+        se = np.sqrt(np.diag(V))
+        th[npar0:] = np.abs(th[npar0:])                          # the sign of a standard deviation is not identified
+    tabs = []
+    tabs.append(coef_table(names_all, th, se, dist="z", title="Conditional logit" if model == "clogit" else f"Mixed logit ({ndraw} Halton draws)",
+                           note=f"{N} choice situations, {J} alternatives; base alternative for constants and case-specific variables: {S['base']}. "
+                                + ("Utility of alternative j: x_ij'b + constant_j + w_i'd_j." if model == "clogit" else "Coefficients on the listed variables are normally distributed across people: mean and standard deviation (sd) are reported.")))
+    # willingness to pay / marginal rates of substitution
+    num = spec.get("numeraire")
+    if num not in (None, "") and num in S["xa"]:
+        i0 = S["xa"].index(num)
+        rows = []
+        for i, c in enumerate(S["xa"]):
+            if i == i0:
+                continue
+            g = np.zeros(len(th)); g[i] = 1 / th[i0]; g[i0] = -th[i] / th[i0] ** 2
+            vr = float(g @ V[:len(th), :len(th)] @ g) if model == "clogit" else float(g @ V @ g)
+            rows.append([f"{c} / {num}", f(-th[i] / th[i0] * -1), f(np.sqrt(max(vr, 0)))])
+        tabs.append(table(f"Marginal rates of substitution relative to {num}", ["Ratio", "Estimate", "Delta-method s.e."], rows,
+                          f"The ratio of the coefficient on each variable to the coefficient on {num}; when {num} is a price, it is the willingness to pay for one unit of the variable."))
+    # fit
+    pc = np.exp(_logp(_util(th_c, XA, XC, S, b, others), AV))
+    pred_share = pc.mean(axis=0)
+    if model == "mixed":
+        U = _util(th, XA, XC, S, b, others, draws, rnd)
+        pm = np.exp(_logp(U, AV)).mean(axis=2)
+        pred_share = pm.mean(axis=0)
+    drows = [["Log-likelihood", f(ll), None, ""], ["Log-likelihood, equal shares", f(ll_equal), None, "all alternatives equally likely"],
+             ["Log-likelihood, constants only", f(ll_const), None, "market shares only"],
+             ["McFadden R-squared (against equal shares)", f(1 - ll / ll_equal, 4), None, ""],
+             ["McFadden R-squared (against market shares)", f(1 - ll / ll_const, 4), None, ""],
+             ["Share of cases predicted correctly", f(float((np.argmax(pc, axis=1) == CH).mean()), 4), None, "highest-probability alternative equals the chosen one"]]
+    if model == "mixed":
+        lr = max(2 * (ll - ll_c), 0.0)
+        drows.append(test_row(f"LR test of random coefficients against conditional logit ({len(rnd)} df)", lr, stats.chi2.sf(lr, len(rnd)), "H0: no taste heterogeneity; boundary test, so the p-value is conservative"))
+    # Hausman-McFadden IIA test for the conditional logit, on the coefficients of the alternative-specific variables
+    if model == "clogit" and J >= 3 and kxa:
+        iia = []
+        for j in range(J):
+            try:
+                d2 = S["d"][(S["d"]["_alt"] != levels[j])]
+                bad_cases = set(S["cidx"][(S["aj"] == j) & (S["d"][S["y"]].to_numpy() == 1)])
+                d2 = d2[~pd.Series(S["cidx"][d2.index]).isin(bad_cases).to_numpy()].reset_index(drop=True)
+                lv2 = [l for l in levels if l != levels[j]]
+                cid2, cidx2 = np.unique(d2[S["ident"]].astype(str), return_inverse=True)
+                S2 = dict(S); S2.update(d=d2, levels=lv2, base=S["base"] if S["base"] in lv2 else lv2[0], N=len(cid2), cidx=cidx2,
+                                      aj=np.array([lv2.index(a) for a in d2["_alt"]]), J=len(lv2))
+                XA2, AV2, CH2, XC2, b2, oth2 = _choice_arrays(S2)
+                if S2["N"] < 5 * npar0:
+                    iia.append([f"Drop {levels[j]}", None, None, None, "too few cases remain"]); continue
+                ar2 = np.arange(S2["N"]); n2 = kxa + (S2["J"] - 1 if S["asc"] else 0) + kxc * (S2["J"] - 1)
+                f2 = lambda t: -float(_logp(_util(t, XA2, XC2, S2, b2, oth2), AV2)[ar2, CH2].sum())
+                rr = optimize.minimize(f2, np.zeros(n2), method="BFGS", options={"gtol": 1e-7, "maxiter": 1000})
+                Vr = np.linalg.inv(approx_hess(rr.x, f2))
+                dbeta = rr.x[:kxa] - th_c[:kxa]
+                Dv = Vr[:kxa, :kxa] - Vc[:kxa, :kxa]
+                ev, evec = np.linalg.eigh((Dv + Dv.T) / 2)
+                pos = ev > 1e-10 * max(1.0, abs(ev).max())
+                if not pos.any():
+                    iia.append([f"Drop {levels[j]}", None, None, None, "not computable: the variance difference has no positive part"]); continue
+                proj = evec[:, pos].T @ dbeta
+                st_ = float((proj ** 2 / ev[pos]).sum())
+                dfh = int(pos.sum())
+                iia.append([f"Drop {levels[j]}", f(st_, 3), dfh, f(stats.chi2.sf(st_, dfh), 4),
+                            "" if pos.all() else "variance difference not positive definite: statistic computed on its positive part"])
+            except Exception:
+                iia.append([f"Drop {levels[j]}", None, None, None, "not estimable"])
+        tabs.append(table("Hausman-McFadden test of independence of irrelevant alternatives", ["Alternative dropped", "Chi-squared", "df", "p-value", "Note"], iia,
+                          "H0: the coefficients of the alternative-specific variables do not change when one alternative (and the people who chose it) is removed. A rejection suggests nested logit or mixed logit."))
+    tabs.append(tests_table(drows, title="Fit and specification"))
+    # elasticities (conditional logit): own and cross elasticity of the first alternative-specific variable
+    if model == "clogit" and kxa:
+        el = []
+        for k in range(kxa):
+            own = np.full(J, np.nan); cross = np.full(J, np.nan)
+            for j in range(J):
+                m_ = AV[:, j]
+                own[j] = float((th[k] * XA[m_, j, k] * (1 - pc[m_, j])).mean())
+                cross[j] = float((-th[k] * XA[m_, j, k] * pc[m_, j]).mean())
+            for j in range(J):
+                el.append([S["xa"][k], levels[j], f(own[j]), f(cross[j])])
+        tabs.append(table("Average elasticities of the choice probabilities", ["Variable", "Alternative", "Own elasticity", "Cross elasticity (effect on each other alternative)"], el,
+                          "Own: percent change in the probability of j for a 1% change of the variable of j. Cross: percent change in the probability of every other alternative; identical for all of them under IIA."))
+    ch = chart("Observed and predicted choice shares", levels, [("Observed", [float(shares[j]) for j in range(J)]), ("Predicted", [float(pred_share[j]) for j in range(J)])], "Alternative", "Share chosen", kind="bar")
+    summary = [stat("Choice situations", N), stat("Alternatives", J), stat("Log-likelihood", ll), stat("McFadden R-squared", 1 - ll / ll_equal), stat("Parameters", len(th))]
+    notes = [f"{'Conditional logit' if model == 'clogit' else 'Mixed logit'} of {S['y']}: {N} choice situations, {J} alternatives ({', '.join(levels)}).",
+             "The conditional logit assumes independence of irrelevant alternatives: the odds of two alternatives do not depend on the other alternatives. Test it, and use the mixed logit when tastes vary across people.",
+             "Case-specific variables (such as income) enter only through coefficients that differ by alternative, relative to the base alternative."]
+    return result("choice", "Mixed logit" if model == "mixed" else "Conditional logit", N, summary, tabs, [ch], notes)

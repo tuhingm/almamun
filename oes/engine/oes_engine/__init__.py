@@ -491,6 +491,15 @@ MODELS += [
                  sel("estimator", "Estimator", [["cf", "Control function (two-step, corrected s.e.)"], ["mle", "Maximum likelihood (one endogenous regressor)"]], "cf")],
          example=dict(file=ME + "mroz_iv.csv", spec=dict(y="inlf", x=["exper", "expersq", "age", "kidslt6", "kidsge6", "nwifeinc"], endog=["educ"], inst=["motheduc", "fatheduc"], estimator="cf")),
          check=dict(table=1, row=1, col=1)),
+    dict(id="choice", group="Microeconometrics", name="Conditional and mixed logit (discrete choice among alternatives)", guide="microeconometrics-guide/conditional-mixed-logit.html", fn=micro.choice,
+         fields=[col("y", "Chosen-alternative indicator (0/1)"), col("id", "Choice-situation identifier"), col("alt", "Alternative identifier"),
+                 cols("xalt", "Alternative-specific variables (cost, time)", required=False), cols("xcase", "Case-specific variables (income, age)", required=False),
+                 sel("model", "Model", [["clogit", "Conditional logit"], ["mixed", "Mixed logit (random coefficients)"]], "clogit"),
+                 cols("random", "Variables with random coefficients (mixed logit)", required=False), num("draws", "Draws per person (mixed logit)", 100),
+                 sel("asc", "Alternative-specific constants", [["yes", "Yes"], ["no", "No"]], "yes"), col("base", "Base alternative (blank = first)", required=False),
+                 col("numeraire", "Variable to divide by (willingness to pay)", required=False)],
+         example=dict(file=ME + "travel_mode.csv", spec=dict(y="choice", id="id", alt="alt", xalt=["ttme", "invc", "invt", "gc"], xcase=[], model="clogit", asc="yes", base="car", numeraire="invc")),
+         check=dict(table=0, row=0, col=1)),
 ]
 
 CE = "oes/examples/"

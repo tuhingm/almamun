@@ -680,3 +680,65 @@ def test_iv_probit_errors():
     for kw, msg in [(dict(inst=["motheduc"], endog=["educ", "age"], x=["exper"]), "under-identified"), (dict(endog=[]), "endogenous"), (dict(inst=[]), "instrument"),
                     (dict(y="educ", endog=["age"], x=["exper"]), "only 0 and 1"), (dict(endog=["educ", "age"], x=["exper"], estimator="mle"), "one endogenous")]:
         assert msg in ivp(**kw)["error"]
+
+
+# ------------------------------------------------------------------ conditional and mixed logit
+def travel(**kw):
+    spec = dict(o.BY_ID["choice"]["example"]["spec"]); spec.update(kw)
+    return o.run("choice", open(os.path.join(ME, "travel_mode.csv")).read(), spec)
+
+
+def test_conditional_logit_matches_greene_travel_mode_results():
+    # Greene, Econometric Analysis, travel-mode example (210 travellers, 4 modes): the three main coefficients and the log-likelihood
+    r = travel()
+    for nm, b, se in [("ttme", -0.10365, 0.01094), ("invc", -0.08493, 0.01938), ("invt", -0.01333, 0.00252)]:
+        x = row(r, "Conditional logit", nm); assert x[1] == pytest.approx(b, abs=5e-4) and x[2] == pytest.approx(se, abs=5e-4)
+    assert summ(r, "Log-likelihood") == pytest.approx(-184.5067, abs=2e-3)
+
+
+def test_conditional_logit_matches_independent_likelihood():
+    from scipy import optimize
+    d = pd.read_csv(os.path.join(ME, "travel_mode.csv")); alts = ["air", "bus", "car", "train"]
+    XA = d[["ttme", "invc", "invt", "gc"]].values.reshape(210, 4, 4)   # rows are ordered air, train, bus, car within each id
+    order = [0, 2, 3, 1]; XA = XA[:, order, :]; ch = d.choice.values.reshape(210, 4)[:, order].argmax(1)
+
+    def nll(t):                                                        # constants for air, bus, train (car is the base)
+        U = XA @ t[:4]; U[:, 0] += t[4]; U[:, 1] += t[5]; U[:, 3] += t[6]
+        return -(U[np.arange(210), ch] - np.log(np.exp(U).sum(1))).sum()
+    r0 = optimize.minimize(nll, np.zeros(7), method="BFGS", options={"gtol": 1e-9}); r = travel()
+    assert summ(r, "Log-likelihood") == pytest.approx(-r0.fun, abs=1e-4)
+    for i, nm in enumerate(["ttme", "invc", "invt", "gc", "const: air", "const: bus", "const: train"]):
+        assert row(r, "Conditional logit", nm)[1] == pytest.approx(r0.x[i], abs=1e-3)
+
+
+def test_choice_wtp_ratio_and_probability_sums():
+    r = travel(); b = {nm: row(r, "Conditional logit", nm)[1] for nm in ["ttme", "invc", "invt"]}
+    ratio = next(x for x in table(r, "Marginal rates")["rows"] if x[0] == "invt / invc")[1]
+    assert ratio == pytest.approx(b["invt"] / b["invc"], abs=1e-5)
+    pred = r["charts"][0]["series"][1]["y"]; assert sum(pred) == pytest.approx(1.0, abs=1e-4)
+
+
+def test_mixed_logit_recovers_random_coefficient_in_simulation():
+    rng = np.random.default_rng(12); N, J = 900, 3
+    price = rng.uniform(1, 3, size=(N, J)); qual = rng.normal(size=(N, J)); bq = 1.0 + 0.8 * rng.normal(size=N)
+    U = -1.0 * price + bq[:, None] * qual + rng.gumbel(size=(N, J)); ch = U.argmax(1)
+    rows_ = [dict(id=i, alt=f"a{j}", y=int(ch[i] == j), price=price[i, j], qual=qual[i, j]) for i in range(N) for j in range(J)]
+    r = o.run("choice", pd.DataFrame(rows_).to_csv(index=False), dict(y="y", id="id", alt="alt", xalt=["price", "qual"], model="mixed", random=["qual"], draws=150, asc="yes"))
+    assert row(r, "Mixed logit", "qual")[1] == pytest.approx(1.0, abs=0.2) and row(r, "Mixed logit", "sd(qual)")[1] == pytest.approx(0.8, abs=0.25)
+
+
+def test_iia_test_flags_a_violation_and_errors_are_reported():
+    # duplicate an alternative (a "blue bus / red bus" structure): IIA fails
+    rng = np.random.default_rng(1); N = 1500; cost = rng.uniform(1, 3, size=(N, 2)); U = -1.0 * cost + rng.gumbel(size=(N, 2))
+    ch = U.argmax(1); 
+    rows_ = []
+    for i in range(N):
+        # alternative 2 is split into two perfect substitutes with a shared taste shock
+        shock = rng.normal(scale=1.5); u3 = U[i, 1] + shock
+        full = [U[i, 0], U[i, 1] + shock, u3 + rng.gumbel(scale=0.2)]
+        c = int(np.argmax(full))
+        for j in range(3): rows_.append(dict(id=i, alt=f"a{j}", y=int(c == j), cost=cost[i, min(j, 1)]))
+    r = o.run("choice", pd.DataFrame(rows_).to_csv(index=False), dict(y="y", id="id", alt="alt", xalt=["cost"], model="clogit", asc="yes", base="a0"))
+    assert "error" not in r
+    for kw, msg in [(dict(y="hinc", xalt=["ttme"]), "only 0 and 1"), (dict(base="zzz"), "not among"), (dict(xalt=[], xcase=[]), "at least one"), (dict(model="mixed", random=[]), "random coefficient")]:
+        assert msg in travel(**kw)["error"]
