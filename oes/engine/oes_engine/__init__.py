@@ -19,7 +19,7 @@ from . import stat_registry
 from .core import OESError, read_csv, time_order
 from .report import frame, plot, show, summary, tables
 
-__version__ = "1.6.0"
+__version__ = "1.5.0"
 
 # field helpers -------------------------------------------------------------------------------------------------
 def col(key, label, required=True, help=""):
@@ -584,37 +584,13 @@ def run(model_id, csv_text, spec=None):
         out = m["fn"](df, spec)
         out["guide"] = m["guide"]
         out["engine"] = __version__
-        out = _clean(out)
-        _attach_report(out, model_id, df, spec)
-        return out
+        return _clean(out)
     except OESError as e:
         return {"error": str(e)}
     except np.linalg.LinAlgError as e:
         return {"error": f"The model could not be estimated: a matrix is singular ({e}). Check for collinear or constant variables."}
     except Exception as e:  # report rather than crash the page
         return {"error": f"The estimation failed: {type(e).__name__}: {e}"}
-
-
-REPORTERS = {"ols": ("rep_ols", "build"), "stat_anova1": ("rep_anova1", "build")}
-
-
-def _attach_report(out, model_id, df, spec):
-    """Add the publication report (steps, tables, figures, text) next to the standard result. Never changes an estimate;
-    a failure of the report layer is returned as report_error and leaves the standard output intact."""
-    if spec.get("report") is False or "tables" not in out:
-        return
-    try:
-        import importlib
-        from . import rep_export
-        if model_id in REPORTERS:
-            mod, fn = REPORTERS[model_id]
-            rep = getattr(importlib.import_module("." + mod, __name__), fn)(df, dict(spec))
-        else:
-            from . import rep_generic
-            rep = rep_generic.build_from_result(out)
-        out["report"] = _clean(rep_export.to_json(rep))
-    except Exception as e:  # noqa: BLE001
-        out["report_error"] = f"{type(e).__name__}: {e}"
 
 
 def _clean(o):
