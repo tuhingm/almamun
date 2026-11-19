@@ -444,6 +444,11 @@ MODELS += [
                  num("base", "Base category (blank = the lowest code)", "")],
          example=dict(file=ME + "beps.csv", spec=dict(y="vote", x=["age", "econ_national", "econ_household", "europe", "political_knowledge", "female"], base=0)),
          check=dict(table=0, row=1, col=1)),
+    dict(id="tobit", group="Microeconometrics", name="Tobit (censored outcome)", guide="microeconometrics-guide/tobit.html", fn=micro.tobit,
+         fields=[col("y", "Censored outcome variable"), cols("x", "Explanatory variables"),
+                 num("lower", "Lower limit (blank = none)", 0), num("upper", "Upper limit (blank = none)", "")],
+         example=dict(file=ME + "affairs.csv", spec=dict(y="affairs", x=["age", "yearsmarried", "religiousness", "occupation", "rating"], lower=0)),
+         check=dict(table=0, row=1, col=1)),
 ]
 
 CE = "oes/examples/"

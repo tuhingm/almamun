@@ -270,6 +270,12 @@
   "sub": "An outcome with ordered categories (low, medium, high; a rating from 1 to 5; a degree level) explained by one or more regressors.…"
  },
  {
+  "out": "assets/og/microeconometrics-guide/tobit.jpg",
+  "kicker": "Microeconometrics Guide · Model guide",
+  "title": "Tobit Regression (Censored Outcomes)",
+  "sub": "An outcome that piles up at a limit, usually zero (hours worked, spending, number of affairs), explained by one or more…"
+ },
+ {
   "out": "assets/og/ml-guide/causal-forest.jpg",
   "kicker": "Machine Learning Guide · Model guide",
   "title": "Causal Forest",
