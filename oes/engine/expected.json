@@ -1204,5 +1204,21 @@
    "label": "ADF p-value (level, constant)",
    "value": 0.155
   }
+ },
+ "unobserved": {
+  "nobs": 202,
+  "table_index": 0,
+  "table": "Unobserved-components model: smooth trend + damped stochastic cycle",
+  "row": "sigma2.irregular",
+  "row_index": 0,
+  "col": "Estimate",
+  "col_index": 1,
+  "value": 0.0,
+  "rtol": 0.001,
+  "seconds": 0.7,
+  "summary": {
+   "label": "Log-likelihood",
+   "value": -249.38
+  }
  }
 }

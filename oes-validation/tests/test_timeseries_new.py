@@ -80,3 +80,57 @@ def test_unitroot_errors():
     assert "40" in o.run("unitroot", short.to_csv(index=False), dict(y="y"))["error"]
     assert "series" in o.run("unitroot", macro().to_csv(index=False), dict())["error"].lower()
     assert "BIC" in o.run("unitroot", macro().to_csv(index=False), dict(y="tbilrate", ic="hq"))["error"]
+
+
+# ------------------------------------------------------------------ unobserved components and filters
+def gdp(): return pd.read_csv(os.path.join(OX, "us_gdp_level.csv"))
+
+
+def test_unobserved_registered():
+    m = o.BY_ID["unobserved"]
+    assert m["group"] == "Time series" and os.path.exists(os.path.join(ROOT, m["guide"])) and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+def test_hamilton_filter_matches_ols_by_hand():
+    import statsmodels.api as sm
+    x = np.cumsum(np.random.default_rng(2).standard_normal(120)); h = 8
+    e = ts_extra._hamilton(x, h=h, p=4)
+    t = np.arange(3 + h, 120)
+    X = sm.add_constant(np.column_stack([x[t - h - j] for j in range(4)])); res = sm.OLS(x[t], X).fit()
+    assert np.allclose(e[t], res.resid, atol=1e-8) and np.isnan(e[:3 + h]).all()
+
+
+def test_uc_cycle_recovered_from_simulation():
+    # trend + damped stochastic cycle with period 20 and damping 0.92
+    rng = np.random.default_rng(5); n = 400; lam = 2 * np.pi / 20; rho = .92
+    c = np.zeros(n); cs = np.zeros(n)
+    for t in range(1, n):
+        a = rho * (np.cos(lam) * c[t - 1] + np.sin(lam) * cs[t - 1]) + .8 * rng.standard_normal()
+        b = rho * (-np.sin(lam) * c[t - 1] + np.cos(lam) * cs[t - 1]) + .8 * rng.standard_normal(); c[t], cs[t] = a, b
+    trend = np.cumsum(np.cumsum(.02 * rng.standard_normal(n))) * .2 + .05 * np.arange(n)
+    df = pd.DataFrame({"y": trend + c})
+    r = ts_extra.unobserved(df, dict(y="y", ppy=4, pmin=6, pmax=40))
+    per = next(s["value"] for s in r["summary"] if s["label"] == "Cycle period (years)") * 4
+    assert 14 < per < 28
+    cy = np.array(r["charts"][1]["series"][0]["y"], float)
+    assert np.corrcoef(cy, c)[0, 1] > .8
+
+
+def test_hp_cycle_in_engine_equals_statsmodels():
+    from statsmodels.tsa.filters.hp_filter import hpfilter
+    d = gdp(); r = ts_extra.unobserved(d, dict(y="gdp_level", time="date"))
+    cyc, _ = hpfilter(d.gdp_level.to_numpy(float), lamb=1600)
+    assert np.allclose(r["charts"][1]["series"][1]["y"], np.round(cyc, 6), atol=1e-5)
+
+
+def test_unobserved_errors():
+    d = gdp()
+    assert "positive" in ts_extra_err(d.assign(gdp_level=-d.gdp_level.abs()), dict(y="gdp_level", log="yes")).lower()
+    assert "Choose" in ts_extra_err(d, dict(y="gdp_level", trend="cubic"))
+    assert "shorter" in ts_extra_err(d, dict(y="gdp_level", pmin=30, pmax=20)).lower() or "bounds" in ts_extra_err(d, dict(y="gdp_level", pmin=30, pmax=20)).lower()
+    assert "40" in ts_extra_err(d.head(30), dict(y="gdp_level"))
+
+
+def ts_extra_err(df, spec):
+    cols = list(df.columns)
+    return o.run("unobserved", df.to_csv(index=False), spec)["error"]

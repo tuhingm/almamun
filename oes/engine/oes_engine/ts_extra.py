@@ -734,3 +734,90 @@ def unitroot(df, spec):
     summary = [stat("Observations", n), stat("Conclusion", verdict), stat("ADF p-value (level, constant)", float(rows[0][5]), 3), stat("KPSS p-value (level)", float(krows[0][5]), 3)]
     return result("unitroot", f"Unit-root and stationarity tests: {y}", n, summary, [ur, kt, zat, vt], ch,
                   ["Run the tests on levels and first differences. A conclusion of I(1) means you should difference the series or model it with cointegration.", "Seasonal unit roots and the Lee-Strazicich LM test are not part of the OES version."])
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Unobserved-components trend-cycle decomposition, compared with the HP and Hamilton filters
+# ---------------------------------------------------------------------------------------------------------------
+_UC_TRENDS = {"smooth trend": "smooth trend", "local linear trend": "lltrend", "random walk with drift": "rwdrift"}
+
+
+def _hamilton(x, h, p=4):
+    """Hamilton (2018) regression filter: the cycle is the residual of x_{t+h} on a constant and x_t ... x_{t-p+1}."""
+    T = len(x); idx = np.arange(p - 1, T - h)
+    X = np.column_stack([np.ones(len(idx))] + [x[idx - j] for j in range(p)]); yy = x[idx + h]
+    b = np.linalg.lstsq(X, yy, rcond=None)[0]; e = np.full(T, np.nan); e[idx + h] = yy - X @ b
+    return e
+
+
+def _uc_fit(x, trend, cycle, ppy, bounds):
+    import statsmodels.api as sm
+    kw = dict(level=_UC_TRENDS[trend])
+    if cycle:
+        kw.update(cycle=True, stochastic_cycle=True, damped_cycle=True, cycle_period_bounds=bounds)
+    m = sm.tsa.UnobservedComponents(x, **kw)
+    r = m.fit(method="powell", disp=0, maxiter=3000)
+    return m, m.fit(r.params, disp=0, maxiter=300)
+
+
+def unobserved(df, spec):
+    from statsmodels.tsa.filters.hp_filter import hpfilter
+    y = need(spec, "y", "series")
+    d, labels = _series_frame(df, spec, [y])
+    x = d[y].to_numpy(float); n = len(x)
+    if (spec.get("log") or "no") == "yes":
+        if (x <= 0).any():
+            raise OESError("The log transformation needs a series that is positive in every period.")
+        x = 100 * np.log(x)
+    ppy = int_option(spec, "ppy", 4, 1, 12, "Periods per year")
+    if n < 8 * ppy or n < 40:
+        raise OESError("The decomposition needs at least 40 observations and eight years of data.")
+    trend = spec.get("trend") or "smooth trend"
+    if trend not in _UC_TRENDS:
+        raise OESError("Choose smooth trend, local linear trend or random walk with drift.")
+    cyc = (spec.get("cycle") or "yes") == "yes"
+    bounds = (int_option(spec, "pmin", 6, 2, 60, "Shortest cycle"), int_option(spec, "pmax", 40, 8, 200, "Longest cycle"))
+    if bounds[0] >= bounds[1]:
+        raise OESError("The shortest cycle must be shorter than the longest.")
+    m, r = _uc_fit(x, trend, cyc, ppy, bounds)
+    se = r.bse
+    prow = []
+    for nm, v, s_ in zip(m.param_names, r.params, se):
+        prow.append([nm, f(v, 5), f(s_, 5)])
+    tabs = [table(f"Unobserved-components model: {trend}" + (" + damped stochastic cycle" if cyc else ""), ["Parameter", "Estimate", "s.e."], prow,
+                  "Variances of the shocks to each component; a variance of zero means that component is deterministic (e.g. a smooth trend has no level shock).")]
+    summ = [stat("Observations", n), stat("Log-likelihood", float(r.llf), 2), stat("AIC", float(r.aic), 1)]
+    tr_est = r.smoothed_state[0]
+    cycle_est = np.asarray(r.cycle.smoothed) if cyc else x - tr_est
+    if cyc:
+        fr = float(r.params[m.param_names.index("frequency.cycle")]); damp = float(r.params[m.param_names.index("damping.cycle")])
+        per = 2 * np.pi / fr
+        summ += [stat("Cycle period (years)", per / ppy, 2), stat("Cycle damping", damp, 3)]
+    # comparison of specifications by information criteria
+    crow = []
+    for tn in _UC_TRENDS:
+        for cy in (True, False):
+            try:
+                m2, r2 = _uc_fit(x, tn, cy, ppy, bounds)
+                crow.append([tn, "yes" if cy else "no", f(float(r2.llf), 2), f(float(r2.aic), 1), f(float(r2.bic), 1)])
+            except Exception:
+                crow.append([tn, "yes" if cy else "no", None, None, None])
+    tabs.append(table("Model comparison", ["Trend", "Cycle", "Log-likelihood", "AIC", "BIC"], crow, "Lower AIC and BIC are better."))
+    # filters
+    lam = {1: 100, 4: 1600, 12: 129600}.get(ppy, 1600 * (ppy / 4) ** 4)
+    hp_c, hp_t = hpfilter(x, lamb=lam)
+    ham = _hamilton(x, h=2 * ppy, p=4); ok = ~np.isnan(ham)
+    cycles = {"Unobserved components": cycle_est, "Hodrick-Prescott": np.asarray(hp_c), "Hamilton": ham}
+    srows = []; names = list(cycles)
+    for nm in names:
+        c_ = cycles[nm]; srows.append([nm, f(np.nanstd(c_), 3), f(np.nanstd(c_[ok]), 3)] + [f(np.corrcoef(c_[ok], cycles[o_][ok])[0, 1], 3) for o_ in names])
+    tabs.append(table("Cycle estimates compared", ["Filter", "Std. dev. (own sample)", "Std. dev. (common sample)"] + [f"Corr. with {o_}" for o_ in names], srows,
+                      f"HP smoothing parameter {lam:g}; Hamilton regression uses h = {2 * ppy} periods and 4 lags. Correlations use the sample in which all three are defined."))
+    gr = np.diff(tr_est) * ppy
+    tabs.append(table("Trend growth (annualised, in the units of the series per year)", ["Period", "Trend growth"],
+                      [[labels[i], f(gr[i - 1], 3)] for i in sorted(set([1, n // 4, n // 2, 3 * n // 4, n - 1]))], "Slope of the estimated trend."))
+    ch = [chart(f"{y}: series and estimated trend", labels, [(y, x), ("UC trend", tr_est), ("HP trend", np.asarray(hp_t))]),
+          chart(f"{y}: estimated cycles", labels, [(k, v) for k, v in cycles.items()])]
+    return result("unobserved", f"Trend-cycle decomposition: {y}", n, summ, tabs, ch,
+                  ["The cycle is identified by the assumption that it is a stationary, damped, stochastic cycle with a period between the bounds; the estimate depends on it.",
+                   "End-of-sample trend estimates from all the filters are revised when data are added."])
