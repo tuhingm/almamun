@@ -1308,5 +1308,21 @@
    "label": "Variance explained by the factors used (%)",
    "value": 78.4
   }
+ },
+ "spectral": {
+  "nobs": 202,
+  "table_index": 0,
+  "table": "Largest peaks of the smoothed spectrum",
+  "row": "5.58",
+  "row_index": 0,
+  "col": "Frequency (cycles per year)",
+  "col_index": 1,
+  "value": 0.179,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Dominant period (years)",
+   "value": 5.58
+  }
  }
 }

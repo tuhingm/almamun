@@ -1171,3 +1171,51 @@ def factors(df, spec):
     return result("factors", f"Factor model: {len(xs)} variables", T, [stat("Observations", T), stat("Variables", N), stat("Factors (IC_p2)", sel_[2][0]), stat("Variance explained by the factors used (%)", 100 * float(ev[:r].sum() / ev.sum()), 1)],
                   tabs, ch, ["Principal components are consistent for the factor space when both N and T are large (Bai and Ng, 2002); with N below 20 the criteria are unreliable.",
                              "Use stationary series. Factors from non-stationary data are dominated by trends."])
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Spectral analysis: periodogram, smoothed spectrum, dominant cycles and coherence between two series
+# ---------------------------------------------------------------------------------------------------------------
+def spectral(df, spec):
+    from scipy import signal
+    y = need(spec, "y", "series"); x2 = spec.get("x") or None
+    cols_ = [y] + ([x2] if x2 else [])
+    d, labels = _series_frame(df, spec, cols_); n = len(d)
+    if n < 60:
+        raise OESError("Spectral analysis needs at least 60 observations.")
+    ppy = int_option(spec, "ppy", 4, 1, 52, "Periods per year")
+    detr = spec.get("detrend") or "linear"
+    if detr not in ("none", "mean", "linear"):
+        raise OESError("Choose none, mean or linear detrending.")
+    seg = int_option(spec, "segment", max(32, n // 3), 16, n, "Segment length (Welch)")
+    def prep(v):
+        v = np.asarray(v, float); t = np.arange(len(v))
+        return v if detr == "none" else (v - v.mean() if detr == "mean" else v - np.polyval(np.polyfit(t, v, 1), t))
+    a = prep(d[y]); fr, P = signal.welch(a, fs=1.0, nperseg=seg, window="hann", noverlap=seg // 2, detrend=False, scaling="density")
+    fr, P = fr[1:], P[1:]; per = 1 / fr / ppy
+    order = np.argsort(P)[::-1][:5]
+    rows = [[f(per[i], 2), f(fr[i] * ppy, 3), f(P[i], 4), f(100 * P[i] / P.sum(), 1)] for i in sorted(order, key=lambda j: -P[j])]
+    tabs = [table("Largest peaks of the smoothed spectrum", ["Period (years)", "Frequency (cycles per year)", "Spectral density", "% of total power"], rows,
+                  f"Welch estimate with {seg}-period Hann segments and 50% overlap, after {detr} detrending. A peak is a cycle only if it is well above the neighbouring frequencies.")]
+    bands = [("Short (under 1.5 years)", 0, 1.5), ("Business cycle (1.5 to 8 years)", 1.5, 8), ("Long (over 8 years)", 8, 1e9)]
+    brow = []
+    for lab, lo, hi in bands:
+        m = (per >= lo) & (per < hi) if hi < 1e9 else (per >= lo)
+        brow.append([lab, f(100 * P[m].sum() / P.sum(), 1)])
+    tabs.append(table("Share of variance by cycle length", ["Band", "% of total power"], brow, "Power in the periods of the smoothed spectrum, relative to the total."))
+    ch = [chart("Smoothed spectrum", [f"{p_:.2f}" for p_ in per], [("spectral density", P)], xlabel="Period (years)")]
+    summ = [stat("Observations", n), stat("Dominant period (years)", float(per[int(np.argmax(P))]), 2), stat("Power in the business-cycle band (%)", brow[1][1], 1)]
+    if x2:
+        b = prep(d[x2]); frc, C = signal.coherence(a, b, fs=1.0, nperseg=seg, window="hann", noverlap=seg // 2); frc, C = frc[1:], C[1:]
+        fr2, Pxy = signal.csd(a, b, fs=1.0, nperseg=seg, window="hann", noverlap=seg // 2); ph = np.angle(Pxy[1:]) / np.pi
+        perc = 1 / frc / ppy; crow = []; K = (n - seg) // (seg - seg // 2) + 1
+        for lab, lo, hi in bands:
+            m = (perc >= lo) & (perc < hi) if hi < 1e9 else (perc >= lo)
+            if m.any():
+                crow.append([lab, f(float(C[m].mean()), 3), f(float(np.median(ph[m])), 2)])
+        tabs.append(table(f"Coherence between {y} and {x2}", ["Band", "Average squared coherence", "Median phase of the second series relative to the first (units of pi)"], crow,
+                          f"Squared coherence is the R-squared of the relation at that frequency (0 to 1). A phase near 0 means the series move together, near +1 or -1 they move in opposite directions. With {K} overlapping segments the 95% significance threshold is about {1 - 0.05 ** (1 / max(1, K - 1)):.2f}."))
+        ch.append(chart("Squared coherence", [f"{p_:.2f}" for p_ in perc], [("coherence", C)], xlabel="Period (years)"))
+        summ.append(stat("Average coherence in the business-cycle band", crow[1][1] if len(crow) > 1 else None, 3))
+    return result("spectral", f"Spectral analysis: {y}" + (f" and {x2}" if x2 else ""), n, summ, tabs, ch,
+                  ["Spectral estimates from short samples are noisy: the Welch segments trade resolution for lower variance.", "Detrending changes the low-frequency power; report the choice."])
