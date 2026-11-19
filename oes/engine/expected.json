@@ -943,7 +943,7 @@
   "col_index": 1,
   "value": 0.6161,
   "rtol": 0.05,
-  "seconds": 2.5,
+  "seconds": 4.0,
   "summary": {
    "label": "CV RMSE (training)",
    "value": 0.7036
@@ -975,7 +975,7 @@
   "col_index": 1,
   "value": 1.734233,
   "rtol": 0.001,
-  "seconds": 0.0,
+  "seconds": 0.1,
   "summary": {
    "label": "R-squared",
    "value": 0.7358
