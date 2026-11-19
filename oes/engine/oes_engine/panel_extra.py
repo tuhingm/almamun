@@ -5,7 +5,7 @@ import pandas as pd
 from scipy import optimize, stats
 
 from . import _panel_tests
-from .core import OESError, as_list, chart, distinct, f, int_option, float_option, need, result, stat, table, test_row, tests_table
+from .core import OESError, as_list, chart, coef_table, distinct, f, int_option, float_option, need, result, stat, table, test_row, tests_table
 from .panel import _panel
 
 
@@ -540,3 +540,275 @@ def spatial(df, spec):
     summary = [stat("Observations", n_obs), stat("Units", N), stat("Periods", T), stat("SAR rho", r_sar, 3), stat("SEM lambda", l_sem, 3), stat("Moran's I (residuals)", I_pool, 3)]
     notes = ["Fixed effects are removed by two-way demeaning and the concentrated likelihood is maximised over the spatial coefficient (Lee and Yu 2010 style, without the bias correction). Standard errors come from the numerical Hessian."]
     return result("spatial", f"Spatial panel models: {y}", n_obs, summary, tabs, ch, notes)
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Time-series cross-section (TSCS) estimators: panel-corrected standard errors (Beck and Katz 1995) and
+# feasible GLS with panel heteroskedasticity, contemporaneous correlation and AR(1) errors (Parks 1967, Kmenta 1986)
+# ---------------------------------------------------------------------------------------------------------------
+def _choice(spec, key, options, default, label):
+    v = str(spec.get(key) or default).lower()
+    if v not in options:
+        raise OESError(f"{label} must be one of: " + ", ".join(options) + ".")
+    return v
+
+
+def _tscs_data(df, spec):
+    """Panel, design matrix (constant, regressors, optional unit dummies) and index vectors shared by PCSE and FGLS."""
+    y = need(spec, "y", "dependent variable"); xs = as_list(need(spec, "x", "regressors")); distinct([y], xs)
+    d, unit, time, N, T = _panel(df, spec, [y] + xs)
+    ue = str(spec.get("unit_effects", "no")).lower() in ("yes", "true", "1")
+    Y = d[y].to_numpy(float)
+    X = np.column_stack([np.ones(len(d)), d[xs].to_numpy(float)])
+    km = X.shape[1]
+    if ue:
+        X = np.column_stack([X, pd.get_dummies(d["_u"], drop_first=True).to_numpy(float)])
+    if len(d) <= X.shape[1] + 1:
+        raise OESError("There are too few observations for the number of regressors.")
+    u, t = _codes(d)
+    return d, y, xs, N, T, Y, X, km, u, t, ue
+
+
+def _has_prev(u, t):
+    """True where the previous row is the same unit in the previous period."""
+    return np.r_[False, (u[1:] == u[:-1]) & (t[1:] - t[:-1] == 1)]
+
+
+def _ar1_rho(e, u, t, N, by_unit):
+    """AR(1) coefficient of the residuals, sum e_t e_(t-1) / sum e_(t-1)^2 over consecutive pairs: one value, or one per unit."""
+    idx = np.where(_has_prev(u, t))[0]
+    if len(idx) == 0:
+        raise OESError("The AR(1) correction needs units observed in consecutive periods.")
+    num, den = e[idx] * e[idx - 1], e[idx - 1] ** 2
+    if by_unit:
+        rho = np.bincount(u[idx], num, N) / np.maximum(np.bincount(u[idx], den, N), 1e-300)
+        rho[np.bincount(u[idx], minlength=N) < 3] = 0.0
+    else:
+        rho = np.full(N, num.sum() / den.sum())
+    return np.clip(rho, -0.99, 0.99), bool(np.any(np.abs(rho) >= 0.99))
+
+
+def _prais_winsten(Y, X, u, t, rho):
+    """Prais-Winsten transformation: y_t - rho y_(t-1) after the first period of a run, sqrt(1 - rho^2) y_t at the first."""
+    r = rho[u]
+    prev = _has_prev(u, t)
+    Yl = np.r_[0.0, Y[:-1]]
+    Xl = np.vstack([np.zeros((1, X.shape[1])), X[:-1]])
+    Ys = np.where(prev, Y - r * Yl, np.sqrt(1 - r ** 2) * Y)
+    Xs = np.where(prev[:, None], X - r[:, None] * Xl, np.sqrt(1 - r ** 2)[:, None] * X)
+    return Ys, Xs
+
+
+def _contemp(e, u, t, N, T):
+    """Contemporaneous covariance of the residuals, sum_t e_it e_jt / T_ij over the periods both units are observed, and the counts T_ij."""
+    E = np.zeros((T, N)); Mk = np.zeros((T, N))
+    E[t, u] = e; Mk[t, u] = 1.0
+    num, cnt = E.T @ E, Mk.T @ Mk
+    return np.divide(num, cnt, out=np.zeros_like(num), where=cnt > 0), cnt
+
+
+def _cross_corr(S, cnt):
+    """Breusch-Pagan LM test of cross-sectional independence from the residual correlations, and the correlations themselves."""
+    sd = np.sqrt(np.maximum(np.diag(S), 1e-300))
+    R = S / np.outer(sd, sd)
+    iu = np.triu_indices(S.shape[0], 1)
+    ok = cnt[iu] >= 3
+    r = R[iu][ok]
+    lm = float((cnt[iu][ok] * r ** 2).sum())
+    return lm, int(ok.sum()), r
+
+
+def _pcse_vcov(Xs, es, u, t, N, T, diag_only):
+    S, _ = _contemp(es, u, t, N, T)
+    if diag_only:
+        S = np.diag(np.diag(S))
+    Xz = np.zeros((T, N, Xs.shape[1])); Xz[t, u] = Xs
+    meat = np.einsum("tik,ij,tjl->kl", Xz, S, Xz, optimize=True)
+    XtXi = np.linalg.pinv(Xs.T @ Xs)
+    return XtXi @ meat @ XtXi
+
+
+def _wooldridge_ar(d, y, xs):
+    """Wooldridge (2002) / Drukker (2003) test for first-order serial correlation: residuals of the first-differenced model on their lag, H0 slope = -0.5."""
+    g = d.groupby("_u")
+    cols = [y] + list(xs)
+    D = d[cols].astype(float) - g[cols].shift(1).astype(float)
+    D = D[((d["_ti"] - g["_ti"].shift(1)) == 1).to_numpy()]
+    dd = d.loc[D.index]
+    b = np.linalg.lstsq(D[xs].to_numpy(float), D[y].to_numpy(float), rcond=None)[0]
+    e = pd.Series(D[y].to_numpy(float) - D[xs].to_numpy(float) @ b, index=D.index)
+    lag = e.groupby(dd["_u"].values).shift(1)
+    ok = lag.notna().to_numpy()
+    if ok.sum() < 10:
+        return None
+    ev, lv, gv = e.to_numpy()[ok], lag.to_numpy()[ok], dd["_u"].to_numpy()[ok]
+    rho = float(lv @ ev / (lv @ lv))
+    res = ev - rho * lv
+    G = np.unique(gv).size
+    if G < 3:
+        return None
+    sc = np.bincount(np.searchsorted(np.unique(gv), gv), lv * res, G)
+    V = float((sc ** 2).sum()) / float(lv @ lv) ** 2 * G / (G - 1)
+    F = (rho + 0.5) ** 2 / V
+    return F, float(stats.f.sf(F, 1, G - 1)), rho, G
+
+
+def _tscs_diagnostics(d, y, xs, es, S, cnt, u, t, N, T):
+    rows = []
+    lm, npair, r = _cross_corr(S, cnt)
+    if npair:
+        rows.append(test_row(f"Breusch-Pagan LM of cross-sectional independence ({npair} df)", lm, stats.chi2.sf(lm, npair),
+                             f"H0: no contemporaneous correlation; mean |r| = {f(float(np.abs(r).mean()), 3)}, largest {f(float(np.abs(r).max()), 3)}"))
+    W = pd.DataFrame({"u": u, "t": t, "e": es}).pivot(index="t", columns="u", values="e")
+    cd, p, rr = _panel_tests._cd(W.to_numpy(float))
+    if cd is not None:
+        rows.append(test_row("Pesaran CD on residuals", cd, p, f"H0: no cross-sectional dependence; mean |rho| = {f(rr, 3)}"))
+    try:
+        w = _wooldridge_ar(d, y, xs)
+    except Exception:
+        w = None
+    if w:
+        rows.append(test_row(f"Wooldridge test for serial correlation F(1, {w[3] - 1}) (before any correction)", w[0], w[1], f"H0: no first-order autocorrelation; first-difference residual coefficient {f(w[2], 3)} (-0.5 under H0)"))
+    return rows, r
+
+
+def _tscs_charts(S, r):
+    sd = np.sqrt(np.diag(S))
+    show = min(len(sd), 40)
+    ch = [chart("Residual standard deviation by unit", [f"unit {i + 1}" for i in range(show)], [("s.d.", sd[:show])], "", "", kind="bar")]
+    if len(r) >= 10:
+        hist, edges = np.histogram(r, bins=np.linspace(-1, 1, 21))
+        ch.append(chart("Contemporaneous correlations between units' residuals", [f((a + b) / 2, 2) for a, b in zip(edges[:-1], edges[1:])], [("pairs", hist)], "correlation", "number of unit pairs", kind="bar"))
+    return ch
+
+
+def _unit_rho_table(rho, d, unit):
+    names = d.groupby("_u")[unit].first().astype(str).to_list()
+    return table("Panel-specific AR(1) coefficients", ["Unit", "rho"], [[n, f(v, 4)] for n, v in zip(names, rho)])
+
+
+def pcse(df, spec):
+    d, y, xs, N, T, Y, X, km, u, t, ue = _tscs_data(df, spec)
+    corr = _choice(spec, "corr", ("none", "ar1", "psar1"), "none", "Serial correlation")
+    cov = _choice(spec, "cov", ("full", "hetonly"), "full", "Covariance")
+    n, k = X.shape
+    b0 = np.linalg.lstsq(X, Y, rcond=None)[0]
+    e0 = Y - X @ b0
+    rho, clipped = np.zeros(N), False
+    if corr != "none":
+        rho, clipped = _ar1_rho(e0, u, t, N, corr == "psar1")
+        Ys, Xs = _prais_winsten(Y, X, u, t, rho)
+        b = np.linalg.lstsq(Xs, Ys, rcond=None)[0]
+        es = Ys - Xs @ b
+    else:
+        Ys, Xs, b, es = Y, X, b0, e0
+    V = _pcse_vcov(Xs, es, u, t, N, T, cov == "hetonly")
+    if np.any(np.diag(V)[:km] <= 0):
+        raise OESError("The panel-corrected covariance matrix is not positive definite (too few overlapping periods between units). Choose panel heteroskedasticity only.")
+    se = np.sqrt(np.diag(V))
+    names = ["const"] + list(xs)
+    # standard errors compared: conventional and clustered OLS on the same (transformed) data, and PCSE
+    XtXi = np.linalg.pinv(Xs.T @ Xs)
+    se_ols = np.sqrt(np.diag(XtXi) * float(es @ es) / (n - k))
+    se_cl = np.sqrt(np.diag(_cluster_v(Xs, es, u, k)))
+    comp = table("Standard errors compared", ["Variable", "Coef.", "Conventional", "Clustered by unit", "Panel-corrected", "PCSE / conventional"],
+                 [[names[i], f(b[i]), f(se_ols[i]), f(se_cl[i]), f(se[i]), f(se[i] / se_ols[i], 3)] for i in range(km)],
+                 "Same coefficients, three ways of estimating their precision. Conventional errors assume independent, homoskedastic residuals; clustered errors allow serial correlation within units but not correlation between units.")
+    S, cnt = _contemp(es, u, t, N, T)
+    drows, r = _tscs_diagnostics(d, y, xs, es, S, cnt, u, t, N, T)
+    bs, Vs = b[1:km], V[1:km, 1:km]
+    W = float(bs @ np.linalg.pinv(Vs) @ bs)
+    drows.insert(0, test_row(f"Wald test that all slopes are zero ({km - 1} df)", W, stats.chi2.sf(W, km - 1), "H0: all slope coefficients are zero (panel-corrected covariance)"))
+    fitted = X @ b
+    r2 = 1 - float(((Y - fitted) ** 2).sum()) / float(((Y - Y.mean()) ** 2).sum())
+    covtxt = "contemporaneous correlation and panel heteroskedasticity" if cov == "full" else "panel heteroskedasticity only"
+    est = {"none": "pooled OLS", "ar1": "Prais-Winsten with a common AR(1) coefficient", "psar1": "Prais-Winsten with panel-specific AR(1) coefficients"}[corr]
+    tabs = [coef_table(names, b[:km], se[:km], dist="z", note=f"Estimator: {est}. Standard errors robust to {covtxt} (Beck and Katz 1995), no small-sample correction."
+                       + (" Unit dummies are included but not shown." if ue else "")), comp, tests_table(drows)]
+    if corr == "psar1":
+        tabs.insert(2, _unit_rho_table(rho, d, spec.get("unit")))
+    summary = [stat("Observations", n), stat("Units", N), stat("Periods", T), stat("R-squared", r2), stat("Wald chi-squared", W)]
+    if corr == "ar1":
+        summary.append(stat("AR(1) rho", float(rho[0]), 3))
+    notes = ["Panel-corrected standard errors (Beck and Katz 1995) keep the pooled OLS (or Prais-Winsten) coefficients and replace the standard errors by a sandwich "
+             "with the N x N contemporaneous covariance matrix of the residuals, estimated from T periods. They work best when T is at least about 15; "
+             "serial correlation is better handled in the model (AR(1) correction or a lagged dependent variable) than in the standard errors."]
+    if T < N:
+        notes.append(f"T = {T} is smaller than N = {N}: the contemporaneous covariance matrix is singular, which PCSE tolerates, but its estimate is noisy.")
+    if len(d) != N * T:
+        notes.append("The panel is unbalanced: each covariance is computed over the periods in which both units are observed.")
+    if clipped:
+        notes.append("An estimated AR(1) coefficient was truncated at 0.99 in absolute value.")
+    return result("pcse", f"Panel-corrected standard errors (PCSE): {y}", n, summary, tabs, _tscs_charts(S, r), notes)
+
+
+def fgls(df, spec):
+    d, y, xs, N, T, Y, X, km, u, t, ue = _tscs_data(df, spec)
+    panels = _choice(spec, "panels", ("iid", "het", "corr"), "het", "Error structure across units")
+    corr = _choice(spec, "corr", ("none", "ar1", "psar1"), "none", "Serial correlation")
+    n, k = X.shape
+    if panels == "corr":
+        _balanced(d, N, T, "FGLS with contemporaneous correlation")
+        if T < N:
+            raise OESError(f"FGLS with contemporaneous correlation needs at least as many periods as units (T = {T}, N = {N}): the N x N covariance matrix cannot be estimated. "
+                           "Choose panel heteroskedasticity only, or use panel-corrected standard errors.")
+    b0 = np.linalg.lstsq(X, Y, rcond=None)[0]
+    e0 = Y - X @ b0
+    rho, clipped = np.zeros(N), False
+    if corr != "none":
+        rho, clipped = _ar1_rho(e0, u, t, N, corr == "psar1")
+        Ys, Xs = _prais_winsten(Y, X, u, t, rho)
+    else:
+        Ys, Xs = Y, X
+    bt = np.linalg.lstsq(Xs, Ys, rcond=None)[0]
+    es = Ys - Xs @ bt
+    Ti = np.bincount(u, minlength=N).astype(float)
+    s2i = np.bincount(u, es ** 2, N) / Ti
+    s2 = float(es @ es) / n
+    S, cnt = _contemp(es, u, t, N, T)
+    if panels == "corr":
+        if np.linalg.cond(S) > 1e12:
+            raise OESError("The estimated contemporaneous covariance matrix is numerically singular (T is too close to N or units are collinear). Choose panel heteroskedasticity only.")
+        Si = np.linalg.inv(S)
+        Xz = np.zeros((T, N, k)); Xz[t, u] = Xs
+        Yz = np.zeros((T, N)); Yz[t, u] = Ys
+        A = np.einsum("tik,ij,tjl->kl", Xz, Si, Xz, optimize=True)
+        b = np.linalg.solve(A, np.einsum("tik,ij,tj->k", Xz, Si, Yz, optimize=True))
+        V = np.linalg.inv(A)
+    else:
+        w = 1.0 / s2i[u] if panels == "het" else np.full(n, 1.0 / s2)
+        A = (Xs * w[:, None]).T @ Xs
+        b = np.linalg.solve(A, (Xs * w[:, None]).T @ Ys)
+        V = np.linalg.inv(A)
+    se = np.sqrt(np.diag(V))
+    names = ["const"] + list(xs)
+    eg = Ys - Xs @ b                                  # GLS residuals on the transformed data
+    drows, r = _tscs_diagnostics(d, y, xs, es, S, cnt, u, t, N, T)
+    lr = n * np.log(s2) - float((Ti * np.log(np.maximum(s2i, 1e-300))).sum())
+    drows.insert(0, test_row(f"Likelihood-ratio test of panel heteroskedasticity ({N - 1} df)", lr, stats.chi2.sf(lr, N - 1), "H0: the error variance is the same in every unit"))
+    bs, Vs = b[1:km], V[1:km, 1:km]
+    W = float(bs @ np.linalg.pinv(Vs) @ bs)
+    drows.insert(0, test_row(f"Wald test that all slopes are zero ({km - 1} df)", W, stats.chi2.sf(W, km - 1), "H0: all slope coefficients are zero"))
+    # comparison with pooled OLS: conventional and panel-corrected standard errors
+    Vp = _pcse_vcov(X, e0, u, t, N, T, False)
+    se_ols = np.sqrt(np.diag(np.linalg.pinv(X.T @ X)) * float(e0 @ e0) / (n - k))
+    se_pc = np.sqrt(np.maximum(np.diag(Vp), 0))
+    comp = table("FGLS compared with pooled OLS", ["Variable", "OLS coef.", "OLS conventional s.e.", "OLS panel-corrected s.e.", "FGLS coef.", "FGLS s.e.", "FGLS s.e. / panel-corrected"],
+                 [[names[i], f(b0[i]), f(se_ols[i]), f(se_pc[i]), f(b[i]), f(se[i]), f(se[i] / se_pc[i], 3)] for i in range(km)],
+                 "Beck and Katz (1995) show that the Parks FGLS standard errors can be far too small when T is not much larger than N: a ratio well below 1 in the last column is that warning.")
+    structure = {"iid": "homoskedastic and independent errors", "het": "panel-specific error variances", "corr": "panel-specific variances and contemporaneous correlation between units"}[panels]
+    ar = {"none": "no serial correlation", "ar1": "a common AR(1) coefficient (Prais-Winsten)", "psar1": "panel-specific AR(1) coefficients (Prais-Winsten)"}[corr]
+    tabs = [coef_table(names, b[:km], se[:km], dist="z", note=f"Feasible GLS with {structure} and {ar}; z statistics." + (" Unit dummies are included but not shown." if ue else "")), comp, tests_table(drows)]
+    if corr == "psar1":
+        tabs.insert(2, _unit_rho_table(rho, d, spec.get("unit")))
+    r2 = 1 - float(((Y - X @ b) ** 2).sum()) / float(((Y - Y.mean()) ** 2).sum())
+    summary = [stat("Observations", n), stat("Units", N), stat("Periods", T), stat("R-squared", r2), stat("Wald chi-squared", W)]
+    if corr == "ar1":
+        summary.append(stat("AR(1) rho", float(rho[0]), 3))
+    notes = ["Feasible GLS in the steps of Parks (1967) and Kmenta (1986): pooled OLS, the AR(1) coefficient from its residuals, a Prais-Winsten transformation, the error covariance "
+             "(per unit, and between units) from the transformed OLS residuals, then GLS. The covariance matrix of the estimates is the GLS one, (X' Omega^-1 X)^-1, with no sandwich."]
+    if panels == "corr" and T < 3 * N:
+        notes.append(f"T = {T} is less than three times N = {N}: the Parks standard errors are likely too small (Beck and Katz 1995). Compare them with the panel-corrected ones in the table above.")
+    if clipped:
+        notes.append("An estimated AR(1) coefficient was truncated at 0.99 in absolute value.")
+    return result("fgls", f"Feasible GLS (Parks-Kmenta): {y}", n, summary, tabs, _tscs_charts(S, r), notes)

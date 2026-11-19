@@ -932,5 +932,69 @@
    "label": "SAR rho",
    "value": 0.196
   }
+ },
+ "svr": {
+  "nobs": 353,
+  "table_index": 0,
+  "table": "Out-of-sample accuracy",
+  "row": "Support vector regression",
+  "row_index": 0,
+  "col": "Test RMSE",
+  "col_index": 1,
+  "value": 0.6161,
+  "rtol": 0.05,
+  "seconds": 2.5,
+  "summary": {
+   "label": "CV RMSE (training)",
+   "value": 0.7036
+  }
+ },
+ "krls": {
+  "nobs": 663,
+  "table_index": 0,
+  "table": "Out-of-sample accuracy",
+  "row": "KRLS",
+  "row_index": 0,
+  "col": "Test RMSE",
+  "col_index": 1,
+  "value": 0.4184,
+  "rtol": 0.05,
+  "seconds": 1.0,
+  "summary": {
+   "label": "CV RMSE (training)",
+   "value": 0.3582
+  }
+ },
+ "pcse": {
+  "nobs": 342,
+  "table_index": 0,
+  "table": "Coefficient estimates",
+  "row": "const",
+  "row_index": 0,
+  "col": "Coef.",
+  "col_index": 1,
+  "value": 1.734233,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "R-squared",
+   "value": 0.7358
+  }
+ },
+ "fgls": {
+  "nobs": 342,
+  "table_index": 0,
+  "table": "Coefficient estimates",
+  "row": "const",
+  "row_index": 0,
+  "col": "Coef.",
+  "col_index": 1,
+  "value": 1.693818,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "R-squared",
+   "value": 0.7317
+  }
  }
 }
