@@ -1,0 +1,203 @@
+{
+ "model": "stat_parametric",
+ "scenarios": [
+  {
+   "scenario": "True Weibull: AIC picks Weibull",
+   "model": "stat_parametric",
+   "note": "",
+   "h0_true": null,
+   "results": [
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 232,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.03392,
+     "failure_reasons": {},
+     "reps_valid": 232,
+     "rate_flag_correct": 0.7586206896551724
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 200,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.03953,
+     "failure_reasons": {},
+     "reps_valid": 200,
+     "rate_flag_correct": 0.87
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 176,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.04495,
+     "failure_reasons": {},
+     "reps_valid": 176,
+     "rate_flag_correct": 0.9375
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 129,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.0615,
+     "failure_reasons": {},
+     "reps_valid": 129,
+     "rate_flag_correct": 1.0
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 100,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.08997,
+     "failure_reasons": {},
+     "reps_valid": 100,
+     "rate_flag_correct": 1.0
+    }
+   ]
+  },
+  {
+   "scenario": "True log-normal: AIC picks log-normal",
+   "model": "stat_parametric",
+   "note": "",
+   "h0_true": null,
+   "results": [
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 242,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.03256,
+     "failure_reasons": {},
+     "reps_valid": 242,
+     "rate_flag_correct": 0.0
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 206,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.03829,
+     "failure_reasons": {},
+     "reps_valid": 206,
+     "rate_flag_correct": 0.0
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 183,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.04318,
+     "failure_reasons": {},
+     "reps_valid": 183,
+     "rate_flag_correct": 0.0
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 133,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.05973,
+     "failure_reasons": {},
+     "reps_valid": 133,
+     "rate_flag_correct": 0.0
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 100,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.09143,
+     "failure_reasons": {},
+     "reps_valid": 100,
+     "rate_flag_correct": 0.0
+    }
+   ]
+  },
+  {
+   "scenario": "True exponential: AIC picks exponential",
+   "model": "stat_parametric",
+   "note": "",
+   "h0_true": null,
+   "results": [
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 241,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.03274,
+     "failure_reasons": {},
+     "reps_valid": 241,
+     "rate_flag_correct": 0.6348547717842323
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 201,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.03937,
+     "failure_reasons": {},
+     "reps_valid": 201,
+     "rate_flag_correct": 0.7313432835820896
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 191,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.04136,
+     "failure_reasons": {},
+     "reps_valid": 191,
+     "rate_flag_correct": 0.7801047120418848
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 133,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.05976,
+     "failure_reasons": {},
+     "reps_valid": 133,
+     "rate_flag_correct": 0.849624060150376
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 100,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.09476,
+     "failure_reasons": {},
+     "reps_valid": 100,
+     "rate_flag_correct": 0.8
+    }
+   ]
+  }
+ ],
+ "env": {
+  "python": "3.13.18",
+  "numpy": "2.5.3",
+  "scipy": "1.18.1",
+  "pandas": "2.3.3",
+  "engine": "1.5.0"
+ },
+ "wall_seconds": 124.1,
+ "budget_seconds_per_cell": 8.0
+}

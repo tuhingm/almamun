@@ -1,7 +1,7 @@
 # Validation summary
 
 * Methods registered: 31 (69 existing OES models + 31 = 100).
-* Monte Carlo result files: 8; total replications run: 211,401.
+* Monte Carlo result files: 31; total replications run: 457,017.
 * Software tests: see `stat-validation/tests` (run `pytest`).
 * Benchmark log: `results/benchmark_log.txt`.
 

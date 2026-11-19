@@ -1,4 +1,4 @@
-##### bench_A.py
+=== stat-validation/benchmarks/bench_A.py
 PASS A1 F 4.8461 4.846087862380135
 PASS A1 p 0.01591 0.015909958325622912
 PASS A1 eta2 0.2641 0.26414829683211977
@@ -19,7 +19,7 @@ unbal II [122.936479, 2204.92274, 83.353763] [122.9365, 2204.9227, 83.3538, 592.
 ['Within factor: Days', 13199.199468, 4, 3299.799867, 7.8254, 3e-05, 0.3152, 0.1091]
 [["Mauchly's test of sphericity", 0.1339, 9.0, 0.0003, None], ['Greenhouse-Geisser corrected F', 7.8254, '2.191, 37.239', 0.00109, 0.5476], ['Huynh-Feldt corrected F', 7.8254, '2.527, 42.966', 0.000554, 0.6319], ['Used in the summary', 7.8254, '2.191, 37.239', 0.00109, 0.5476]]
 SpherResults(spher=False, W=np.float64(0.13393517933606416), chi2=np.float64(30.993656373997453), dof=9, pval=np.float64(0.00032119007719642265))
-##### bench_A2.py
+=== stat-validation/benchmarks/bench_A2.py
 [[683.81204, 1.0, 14.04275, 0.00037], [766.27281, 2.0, 7.86808, 0.00084], [353.79491, 1.0, 7.26552, 0.00885], [3311.26262, 68.0, nan, nan]]
 [['Treat', 766.272813, 2, 383.136406, 7.8681, 0.000844, 0.1879, 0.1602, 0.0379, 0.3276], ['Prewt (covariate)', 353.794909, 1, 353.794909, 7.2655, 0.00885, 0.0965, 0.0801, 0.0061, 0.2346], ['Residuals', 3311.26262, 68, 48.695039, None, None, None, None, None, None]]
 adjusted [['Cont', 26, 81.107692, 81.477263, 1.375385, 78.732724, 84.221801], ['CBT', 29, 85.696552, 85.574328, 1.296609, 82.986985, 88.161672], ['FT', 17, 90.494118, 90.137391, 1.697624, 86.749834, 93.524948]]
@@ -39,7 +39,7 @@ Multivariate tests for group (adjusted for the covariates) [["Wilks' lambda", 0.
 Multivariate tests for n (covariate) [["Wilks' lambda", 0.93547, 1.4257, 3.0, 62.0, 0.243785], ["Pillai's trace", 0.06453, 1.4257, 3.0, 62.0, 0.243785], ['Hotelling-Lawley trace', 0.06899, 1.4257, 3.0, 62.0, 0.243785], ["Roy's largest root", 0.06899, 1.4257, 3.0, 62.0, 0.243785]]
 Multivariate tests for s (covariate) [["Wilks' lambda", 0.91935, 1.813, 3.0, 62.0, 0.154058], ["Pillai's trace", 0.08065, 1.813, 3.0, 62.0, 0.154058], ['Hotelling-Lawley trace', 0.08772, 1.813, 3.0, 62.0, 0.154058], ["Roy's largest root", 0.08772, 1.813, 3.0, 62.0, 0.154058]]
 Multivariate tests for ns (covariate) [["Wilks' lambda", 0.84897, 3.6766, 3.0, 62.0, 0.016696], ["Pillai's trace", 0.15103, 3.6766, 3.0, 62.0, 0.016696], ['Hotelling-Lawley trace', 0.1779, 3.6766, 3.0, 62.0, 0.016696], ["Roy's largest root", 0.1779, 3.6766, 3.0, 62.0, 0.016696]]
-##### bench_B.py
+=== stat-validation/benchmarks/bench_B.py
 PASS B1 asym p two-sided 0.064491 0.0644906721338357
 PASS B1 U 324.5 324.5
 PASS B1 asym p greater 0.968808 0.9688084275595561
@@ -82,7 +82,7 @@ PASS B5 exact p 0.50061 0.5006096271664154
 PASS B5 exact tau 0.1158 0.11578947368421053
 PASS B5 exact greater 0.250305 0.2503048135832077
 PASS B5 exact less 0.769738 0.7697381027805417
-##### bench_C.py
+=== stat-validation/benchmarks/bench_C.py
 eig ours [2.48024, 0.98977, 0.35656, 0.17343] sk [2.48024, 0.98977, 0.35656, 0.17343]
 loadings ours [['Murder', 0.844, 0.7123], ['Assault', 0.9184, 0.8435]]
 sk loadings [[0.844, -0.416, -0.2038, -0.2704], [0.9184, -0.187, -0.1601, 0.3096]]
@@ -115,7 +115,7 @@ RMSEA   0.092275
 5   x6  ~  textual  0.926120  0.055425  16.709493     0.0
 6   x7  ~    speed  1.000000         -          -       -
 7   x8  ~    speed  1.179980  0.165045   7.149459     0.0
-##### bench_C2.py
+=== stat-validation/benchmarks/bench_C2.py
 [('Resubstitution accuracy', 0.98), ('Cross-validated accuracy', 0.98), ('LD1 % of trace', 99.121), ('Classes', 3)]
 [['Sepal.Length', -0.82938, 0.0241], ['Sepal.Width', -1.53447, 2.16452], ['Petal.Length', 2.20121, -0.93192], ['Petal.Width', 2.81046, 2.83919]]
 [['LD1', 32.19193, 99.121, 99.121, 0.9848], ['LD2', 0.28539, 0.879, 100.0, 0.4712]]
@@ -129,7 +129,7 @@ sm [0.79561 0.20056 0.07257]
 [['Observations', 5387.0], ['Pearson chi-square', 1240.039], ['df', 12], ['p-value', 0.0], ['Total inertia (phi-squared)', 0.23019], ["Cramer's V", 0.277]]
 [['blue', 0.1333, 0.111, 0.4003, 0.1654, 0.1072, 0.1212, 0.8358, 0.1427], ['light', 0.2933, 0.2587, 0.4407, 0.0885, 0.2859, 0.0763, 0.9565, 0.0385]]
 [[1, 0.44637, 0.19924, 86.556, 86.556, 1073.331], [2, 0.17346, 0.03009, 13.07, 99.627, 162.077]]
-##### bench_D.py
+=== stat-validation/benchmarks/bench_D.py
 KM S max diff 0.03601804270431514
 KM median 80.0 80.0
 CI diff 4.440892098500626e-16 5.551115123125783e-16
@@ -154,40 +154,40 @@ lognormal ll -687.4410348771728 -687.4410348943402
 loglogistic ll -682.9318000381022 -682.931813453536
  theta [ 3.6572  0.2582  0.0455 -0.0743 -0.426 ] se [0.3651 0.1452 0.0152 0.0219 0.0868]
  lifel [ 0.0456  0.2582 -0.0743  3.656   0.4257] [0.0152 0.1453 0.0219 0.3653 0.0868]
-##### bench_D2.py
+=== stat-validation/benchmarks/bench_D2.py
 FG==Cox(breslow) 1.95975458083808e-11
 grad check 0.0018114100730599603
 FG sim true .7: mean est 0.7085825333333334 sd 0.11924098166422856 mean se 0.12628783333333335 coverage 0.9533333333333334
-##### bench_E1.py
+=== stat-validation/benchmarks/bench_E1.py
 None yes reml 0.03 s
  fx [('(Intercept)', 251.4051, 9.74672, 22.81, 0.0), ('Days', 10.46729, 0.80422, 161.0, 0.0)]
  vc [['Group (Subject): intercept', 1378.17868, 37.12383, None], ['Residual', 960.45657, 30.99123, None]]
  sm fe [251.4051  10.4673] [9.7469 0.8042] cov_re [[1378.232]] scale 960.453 ll -893.2325
-None yes ml 0.03 s
+None yes ml 0.04 s
  fx [('(Intercept)', 251.4051, 9.50619, 24.49, 0.0), ('Days', 10.46729, 0.80174, 162.0, 0.0)]
  vc [['Group (Subject): intercept', 1296.87002, 36.01208, None], ['Residual', 954.52784, 30.89543, None]]
  sm fe [251.4051  10.4673] [9.5063 0.8017] cov_re [[1296.907]] scale 954.525 ll -897.0393
-Days yes reml 0.09 s
+Days yes reml 0.1 s
  fx [('(Intercept)', 251.4051, 6.82456, 17.0, 0.0), ('Days', 10.46729, 1.54579, 17.0, 3e-06)]
  vc [['Group (Subject): intercept', 612.09063, 24.74047, None], ['Group (Subject): slope of Days', 35.07163, 5.92213, 0.0656], ['Residual', 654.94102, 25.59182, None]]
  sm fe [251.4051  10.4673] [6.8246 1.5458] cov_re [[612.089, 9.605], [9.605, 35.072]] scale 654.941 ll -871.8141
-Days yes ml 0.07 s
+Days yes ml 0.11 s
  fx [('(Intercept)', 251.4051, 6.63228, 18.0, 0.0), ('Days', 10.46729, 1.50224, 18.0, 2e-06)]
  vc [['Group (Subject): intercept', 565.51521, 23.78056, None], ['Group (Subject): slope of Days', 32.6822, 5.71683, 0.0813], ['Residual', 654.94104, 25.59182, None]]
  sm fe [251.4051  10.4673] [6.6323 1.5022] cov_re [[565.517, 11.056], [11.056, 32.682]] scale 654.941 ll -875.9697
-Days no reml 0.09 s
+Days no reml 0.11 s
  fx [('(Intercept)', 251.4051, 6.88538, 16.8, 0.0), ('Days', 10.46729, 1.55957, 16.35, 4e-06)]
  vc [['Group (Subject): intercept', 627.56947, 25.05134, None], ['Group (Subject): slope of Days', 35.85817, 5.98817, 0.0], ['Residual', 653.58382, 25.56529, None]]
-Days no ml 0.08 s
+Days no ml 0.11 s
  fx [('(Intercept)', 251.4051, 6.70767, 17.74, 0.0), ('Days', 10.46729, 1.51931, 17.12, 3e-06)]
  vc [['Group (Subject): intercept', 584.25035, 24.17127, None], ['Group (Subject): slope of Days', 33.63311, 5.79941, 0.0], ['Residual', 653.11605, 25.55614, None]]
-##### bench_E2.py
-1 0.29 s [('(Intercept)', -1.39853, 0.23247), ('period[2] vs 1', -0.99233, 0.30664), ('period[3] vs 1', -1.12867, 0.32664), ('period[4] vs 1', -1.58031, 0.42744)] sd [0.64226, 0.17856] ll -92.026
-15 0.42 s [('(Intercept)', -1.39923, 0.23351), ('period[2] vs 1', -0.9914, 0.30677), ('period[3] vs 1', -1.12782, 0.32677), ('period[4] vs 1', -1.57947, 0.42759)] sd [0.64752, 0.18052] ll -91.983
+=== stat-validation/benchmarks/bench_E2.py
+1 0.22 s [('(Intercept)', -1.39853, 0.23247), ('period[2] vs 1', -0.99233, 0.30664), ('period[3] vs 1', -1.12867, 0.32664), ('period[4] vs 1', -1.58031, 0.42744)] sd [0.64226, 0.17856] ll -92.026
+15 0.45 s [('(Intercept)', -1.39923, 0.23351), ('period[2] vs 1', -0.9914, 0.30677), ('period[3] vs 1', -1.12782, 0.32677), ('period[4] vs 1', -1.57947, 0.42759)] sd [0.64752, 0.18052] ll -91.983
 25 0.53 s [('(Intercept)', -1.39923, 0.23351), ('period[2] vs 1', -0.9914, 0.30677), ('period[3] vs 1', -1.12782, 0.32677), ('period[4] vs 1', -1.57947, 0.42759)] sd [0.64752, 0.18052] ll -91.983
-quad MLE [-1.3992 -0.9914 -1.1278 -1.5795] sd 0.6475 ll -91.9833689219524 46.3 s
+quad MLE [-1.3992 -0.9914 -1.1278 -1.5795] sd 0.6475 ll -91.9833689219524 46.6 s
 mine ll at quad optimum -91.9833689219524
-##### bench_E3.py
+=== stat-validation/benchmarks/bench_E3.py
 gaussian independence coef maxdiff 5e-06 robust se maxdiff 4e-06 alpha None None scale 5.16068 5.16068 QIC 117.128 [np.float64(117.128), np.float64(111.0)]
 gaussian exchangeable coef maxdiff 5e-06 robust se maxdiff 4e-06 alpha 0.59094 0.5909391990460952 scale 5.16068 5.16068 QIC 117.128 [np.float64(117.128), np.float64(111.0)]
 gaussian ar1 statsmodels fails: Autoregressive: unable to find right bracket | mine coef [17.80658, 0.65542, -2.37114] alpha 0.61548
@@ -213,21 +213,21 @@ ICC(3,4) 0.90932 0.6757 0.9859 0.000135
 alpha [["Cronbach's alpha", 0.90932, 0.6757, 0.9859]] (np.float64(0.9093155423770694), array([0.676, 0.986]))
 --- AR1 with alpha fixed at statsmodels value
 0.4753469312718348 0.3358310539276135 106.432 (np.float64(100.28078661724919), np.float64(104.56070796854983))
-##### bench_F.py
+=== stat-validation/benchmarks/bench_F.py
 mean 0.1 s mine [('Percen', 16.84, 20.70667), ('Basic ', 16.92, 20.78667), ('BCa (b', 16.81, 20.685)] 
    scipy {'percentile': (np.float64(16.8716), np.float64(20.67)), 'basic': (np.float64(16.9566), np.float64(20.7551)), 'BCa': (np.float64(16.8717), np.float64(20.6702))} se 0.979584 0.9681276171918262
-median 0.1 s mine [('Percen', 16.5, 22.9), ('Basic ', 15.6, 22.0), ('BCa (b', 16.5, 22.9)] 
+median 0.2 s mine [('Percen', 16.5, 22.9), ('Basic ', 15.6, 22.0), ('BCa (b', 16.5, 22.9)] 
    scipy {'percentile': (np.float64(16.5), np.float64(22.9)), 'basic': (np.float64(15.6), np.float64(22.0)), 'BCa': (np.float64(16.5), np.float64(22.9))} se 1.915149 
 sd 0.1 s mine [('Percen', 6.569, 8.52934), ('Basic ', 6.76929, 8.72963), ('BCa (b', 6.77004, 8.74797)] 
    scipy {'percentile': (np.float64(6.5681), np.float64(8.5286)), 'basic': (np.float64(6.77), np.float64(8.7306)), 'BCa': (np.float64(6.7647), np.float64(8.7815))} se 0.499939 
 ['Ozone', 'Month']
-##### bench_F2.py
+=== stat-validation/benchmarks/bench_F2.py
 mean mine [(16.88333, 20.73167), (16.895, 20.74333), (16.87, 20.71667)] 
  scipy [(16.885, 20.732), (16.895, 20.742), (16.865, 20.71)]
 sd mine [(6.56532, 8.54764), (6.75099, 8.73331), (6.76835, 8.76012)] 
  scipy [(6.568, 8.554), (6.745, 8.731), (6.771, 8.768)]
 perm exact two-sample 0.005218 0.005217692524194072 nperm 184756
-perm exact corr 0.678175 0.6708273291726708
+perm exact corr 0.678175 0.6687113312886687
 perm exact paired 0.004883 0.0048828125 4096
 MC mean diff p 0.060639 welch ['Welch t-test', -1.9153, 0.060635]
 ANOVA 5e-05 [['One-way ANOVA F test', 67.4157, 0.0]]
@@ -240,7 +240,7 @@ corr n 85 (pwr: 84.07 -> 85)
 prop n 175 174.41912242947043 (pwr 174.4)
 chisq N 108 107.05209855440535
 detectable d 0.4991 0.499069177194551
-##### bench_G.py
+=== stat-validation/benchmarks/bench_G.py
 FE [-0.43029, 0.0405, -10.6247, 0.0, -0.50966, -0.35091] metafor FE -0.4303 se 0.0481
 dl [-0.71412, 0.17874, -3.9952, 6.5e-05, -1.06445, -0.36379] tau2 0.30876 I2 92.12
 reml [-0.71453, 0.17978, -3.9744, 7.1e-05, -1.0669, -0.36217] tau2 0.31324 I2 92.12

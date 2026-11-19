@@ -6,35 +6,35 @@ Status of the 31 Statistics Division methods. 'MC reps' is the total number of M
 |---|---|---|---|---|---|---|---|---|
 | A1 | One-way ANOVA | yes | yes | yes | yes | 40000 | 0 | Validated |
 | A2 | Two-way ANOVA | yes | yes | yes | yes | 39036 | 9 | Validated |
-| A3 | Repeated-measures ANOVA | yes | yes | yes | NO | – | – | Validated |
-| A4 | Analysis of covariance (ANCOVA) | yes | yes | yes | NO | – | – | Validated |
-| A5 | Multivariate ANOVA (MANOVA) | yes | yes | yes | NO | – | – | Validated |
-| A6 | Multivariate ANCOVA (MANCOVA) | yes | yes | yes | NO | – | – | Validated |
+| A3 | Repeated-measures ANOVA | yes | yes | yes | yes | 15328 | 15 | Validated |
+| A4 | Analysis of covariance (ANCOVA) | yes | yes | yes | yes | 15265 | 15 | Validated |
+| A5 | Multivariate ANOVA (MANOVA) | yes | yes | yes | yes | 5659 | 15 | Validated |
+| A6 | Multivariate ANCOVA (MANCOVA) | yes | yes | yes | yes | 6500 | 10 | Validated |
 | B1 | Mann-Whitney U test | yes | yes | yes | yes | 40000 | 0 | Validated |
 | B2 | Wilcoxon signed-rank test | yes | yes | yes | yes | 27792 | 3 | Validated |
-| B3 | Kruskal-Wallis test | yes | yes | yes | NO | – | – | Validated |
-| B4 | Friedman test | yes | yes | yes | NO | – | – | Validated |
+| B3 | Kruskal-Wallis test | yes | yes | yes | yes | 26939 | 15 | Validated |
+| B4 | Friedman test | yes | yes | yes | yes | 8884 | 15 | Validated |
 | B5 | Kendall's tau correlation | yes | yes | yes | yes | 25951 | 4 | Validated |
-| C1 | Principal component analysis (PCA) | yes | yes | yes | NO | – | – | Validated |
-| C2 | Exploratory factor analysis (EFA) | yes | yes | yes | NO | – | – | Validated |
+| C1 | Principal component analysis (PCA) | yes | yes | yes | yes | 1944 | 5 | Validated |
+| C2 | Exploratory factor analysis (EFA) | yes | yes | yes | yes | 3301 | 10 | Validated |
 | C3 | Confirmatory factor analysis (CFA) | yes | yes | yes | yes | 16000 | 0 | Validated |
-| C4 | Linear discriminant analysis (LDA) | yes | yes | yes | NO | – | – | Validated |
-| C5 | Canonical correlation analysis (CCA) | yes | yes | yes | NO | – | – | Validated |
-| C6 | Correspondence analysis (CA) | yes | yes | yes | NO | – | – | Validated |
-| D1 | Kaplan-Meier estimator and log-rank test | yes | yes | yes | NO | – | – | Validated |
-| D2 | Cox proportional hazards model | yes | yes | yes | NO | – | – | Validated |
-| D3 | Accelerated failure time model | yes | yes | yes | NO | – | – | Validated |
-| D4 | Fine-Gray competing-risks regression | yes | yes | yes | NO | – | – | Partially validated |
-| D5 | Parametric survival (Weibull, exponential, log-normal) | yes | yes | yes | NO | – | – | Validated |
+| C4 | Linear discriminant analysis (LDA) | yes | yes | yes | yes | 2291 | 5 | Validated |
+| C5 | Canonical correlation analysis (CCA) | yes | yes | yes | yes | 12954 | 6 | Validated |
+| C6 | Correspondence analysis (CA) | yes | yes | yes | yes | 20000 | 0 | Validated |
+| D1 | Kaplan-Meier estimator and log-rank test | yes | yes | yes | yes | 13043 | 14 | Validated |
+| D2 | Cox proportional hazards model | yes | yes | yes | yes | 13638 | 25 | Validated |
+| D3 | Accelerated failure time model | yes | yes | yes | yes | 5678 | 15 | Validated |
+| D4 | Fine-Gray competing-risks regression | yes | yes | yes | yes | 1234 | 4 | Partially validated |
+| D5 | Parametric survival (Weibull, exponential, log-normal) | yes | yes | yes | yes | 2567 | 15 | Validated |
 | E1 | Linear mixed-effects model (LMM) | yes | yes | yes | yes | 21551 | 18 | Validated |
 | E2 | Generalised linear mixed model (GLMM) | yes | yes | yes | yes | 1071 | 8 | Partially validated |
-| E3 | Generalised estimating equations (GEE) | yes | yes | yes | NO | – | – | Validated with a documented deviation |
-| E4 | Intraclass correlation (ICC) and reliability | yes | yes | yes | NO | – | – | Validated |
-| F1 | Bootstrap confidence intervals | yes | yes | yes | NO | – | – | Validated |
-| F2 | Permutation tests | yes | yes | yes | NO | – | – | Validated |
-| F3 | Power and sample-size analysis | yes | yes | yes | NO | – | – | Validated |
-| G1 | Fixed-effect meta-analysis | yes | yes | yes | NO | – | – | Validated, small-study tests unchecked |
-| G2 | Random-effects meta-analysis | yes | yes | yes | NO | – | – | Validated, small-study tests unchecked |
+| E3 | Generalised estimating equations (GEE) | yes | yes | yes | yes | 13780 | 14 | Validated with a documented deviation |
+| E4 | Intraclass correlation (ICC) and reliability | yes | yes | yes | yes | 20000 | 0 | Validated |
+| F1 | Bootstrap confidence intervals | yes | yes | yes | yes | 28322 | 14 | Validated |
+| F2 | Permutation tests | yes | yes | yes | yes | 13585 | 15 | Validated |
+| F3 | Power and sample-size analysis | yes | yes | yes | yes | – | – | Validated |
+| G1 | Fixed-effect meta-analysis | yes | yes | yes | yes | 8344 | 10 | Validated, small-study tests unchecked |
+| G2 | Random-effects meta-analysis | yes | yes | yes | yes | 6360 | 20 | Validated, small-study tests unchecked |
 
 ## Reasons behind non-plain statuses
 

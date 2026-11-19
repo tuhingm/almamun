@@ -1,0 +1,150 @@
+{
+ "model": "stat_ca",
+ "scenarios": [
+  {
+   "scenario": "H0 independence, chi-square test",
+   "model": "stat_ca",
+   "note": "",
+   "h0_true": true,
+   "results": [
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00333,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.0585,
+     "mc_se_reject_p": 0.0052477495176503994
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00322,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.052,
+     "mc_se_reject_p": 0.004964675215963275
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00302,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.0595,
+     "mc_se_reject_p": 0.005289600646551685
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.0032,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.0515,
+     "mc_se_reject_p": 0.004942051699446294
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00315,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.05,
+     "mc_se_reject_p": 0.004873397172404482
+    }
+   ]
+  },
+  {
+   "scenario": "Power (dependence)",
+   "model": "stat_ca",
+   "note": "",
+   "h0_true": false,
+   "results": [
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00319,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.615,
+     "mc_se_reject_p": 0.010880602005403929
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00326,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.932,
+     "mc_se_reject_p": 0.005629209535982825
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00309,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 1.0,
+     "mc_se_reject_p": 0.0
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00307,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 1.0,
+     "mc_se_reject_p": 0.0
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00313,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 1.0,
+     "mc_se_reject_p": 0.0
+    }
+   ]
+  }
+ ],
+ "env": {
+  "python": "3.13.18",
+  "numpy": "2.5.3",
+  "scipy": "1.18.1",
+  "pandas": "2.3.3",
+  "engine": "1.5.0"
+ },
+ "wall_seconds": 71.6,
+ "budget_seconds_per_cell": 15.0
+}

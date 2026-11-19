@@ -1,0 +1,306 @@
+{
+ "model": "stat_bootstrap",
+ "scenarios": [
+  {
+   "scenario": "Mean, normal: percentile vs BCa coverage",
+   "model": "stat_bootstrap",
+   "note": "",
+   "h0_true": null,
+   "results": [
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00281,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "coverage": 0.946,
+     "mc_se_coverage": 0.005053909377897473,
+     "mean_ci_width": 0.54193097
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00316,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "coverage": 0.937,
+     "mc_se_coverage": 0.00543281694887652,
+     "mean_ci_width": 0.38731642
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 1877,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00403,
+     "failure_reasons": {},
+     "reps_valid": 1877,
+     "coverage": 0.9557805007991476,
+     "mc_se_coverage": 0.004745192732756595,
+     "mean_ci_width": 0.24612526904635054
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 1301,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00589,
+     "failure_reasons": {},
+     "reps_valid": 1301,
+     "coverage": 0.9485011529592621,
+     "mc_se_coverage": 0.006127439563058422,
+     "mean_ci_width": 0.17397268255188317
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 622,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.01254,
+     "failure_reasons": {},
+     "reps_valid": 622,
+     "coverage": 0.9694533762057878,
+     "mc_se_coverage": 0.006900012531908456,
+     "mean_ci_width": 0.12355332797427651
+    }
+   ]
+  },
+  {
+   "scenario": "Mean, exponential (skewed): BCa",
+   "model": "stat_bootstrap",
+   "note": "",
+   "h0_true": null,
+   "results": [
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00288,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "coverage": 0.933,
+     "mc_se_coverage": 0.0055906618570612885,
+     "mean_ci_width": 0.55453957
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00307,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "coverage": 0.939,
+     "mc_se_coverage": 0.005351588549206677,
+     "mean_ci_width": 0.391297505
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 1781,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00423,
+     "failure_reasons": {},
+     "reps_valid": 1781,
+     "coverage": 0.948905109489051,
+     "mc_se_coverage": 0.005217568617335008,
+     "mean_ci_width": 0.24675140370578327
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 1205,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00635,
+     "failure_reasons": {},
+     "reps_valid": 1205,
+     "coverage": 0.9427385892116182,
+     "mc_se_coverage": 0.006693189802220811,
+     "mean_ci_width": 0.17494633195020745
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 614,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.01268,
+     "failure_reasons": {},
+     "reps_valid": 614,
+     "coverage": 0.9560260586319218,
+     "mc_se_coverage": 0.008274626048079872,
+     "mean_ci_width": 0.12362993485342018
+    }
+   ]
+  },
+  {
+   "scenario": "Mean, exponential: percentile",
+   "model": "stat_bootstrap",
+   "note": "",
+   "h0_true": null,
+   "results": [
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00288,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "coverage": 0.942,
+     "mc_se_coverage": 0.005226662414964259,
+     "mean_ci_width": 0.53393376
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00313,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "coverage": 0.942,
+     "mc_se_coverage": 0.005226662414964259,
+     "mean_ci_width": 0.384210085
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 1816,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00416,
+     "failure_reasons": {},
+     "reps_valid": 1816,
+     "coverage": 0.9432819383259912,
+     "mc_se_coverage": 0.005427796136532156,
+     "mean_ci_width": 0.24572084801762115
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 1290,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00594,
+     "failure_reasons": {},
+     "reps_valid": 1290,
+     "coverage": 0.9503875968992248,
+     "mc_se_coverage": 0.006045756571895797,
+     "mean_ci_width": 0.17393211627906977
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 581,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.01342,
+     "failure_reasons": {},
+     "reps_valid": 581,
+     "coverage": 0.9380378657487092,
+     "mc_se_coverage": 0.010001964365610362,
+     "mean_ci_width": 0.12256533562822719
+    }
+   ]
+  },
+  {
+   "scenario": "Median, normal: percentile",
+   "model": "stat_bootstrap",
+   "note": "",
+   "h0_true": null,
+   "results": [
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 1974,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00381,
+     "failure_reasons": {},
+     "reps_valid": 1974,
+     "coverage": 0.9473150962512664,
+     "mc_se_coverage": 0.005028248704903009,
+     "mean_ci_width": 0.6860441793313069
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 1534,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00497,
+     "failure_reasons": {},
+     "reps_valid": 1534,
+     "coverage": 0.9517601043024772,
+     "mc_se_coverage": 0.0054708429569961204,
+     "mean_ci_width": 0.4814718774445893
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 944,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.0082,
+     "failure_reasons": {},
+     "reps_valid": 944,
+     "coverage": 0.940677966101695,
+     "mc_se_coverage": 0.007688515689583786,
+     "mean_ci_width": 0.3095384216101695
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 542,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.01446,
+     "failure_reasons": {},
+     "reps_valid": 542,
+     "coverage": 0.9501845018450185,
+     "mc_se_coverage": 0.009345156242689659,
+     "mean_ci_width": 0.21905577490774908
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 241,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.03292,
+     "failure_reasons": {},
+     "reps_valid": 241,
+     "coverage": 0.9377593360995851,
+     "mc_se_coverage": 0.015562317993089976,
+     "mean_ci_width": 0.15473966804979253
+    }
+   ]
+  }
+ ],
+ "env": {
+  "python": "3.13.18",
+  "numpy": "2.5.3",
+  "scipy": "1.18.1",
+  "pandas": "2.3.3",
+  "engine": "1.5.0"
+ },
+ "wall_seconds": 150.8,
+ "budget_seconds_per_cell": 8.0
+}

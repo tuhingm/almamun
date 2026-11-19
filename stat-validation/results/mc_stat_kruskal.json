@@ -1,0 +1,218 @@
+{
+ "model": "stat_kruskal",
+ "scenarios": [
+  {
+   "scenario": "H0, normal",
+   "model": "stat_kruskal",
+   "note": "",
+   "h0_true": true,
+   "results": [
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 1918,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00392,
+     "failure_reasons": {},
+     "reps_valid": 1918,
+     "reject_p": 0.04692387904066736,
+     "mc_se_reject_p": 0.004828769179789091
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 1912,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00393,
+     "failure_reasons": {},
+     "reps_valid": 1912,
+     "reject_p": 0.05805439330543933,
+     "mc_se_reject_p": 0.005347939849080308
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 1818,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00414,
+     "failure_reasons": {},
+     "reps_valid": 1818,
+     "reject_p": 0.0539053905390539,
+     "mc_se_reject_p": 0.005296469100630219
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 1775,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00424,
+     "failure_reasons": {},
+     "reps_valid": 1775,
+     "reject_p": 0.049014084507042255,
+     "mc_se_reject_p": 0.005124462405440865
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 1608,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00469,
+     "failure_reasons": {},
+     "reps_valid": 1608,
+     "reject_p": 0.05286069651741294,
+     "mc_se_reject_p": 0.005579950520536329
+    }
+   ]
+  },
+  {
+   "scenario": "H0, t(3)",
+   "model": "stat_kruskal",
+   "note": "",
+   "h0_true": true,
+   "results": [
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 1941,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00386,
+     "failure_reasons": {},
+     "reps_valid": 1941,
+     "reject_p": 0.05100463678516229,
+     "mc_se_reject_p": 0.004993719074656414
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 1868,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00402,
+     "failure_reasons": {},
+     "reps_valid": 1868,
+     "reject_p": 0.0487152034261242,
+     "mc_se_reject_p": 0.00498079998719685
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 1755,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00427,
+     "failure_reasons": {},
+     "reps_valid": 1755,
+     "reject_p": 0.0472934472934473,
+     "mc_se_reject_p": 0.005066890297389813
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 1807,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00415,
+     "failure_reasons": {},
+     "reps_valid": 1807,
+     "reject_p": 0.05368013281682346,
+     "mc_se_reject_p": 0.005302085093684421
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 1590,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.0047,
+     "failure_reasons": {},
+     "reps_valid": 1590,
+     "reject_p": 0.04968553459119497,
+     "mc_se_reject_p": 0.005449417616081023
+    }
+   ]
+  },
+  {
+   "scenario": "Power, delta=0.7",
+   "model": "stat_kruskal",
+   "note": "",
+   "h0_true": false,
+   "results": [
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 1807,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00416,
+     "failure_reasons": {},
+     "reps_valid": 1807,
+     "reject_p": 0.49197565024903156,
+     "mc_se_reject_p": 0.01176074929687039
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 1872,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00402,
+     "failure_reasons": {},
+     "reps_valid": 1872,
+     "reject_p": 0.8039529914529915,
+     "mc_se_reject_p": 0.009175769925856524
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 1914,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00393,
+     "failure_reasons": {},
+     "reps_valid": 1914,
+     "reject_p": 0.9968652037617555,
+     "mc_se_reject_p": 0.0012777677134620145
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 1756,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00429,
+     "failure_reasons": {},
+     "reps_valid": 1756,
+     "reject_p": 1.0,
+     "mc_se_reject_p": 0.0
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 1598,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00471,
+     "failure_reasons": {},
+     "reps_valid": 1598,
+     "reject_p": 1.0,
+     "mc_se_reject_p": 0.0
+    }
+   ]
+  }
+ ],
+ "env": {
+  "python": "3.13.18",
+  "numpy": "2.5.3",
+  "scipy": "1.18.1",
+  "pandas": "2.3.3",
+  "engine": "1.5.0"
+ },
+ "wall_seconds": 120.1,
+ "budget_seconds_per_cell": 8.0
+}
