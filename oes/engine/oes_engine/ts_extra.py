@@ -1059,3 +1059,69 @@ def seasonal(df, spec):
                   stat("Seasonality test p-value", float(pF), 4)], tabs, ch,
                   ["STL is a descriptive filter: it is not the X-13 ARIMA-SEATS procedure used by statistical agencies, and it does not adjust for trading days or holidays.",
                    "Seasonally adjust before estimating only if the seasonal pattern is not part of the question; otherwise include seasonal terms in the model."])
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Long memory: GPH and local Whittle estimates of the fractional order of integration d
+# ---------------------------------------------------------------------------------------------------------------
+def _periodogram(x):
+    n = len(x); xc = x - x.mean(); fft = np.fft.fft(xc); I = (np.abs(fft) ** 2) / (2 * np.pi * n); lam = 2 * np.pi * np.arange(n) / n
+    return lam[1:(n - 1) // 2 + 1], I[1:(n - 1) // 2 + 1]
+
+
+def _gph(x, m):
+    lam, I = _periodogram(x); lam, I = lam[:m], I[:m]
+    X = -2 * np.log(2 * np.sin(lam / 2)); Xc = X - X.mean(); b = (Xc @ np.log(I)) / (Xc @ Xc)
+    return float(b), float(np.sqrt(np.pi ** 2 / 6 / (Xc @ Xc)))
+
+
+def _whittle(x, m):
+    lam, I = _periodogram(x); lam, I = lam[:m], I[:m]
+    def obj(d):
+        return np.log(np.mean(lam ** (2 * d) * I)) - 2 * d * np.mean(np.log(lam))
+    r = optimize.minimize_scalar(obj, bounds=(-0.49, 1.49), method="bounded")
+    return float(r.x), float(1 / (2 * np.sqrt(m)))
+
+
+def _fracdiff(x, d, thresh=1e-5):
+    n = len(x); w = [1.0]
+    for k in range(1, n):
+        w.append(-w[-1] * (d - k + 1) / k)
+    w = np.array(w); return np.array([w[:t + 1] @ x[t::-1][:t + 1] for t in range(n)])
+
+
+def longmemory(df, spec):
+    from statsmodels.tsa.stattools import acf
+    from statsmodels.stats.diagnostic import acorr_ljungbox
+    y = need(spec, "y", "series")
+    d_, labels = _series_frame(df, spec, [y])
+    x0 = d_[y].to_numpy(float); n = len(x0)
+    if n < 100:
+        raise OESError("Long-memory estimates need at least 100 observations.")
+    tr = spec.get("transform") or "level"
+    if tr not in ("level", "absolute", "squared", "log absolute"):
+        raise OESError("Choose level, absolute, squared or log absolute.")
+    xc = x0 - x0.mean()
+    x = {"level": x0, "absolute": np.abs(xc), "squared": xc ** 2, "log absolute": np.log(np.abs(xc) + 1e-8)}[tr]
+    pw = float_option(spec, "power", 0.65, "Bandwidth power")
+    if not 0.4 <= pw <= 0.85:
+        raise OESError("Bandwidth power must be between 0.4 and 0.85.")
+    ms = sorted(set([int(n ** p_) for p_ in (0.5, 0.6, pw, 0.75, 0.8)]))
+    rows = []
+    for m in ms:
+        g, sg = _gph(x, m); w_, sw = _whittle(x, m)
+        rows.append([m, f"n^{np.log(m) / np.log(n):.2f}", f(g, 3), f(sg, 3), f(w_, 3), f(sw, 3), f(2 * stats.norm.sf(abs(w_) / sw), 4)])
+    m0 = int(n ** pw); g0, sg0 = _gph(x, m0); w0, sw0 = _whittle(x, m0)
+    tabs = [table("Estimates of the fractional order d", ["Frequencies m", "Bandwidth", "GPH d", "s.e.", "Local Whittle d", "s.e.", "p (Whittle, d = 0)"], rows,
+                  "d = 0: short memory; 0 < d < 0.5: stationary long memory (autocorrelations decay hyperbolically); 0.5 <= d < 1: non-stationary but mean-reverting; d = 1: unit root. Standard errors are asymptotic and ignore the bandwidth choice.")]
+    ac = acf(x, nlags=60, fft=True); lags = [1, 5, 10, 20, 40, 60]
+    lb0 = acorr_ljungbox(x, lags=[20], return_df=True)
+    xf = _fracdiff(x - x.mean(), w0); lb1 = acorr_ljungbox(xf[20:], lags=[20], return_df=True)
+    tabs.append(table("Autocorrelations", ["Lag"] + [str(l) for l in lags], [["Series"] + [f(ac[l], 3) for l in lags]], "Short memory: autocorrelations decay geometrically; long memory: slowly."))
+    tabs.append(table("Does fractional differencing remove the dependence?", ["Series", "Ljung-Box (20)", "p-value"],
+                      [[f"{tr}, original", f(lb0.lb_stat.iloc[0], 2), f(lb0.lb_pvalue.iloc[0], 4)], [f"after (1 - L)^{w0:.2f}", f(lb1.lb_stat.iloc[0], 2), f(lb1.lb_pvalue.iloc[0], 4)]],
+                      "If the fractional difference is white noise the long-memory model captures the dependence."))
+    ch = [chart("Autocorrelation function", list(range(1, 61)), [("ACF", ac[1:61])]), chart("Log periodogram against log frequency", list(range(1, m0 + 1)), [("log I(lambda)", np.log(_periodogram(x)[1][:m0]))])]
+    return result("longmemory", f"Long memory: {y} ({tr})", n, [stat("Observations", n), stat("GPH d", g0, 3), stat("Local Whittle d", w0, 3), stat("Bandwidth m", m0)], tabs, ch,
+                  ["Structural breaks and regime changes produce spurious long memory: check for breaks before you conclude that d > 0.",
+                   "The estimates are semiparametric and depend on the bandwidth; report a range."])
