@@ -5,13 +5,13 @@ Status of the 31 Statistics Division methods. 'MC reps' is the total number of M
 | Code | Method | Implemented | Unit/integration tests | Benchmarked | Monte Carlo | MC reps | capped cells | Status |
 |---|---|---|---|---|---|---|---|---|
 | A1 | One-way ANOVA | yes | yes | yes | yes | 40000 | 0 | Validated |
-| A2 | Two-way ANOVA | yes | yes | yes | NO | – | – | Validated |
+| A2 | Two-way ANOVA | yes | yes | yes | yes | 39036 | 9 | Validated |
 | A3 | Repeated-measures ANOVA | yes | yes | yes | NO | – | – | Validated |
 | A4 | Analysis of covariance (ANCOVA) | yes | yes | yes | NO | – | – | Validated |
 | A5 | Multivariate ANOVA (MANOVA) | yes | yes | yes | NO | – | – | Validated |
 | A6 | Multivariate ANCOVA (MANCOVA) | yes | yes | yes | NO | – | – | Validated |
 | B1 | Mann-Whitney U test | yes | yes | yes | yes | 40000 | 0 | Validated |
-| B2 | Wilcoxon signed-rank test | yes | yes | yes | NO | – | – | Validated |
+| B2 | Wilcoxon signed-rank test | yes | yes | yes | yes | 27792 | 3 | Validated |
 | B3 | Kruskal-Wallis test | yes | yes | yes | NO | – | – | Validated |
 | B4 | Friedman test | yes | yes | yes | NO | – | – | Validated |
 | B5 | Kendall's tau correlation | yes | yes | yes | NO | – | – | Validated |

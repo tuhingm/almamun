@@ -163,7 +163,7 @@ def dataset_block(m):
 def build_method_page(m, d, res, dt):
     mid = m["id"]; st = STATUS.get(mid, DEFAULT_STATUS)
     body = f'<section><h2>Overview</h2><p>{esc(d["intro"])}</p><p><span class="badge {"ok" if st[0]=="Validated" else "warn"}">{esc(st[0])}</span> <span class="hint">{esc(st[1])}</span></p>'
-    body += f'<a class="cta" href="../oes/statistics.html">Run it on your data</a><a class="cta alt" href="reports/{slug(m)}.html">Technical validation report</a></section>'
+    body += f'<a class="cta" href="../oes/index.html#{mid}">Run it on your data</a><a class="cta alt" href="reports/{slug(m)}.html">Technical validation report</a></section>'
     body += f'<section><h2>Mathematical formulation</h2>{math_html(d["math"])}</section>'
     body += f'<section><h2>Assumptions</h2>{ul(d["assumptions"])}</section>'
     body += f'<section><h2>Data input</h2><p>Upload a CSV file (or use the example) and choose these settings:</p>{fields_table(m)}</section>'
@@ -171,7 +171,7 @@ def build_method_page(m, d, res, dt):
     body += f'<section><h2>Example: results</h2>{dataset_block(m)}<p>Specification: <code>{esc(json.dumps(m["example"]["spec"]))}</code>. Computed in {dt:.2f} s by this engine when this page was generated.</p>{result_tables(res)}</section>'
     body += f'<section><h2>Diagnostics and interpretation</h2>{ul(d["interp"])}<p class="hint">The diagnostic tables are part of the results above (assumption checks, fit statistics, residual or goodness-of-fit tables).</p></section>'
     body += f'<section><h2>Limitations</h2>{ul(d["limitations"])}</section>'
-    body += f'<section><h2>Replication code</h2><pre>{esc(replication_code(m))}</pre><p class="hint">Results can be exported as CSV from the Statistics Division page.</p></section>'
+    body += f'<section><h2>Replication code</h2><pre>{esc(replication_code(m))}</pre><p class="hint">Results can be exported as CSV from the OES page (Statistics section).</p></section>'
     body += f'<section><h2>References</h2>{refs_html(d["refs"])}</section>'
     crumbs = '<a href="index.html">Statistics Division guide</a> / ' + esc(m["group"])
     return page(m["name"], f'{m["code"]} · {m["group"]}', d["intro"], body, crumbs, 1)
@@ -263,7 +263,7 @@ def main():
     body = ""
     for g, items in idx.items():
         body += f"<section><h2>{esc(g)}</h2><div class='tw'><table><thead><tr><th>Code</th><th>Method</th><th>Status</th><th>Report</th></tr></thead><tbody>" + "".join(f'<tr><td>{m["code"]}</td><td><a href="{slug(m)}.html">{esc(m["name"])}</a></td><td>{esc(st[0])}</td><td><a href="reports/{slug(m)}.html">validation report</a></td></tr>' for m, st in items) + "</tbody></table></div></section>"
-    open(os.path.join(ROOT, "stat-guide", "index.html"), "w").write(page("Statistics Division: method guides", "OES · Statistics", "Thirty-one statistical methods in seven categories, each with a method page and a technical validation report.", body, '<a href="../oes/statistics.html">OES Statistics Division</a>', 1))
+    open(os.path.join(ROOT, "stat-guide", "index.html"), "w").write(page("Statistics Division: method guides", "OES · Statistics", "Thirty-one statistical methods in seven categories, each with a method page and a technical validation report.", body, '<a href="../oes/index.html#statistics">OES: Statistics section</a>', 1))
     json.dump(ledger, open(os.path.join(ROOT, "stat-validation", "results", "ledger.json"), "w"), indent=1)
     print("pages written:", len(ledger))
 main()
