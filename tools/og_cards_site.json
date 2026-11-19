@@ -126,6 +126,12 @@
   "sub": "An instrument shifts the treatment. Step-by-step guide with Python code and real output."
  },
  {
+  "out": "assets/og/causal-inference-guide/lee-bounds.jpg",
+  "kicker": "Causal Inference Guide · Model guide",
+  "title": "Lee Bounds for Sample Selection and Attrition",
+  "sub": "An outcome is observed only for some units, treatment changes who is observed, and you want an effect without a selection model.…"
+ },
+ {
   "out": "assets/og/causal-inference-guide/matching.jpg",
   "kicker": "Causal Inference Guide · Model guide",
   "title": "Matching, inverse-probability weighting and doubly robust estimation",

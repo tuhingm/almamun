@@ -551,3 +551,74 @@ def mediation(df, spec):
     ch = [chart("ACME as a function of the error correlation rho", list(grid), [("ACME", acm), ("Zero", [0.0] * len(grid))], "rho", "ACME", kind="line")]
     notes = ["The treatment must be randomised or ignorable given the covariates, and the mediator must be ignorable given treatment and covariates (sequential ignorability); the second assumption cannot be ensured by randomising the treatment.", "A mediator measured after treatment and affected by it can confound the mediator-outcome relationship through variables that are also affected by treatment; check the sensitivity table."]
     return result("mediation", f"Causal mediation: {t} -> {m} -> {y}", n, [stat("Observations", n), stat("ACME", acme_avg, 4), stat("ADE", ade_avg, 4), stat("Total effect", tot, 4), stat("Proportion mediated", acme_avg / tot if tot != 0 else None, 3), stat("rho at which ACME = 0", float(rstar), 3)], tabs, ch, notes)
+
+
+# ------------------------------------------------------------------------------------------------------------------
+# Lee (2009) trimming bounds for sample selection and attrition, with Manski worst-case bounds for comparison
+# ------------------------------------------------------------------------------------------------------------------
+def _lee(Y, T, S):
+    """Lee bounds on the effect for the always-selected. Y may be NaN where S = 0."""
+    q1 = S[T == 1].mean(); q0 = S[T == 0].mean()
+    y1 = Y[(T == 1) & (S == 1)]; y0 = Y[(T == 0) & (S == 1)]
+    if q1 >= q0:
+        p = (q1 - q0) / q1 if q1 > 0 else 0.0; arm = 1; ys = np.sort(y1)
+    else:
+        p = (q0 - q1) / q0 if q0 > 0 else 0.0; arm = 0; ys = np.sort(y0)
+    k = int(np.floor(p * len(ys) + 1e-9)); frac = p * len(ys) - k
+    # trim exactly p of the selected in the arm with the higher selection rate (fractional observation at the edge)
+    def trimmed_mean(v, from_top):
+        v = np.sort(v)
+        if p <= 0: return float(v.mean())
+        w = np.ones(len(v));
+        idx = np.arange(len(v) - 1, -1, -1) if from_top else np.arange(len(v))
+        rem = p * len(v)
+        for j in idx:
+            take = min(1.0, rem); w[j] -= take; rem -= take
+            if rem <= 1e-12: break
+        return float(np.sum(w * v) / np.sum(w))
+    if arm == 1:
+        lo = trimmed_mean(y1, True) - y0.mean(); hi = trimmed_mean(y1, False) - y0.mean()
+    else:
+        lo = y1.mean() - trimmed_mean(y0, False); hi = y1.mean() - trimmed_mean(y0, True)
+    return lo, hi, p, arm, float(y1.mean() - y0.mean()), q1, q0
+
+
+def leebounds(df, spec):
+    y = need(spec, "outcome", "outcome"); t = need(spec, "treat", "treatment (0/1)"); s = need(spec, "selected", "selection indicator (1 if the outcome is observed)"); distinct([y, t, s])
+    miss = [c for c in [y, t, s] if c not in df.columns]
+    if miss:
+        raise OESError("Column(s) not found in the data: " + ", ".join(miss))
+    d = df[[y, t, s]].apply(pd.to_numeric, errors="coerce"); d = d.dropna(subset=[t, s]).reset_index(drop=True); n = len(d)
+    if not set(np.unique(d[t])) <= {0.0, 1.0} or d[t].nunique() != 2:
+        raise OESError("The treatment must be a 0/1 indicator with both values present.")
+    if not set(np.unique(d[s])) <= {0.0, 1.0} or d[s].nunique() != 2:
+        raise OESError("The selection indicator must be 0/1 with both values present.")
+    if d.loc[d[s] == 1, y].isna().any():
+        raise OESError("The outcome is missing for some units marked as selected.")
+    B = int_option(spec, "boot", 500, 99, 5000, "Bootstrap replications"); seed = int_option(spec, "seed", 0, 0, 10 ** 6, "Random seed")
+    T = d[t].to_numpy(float); S = d[s].to_numpy(float); Y = d[y].to_numpy(float)
+    if min(((T == 1) & (S == 1)).sum(), ((T == 0) & (S == 1)).sum()) < 10:
+        raise OESError("Each arm needs at least 10 units with an observed outcome.")
+    lo, hi, p, arm, naive, q1, q0 = _lee(Y, T, S)
+    rng = np.random.default_rng(seed); bl, bh = [], []
+    for _ in range(B):
+        i = rng.integers(0, n, n); Tb, Sb, Yb = T[i], S[i], Y[i]
+        if min(((Tb == 1) & (Sb == 1)).sum(), ((Tb == 0) & (Sb == 1)).sum()) < 3: continue
+        l_, h_, *_ = _lee(Yb, Tb, Sb); bl.append(l_); bh.append(h_)
+    bl, bh = np.array(bl), np.array(bh)
+    ci_lo, ci_hi = float(np.percentile(bl, 2.5)), float(np.percentile(bh, 97.5))
+    # Manski worst-case bounds for the effect on the outcome of all units, filling missing outcomes with the extremes
+    ymin = float(spec["ymin"]) if spec.get("ymin") not in (None, "") else float(np.nanmin(Y[S == 1])); ymax = float(spec["ymax"]) if spec.get("ymax") not in (None, "") else float(np.nanmax(Y[S == 1]))
+    def arm_mean(tt, fill): v = np.where(S[T == tt] == 1, Y[T == tt], fill); return float(np.mean(v))
+    m_lo = arm_mean(1, ymin) - arm_mean(0, ymax); m_hi = arm_mean(1, ymax) - arm_mean(0, ymin)
+    sel_tab = table("Selection (outcome observed) by treatment arm", ["Arm", "Units", "Share with an observed outcome", "Mean outcome among the selected"],
+                    [["Control", int((T == 0).sum()), f(q0, 4), f(float(Y[(T == 0) & (S == 1)].mean()), 4)], ["Treated", int((T == 1).sum()), f(q1, 4), f(float(Y[(T == 1) & (S == 1)].mean()), 4)]],
+                    f"The treatment changes the selection rate by {100 * (q1 - q0):.1f} percentage points. Lee bounds assume that treatment moves selection in one direction only (monotonicity).")
+    res = table(f"Effect of {t} on {y} for units that would be selected under either arm", ["Estimate", "Value", "95% CI low", "95% CI high"],
+                [["Naive difference among the selected (biased)", f(naive, 4), "", ""], ["Lee lower bound", f(lo, 4), f(ci_lo, 4), ""], ["Lee upper bound", f(hi, 4), "", f(ci_hi, 4)],
+                 ["Lee bounds: confidence interval for the effect", f"[{lo:.3f}, {hi:.3f}]", f(ci_lo, 4), f(ci_hi, 4)], [f"Share trimmed ({'treated' if arm == 1 else 'control'} arm)", f(p, 4), "", ""],
+                 ["Manski worst-case bounds (all units, outcome in [{:.2f}, {:.2f}])".format(ymin, ymax), f"[{m_lo:.3f}, {m_hi:.3f}]", "", ""]],
+                "Bootstrap percentile intervals with " + f"{len(bl)} resamples. The confidence interval for the effect takes the lower end of the lower bound and the upper end of the upper bound.")
+    ch = [chart("Bootstrap distributions of the Lee bounds", list(range(len(bl))), [("Lower bound (sorted)", np.sort(bl)), ("Upper bound (sorted)", np.sort(bh))], "Resample", "Effect", kind="line")]
+    notes = ["The bounds are for the always-selected: units that would have an observed outcome whether treated or not. They are not the effect for the whole sample.", "Monotonicity (treatment cannot push some units into selection and others out) is an assumption; covariates can tighten the bounds."]
+    return result("leebounds", f"Lee bounds: effect of {t} on {y}", n, [stat("Observations", n), stat("Share trimmed", p, 4), stat("Lee lower bound", lo, 4), stat("Lee upper bound", hi, 4), stat("Naive effect", naive, 4)], [sel_tab, res], ch, notes)

@@ -1464,5 +1464,21 @@
    "label": "ACME",
    "value": 0.8183
   }
+ },
+ "leebounds": {
+  "nobs": 445,
+  "table_index": 0,
+  "table": "Selection (outcome observed) by treatment arm",
+  "row": "Control",
+  "row_index": 0,
+  "col": "Share with an observed outcome",
+  "col_index": 2,
+  "value": 0.6462,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Share trimmed",
+   "value": 0.1462
+  }
  }
 }

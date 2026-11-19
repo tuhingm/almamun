@@ -196,3 +196,61 @@ def test_mediation_errors():
     assert "0/1" in o.run("mediation", d.assign(train=d.train * 2).to_csv(index=False), MS)["error"]
     assert "does not vary" in o.run("mediation", d.assign(employed78=1.0).to_csv(index=False), MS)["error"]
     assert "Column(s) not found" in o.run("mediation", d.to_csv(index=False), dict(MS, mediator="nope"))["error"]
+
+
+# ------------------------------------------------------------------ Lee bounds
+def _lee_sim(n=4000, effect=1.0, sel_shift=0.8, seed=0):
+    rng = np.random.default_rng(seed); T = rng.integers(0, 2, n).astype(float); u = rng.normal(size=n); v = rng.normal(size=n)
+    S = (0.2 + sel_shift * T * 0 + v + sel_shift * T > 0).astype(float)
+    Y = effect * T + 0.7 * v + u; return pd.DataFrame(dict(y=np.where(S == 1, Y, np.nan), t=T, s=S))
+
+
+def _lee_run(d, **kw): return causal_extra.leebounds(d, dict(outcome="y", treat="t", selected="s", boot=150, **kw))
+
+
+def test_lee_registered():
+    m = o.BY_ID["leebounds"]; assert m["group"] == "Causal inference" and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+def test_lee_no_selection_difference_is_point_identified():
+    rng = np.random.default_rng(1); n = 3000; T = rng.integers(0, 2, n).astype(float); S = (rng.random(n) < 0.7).astype(float)
+    d = pd.DataFrame(dict(y=np.where(S == 1, 2 * T + rng.normal(size=n), np.nan), t=T, s=S)); r = _lee_run(d)
+    s = {x["label"]: x["value"] for x in r["summary"]}
+    # selection rates differ only by chance, so trimming is tiny and the bounds hug the plain difference
+    assert s["Share trimmed"] < 0.05 and s["Lee upper bound"] - s["Lee lower bound"] < 0.25 and abs(s["Naive effect"] - 2) < 0.15
+
+
+def test_lee_bounds_cover_true_effect_for_always_selected():
+    # monotone selection: always-selected effect is exactly 'effect' for the stayers
+    d = _lee_sim(n=20000, effect=1.0); r = _lee_run(d); s = {x["label"]: x["value"] for x in r["summary"]}
+    assert s["Lee lower bound"] <= 1.0 + 0.1 and s["Lee upper bound"] >= 1.0 - 0.1 and s["Lee lower bound"] <= s["Lee upper bound"]
+
+
+def test_lee_matches_hand_trimming():
+    d = _lee_sim(n=2000, seed=3); Y = d.y.to_numpy(); T = d.t.to_numpy(); S = d.s.to_numpy()
+    q1, q0 = S[T == 1].mean(), S[T == 0].mean(); p = (q1 - q0) / q1; y1 = np.sort(Y[(T == 1) & (S == 1)]); y0 = Y[(T == 0) & (S == 1)]
+    k = int(round(p * len(y1))); lo = y1[:len(y1) - k].mean() - y0.mean(); hi = y1[k:].mean() - y0.mean()
+    s = {x["label"]: x["value"] for x in _lee_run(d)["summary"]}
+    assert abs(s["Lee lower bound"] - lo) < 0.01 and abs(s["Lee upper bound"] - hi) < 0.01
+
+
+def test_lee_control_arm_trimmed_when_control_selected_more():
+    d = _lee_sim(n=3000, seed=4); d["t"] = 1 - d["t"]; r = _lee_run(d)
+    assert any("control" in row[0] for row in r["tables"][1]["rows"] if row[0].startswith("Share trimmed"))
+
+
+def test_lee_narrower_than_manski():
+    r = _lee_run(_lee_sim(n=3000, seed=5))
+    lee = [float(v) for v in re.findall(r"-?\d+\.\d+", next(x[1] for x in r["tables"][1]["rows"] if x[0].startswith("Lee bounds:")))]
+    man = [float(v) for v in re.findall(r"-?\d+\.\d+", next(x[1] for x in r["tables"][1]["rows"] if x[0].startswith("Manski")))]
+    assert lee[1] - lee[0] < man[1] - man[0]
+
+
+def test_lee_errors():
+    d = _lee_sim(n=500)
+    for spec, msg in [(dict(outcome="y", treat="s", selected="s"), "more than one role"), (dict(outcome="y", treat="y", selected="s"), "more than one role"), (dict(outcome="nope", treat="t", selected="s"), "not found")]:
+        with pytest.raises(causal_extra.OESError, match=msg): causal_extra.leebounds(d, spec)
+    bad = d.copy(); bad["t"] = bad["t"] * 2
+    with pytest.raises(causal_extra.OESError, match="0/1"): causal_extra.leebounds(bad, dict(outcome="y", treat="t", selected="s"))
+    bad = d.copy(); bad.loc[bad.s == 1, "y"] = np.nan
+    with pytest.raises(causal_extra.OESError, match="missing"): causal_extra.leebounds(bad, dict(outcome="y", treat="t", selected="s"))

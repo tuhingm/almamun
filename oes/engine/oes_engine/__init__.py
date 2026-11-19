@@ -528,6 +528,10 @@ MODELS += [
          fields=[col("outcome", "Outcome"), col("treat", "Treatment (0/1)"), col("mediator", "Mediator"), cols("covariates", "Pre-treatment covariates", required=False), sel("interaction", "Treatment-by-mediator interaction", [["no", "No"], ["yes", "Yes"]], "no"),
                  num("boot", "Bootstrap replications", 500), num("seed", "Random seed", 0)],
          example=dict(file=CI + "nsw_mediation.csv", spec=dict(outcome="re78", treat="train", mediator="employed78", covariates=["age", "educ", "black", "hisp", "married", "nodegree", "re74", "re75"], boot=300))),
+    dict(id="leebounds", group="Causal inference", name="Lee bounds for sample selection and attrition", guide="causal-inference-guide/lee-bounds.html", fn=causal_extra.leebounds,
+         fields=[col("outcome", "Outcome (missing where not selected)"), col("treat", "Treatment (0/1)"), col("selected", "Selection indicator (1 = outcome observed)"), num("ymin", "Lowest possible outcome (Manski bound, optional)", ""), num("ymax", "Highest possible outcome (Manski bound, optional)", ""),
+                 num("boot", "Bootstrap replications", 500), num("seed", "Random seed", 0)],
+         example=dict(file=CI + "nsw_attrition.csv", spec=dict(outcome="earn_if_employed", treat="train", selected="employed78", boot=300))),
 ]
 
 MODELS += [
