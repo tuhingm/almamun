@@ -5,7 +5,7 @@
 const PYODIDE = "https://cdn.jsdelivr.net/pyodide/v0.27.2/full/";
 const FILES = ["__init__.py", "core.py", "lp.py", "svar.py", "breaks.py", "pthreshold.py", "tar.py", "smooth.py", "_bp_cv.py", "timeseries.py", "panel.py", "causal.py", "causal_extra.py", "ml.py", "bayes.py", "bayes_extra.py", "ts_extra.py", "panel_extra.py", "statespace_var.py",
                "pvar.py", "markov.py", "diagnostics.py", "report.py", "_causal_core.py", "_panel_core.py", "_panel_tests.py", "_diff_gmm.py", "_ml_core.py",
-               "stat_core.py", "stat_anova.py", "stat_nonparam.py", "stat_multivariate.py", "stat_survival.py", "stat_mixed.py", "stat_resample.py", "stat_meta.py", "stat_registry.py"];
+               "rep_model.py", "rep_tables.py", "rep_text.py", "rep_fig.py", "rep_export.py", "rep_ols.py", "rep_anova1.py", "stat_core.py", "stat_anova.py", "stat_nonparam.py", "stat_multivariate.py", "stat_survival.py", "stat_mixed.py", "stat_resample.py", "stat_meta.py", "stat_registry.py"];
 const BASE = ["numpy", "pandas", "scipy", "statsmodels"];
 let py = null, booting = null;
 const loaded = new Set();
