@@ -214,3 +214,42 @@ def test_connectedness_independent_series_have_low_connectedness():
 def test_connectedness_errors():
     assert "two" in o.run("connectedness", rets().to_csv(index=False), dict(x=["sp500_return"]))["error"]
     assert "60" in o.run("connectedness", rets().head(30).to_csv(index=False), dict(x=["sp500_return", "ip_growth"]))["error"]
+
+
+# ------------------------------------------------------------------ Toda-Yamamoto Granger causality
+MONEY = os.path.join(ROOT, "time-series-guide", "examples", "money.csv")
+def money(): return pd.read_csv(MONEY)
+
+
+def test_granger_ty_registered():
+    m = o.BY_ID["granger_ty"]
+    assert os.path.exists(os.path.join(ROOT, m["guide"])) and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+def test_granger_ty_wald_matches_statsmodels_ols_wald_test():
+    import statsmodels.api as sm
+    d = money()[["log_price", "log_m2", "log_gdp"]].to_numpy(float); p, dmax, k = 3, 1, 3; L = p + dmax
+    r = ts_extra.granger_ty(money(), dict(x=["log_price", "log_m2", "log_gdp"], lags=p, dmax=dmax))
+    got = next(x for x in r["tables"][0]["rows"] if x[0] == "log_m2 -> log_price")
+    X = np.column_stack([d[L - l:len(d) - l, j] for l in range(1, L + 1) for j in range(k)]); res = sm.OLS(d[L:, 0], sm.add_constant(X)).fit()
+    names = [f"x{i + 1}" for i in range(X.shape[1])]; idx = [1 + (l * k + 1) for l in range(p)]
+    w = res.wald_test(np.eye(len(res.params))[idx], use_f=False, scalar=True)
+    assert got[1] == pytest.approx(float(w.statistic), abs=1e-3)
+
+
+def test_granger_ty_detects_true_causality_and_is_not_fooled_by_random_walks():
+    rng = np.random.default_rng(12); n = 300; x = np.cumsum(rng.standard_normal(n)); y = np.zeros(n)
+    for t in range(1, n): y[t] = .5 * y[t - 1] + .6 * x[t - 1] + rng.standard_normal()
+    r = ts_extra.granger_ty(pd.DataFrame({"x": x, "y": y}), dict(x=["x", "y"], lags=2, dmax=1))
+    rows = {r_[0]: r_ for r_ in r["tables"][0]["rows"]}
+    assert rows["x -> y"][-1].startswith("rejects")
+    rej = 0
+    for s in range(30):
+        g = np.random.default_rng(100 + s); a, b = np.cumsum(g.standard_normal(200)), np.cumsum(g.standard_normal(200))
+        rr = ts_extra.granger_ty(pd.DataFrame({"a": a, "b": b}), dict(x=["a", "b"], lags=2, dmax=1)); rej += rr["tables"][0]["rows"][0][-1].startswith("rejects")
+    assert rej <= 6                                   # spurious causality between independent random walks stays near the 5% level
+
+
+def test_granger_ty_errors():
+    assert "two" in o.run("granger_ty", money().to_csv(index=False), dict(x=["log_price"]))["error"]
+    assert "AIC" in o.run("granger_ty", money().to_csv(index=False), dict(x=["log_price", "log_m2"], ic="xx"))["error"]
