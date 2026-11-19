@@ -1324,5 +1324,21 @@
    "label": "Dominant period (years)",
    "value": 5.58
   }
+ },
+ "tvp_regression": {
+  "nobs": 201,
+  "table_index": 0,
+  "table": "Variances (maximum likelihood)",
+  "row": "sigma2.obs",
+  "row_index": 0,
+  "col": "Estimate",
+  "col_index": 1,
+  "value": 3.710674,
+  "rtol": 0.001,
+  "seconds": 0.1,
+  "summary": {
+   "label": "Log-likelihood",
+   "value": -447.72
+  }
  }
 }

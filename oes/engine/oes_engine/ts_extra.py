@@ -1219,3 +1219,57 @@ def spectral(df, spec):
         summ.append(stat("Average coherence in the business-cycle band", crow[1][1] if len(crow) > 1 else None, 3))
     return result("spectral", f"Spectral analysis: {y}" + (f" and {x2}" if x2 else ""), n, summ, tabs, ch,
                   ["Spectral estimates from short samples are noisy: the Welch segments trade resolution for lower variance.", "Detrending changes the low-frequency power; report the choice."])
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Time-varying-parameter regression (random-walk coefficients, Kalman filter, maximum likelihood)
+# ---------------------------------------------------------------------------------------------------------------
+def tvp_regression(df, spec):
+    import statsmodels.api as sm
+    from statsmodels.tsa.statespace.mlemodel import MLEModel
+    y = need(spec, "y", "dependent variable"); xs = as_list(need(spec, "x", "regressors")); distinct([y], xs)
+    d, labels = _series_frame(df, spec, [y] + xs); n = len(d); k = len(xs) + 1
+    if n < 60:
+        raise OESError("Time-varying-parameter regression needs at least 60 observations.")
+    yv = d[y].to_numpy(float); X = np.column_stack([np.ones(n), d[xs].to_numpy(float)]); names = ["const"] + xs
+    mu_sd = yv.std()
+
+    class TVP(MLEModel):
+        def __init__(self, endog, exog):
+            super().__init__(endog, k_states=k, exog=exog, initialization="diffuse")
+            self["design"] = np.zeros((1, k, n)); self["design", 0, :, :] = exog.T
+            self["transition"] = np.eye(k); self["selection"] = np.eye(k)
+        @property
+        def param_names(self):
+            return ["sigma2.obs"] + [f"sigma2.{nm}" for nm in names]
+        @property
+        def start_params(self):
+            return np.r_[yv.var() * .5, np.full(k, 1e-3 * yv.var())]
+        def transform_params(self, p): return p ** 2
+        def untransform_params(self, p): return np.sqrt(p)
+        def update(self, params, **kw):
+            params = super().update(params, **kw)
+            self["obs_cov", 0, 0] = params[0]; self["state_cov"] = np.diag(params[1:])
+
+    mod = TVP(yv, X)
+    res = mod.fit(method="powell", disp=0, maxiter=4000); res = mod.fit(res.params, method="bfgs", disp=0, maxiter=200)
+    ols = sm.OLS(yv, X).fit(cov_type="HAC", cov_kwds={"maxlags": 4})
+    # constant-coefficient model on the same likelihood basis: the same state-space model with all state variances fixed at zero
+    p_c = np.r_[float(np.mean(ols.resid ** 2)), np.zeros(k)]
+    ll_c = float(mod.loglike(p_c)); ll_t = float(res.llf); lr = 2 * (ll_t - ll_c)
+    bound = res.params[0] < 1e-3 * yv.var()
+    sm_state = np.asarray(res.smoothed_state).T; sd_state = np.sqrt(np.array([np.diag(res.smoothed_state_cov[:, :, t]) for t in range(n)]))
+    prow = [[nm, f(v, 6), f(s, 6)] for nm, v, s in zip(mod.param_names, res.params, np.sqrt(np.maximum(np.diag(res.cov_params()), 0)))]
+    tabs = [table("Variances (maximum likelihood)", ["Parameter", "Estimate", "s.e."], prow, "sigma2.obs is the variance of the regression error; sigma2.<x> is the variance of the random-walk shocks to that coefficient. A variance near zero means the coefficient is constant.")]
+    crow = []
+    for j, nm in enumerate(names):
+        crow.append([nm, f(float(ols.params[j]), 3), f(float(ols.bse[j]), 3), f(float(sm_state[0, j]), 3), f(float(sm_state[n // 2, j]), 3), f(float(sm_state[-1, j]), 3), f(float(sm_state[:, j].min()), 3), f(float(sm_state[:, j].max()), 3)])
+    tabs.append(table("Coefficients: constant model against time-varying path", ["Variable", "OLS", "OLS s.e. (HAC)", "TVP first period", "TVP middle", "TVP last period", "TVP minimum", "TVP maximum"], crow,
+                      "The time-varying coefficients are smoothed estimates (they use the whole sample)."))
+    tabs.append(table("Model comparison", ["Model", "Log-likelihood", "Variance parameters", "AIC"], [["Constant coefficients", f(ll_c, 2), 1, f(-2 * ll_c + 2, 1)], ["Time-varying coefficients", f(ll_t, 2), 1 + k, f(-2 * ll_t + 2 * (1 + k), 1)]],
+                      f"Likelihood-ratio statistic {lr:.1f}; the null (variances of zero) is on the boundary, so the usual chi-squared p-value is not valid: compare with the AIC and the paths."))
+    ch = [chart(f"Smoothed coefficient: {nm}", labels, [("TVP estimate", sm_state[:, j]), ("OLS (constant)", [float(ols.params[j])] * n)], band=(sm_state[:, j] - 1.96 * sd_state[:, j], sm_state[:, j] + 1.96 * sd_state[:, j])) for j, nm in enumerate(names)]
+    notes = ["Coefficients follow random walks; the model detects drift, not sudden breaks (use the break tests for those).", "A smoothed path uses future data, so it cannot be used to claim what agents knew at the time; use the filtered estimates for that."]
+    if bound:
+        notes.append("The variance of the regression error is at zero: the time-varying coefficients absorb all the variation in the dependent variable, so the paths are flexible enough to fit anything. Interpret them with caution.")
+    return result("tvp_regression", f"Time-varying-parameter regression: {y} on {', '.join(xs)}", n, [stat("Observations", n), stat("Log-likelihood", ll_t, 2), stat("AIC (TVP)", -2 * ll_t + 2 * (1 + k), 1), stat("AIC (constant)", -2 * ll_c + 2, 1)], tabs, ch, notes)
