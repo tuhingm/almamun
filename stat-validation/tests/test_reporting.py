@@ -460,7 +460,8 @@ def test_exports(name, ols, anova):
     assert "−" not in tex and "²" not in tex
     j = rep_export.to_json(rep)
     json.dumps(j)
-    assert j["manuscript"].startswith("METHODS") and j["references"]
+    assert j["manuscript"].startswith("METHODS") and j["references"] == [] and "REFERENCES" not in j["manuscript"]
+    assert all(s["paragraphs"] == [] for s in j["steps"])      # no interpretation text in the export (user choice)
 
 
 @pytest.mark.skipif(shutil.which("pdflatex") is None, reason="pdflatex not installed")
@@ -496,3 +497,40 @@ def test_figure_style():
         assert re.fullmatch(r"#[0-9A-Fa-f]{6}", c)
     # distinct series are told apart by dash pattern as well as colour (grayscale safe)
     assert len({tuple(d) if d else None for d in rep_fig.DASHES[:5]}) == 5
+
+
+# ------------------------------------------------------------------------------------------------- generic reports (all models)
+def _all_examples():
+    return [(m["id"], m["example"]) for m in list(oes_engine.MODELS) + list(oes_engine.STAT_MODELS)]
+
+
+@pytest.mark.parametrize("mid,ex", _all_examples())
+def test_generic_reports(mid, ex):
+    """Every model returns a report whose tables and chart values are the engine's own numbers; the old output is unchanged."""
+    if not ex.get("file"):
+        pytest.skip("no data file for this example")
+    path = os.path.join(ROOT, "oes", "examples", os.path.basename(ex["file"]))
+    if not os.path.exists(path):
+        path = os.path.join(ROOT, ex["file"])
+    if mid == "xgb":
+        pytest.skip("xgboost is not installed in this environment")
+    csv_text = open(path).read()
+    with_rep = oes_engine.run(mid, csv_text, dict(ex["spec"]))
+    without = oes_engine.run(mid, csv_text, dict(ex["spec"], report=False))
+    if "error" in without:
+        pytest.skip("example fails in this environment: " + without["error"][:60])
+    assert "report_error" not in with_rep, with_rep.get("report_error")
+    assert {k: v for k, v in with_rep.items() if k != "report"} == without
+    rp = with_rep["report"]
+    assert rp["steps"] and rp["methods"] and rp["limitations"]
+    if mid not in ("ols", "stat_anova1"):
+        # every engine table cell appears in the report table of the same title (first MAX_ROWS rows), unchanged
+        shown = {t["title"]: t for s in rp["steps"] for t in s["tables"]}
+        for t in without["tables"]:
+            rt = shown[t["title"]]["raw"]
+            assert rt["rows"] == t["rows"][:60]
+        nf = sum(len(s["figures"]) for s in rp["steps"])
+        assert nf == sum(1 for c in without["charts"] if c.get("x") and c.get("series"))
+    for s in rp["steps"]:
+        for f in s["figures"]:
+            assert f["svg"].startswith("<svg") and f["pdf_b64"]

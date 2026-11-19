@@ -110,7 +110,8 @@ class Report:
         for k in self.meta.get("extra_refs", []):
             if k not in keys:
                 keys.append(k)
-        return [self.references[k] for k in sorted(keys, key=lambda k: self.references[k]) if k in self.references]
+        keys = [k for k in keys if k in self.references]
+        return [self.references[k] for k in sorted(keys, key=lambda k: self.references[k])]
 
     def unvalidated_steps(self):
         return [s.title for s in self.steps if s.validated == "not validated"]
