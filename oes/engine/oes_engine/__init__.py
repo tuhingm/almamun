@@ -555,6 +555,9 @@ MODELS += [
                  sel("loss", "Loss function", [["squared", "Squared error"], ["absolute", "Absolute error"]], "squared"),
                  sel("benchmark", "Benchmark", [["random walk", "Random walk"], ["historical mean", "Historical mean"], ["AR (BIC)", "AR (BIC)"], ["exponential smoothing", "Damped exponential smoothing"]], "random walk")],
          example=dict(file=OX + "us_macro.csv", spec=dict(y="inflation", time="date", h=1, window=100, maxp=4, loss="squared", benchmark="random walk"))),
+    dict(id="connectedness", group="Time series", name="Connectedness and spillovers (Diebold-Yilmaz)", guide="time-series-guide/spillovers.html", fn=ts_extra.connectedness,
+         fields=[cols("x", "Variables (two or more)"), TIME, num("horizon", "Forecast horizon", 10), num("maxlag", "Maximum VAR lag (BIC)", 6), num("window", "Rolling window", 120)],
+         example=dict(file="time-series-guide/examples/returns.csv", spec=dict(x=["sp500_return", "ip_growth", "d_fedfunds", "d_credit_spread"], time="date", horizon=10, maxlag=6, window=120))),
 ]
 
 MODELS += [

@@ -900,3 +900,54 @@ def forecast_eval(df, spec):
     return result("forecast_eval", f"Forecast comparison: {y}", T, [stat("Forecasts", T), stat("Horizon", h), stat("Lowest RMSE", best), stat("Benchmark", base)], tabs, ch,
                   ["Forecasts use only the data available at each origin (no look-ahead), but the data are the final revised values, not real-time vintages.",
                    "The Diebold-Mariano test is for forecasts that do not come from nested models estimated on a short window; for nested models use the Clark-West test."])
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Diebold-Yilmaz connectedness (spillover) table from a VAR with generalised forecast-error variance decompositions
+# ---------------------------------------------------------------------------------------------------------------
+def _gfevd(res, H):
+    """Row-normalised generalised FEVD (Pesaran-Shin): element [i, j] is the share of variable i's H-step forecast-error variance due to shocks to j."""
+    A = res.ma_rep(H - 1); S = np.asarray(res.sigma_u); k = S.shape[0]
+    th = np.zeros((k, k))
+    for i in range(k):
+        den = sum(A[h][i] @ S @ A[h][i] for h in range(H))
+        for j in range(k):
+            th[i, j] = sum((A[h][i] @ S[:, j]) ** 2 for h in range(H)) / (S[j, j] * den)
+    return th / th.sum(1, keepdims=True)
+
+
+def connectedness(df, spec):
+    from statsmodels.tsa.api import VAR
+    xs = as_list(need(spec, "x", "variables"))
+    if len(xs) < 2:
+        raise OESError("Connectedness needs at least two variables.")
+    d, labels = _series_frame(df, spec, xs); n = len(d)
+    if n < 60:
+        raise OESError("Connectedness analysis needs at least 60 observations.")
+    H = int_option(spec, "horizon", 10, 2, 40, "Forecast horizon"); w = int_option(spec, "window", min(120, n // 2), 30, n, "Rolling window")
+    maxlag = int_option(spec, "maxlag", 6, 1, 12, "Maximum lag")
+    data = d[xs].to_numpy(float)
+    ic = VAR(data).select_order(maxlag); p = max(1, int(ic.selected_orders["bic"])); res = VAR(data).fit(p)
+    th = _gfevd(res, H); k = len(xs)
+    rows = [[xs[i]] + [f(100 * th[i, j], 1) for j in range(k)] + [f(100 * (th[i].sum() - th[i, i]), 1)] for i in range(k)]
+    frm = 100 * (th.sum(1) - np.diag(th)); to = 100 * (th.sum(0) - np.diag(th)); net = to - frm
+    rows.append(["To others"] + [f(to[j], 1) for j in range(k)] + [f(to.sum() / k, 1)])
+    total = float(to.sum() / k)
+    tabs = [table(f"Connectedness table (VAR({p}), horizon {H}, % of forecast-error variance)", ["Variable i"] + [f"from {x}" for x in xs] + ["From others"], rows,
+                  "Row i, column j: the share of the H-step forecast-error variance of i that comes from shocks to j (generalised decomposition, rows normalised to 100). The bottom-right entry is the total connectedness.")]
+    tabs.append(table("Directional spillovers", ["Variable", "To others", "From others", "Net (to - from)", "Role"],
+                      [[xs[i], f(to[i], 1), f(frm[i], 1), f(net[i], 1), "net transmitter" if net[i] > 0 else "net receiver"] for i in range(k)]))
+    # rolling total connectedness
+    roll = []; rl = []
+    for s0 in range(0, n - w + 1, max(1, (n - w) // 80 or 1)):
+        try:
+            rr = VAR(data[s0:s0 + w]).fit(p); t_ = _gfevd(rr, H); roll.append(100 * (t_.sum() - np.trace(t_)) / k); rl.append(labels[s0 + w - 1])
+        except Exception:
+            continue
+    ch = [chart(f"Total connectedness, {w}-period rolling window", rl, [("total connectedness (%)", roll)])]
+    tabs.append(table("Total connectedness over time", ["Statistic", "Value"], [["Full sample", f(total, 1)], ["Minimum over rolling windows", f(min(roll), 1)], ["Maximum over rolling windows", f(max(roll), 1)],
+                      ["Date of maximum", rl[int(np.argmax(roll))]]]))
+    return result("connectedness", f"Connectedness (Diebold-Yilmaz): {', '.join(xs)}", n, [stat("Observations", n), stat("VAR lags (BIC)", p), stat("Total connectedness (%)", total, 1),
+                  stat("Largest net transmitter", xs[int(np.argmax(net))])], tabs, ch,
+                  ["Generalised decompositions do not depend on the ordering of the variables, but the shocks are not orthogonal, so the shares are normalised to sum to one.",
+                   "Connectedness is a statement about forecast-error variance, not about causality."])
