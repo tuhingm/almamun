@@ -342,3 +342,50 @@ def test_tobit_errors_and_example_reference():
     e = EXPECTED["tobit"]; m = o.BY_ID["tobit"]
     r = o.run("tobit", open(os.path.join(ROOT, m["example"]["file"])).read(), dict(m["example"]["spec"]))
     assert r["tables"][e["table_index"]]["rows"][e["row_index"]][e["col_index"]] == pytest.approx(e["value"], rel=e["rtol"])
+
+
+# ------------------------------------------------------------------ Heckman selection
+def mroz(**kw):
+    spec = dict(o.BY_ID["heckman"]["example"]["spec"]); spec.update(kw)
+    return o.run("heckman", open(os.path.join(ME, "mroz.csv")).read(), spec)
+
+
+def test_heckman_two_step_matches_published_mroz():
+    # Wooldridge/Stata two-step on the Mroz (1987) data: educ .1091, exper .0439, lambda .0323
+    t = table(mroz(), "Two-step")
+    assert next(x for x in t["rows"] if x[0] == "educ")[1] == pytest.approx(0.109066, abs=5e-4)
+    assert next(x for x in t["rows"] if x[0] == "exper")[1] == pytest.approx(0.043887, abs=5e-4)
+    assert next(x for x in t["rows"] if x[0].startswith("lambda"))[1] == pytest.approx(0.032261, abs=5e-4)
+
+
+def test_heckman_ml_matches_independent_likelihood():
+    from scipy import optimize
+    d = pd.read_csv(os.path.join(ME, "mroz.csv")); s = d.inlf.values == 1
+    Z = sm.add_constant(d[["educ", "exper", "expersq", "age", "kidslt6", "kidsge6", "nwifeinc"]]).values
+    X = sm.add_constant(d[["educ", "exper", "expersq"]]).values; y = d.lwage.fillna(0).values
+
+    def nll(t):
+        g, b, sg, rh = t[:8], t[8:12], np.exp(t[12]), np.tanh(t[13]); zg = Z @ g; u = (y[s] - X[s] @ b) / sg
+        return -(stats.norm.logcdf(-zg[~s]).sum() + (stats.norm.logpdf(u) - np.log(sg) + stats.norm.logcdf((zg[s] + rh * u) / np.sqrt(1 - rh ** 2))).sum())
+    r0 = optimize.minimize(nll, np.r_[np.zeros(8), np.zeros(4), 0, 0], method="Nelder-Mead", options={"maxiter": 20000, "xatol": 1e-8, "fatol": 1e-10})
+    r1 = optimize.minimize(nll, r0.x, method="BFGS")
+    assert summ(mroz(), "Log-likelihood") == pytest.approx(-r1.fun, abs=1e-3)
+
+
+def test_heckman_recovers_selection_bias_in_simulation():
+    rng = np.random.default_rng(3); n = 6000
+    x, w = rng.normal(size=n), rng.normal(size=n)
+    e = rng.multivariate_normal([0, 0], [[1, .7], [.7, 1]], n)
+    sel = (0.3 + 0.8 * x + 1.0 * w + e[:, 0] > 0).astype(int)
+    y = 1.0 + 2.0 * x + e[:, 1]
+    d = pd.DataFrame(dict(y=np.where(sel == 1, y, np.nan), x=x, w=w, s=sel))
+    r = o.run("heckman", d.to_csv(index=False), dict(y="y", x=["x"], sel="s", z=["x", "w"]))
+    assert row(r, "Outcome equation", "x")[1] == pytest.approx(2.0, abs=0.1)
+    assert row(r, "Outcome equation", "rho")[1] == pytest.approx(0.7, abs=0.1)
+    ols = sm.OLS(y[sel == 1], sm.add_constant(x[sel == 1])).fit().params[0]
+    assert abs(ols - 1.0) > abs(row(r, "Outcome equation", "const")[1] - 1.0)       # OLS intercept is biased, Heckman is not
+
+
+def test_heckman_errors():
+    for kw, msg in [(dict(sel="kidsge6", z=["educ", "age"]), "0 and 1"), (dict(z=[]), "selection equation"), (dict(y="lwage", x=["lwage"]), "more than one role")]:
+        assert msg in mroz(**kw)["error"]

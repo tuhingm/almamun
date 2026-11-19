@@ -644,3 +644,137 @@ def tobit(df, spec):
              "The Tobit model assumes that the same process decides whether the outcome is above the limit and how large it is, and that the latent errors are normal and homoskedastic. "
              "If a separate decision creates the zeros (for example, whether to have an affair at all), a hurdle or Heckman model is more appropriate."]
     return result("tobit", f"Tobit regression: {y}", n, summary, tabs, [ch], notes)
+
+
+def _heckman_nll(t, Z, X, y, s, kz, kx):
+    g, b = t[:kz], t[kz:kz + kx]
+    sig, rho = np.exp(t[kz + kx]), np.tanh(t[kz + kx + 1])
+    zg = Z @ g
+    u = (y[s] - X[s] @ b) / sig
+    ll = stats.norm.logcdf(-zg[~s]).sum()
+    ll += (stats.norm.logpdf(u) - np.log(sig) + stats.norm.logcdf((zg[s] + rho * u) / np.sqrt(1 - rho ** 2))).sum()
+    return -ll
+
+
+def heckman(df, spec):
+    """Heckman sample-selection model: full-information maximum likelihood and the two-step estimator."""
+    from statsmodels.tools.numdiff import approx_hess
+    from scipy import optimize
+    y = need(spec, "y", "outcome variable (blank for people who are not selected)")
+    sel = need(spec, "sel", "selection indicator (1 = outcome observed, 0 = not)")
+    xs, zs = as_list(spec.get("x")), as_list(spec.get("z"))
+    if not xs:
+        raise OESError("Choose at least one explanatory variable for the outcome equation.")
+    if not zs:
+        raise OESError("Choose at least one explanatory variable for the selection equation.")
+    distinct(y, sel, xs)
+    if y in zs or sel in zs:
+        raise OESError("The outcome and the selection indicator cannot be explanatory variables.")
+    check = numeric(df, [sel] + zs)
+    if not set(check[sel].unique()) <= {0, 1}:
+        raise OESError(f"The selection indicator {sel} must contain only 0 and 1.")
+    d = df.copy()
+    for c in [y, sel] + xs + zs:
+        if c not in d.columns:
+            raise OESError("Column(s) not found in the data: " + c)
+        d[c] = pd.to_numeric(d[c], errors="coerce")
+    d = d.dropna(subset=[sel] + zs).reset_index(drop=True)
+    s = d[sel].to_numpy(float) == 1
+    if s.sum() == 0 or (~s).sum() == 0:
+        raise OESError("The selection indicator needs both selected (1) and non-selected (0) observations.")
+    if d.loc[s, [y] + xs].isna().any().any():
+        raise OESError(f"{y} and the outcome regressors must be observed for every selected observation.")
+    if d.loc[~s, y].notna().any():
+        pass                                           # an outcome recorded for non-selected people is simply not used
+    n, n1 = len(d), int(s.sum())
+    kx, kz = len(xs) + 1, len(zs) + 1
+    if n1 < 3 * (kx + 2):
+        raise OESError("Too few selected observations to estimate the outcome equation.")
+    Z = sm.add_constant(d[zs].astype(float), has_constant="add")
+    Xf = d[xs].copy()
+    Xf = Xf.fillna(Xf.loc[s].mean())                  # placeholder for the unselected rows, never used in the likelihood
+    X = sm.add_constant(Xf.astype(float), has_constant="add")
+    zn, xn, zn_names, xn_names = np.asarray(Z, float), np.asarray(X, float), list(Z.columns), list(X.columns)
+    yv = d[y].fillna(0).to_numpy(float)
+    try:
+        pr = sm.Probit(s.astype(float), zn).fit(disp=0, maxiter=200)
+    except Exception as e:
+        raise OESError("The selection probit could not be estimated (perfect prediction or collinear variables): " + str(e))
+    if not pr.mle_retvals.get("converged", True):
+        raise OESError("The selection probit did not converge.")
+    zg = zn @ pr.params
+    lam = stats.norm.pdf(zg) / stats.norm.cdf(zg)
+    # ---- two-step
+    X2 = np.column_stack([xn[s], lam[s]])
+    if np.linalg.matrix_rank(X2) < X2.shape[1]:
+        raise OESError("The inverse Mills ratio is collinear with the outcome regressors: add a variable to the selection equation that is not in the outcome equation.")
+    b2 = np.linalg.lstsq(X2, yv[s], rcond=None)[0]
+    e = yv[s] - X2 @ b2
+    dl = lam[s] * (lam[s] + zg[s])
+    bl = b2[-1]
+    s2 = float(e @ e / n1 + bl ** 2 * dl.mean())
+    rho2 = bl ** 2 / s2
+    A = np.linalg.inv(X2.T @ X2)
+    Dm = np.diag(dl)
+    Q = rho2 * (X2.T @ Dm @ zn[s]) @ np.asarray(pr.cov_params()) @ (zn[s].T @ Dm @ X2)
+    V2 = s2 * A @ (X2.T @ (np.eye(n1) - rho2 * Dm) @ X2 + Q) @ A
+    se2 = np.sqrt(np.maximum(np.diag(V2), 0))
+    sigma2 = float(np.sqrt(s2))
+    # ---- full-information ML
+    rho0 = float(np.clip(bl / sigma2, -0.9, 0.9))
+    t0 = np.r_[pr.params, b2[:-1], np.log(sigma2), np.arctanh(rho0)]
+    fun = lambda t: _heckman_nll(t, zn, xn, yv, s, kz, kx)
+    opt = optimize.minimize(fun, t0, method="BFGS", options={"gtol": 1e-7, "maxiter": 3000})
+    opt = optimize.minimize(fun, opt.x, method="BFGS", options={"gtol": 1e-8, "maxiter": 3000})
+    if not np.isfinite(opt.fun) or np.linalg.norm(opt.jac) > 1e-2 * max(1, n):
+        raise OESError("The maximum-likelihood iterations did not converge. Check the scale of the variables and the exclusion restriction.")
+    t = opt.x
+    try:
+        V = np.linalg.inv(approx_hess(t, fun))
+    except np.linalg.LinAlgError:
+        raise OESError("The information matrix is singular: the model is not identified (add an exclusion restriction) or the regressors are collinear.")
+    if np.any(np.diag(V) <= 0):
+        raise OESError("The information matrix is not positive definite; the estimate is not a maximum. Try removing the weakest variable.")
+    se = np.sqrt(np.diag(V))
+    g, b = t[:kz], t[kz:kz + kx]
+    sig, rho = float(np.exp(t[kz + kx])), float(np.tanh(t[kz + kx + 1]))
+    se_sig, se_rho = sig * se[kz + kx], (1 - rho ** 2) * se[kz + kx + 1]
+    # delta method for lambda = rho * sigma
+    gl = np.zeros(len(t)); gl[kz + kx] = rho * sig; gl[kz + kx + 1] = sig * (1 - rho ** 2)
+    lam_ml, se_lam = rho * sig, float(np.sqrt(gl @ V @ gl))
+    ll = -float(opt.fun)
+    # ---- independence benchmark (rho = 0): probit + OLS on the selected observations
+    ols = sm.OLS(yv[s], xn[s]).fit()
+    s_ml = float(np.sqrt(ols.ssr / n1))
+    ll0 = pr.llf + float(np.sum(stats.norm.logpdf(ols.resid / s_ml) - np.log(s_ml)))
+    lr = max(2 * (ll - ll0), 0.0)
+    out = coef_table(xn_names, b, se[kz:kz + kx], dist="z", title="Outcome equation (maximum likelihood)",
+                     note=f"Dependent variable: {y}, observed for {n1} of {n} observations. Full-information maximum likelihood.")
+    for lab, v, sv in [("sigma", sig, se_sig), ("rho", rho, se_rho), ("lambda = rho x sigma", lam_ml, se_lam)]:
+        out["rows"].append([lab, f(v), f(sv), f(v / sv, 4), f(2 * stats.norm.sf(abs(v / sv)), 4), f(v - 1.96 * sv), f(v + 1.96 * sv)])
+    tabs = [out, coef_table(zn_names, g, se[:kz], dist="z", title=f"Selection equation (probit for {sel} = 1)",
+                            note="Maximum-likelihood probit coefficients from the joint model.")]
+    cmp_rows = []
+    for i, nm in enumerate(xn_names):
+        cmp_rows.append([nm, f(b2[i]), f(se2[i]), f(b[i]), f(se[kz + i]), f(ols.params[i])])
+    cmp_rows.append(["lambda (inverse Mills ratio)", f(bl), f(se2[-1]), f(lam_ml), f(se_lam), None])
+    tabs.append(table("Two-step estimator, maximum likelihood and OLS on the selected sample",
+                      ["Variable", "Two-step coef.", "Two-step s.e.", "ML coef.", "ML s.e.", "OLS (selected only)"], cmp_rows,
+                      "Two-step standard errors are corrected for the estimated inverse Mills ratio (Heckman 1979; Greene). OLS ignores selection."))
+    tt = bl / se2[-1]
+    drows = [test_row("Likelihood-ratio test of independent equations, rho = 0 (1 df)", lr, stats.chi2.sf(lr, 1), "H0: no selection bias; if not rejected, OLS on the selected sample is consistent"),
+             test_row("Wald test, rho = 0 (ML)", (rho / se_rho) ** 2, stats.chi2.sf((rho / se_rho) ** 2, 1), "H0: rho = 0"),
+             test_row("t test, coefficient on the inverse Mills ratio (two-step)", tt, 2 * stats.norm.sf(abs(tt)), "H0: no selection bias (two-step version)")]
+    tabs.append(tests_table(drows))
+    xz_only = [c for c in zs if c not in xs]
+    q = pd.qcut(pd.Series(zn @ g).rank(method="first"), 10, labels=False)
+    pg = stats.norm.cdf(zn @ g)
+    ch = chart("Share selected by decile of the selection index: observed and predicted", [str(i + 1) for i in range(10)],
+               [("Observed", [float(s[q == k].mean()) for k in range(10)]), ("Predicted", [float(pg[q == k].mean()) for k in range(10)])],
+               "Decile of z'g", "Share with the outcome observed", kind="bar")
+    summary = [stat("Observations", n), stat("Selected (outcome observed)", n1), stat("Log-likelihood", ll), stat("rho", rho), stat("sigma", sig), stat("LR test of rho = 0", lr)]
+    notes = [f"Heckman selection model: {y} observed for {n1} of {n} observations (selection equation: {sel}).",
+             ("Exclusion restriction(s): " + ", ".join(xz_only) + " enter the selection equation only.") if xz_only else
+             "WARNING: every selection variable is also in the outcome equation. The model is then identified only by the nonlinearity of the inverse Mills ratio, which is fragile: add a variable that affects selection but not the outcome.",
+             "The model assumes that the errors of the two equations are jointly normal. If rho is close to zero, selection is ignorable and OLS on the selected sample is consistent."]
+    return result("heckman", f"Heckman selection model: {y}", n, summary, tabs, [ch], notes)
