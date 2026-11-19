@@ -1260,5 +1260,21 @@
   "value": 5.222,
   "rtol": 0.001,
   "seconds": 0.0
+ },
+ "seasonal": {
+  "nobs": 108,
+  "table_index": 0,
+  "table": "Seasonal factors (multiplicative)",
+  "row": "period 1",
+  "row_index": 0,
+  "col": "Mean factor",
+  "col_index": 1,
+  "value": 1.5503,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Seasonal strength",
+   "value": 0.973
+  }
  }
 }

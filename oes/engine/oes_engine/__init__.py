@@ -562,6 +562,10 @@ MODELS += [
          fields=[cols("x", "Variables (two or more, in levels)"), TIME, num("dmax", "Extra lags dmax (highest order of integration)", 1), sel("ic", "Lag criterion", [["aic", "AIC"], ["bic", "BIC"], ["hqic", "HQIC"]], "aic"),
                  num("lags", "Lags p (blank = criterion)", ""), num("maxlag", "Maximum lag", 8)],
          example=dict(file="time-series-guide/examples/money.csv", spec=dict(x=["log_price", "log_m2", "log_gdp"], time="date", dmax=1, ic="aic", maxlag=8))),
+    dict(id="seasonal", group="Time series", name="Seasonal decomposition and adjustment (STL)", guide="time-series-guide/seasonality.html", fn=ts_extra.seasonal,
+         fields=[col("y", "Series"), TIME, num("period", "Seasonal period (4 quarterly, 12 monthly)", 4), sel("mode", "Decomposition", [["multiplicative", "Multiplicative (log)"], ["additive", "Additive"]], "multiplicative"),
+                 sel("robust", "Robust to outliers", [["yes", "Yes"], ["no", "No"]], "yes"), num("swindow", "Seasonal window (odd; larger = more stable pattern)", 7)],
+         example=dict(file=OX + "uk_gas.csv", spec=dict(y="gas", time="date", period=4, mode="multiplicative", robust="yes", swindow=7))),
 ]
 
 MODELS += [
