@@ -412,5 +412,17 @@
   "kicker": "Panel Data Guide · Model guide",
   "title": "Two-Way Fixed Effects with Clustered Standard Errors",
   "sub": "Unit and time effects are both needed and errors are correlated within units or across units. Step-by-step guide with Python code…"
+ },
+ {
+  "out": "assets/og/panel-data-guide/pcse.jpg",
+  "kicker": "Panel Data Guide · Model guide",
+  "title": "Panel-Corrected Standard Errors (PCSE)",
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
+ },
+ {
+  "out": "assets/og/panel-data-guide/fgls.jpg",
+  "kicker": "Panel Data Guide · Model guide",
+  "title": "Feasible GLS for Panels (Parks-Kmenta)",
+  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  }
 ]

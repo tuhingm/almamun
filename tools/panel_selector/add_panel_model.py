@@ -13,6 +13,18 @@ ROOT = HERE.parents[1]
 PD = ROOT / "panel-data-guide"
 
 EXTRA = {
+    "pcse": dict(key="PCSE", short="PCSE",
+                 name="Panel-corrected standard errors (Beck-Katz)", when="Long panels (T of at least about 15) with common shocks and unit-specific variances",
+                 why="In a time-series cross-section the errors are correlated across units in the same year and have a different variance in each unit. Beck and Katz keep the OLS or Prais-Winsten coefficients and correct only the standard errors, which works when T is large enough to estimate the cross-unit covariance.",
+                 steps=["Cross-sectional dependence and serial correlation tests", "Pooled OLS", "Panel-corrected standard errors", "Prais-Winsten AR(1) or lagged dependent variable", "Unit effects", "Write the results"],
+                 lec=[["../teaching/econometrics/lectures/07-panel-data.html", "Lecture 07: Static panels"]],
+                 q=("I have a long panel with errors correlated across units and different variances", "Panel-corrected standard errors")),
+    "fgls": dict(key="FGLS", short="FGLS",
+                 name="Feasible GLS for panels (Parks-Kmenta)", when="Long, balanced panel, T much larger than N, to model the error structure",
+                 why="FGLS models heteroskedasticity, correlation across units and AR(1) errors, and can be more efficient than OLS. With T not far above N its standard errors are far too small, so compare it with PCSE before trusting it.",
+                 steps=["Check T against N", "OLS, rho and Prais-Winsten", "Error covariance and GLS", "Compare with PCSE", "Simulation of the coverage", "Write the results"],
+                 lec=[["../teaching/econometrics/lectures/07-panel-data.html", "Lecture 07: Static panels"]],
+                 q=("I want to model heteroskedasticity and cross-unit correlation by GLS", "Feasible GLS (Parks-Kmenta)")),
     "twfe": dict(key="TWFE", short="Two-way FE, clustered",
                  name="Two-way fixed effects with clustered standard errors", when="Unit and time effects, with honest standard errors",
                  why="You already know a fixed-effects model is appropriate, and the question is inference. Errors are correlated within units over time, so default standard errors are far too small. Cluster at the level of the treatment or the shocks, check the choice with two-way clustering and the wild cluster bootstrap, and be careful when units adopt a policy at different dates.",

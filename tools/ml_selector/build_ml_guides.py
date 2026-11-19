@@ -16,7 +16,7 @@ OUT = ROOT / "ml-guide"
 sys.path.insert(0, str(ROOT / "tools"))
 from build_courses import md_to_html  # same Markdown and math settings as the course sites
 
-ORDER = ["lasso", "ridge", "enet", "rf", "xgb", "dml-plr", "dml-irm", "dml-iv", "causal-forest"]
+ORDER = ["lasso", "ridge", "enet", "rf", "xgb", "svr", "krls", "dml-plr", "dml-irm", "dml-iv", "causal-forest"]
 BLOCK = re.compile(r"```python( norun)?\n(.*?)\n```", re.S)
 
 

@@ -16,7 +16,7 @@ OUT = ROOT / "panel-data-guide"
 sys.path.insert(0, str(ROOT / "tools"))
 from build_courses import md_to_html  # same Markdown and math settings as the course sites
 
-ORDER = ["pols", "re", "fe", "gmm", "fedk", "mg", "diff", "pmg", "csardl", "plp", "pthresh", "twfe", "dpthresh", "pcoint", "pquant", "spatial"]
+ORDER = ["pols", "re", "fe", "gmm", "fedk", "mg", "diff", "pmg", "csardl", "plp", "pthresh", "twfe", "dpthresh", "pcoint", "pquant", "spatial", "pcse", "fgls"]
 STATIC = dict(plp="Panel LP", pthresh="Panel threshold")   # built by tools/bayes_markov/build_guides.py
 BLOCK = re.compile(r"```python( norun)?\n(.*?)\n```", re.S)
 
