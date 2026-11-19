@@ -530,7 +530,7 @@ def test_generic_reports(mid, ex):
             rt = shown[t["title"]]["raw"]
             assert rt["rows"] == t["rows"][:60]
         nf = sum(len(s["figures"]) for s in rp["steps"])
-        assert nf == sum(1 for c in without["charts"] if c.get("x") and c.get("series"))
+        assert nf >= sum(1 for c in without["charts"] if c.get("x") and c.get("series"))
     for s in rp["steps"]:
         for f in s["figures"]:
             assert f["svg"].startswith("<svg") and f["pdf_b64"]

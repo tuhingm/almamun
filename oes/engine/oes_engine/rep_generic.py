@@ -89,6 +89,27 @@ def _figure(i, c):
     return Figure(f"f_{i}", c["title"], {"ncols": 1, "panels": [panel]}, note, "Source: author's calculations.", 6.0, 3.2)
 
 
+def _coef_figure(i, t):
+    """Coefficient plot from a table that already has an estimate and its confidence interval (the engine's numbers, nothing recomputed)."""
+    low = [c.lower() for c in t["columns"]]
+    ci = next((j for j, c in enumerate(low) if c in ("coef.", "coefficient", "estimate")), None)
+    lo = next((j for j, c in enumerate(low) if "ci low" in c or c in ("lower", "ci lower")), None)
+    hi = next((j for j, c in enumerate(low) if "ci high" in c or c in ("upper", "ci upper")), None)
+    if None in (ci, lo, hi):
+        return None
+    rows = [r for r in t["rows"] if len(r) > max(ci, lo, hi) and all(_isnum(r[j]) for j in (ci, lo, hi)) and str(r[0]).lower() not in ("const", "constant", "intercept")][:20]
+    if len(rows) < 2:
+        return None
+    m = len(rows)
+    ypos = [float(m - 1 - k) for k in range(m)]
+    panel = {"xlabel": "Estimate with confidence interval", "yticks": [[ypos[k], str(rows[k][0])[:24]] for k in range(m)], "ylim": [-0.7, m - 0.3],
+             "ml": 20 + 5.2 * min(24, max(len(str(r[0])) for r in rows)),
+             "layers": [{"type": "errh", "y": ypos, "x": [float(r[ci]) for r in rows], "lo": [float(r[lo]) for r in rows], "hi": [float(r[hi]) for r in rows]}, {"type": "vline", "x": 0.0}]}
+    return Figure(f"f_coef{i}", f"Estimates with confidence intervals: {t['title']}", {"ncols": 1, "panels": [panel]},
+                  "Points and bars are the estimates and confidence intervals reported in the corresponding table (the intercept is omitted); the dashed line marks zero.",
+                  "Source: author's calculations.", 5.2, max(2.2, 0.45 * m + 1.2))
+
+
 def build_from_result(out):
     from . import __version__
     mid = out.get("model", "model")
@@ -147,6 +168,11 @@ def build_from_result(out):
                 s4.figures.append(_figure(i, c))
         if s4.figures:
             rep.steps.append(s4)
+    cf = [f for f in (_coef_figure(i + 1, t) for i, t in enumerate(tabs)) if f]
+    if cf:
+        s5 = Step("coefplots", "Coefficient plots", "Estimates and confidence intervals of the result tables, drawn from the numbers the engine reported.", validated=VALIDATED)
+        s5.figures = cf
+        rep.steps.append(s5)
 
     rep.methods.append(Paragraph("method", f"{out.get('title', mid)} was estimated with the Open Econometric Systems engine (version {__version__}) using {out.get('nobs')} observations. "
                                  "The tables and figures of this report are the engine's output, reproduced without change.", {"n": out.get("nobs"), "ver": __version__}))
