@@ -48,7 +48,8 @@ def manuscript_text(rep):
             continue
         out += [s.title, paragraphs_text(res), ""]
     out += ["LIMITATIONS", paragraphs_text(rep.limitations), ""]
-    out += ["REFERENCES"] + rep.used_references()
+    if rep.used_references():
+        out += ["REFERENCES"] + rep.used_references()
     return "\n".join(out)
 
 
@@ -113,7 +114,17 @@ def _tests_rows(s):
     return [dict(name=t.name, statistic=t.statistic, p_value=t.p_value, df=t.df, null=t.null, reject=t.reject, problem=t.problem, reference=t.reference) for t in s.tests]
 
 
-def to_json(rep):
+def strip(rep):
+    """Copy of the report without the interpretation paragraphs of the steps and without the reference list (the user does not want them).
+    The generators still run, so their number checks stay in the tests; only the export drops the text."""
+    import dataclasses
+    steps = [dataclasses.replace(s, paragraphs=[]) for s in rep.steps]
+    return dataclasses.replace(rep, steps=steps, references={}, meta=dict(rep.meta, extra_refs=[]))
+
+
+def to_json(rep, interpretation=False):
+    if not interpretation:
+        rep = strip(rep)
     steps = []
     for s in rep.steps:
         steps.append(dict(

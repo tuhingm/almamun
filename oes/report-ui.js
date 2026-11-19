@@ -179,7 +179,7 @@
     h += `<section class="rstep" id="oesr-text"><div class="rhead" data-toggle="text" role="button" tabindex="0" aria-expanded="true"><h3>Text for the paper</h3><small>methods, limitations, references ▾</small></div><div class="rbody">
       <h4>Methods paragraph</h4>${rep.methods.map((m, i) => `<div class="para" data-m="${i}">${esc(m)}<div class="acts">${act("Copy text", "mtxt")}</div></div>`).join("")}
       <h4>Notes on limits</h4>${rep.limitations.map((m, i) => `<div class="para" data-l="${i}">${esc(m)}<div class="acts">${act("Copy text", "ltxt")}</div></div>`).join("")}
-      <h4>References for this method</h4><div class="refs">${rep.references.map(r => `<p>${esc(r)}</p>`).join("")}</div><div class="acts">${act("Copy references", "refs")}</div>
+      ${rep.references.length ? `<h4>References for this method</h4><div class="refs">${rep.references.map(r => `<p>${esc(r)}</p>`).join("")}</div><div class="acts">${act("Copy references", "refs")}</div>` : ""}
       <p class="valnote">${rep.unvalidated.length ? "Steps not validated against a reference: " + esc(rep.unvalidated.join("; ")) + "." : "Every step of this report is validated against a reference implementation or closed form in the project's automated tests."}</p></div></section></div>`;
     el.innerHTML = h;
     wire(el, rep);
