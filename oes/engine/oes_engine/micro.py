@@ -1303,3 +1303,213 @@ def systems(df, spec):
              "3SLS combines instrumental variables (for endogenous regressors) with the SUR weighting; it is more efficient than 2SLS if the system is correctly specified, "
              "but a specification error in one equation can contaminate the others, so compare with 2SLS equation by equation."]
     return result("systems", f"System of equations ({est.upper()})", n, summary, tabs, [ch], notes)
+
+
+_QX = np.linspace(-6.0, 6.0, 61)                              # equally spaced nodes for the standard-normal unit effect: the trapezoid rule
+_GH_X = _QX / np.sqrt(2)                                       # converges geometrically for smooth integrands; written in the Gauss-Hermite convention
+_GH_W = stats.norm.pdf(_QX) * (_QX[1] - _QX[0]) * np.sqrt(np.pi)
+
+
+def _pb_re_nll(t, X, q, gi, ng, link):
+    """Random-intercept logit/probit: log-likelihood by 61-point quadrature."""
+    from scipy.special import logsumexp
+    b, s = t[:-1], np.exp(t[-1])
+    F = (lambda z: -np.logaddexp(0, -z)) if link == "logit" else (lambda z: stats.norm.logcdf(z))
+    xb = X @ b
+    z = q[:, None] * (xb[:, None] + np.sqrt(2) * s * _GH_X[None, :])
+    lg = np.zeros((ng, len(_GH_X)))
+    np.add.at(lg, gi, F(z))
+    return -float((logsumexp(lg + np.log(_GH_W / np.sqrt(np.pi))[None, :], axis=1)).sum())
+
+
+def _log_esym(la, s):
+    """log of the elementary symmetric polynomial of order s of exp(la)."""
+    T = len(la)
+    prev = np.full(s + 1, -np.inf); prev[0] = 0.0
+    for t in range(T):
+        new = prev.copy()
+        new[1:] = np.logaddexp(prev[1:], prev[:-1] + la[t])
+        prev = new
+    return prev[s]
+
+
+def _pb_fe_nll(b, groups, link=None):
+    tot = 0.0
+    for Xi, yi in groups:
+        eta = Xi @ b
+        tot += float((yi * eta).sum()) - _log_esym(eta, int(yi.sum()))
+    return -tot
+
+
+def paneldiscrete(df, spec):
+    """Binary-outcome panel models: pooled with clustered errors, random-effects, correlated random effects (Mundlak) and conditional fixed-effects logit."""
+    from statsmodels.tools.numdiff import approx_hess
+    from scipy import optimize
+    y = need(spec, "y", "binary outcome")
+    xs = as_list(spec.get("x"))
+    ident = need(spec, "id", "unit identifier")
+    if not xs:
+        raise OESError("Choose at least one explanatory variable.")
+    link = _choice(spec, "link", ["logit", "probit"], "logit", "The link")
+    est = _choice(spec, "estimator", ["re", "cre", "fe", "pooled"], "re", "The estimator")
+    if est == "fe" and link != "logit":
+        raise OESError("The fixed-effects estimator is available for the logit link only (the probit has an incidental-parameters problem).")
+    distinct(y, xs, [ident])
+    d = numeric(df, [y] + xs, keep=[ident]).reset_index(drop=True)
+    if not set(d[y].unique()) <= {0, 1}:
+        raise OESError(f"{y} must contain only 0 and 1.")
+    gcodes, gidx = np.unique(d[ident].astype(str), return_inverse=True)
+    ng = len(gcodes)
+    if ng < 20:
+        raise OESError("Too few units (at least 20 are needed).")
+    gsize = np.bincount(gidx)
+    if gsize.max() < 2:
+        raise OESError("Each unit is observed only once: this is not a panel.")
+    n, k = len(d), len(xs)
+    Y = d[y].to_numpy(float)
+    # which regressors vary within units
+    within = [bool((d.groupby(gidx)[c].nunique() > 1).any()) for c in xs]
+    gm = d.groupby(gidx)[y].transform("mean").to_numpy()
+    varying_units = int(((pd.Series(Y).groupby(gidx).mean() > 0) & (pd.Series(Y).groupby(gidx).mean() < 1)).sum())
+    # pooled
+    X = sm.add_constant(d[xs].astype(float), has_constant="add")
+    names = list(X.columns); Xn = np.asarray(X, float)
+    mod = sm.Logit if link == "logit" else sm.Probit
+    try:
+        pooled = mod(Y, Xn).fit(disp=0, maxiter=200, cov_type="cluster", cov_kwds={"groups": gidx})
+        pooled_plain = mod(Y, Xn).fit(disp=0, maxiter=200)
+    except Exception as e:
+        raise OESError("The pooled model could not be estimated (perfect prediction or collinearity): " + str(e))
+    tabs, notes = [], []
+    cmp_cols = {"Pooled": (np.asarray(pooled.params), np.asarray(pooled.bse))}
+    q = 2 * Y - 1
+    # random effects (also needed for the comparison and the CRE estimator)
+    def fit_re(Xm):
+        t0 = np.r_[np.asarray(mod(Y, Xm).fit(disp=0).params), 0.0]
+        fun = lambda t: _pb_re_nll(t, Xm, q, gidx, ng, link)
+        o1 = optimize.minimize(fun, t0, method="BFGS", options={"gtol": 1e-6, "maxiter": 1000})
+        o2 = optimize.minimize(fun, o1.x, method="BFGS", options={"gtol": 1e-7, "maxiter": 1000})
+        if not np.isfinite(o2.fun) or np.linalg.norm(o2.jac) > 1e-2 * max(1, n):
+            raise OESError("The random-effects likelihood did not converge. Try fewer variables or rescale them.")
+        H = approx_hess(o2.x, fun)
+        try:
+            V = np.linalg.inv(H)
+        except np.linalg.LinAlgError:
+            raise OESError("The information matrix is singular (collinear variables).")
+        if np.any(np.diag(V) <= 0):
+            raise OESError("The information matrix is not positive definite; simplify the model.")
+        return o2.x, V, -float(o2.fun)
+    scale = (lambda s: np.sqrt(1 + s ** 2)) if link == "probit" else (lambda s: np.sqrt(1 + np.pi ** 2 * s ** 2 / 3))
+    ll_pooled = float(pooled_plain.llf)
+    if est in ("re", "cre"):
+        if est == "cre":
+            wv = [c for c, w in zip(xs, within) if w]
+            if not wv:
+                raise OESError("No regressor varies within units, so group means cannot be added.")
+            Xm = np.column_stack([Xn] + [d.groupby(gidx)[c].transform("mean").to_numpy(float) for c in wv])
+            mnames = names + [f"mean of {c}" for c in wv]
+        else:
+            Xm, mnames = Xn, names
+        th, V, ll = fit_re(Xm)
+        kk = Xm.shape[1]
+        sig = float(np.exp(th[-1])); se_sig = sig * float(np.sqrt(V[-1, -1]))
+        cof = coef_table(mnames, th[:kk], np.sqrt(np.diag(V))[:kk], dist="z",
+                         title="Random-effects " + link + (" with group means (Mundlak / correlated random effects)" if est == "cre" else ""),
+                         note="Coefficients are conditional on the unit effect (their scale is larger than the pooled coefficients by a factor of about " + f"{scale(sig):.2f}" + ").")
+        rho = sig ** 2 / (sig ** 2 + (1.0 if link == "probit" else np.pi ** 2 / 3))
+        cof["rows"].append(["sigma_u", f(sig), f(se_sig), f(sig / se_sig, 4), f(2 * stats.norm.sf(abs(sig / se_sig)), 4), f(sig - 1.96 * se_sig), f(sig + 1.96 * se_sig)])
+        tabs.append(cof)
+        lr = max(2 * (ll - ll_pooled), 0.0)
+        drows = [test_row("LR test that the unit effect is zero, sigma_u = 0", lr, 0.5 * stats.chi2.sf(lr, 1), "H0: pooled model is adequate; boundary test, p-value halved"),
+                 ["Intraclass correlation rho (latent)", f(rho), None, "share of the latent variance due to the unit effect"]]
+        if est == "cre":
+            nm = len(wv)
+            bm = th[len(names):kk]; Vm = V[len(names):kk, len(names):kk]
+            w = float(bm @ np.linalg.solve(Vm, bm))
+            drows.append(test_row(f"Mundlak test: group means jointly zero ({nm} df)", w, stats.chi2.sf(w, nm), "H0: the unit effect is uncorrelated with the regressors (random effects is consistent)"))
+        # average partial effects over the distribution of the unit effect
+        b_ = th[:kk]
+        def ape(tt):
+            bb, ss = tt[:-1], np.exp(tt[-1]); out = np.zeros(k)
+            F = (lambda z: 1 / (1 + np.exp(-z))) if link == "logit" else stats.norm.cdf
+            for i in range(k):
+                col = names.index(xs[i])
+                isd = bool(set(d[xs[i]].unique()) <= {0, 1})
+                A1, A0 = Xm.copy(), Xm.copy(); h = 1.0 if isd else 1e-4 * max(float(Xm[:, col].std()), 1e-8)
+                if isd: A1[:, col], A0[:, col] = 1, 0
+                else: A1[:, col] += h; A0[:, col] -= h
+                p1 = (F(((A1 @ bb)[:, None] + np.sqrt(2) * ss * _GH_X[None, :])) * (_GH_W / np.sqrt(np.pi))[None, :]).sum(1)
+                p0 = (F(((A0 @ bb)[:, None] + np.sqrt(2) * ss * _GH_X[None, :])) * (_GH_W / np.sqrt(np.pi))[None, :]).sum(1)
+                out[i] = ((p1 - p0) / (1 if isd else 2 * h)).mean()
+            return out
+        ap = ape(th); Ja = _num_jac(ape, th); sa = np.sqrt(np.maximum(np.diag(Ja @ V @ Ja.T), 0))
+        tabs.append(table("Average partial effects on the probability", ["Variable", "Effect", "Std. err.", "z", "p-value"],
+                          [[xs[i], f(ap[i]), f(sa[i]), f(ap[i] / sa[i], 4) if sa[i] > 0 else None, f(2 * stats.norm.sf(abs(ap[i] / sa[i]))) if sa[i] > 0 else None] for i in range(k)],
+                          "Effects averaged over the distribution of the unit effect (population-averaged), comparable with the pooled marginal effects. Delta-method standard errors."))
+        cmp_cols["Correlated RE" if est == "cre" else "Random effects"] = (th[:len(names)], np.sqrt(np.diag(V))[:len(names)])
+        main_ll = ll
+    elif est == "pooled":
+        tabs.append(coef_table(names, pooled.params, pooled.bse, dist="z", title="Pooled " + link, note="Standard errors clustered by unit."))
+        mfx = pooled_plain.get_margeff(at="overall").summary_frame()
+        tabs.append(table("Average marginal effects (pooled)", ["Variable", "Effect", "Std. err.", "z", "p-value"],
+                          [[c, f(mfx.iloc[i, 0]), f(mfx.iloc[i, 1]), f(mfx.iloc[i, 2], 4), f(mfx.iloc[i, 3])] for i, c in enumerate(xs)], "Delta-method standard errors, ignoring clustering."))
+        drows = []; main_ll = ll_pooled
+    if est == "fe" or link == "logit":
+        # conditional (fixed-effects) logit: only units whose outcome varies and regressors that vary within units
+        keepc = [i for i, w in enumerate(within) if w]
+        dropped = [xs[i] for i, w in enumerate(within) if not w]
+        if keepc:
+            Xw = np.asarray(d[[xs[i] for i in keepc]], float)
+            groups = []
+            for g in range(ng):
+                m_ = gidx == g
+                if 0 < Y[m_].sum() < m_.sum():
+                    groups.append((Xw[m_], Y[m_]))
+            if len(groups) >= 10:
+                fun = lambda b_: _pb_fe_nll(b_, groups)
+                start = np.zeros(len(keepc))
+                o1 = optimize.minimize(fun, start, method="BFGS", options={"gtol": 1e-7})
+                Vf = np.linalg.inv(approx_hess(o1.x, fun))
+                sef = np.sqrt(np.diag(Vf))
+                fe_b = np.full(k, np.nan); fe_se = np.full(k, np.nan)
+                for j, i in enumerate(keepc):
+                    fe_b[i], fe_se[i] = o1.x[j], sef[j]
+                if est == "fe":
+                    cof = coef_table([xs[i] for i in keepc], o1.x, sef, dist="z", title="Fixed-effects (conditional) logit",
+                                     note=f"Chamberlain's conditional logit: {len(groups)} of {ng} units have a changing outcome and contribute; the other units, and {len(dropped)} time-invariant regressor(s) "
+                                          + (f"({', '.join(dropped)}) " if dropped else "") + "are not identified.")
+                    tabs.append(cof)
+                    tabs.append(table("Odds ratios exp(b)", ["Variable", "Odds ratio", "Std. err.", "95% CI low", "95% CI high"],
+                                      [[xs[i], f(np.exp(o1.x[j])), f(np.exp(o1.x[j]) * sef[j]), f(np.exp(o1.x[j] - 1.96 * sef[j])), f(np.exp(o1.x[j] + 1.96 * sef[j]))] for j, i in enumerate(keepc)],
+                                      "Effect on the odds within a unit; average partial effects are not identified by fixed-effects logit."))
+                    drows = [["Units contributing to the likelihood", f(len(groups)), None, f"{ng - len(groups)} units with no change in the outcome drop out"]]
+                    main_ll = -float(o1.fun)
+                cmp_cols["Fixed effects"] = (fe_b, fe_se)
+    # comparison table
+    if len(cmp_cols) > 1 or est == "fe":
+        cn = list(cmp_cols)
+        crow = []
+        for i, c in enumerate(names):
+            r_ = [c]
+            for key in cn:
+                bvec, sevec = cmp_cols[key]
+                if key == "Fixed effects":
+                    j = i - 1
+                    r_ += [f(bvec[j]) if j >= 0 and np.isfinite(bvec[j]) else None, f(sevec[j]) if j >= 0 and np.isfinite(sevec[j]) else None]
+                else:
+                    r_ += [f(bvec[i]), f(sevec[i])]
+            crow.append(r_)
+        hdr = ["Variable"]
+        for key in cn:
+            hdr += [key, key + " s.e."]
+        tabs.append(table("Comparison of estimators", hdr, crow, "Pooled: clustered standard errors. Random effects: conditional on the unit effect. Fixed effects: only regressors that vary within units."))
+    tabs.append(tests_table(drows if drows else [["Units", f(ng), None, f"{ng} units, {n} observations"]]))
+    pr = pooled_plain.predict(Xn)
+    qq = pd.qcut(pd.Series(pr).rank(method="first"), 10, labels=False)
+    ch = chart("Observed and predicted share with the outcome by decile of the pooled prediction", [str(i + 1) for i in range(10)],
+               [("Observed", [float(Y[qq == g].mean()) for g in range(10)]), ("Predicted", [float(pr[qq == g].mean()) for g in range(10)])], "Decile of predicted probability", y, kind="bar")
+    summary = [stat("Observations", n), stat("Units", ng), stat("Average periods per unit", n / ng), stat("Share with outcome = 1", float(Y.mean())), stat("Log-likelihood", main_ll)]
+    notes = [f"Panel {link} ({est}): {n} observations on {ng} units; the outcome changes within {varying_units} units.",
+             "Fixed-effects logit uses only units whose outcome changes and removes the unit effect by conditioning, without assuming anything about its relation to the regressors; "
+             "random effects assumes that the unit effect is independent of the regressors (test it with the Mundlak option). Pooled estimates describe population averages and need clustered standard errors."]
+    return result("paneldiscrete", f"Panel {link}: {y}", n, summary, tabs, [ch], notes)

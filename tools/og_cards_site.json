@@ -288,6 +288,12 @@
   "sub": "An outcome with ordered categories (low, medium, high; a rating from 1 to 5; a degree level) explained by one or more regressors.…"
  },
  {
+  "out": "assets/og/microeconometrics-guide/panel-logit-probit.jpg",
+  "kicker": "Microeconometrics Guide · Model guide",
+  "title": "Panel Logit and Probit (Pooled, Random and Fixed Effects)",
+  "sub": "A binary outcome observed for the same units over several periods (union membership, employment, default, adoption) and…"
+ },
+ {
   "out": "assets/og/microeconometrics-guide/systems-sur-3sls.jpg",
   "kicker": "Microeconometrics Guide · Model guide",
   "title": "Systems of Equations: SUR and Three-Stage Least Squares",

@@ -1140,5 +1140,21 @@
    "label": "Breusch-Pagan LM",
    "value": 75.9871
   }
+ },
+ "paneldiscrete": {
+  "nobs": 4360,
+  "table_index": 0,
+  "table": "Random-effects logit with group means (Mundlak / correlated random effects)",
+  "row": "married",
+  "row_index": 1,
+  "col": "Coef.",
+  "col_index": 1,
+  "value": 0.271468,
+  "rtol": 0.001,
+  "seconds": 8.9,
+  "summary": {
+   "label": "Average periods per unit",
+   "value": 8.0
+  }
  }
 }
