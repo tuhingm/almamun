@@ -96,6 +96,12 @@
   "sub": "You need dynamic effects around a policy, a valid test of pre-trends, and a way to judge how much a pre-trend would change the…"
  },
  {
+  "out": "assets/og/causal-inference-guide/experiments.jpg",
+  "kicker": "Causal Inference Guide · Model guide",
+  "title": "Randomised Experiments: Balance, Adjustment and Randomisation Inference",
+  "sub": "Treatment was assigned at random and you need to report the effect, check that the randomisation worked, adjust for covariates…"
+ },
+ {
   "out": "assets/og/causal-inference-guide/gsc.jpg",
   "kicker": "Causal Inference Guide · Model guide",
   "title": "Generalized Synthetic Control",

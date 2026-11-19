@@ -79,3 +79,65 @@ def test_weakiv_errors():
     assert "Column(s) not found" in o.run("weakiv", d.to_csv(index=False), wspec(["nope"]))["error"]
     assert "collinear" in o.run("weakiv", d.assign(z2=d.nearc4).to_csv(index=False), wspec(["nearc4", "z2"]))["error"]
     assert "confidence level" in o.run("weakiv", d.to_csv(index=False), wspec(["nearc4"], level=0.2))["error"]
+
+
+# ---- randomised experiments ------------------------------------------------------------------------------------
+def nsw(): return pd.read_csv(os.path.join(CX, "nsw_experiment.csv"))
+COV = ["age", "educ", "black", "hisp", "married", "nodegree", "re74", "re75"]
+ES = dict(outcome="re78", treat="train", covariates=COV, draws=1000)
+def erow(r, name): return next(x for x in r["tables"][0]["rows"] if x[0].startswith(name))
+
+
+def test_experiment_registered():
+    m = o.BY_ID["experiment"]; assert m["group"] == "Causal inference" and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+def test_experiment_difference_in_means_matches_published_nsw():
+    # Dehejia and Wahba (1999) experimental sample: 1.794 (0.671) in thousands of 1978 dollars
+    r = causal_extra.experiment(nsw(), ES); row = erow(r, "Difference")
+    assert float(row[1]) == pytest.approx(1.794, abs=1e-3) and float(row[2]) == pytest.approx(0.671, abs=1e-3)
+
+
+def test_experiment_regression_estimators_match_statsmodels():
+    import statsmodels.api as sm
+    d = nsw(); r = causal_extra.experiment(d, ES); Xc = d[COV] - d[COV].mean()
+    a = sm.OLS(d.re78, sm.add_constant(pd.concat([d.train, Xc], axis=1))).fit(cov_type="HC2")
+    assert float(erow(r, "Regression adjustment")[1]) == pytest.approx(a.params["train"], abs=1e-3) and float(erow(r, "Regression adjustment")[2]) == pytest.approx(a.bse["train"], abs=1e-3)
+    inter = pd.concat([d.train, Xc, Xc.mul(d.train, axis=0).add_suffix("_x")], axis=1)
+    l = sm.OLS(d.re78, sm.add_constant(inter)).fit(cov_type="HC2")
+    assert float(erow(r, "Lin")[1]) == pytest.approx(l.params["train"], abs=1e-3) and float(erow(r, "Lin")[2]) == pytest.approx(l.bse["train"], abs=1e-3)
+
+
+def test_experiment_randomisation_inference_matches_scipy_permutation():
+    d = nsw(); r = causal_extra.experiment(d, dict(outcome="re78", treat="train", draws=4000))
+    res = stats.permutation_test((d.re78[d.train == 1].to_numpy(), d.re78[d.train == 0].to_numpy()), lambda a, b: a.mean() - b.mean(), n_resamples=4000, random_state=1)
+    assert float(r["tables"][1]["rows"][0][2]) == pytest.approx(res.pvalue, abs=0.012)
+
+
+def test_experiment_balance_joint_test_matches_statsmodels():
+    import statsmodels.api as sm
+    d = nsw(); r = causal_extra.experiment(d, ES); m = sm.OLS(d.train, sm.add_constant(d[COV])).fit()
+    note = next(t for t in r["tables"] if t["title"] == "Covariate balance")["note"]; F = float(re.search(r"F = ([\d.]+)", note).group(1))
+    assert F == pytest.approx(m.fvalue, abs=0.01)
+
+
+def exp_sim(seed, n=200, tau=0.0, prog=2.0):
+    rng = np.random.default_rng(seed); x = rng.normal(size=n); T = np.zeros(n); T[rng.permutation(n)[: n // 2]] = 1
+    y = prog * x + tau * T + rng.normal(size=n); return pd.DataFrame(dict(y=y, t=T, x=x))
+
+
+def test_experiment_neyman_coverage_ri_size_and_lin_precision():
+    cov = rej = 0; se_d = se_l = 0.0; R = 300
+    for s in range(R):
+        r = causal_extra.experiment(exp_sim(s, tau=1.0), dict(outcome="y", treat="t", covariates=["x"], draws=200))
+        e, se = float(erow(r, "Difference")[1]), float(erow(r, "Difference")[2]); cov += abs(e - 1.0) <= 1.96 * se; se_d += se; se_l += float(erow(r, "Lin")[2])
+        rej += float(causal_extra.experiment(exp_sim(s, tau=0.0), dict(outcome="y", treat="t", draws=200))["tables"][1]["rows"][0][2]) < 0.05
+    assert 0.92 <= cov / R <= 0.985 and 0.02 <= rej / R <= 0.09 and se_l < 0.6 * se_d
+
+
+def test_experiment_errors():
+    d = nsw()
+    assert "0/1" in o.run("experiment", d.assign(train=d.train * 2).to_csv(index=False), dict(ES))["error"]
+    assert "Column(s) not found" in o.run("experiment", d.to_csv(index=False), dict(ES, covariates=["nope"]))["error"]
+    few = d.iloc[:60].assign(train=[1.0] * 3 + [0.0] * 57)
+    assert "at least 5" in o.run("experiment", few.to_csv(index=False), dict(outcome="re78", treat="train"))["error"]
