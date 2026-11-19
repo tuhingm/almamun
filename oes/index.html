@@ -413,7 +413,8 @@ function renderResult() {
   $("s-results").hidden = false;
   $("res-title").textContent = out.title;
   $("res-sub").textContent = `${model.name} · ${RESULT.data} · ${out.nobs.toLocaleString()} observations · estimated in ${seconds.toFixed(1)} s with OES engine ${out.engine}`;
-  if (out.report && window.OESReport) { try { OESReport.render($("report"), out.report); } catch (err) { $("report").innerHTML = `<p class="tnote">The publication report could not be displayed (${esc(String(err))}). The standard results below are unaffected.</p>`; } } else $("report").innerHTML = out.report_error ? `<p class="tnote">The publication report could not be produced for this run (${esc(out.report_error)}). The standard results below are unaffected.</p>` : "";
+  let hasRep = false;
+  if (out.report && window.OESReport) { try { OESReport.render($("report"), out.report); hasRep = true; } catch (err) { $("report").innerHTML = `<p class="tnote">The publication report could not be displayed (${esc(String(err))}). The standard results below are unaffected.</p>`; } } else $("report").innerHTML = out.report_error ? `<p class="tnote">The publication report could not be produced for this run (${esc(out.report_error)}). The standard results below are unaffected.</p>` : "";
   $("metrics").innerHTML = out.summary.map(s => `<div class="metric"><small>${esc(s.label)}</small><strong>${esc(NUM(s.value))}</strong></div>`).join("");
   $("tables").innerHTML = out.tables.map(t => {
     const pcol = t.columns.indexOf("p-value");
@@ -424,6 +425,13 @@ function renderResult() {
   $("charts").innerHTML = (out.forest ? forestPlot(out.forest) : "") + out.charts.map(svgChart).join("");
   $("notes").hidden = !out.notes.length;
   $("notes").innerHTML = out.notes.map(n => `<p>${esc(n)}</p>`).join("");
+  // the report already shows every table, test and chart: hide the plain copy of the same results (only the meta-analysis forest plot, which the report does not draw, stays)
+  if (hasRep) {
+    ["metrics", "tables", "notes", "dl-csv", "dl-json"].forEach(i => { $(i).style.display = "none"; });
+    $("charts").innerHTML = out.forest ? forestPlot(out.forest) : ""; $("charts").style.display = out.forest ? "" : "none";
+  } else {
+    ["metrics", "tables", "charts", "dl-csv", "dl-json"].forEach(i => { $(i).style.display = ""; });
+  }
   $("res-guide").style.display = out.guide ? "" : "none"; if (out.guide) $("res-guide").href = "../" + out.guide;
   const s = JSON.stringify(spec, null, 1).replace(/\n\s*/g, " ");
   if (model.division === "statistics") {
