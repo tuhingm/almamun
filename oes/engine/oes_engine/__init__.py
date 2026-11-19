@@ -459,6 +459,11 @@ MODELS += [
                  sel("cov", "Standard errors", [["robust", "Robust (sandwich)"], ["model", "Model-based"]], "robust"), col("exposure", "Exposure variable (optional)", required=False)],
          example=dict(file=ME + "doctor_visits.csv", spec=dict(y="mdvis", x=["lncoins", "idp", "lpi", "fmde", "physlm", "disea", "hlthg", "hlthf", "hlthp"], family="negbin")),
          check=dict(table=0, row=1, col=1)),
+    dict(id="zero_count", group="Microeconometrics", name="Zero-inflated and hurdle count models", guide="microeconometrics-guide/zero-inflated-hurdle.html", fn=micro.zero_count,
+         fields=[col("y", "Count outcome"), cols("x", "Count-equation variables"), cols("z", "Zero-equation variables (blank = same as count)", required=False),
+                 sel("model", "Model", [["zip", "Zero-inflated Poisson"], ["zinb", "Zero-inflated negative binomial"], ["hurdle_poisson", "Poisson hurdle"], ["hurdle_nb", "Negative-binomial hurdle"]], "zinb")],
+         example=dict(file=ME + "arrests.csv", spec=dict(y="narr86", x=["pcnv", "ptime86", "qemp86", "black", "hispan"], z=["pcnv", "ptime86", "qemp86", "black", "hispan"], model="zinb")),
+         check=dict(table=0, row=1, col=1)),
 ]
 
 CE = "oes/examples/"

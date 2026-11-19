@@ -900,3 +900,165 @@ def count(df, spec):
              "Poisson regression is consistent for the mean whenever the mean is correctly specified, so use robust standard errors; it is efficient only if variance equals mean. "
              "The negative binomial adds a dispersion parameter alpha and is the standard model for overdispersed counts."]
     return result("count", f"{'Poisson' if fam == 'poisson' else 'Negative-binomial'} regression: {y}", n, summary, tabs, [ch], notes)
+
+
+def _zc_pieces(theta, Zn, Xn, kz, kx, dist):
+    g, b = theta[:kz], theta[kz:kz + kx]
+    mu = np.exp(Xn @ b)
+    pi = 1 / (1 + np.exp(-(Zn @ g)))
+    if dist == "poisson":
+        return pi, mu, None
+    a = np.exp(theta[kz + kx]); r = 1 / a
+    return pi, mu, r
+
+
+def _f_pmf(y, mu, r):
+    return stats.poisson.pmf(y, mu) if r is None else stats.nbinom.pmf(y, r, r / (r + mu))
+
+
+def _f_logpmf(y, mu, r):
+    return stats.poisson.logpmf(y, mu) if r is None else stats.nbinom.logpmf(y, r, r / (r + mu))
+
+
+def _zc_logl_obs(theta, Zn, Xn, Y, kz, kx, kind, dist):
+    """Log-likelihood contribution of each observation. ZI: pi = Pr(structural zero). Hurdle: pi = Pr(y > 0)."""
+    pi, mu, r = _zc_pieces(theta, Zn, Xn, kz, kx, dist)
+    f0 = _f_pmf(0, mu, r)
+    lf = _f_logpmf(Y, mu, r)
+    if kind == "zi":
+        return np.where(Y == 0, np.log(pi + (1 - pi) * f0 + 1e-300), np.log1p(-pi + 1e-300) + lf)
+    return np.where(Y == 0, np.log1p(-pi + 1e-300), np.log(pi + 1e-300) + lf - np.log1p(-f0 + 1e-300))
+
+
+def _zc_mean(theta, Zn, Xn, kz, kx, kind, dist):
+    pi, mu, r = _zc_pieces(theta, Zn, Xn, kz, kx, dist)
+    if kind == "zi":
+        return (1 - pi) * mu
+    return pi * mu / (1 - _f_pmf(0, mu, r))
+
+
+def zero_count(df, spec):
+    """Zero-inflated and hurdle count models (Poisson or negative binomial) with a Vuong comparison to the standard count model."""
+    from statsmodels.tools.numdiff import approx_hess
+    from scipy import optimize
+    y = need(spec, "y", "count outcome variable")
+    xs = as_list(spec.get("x"))
+    zs = as_list(spec.get("z")) or xs
+    if not xs:
+        raise OESError("Choose at least one explanatory variable for the count equation.")
+    model = _choice(spec, "model", ["zip", "zinb", "hurdle_poisson", "hurdle_nb"], "zip", "The model")
+    kind = "zi" if model.startswith("zi") else "hurdle"
+    dist = "poisson" if model in ("zip", "hurdle_poisson") else "nb"
+    distinct(y, xs)
+    if y in zs:
+        raise OESError("The outcome cannot be an explanatory variable of the zero equation.")
+    d = numeric(df, [y] + list(dict.fromkeys(xs + zs))).reset_index(drop=True)
+    Y = d[y].to_numpy(float)
+    if (Y < 0).any() or not np.allclose(Y, np.round(Y)):
+        raise OESError(f"{y} must contain non-negative whole numbers (counts).")
+    if (Y == 0).sum() < 10 or (Y > 0).sum() < 10:
+        raise OESError("The model needs at least 10 zeros and 10 positive counts.")
+    n = len(d)
+    Xd = sm.add_constant(d[xs].astype(float), has_constant="add")
+    Zd = sm.add_constant(d[zs].astype(float), has_constant="add")
+    Xn, Zn = np.asarray(Xd, float), np.asarray(Zd, float)
+    xnames, znames = list(Xd.columns), list(Zd.columns)
+    kx, kz = Xn.shape[1], Zn.shape[1]
+    if n < 5 * (kx + kz):
+        raise OESError("Too few observations for this number of variables.")
+    # standard count models for comparison and starting values
+    try:
+        p0 = sm.GLM(Y, Xn, family=sm.families.Poisson()).fit()
+        nb0 = sm.NegativeBinomial(Y, Xn, loglike_method="nb2").fit(start_params=np.r_[p0.params, 0.5], method="bfgs", maxiter=2000, disp=0)
+    except Exception as e:
+        raise OESError(f"The standard count models could not be estimated ({e}).")
+    std = p0 if dist == "poisson" else nb0
+    std_obs = (stats.poisson.logpmf(Y, p0.mu) if dist == "poisson" else
+               stats.nbinom.logpmf(Y, 1 / nb0.params[-1], (1 / nb0.params[-1]) / (1 / nb0.params[-1] + np.exp(Xn @ nb0.params[:-1]))))
+    if kind == "zi":
+        g0 = np.zeros(kz); g0[0] = -1.0
+    else:
+        try:
+            g0 = np.asarray(sm.Logit((Y > 0).astype(float), Zn).fit(disp=0).params)
+        except Exception:
+            g0 = np.zeros(kz)
+    b0 = np.asarray(p0.params if dist == "poisson" else nb0.params[:-1])
+    t0 = np.r_[g0, b0] if dist == "poisson" else np.r_[g0, b0, np.log(max(float(nb0.params[-1]), 0.05))]
+    fun = lambda t: -_zc_logl_obs(t, Zn, Xn, Y, kz, kx, kind, dist).sum()
+    opt = optimize.minimize(fun, t0, method="BFGS", options={"gtol": 1e-7, "maxiter": 3000})
+    opt = optimize.minimize(fun, opt.x, method="BFGS", options={"gtol": 1e-8, "maxiter": 3000})
+    if not np.isfinite(opt.fun) or np.linalg.norm(opt.jac) > 1e-2 * max(1, n):
+        raise OESError("The likelihood did not converge. Try a simpler zero equation, fewer variables or a Poisson model.")
+    t = opt.x
+    try:
+        V = np.linalg.inv(approx_hess(t, fun))
+    except np.linalg.LinAlgError:
+        raise OESError("The information matrix is singular: the variables are collinear or the zero equation is not identified.")
+    if np.any(np.diag(V) <= 0):
+        raise OESError("The information matrix is not positive definite; the estimate is not a maximum. Simplify the zero equation.")
+    se = np.sqrt(np.diag(V))
+    ll = -float(opt.fun)
+    npar = len(t)
+    zlab = "Zero (inflation) equation: logit for a structural zero" if kind == "zi" else "Hurdle equation: logit for a positive count (y > 0)"
+    clab = "Count equation" if kind == "zi" else "Count equation (zero-truncated)"
+    tc = coef_table(xnames, t[kz:kz + kx], se[kz:kz + kx], dist="z", title=clab,
+                    note="Effects on the log of the Poisson/NB mean " + ("before inflation." if kind == "zi" else "of the positive counts."))
+    if dist == "nb":
+        a_, sa_ = float(np.exp(t[-1])), float(np.exp(t[-1]) * se[-1])
+        tc["rows"].append(["alpha (dispersion)", f(a_), f(sa_), f(a_ / sa_, 4), f(2 * stats.norm.sf(abs(a_ / sa_)), 4), f(a_ - 1.96 * sa_), f(a_ + 1.96 * sa_)])
+    tz = coef_table(znames, t[:kz], se[:kz], dist="z", title=zlab,
+                    note="A positive coefficient " + ("raises the probability of a structural (always-zero) outcome." if kind == "zi" else "raises the probability of a positive count."))
+    # marginal effects on E[y]
+    dummy = [bool(set(d[c].unique()) <= {0, 1}) for c in xs]
+    zin = [c for c in zs if c not in xs]
+    allv = list(dict.fromkeys(xs + zs))
+
+    def ame(th):
+        out = np.zeros(len(allv))
+        for i, c in enumerate(allv):
+            A, B = Xn.copy(), Xn.copy(); C, D = Zn.copy(), Zn.copy()
+            isd = bool(set(d[c].unique()) <= {0, 1})
+            h = 1.0 if isd else 1e-4 * max(float(d[c].std()), 1e-8)
+            if c in xs:
+                j = xs.index(c) + 1
+                A[:, j] = 1 if isd else A[:, j] + h; B[:, j] = 0 if isd else B[:, j] - h
+            if c in zs:
+                j = zs.index(c) + 1
+                C[:, j] = 1 if isd else C[:, j] + h; D[:, j] = 0 if isd else D[:, j] - h
+            m1, m0 = _zc_mean(th, C, A, kz, kx, kind, dist), _zc_mean(th, D, B, kz, kx, kind, dist)
+            out[i] = ((m1 - m0) / (1 if isd else 2 * h)).mean()
+        return out
+    am = ame(t)
+    J = _num_jac(ame, t)
+    sa = np.sqrt(np.maximum(np.diag(J @ V @ J.T), 0))
+    tm = table("Average marginal effects on the expected count E[y]", ["Variable", "dE[y]/dx", "Std. err.", "z", "p-value"],
+               [[allv[i], f(am[i]), f(sa[i]), f(am[i] / sa[i], 4) if sa[i] > 0 else None, f(2 * stats.norm.sf(abs(am[i] / sa[i]))) if sa[i] > 0 else None] for i in range(len(allv))],
+               "Total effect on the expected count, combining the zero and count equations (variables in both equations act through both). Delta-method standard errors.")
+    # comparison with the standard model: AIC, BIC and the Vuong test
+    ll_std = float(std.llf)
+    k_std = kx + (1 if dist == "nb" else 0)
+    mi = _zc_logl_obs(t, Zn, Xn, Y, kz, kx, kind, dist) - std_obs
+    vuong = float(np.sqrt(n) * mi.mean() / mi.std(ddof=1)) if mi.std(ddof=1) > 0 else 0.0
+    cmp_rows = [["Standard " + ("Poisson" if dist == "poisson" else "negative binomial"), f(ll_std, 3), k_std, f(-2 * ll_std + 2 * k_std, 2), f(-2 * ll_std + np.log(n) * k_std, 2)],
+                [{"zip": "Zero-inflated Poisson", "zinb": "Zero-inflated negative binomial", "hurdle_poisson": "Poisson hurdle", "hurdle_nb": "Negative-binomial hurdle"}[model],
+                 f(ll, 3), npar, f(-2 * ll + 2 * npar, 2), f(-2 * ll + np.log(n) * npar, 2)]]
+    tcmp = table("Model comparison", ["Model", "Log-likelihood", "Parameters", "AIC", "BIC"], cmp_rows, "Smaller AIC and BIC indicate the better trade-off between fit and number of parameters.")
+    pv = 2 * stats.norm.sf(abs(vuong))
+    drows = [test_row("Vuong test: zero-augmented model against the standard model", vuong, pv, "positive values favor the zero-augmented model; |V| > 1.96 is significant at 5%"),
+             ["Share of zeros: observed, standard model, this model", f(float((Y == 0).mean())),
+              f(float(np.mean(_f_pmf(0, np.asarray(p0.mu if dist == "poisson" else np.exp(Xn @ nb0.params[:-1])), None if dist == "poisson" else 1 / nb0.params[-1])))),
+              f(float(np.mean(np.exp(_zc_logl_obs(t, Zn, Xn, np.zeros(n), kz, kx, kind, dist)))))]]
+    kmax = int(min(max(Y.max(), 4), 8))
+    obs = [float((Y == j).mean()) for j in range(kmax)] + [float((Y >= kmax).mean())]
+    pm = [float(np.mean(np.exp(_zc_logl_obs(t, Zn, Xn, np.full(n, float(j)), kz, kx, kind, dist)))) for j in range(kmax)]
+    pst = [float(np.mean(_f_pmf(j, np.asarray(p0.mu if dist == "poisson" else np.exp(Xn @ nb0.params[:-1])), None if dist == "poisson" else 1 / nb0.params[-1]))) for j in range(kmax)]
+    ch = chart("Observed and predicted distribution of the count", [str(j) for j in range(kmax)] + [f"{kmax}+"],
+               [("Observed", obs), ("Standard model", pst + [1 - sum(pst)]), ("Zero-augmented model", pm + [1 - sum(pm)])], y, "Share of observations", kind="bar")
+    summary = [stat("Observations", n), stat("Zeros", int((Y == 0).sum())), stat("Log-likelihood", ll), stat("AIC", -2 * ll + 2 * npar), stat("Vuong statistic", vuong)]
+    notes = [f"{cmp_rows[1][0]} for {y}: {n} observations, {(Y == 0).mean():.0%} zeros.",
+             "Zero-inflated models say that some zeros are structural (people who can never have the event) and others come from the count process. "
+             "Hurdle models say that a first decision determines whether the count is positive and a truncated count model gives its size. "
+             "Choose by the economics of the zeros; the Vuong test and AIC compare fit, not interpretation."]
+    if zin:
+        notes.append("Variables only in the zero equation: " + ", ".join(zin) + ".")
+    return result("zero_count", f"{cmp_rows[1][0]}: {y}", n, summary, [tc, tz, tm, tcmp, tests_table(drows)], [ch], notes)

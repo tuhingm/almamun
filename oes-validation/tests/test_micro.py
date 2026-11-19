@@ -448,3 +448,52 @@ def test_irr_and_marginal_effect_by_hand():
 def test_count_errors():
     for kw, msg in [(dict(y="fmde", x=["disea"]), "whole numbers"), (dict(x=[]), "at least one"), (dict(family="zip"), "must be one of")]:
         assert msg in visits(**kw)["error"]
+
+
+# ------------------------------------------------------------------ zero-inflated and hurdle models
+def arrests(**kw):
+    spec = dict(o.BY_ID["zero_count"]["example"]["spec"]); spec.update(kw)
+    return o.run("zero_count", open(os.path.join(ME, "arrests.csv")).read(), spec)
+
+
+def test_zip_matches_statsmodels_at_the_same_optimum():
+    from statsmodels.discrete.count_model import ZeroInflatedPoisson
+    d = pd.read_csv(os.path.join(ME, "arrests.csv")); xs = o.BY_ID["zero_count"]["example"]["spec"]["x"]
+    X = sm.add_constant(d[xs])
+    r = arrests(model="zip")
+    sm_fit = ZeroInflatedPoisson(d.narr86, X, exog_infl=X, inflation="logit").fit(method="bfgs", maxiter=2000, disp=0)
+    assert summ(r, "Log-likelihood") >= sm_fit.llf - 1e-3                      # engine reaches at least the statsmodels optimum
+    assert summ(r, "Log-likelihood") == pytest.approx(sm_fit.llf, abs=0.05)
+
+
+def test_zinb_and_hurdle_likelihoods_by_hand():
+    from scipy import optimize
+    d = pd.read_csv(os.path.join(ME, "arrests.csv")); xs = o.BY_ID["zero_count"]["example"]["spec"]["x"]
+    X = sm.add_constant(d[xs]).values; y = d.narr86.values.astype(float)
+    # Poisson hurdle: the logit part and the zero-truncated Poisson part separate, so the log-likelihood is the sum of the two maximised parts
+    lg = sm.Logit((y > 0).astype(float), X).fit(disp=0)
+    pos = y > 0
+
+    def nll(b):
+        mu = np.exp(X[pos] @ b); return -(stats.poisson.logpmf(y[pos], mu) - np.log1p(-np.exp(-mu))).sum()
+    t = optimize.minimize(nll, np.zeros(X.shape[1]), method="BFGS", options={"gtol": 1e-8})
+    assert summ(arrests(model="hurdle_poisson"), "Log-likelihood") == pytest.approx(lg.llf - t.fun, abs=1e-2)
+    r = arrests(model="zinb")
+    assert row(r, "Count equation", "alpha (dispersion)")[1] > 0 and summ(r, "Log-likelihood") > summ(arrests(model="zip"), "Log-likelihood")
+
+
+def test_zero_inflation_recovered_in_simulation():
+    rng = np.random.default_rng(11); n = 6000
+    x = rng.normal(size=n); w = rng.normal(size=n)
+    struct = rng.random(n) < 1 / (1 + np.exp(-(-0.5 + 1.0 * w)))
+    y = np.where(struct, 0, rng.poisson(np.exp(0.3 + 0.5 * x)))
+    dd = pd.DataFrame(dict(y=y, x=x, w=w))
+    r = o.run("zero_count", dd.to_csv(index=False), dict(y="y", x=["x"], z=["w"], model="zip"))
+    assert row(r, "Count equation", "x")[1] == pytest.approx(0.5, abs=0.06)
+    assert row(r, "Zero (inflation)", "w")[1] == pytest.approx(1.0, abs=0.2)
+    assert next(t for t in table(r, "Specification")["rows"] if t[0].startswith("Vuong"))[1] > 1.96
+
+
+def test_zero_count_errors():
+    for kw, msg in [(dict(y="pcnv", x=["black"], z=["hispan"]), "whole numbers"), (dict(model="zz"), "must be one of"), (dict(x=[]), "at least one")]:
+        assert msg in arrests(**kw)["error"]
