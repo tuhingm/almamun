@@ -413,7 +413,7 @@ function renderResult() {
   $("s-results").hidden = false;
   $("res-title").textContent = out.title;
   $("res-sub").textContent = `${model.name} · ${RESULT.data} · ${out.nobs.toLocaleString()} observations · estimated in ${seconds.toFixed(1)} s with OES engine ${out.engine}`;
-  if (out.report && window.OESReport) { try { OESReport.render($("report"), out.report); } catch (err) { $("report").innerHTML = `<p class="tnote">The publication report could not be displayed (${esc(String(err))}). The standard results below are unaffected.</p>`; } } else $("report").innerHTML = out.report_error ? `<p class="tnote">The publication report could not be produced for this run (${esc(out.report_error)}). The standard results below are unaffected.</p>` : "";
+  if (out.report && window.OESReport) OESReport.render($("report"), out.report); else $("report").innerHTML = out.report_error ? `<p class="tnote">The publication report could not be produced for this run (${esc(out.report_error)}). The standard results below are unaffected.</p>` : "";
   $("metrics").innerHTML = out.summary.map(s => `<div class="metric"><small>${esc(s.label)}</small><strong>${esc(NUM(s.value))}</strong></div>`).join("");
   $("tables").innerHTML = out.tables.map(t => {
     const pcol = t.columns.indexOf("p-value");

@@ -137,8 +137,6 @@ def build(df, spec):
     cov = spec.get("cov", "HC1") or "HC1"
     hac = int_option(spec, "hac_lags", 4, 0, 48, "HAC lags")
     names = ["const"] + xs
-    if np.linalg.matrix_rank(d[xs].astype(float).assign(_c=1.0).to_numpy()) < k:
-        raise OESError("The regressors are perfectly collinear (or one is constant), so the step-by-step diagnostics, which need an invertible regressor matrix, cannot be computed. Remove the redundant variable to get the full report.")
     Xd = sm.add_constant(d[xs].astype(float), has_constant="add")
     yv = d[y].astype(float)
     base = sm.OLS(yv, Xd).fit()

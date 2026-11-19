@@ -601,18 +601,14 @@ REPORTERS = {"ols": ("rep_ols", "build"), "stat_anova1": ("rep_anova1", "build")
 def _attach_report(out, model_id, df, spec):
     """Add the publication report (steps, tables, figures, text) next to the standard result. Never changes an estimate;
     a failure of the report layer is returned as report_error and leaves the standard output intact."""
-    if spec.get("report") is False or "tables" not in out:
+    if model_id not in REPORTERS or spec.get("report") is False:
         return
     try:
         import importlib
         from . import rep_export
-        if model_id in REPORTERS:
-            mod, fn = REPORTERS[model_id]
-            rep = getattr(importlib.import_module("." + mod, __name__), fn)(df, dict(spec))
-        else:
-            from . import rep_generic
-            rep = rep_generic.build_from_result(out)
-        out["report"] = _clean(rep_export.to_json(rep))
+        mod, fn = REPORTERS[model_id]
+        builder = getattr(importlib.import_module("." + mod, __name__), fn)
+        out["report"] = _clean(rep_export.to_json(builder(df, dict(spec))))
     except Exception as e:  # noqa: BLE001
         out["report_error"] = f"{type(e).__name__}: {e}"
 
