@@ -1,7 +1,7 @@
 """Registry of the Statistics Division: 31 methods in seven categories, with their input fields and the example each one is
 tested on. __init__.py calls build() with the field helpers, so the models are registered like every other OES model.
 Each entry carries the category (group), a code (A1 ... G2), the guide page and a documented public example dataset."""
-from . import stat_anova, stat_multivariate, stat_nonparam
+from . import stat_anova, stat_multivariate, stat_nonparam, stat_survival
 
 SX = "stat-guide/examples/"
 G_ANOVA = "Analysis of variance"
@@ -86,4 +86,25 @@ def build(col, cols, num, sel):
     add(id="stat_ca", code="C6", group=G_MULTI, name="Correspondence analysis (CA)", guide="stat-guide/correspondence-analysis.html", fn=stat_multivariate.ca,
         fields=[col("row_var", "Row variable (a category, or the row label of a count table)"), col("col_var", "Column variable (one row per case; leave blank for a count table)", required=False), cols("counts", "Count columns (for a table that is already cross-tabulated)", required=False)],
         example=dict(file=SX + "caith.csv", spec=dict(row_var="eye", counts=["fair", "red", "medium", "dark", "black"])))
+    TIME = col("time", "Follow-up time")
+    EVENT = col("event", "Event indicator (1 = event, 0 = censored)")
+    add(id="stat_km", code="D1", group=G_SURV, name="Kaplan-Meier estimator and log-rank test", guide="stat-guide/kaplan-meier.html", fn=stat_survival.kaplan_meier,
+        fields=[TIME, EVENT, col("group", "Grouping variable (optional)", required=False),
+                sel("test", "Test across groups", [["logrank", "Log-rank"], ["gehan", "Gehan-Breslow (Wilcoxon)"], ["peto", "Peto-Peto"]], "logrank"),
+                sel("ci_type", "Confidence interval", [["loglog", "Log-log"], ["log", "Log"], ["plain", "Plain"]], "loglog"), ALPHA],
+        example=dict(file=SX + "veteran.csv", spec=dict(time="time", event="status", group="trt")))
+    add(id="stat_cox", code="D2", group=G_SURV, name="Cox proportional hazards model", guide="stat-guide/cox-ph.html", fn=stat_survival.cox_ph,
+        fields=[TIME, EVENT, cols("covariates", "Numeric covariates", required=False), cols("factors", "Categorical covariates (dummy-coded)", required=False),
+                sel("ties", "Handling of tied event times", [["efron", "Efron"], ["breslow", "Breslow"]], "efron"), ALPHA],
+        example=dict(file=SX + "rossi.csv", spec=dict(time="week", event="arrest", covariates=["fin", "age", "race", "wexp", "mar", "paro", "prio"])))
+    add(id="stat_aft", code="D3", group=G_SURV, name="Accelerated failure time model", guide="stat-guide/aft.html", fn=stat_survival.aft,
+        fields=[TIME, EVENT, cols("covariates", "Numeric covariates", required=False), cols("factors", "Categorical covariates (dummy-coded)", required=False),
+                sel("distribution", "Error distribution", [["weibull", "Weibull"], ["lognormal", "Log-normal"], ["loglogistic", "Log-logistic"], ["exponential", "Exponential"]], "weibull"), ALPHA],
+        example=dict(file=SX + "rossi.csv", spec=dict(time="week", event="arrest", covariates=["fin", "age", "prio"], distribution="weibull")))
+    add(id="stat_finegray", code="D4", group=G_SURV, name="Fine-Gray competing-risks regression", guide="stat-guide/fine-gray.html", fn=stat_survival.fine_gray,
+        fields=[TIME, col("event", "Status (0 = censored, 1, 2, ... = event types)"), num("cause", "Event code of interest", 1), cols("covariates", "Numeric covariates", required=False), cols("factors", "Categorical covariates (dummy-coded)", required=False), ALPHA],
+        example=dict(file=SX + "melanoma.csv", spec=dict(time="time", event="status", cause=1, covariates=["age", "thickness", "ulcer", "sex"])))
+    add(id="stat_parametric", code="D5", group=G_SURV, name="Parametric survival (Weibull, exponential, log-normal)", guide="stat-guide/parametric-survival.html", fn=stat_survival.parametric,
+        fields=[TIME, EVENT, cols("covariates", "Numeric covariates (optional)", required=False), cols("factors", "Categorical covariates (optional)", required=False), ALPHA],
+        example=dict(file=SX + "veteran.csv", spec=dict(time="time", event="status", covariates=["karno"])))
     return M
