@@ -596,6 +596,7 @@ def run(model_id, csv_text, spec=None):
 
 
 REPORTERS = {"ols": ("rep_ols", "build"), "stat_anova1": ("rep_anova1", "build"), "var": ("rep_var", "build"), "stat_pca": ("rep_pca", "build")}
+REPORTERS["arima"] = ("rep_arima", "build")
 for _m in ("pols", "fe", "re", "fd", "fedk"):
     REPORTERS[_m] = ("rep_panel", "build")
 

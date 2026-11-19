@@ -36,3 +36,9 @@ Each reported step names the automated test that checks it against an independen
 - F test of unit effects (statsmodels compare_f_test), Breusch-Pagan LM (definition), Jarque-Bera (scipy), unit effects (LSDV): validated.
 - Hausman, Mundlak, Pesaran CD: computed by the engine's own helper functions; the Hausman and Mundlak formulas are NOT independently validated here. CD: NOT validated.
 - fd column and first-differences figure inputs: from the engine's formulas, NOT independently validated.
+
+## ARIMA dedicated report
+6 steps (data, unit root, order, estimation, diagnostics, forecast), 14 figures. Tests: `test_reporting_arima.py` (9).
+- ACF (statsmodels acf), PACF (Yule-Walker, statsmodels pacf ywm), ADF statistic (OLS), KPSS statistic (definition), BIC (log-likelihood), Ljung-Box, Jarque-Bera, ARCH LM (definitions), RMSE of the hold-out: validated.
+- Estimates vs statsmodels ARIMA class: log-likelihood 1e-4, AR/MA/sigma2 within 2e-3 (intercept compared after converting mean to equation constant).
+- ADF/KPSS p-values (interpolated tables), Diebold-Mariano statistic (engine's formula, not independently validated), forecast intervals: NOT validated.
