@@ -26,7 +26,7 @@ TEXT = {
                "The theory and methods are standard, and the sources are listed in each lecture's readings."),
 }
 GUIDES = ["time-series-guide", "panel-data-guide", "causal-inference-guide", "ml-guide",
-          "bayesian-guide", "markov-guide", "dsge-guide"]
+          "bayesian-guide", "markov-guide", "microeconometrics-guide", "dsge-guide"]
 
 
 def kind(rel: str) -> str:

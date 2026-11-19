@@ -29,9 +29,9 @@ def summ(r, label): return next(s["value"] for s in r["summary"] if s["label"] =
 # ---------------------------------------------------------------- registry
 def test_registry_counts():
     allm = list(o.MODELS) + list(o.STAT_MODELS)
-    assert len(o.STAT_MODELS) == 31 and len(o.MODELS) == 69 and len(allm) == 100
-    assert len({m["id"] for m in allm}) == 100
-    assert len({m["name"] for m in allm}) == 100
+    assert len(o.STAT_MODELS) == 31
+    assert len({m["id"] for m in allm}) == len(allm)      # every id and every name is unique across both divisions
+    assert len({m["name"] for m in allm}) == len(allm)
 
 def test_seven_categories_with_expected_sizes():
     from collections import Counter

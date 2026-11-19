@@ -44,6 +44,13 @@ HUBS = {
                ("A panel of countries that share the same regimes (a global slowdown)", "Markov-switching panel VAR", "ms-panel-var"),
                ("Hidden regimes, and an observed variable (a policy rate, a spread) that changes the probability of switching", "Markov switching with time-varying transition probabilities", "ms-tvtp")],
         other=("The regime is <b>observed</b> (a variable above or below a threshold)?", "Use the <a href=\"../bayesian-guide/threshold-var.html\">Bayesian threshold VAR</a>.")),
+    "micro": dict(
+        title="Which microeconometric model fits your outcome?",
+        lead="Microeconometric models are for outcomes that are not continuous and unbounded: a yes/no decision, a count, a choice among options, an amount that is censored at zero. "
+             "Find the type of outcome you have in the table, then follow the guide: each one takes a real dataset through the model, marginal effects, diagnostics, "
+             "robustness checks and the text for the paper.",
+        table=[("A yes/no outcome (passed, defaulted, employed, adopted)", "Logit and probit", "logit-probit")],
+        other=("Your outcome is a continuous variable observed over time or across units?", "Use the <a href=\"../time-series-guide/index.html\">Time-Series Guide</a> or the <a href=\"../panel-data-guide/index.html\">Panel-Data Guide</a>.")),
 }
 
 CSS = """

@@ -996,5 +996,21 @@
    "label": "R-squared",
    "value": 0.7317
   }
+ },
+ "logit_probit": {
+  "nobs": 32,
+  "table_index": 0,
+  "table": "Coefficient estimates",
+  "row": "GPA",
+  "row_index": 1,
+  "col": "Coef.",
+  "col_index": 1,
+  "value": 2.826113,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Log-likelihood",
+   "value": -12.8896
+  }
  }
 }

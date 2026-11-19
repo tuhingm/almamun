@@ -32,19 +32,21 @@ NAV = [("Home", "index.html", ""), ("Teaching Courses", "teaching/index.html", "
        ("Causal Inference", "causal-inference-guide/index.html", "causal-inference-guide"),
        ("DSGE", "dsge-guide/index.html", "dsge-guide"), ("Machine Learning", "ml-guide/index.html", "ml-guide"),
        ("Bayesian", "bayesian-guide/index.html", "bayesian-guide"), ("Markov Switching", "markov-guide/index.html", "markov-guide"),
+       ("Microeconometrics", "microeconometrics-guide/index.html", "microeconometrics-guide"),
        ("Open Econometric Systems", "oes/index.html", "oes")]
 SECTION = {"teaching": "Teaching Courses", "working-papers": "Working Papers",
            "time-series-guide": "Time-Series Research Guide", "panel-data-guide": "Panel Data Research Guide",
            "causal-inference-guide": "Causal Inference Research Guide", "dsge-guide": "DSGE Research Guide",
            "ml-guide": "Machine Learning Research Guide", "oes": "Open Econometric Systems",
-           "bayesian-guide": "Bayesian Research Guide", "markov-guide": "Markov-Switching Research Guide"}
+           "bayesian-guide": "Bayesian Research Guide", "markov-guide": "Markov-Switching Research Guide",
+           "microeconometrics-guide": "Microeconometrics Research Guide"}
 KICKER = {"panel-data-guide": "Panel Data Research Guide", "causal-inference-guide": "Causal Inference Research Guide",
           "dsge-guide": "DSGE Research Guide", "time-series-guide": "Time-Series Research Guide",
           "ml-guide": "Machine Learning Research Guide", "bayesian-guide": "Bayesian Research Guide",
-          "markov-guide": "Markov-Switching Research Guide"}
+          "markov-guide": "Markov-Switching Research Guide", "microeconometrics-guide": "Microeconometrics Research Guide"}
 CARD_KICKER = {"panel-data-guide": "Panel Data Guide", "causal-inference-guide": "Causal Inference Guide",
                "dsge-guide": "DSGE Guide · Dynare", "ml-guide": "Machine Learning Guide",
-               "bayesian-guide": "Bayesian Guide", "markov-guide": "Markov-Switching Guide"}
+               "bayesian-guide": "Bayesian Guide", "markov-guide": "Markov-Switching Guide", "microeconometrics-guide": "Microeconometrics Guide"}
 INDEX_CARDS = {
     "panel-data-guide/index.html": ("Which panel model fits your data?",
         "Test your panel and follow the path to pooled OLS, FE/RE, GMM, Mean Group, PMG or CS-ARDL. Real examples and Python code."),
@@ -56,6 +58,8 @@ INDEX_CARDS = {
         "Bayesian VAR, FAVAR, steady-state, panel, time-varying, stochastic-volatility, mixed-frequency and threshold models, step by step."),
     "markov-guide/index.html": ("Which Markov-switching model fits your data?",
         "Hamilton's regime model, regression, VAR and panel VAR with hidden regimes: tests, regime dates and the text for the paper."),
+    "microeconometrics-guide/index.html": ("Which microeconometric model fits your outcome?",
+        "Logit, probit and the other models for binary, count, censored and choice outcomes: marginal effects, tests and the text for the paper."),
     "dsge-guide/index.html": ("Which DSGE model fits your question?",
         "RBC, New Keynesian, open economy, Bayesian estimation, OccBin and optimal policy, step by step in Dynare."),
 }
@@ -179,7 +183,7 @@ for p in pages:
               f'<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">\n'
               f'<meta name="twitter:card" content="summary_large_image">')
         s = re.sub(r'(<link rel="canonical" href="[^"]*">)', lambda m: m.group(1) + "\n" + og, s, count=1)
-    if rel.startswith(("panel-data-guide/", "causal-inference-guide/", "dsge-guide/", "ml-guide/", "bayesian-guide/", "markov-guide/")):
+    if rel.startswith(("panel-data-guide/", "causal-inference-guide/", "dsge-guide/", "ml-guide/", "bayesian-guide/", "markov-guide/", "microeconometrics-guide/")):
         kicker = CARD_KICKER[section] + (" · Lecture" if "/lectures/" in rel else (" · Model guide" if not rel.endswith("index.html") else ""))
         t_, sub_ = INDEX_CARDS.get(rel, (name, short(_sub(name, meta(s, "description") or ""), 130)))
         cards.append(dict(out="assets/og/" + rel[:-5] + ".jpg", kicker=kicker, title=t_, sub=sub_))
