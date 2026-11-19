@@ -570,6 +570,9 @@ MODELS += [
          fields=[col("y", "Series"), TIME, sel("transform", "Transform", [["level", "Level"], ["absolute", "Absolute deviation"], ["squared", "Squared deviation"], ["log absolute", "Log absolute deviation"]], "level"),
                  num("power", "Bandwidth power (m = n^power)", 0.65)],
          example=dict(file=OX + "us_macro.csv", spec=dict(y="inflation", time="date", transform="level", power=0.65))),
+    dict(id="factors", group="Time series", name="Factor model (principal components, Bai-Ng number of factors)", guide="time-series-guide/factor-models.html", fn=ts_extra.factors,
+         fields=[cols("x", "Variables (five or more, stationary)"), TIME, num("kmax", "Maximum factors", 8), num("r", "Number of factors to extract (blank = IC_p2)", "")],
+         example=dict(file=OX + "inflation_countries.csv", spec=dict(x=['USA', 'CAN', 'MEX', 'CHL', 'COL', 'GBR', 'FRA', 'DEU', 'ITA', 'ESP', 'NLD', 'BEL', 'AUT', 'SWE', 'NOR', 'DNK', 'FIN', 'CHE', 'IRL', 'PRT', 'GRC', 'HUN', 'JPN', 'KOR', 'AUS', 'NZL', 'IND', 'IDN', 'THA', 'MYS', 'PHL', 'ZAF', 'ISR', 'EGY'], time="date", kmax=6))),
 ]
 
 MODELS += [

@@ -1125,3 +1125,49 @@ def longmemory(df, spec):
     return result("longmemory", f"Long memory: {y} ({tr})", n, [stat("Observations", n), stat("GPH d", g0, 3), stat("Local Whittle d", w0, 3), stat("Bandwidth m", m0)], tabs, ch,
                   ["Structural breaks and regime changes produce spurious long memory: check for breaks before you conclude that d > 0.",
                    "The estimates are semiparametric and depend on the bandwidth; report a range."])
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Approximate factor model: principal components with the Bai-Ng information criteria
+# ---------------------------------------------------------------------------------------------------------------
+def factors(df, spec):
+    xs = as_list(need(spec, "x", "variables"))
+    if len(xs) < 5:
+        raise OESError("A factor model needs at least five variables.")
+    d, labels = _series_frame(df, spec, xs); d = d[xs]; T, N = d.shape
+    if T < 30:
+        raise OESError("A factor model needs at least 30 observations.")
+    X = d.to_numpy(float); sd = X.std(0, ddof=0)
+    if (sd == 0).any():
+        raise OESError("A variable is constant; remove it.")
+    Z = (X - X.mean(0)) / sd
+    kmax = int_option(spec, "kmax", min(8, N - 1), 1, N - 1, "Maximum number of factors")
+    U, s, Vt = np.linalg.svd(Z, full_matrices=False); ev = s ** 2 / T
+    def V(k):
+        F = np.sqrt(T) * U[:, :k]; L = Z.T @ F / T; e = Z - F @ L.T; return float((e ** 2).sum() / (N * T))
+    C = (N + T) / (N * T) * np.log(N * T / (N + T)); C2 = (N + T) / (N * T) * np.log(min(N, T)); C3 = np.log(min(N, T)) / min(N, T)
+    V0 = float((Z ** 2).sum() / (N * T)); rows = []; sel_ = {1: (0, 1e9), 2: (0, 1e9), 3: (0, 1e9)}
+    for k in range(0, kmax + 1):
+        Vk = V(k) if k else V0; vals = [np.log(Vk) + k * C, np.log(Vk) + k * C2, np.log(Vk) + k * C3]
+        for i, v in enumerate(vals, 1):
+            if v < sel_[i][1]:
+                sel_[i] = (k, v)
+        rows.append([k, f(Vk, 4)] + [f(v, 4) for v in vals] + [f(float(ev[k - 1]), 3) if k else None, f(100 * float(ev[:k].sum() / ev.sum()), 1) if k else 0.0])
+    r_ = max(1, sel_[2][0]); r_user = int(spec.get("r") or 0); r = r_user if r_user else r_
+    if r > N - 1:
+        raise OESError("The number of factors must be smaller than the number of variables.")
+    tabs = [table("Number of factors (Bai-Ng criteria)", ["Factors k", "Residual variance V(k)", "IC_p1", "IC_p2", "IC_p3", "Eigenvalue of k-th factor", "Cumulative % of variance"], rows,
+                  f"Select the k that minimises each criterion. Selected: IC_p1 = {sel_[1][0]}, IC_p2 = {sel_[2][0]}, IC_p3 = {sel_[3][0]}. Kaiser rule (eigenvalue > 1): {int((ev > 1).sum())} factors. Variables are standardised.")]
+    F = np.sqrt(T) * U[:, :r]; L = Z.T @ F / T; fit = F @ L.T
+    r2 = 1 - ((Z - fit) ** 2).sum(0) / (Z ** 2).sum(0)
+    lrows = [[xs[j]] + [f(L[j, i], 3) for i in range(r)] + [f(r2[j], 3)] for j in range(N)]
+    tabs.append(table(f"Loadings of the {r} factor(s) (sign and scale are arbitrary)", ["Variable"] + [f"Factor {i + 1}" for i in range(r)] + ["R-squared"], lrows, "The factors are identified up to rotation. Read a factor by the variables that load on it most."))
+    # stability: the factors in the first and the second half of the sample
+    h = T // 2; sub = []
+    for lab, sl in (("first half", slice(0, h)), ("second half", slice(h, T))):
+        Zs = Z[sl]; ev_s = np.linalg.svd(Zs, compute_uv=False) ** 2 / len(Zs); sub.append([lab, f(float(ev_s[0] / ev_s.sum() * 100), 1), f(float(ev_s[:min(r, len(ev_s))].sum() / ev_s.sum() * 100), 1)])
+    tabs.append(table("Stability of the factor structure", ["Subsample", "Variance share of the first factor (%)", f"Variance share of the first {r} (%)"], sub, "A large change suggests that the factor structure is not stable."))
+    ch = [chart("Factors (standardised)", labels, [(f"Factor {i + 1}", F[:, i]) for i in range(r)]), chart("Eigenvalues (scree plot)", list(range(1, len(ev) + 1)), [("eigenvalue", ev)], kind="line")]
+    return result("factors", f"Factor model: {len(xs)} variables", T, [stat("Observations", T), stat("Variables", N), stat("Factors (IC_p2)", sel_[2][0]), stat("Variance explained by the factors used (%)", 100 * float(ev[:r].sum() / ev.sum()), 1)],
+                  tabs, ch, ["Principal components are consistent for the factor space when both N and T are large (Bai and Ng, 2002); with N below 20 the criteria are unreliable.",
+                             "Use stationary series. Factors from non-stationary data are dominated by trends."])
