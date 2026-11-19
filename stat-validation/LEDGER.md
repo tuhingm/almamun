@@ -14,7 +14,7 @@ Status of the 31 Statistics Division methods. 'MC reps' is the total number of M
 | B2 | Wilcoxon signed-rank test | yes | yes | yes | yes | 27792 | 3 | Validated |
 | B3 | Kruskal-Wallis test | yes | yes | yes | NO | – | – | Validated |
 | B4 | Friedman test | yes | yes | yes | NO | – | – | Validated |
-| B5 | Kendall's tau correlation | yes | yes | yes | NO | – | – | Validated |
+| B5 | Kendall's tau correlation | yes | yes | yes | yes | 25951 | 4 | Validated |
 | C1 | Principal component analysis (PCA) | yes | yes | yes | NO | – | – | Validated |
 | C2 | Exploratory factor analysis (EFA) | yes | yes | yes | NO | – | – | Validated |
 | C3 | Confirmatory factor analysis (CFA) | yes | yes | yes | yes | 16000 | 0 | Validated |

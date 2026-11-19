@@ -126,10 +126,10 @@
   "group": "Nonparametric statistics",
   "status": "Validated",
   "reason": "Compared with reference software on identical data and specifications, and checked by Monte Carlo simulation.",
-  "mc": false,
-  "reps": null,
-  "capped": null,
-  "cells": null
+  "mc": true,
+  "reps": 25951,
+  "capped": 4,
+  "cells": 15
  },
  {
   "id": "stat_pca",
