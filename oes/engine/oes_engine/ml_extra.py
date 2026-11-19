@@ -150,3 +150,60 @@ def interpret(df, spec):
     summary = [stat("Observations", len(d)), stat("Predictors", len(x)), stat("Test R-squared", base, 4), stat("Most important predictor", x[int(order[0])]), stat("Rank correlation with |OLS coefficient|", rho, 3)]
     return result("interpret", f"Interpretation of the {'forest' if kind == 'rf' else 'boosting'} model for {y}", len(d), summary, tabs, charts,
                   ["Importance, partial dependence and interaction strength describe the fitted model, not the economy. They are causal only if the model is a causal one.", "Permutation importance is computed on data the model has not seen, so it does not reward overfitting."])
+
+
+# ------------------------------------------------------------------------------------------------------------------
+# Stacking: the super learner (van der Laan, Polley and Hubbard 2007)
+# ------------------------------------------------------------------------------------------------------------------
+def _base_learners():
+    from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
+    from sklearn.linear_model import LassoCV, LinearRegression, RidgeCV
+    from sklearn.neighbors import KNeighborsRegressor
+    from sklearn.pipeline import make_pipeline
+    from sklearn.preprocessing import StandardScaler
+    return {"OLS": make_pipeline(StandardScaler(), LinearRegression()),
+            "LASSO": make_pipeline(StandardScaler(), LassoCV(cv=5, n_alphas=40, max_iter=5000, tol=1e-3, random_state=0)),
+            "Ridge": make_pipeline(StandardScaler(), RidgeCV(alphas=np.logspace(-2, 3, 20))),
+            "Random forest": RandomForestRegressor(n_estimators=150, min_samples_leaf=5, max_features=0.5, random_state=0, n_jobs=1),
+            "Gradient boosting": GradientBoostingRegressor(n_estimators=150, learning_rate=0.05, max_depth=3, subsample=0.8, random_state=0),
+            "k nearest neighbours": make_pipeline(StandardScaler(), KNeighborsRegressor(n_neighbors=10, weights="distance"))}
+
+
+def _nnls_weights(P, y):
+    from scipy.optimize import nnls
+    w, _ = nnls(P, y); s = w.sum()
+    return w / s if s > 0 else np.ones(P.shape[1]) / P.shape[1]
+
+
+def stacking(df, spec):
+    d, y, x, ts = _xy(df, spec)
+    share = float_option(spec, "test_share", 0.25, "Test share")
+    if not 0.05 <= share <= 0.5:
+        raise OESError("The test share must be between 0.05 and 0.5.")
+    K = int_option(spec, "folds", 5, 3, 10, "Number of folds")
+    from sklearn.base import clone
+    from sklearn.model_selection import KFold
+    X, Y = d[x].astype(float).to_numpy(), d[y].astype(float).to_numpy(); tr, te = _split(len(d), ts, share)
+    if len(tr) < 5 * K:
+        raise OESError("The training sample is too small for this number of folds.")
+    L = _base_learners(); names = list(L); P = np.zeros((len(tr), len(L)))
+    for a, b in KFold(K, shuffle=not ts, random_state=None if ts else 0).split(tr):
+        for j, nm in enumerate(names):
+            P[b, j] = clone(L[nm]).fit(X[tr][a], Y[tr][a]).predict(X[tr][b])
+    cvr = np.sqrt(((Y[tr][:, None] - P) ** 2).mean(0)); w = _nnls_weights(P, Y[tr])
+    cv_ens = float(np.sqrt(((Y[tr] - P @ w) ** 2).mean())); best = int(np.argmin(cvr))
+    T = np.zeros((len(te), len(L)))
+    for j, nm in enumerate(names):
+        T[:, j] = clone(L[nm]).fit(X[tr], Y[tr]).predict(X[te])
+    den = float(((Y[te] - Y[tr].mean()) ** 2).sum()); rm = lambda p: float(np.sqrt(np.mean((Y[te] - p) ** 2))); r2 = lambda p: 1 - float(((Y[te] - p) ** 2).sum()) / den
+    ens = T @ w
+    rows = [[nm, f(float(w[j]), 4), f(float(cvr[j]), 4), f(rm(T[:, j]), 4), f(r2(T[:, j]), 4)] for j, nm in enumerate(names)]
+    rows += [["Super learner (weighted average)", "1.0000", f(cv_ens, 4), f(rm(ens), 4), f(r2(ens), 4)], [f"Discrete super learner ({names[best]})", "", f(float(cvr[best]), 4), f(rm(T[:, best]), 4), f(r2(T[:, best]), 4)],
+             ["Equal weights", f(1 / len(names), 4), "", f(rm(T.mean(1)), 4), f(r2(T.mean(1)), 4)]]
+    tab = table("Learner weights, cross-validated risk and test performance", ["Learner", "Weight", f"{K}-fold CV RMSE (training)", "Test RMSE", "Test R-squared"], rows,
+                "Weights solve a non-negative least-squares problem on the cross-validated predictions and are rescaled to sum to one. The CV RMSE of the weighted average is optimistic because the weights were fitted on the same predictions; the test columns are not.")
+    corr = np.corrcoef(P.T); cr = [[names[i]] + [f(float(corr[i, j]), 3) for j in range(len(names))] for i in range(len(names))]
+    ctab = table("Correlation of the cross-validated predictions", ["Learner"] + names, cr, "Highly correlated learners are substitutes: the weights are shared among them, and adding a similar learner changes little.")
+    summary = [stat("Observations", len(d)), stat("Learners", len(L)), stat("Test RMSE, super learner", rm(ens), 4), stat("Test RMSE, best single learner (chosen on the test set)", min(rm(T[:, j]) for j in range(len(names))), 4), stat("Test R-squared, super learner", r2(ens), 4), stat("Largest weight", names[int(np.argmax(w))])]
+    ch = [chart("Super learner weights", names, [("Weight", [float(v) for v in w])], "Learner", "Weight", kind="bar")]
+    return result("stacking", f"Stacking (super learner) for {y}", len(d), summary, [tab, ctab], ch, ["The super learner is asymptotically as good as the best weighted combination of its learners (an oracle inequality), so it protects against picking the wrong model, not against omitting a useful learner.", "Report the test results, not the cross-validated risk of the combination."])
