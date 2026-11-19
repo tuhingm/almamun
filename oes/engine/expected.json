@@ -1388,5 +1388,21 @@
    "label": "W-bar (unem to gdp_growth)",
    "value": 1.294
   }
+ },
+ "cre": {
+  "nobs": 4360,
+  "table_index": 0,
+  "table": "Correlated random effects (Mundlak) estimates, dependent variable: lwage",
+  "row": "const",
+  "row_index": 0,
+  "col": "Coefficient",
+  "col_index": 1,
+  "value": -0.112,
+  "rtol": 0.001,
+  "seconds": 0.1,
+  "summary": {
+   "label": "Mundlak chi-squared",
+   "value": 68.174
+  }
  }
 }

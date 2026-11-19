@@ -462,6 +462,12 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/panel-data-guide/mundlak-cre.jpg",
+  "kicker": "Panel Data Guide · Model guide",
+  "title": "Correlated Random Effects (Mundlak) and the Robust Hausman Test",
+  "sub": "You want random-effects estimates of time-invariant variables but need to guard against a unit effect that is correlated with the…"
+ },
+ {
   "out": "assets/og/panel-data-guide/panel-granger.jpg",
   "kicker": "Panel Data Guide · Model guide",
   "title": "Panel Granger Causality (Dumitrescu-Hurlin)",
