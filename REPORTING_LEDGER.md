@@ -28,3 +28,11 @@ Each reported step names the automated test that checks it against an independen
 - Bartlett statistic and p-value, KMO: from definitions with numpy/scipy — validated.
 - Broken-stick: from its definition — validated.
 - Parallel analysis (Monte-Carlo, seeded): **NOT VALIDATED** (no reference implementation); marked in the report.
+
+## Static panel (pols, fe, re, fd, fedk) dedicated report
+5 steps (data, estimation, tests, residuals, effects), 11 figures. Tests: `test_reporting_panel.py` (9).
+- Pooled OLS: statsmodels OLS with cluster SEs. FE: LSDV (statsmodels dummies). Two-way FE: LSDV with unit and period dummies.
+- FE/RE vs linearmodels 7.1: coefficients agree to 1e-5; clustered SEs agree to 5e-4 relative (linearmodels 7.x differs from the engine's small-sample factor in the 4th digit; the engine follows the guide's linearmodels version).
+- F test of unit effects (statsmodels compare_f_test), Breusch-Pagan LM (definition), Jarque-Bera (scipy), unit effects (LSDV): validated.
+- Hausman, Mundlak, Pesaran CD: computed by the engine's own helper functions; the Hausman and Mundlak formulas are NOT independently validated here. CD: NOT validated.
+- fd column and first-differences figure inputs: from the engine's formulas, NOT independently validated.

@@ -596,6 +596,8 @@ def run(model_id, csv_text, spec=None):
 
 
 REPORTERS = {"ols": ("rep_ols", "build"), "stat_anova1": ("rep_anova1", "build"), "var": ("rep_var", "build"), "stat_pca": ("rep_pca", "build")}
+for _m in ("pols", "fe", "re", "fd", "fedk"):
+    REPORTERS[_m] = ("rep_panel", "build")
 
 
 def _attach_report(out, model_id, df, spec):
@@ -608,7 +610,8 @@ def _attach_report(out, model_id, df, spec):
         from . import rep_export
         if model_id in REPORTERS:
             mod, fn = REPORTERS[model_id]
-            rep = getattr(importlib.import_module("." + mod, __name__), fn)(df, dict(spec))
+            _f = getattr(importlib.import_module("." + mod, __name__), fn)
+            rep = _f(df, dict(spec), model_id=model_id) if mod == "rep_panel" else _f(df, dict(spec))
         else:
             from . import rep_generic
             rep = rep_generic.build_from_result(out)
