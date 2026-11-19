@@ -50,7 +50,8 @@ HUBS = {
              "Find the type of outcome you have in the table, then follow the guide: each one takes a real dataset through the model, marginal effects, diagnostics, "
              "robustness checks and the text for the paper.",
         table=[("A yes/no outcome (passed, defaulted, employed, adopted)", "Logit and probit", "logit-probit"),
-               ("An outcome with ordered categories (low, medium, high; a rating from 1 to 5)", "Ordered logit and probit", "ordered-logit-probit")],
+               ("An outcome with ordered categories (low, medium, high; a rating from 1 to 5)", "Ordered logit and probit", "ordered-logit-probit"),
+               ("A choice among three or more unordered alternatives (party, transport mode, occupation)", "Multinomial logit", "multinomial-logit")],
         other=("Your outcome is a continuous variable observed over time or across units?", "Use the <a href=\"../time-series-guide/index.html\">Time-Series Guide</a> or the <a href=\"../panel-data-guide/index.html\">Panel-Data Guide</a>.")),
 }
 

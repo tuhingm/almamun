@@ -258,6 +258,12 @@
   "sub": "A yes/no outcome (passed, defaulted, employed, adopted) explained by one or more regressors. Step-by-step guide with Python code…"
  },
  {
+  "out": "assets/og/microeconometrics-guide/multinomial-logit.jpg",
+  "kicker": "Microeconometrics Guide · Model guide",
+  "title": "Multinomial Logit Regression",
+  "sub": "An outcome with three or more categories that have no natural order (party voted for, mode of transport, occupation, brand)…"
+ },
+ {
   "out": "assets/og/microeconometrics-guide/ordered-logit-probit.jpg",
   "kicker": "Microeconometrics Guide · Model guide",
   "title": "Ordered Logit and Probit Regression",
