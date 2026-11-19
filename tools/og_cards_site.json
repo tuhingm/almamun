@@ -150,6 +150,12 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/causal-inference-guide/weak-iv.jpg",
+  "kicker": "Causal Inference Guide · Model guide",
+  "title": "Weak-Instrument-Robust IV Inference",
+  "sub": "Your instruments are weak or you are not sure they are strong, and you need confidence sets that stay valid whatever the…"
+ },
+ {
   "out": "assets/og/dsge-guide/estimation.jpg",
   "kicker": "DSGE Guide · Dynare · Model guide",
   "title": "Bayesian Estimation of a New Keynesian Model",
