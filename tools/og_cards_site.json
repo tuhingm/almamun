@@ -462,6 +462,12 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/panel-data-guide/panel-granger.jpg",
+  "kicker": "Panel Data Guide · Model guide",
+  "title": "Panel Granger Causality (Dumitrescu-Hurlin)",
+  "sub": "You want to know whether one variable helps predict another in a panel where the relationship may differ across units, such as…"
+ },
+ {
   "out": "assets/og/panel-data-guide/panel-unit-root.jpg",
   "kicker": "Panel Data Guide · Model guide",
   "title": "Panel Unit-Root and Stationarity Tests",

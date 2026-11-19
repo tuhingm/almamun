@@ -1013,3 +1013,64 @@ def punitroot(df, spec):
     notes = short + ["The tests assume independence across units; common shocks make them over-reject. Cross-sectional demeaning removes a common time effect but not other forms of dependence.",
              "A rejection by IPS or Fisher means at least one unit is stationary, not that all are."]
     return result("punitroot", f"Panel unit-root tests: {y}", sum(Ts), [stat("Units", N), stat("Share of units rejecting at 5%", share, 3), stat("IPS W-statistic", Wt, 3), stat("IPS p-value", p_ips, 4)], tabs, ch, notes)
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Dumitrescu-Hurlin Granger non-causality test for heterogeneous panels
+# ---------------------------------------------------------------------------------------------------------------
+def _dh_unit(y, x, K):
+    """Wald (F-form) statistic that the K lags of x do not help predict y in the unit's regression of y on K lags of y and of x."""
+    T = len(y); n = T - K
+    cols = [np.ones(n)] + [y[K - j: T - j] for j in range(1, K + 1)] + [x[K - j: T - j] for j in range(1, K + 1)]
+    X = np.column_stack(cols); yt = y[K:]
+    b = np.linalg.lstsq(X, yt, rcond=None)[0]; rss1 = float(((yt - X @ b) ** 2).sum())
+    X0 = X[:, : 1 + K]; b0 = np.linalg.lstsq(X0, yt, rcond=None)[0]; rss0 = float(((yt - X0 @ b0) ** 2).sum())
+    dfd = n - X.shape[1]
+    if dfd < 1 or rss1 <= 0:
+        return None
+    F = ((rss0 - rss1) / K) / (rss1 / dfd)
+    return dict(W=K * F, F=F, p=float(stats.f.sf(F, K, dfd)), n=n, dfd=dfd)
+
+
+def _dh_stats(W, T, K):
+    N = len(W); Wb = float(np.mean(W))
+    Zbar = float(np.sqrt(N / (2 * K)) * (Wb - K))
+    Zt = None
+    if T - 3 * K - 5 > 0:
+        Zt = float(np.sqrt(N / (2 * K) * (T - 3 * K - 5) / (T - 2 * K - 3)) * ((T - 3 * K - 3) / (T - 3 * K - 1) * Wb - K))
+    return Wb, Zbar, Zt
+
+
+def dh_causality(df, spec):
+    y = need(spec, "y", "variable that may be caused"); x = need(spec, "x", "variable that may cause it"); distinct([y], [x])
+    d, unit, time, N, T = _panel(df, spec, [y, x])
+    K = int_option(spec, "lags", 1, 1, 6, "Lags"); dy = _choice(spec, "diff_y", ["no", "yes"], "no", "Difference the caused variable") == "yes"; dx = _choice(spec, "diff_x", ["no", "yes"], "no", "Difference the causing variable") == "yes"
+    _balanced(d, N, T, "The Dumitrescu-Hurlin test")
+    if N < 3:
+        raise OESError("The test needs at least 3 units.")
+    names = d.drop_duplicates("_u").sort_values("_u")[unit].astype(str).tolist()
+    ser = {k: np.column_stack([g.sort_values("_ti")[k].to_numpy(float) for _, g in d.groupby("_u", sort=True)]) for k in (y, x)}
+    ser = {y: np.diff(ser[y], axis=0) if dy else ser[y][1:] if dx else ser[y], x: np.diff(ser[x], axis=0) if dx else ser[x][1:] if dy else ser[x]}
+    Te = ser[y].shape[0]
+    if Te < 3 * K + 8:
+        raise OESError(f"Each unit needs at least {3 * K + 8} periods with {K} lags (this panel has {Te} after any differencing).")
+    tabs = []; summ = []; out = {}
+    for lab, (a, b) in {f"{x} does not Granger-cause {y}": (y, x), f"{y} does not Granger-cause {x}": (x, y)}.items():
+        res = [_dh_unit(ser[a][:, i], ser[b][:, i], K) for i in range(N)]
+        if any(r is None for r in res):
+            raise OESError("A unit has too few observations for the chosen number of lags.")
+        W = np.array([r["W"] for r in res]); Wb, Zb, Zt = _dh_stats(W, Te, K)
+        out[lab] = (res, Wb, Zb, Zt)
+    rows = []
+    for lab, (res, Wb, Zb, Zt) in out.items():
+        rows.append([lab, f(Wb, 3), f(Zb, 3), f(2 * stats.norm.sf(abs(Zb)), 4), f(Zt, 3) if Zt is not None else "n/a", f(2 * stats.norm.sf(abs(Zt)), 4) if Zt is not None else "n/a"])
+    tabs.append(table(f"Dumitrescu-Hurlin Granger non-causality test ({K} lag{'s' if K > 1 else ''}, {N} units, T = {Te})", ["Null hypothesis", "W-bar", "Z-bar", "p-value", "Z-tilde", "p-value"], rows,
+                      "H0: x does not Granger-cause y for any unit. H1: it does for at least one unit (causality may differ across units). Z-bar is for large T, Z-tilde is the standardisation for small T and is the one to use when T is below about 50 or N is larger than T."))
+    res = out[f"{x} does not Granger-cause {y}"][0]
+    ur = [[names[i], f(res[i]["W"], 3), f(res[i]["F"], 3), f(res[i]["p"], 4), "rejects" if res[i]["p"] < 0.05 else "does not reject"] for i in range(N)]
+    tabs.append(table(f"Unit-by-unit tests: {x} -> {y}", ["Unit", "Wald statistic", "F statistic", "p-value", "5% decision"], ur, "F test with " + f"{K} and the unit's residual degrees of freedom."))
+    ch = [chart(f"Unit-by-unit p-values: does {x} Granger-cause {y}?", names, [("p-value", [r["p"] for r in res])], "", "p-value", kind="bar")]
+    Wb, Zb, Zt = out[f"{x} does not Granger-cause {y}"][1:]
+    notes = ["Both variables must be stationary: difference them first if they have unit roots.", "Granger causality is predictive content, not a causal effect: an omitted variable that moves both series produces it too.",
+             "The test is for the null of no causality in every unit; a rejection does not say in which units causality holds."]
+    return result("dh_causality", f"Panel Granger causality: {x} and {y}", int(N * Te), [stat("Units", N), stat("T per unit", Te), stat(f"W-bar ({x} to {y})", Wb, 3), stat("Z-tilde p-value", 2 * stats.norm.sf(abs(Zt)) if Zt is not None else None, 4)], tabs, ch, notes)

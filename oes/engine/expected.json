@@ -1372,5 +1372,21 @@
    "label": "Share of units rejecting at 5%",
    "value": 0.676
   }
+ },
+ "dh_causality": {
+  "nobs": 336,
+  "table_index": 0,
+  "table": "Dumitrescu-Hurlin Granger non-causality test (1 lag, 14 units, T = 24)",
+  "row": "unem does not Granger-cause gdp_growth",
+  "row_index": 0,
+  "col": "W-bar",
+  "col_index": 1,
+  "value": 1.294,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "W-bar (unem to gdp_growth)",
+   "value": 1.294
+  }
  }
 }
