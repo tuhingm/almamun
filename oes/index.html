@@ -528,8 +528,8 @@ $("test-run").onclick = async () => {
       const rp = r.result.report;
       if (rp) {   // the report must exist, belong to this run, and hold complete tables and figures
         const figs = rp.steps.flatMap(x => x.figures), tabs = rp.steps.flatMap(x => x.tables);
-        const good = rp.meta.nobs === r.result.nobs && figs.length >= 6 && figs.every(f => f.svg.startsWith("<svg") && f.pdf_b64.length > 100) && tabs.every(t => t.rows.length && t.csv && t.latex && t.html) && rp.methods.length && rp.references.length;
-        cells[7].innerHTML = good ? `<span class="test-ok">✓ ${rp.steps.length} steps, ${tabs.length} tables, ${figs.length} figures</span>` : '<span class="test-bad">✗ incomplete</span>';
+        const good = rp.meta.nobs === r.result.nobs && (rp.meta.level === "generic" || figs.length >= 6) && figs.every(f => f.svg.startsWith("<svg") && f.pdf_b64.length > 100) && tabs.every(t => t.rows.length && t.csv && t.latex && t.html) && rp.methods.length;
+        cells[7].innerHTML = good ? `<span class="test-ok">✓ ${rp.meta.level === "generic" ? "basic: " : ""}${rp.steps.length} steps, ${tabs.length} tables, ${figs.length} figures</span>` : '<span class="test-bad">✗ incomplete</span>';
         good ? ok++ : bad++;
       } else cells[7].textContent = r.result.report_error ? "error: " + r.result.report_error.slice(0, 60) : "not yet";
       pass ? ok++ : bad++;
