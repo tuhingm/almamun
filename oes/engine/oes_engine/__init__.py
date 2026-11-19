@@ -19,7 +19,7 @@ from . import stat_registry
 from .core import OESError, read_csv, time_order
 from .report import frame, plot, show, summary, tables
 
-__version__ = "1.5.0"
+__version__ = "1.5.1"
 
 # field helpers -------------------------------------------------------------------------------------------------
 def col(key, label, required=True, help=""):
@@ -166,6 +166,19 @@ MODELS = [
                  sel("time_effects", "Time effects", [["no", "No"], ["yes", "Yes (two-way FE)"]], "no"), num("bandwidth", "Bandwidth (blank = automatic)", 3)],
          example=dict(file=PD + "garrett.csv", ops=[dict(op="diff", vars=["trade"], unit="country", time="year")],
                       spec=dict(y="gdp_growth", x=["unem", "d_trade"], unit="country", time="year", bandwidth=3))),
+    dict(id="pcse", group="Panel data", name="Panel-corrected standard errors (PCSE, Beck-Katz)", guide=None, fn=panel_extra.pcse,
+         fields=[col("y", "Dependent variable"), cols("x", "Regressors"), UNIT, PTIME,
+                 sel("corr", "Serial correlation", [["none", "None (pooled OLS)"], ["ar1", "Common AR(1) (Prais-Winsten)"], ["psar1", "Panel-specific AR(1) (Prais-Winsten)"]], "none"),
+                 sel("cov", "Cross-sectional structure", [["full", "Contemporaneous correlation and panel heteroskedasticity"], ["hetonly", "Panel heteroskedasticity only"]], "full"),
+                 sel("unit_effects", "Unit effects", [["no", "No"], ["yes", "Yes (unit dummies)"]], "no")],
+         example=dict(file=PD + "gasoline.csv", spec=dict(y="lgaspcar", x=["lincomep", "lrpmg", "lcarpcap"], unit="country", time="year", corr="ar1", cov="full"))),
+    dict(id="fgls", group="Panel data", name="Feasible GLS (Parks-Kmenta)", guide=None, fn=panel_extra.fgls,
+         fields=[col("y", "Dependent variable"), cols("x", "Regressors"), UNIT, PTIME,
+                 sel("panels", "Errors across units", [["iid", "Homoskedastic and independent"], ["het", "Panel heteroskedastic"],
+                                                         ["corr", "Heteroskedastic and contemporaneously correlated (needs T >= N)"]], "het"),
+                 sel("corr", "Serial correlation", [["none", "None"], ["ar1", "Common AR(1) (Prais-Winsten)"], ["psar1", "Panel-specific AR(1) (Prais-Winsten)"]], "none"),
+                 sel("unit_effects", "Unit effects", [["no", "No"], ["yes", "Yes (unit dummies)"]], "no")],
+         example=dict(file=PD + "gasoline.csv", spec=dict(y="lgaspcar", x=["lincomep", "lrpmg", "lcarpcap"], unit="country", time="year", panels="corr", corr="ar1"))),
     dict(id="diff_gmm", group="Panel data", name="Difference GMM (Arellano-Bond)", guide="panel-data-guide/gmm.html", fn=panel.diff_gmm,
          fields=[col("y", "Dependent variable"), cols("x", "Strictly exogenous regressors", required=False), UNIT, PTIME,
                  num("lags_y", "Lags of the dependent variable", 1), num("gmm_first", "First instrument lag", 2),
@@ -261,6 +274,16 @@ MODELS = [
                  num("test_share", "Test share", 0.2), num("n_estimators", "Number of trees", 400), num("learning_rate", "Learning rate", 0.05),
                  num("max_depth", "Maximum depth", 4)],
          example=dict(file=MLD + "injury.csv", spec=dict(y="ldurat", x="__all__"))),
+    dict(id="svr", group="Machine learning", name="Support vector regression (SVR)", guide=None, fn=ml.svr,
+         fields=[col("y", "Outcome to predict"), cols("x", "Predictors"), col("time", "Time column (time-ordered validation)", required=False),
+                 num("test_share", "Test share", 0.2), sel("kernel", "Kernel", [["rbf", "Gaussian (radial basis)"], ["linear", "Linear"]], "rbf"),
+                 num("epsilon", "Epsilon tube (standard deviations of the outcome)", 0.1)],
+         example=dict(file=MLD + "mlb1.csv", spec=dict(y="lsalary", x="__all__"))),
+    dict(id="krls", group="Machine learning", name="Kernel regularized least squares (KRLS)", guide=None, fn=ml.krls,
+         fields=[col("y", "Outcome to predict"), cols("x", "Predictors"), col("time", "Time column (time-ordered validation)", required=False),
+                 num("test_share", "Test share", 0.2), num("sigma", "Kernel bandwidth sigma2 (blank = number of predictors)", ""),
+                 num("lambda", "Regularisation lambda (blank = leave-one-out CV)", "")],
+         example=dict(file=MLD + "wage2.csv", spec=dict(y="lwage", x=["educ", "exper", "tenure", "IQ", "married", "black", "south", "urban"]))),
     dict(id="dml_plr", group="Machine learning", name="Double ML: partially linear model", guide="ml-guide/dml-plr.html", fn=ml.dml_plr,
          fields=[col("y", "Outcome"), col("treat", "Treatment (continuous or binary)"), cols("x", "Controls"),
                  sel("learner", "Learners", [["both", "LASSO and random forest"], ["lasso", "LASSO"], ["rf", "Random forest"]], "both"),
@@ -477,7 +500,7 @@ def packages(model_id):
     return ["scikit-learn", "xgboost"] if model_id == "xgb" else ["scikit-learn"]
 
 
-SLOW = {"dml_irm", "dml_iv", "causal_forest", "staggered", "tvpvar", "mfbvar", "svvar", "hier_panel", "sign_bvar", "ms_tvtp", "eventstudy", "sdid", "matching", "bartik", "arima", "garch", "quantile", "cointegration", "wavelet", "twfe", "dpthresh", "pcoint", "pquant", "spatial"}
+SLOW = {"svr", "krls", "dml_irm", "dml_iv", "causal_forest", "staggered", "tvpvar", "mfbvar", "svvar", "hier_panel", "sign_bvar", "ms_tvtp", "eventstudy", "sdid", "matching", "bartik", "arima", "garch", "quantile", "cointegration", "wavelet", "twfe", "dpthresh", "pcoint", "pquant", "spatial"}
 
 
 def catalog(division="econometrics"):

@@ -1,11 +1,12 @@
 """Machine-learning models of the Machine Learning Research Guide.
 
-Prediction: LASSO, ridge, elastic net, random forest and XGBoost, each with cross-validated tuning, a hold-out test
-set and an OLS benchmark. Causal: double machine learning (partially linear, interactive and IV models) using the
+Prediction: LASSO, ridge, elastic net, random forest, XGBoost, support vector regression and kernel-based regularized
+least squares (KRLS), each with cross-validated tuning, a hold-out test set and an OLS benchmark. Causal: double machine learning (partially linear, interactive and IV models) using the
 guide's cross-fitting routine (_ml_core.crossfit), and a causal forest built as a doubly robust forest (DR-learner).
 """
 import numpy as np
 import pandas as pd
+from scipy import stats
 
 from . import _ml_core as M
 from .core import OESError, as_list, chart, coef_table, distinct, f, float_option, int_option, need, numeric, result, stat, table, tests_table, test_row, time_order
@@ -55,6 +56,147 @@ class XGBoostRegressor:
     def score(self, X, y):
         from sklearn.metrics import r2_score
         return r2_score(y, self.predict(X))
+
+
+class KRLSRegressor:
+    """Kernel-based regularized least squares (Hainmueller and Hazlett 2014), scikit-learn compatible.
+
+    Predictors and outcome are standardised, the Gaussian kernel is k(x, z) = exp(-|x - z|^2 / sigma2) with sigma2 = number of
+    predictors by default, the weights solve (K + lambda I) c = y, and lambda is chosen by leave-one-out cross-validation
+    (golden-section search over the bounds of the KRLS package). Pointwise marginal effects, average marginal effects with their
+    standard errors (and first differences for 0/1 predictors) follow the formulas of the paper."""
+
+    def __init__(self, sigma=None, lam=None):
+        self.sigma, self.lam = sigma, lam
+
+    def get_params(self, deep=True):
+        return {"sigma": self.sigma, "lam": self.lam}
+
+    def set_params(self, **p):
+        for k, v in p.items():
+            setattr(self, k, v)
+        return self
+
+    @staticmethod
+    def _kernel(A, B, sigma2):
+        d2 = (A ** 2).sum(1)[:, None] + (B ** 2).sum(1)[None, :] - 2 * A @ B.T
+        return np.exp(-np.maximum(d2, 0) / sigma2)
+
+    @staticmethod
+    def _loo_loss(lam, d, U, Uty):
+        inv = 1.0 / (d + lam)
+        c = U @ (Uty * inv)
+        return float(np.sum((c / ((U ** 2) @ inv)) ** 2))
+
+    @staticmethod
+    def _bounds(d, n):
+        """Bounds of the lambda search used by the KRLS package: the upper bound keeps the effective degrees of freedom at one or more, the lower
+        bound keeps them at or below the number of eigenvalues above 1/1000 of the largest."""
+        up = float(n)
+        while np.sum(d / (d + up)) < 1 and up > 1e-8:
+            up -= 1.0
+            if up <= 0:
+                up = 1e-3
+                break
+        dd = np.sort(d)[::-1]
+        q = int(np.argmin(np.abs(dd - dd[0] / 1000.0))) + 1
+        lo = np.finfo(float).eps
+        if np.sum(d / (d + lo)) > q:
+            a, b = lo, up
+            for _ in range(80):
+                mid = 0.5 * (a + b)
+                a, b = (mid, b) if np.sum(d / (d + mid)) > q else (a, mid)
+            lo = b
+        return min(lo, up * 0.5), up
+
+    @staticmethod
+    def _lambda_search(d, U, Uty, n):
+        """Golden-section search for the leave-one-out minimiser between the bounds of _bounds."""
+        lo, up = KRLSRegressor._bounds(d, n)
+        tol = 1e-3 * n
+        x1, x2 = lo + 0.381966 * (up - lo), up - 0.381966 * (up - lo)
+        s1, s2 = KRLSRegressor._loo_loss(x1, d, U, Uty), KRLSRegressor._loo_loss(x2, d, U, Uty)
+        for _ in range(100):
+            if abs(s1 - s2) <= tol:
+                break
+            if s1 < s2:
+                up, x2, s2 = x2, x1, s1
+                x1 = lo + 0.381966 * (up - lo)
+                s1 = KRLSRegressor._loo_loss(x1, d, U, Uty)
+            else:
+                lo, x1, s1 = x1, x2, s2
+                x2 = up - 0.381966 * (up - lo)
+                s2 = KRLSRegressor._loo_loss(x2, d, U, Uty)
+        return x1 if s1 < s2 else x2
+
+    def fit(self, X, y):
+        X, y = np.asarray(X, float), np.asarray(y, float)
+        n, p = X.shape
+        self.xm_, self.xs_ = X.mean(0), X.std(0, ddof=1)
+        self.xs_[self.xs_ == 0] = 1.0
+        self.ym_, self.ys_ = float(y.mean()), float(y.std(ddof=1)) or 1.0
+        self.Z_ = (X - self.xm_) / self.xs_
+        t = (y - self.ym_) / self.ys_
+        self.sigma2_ = float(p) if self.sigma in (None, "") else float(self.sigma)
+        K = self._kernel(self.Z_, self.Z_, self.sigma2_)
+        d, U = np.linalg.eigh(K)
+        d = np.maximum(d, 0.0)
+        Uty = U.T @ t
+        self.lambda_ = float(self.lam) if self.lam not in (None, "") else float(self._lambda_search(d, U, Uty, n))
+        self.coef_ = U @ (Uty / (d + self.lambda_))
+        self.d_, self.U_, self.K_ = d, U, K
+        fit = K @ self.coef_
+        self.sigma_eps2_ = float(np.mean((t - fit) ** 2))             # residual variance in standardised units
+        self.df_eff_ = float(np.sum(d / (d + self.lambda_)))
+        self.r2_ = 1 - float(np.sum((t - fit) ** 2)) / float(np.sum(t ** 2))
+        self.binary_ = np.array([set(np.unique(X[:, j])) <= {0.0, 1.0} and len(np.unique(X[:, j])) == 2 for j in range(p)])
+        return self
+
+    def predict(self, X):
+        Z = (np.asarray(X, float) - self.xm_) / self.xs_
+        return self.ym_ + self.ys_ * (self._kernel(Z, self.Z_, self.sigma2_) @ self.coef_)
+
+    def score(self, X, y):
+        from sklearn.metrics import r2_score
+        return r2_score(y, self.predict(X))
+
+    def _quad(self, w):
+        """w' Var(c) w with Var(c) = sigma_eps2 U diag((d + lambda)^-2) U' (Hainmueller and Hazlett 2014)."""
+        v = (self.U_.T @ w) / (self.d_ + self.lambda_)
+        return self.sigma_eps2_ * float(v @ v)
+
+    def effects(self):
+        """Pointwise marginal effects (original units: derivatives, or first differences for 0/1 predictors), their average and its standard error."""
+        Z, n, p = self.Z_, *self.Z_.shape
+        pointwise, avg, se = np.zeros((n, p)), np.zeros(p), np.zeros(p)
+        for j in range(p):
+            if self.binary_[j]:
+                Z1, Z0 = Z.copy(), Z.copy()
+                Z1[:, j], Z0[:, j] = (1.0 - self.xm_[j]) / self.xs_[j], (0.0 - self.xm_[j]) / self.xs_[j]
+                D = self._kernel(Z1, Z, self.sigma2_) - self._kernel(Z0, Z, self.sigma2_)
+                scale = self.ys_
+            else:
+                D = (-2.0 / self.sigma2_) * self.K_ * (Z[:, j][:, None] - Z[:, j][None, :])
+                scale = self.ys_ / self.xs_[j]
+            pointwise[:, j] = scale * (D @ self.coef_)
+            avg[j] = pointwise[:, j].mean()
+            se[j] = scale * np.sqrt(self._quad(D.sum(0)) / n ** 2)
+        return dict(pointwise=pointwise, avg=avg, se=se)
+
+
+def _svr(p, kernel="rbf", epsilon=0.1):
+    """Support vector regression with the outcome and the predictors standardised; C (and gamma) chosen by 3-fold cross-validation."""
+    from sklearn.compose import TransformedTargetRegressor
+    from sklearn.model_selection import GridSearchCV, KFold
+    from sklearn.pipeline import make_pipeline
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.svm import SVR
+    grid = {"svr__C": [0.5, 5.0, 50.0]}
+    if kernel == "rbf":
+        grid["svr__gamma"] = [0.25 / p, 1.0 / p, 4.0 / p]
+    inner = GridSearchCV(make_pipeline(StandardScaler(), SVR(kernel=kernel, epsilon=epsilon)), grid,
+                         cv=KFold(3, shuffle=True, random_state=0), scoring="neg_mean_squared_error", n_jobs=1)
+    return TransformedTargetRegressor(regressor=inner, transformer=StandardScaler())
 
 
 def _learners(binary, trees):
@@ -108,6 +250,22 @@ def _predict(df, spec, kind):
         models["rf"] = RandomForestRegressor(n_estimators=int_option(spec, "n_estimators", 300, 50, 2000, "Number of trees"),
                                              min_samples_leaf=int_option(spec, "min_leaf", 5, 1, 100, "Minimum leaf size"),
                                              max_features=0.5, random_state=0, n_jobs=1)
+    if kind == "svr":
+        kernel = str(spec.get("kernel") or "rbf")
+        if kernel not in ("rbf", "linear"):
+            raise OESError("The kernel must be rbf or linear.")
+        eps = float_option(spec, "epsilon", 0.1, "Epsilon")
+        if not 0 < eps <= 1:
+            raise OESError("Epsilon (in standard deviations of the outcome) must be between 0 and 1.")
+        models["svr"] = _svr(len(x), kernel, eps)
+    if kind == "krls":
+        if len(tr) > 2000:
+            raise OESError(f"KRLS builds an n x n kernel matrix and the training sample has {len(tr)} observations; above 2,000 it is too slow in the browser. "
+                           "Use a smaller sample or support vector regression.")
+        sg, lm = float_option(spec, "sigma", None, "Kernel bandwidth"), float_option(spec, "lambda", None, "Lambda")
+        if (sg is not None and sg <= 0) or (lm is not None and lm <= 0):
+            raise OESError("The kernel bandwidth and lambda must be positive.")
+        models["krls"] = KRLSRegressor(sigma=sg, lam=lm)
     main = models[kind]
     m, pred, rmse, r2 = _fit_stats(clone(main), X, Y, tr, te, ts)
     cv = M.cv_rmse(clone(main), X.iloc[tr], Y.iloc[tr], ts)
@@ -117,7 +275,8 @@ def _predict(df, spec, kind):
             continue
         _, _, r_, q_ = _fit_stats(clone(models[key]), X, Y, tr, te, ts)
         bench.append([name, f(r_, 4), f(q_, 4)])
-    label = {"lasso": "LASSO", "ridge": "Ridge", "enet": "Elastic net", "rf": "Random forest", "xgb": "XGBoost"}[kind]
+    label = {"lasso": "LASSO", "ridge": "Ridge", "enet": "Elastic net", "rf": "Random forest", "xgb": "XGBoost",
+             "svr": "Support vector regression", "krls": "KRLS"}[kind]
     tabs = [table("Out-of-sample accuracy", ["Model", "Test RMSE", "Test R-squared"], [[label, f(rmse, 4), f(r2, 4)]] + bench,
                   ("Test set: the last " if ts else "Test set: a random ") + f"{int(round(share * 100))}% of the observations"
                   + (" (time order kept; validation is rolling-origin)." if ts else "."))]
@@ -138,13 +297,49 @@ def _predict(df, spec, kind):
             summary.append(stat("Kept at min CV", int(sum(abs(c) > 1e-10 for c in coef))))
             summary.append(stat("Kept at 1-s.e. rule", len(keep)))
             notes.append("One-standard-error rule keeps: " + (", ".join(keep) if keep else "no predictor") + ".")
+    extra_charts = []
+    if kind == "svr":
+        gs = m.regressor_
+        best, est = gs.best_params_, gs.best_estimator_[-1]
+        nsv = len(est.support_)
+        rows = [["Kernel", "Gaussian (radial basis)" if est.kernel == "rbf" else "Linear"], ["C (cost), chosen by cross-validation", f(best["svr__C"], 4)]]
+        if est.kernel == "rbf":
+            rows.append(["Gamma, chosen by cross-validation", f(best["svr__gamma"], 4)])
+            summary.append(stat("Gamma", float(best["svr__gamma"]), 4))
+        rows += [["Epsilon (standard deviations of the outcome)", f(est.epsilon, 4)], ["Support vectors", f"{nsv} of {len(tr)} training observations ({f(100 * nsv / len(tr), 1)}%)"]]
+        tabs.append(table("Selected hyperparameters", ["Parameter", "Value"], rows,
+                          "C and gamma are chosen from a grid by 3-fold cross-validation on the training set; the outcome and the predictors are standardised first."))
+        summary.append(stat("C (cost)", float(best["svr__C"]), 3))
+        summary.append(stat("Support vectors (share)", nsv / len(tr), 3))
+        notes.append("Epsilon-insensitive support vector regression: errors smaller than epsilon are not penalised, so only the support vectors shape the fit. "
+                     "Like every kernel method it gives predictions, not marginal effects; use KRLS when you need the effect of each predictor.")
+    if kind == "krls":
+        ef = m.effects()
+        dfe = max(len(tr) - m.df_eff_, 1.0)
+        tv = ef["avg"] / ef["se"]
+        pv = 2 * stats.t.sf(np.abs(tv), dfe)
+        pw = ef["pointwise"]
+        order = np.argsort(-np.abs(np.nan_to_num(tv)))
+        rows = [[x[j], "first difference (0 to 1)" if m.binary_[j] else "derivative", f(ef["avg"][j]), f(ef["se"][j]), f(tv[j], 3), f(pv[j], 4),
+                 f(np.percentile(pw[:, j], 25)), f(np.percentile(pw[:, j], 50)), f(np.percentile(pw[:, j], 75))] for j in order]
+        tabs.append(table("Average marginal effects (training sample)", ["Predictor", "Effect of", "Average", "Std. err.", "t", "p-value", "25th pct", "Median", "75th pct"], rows,
+                          f"Effect on {y} of one unit of the predictor (or of a switch from 0 to 1), averaged over the training observations; the last three columns show how the pointwise "
+                          f"effects vary. Standard errors condition on lambda and the bandwidth; t has {f(dfe, 1)} degrees of freedom (n minus effective df)."))
+        summary += [stat("Lambda", m.lambda_, 4), stat("Kernel bandwidth sigma2", m.sigma2_, 3), stat("Effective df", m.df_eff_, 1), stat("R-squared (training)", m.r2_, 4)]
+        for j in [j for j in order if not m.binary_[j]][:3]:
+            extra_charts.append(chart(f"Marginal effect of {x[j]} across observations", X.iloc[tr][x[j]].to_numpy(), [("marginal effect", pw[:, j])], x[j], f"effect on {y}", kind="scatter"))
+        notes.append("Kernel-based regularized least squares (Hainmueller and Hazlett 2014): a flexible, nonparametric fit with a Gaussian kernel, lambda chosen by leave-one-out "
+                     "cross-validation, and marginal effects that are free to vary across observations. The averages are comparable to regression coefficients; "
+                     "the spread of the pointwise effects shows nonlinearity and interaction.")
+        if len(tr) > 1000:
+            notes.append("With more than 1,000 training observations KRLS can take a minute or more in the browser.")
     pi = permutation_importance(m, X.iloc[te], Y.iloc[te], n_repeats=10, random_state=0, scoring="neg_root_mean_squared_error")
     order = np.argsort(-pi.importances_mean)
     tabs.append(table("Permutation importance on the test set", ["Predictor", "RMSE increase", "Std."],
                       [[x[i], f(pi.importances_mean[i]), f(pi.importances_std[i])] for i in order]))
     top = order[: min(15, len(order))]
     charts = [chart("Permutation importance", [x[i] for i in top], [("RMSE increase", pi.importances_mean[top])], "", "", kind="bar"),
-              chart("Test set: actual and predicted", list(range(1, len(te) + 1)), [("actual", Y.iloc[te].values), ("predicted", pred)], "test observation", y)]
+              chart("Test set: actual and predicted", list(range(1, len(te) + 1)), [("actual", Y.iloc[te].values), ("predicted", pred)], "test observation", y)] + extra_charts
     return result(kind, f"{label}: predicting {y}", len(d), summary, tabs, charts, notes)
 
 
@@ -166,6 +361,14 @@ def rf(df, spec):
 
 def xgb(df, spec):
     return _predict(df, spec, "xgb")
+
+
+def svr(df, spec):
+    return _predict(df, spec, "svr")
+
+
+def krls(df, spec):
+    return _predict(df, spec, "krls")
 
 
 # ------------------------------------------------------------------------------------------------ double machine learning
