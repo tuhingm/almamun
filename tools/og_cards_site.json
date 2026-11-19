@@ -132,6 +132,12 @@
   "sub": "Treatment is not randomly assigned, but you observe the covariates that drive selection into it (selection on observables).…"
  },
  {
+  "out": "assets/og/causal-inference-guide/mediation.jpg",
+  "kicker": "Causal Inference Guide · Model guide",
+  "title": "Causal Mediation Analysis",
+  "sub": "A treatment has an effect and you want to know how much of it works through a specific channel (the mediator) and how much does…"
+ },
+ {
   "out": "assets/og/causal-inference-guide/rdd.jpg",
   "kicker": "Causal Inference Guide · Model guide",
   "title": "Regression Discontinuity",

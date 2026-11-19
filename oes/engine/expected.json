@@ -1448,5 +1448,21 @@
    "label": "Effect",
    "value": 1.6216
   }
+ },
+ "mediation": {
+  "nobs": 445,
+  "table_index": 0,
+  "table": "Mediation of the effect of train on re78 through employed78",
+  "row": "ACME (average mediation effect)",
+  "row_index": 0,
+  "col": "Estimate",
+  "col_index": 1,
+  "value": 0.8183,
+  "rtol": 0.001,
+  "seconds": 0.1,
+  "summary": {
+   "label": "ACME",
+   "value": 0.8183
+  }
  }
 }

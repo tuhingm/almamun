@@ -492,3 +492,62 @@ def experiment(df, spec):
 def _lin_t(Y, T, Xc):
     n = len(Y); L = np.column_stack([np.ones(n), T, Xc, Xc * T[:, None]])
     return float(np.linalg.lstsq(L, Y, rcond=None)[0][1])
+
+
+# ------------------------------------------------------------------------------------------------------------------
+# Causal mediation analysis (linear models, Imai-Keele-Tingley) with bootstrap intervals and sensitivity to sequential ignorability
+# ------------------------------------------------------------------------------------------------------------------
+def _med_fit(Y, T, M, X, interact):
+    n = len(Y); one = np.ones(n)
+    Am = np.column_stack([one, T, X]); gm = np.linalg.lstsq(Am, M, rcond=None)[0]; e1 = M - Am @ gm
+    Ay = np.column_stack([one, T, M] + ([T * M] if interact else []) + [X]); gy = np.linalg.lstsq(Ay, Y, rcond=None)[0]; e2 = Y - Ay @ gy
+    a = float(gm[1]); c = float(gy[1]); b = float(gy[2]); kap = float(gy[3]) if interact else 0.0
+    Mbar = {t: float(gm[0] + a * t + (X.mean(0) @ gm[2:] if X.shape[1] else 0.0)) for t in (0.0, 1.0)}
+    acme = {t: a * (b + kap * t) for t in (0.0, 1.0)}; ade = {t: c + kap * Mbar[t] for t in (0.0, 1.0)}
+    return dict(a=a, b=b, c=c, kap=kap, acme=acme, ade=ade, s1=float(np.sqrt(e1 @ e1 / (n - Am.shape[1]))), s2=float(np.sqrt(e2 @ e2 / (n - Ay.shape[1]))))
+
+
+def mediation(df, spec):
+    y = need(spec, "outcome", "outcome"); t = need(spec, "treat", "treatment (0/1)"); m = need(spec, "mediator", "mediator"); xs = as_list(spec.get("covariates") or []); distinct([y, t, m], xs)
+    miss = [c for c in [y, t, m] + xs if c not in df.columns]
+    if miss:
+        raise OESError("Column(s) not found in the data: " + ", ".join(miss))
+    d = numeric(df, [y, t, m] + xs); n = len(d)
+    if not set(np.unique(d[t])) <= {0.0, 1.0} or d[t].nunique() != 2:
+        raise OESError("The treatment must be a 0/1 indicator with both values present.")
+    interact = str(spec.get("interaction") or "no").lower() == "yes"; B = int_option(spec, "boot", 500, 99, 5000, "Bootstrap replications"); seed = int_option(spec, "seed", 0, 0, 10 ** 6, "Random seed")
+    if n < 5 * (len(xs) + 4):
+        raise OESError("Too few observations for this number of covariates.")
+    Y, T, M = d[y].to_numpy(float), d[t].to_numpy(float), d[m].to_numpy(float); X = d[xs].to_numpy(float) if xs else np.zeros((n, 0))
+    if d[m].nunique() < 2:
+        raise OESError("The mediator does not vary.")
+    fit = _med_fit(Y, T, M, X, interact)
+    rng = np.random.default_rng(seed); draws = []
+    for _ in range(B):
+        i = rng.integers(0, n, n); fb = _med_fit(Y[i], T[i], M[i], X[i], interact)
+        draws.append([fb["acme"][0.0], fb["acme"][1.0], fb["ade"][0.0], fb["ade"][1.0], fb["a"], fb["b"]])
+    D = np.array(draws)
+    def ci(v): return np.percentile(v, [2.5, 97.5])
+    acme_avg = 0.5 * (fit["acme"][0.0] + fit["acme"][1.0]); ade_avg = 0.5 * (fit["ade"][0.0] + fit["ade"][1.0]); tot = acme_avg + ade_avg
+    ca = 0.5 * (D[:, 0] + D[:, 1]); cd = 0.5 * (D[:, 2] + D[:, 3]); ct = ca + cd; prop = ca / ct
+    def prow(lab, est, v): lo, hi = ci(v); return [lab, f(est, 4), f(float(np.std(v, ddof=1)), 4), f(lo, 4), f(hi, 4), f(float(max(2 * min(np.mean(v <= 0), np.mean(v >= 0)), 1.0 / (B + 1))), 4)]
+    rows = []
+    if interact:
+        rows += [prow("ACME, control (t = 0)", fit["acme"][0.0], D[:, 0]), prow("ACME, treated (t = 1)", fit["acme"][1.0], D[:, 1]), prow("ADE, control (t = 0)", fit["ade"][0.0], D[:, 2]), prow("ADE, treated (t = 1)", fit["ade"][1.0], D[:, 3])]
+    rows += [prow("ACME (average mediation effect)", acme_avg, ca), prow("ADE (average direct effect)", ade_avg, cd), prow("Total effect", tot, ct)]
+    pm = float(np.median(prop)) if tot != 0 else float("nan"); plo, phi = np.percentile(prop, [2.5, 97.5])
+    rows.append(["Proportion mediated (ACME / total)", f(acme_avg / tot if tot != 0 else float("nan"), 4), f(float(np.std(prop, ddof=1)), 4), f(plo, 4), f(phi, 4), ""])
+    tabs = [table(f"Mediation of the effect of {t} on {y} through {m}", ["Effect", "Estimate", "Boot. s.e.", "95% CI low", "95% CI high", "Boot. p-value"], rows,
+                  f"Linear models for the mediator and the outcome{' with a treatment-by-mediator interaction' if interact else ''}; percentile intervals from {B} bootstrap resamples. The proportion mediated is unstable when the total effect is near zero.")]
+    ab = table("Path coefficients", ["Path", "Coefficient"], [[f"{t} -> {m} (a)", f(fit["a"], 4)], [f"{m} -> {y}, holding treatment fixed (b)", f(fit["b"], 4)], [f"{t} -> {y}, holding the mediator fixed (c')", f(fit["c"], 4)]] + ([["Treatment-by-mediator interaction", f(fit["kap"], 4)]] if interact else []))
+    tabs.append(ab)
+    # sensitivity to a violation of sequential ignorability: correlation rho between the errors of the mediator and outcome models
+    grid = np.round(np.linspace(-0.9, 0.9, 19), 2); b0 = fit["b"]; s1, s2 = fit["s1"], fit["s2"]; a = fit["a"]
+    bro = lambda r: b0 - r * s2 / (s1 * np.sqrt(1 - r ** 2))
+    acm = np.array([a * bro(r) for r in grid]); rstar = (b0 * s1 / s2) / np.sqrt(1 + (b0 * s1 / s2) ** 2)
+    srows = [[f(r, 2), f(float(a * bro(r)), 4)] for r in grid]
+    tabs.append(table("Sensitivity of the ACME to correlation between the mediator and outcome errors", ["rho", "ACME at that rho"], srows,
+                      f"At rho = 0 the estimate relies on sequential ignorability (no unmeasured confounder of the mediator-outcome relationship, given treatment and covariates). The ACME is zero at rho = {rstar:.3f}. The no-interaction ACME formula is used here."))
+    ch = [chart("ACME as a function of the error correlation rho", list(grid), [("ACME", acm), ("Zero", [0.0] * len(grid))], "rho", "ACME", kind="line")]
+    notes = ["The treatment must be randomised or ignorable given the covariates, and the mediator must be ignorable given treatment and covariates (sequential ignorability); the second assumption cannot be ensured by randomising the treatment.", "A mediator measured after treatment and affected by it can confound the mediator-outcome relationship through variables that are also affected by treatment; check the sensitivity table."]
+    return result("mediation", f"Causal mediation: {t} -> {m} -> {y}", n, [stat("Observations", n), stat("ACME", acme_avg, 4), stat("ADE", ade_avg, 4), stat("Total effect", tot, 4), stat("Proportion mediated", acme_avg / tot if tot != 0 else None, 3), stat("rho at which ACME = 0", float(rstar), 3)], tabs, ch, notes)
