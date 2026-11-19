@@ -134,3 +134,37 @@ def test_unobserved_errors():
 def ts_extra_err(df, spec):
     cols = list(df.columns)
     return o.run("unobserved", df.to_csv(index=False), spec)["error"]
+
+
+# ------------------------------------------------------------------ forecast comparison
+def test_forecast_eval_registered_and_dm_by_hand():
+    m = o.BY_ID["forecast_eval"]
+    assert os.path.exists(os.path.join(ROOT, m["guide"])) and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+    rng = np.random.default_rng(1); d = rng.standard_normal(80) + .3; T = 80
+    # h = 1: the DM statistic is the t statistic of the mean, times the HLN factor sqrt((T-1)/T)
+    st, p = ts_extra._dm(d, 1)
+    t_ = d.mean() / (d.std(ddof=0) / np.sqrt(T)); assert st == pytest.approx(t_ * np.sqrt((T - 1) / T), rel=1e-9)
+    assert p == pytest.approx(2 * stats.t.sf(abs(st), T - 1), rel=1e-9)
+
+
+def test_dm_rejects_when_one_forecast_is_clearly_better_and_not_when_equal():
+    rng = np.random.default_rng(4); n = 300; x = np.zeros(n)
+    for t in range(1, n): x[t] = .8 * x[t - 1] + rng.standard_normal()
+    r = ts_extra.forecast_eval(pd.DataFrame({"y": x}), dict(y="y", window=150, benchmark="historical mean"))
+    row = next(r_ for r_ in r["tables"][0]["rows"] if r_[0] == "AR (BIC)")
+    assert row[6] == "better than benchmark" and row[3] < 0.9
+
+
+def test_forecasts_use_no_future_data():
+    d = macro(); a = ts_extra.forecast_eval(d, dict(y="inflation", window=100))
+    d2 = d.copy(); d2.loc[d2.index[-1], "inflation"] += 50          # change only the last observation
+    b = ts_extra.forecast_eval(d2, dict(y="inflation", window=100))
+    fa = a["charts"][0]["series"][3]["y"]; fb = b["charts"][0]["series"][3]["y"]
+    assert fa[:-1] == fb[:-1]
+
+
+def test_forecast_eval_errors():
+    d = macro()
+    assert "forecasts" in o.run("forecast_eval", d.to_csv(index=False), dict(y="inflation", window=187, h=4))["error"].lower()
+    assert "benchmark" in o.run("forecast_eval", d.to_csv(index=False), dict(y="inflation", benchmark="oracle"))["error"].lower()
+    assert "loss" in o.run("forecast_eval", d.to_csv(index=False), dict(y="inflation", loss="huber"))["error"].lower()

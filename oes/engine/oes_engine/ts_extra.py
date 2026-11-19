@@ -821,3 +821,82 @@ def unobserved(df, spec):
     return result("unobserved", f"Trend-cycle decomposition: {y}", n, summ, tabs, ch,
                   ["The cycle is identified by the assumption that it is a stationary, damped, stochastic cycle with a period between the bounds; the estimate depends on it.",
                    "End-of-sample trend estimates from all the filters are revised when data are added."])
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Forecast evaluation: rolling-origin forecasts and Diebold-Mariano tests
+# ---------------------------------------------------------------------------------------------------------------
+def _ar_fc(z, h, maxp):
+    """Direct-iterated AR(p) forecast with p chosen by BIC."""
+    best = None
+    for p in range(1, maxp + 1):
+        if len(z) <= p + 5:
+            break
+        Y = z[p:]; X = np.column_stack([np.ones(len(Y))] + [z[p - j:len(z) - j] for j in range(1, p + 1)])
+        b = np.linalg.lstsq(X, Y, rcond=None)[0]; e = Y - X @ b; bic = np.log(e @ e / len(Y)) + (p + 1) * np.log(len(Y)) / len(Y)
+        if best is None or bic < best[0]:
+            best = (bic, p, b)
+    _, p, b = best; hist = list(z[-p:][::-1])
+    for _ in range(h):
+        nxt = b[0] + sum(b[j + 1] * hist[j] for j in range(p)); hist.insert(0, nxt)
+    return hist[0]
+
+
+def _dm(d, h):
+    """Diebold-Mariano statistic with the Harvey-Leybourne-Newbold small-sample correction (loss differential d, horizon h)."""
+    T = len(d); dm = d.mean(); lam = ((d - dm) @ (d - dm)) / T
+    for j in range(1, h):
+        lam += 2 * ((d[j:] - dm) @ (d[:-j] - dm)) / T
+    lam = max(lam, 1e-12); stat_ = dm / np.sqrt(lam / T)
+    hln = stat_ * np.sqrt((T + 1 - 2 * h + h * (h - 1) / T) / T)
+    return hln, 2 * stats.t.sf(abs(hln), T - 1)
+
+
+def forecast_eval(df, spec):
+    from statsmodels.tsa.holtwinters import ExponentialSmoothing
+    y = need(spec, "y", "series")
+    d, labels = _series_frame(df, spec, [y])
+    x = d[y].to_numpy(float); n = len(x)
+    h = int_option(spec, "h", 1, 1, 12, "Forecast horizon"); w = int_option(spec, "window", max(40, n // 2), 30, n - 15, "Initial estimation window")
+    maxp = int_option(spec, "maxp", 4, 1, 8, "Maximum AR lags")
+    if n - w - h + 1 < 15:
+        raise OESError("Too few forecast origins: shorten the initial window or the horizon (at least 15 forecasts are needed).")
+    loss = spec.get("loss") or "squared"
+    if loss not in ("squared", "absolute"):
+        raise OESError("Choose squared or absolute loss.")
+    base = spec.get("benchmark") or "random walk"
+    names = ["random walk", "historical mean", "AR (BIC)", "exponential smoothing"]
+    if base not in names:
+        raise OESError("Choose a benchmark from: " + ", ".join(names) + ".")
+    fc = {k: [] for k in names}; act = []; per = []
+    for t in range(w, n - h + 1):
+        z = x[:t]; act.append(x[t + h - 1]); per.append(labels[t + h - 1])
+        fc["random walk"].append(z[-1]); fc["historical mean"].append(z.mean()); fc["AR (BIC)"].append(_ar_fc(z, h, maxp))
+        try:
+            fc["exponential smoothing"].append(float(ExponentialSmoothing(z, trend="add", damped_trend=True).fit().forecast(h)[-1]))
+        except Exception:
+            fc["exponential smoothing"].append(z[-1])
+    act = np.array(act); fc = {k: np.array(v) for k, v in fc.items()}; err = {k: act - v for k, v in fc.items()}
+    L = (lambda e: e ** 2) if loss == "squared" else np.abs
+    rows = []; T = len(act)
+    for k in names:
+        rmse = float(np.sqrt((err[k] ** 2).mean())); mae = float(np.abs(err[k]).mean())
+        rel = float(np.sqrt((err[k] ** 2).mean() / (err[base] ** 2).mean()))
+        if k == base:
+            rows.append([k, f(rmse, 4), f(mae, 4), 1.0, None, None, "benchmark"])
+        else:
+            st, p = _dm(L(err[base]) - L(err[k]), h)
+            rows.append([k, f(rmse, 4), f(mae, 4), f(rel, 3), f(st, 3), f(p, 4), "better than benchmark" if (p < .05 and st > 0) else ("worse than benchmark" if (p < .05 and st < 0) else "no significant difference")])
+    tabs = [table(f"Out-of-sample accuracy ({T} {h}-step-ahead forecasts)", ["Model", "RMSE", "MAE", "RMSE relative to benchmark", "DM statistic", "DM p-value", "Result"], rows,
+                  f"Forecasts are re-estimated on an expanding window starting with {w} observations. Benchmark: {base}. DM tests the equality of {loss} loss with the Harvey-Leybourne-Newbold small-sample correction; a positive statistic favours the model over the benchmark.")]
+    pair = []
+    for i, a in enumerate(names):
+        for b in names[i + 1:]:
+            st, p = _dm(L(err[a]) - L(err[b]), h); pair.append([f"{a} vs {b}", f(st, 3), f(p, 4)])
+    tabs.append(table("Pairwise Diebold-Mariano tests", ["Pair", "DM statistic", "p-value"], pair, "H0: equal expected loss. A positive statistic means the first model has the larger loss, so the second is better."))
+    best = min(names, key=lambda k: float(np.sqrt((err[k] ** 2).mean())))
+    ch = [chart(f"{y}: actual and forecasts", per, [("actual", act)] + [(k, fc[k]) for k in names]),
+          chart("Cumulative squared forecast error", per, [(k, np.cumsum(err[k] ** 2)) for k in names])]
+    return result("forecast_eval", f"Forecast comparison: {y}", T, [stat("Forecasts", T), stat("Horizon", h), stat("Lowest RMSE", best), stat("Benchmark", base)], tabs, ch,
+                  ["Forecasts use only the data available at each origin (no look-ahead), but the data are the final revised values, not real-time vintages.",
+                   "The Diebold-Mariano test is for forecasts that do not come from nested models estimated on a short window; for nested models use the Clark-West test."])
