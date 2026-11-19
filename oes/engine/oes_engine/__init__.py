@@ -486,6 +486,11 @@ MODELS += [
                  sel("link", "Link", [["logit", "Logit"], ["probit", "Probit"]], "logit")],
          example=dict(file=ME + "wagepan_union.csv", spec=dict(y="union", x=["married", "educ", "black", "hisp", "exper", "expersq"], id="nr", estimator="cre", link="logit")),
          check=dict(table=0, row=1, col=1)),
+    dict(id="ivprobit", group="Microeconometrics", name="IV probit and control function (endogenous regressors in a binary model)", guide="microeconometrics-guide/iv-probit.html", fn=micro.ivprobit,
+         fields=[col("y", "Binary outcome (0/1)"), cols("x", "Exogenous explanatory variables"), cols("endog", "Endogenous regressor(s)"), cols("inst", "Excluded instruments"),
+                 sel("estimator", "Estimator", [["cf", "Control function (two-step, corrected s.e.)"], ["mle", "Maximum likelihood (one endogenous regressor)"]], "cf")],
+         example=dict(file=ME + "mroz_iv.csv", spec=dict(y="inlf", x=["exper", "expersq", "age", "kidslt6", "kidsge6", "nwifeinc"], endog=["educ"], inst=["motheduc", "fatheduc"], estimator="cf")),
+         check=dict(table=1, row=1, col=1)),
 ]
 
 CE = "oes/examples/"

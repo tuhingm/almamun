@@ -1156,5 +1156,21 @@
    "label": "Average periods per unit",
    "value": 8.0
   }
+ },
+ "ivprobit": {
+  "nobs": 753,
+  "table_index": 1,
+  "table": "Second stage: probit with control function (Rivers-Vuong)",
+  "row": "exper",
+  "row_index": 1,
+  "col": "Coef.",
+  "col_index": 1,
+  "value": 0.121302,
+  "rtol": 0.001,
+  "seconds": 0.1,
+  "summary": {
+   "label": "Log-likelihood",
+   "value": -401.2241
+  }
  }
 }

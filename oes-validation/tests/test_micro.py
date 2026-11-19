@@ -636,3 +636,47 @@ def test_fe_logit_is_robust_to_correlated_unit_effects_in_simulation():
 def test_panel_binary_errors():
     for kw, msg in [(dict(y="lwage", x=["educ"]), "only 0 and 1"), (dict(estimator="fe", link="probit"), "logit link only"), (dict(x=[]), "at least one")]:
         assert msg in wage_union(**kw)["error"]
+
+
+# ------------------------------------------------------------------ IV probit
+def ivp(**kw):
+    spec = dict(o.BY_ID["ivprobit"]["example"]["spec"]); spec.update(kw)
+    return o.run("ivprobit", open(os.path.join(ME, "mroz_iv.csv")).read(), spec)
+
+
+def test_control_function_point_estimates_match_hand_two_step():
+    d = pd.read_csv(os.path.join(ME, "mroz_iv.csv")); xs = ["exper", "expersq", "age", "kidslt6", "kidsge6", "nwifeinc"]
+    Z = sm.add_constant(d[xs + ["motheduc", "fatheduc"]]); v = sm.OLS(d.educ, Z).fit().resid
+    W = sm.add_constant(d[xs].assign(educ=d.educ, v=v)); m = sm.Probit(d.inlf, W).fit(disp=0)
+    r = ivp()
+    for c in xs + ["educ"]:
+        assert row(r, "Second stage", c)[1] == pytest.approx(m.params[c], abs=1e-5)
+    # the corrected standard error differs from the naive second-stage one (it accounts for the estimated residual)
+    assert abs(row(r, "Second stage", "educ")[2] - m.bse["educ"]) > 1e-4
+
+
+def test_mle_and_control_function_agree_and_test_exogeneity_consistently():
+    a, b = ivp(), ivp(estimator="mle")
+    assert row(a, "Second stage", "educ")[1] == pytest.approx(row(b, "Structural", "educ")[1], abs=0.01)
+    pa = next(t for t in table(a, "Specification")["rows"] if t[0].startswith("Exogeneity"))[2]
+    pb = next(t for t in table(b, "Specification")["rows"] if t[0].startswith("Wald"))[2]
+    assert abs(pa - pb) < 0.05
+
+
+def test_iv_probit_removes_endogeneity_bias_in_simulation():
+    rng = np.random.default_rng(4); n = 8000
+    z1, z2, x = rng.normal(size=(3, n)); u = rng.normal(size=n); v = 0.8 * u + 0.6 * rng.normal(size=n)
+    e = 0.7 * z1 + 0.5 * z2 + 0.3 * x + v; yy = (0.5 * e + 0.4 * x + u > 0).astype(int)
+    dd = pd.DataFrame(dict(y=yy, e=e, x=x, z1=z1, z2=z2)).to_csv(index=False)
+    r = o.run("ivprobit", dd, dict(y="y", x=["x"], endog=["e"], inst=["z1", "z2"], estimator="mle"))
+    assert row(r, "Structural", "e")[1] == pytest.approx(0.5, abs=0.08) and row(r, "Structural", "rho (corr. of the two errors)")[1] == pytest.approx(0.8, abs=0.1)
+    plain = sm.Probit(yy, sm.add_constant(pd.DataFrame(dict(x=x, e=e)))).fit(disp=0)
+    assert plain.params["e"] > 0.65                                       # ordinary probit is biased upward
+    cf = o.run("ivprobit", dd, dict(y="y", x=["x"], endog=["e"], inst=["z1", "z2"]))
+    assert next(t for t in table(cf, "Specification")["rows"] if t[0].startswith("Exogeneity"))[2] < 0.001
+
+
+def test_iv_probit_errors():
+    for kw, msg in [(dict(inst=["motheduc"], endog=["educ", "age"], x=["exper"]), "under-identified"), (dict(endog=[]), "endogenous"), (dict(inst=[]), "instrument"),
+                    (dict(y="educ", endog=["age"], x=["exper"]), "only 0 and 1"), (dict(endog=["educ", "age"], x=["exper"], estimator="mle"), "one endogenous")]:
+        assert msg in ivp(**kw)["error"]

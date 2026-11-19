@@ -1513,3 +1513,186 @@ def paneldiscrete(df, spec):
              "Fixed-effects logit uses only units whose outcome changes and removes the unit effect by conditioning, without assuming anything about its relation to the regressors; "
              "random effects assumes that the unit effect is independent of the regressors (test it with the Mundlak option). Pooled estimates describe population averages and need clustered standard errors."]
     return result("paneldiscrete", f"Panel {link}: {y}", n, summary, tabs, [ch], notes)
+
+
+def _ivp_nll(t, Xn, Zn, e, y, kx, kz):
+    """Newey / Stata-style IV probit likelihood for one endogenous regressor: y* = x b + g e + u, e = z pi + v, corr(u, v) = rho."""
+    b, pi = t[:kx + 2], t[kx + 2:kx + 2 + kz]
+    sv, rho = np.exp(t[-2]), np.tanh(t[-1])
+    v = (e - Zn @ pi) / sv
+    idx = (np.column_stack([Xn, e]) @ b + rho * v) / np.sqrt(1 - rho ** 2)
+    q = 2 * y - 1
+    return -float((stats.norm.logpdf(v) - np.log(sv) + stats.norm.logcdf(q * idx)).sum())
+
+
+def ivprobit(df, spec):
+    """Probit with endogenous regressors: control-function (Rivers-Vuong) two-step with corrected standard errors, or maximum likelihood for one endogenous regressor."""
+    from statsmodels.tools.numdiff import approx_hess
+    from scipy import optimize
+    y = need(spec, "y", "binary outcome")
+    xs = as_list(spec.get("x"))
+    endog = as_list(spec.get("endog"))
+    inst = as_list(spec.get("inst"))
+    est = _choice(spec, "estimator", ["cf", "mle"], "cf", "The estimator")
+    if not endog:
+        raise OESError("Choose at least one endogenous regressor.")
+    if not inst:
+        raise OESError("Choose at least one excluded instrument.")
+    if len(inst) < len(endog):
+        raise OESError(f"The model is under-identified: {len(endog)} endogenous regressor(s) but only {len(inst)} instrument(s).")
+    if est == "mle" and len(endog) != 1:
+        raise OESError("Maximum likelihood is available for one endogenous regressor; use the control-function estimator for several.")
+    distinct(y, xs, endog, inst)
+    d = numeric(df, [y] + xs + endog + inst).reset_index(drop=True)
+    if not set(d[y].unique()) <= {0, 1}:
+        raise OESError(f"{y} must contain only 0 and 1.")
+    n, kx, J = len(d), len(xs), len(endog)
+    if n < 10 * (kx + J + 2):
+        raise OESError("Too few observations for this number of variables.")
+    Yv = d[y].to_numpy(float)
+    Xn = np.column_stack([np.ones(n), d[xs].to_numpy(float)]) if xs else np.ones((n, 1))
+    E = d[endog].to_numpy(float)
+    Zn = np.column_stack([Xn, d[inst].to_numpy(float)])
+    if np.linalg.matrix_rank(Zn) < Zn.shape[1]:
+        raise OESError("The instruments are collinear with the exogenous regressors or with each other.")
+    kz = Zn.shape[1]
+    names_x = ["const"] + xs
+    # first stages
+    Pi = np.linalg.lstsq(Zn, E, rcond=None)[0]
+    Vh = E - Zn @ Pi
+    fs_rows = []
+    for j, c in enumerate(endog):
+        u = sm.OLS(E[:, j], Zn).fit(); r = sm.OLS(E[:, j], Xn).fit()
+        Fv = ((r.ssr - u.ssr) / len(inst)) / (u.ssr / u.df_resid)
+        fs_rows.append([c, f(Fv, 3), len(inst), f(stats.f.sf(Fv, len(inst), u.df_resid)), f(u.rsquared, 4)])
+    tabs = []
+    fs_tab = table("First stage: strength of the instruments", ["Endogenous regressor", "F (excluded instruments)", "df", "p-value", "R-squared"], fs_rows,
+                   "A first-stage F below about 10 signals weak instruments.")
+    probit0 = sm.Probit(Yv, np.column_stack([Xn, E])).fit(disp=0)
+    if est == "cf":
+        W = np.column_stack([Xn, E, Vh])
+        kw = W.shape[1]
+        try:
+            pr = sm.Probit(Yv, W).fit(disp=0, maxiter=200)
+        except Exception as e:
+            raise OESError("The second-stage probit could not be estimated: " + str(e))
+        theta0 = np.r_[Pi.T.ravel(), np.asarray(pr.params)]
+
+        def moments(th):
+            pi = th[:J * kz].reshape(J, kz).T
+            b = th[J * kz:]
+            vh = E - Zn @ pi
+            w = np.column_stack([Xn, E, vh])
+            xb = w @ b
+            Phi = np.clip(stats.norm.cdf(xb), 1e-12, 1 - 1e-12)
+            sc = ((Yv - Phi) * stats.norm.pdf(xb) / (Phi * (1 - Phi)))[:, None] * w
+            fsm = np.column_stack([Zn * vh[:, [j]] for j in range(J)])
+            return np.column_stack([fsm, sc])
+        m0 = moments(theta0)
+        Bm = m0.T @ m0 / n
+        Am = np.zeros((len(theta0), len(theta0)))
+        for i in range(len(theta0)):
+            h = 1e-5 * max(1.0, abs(theta0[i]))
+            tp, tm = theta0.copy(), theta0.copy(); tp[i] += h; tm[i] -= h
+            Am[:, i] = (moments(tp).mean(0) - moments(tm).mean(0)) / (2 * h)
+        try:
+            Ai = np.linalg.inv(Am)
+        except np.linalg.LinAlgError:
+            raise OESError("The estimating equations are singular: check for collinear variables.")
+        Vtheta = Ai @ Bm @ Ai.T / n
+        bidx = np.arange(J * kz, len(theta0))
+        beta = theta0[bidx]; Vb = Vtheta[np.ix_(bidx, bidx)]
+        sdb = np.sqrt(np.diag(Vb))
+        if not np.all(np.isfinite(sdb)):
+            raise OESError("Standard errors could not be computed.")
+        wn = names_x + endog + [f"first-stage residual ({c})" for c in endog]
+        tabs.append(coef_table(wn, beta, sdb, dist="z", title="Second stage: probit with control function (Rivers-Vuong)",
+                               note="Standard errors account for the estimated first-stage residuals (stacked moment conditions, robust sandwich). "
+                                    "Coefficients are scaled by the unit error variance of the probit and are not comparable with OLS."))
+        rho_idx = np.arange(kx + 1 + J, kx + 1 + 2 * J)
+        Wd = float(beta[rho_idx] @ np.linalg.solve(Vb[np.ix_(rho_idx, rho_idx)], beta[rho_idx]))
+        main_ll = float(pr.llf)
+        drows = [test_row(f"Exogeneity (Wald, first-stage residuals jointly zero, {J} df)", Wd, stats.chi2.sf(Wd, J), "H0: the regressors are exogenous; if not rejected, ordinary probit is consistent")]
+        # average structural function: derivative of the average of Phi(x b + e g + rho v) with v held at its sample values
+        coef_idx = {c: i for i, c in enumerate(names_x + endog)}
+        dm = [bool(set(d[c].unique()) <= {0, 1}) for c in xs + endog]
+
+        def ame(th):
+            pi = th[:J * kz].reshape(J, kz).T; b = th[J * kz:]; vh = E - Zn @ pi
+            full = np.column_stack([Xn, E]); out = []
+            for c in xs + endog:
+                i = coef_idx[c]
+                if set(d[c].unique()) <= {0, 1}:
+                    A1, A0 = full.copy(), full.copy(); A1[:, i], A0[:, i] = 1, 0
+                    out.append((stats.norm.cdf(np.column_stack([A1, vh]) @ b) - stats.norm.cdf(np.column_stack([A0, vh]) @ b)).mean())
+                else:
+                    h = 1e-4 * max(float(full[:, i].std()), 1e-8)
+                    A1, A0 = full.copy(), full.copy(); A1[:, i] += h; A0[:, i] -= h
+                    out.append(((stats.norm.cdf(np.column_stack([A1, vh]) @ b) - stats.norm.cdf(np.column_stack([A0, vh]) @ b)) / (2 * h)).mean())
+            return np.array(out)
+        am = ame(theta0); Ja = _num_jac(ame, theta0); sa = np.sqrt(np.maximum(np.diag(Ja @ Vtheta @ Ja.T), 0))
+        tabs.append(table("Average structural effects on the probability", ["Variable", "Effect", "Std. err.", "z", "p-value"],
+                          [[c, f(am[i]), f(sa[i]), f(am[i] / sa[i], 4) if sa[i] > 0 else None, f(2 * stats.norm.sf(abs(am[i] / sa[i]))) if sa[i] > 0 else None] for i, c in enumerate(xs + endog)],
+                          "Average of the effect of the variable on the response probability, averaging over the first-stage residuals (the average structural function). Delta-method standard errors."))
+        ame0 = probit0.get_margeff(at="overall").summary_frame()
+        cmp_rows = []
+        allv = xs + endog
+        for i, c in enumerate(allv):
+            cmp_rows.append([c, f(float(ame0.iloc[i, 0])), f(float(ame0.iloc[i, 1])), f(float(am[i])), f(float(sa[i]))])
+        tabs.append(table("Ordinary probit against control-function probit: average effects", ["Variable", "Probit effect", "Probit s.e.", "IV-probit effect", "IV-probit s.e."], cmp_rows,
+                          "A large gap between the two columns for the endogenous regressor is the signature of endogeneity bias."))
+    else:
+        e1 = E[:, 0]
+        b0 = np.asarray(probit0.params)
+        t0 = np.r_[b0, Pi[:, 0], np.log(max(float(Vh[:, 0].std()), 1e-6)), 0.0]
+        fun = lambda t: _ivp_nll(t, Xn, Zn, e1, Yv, kx, kz)
+        o1 = optimize.minimize(fun, t0, method="BFGS", options={"gtol": 1e-7, "maxiter": 3000})
+        o2 = optimize.minimize(fun, o1.x, method="BFGS", options={"gtol": 1e-8, "maxiter": 3000})
+        if not np.isfinite(o2.fun) or np.linalg.norm(o2.jac) > 1e-2 * max(1, n):
+            raise OESError("The maximum-likelihood iterations did not converge. Try the control-function estimator.")
+        try:
+            V = np.linalg.inv(approx_hess(o2.x, fun))
+        except np.linalg.LinAlgError:
+            raise OESError("The information matrix is singular.")
+        if np.any(np.diag(V) <= 0):
+            raise OESError("The information matrix is not positive definite.")
+        th = o2.x; se = np.sqrt(np.diag(V)); main_ll = -float(o2.fun)
+        wn = names_x + endog
+        nb = Xn.shape[1] + 1
+        sv, rho = float(np.exp(th[-2])), float(np.tanh(th[-1]))
+        se_rho = (1 - rho ** 2) * se[-1]
+        # exogeneity: LR test of rho = 0 against the two-step probit + first-stage likelihoods
+        e_res = sm.OLS(e1, Zn).fit(); ll_fs = float(e_res.llf)
+        lr = max(2 * (main_ll - (float(probit0.llf) + ll_fs)), 0.0)
+        drows = [test_row("LR test of exogeneity, rho = 0 (1 df)", lr, stats.chi2.sf(lr, 1), "H0: the regressor is exogenous"),
+                 test_row("Wald test of exogeneity, rho = 0", (rho / se_rho) ** 2, stats.chi2.sf((rho / se_rho) ** 2, 1), "H0: the regressor is exogenous")]
+        full = np.column_stack([Xn, e1])
+        def ame3(t):
+            bb = t[:nb]; out = []
+            for i, c in enumerate(xs + endog):
+                ci = 1 + i
+                if set(d[c].unique()) <= {0, 1}:
+                    A1, A0 = full.copy(), full.copy(); A1[:, ci], A0[:, ci] = 1, 0
+                    out.append((stats.norm.cdf(A1 @ bb) - stats.norm.cdf(A0 @ bb)).mean())
+                else:
+                    out.append((bb[ci] * stats.norm.pdf(full @ bb)).mean())
+            return np.array(out)
+        am = ame3(th); Ja = _num_jac(ame3, th); sa = np.sqrt(np.maximum(np.diag(Ja @ V @ Ja.T), 0))
+        cof = coef_table(wn, th[:nb], se[:nb], dist="z", title="Structural probit equation (maximum likelihood)", note="Structural coefficients with unit error variance.")
+        cof["rows"].append(["rho (corr. of the two errors)", f(rho), f(se_rho), f(rho / se_rho, 4), f(2 * stats.norm.sf(abs(rho / se_rho)), 4), f(rho - 1.96 * se_rho), f(rho + 1.96 * se_rho)])
+        tabs.append(cof)
+        tabs.append(table("Average structural effects on the probability", ["Variable", "Effect", "Std. err.", "z", "p-value"],
+                          [[c, f(am[i]), f(sa[i]), f(am[i] / sa[i], 4) if sa[i] > 0 else None, f(2 * stats.norm.sf(abs(am[i] / sa[i]))) if sa[i] > 0 else None] for i, c in enumerate(xs + endog)],
+                          "Average of the structural effect over the sample. Delta-method standard errors."))
+        ame0 = probit0.get_margeff(at="overall").summary_frame()
+        tabs.append(table("Ordinary probit against IV probit: average effects", ["Variable", "Probit effect", "Probit s.e.", "IV-probit effect", "IV-probit s.e."],
+                          [[c, f(float(ame0.iloc[i, 0])), f(float(ame0.iloc[i, 1])), f(float(am[i])), f(float(sa[i]))] for i, c in enumerate(xs + endog)],
+                          "A large gap between the two columns for the endogenous regressor is the signature of endogeneity bias."))
+    tabs.insert(0, fs_tab)
+    tabs.append(tests_table(drows))
+    summary = [stat("Observations", n), stat("Endogenous regressors", J), stat("Excluded instruments", len(inst)), stat("Log-likelihood", main_ll), stat("Estimator", "Control function" if est == "cf" else "Maximum likelihood")]
+    notes = [f"IV probit of {y}: endogenous {', '.join(endog)}; excluded instruments {', '.join(inst)}; {n} observations.",
+             "An ordinary probit is inconsistent when a regressor is correlated with the error. The control-function estimator adds the first-stage residuals to the probit, "
+             "which also gives a simple test of exogeneity. The structural coefficients depend on the scale of the error, so compare average effects, not coefficients.",
+             "Valid instruments must be relevant (check the first-stage F) and excluded from the outcome equation; the exclusion cannot be tested when the model is exactly identified."]
+    return result("ivprobit", f"IV probit: {y}", n, summary, tabs, [], notes)
