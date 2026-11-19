@@ -110,6 +110,7 @@ footer{background:#00205b;color:#dce7f6;padding:25px 0;font-size:12px}footer .fo
 </section>
 
 <section class="step" id="s-results" hidden><span class="stepno">05 · Results</span><h2 id="res-title">Results</h2><p class="sub" id="res-sub"></p>
+<div id="report"></div>
 <div class="metrics" id="metrics"></div>
 <div class="charts" id="charts"></div>
 <div id="tables"></div>
@@ -165,6 +166,7 @@ footer{background:#00205b;color:#dce7f6;padding:25px 0;font-size:12px}footer .fo
 </section>
 \n</main>
 <footer><div class="wrap foot"><span><b>Tuhin G. M. Al Mamun, Ph.D.</b> · Open Econometric Systems</span><span><a href="https://github.com/tuhingm/open-econometric-systems" target="_blank" rel="noopener">Source code</a> · © <span id="year"></span></span></div></footer>
+<script src="report-ui.js?v=1"></script>
 <script>
 (() => {
 const $ = id => document.getElementById(id);
@@ -411,6 +413,7 @@ function renderResult() {
   $("s-results").hidden = false;
   $("res-title").textContent = out.title;
   $("res-sub").textContent = `${model.name} · ${RESULT.data} · ${out.nobs.toLocaleString()} observations · estimated in ${seconds.toFixed(1)} s with OES engine ${out.engine}`;
+  if (out.report && window.OESReport) OESReport.render($("report"), out.report); else $("report").innerHTML = out.report_error ? `<p class="tnote">The publication report could not be produced for this run (${esc(out.report_error)}). The standard results below are unaffected.</p>` : "";
   $("metrics").innerHTML = out.summary.map(s => `<div class="metric"><small>${esc(s.label)}</small><strong>${esc(NUM(s.value))}</strong></div>`).join("");
   $("tables").innerHTML = out.tables.map(t => {
     const pcol = t.columns.indexOf("p-value");
@@ -495,7 +498,7 @@ $("test-run").onclick = async () => {
   const exp = Object.assign(await (await fetch("engine/expected.json?v=" + CAT.version)).json(), await (await fetch("engine/stat_expected.json?v=" + CAT.version)).json());
   const list = CAT.models.filter(m => $("test-slow").checked || !m.slow);
   const tbl = $("test-table"); tbl.hidden = false;
-  tbl.innerHTML = `<table><thead><tr><th>Model</th><th>Group</th><th>Status</th><th>Seconds</th><th>Checked value</th><th>Browser</th><th>Reference</th></tr></thead><tbody>${list.map(m => `<tr id="t-${m.id}"><td>${esc((m.code ? m.code + " " : "") + m.name)}</td><td>${esc(m.group)}</td><td class="test-run">waiting</td><td></td><td></td><td></td><td></td></tr>`).join("")}</tbody></table>`;
+  tbl.innerHTML = `<table><thead><tr><th>Model</th><th>Group</th><th>Status</th><th>Seconds</th><th>Checked value</th><th>Browser</th><th>Reference</th><th>Report</th></tr></thead><tbody>${list.map(m => `<tr id="t-${m.id}"><td>${esc((m.code ? m.code + " " : "") + m.name)}</td><td>${esc(m.group)}</td><td class="test-run">waiting</td><td></td><td></td><td></td><td></td><td></td></tr>`).join("")}</tbody></table>`;
   let ok = 0, bad = 0;
   status.active = false;
   for (const m of list) {
@@ -514,6 +517,13 @@ $("test-run").onclick = async () => {
       cells[4].innerHTML = `${esc(e.row)} (${esc(e.col)})` + (e.summary ? `<br>${esc(e.summary.label)}` : "");
       cells[5].innerHTML = esc(NUM(v)) + (e.summary ? `<br>${esc(NUM(sv))}` : "");
       cells[6].innerHTML = esc(NUM(e.value)) + (e.summary ? `<br>${esc(NUM(e.summary.value))}` : "");
+      const rp = r.result.report;
+      if (rp) {   // the report must exist, belong to this run, and hold complete tables and figures
+        const figs = rp.steps.flatMap(x => x.figures), tabs = rp.steps.flatMap(x => x.tables);
+        const good = rp.meta.nobs === r.result.nobs && figs.length >= 6 && figs.every(f => f.svg.startsWith("<svg") && f.pdf_b64.length > 100) && tabs.every(t => t.rows.length && t.csv && t.latex && t.html) && rp.methods.length && rp.references.length;
+        cells[7].innerHTML = good ? `<span class="test-ok">✓ ${rp.steps.length} steps, ${tabs.length} tables, ${figs.length} figures</span>` : '<span class="test-bad">✗ incomplete</span>';
+        good ? ok++ : bad++;
+      } else cells[7].textContent = r.result.report_error ? "error: " + r.result.report_error.slice(0, 60) : "not yet";
       pass ? ok++ : bad++;
     } catch (err) { cells[2].innerHTML = `<span class="test-bad">✗ error</span>`; cells[4].textContent = err.message.slice(0, 120); bad++; }
     $("test-sum").textContent = `${ok} passed, ${bad} failed of ${list.length}`;

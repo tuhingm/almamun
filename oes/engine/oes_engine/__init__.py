@@ -19,7 +19,7 @@ from . import stat_registry
 from .core import OESError, read_csv, time_order
 from .report import frame, plot, show, summary, tables
 
-__version__ = "1.5.0"
+__version__ = "1.6.0"
 
 # field helpers -------------------------------------------------------------------------------------------------
 def col(key, label, required=True, help=""):
