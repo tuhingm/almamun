@@ -433,6 +433,12 @@ MODELS += [
                  num("cutoff", "Classification cut-off", 0.5)],
          example=dict(file=ME + "spector.csv", spec=dict(y="GRADE", x=["GPA", "TUCE", "PSI"], link="logit", cov="oim", me="ame", cutoff=0.5)),
          check=dict(table=0, row=1, col=1)),
+    dict(id="ordered", group="Microeconometrics", name="Ordered logit and probit (ordinal outcome)", guide="microeconometrics-guide/ordered-logit-probit.html", fn=micro.ordered,
+         fields=[col("y", "Ordinal outcome variable (3 to 10 ordered categories)"), cols("x", "Explanatory variables"),
+                 sel("link", "Link function", [["logit", "Logit (proportional odds)"], ["probit", "Probit"]], "logit"),
+                 sel("cov", "Standard errors", [["oim", "Conventional"], ["robust", "Robust (HC1)"]], "oim")],
+         example=dict(file=ME + "housing.csv", spec=dict(y="Sat", x=["InflMedium", "InflHigh", "TypeApartment", "TypeAtrium", "TypeTerrace", "ContHigh"], link="logit", cov="oim")),
+         check=dict(table=0, row=0, col=1)),
 ]
 
 CE = "oes/examples/"

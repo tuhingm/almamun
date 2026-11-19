@@ -178,3 +178,186 @@ def binary(df, spec):
     if n < 10 * k:
         notes.append(f"{n} observations for {k} parameters is below the rule of thumb of 10 observations per parameter in the rarer class.")
     return result("logit_probit", f"{link.capitalize()} regression: {y}", n, summary, tabs, [roc, dist], notes)
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+# ordered logit and probit
+# ---------------------------------------------------------------------------------------------------------------------
+def _cdf(link):
+    return (lambda z: 1 / (1 + np.exp(-z))) if link == "logit" else stats.norm.cdf
+
+
+def _pdf(link):
+    return (lambda z: np.exp(z) / (1 + np.exp(z)) ** 2) if link == "logit" else stats.norm.pdf
+
+
+def _ord_probs(X, beta, cuts, link):
+    """n x J matrix of category probabilities: Pr(y = j) = F(c_j - x'b) - F(c_{j-1} - x'b)."""
+    F = _cdf(link)
+    xb = X @ beta
+    cum = np.column_stack([np.zeros(len(xb))] + [F(c - xb) for c in cuts] + [np.ones(len(xb))])
+    return np.diff(cum, axis=1)
+
+
+def _cuts_from_raw(raw):
+    """statsmodels parametrisation (first cut-point, then log increments) to ordered cut-points."""
+    return raw[0] + np.r_[0.0, np.cumsum(np.exp(raw[1:]))]
+
+
+def _num_jac(fun, x, h=1e-5):
+    x = np.asarray(x, float)
+    f0 = np.atleast_1d(fun(x))
+    J = np.zeros((len(f0), len(x)))
+    for i in range(len(x)):
+        e = np.zeros(len(x)); e[i] = h * max(1.0, abs(x[i]))
+        J[:, i] = (np.atleast_1d(fun(x + e)) - np.atleast_1d(fun(x - e))) / (2 * e[i])
+    return J
+
+
+def _brant(Y, X, levels, k):
+    """Brant (1990) Wald test of the parallel-lines (proportional odds) assumption for the ordered logit."""
+    J = len(levels)
+    betas, ps = [], []
+    for j in range(J - 1):
+        yb = (Y > levels[j]).astype(float)
+        fit = sm.Logit(yb, sm.add_constant(X, has_constant="add")).fit(disp=0, maxiter=100)
+        betas.append(np.asarray(fit.params)[1:])
+        ps.append(np.asarray(fit.predict(sm.add_constant(X, has_constant="add"))))
+    Xc = sm.add_constant(X, has_constant="add")
+    inv = [np.linalg.inv(Xc.T @ (Xc * (p * (1 - p))[:, None])) for p in ps]
+    m = J - 1
+    V = np.zeros((m * k, m * k))
+    for a in range(m):
+        for b in range(a, m):
+            W = ps[b] * (1 - ps[a])                       # Pr(y > b)(1 - Pr(y > a)) for a <= b
+            blk = (inv[a] @ (Xc.T @ (Xc * W[:, None])) @ inv[b])[1:, 1:]
+            V[a * k:(a + 1) * k, b * k:(b + 1) * k] = blk
+            V[b * k:(b + 1) * k, a * k:(a + 1) * k] = blk.T
+    D = np.zeros(((m - 1) * k, m * k))
+    for a in range(m - 1):
+        D[a * k:(a + 1) * k, a * k:(a + 1) * k] = np.eye(k)
+        D[a * k:(a + 1) * k, (a + 1) * k:(a + 2) * k] = -np.eye(k)
+    bv = np.concatenate(betas)
+    dv = D @ bv
+    W = float(dv @ np.linalg.solve(D @ V @ D.T, dv))
+    return W, (m - 1) * k, float(stats.chi2.sf(W, (m - 1) * k))
+
+
+def ordered(df, spec):
+    """Ordered logit or probit for an ordinal outcome with 3 to 10 ordered categories."""
+    from statsmodels.miscmodels.ordinal_model import OrderedModel
+    y = need(spec, "y", "ordinal outcome variable")
+    xs = as_list(spec.get("x"))
+    if not xs:
+        raise OESError("Choose at least one explanatory variable.")
+    link = _choice(spec, "link", ("logit", "probit"), "logit", "Link")
+    cov = _choice(spec, "cov", ("oim", "robust"), "oim", "Standard errors")
+    distinct(y, xs)
+    d = numeric(df, [y] + xs).reset_index(drop=True)
+    levels = np.sort(d[y].unique())
+    J = len(levels)
+    if J < 3:
+        raise OESError(f"The outcome {y} has {J} distinct values; use the logit/probit model for a binary outcome.")
+    if J > 10:
+        raise OESError(f"The outcome {y} has {J} distinct values. An ordered model suits 3 to 10 ordered categories; for a continuous outcome use a regression.")
+    n, k = len(d), len(xs)
+    counts = np.array([(d[y] == v).sum() for v in levels])
+    if counts.min() < 5:
+        raise OESError("Every category needs at least 5 observations. Combine the sparse categories and try again.")
+    if n < 10 * k:
+        raise OESError(f"{n} observations are too few for {k} regressors; use at least ten observations per regressor.")
+    X = d[xs].astype(float)
+    if np.linalg.matrix_rank(X.to_numpy()) < k or (X.std() == 0).any():
+        raise OESError("One regressor is constant, or the regressors are perfectly collinear. An ordered model has no intercept, because the cut-points play that role.")
+    ycat = pd.Categorical(d[y], categories=levels, ordered=True)
+    mod = OrderedModel(ycat, X, distr=link)
+    try:
+        kw = dict(method="bfgs", disp=0, maxiter=1000)
+        if cov == "robust":
+            kw.update(cov_type="HC1")
+        res = mod.fit(**kw)
+    except Exception as e:
+        if "constant" in str(e).lower():
+            raise OESError("The regressors contain a constant (for example dummies that add up to one). Drop one of them: the cut-points play the role of the intercept.")
+        raise OESError(f"The model did not converge ({e}).")
+    raw = np.asarray(res.params, float)
+    beta, rawc = raw[:k], raw[k:]
+    cuts = _cuts_from_raw(rawc)
+    Vraw = np.asarray(res.cov_params(), float)
+    # cut-points and their standard errors by the delta method
+    Jc = _num_jac(lambda r: _cuts_from_raw(r), rawc)
+    Vc = Jc @ Vraw[k:, k:] @ Jc.T
+    Vfull = np.zeros((k + J - 1, k + J - 1))
+    Vfull[:k, :k] = Vraw[:k, :k]
+    Vfull[:k, k:] = Vraw[:k, k:] @ Jc.T
+    Vfull[k:, :k] = Jc @ Vraw[k:, :k]
+    Vfull[k:, k:] = Vc
+    se = np.sqrt(np.diag(Vfull))
+    ll = float(res.llf)
+    ll0 = float((counts * np.log(counts / n)).sum())
+    lr = 2 * (ll - ll0)
+    Xn = X.to_numpy()
+    probs = _ord_probs(Xn, beta, cuts, link)
+    ycode = np.searchsorted(levels, d[y].to_numpy())
+    pred = probs.argmax(axis=1)
+    correct = float((pred == ycode).mean())
+    covtxt = "conventional (inverse observed information)" if cov == "oim" else "heteroskedasticity-robust (HC1)"
+    tabs = [coef_table(xs, beta, se[:k], dist="z", note=f"Ordered {link}, maximum likelihood. Standard errors: {covtxt}. "
+                       "A positive coefficient raises the probability of the higher categories and lowers that of the lowest; "
+                       "the size is not a change in probability, so read the odds ratios and marginal effects."),
+            table("Cut-points (thresholds)", ["Cut-point", "Estimate", "Std. err.", "z"],
+                  [[f"{f(levels[i], 6)} | {f(levels[i + 1], 6)}", f(cuts[i]), f(se[k + i]), f(cuts[i] / se[k + i], 4)] for i in range(J - 1)],
+                  "Pr(y <= j) = F(cut-point j - x'b). The cut-points are ordered by construction and are the model's intercepts.")]
+    if link == "logit":
+        ci = np.exp(np.column_stack([beta - 1.96 * se[:k], beta + 1.96 * se[:k]]))
+        tabs.append(table("Odds ratios (proportional odds)", ["Variable", "Odds ratio", "Std. err.", "95% CI low", "95% CI high"],
+                          [[xs[i], f(np.exp(beta[i])), f(np.exp(beta[i]) * se[i]), f(ci[i, 0]), f(ci[i, 1])] for i in range(k)],
+                          "exp(coefficient): the factor by which the odds of being in a HIGHER category (rather than in or below the current one) change for a one-unit rise. "
+                          "The same factor applies at every cut-point, which is the proportional-odds assumption."))
+    dummy = [(X[c].isin([0, 1]).all()) for c in xs]
+
+    def ame_vec(theta):
+        b, c = theta[:k], theta[k:]
+        out = np.zeros((k, J))
+        base_p = _ord_probs(Xn, b, c, link)
+        for i in range(k):
+            if dummy[i]:
+                X1, X0 = Xn.copy(), Xn.copy()
+                X1[:, i], X0[:, i] = 1, 0
+                out[i] = (_ord_probs(X1, b, c, link) - _ord_probs(X0, b, c, link)).mean(axis=0)
+            else:
+                dens = _pdf(link)
+                xb = Xn @ b
+                fz = np.column_stack([np.zeros(n)] + [dens(cj - xb) for cj in c] + [np.zeros(n)])
+                out[i] = (-b[i] * np.diff(fz, axis=1)).mean(axis=0)
+        return out.ravel()
+    theta = np.r_[beta, cuts]
+    ame = ame_vec(theta)
+    Jm = _num_jac(ame_vec, theta)
+    se_ame = np.sqrt(np.maximum(np.diag(Jm @ Vfull @ Jm.T), 0))
+    rows = []
+    for i in range(k):
+        for j in range(J):
+            a, s_ = ame[i * J + j], se_ame[i * J + j]
+            rows.append([xs[i], f"y = {f(levels[j], 6)}", f(a), f(s_), f(a / s_, 4) if s_ > 0 else None, f(2 * stats.norm.sf(abs(a / s_)), 4) if s_ > 0 else None,
+                         "discrete change 0 to 1" if dummy[i] else "derivative"])
+    tabs.append(table("Average marginal effects on each category probability", ["Variable", "Category", "dPr/dx", "Std. err.", "z", "p-value", "Type"], rows,
+                      "Delta-method standard errors. For each regressor the effects across categories add to zero: what the highest category gains, the lower ones lose."))
+    drows = [test_row(f"Likelihood-ratio test, all slopes zero ({k} df)", lr, stats.chi2.sf(lr, k), "H0: the model is no better than the category frequencies")]
+    if link == "logit":
+        try:
+            bw, bdf, bp = _brant(d[y].to_numpy(), Xn, levels, k)
+            drows.append(test_row(f"Brant test of proportional odds ({bdf} df)", bw, bp, "H0: the slopes are the same at every cut-point (parallel lines)"))
+        except Exception:
+            pass
+    tabs.append(tests_table(drows))
+    obs = counts / n
+    prd = probs.mean(axis=0)
+    ch = chart("Observed and predicted category shares", [f"{f(v, 6)}" for v in levels], [("Observed", obs), ("Predicted (average)", prd)], y, "Share of observations", kind="bar")
+    summary = [stat("Observations", n), stat("Categories", J), stat("Log-likelihood", ll), stat("LR chi-squared", lr), stat("McFadden pseudo R-squared", 1 - ll / ll0),
+               stat("Share predicted in the right category", correct, 3)]
+    notes = [f"Ordered {link} of {y} ({J} categories: {', '.join(str(f(v, 6)) for v in levels)}) on {', '.join(xs)}, {n} observations.",
+             "There is no intercept: the J - 1 cut-points play that role. The ordering of the categories must be meaningful, otherwise use a multinomial model."]
+    if link == "logit" and len(drows) > 1 and drows[1][2] is not None and drows[1][2] < 0.05:
+        notes.append("The Brant test rejects proportional odds: the effect of some regressor differs between cut-points. Consider a generalised ordered logit, or collapse categories.")
+    return result("ordered", f"Ordered {link}: {y}", n, summary, tabs, [ch], notes)

@@ -29,7 +29,7 @@ SECTIONS = {
                    data=["oes/examples/hamilton_gnp.csv", "oes/examples/fedfunds.csv", "oes/examples/us_macro.csv",
                          "panel-data-guide/examples/garrett.csv"]),
     "micro": dict(folder="microeconometrics-guide", name="Microeconometrics Research Guide", short="Microeconometrics Guide",
-                  order=["logit-probit"], data=[]),
+                  order=["logit-probit", "ordered-logit-probit"], data=[]),
     # local projections: two more guides in the existing Time-Series and Panel-Data guides (hubs are built by their own tools)
     "lp": dict(folder="time-series-guide", name="Empirical Research Guide (Time Series)", short="Time-Series Guide",
                order=["ols", "ardl", "nardl", "var", "vecm", "gmm", "lp", "svar", "bp", "tar", "str", "arima", "garch", "quantile", "cointegration", "wavelet"], static=dict(ols="OLS", ardl="ARDL", nardl="NARDL", var="VAR", vecm="VECM", gmm="2SLS / GMM"),
