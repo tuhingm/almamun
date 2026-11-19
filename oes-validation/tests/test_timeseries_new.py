@@ -2,6 +2,7 @@
 Checks against (1) statsmodels and the `arch` package, (2) simulated series with a known answer and (3) error messages."""
 import os, sys, warnings
 import numpy as np, pandas as pd, pytest
+from scipy import stats
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, os.path.join(ROOT, "oes", "engine")); sys.dont_write_bytecode = True
