@@ -569,8 +569,11 @@ def run(model_id, csv_text, spec=None):
     if m is None:
         return {"error": f"Unknown model {model_id}."}
     try:
-        df = read_csv(csv_text) if isinstance(csv_text, str) else csv_text.copy()
-        df = prepare(df, spec.pop("ops", None))
+        if m.get("nodata") and not (isinstance(csv_text, str) and csv_text.strip()):
+            df = pd.DataFrame({"_": [0]})
+        else:
+            df = read_csv(csv_text) if isinstance(csv_text, str) else csv_text.copy()
+            df = prepare(df, spec.pop("ops", None))
         if spec.get("x") == "__all__":
             used = {spec.get(k) for k in ("y", "treat", "instrument", "time", "unit")}
             spec["x"] = [c for c in df.columns if c not in used and pd.api.types.is_numeric_dtype(df[c])]

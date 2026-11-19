@@ -1,7 +1,7 @@
 """Registry of the Statistics Division: 31 methods in seven categories, with their input fields and the example each one is
 tested on. __init__.py calls build() with the field helpers, so the models are registered like every other OES model.
 Each entry carries the category (group), a code (A1 ... G2), the guide page and a documented public example dataset."""
-from . import stat_anova, stat_mixed, stat_multivariate, stat_nonparam, stat_survival
+from . import stat_anova, stat_meta, stat_mixed, stat_multivariate, stat_nonparam, stat_resample, stat_survival
 
 SX = "stat-guide/examples/"
 G_ANOVA = "Analysis of variance"
@@ -129,4 +129,34 @@ def build(col, cols, num, sel):
     add(id="stat_icc", code="E4", group=G_MIXED, name="Intraclass correlation (ICC) and reliability", guide="stat-guide/icc.html", fn=stat_mixed.icc,
         fields=[cols("raters", "Rater / measurement columns (one row per subject)"), ALPHA],
         example=dict(file=SX + "shrout_fleiss.csv", spec=dict(raters=["judge1", "judge2", "judge3", "judge4"])))
+    SEED = num("seed", "Random seed", 12345)
+    add(id="stat_bootstrap", code="F1", group=G_RESAMP, name="Bootstrap confidence intervals", guide="stat-guide/bootstrap.html", fn=stat_resample.bootstrap,
+        fields=[col("y", "Variable (outcome)"), col("x", "Second variable (correlation, slope)", required=False), col("group", "Grouping variable with two levels (difference statistics)", required=False),
+                sel("statistic", "Statistic", [[k, v] for k, v in stat_resample._BOOT_STATS.items()], "mean"), num("n_boot", "Bootstrap resamples", 2000), SEED, ALPHA],
+        example=dict(file=SX + "toothgrowth.csv", spec=dict(statistic="median", y="len", n_boot=4000, seed=12345)))
+    add(id="stat_permutation", code="F2", group=G_RESAMP, name="Permutation tests", guide="stat-guide/permutation.html", fn=stat_resample.permutation,
+        fields=[col("y", "Outcome variable"), col("group", "Grouping variable (group tests)", required=False), col("x", "Second variable (paired difference, correlation)", required=False),
+                sel("test", "Test", [[k, v] for k, v in stat_resample._PERM_TESTS.items()], "mean_diff"), ALT, num("n_perm", "Random permutations (when not exact)", 10000),
+                num("exact_max", "Enumerate exactly up to this many rearrangements", 200000), SEED, ALPHA],
+        example=dict(file=SX + "toothgrowth.csv", spec=dict(test="mean_diff", y="len", group="supp", n_perm=20000, seed=12345)))
+    add(id="stat_power", code="F3", group=G_RESAMP, name="Power and sample-size analysis", guide="stat-guide/power.html", fn=stat_resample.power_analysis, nodata=True,
+        fields=[sel("test", "Test", [[k, v[0]] for k, v in stat_resample._POWER_TESTS.items()], "t_two"),
+                sel("solve_for", "Solve for", [["n", "Sample size"], ["power", "Power"], ["effect", "Smallest detectable effect size"]], "n"),
+                num("effect", "Effect size (d, f, r, h or w, depending on the test)", 0.5), num("n", "Sample size (per group, or total for chi-square)", 30), num("power", "Target power", 0.8), ALPHA, ALT,
+                num("k", "Number of groups (ANOVA)", 3), num("df", "Degrees of freedom (chi-square)", 2), num("ratio", "Allocation ratio, second group / first", 1),
+                num("p1", "Proportion in group 1 (two proportions; replaces the effect size)", ""), num("p2", "Proportion in group 2", "")],
+        example=dict(file=None, spec=dict(test="t_two", solve_for="n", effect=0.5, power=0.8, alpha=0.05)))
+    META_IN = sel("input", "Type of study data", [["binary", "Event counts in two groups"], ["means", "Means and SDs in two groups"], ["generic", "Effect size with standard error or variance"]], "generic")
+    META_FIELDS = [META_IN, col("study", "Study label", required=False),
+                   col("yi", "Effect size (generic input)", required=False), col("sei", "Standard error (generic input)", required=False), col("vi", "Variance (generic input, if no standard error)", required=False),
+                   col("ev1", "Events, treatment group (counts input)", required=False), col("n1", "Group size, treatment (counts or means input)", required=False),
+                   col("ev2", "Events, control group (counts input)", required=False), col("n2", "Group size, control (counts or means input)", required=False),
+                   sel("measure", "Effect measure for counts", [["lrr", "Log risk ratio"], ["lor", "Log odds ratio"], ["rd", "Risk difference"]], "lrr"),
+                   col("m1", "Mean, treatment (means input)", required=False), col("sd1", "SD, treatment (means input)", required=False), col("m2", "Mean, control (means input)", required=False), col("sd2", "SD, control (means input)", required=False)]
+    add(id="stat_meta_fixed", code="G1", group=G_META, name="Fixed-effect meta-analysis", guide="stat-guide/meta-fixed.html", fn=stat_meta.meta_fixed, fields=META_FIELDS + [ALPHA],
+        example=dict(file=SX + "bcg_vaccine.csv", spec=dict(input="binary", study="author", ev1="tpos", n1="ttotal", ev2="cpos", n2="ctotal", measure="lrr")))
+    add(id="stat_meta_random", code="G2", group=G_META, name="Random-effects meta-analysis", guide="stat-guide/meta-random.html", fn=stat_meta.meta_random,
+        fields=META_FIELDS + [sel("tau_method", "Between-study variance estimator", [["reml", "REML"], ["dl", "DerSimonian-Laird"], ["pm", "Paule-Mandel"], ["ml", "Maximum likelihood"], ["he", "Hedges"]], "reml"),
+                              sel("ci_method", "Confidence interval", [["wald", "Wald (z)"], ["hksj", "Hartung-Knapp-Sidik-Jonkman"], ["hksj_mod", "Hartung-Knapp, never narrower than Wald"]], "wald"), ALPHA],
+        example=dict(file=SX + "bcg_vaccine.csv", spec=dict(input="binary", study="author", ev1="tpos", n1="ttotal", ev2="cpos", n2="ctotal", measure="lrr", tau_method="reml", ci_method="hksj")))
     return M
