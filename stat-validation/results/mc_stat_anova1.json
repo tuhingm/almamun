@@ -1,0 +1,328 @@
+{
+ "model": "stat_anova1",
+ "scenarios": [
+  {
+   "scenario": "H0, normal, balanced",
+   "model": "stat_anova1",
+   "note": "",
+   "h0_true": true,
+   "results": [
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.0072,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p_F": 0.042,
+     "mc_se_reject_p_F": 0.004485309353879618,
+     "reject_p_Welch": 0.0465,
+     "mc_se_reject_p_Welch": 0.004708383480558906
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00717,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p_F": 0.0555,
+     "mc_se_reject_p_F": 0.005119558086397693,
+     "reject_p_Welch": 0.054,
+     "mc_se_reject_p_Welch": 0.005053909377897471
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00809,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p_F": 0.0485,
+     "mc_se_reject_p_F": 0.004803527349771208,
+     "reject_p_Welch": 0.05,
+     "mc_se_reject_p_Welch": 0.004873397172404482
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00836,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p_F": 0.045,
+     "mc_se_reject_p_F": 0.004635461142108733,
+     "reject_p_Welch": 0.047,
+     "mc_se_reject_p_Welch": 0.00473238840333293
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.0092,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p_F": 0.0465,
+     "mc_se_reject_p_F": 0.004708383480558906,
+     "reject_p_Welch": 0.047,
+     "mc_se_reject_p_Welch": 0.00473238840333293
+    }
+   ]
+  },
+  {
+   "scenario": "H0, heteroskedastic + unbalanced (robustness)",
+   "model": "stat_anova1",
+   "note": "largest variance in the smallest group",
+   "h0_true": true,
+   "results": [
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 1,
+     "convergence": 0.9995,
+     "sec_per_rep": 0.00688,
+     "failure_reasons": {
+      "Every group needs at least two observations. Groups with one observation: 2": 1
+     },
+     "reps_valid": 1999,
+     "reject_p_F": 0.02051025512756378,
+     "mc_se_reject_p_F": 0.003170144663840729,
+     "reject_p_Welch": 0.054527263631815905,
+     "mc_se_reject_p_Welch": 0.005078377254014142
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00726,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p_F": 0.021,
+     "mc_se_reject_p_F": 0.0032061659345704488,
+     "reject_p_Welch": 0.049,
+     "mc_se_reject_p_Welch": 0.0048269555622566076
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00757,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p_F": 0.0225,
+     "mc_se_reject_p_F": 0.0033161536454151216,
+     "reject_p_Welch": 0.047,
+     "mc_se_reject_p_Welch": 0.00473238840333293
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.0082,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p_F": 0.026,
+     "mc_se_reject_p_F": 0.003558370413546066,
+     "reject_p_Welch": 0.0525,
+     "mc_se_reject_p_Welch": 0.004987171041783107
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00948,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p_F": 0.019,
+     "mc_se_reject_p_F": 0.003052785613173647,
+     "reject_p_Welch": 0.0425,
+     "mc_se_reject_p_Welch": 0.0045107510461119445
+    }
+   ]
+  },
+  {
+   "scenario": "H0, t(3) errors (robustness)",
+   "model": "stat_anova1",
+   "note": "",
+   "h0_true": true,
+   "results": [
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00722,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p_F": 0.0385,
+     "mc_se_reject_p_F": 0.004302194207610809,
+     "reject_p_Welch": 0.033,
+     "mc_se_reject_p_Welch": 0.003994433626936364
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00821,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p_F": 0.0435,
+     "mc_se_reject_p_F": 0.004561126505590478,
+     "reject_p_Welch": 0.044,
+     "mc_se_reject_p_Welch": 0.0045860658521220555
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00833,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p_F": 0.0545,
+     "mc_se_reject_p_F": 0.005075911248239078,
+     "reject_p_Welch": 0.0545,
+     "mc_se_reject_p_Welch": 0.005075911248239078
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00837,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p_F": 0.0485,
+     "mc_se_reject_p_F": 0.004803527349771208,
+     "reject_p_Welch": 0.049,
+     "mc_se_reject_p_Welch": 0.0048269555622566076
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00881,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p_F": 0.042,
+     "mc_se_reject_p_F": 0.004485309353879618,
+     "reject_p_Welch": 0.0415,
+     "mc_se_reject_p_Welch": 0.004459694496263169
+    }
+   ]
+  },
+  {
+   "scenario": "Power, delta=0.5 SD",
+   "model": "stat_anova1",
+   "note": "",
+   "h0_true": false,
+   "results": [
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00767,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p_F": 0.2755,
+     "mc_se_reject_p_F": 0.009989988738732391,
+     "reject_p_Welch": 0.276,
+     "mc_se_reject_p_Welch": 0.009995599031573845
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00772,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p_F": 0.54,
+     "mc_se_reject_p_F": 0.011144505372604026,
+     "reject_p_Welch": 0.534,
+     "mc_se_reject_p_Welch": 0.011154460991011623
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00864,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p_F": 0.9195,
+     "mc_se_reject_p_F": 0.006083574196144895,
+     "reject_p_Welch": 0.9185,
+     "mc_se_reject_p_Welch": 0.006117914268768402
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00873,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p_F": 0.9975,
+     "mc_se_reject_p_F": 0.001116635571706353,
+     "reject_p_Welch": 0.997,
+     "mc_se_reject_p_Welch": 0.0012229063741758816
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00944,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p_F": 1.0,
+     "mc_se_reject_p_F": 0.0,
+     "reject_p_Welch": 1.0,
+     "mc_se_reject_p_Welch": 0.0
+    }
+   ]
+  }
+ ],
+ "env": {
+  "python": "3.12.3",
+  "numpy": "2.0.2",
+  "scipy": "1.14.1",
+  "pandas": "2.2.3",
+  "engine": "1.5.0"
+ },
+ "wall_seconds": 339.0,
+ "budget_seconds_per_cell": 45.0
+}

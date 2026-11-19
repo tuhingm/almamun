@@ -1,0 +1,286 @@
+{
+ "model": "stat_mann_whitney",
+ "scenarios": [
+  {
+   "scenario": "H0, normal",
+   "model": "stat_mann_whitney",
+   "note": "",
+   "h0_true": true,
+   "results": [
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.0045,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.05,
+     "mc_se_reject_p": 0.004873397172404482
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.0145,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.0475,
+     "mc_se_reject_p": 0.004756245893559331
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00368,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.043,
+     "mc_se_reject_p": 0.004536022486716748
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00457,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.0495,
+     "mc_se_reject_p": 0.004850244839180801
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00731,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.0465,
+     "mc_se_reject_p": 0.004708383480558906
+    }
+   ]
+  },
+  {
+   "scenario": "H0, exponential (skewed)",
+   "model": "stat_mann_whitney",
+   "note": "",
+   "h0_true": true,
+   "results": [
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00451,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.044,
+     "mc_se_reject_p": 0.0045860658521220555
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.01456,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.0605,
+     "mc_se_reject_p": 0.005331029450303197
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.0036,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.0565,
+     "mc_se_reject_p": 0.005162739098579358
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00453,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.0465,
+     "mc_se_reject_p": 0.004708383480558906
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00692,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.049,
+     "mc_se_reject_p": 0.0048269555622566076
+    }
+   ]
+  },
+  {
+   "scenario": "H0, t(3)",
+   "model": "stat_mann_whitney",
+   "note": "",
+   "h0_true": true,
+   "results": [
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00452,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.057,
+     "mc_se_reject_p": 0.00518415856238985
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.01467,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.0515,
+     "mc_se_reject_p": 0.004942051699446294
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00354,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.0445,
+     "mc_se_reject_p": 0.004610843198374892
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00436,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.054,
+     "mc_se_reject_p": 0.005053909377897471
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00698,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.054,
+     "mc_se_reject_p": 0.005053909377897471
+    }
+   ]
+  },
+  {
+   "scenario": "Power, shift 0.5",
+   "model": "stat_mann_whitney",
+   "note": "",
+   "h0_true": false,
+   "results": [
+    {
+     "n": 50,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00452,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.381,
+     "mc_se_reject_p": 0.010859074546203282
+    },
+    {
+     "n": 100,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.0145,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.673,
+     "mc_se_reject_p": 0.01048978074127386
+    },
+    {
+     "n": 250,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00356,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.9705,
+     "mc_se_reject_p": 0.0037835003634200943
+    },
+    {
+     "n": 500,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00436,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 0.999,
+     "mc_se_reject_p": 0.0007067531393633852
+    },
+    {
+     "n": 1000,
+     "reps_requested": 2000,
+     "reps_run": 2000,
+     "failures": 0,
+     "convergence": 1.0,
+     "sec_per_rep": 0.00702,
+     "failure_reasons": {},
+     "reps_valid": 2000,
+     "reject_p": 1.0,
+     "mc_se_reject_p": 0.0
+    }
+   ]
+  }
+ ],
+ "env": {
+  "python": "3.12.3",
+  "numpy": "2.0.2",
+  "scipy": "1.14.1",
+  "pandas": "2.2.3",
+  "engine": "1.5.0"
+ },
+ "wall_seconds": 284.7,
+ "budget_seconds_per_cell": 45.0
+}
