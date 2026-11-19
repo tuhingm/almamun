@@ -13,7 +13,7 @@ import warnings
 import numpy as np
 import pandas as pd
 
-from . import bayes, bayes_extra, breaks, causal, causal_extra, lp, markov, ml, panel, pthreshold, pvar, smooth, statespace_var, svar, tar, timeseries, ts_extra
+from . import bayes, bayes_extra, breaks, causal, causal_extra, lp, markov, micro, ml, panel, pthreshold, pvar, smooth, statespace_var, svar, tar, timeseries, ts_extra
 from . import panel_extra
 from . import stat_registry
 from .core import OESError, read_csv, time_order
@@ -49,6 +49,7 @@ TS = "time-series-guide/examples/"
 PD = "panel-data-guide/examples/"
 CI = "causal-inference-guide/examples/"
 MLD = "ml-guide/examples/"
+ME = "microeconometrics-guide/examples/"
 LAG4 = [1, 2, 3, 4]
 
 MODELS = [
@@ -422,6 +423,16 @@ MODELS += [
                  sel("switching_variance", "Switching variance", [["yes", "Yes"], ["no", "No"]], "yes"),
                  col("reference", "Reference 0/1 series, e.g. recession dates (optional)", required=False, help="Compared with the estimated regimes")],
          example=dict(file=OX + "gnp_fedfunds.csv", spec=dict(y="gnp_growth", driver=["d_fedfunds"], time="date", reference="nber_recession"))),
+    # ------------------------------------------------------------------ microeconometrics
+    dict(id="logit_probit", group="Microeconometrics", name="Logit and probit (binary outcome)", guide="microeconometrics-guide/logit-probit.html", fn=micro.binary,
+         fields=[col("y", "Binary outcome variable (0/1)"), cols("x", "Explanatory variables"),
+                 sel("link", "Link function", [["logit", "Logit"], ["probit", "Probit"]], "logit"),
+                 sel("cov", "Standard errors", [["oim", "Conventional"], ["robust", "Robust (HC1)"], ["cluster", "Clustered"]], "oim"),
+                 col("cluster", "Cluster variable (clustered errors only)", required=False),
+                 sel("me", "Marginal effects", [["ame", "Average marginal effects"], ["mem", "At the sample means"]], "ame"),
+                 num("cutoff", "Classification cut-off", 0.5)],
+         example=dict(file=ME + "spector.csv", spec=dict(y="GRADE", x=["GPA", "TUCE", "PSI"], link="logit", cov="oim", me="ame", cutoff=0.5)),
+         check=dict(table=0, row=1, col=1)),
 ]
 
 CE = "oes/examples/"

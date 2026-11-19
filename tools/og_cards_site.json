@@ -246,6 +246,18 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/microeconometrics-guide/index.jpg",
+  "kicker": "Microeconometrics Guide",
+  "title": "Which microeconometric model fits your outcome?",
+  "sub": "Logit, probit and the other models for binary, count, censored and choice outcomes: marginal effects, tests and the text for the paper."
+ },
+ {
+  "out": "assets/og/microeconometrics-guide/logit-probit.jpg",
+  "kicker": "Microeconometrics Guide · Model guide",
+  "title": "Logit and Probit Regression",
+  "sub": "A yes/no outcome (passed, defaulted, employed, adopted) explained by one or more regressors. Step-by-step guide with Python code…"
+ },
+ {
   "out": "assets/og/ml-guide/causal-forest.jpg",
   "kicker": "Machine Learning Guide · Model guide",
   "title": "Causal Forest",
@@ -282,6 +294,12 @@
   "sub": "LASSO, ridge, elastic net, random forest, XGBoost or double machine learning, chosen by tests on your data."
  },
  {
+  "out": "assets/og/ml-guide/krls.jpg",
+  "kicker": "Machine Learning Guide · Model guide",
+  "title": "Kernel-Based Regularized Least Squares (KRLS)",
+  "sub": "You want a flexible fit and interpretable marginal effects with standard errors, in samples up to a few thousand observations.…"
+ },
+ {
   "out": "assets/og/ml-guide/lasso.jpg",
   "kicker": "Machine Learning Guide · Model guide",
   "title": "LASSO",
@@ -298,6 +316,12 @@
   "kicker": "Machine Learning Guide · Model guide",
   "title": "Ridge Regression",
   "sub": "Linear, many small effects. Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/ml-guide/svr.jpg",
+  "kicker": "Machine Learning Guide · Model guide",
+  "title": "Support Vector Regression",
+  "sub": "Smooth nonlinear outcome, small or medium sample, standardised predictors. Step-by-step guide with Python code and real output."
  },
  {
   "out": "assets/og/ml-guide/xgb.jpg",
@@ -336,6 +360,12 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/panel-data-guide/fgls.jpg",
+  "kicker": "Panel Data Guide · Model guide",
+  "title": "Feasible GLS for Panels (Parks-Kmenta)",
+  "sub": "A long, balanced panel where you want efficiency gains from modelling heteroskedasticity, correlation across units and AR(1)…"
+ },
+ {
   "out": "assets/og/panel-data-guide/gmm.jpg",
   "kicker": "Panel Data Guide · Model guide",
   "title": "Difference GMM for Dynamic Panels",
@@ -364,6 +394,12 @@
   "kicker": "Panel Data Guide · Model guide",
   "title": "Panel Cointegration Tests",
   "sub": "Non-stationary panel variables that may share a long-run relation (demand, growth, convergence). Step-by-step guide with Python…"
+ },
+ {
+  "out": "assets/og/panel-data-guide/pcse.jpg",
+  "kicker": "Panel Data Guide · Model guide",
+  "title": "Panel-Corrected Standard Errors (PCSE)",
+  "sub": "A long panel (T of at least about 15) where units are hit by common shocks and have different error variances. Step-by-step guide…"
  },
  {
   "out": "assets/og/panel-data-guide/plp.jpg",
@@ -412,17 +448,5 @@
   "kicker": "Panel Data Guide · Model guide",
   "title": "Two-Way Fixed Effects with Clustered Standard Errors",
   "sub": "Unit and time effects are both needed and errors are correlated within units or across units. Step-by-step guide with Python code…"
- },
- {
-  "out": "assets/og/panel-data-guide/pcse.jpg",
-  "kicker": "Panel Data Guide · Model guide",
-  "title": "Panel-Corrected Standard Errors (PCSE)",
-  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
- },
- {
-  "out": "assets/og/panel-data-guide/fgls.jpg",
-  "kicker": "Panel Data Guide · Model guide",
-  "title": "Feasible GLS for Panels (Parks-Kmenta)",
-  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  }
 ]
