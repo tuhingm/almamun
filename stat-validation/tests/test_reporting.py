@@ -507,6 +507,8 @@ def _all_examples():
 @pytest.mark.parametrize("mid,ex", _all_examples())
 def test_generic_reports(mid, ex):
     """Every model returns a report whose tables and chart values are the engine's own numbers; the old output is unchanged."""
+    if not ex.get("file"):
+        pytest.skip("no data file for this example")
     path = os.path.join(ROOT, "oes", "examples", os.path.basename(ex["file"]))
     if not os.path.exists(path):
         path = os.path.join(ROOT, ex["file"])
