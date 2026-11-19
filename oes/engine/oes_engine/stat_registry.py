@@ -1,7 +1,7 @@
 """Registry of the Statistics Division: 31 methods in seven categories, with their input fields and the example each one is
 tested on. __init__.py calls build() with the field helpers, so the models are registered like every other OES model.
 Each entry carries the category (group), a code (A1 ... G2), the guide page and a documented public example dataset."""
-from . import stat_anova, stat_multivariate, stat_nonparam, stat_survival
+from . import stat_anova, stat_mixed, stat_multivariate, stat_nonparam, stat_survival
 
 SX = "stat-guide/examples/"
 G_ANOVA = "Analysis of variance"
@@ -107,4 +107,26 @@ def build(col, cols, num, sel):
     add(id="stat_parametric", code="D5", group=G_SURV, name="Parametric survival (Weibull, exponential, log-normal)", guide="stat-guide/parametric-survival.html", fn=stat_survival.parametric,
         fields=[TIME, EVENT, cols("covariates", "Numeric covariates (optional)", required=False), cols("factors", "Categorical covariates (optional)", required=False), ALPHA],
         example=dict(file=SX + "veteran.csv", spec=dict(time="time", event="status", covariates=["karno"])))
+    COVS = cols("covariates", "Numeric covariates (fixed effects)", required=False)
+    FACS = cols("factors", "Categorical covariates (dummy-coded)", required=False)
+    add(id="stat_lmm", code="E1", group=G_MIXED, name="Linear mixed-effects model (LMM)", guide="stat-guide/lmm.html", fn=stat_mixed.lmm,
+        fields=[col("y", "Outcome variable"), col("group", "Grouping variable (cluster or subject)"), COVS, FACS,
+                col("slope", "Random-slope variable (optional, numeric)", required=False),
+                sel("correlated", "Intercept-slope correlation", [["yes", "Estimated"], ["no", "Fixed at zero"]], "yes"),
+                sel("method", "Estimation", [["reml", "REML"], ["ml", "Maximum likelihood"]], "reml"), ALPHA],
+        example=dict(file=SX + "sleepstudy.csv", spec=dict(y="Reaction", group="Subject", covariates=["Days"], slope="Days", method="reml")))
+    add(id="stat_glmm", code="E2", group=G_MIXED, name="Generalised linear mixed model (GLMM)", guide="stat-guide/glmm.html", fn=stat_mixed.glmm,
+        fields=[col("y", "Outcome (successes, 0/1, or a count)"), col("trials", "Number of trials (binomial counts only; blank for 0/1)", required=False), col("group", "Grouping variable (cluster)"), COVS, FACS,
+                sel("family", "Family", [["binomial", "Binomial (logit link)"], ["poisson", "Poisson (log link)"]], "binomial"),
+                num("nodes", "Quadrature points (1 = Laplace)", 15), ALPHA],
+        example=dict(file=SX + "cbpp.csv", spec=dict(y="incidence", trials="size", group="herd", factors=["period"], family="binomial", nodes=15)))
+    add(id="stat_gee", code="E3", group=G_MIXED, name="Generalised estimating equations (GEE)", guide="stat-guide/gee.html", fn=stat_mixed.gee,
+        fields=[col("y", "Outcome variable"), col("group", "Cluster (subject) identifier"), col("time", "Time or visit order within cluster (optional)", required=False), COVS, FACS,
+                sel("family", "Family", [["gaussian", "Gaussian (identity)"], ["binomial", "Binomial (logit, 0/1 outcome)"], ["poisson", "Poisson (log)"]], "gaussian"),
+                sel("corr", "Working correlation", [["exchangeable", "Exchangeable"], ["ar1", "AR(1)"], ["independence", "Independence"]], "exchangeable"),
+                num("fixed_alpha", "Fix the correlation parameter (blank = estimate)", ""), ALPHA],
+        example=dict(file=SX + "orthodont.csv", spec=dict(y="distance", group="Subject", time="age", covariates=["age", "Sex01"], family="gaussian", corr="exchangeable")))
+    add(id="stat_icc", code="E4", group=G_MIXED, name="Intraclass correlation (ICC) and reliability", guide="stat-guide/icc.html", fn=stat_mixed.icc,
+        fields=[cols("raters", "Rater / measurement columns (one row per subject)"), ALPHA],
+        example=dict(file=SX + "shrout_fleiss.csv", spec=dict(raters=["judge1", "judge2", "judge3", "judge4"])))
     return M
