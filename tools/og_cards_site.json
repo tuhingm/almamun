@@ -438,6 +438,12 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/panel-data-guide/hausman-taylor.jpg",
+  "kicker": "Panel Data Guide · Model guide",
+  "title": "Hausman-Taylor Estimator",
+  "sub": "You want the return to a time-invariant variable such as schooling, but you suspect it is correlated with the unit effect, so…"
+ },
+ {
   "out": "assets/og/panel-data-guide/index.jpg",
   "kicker": "Panel Data Guide",
   "title": "Which panel model fits your data?",

@@ -812,3 +812,65 @@ def fgls(df, spec):
     if clipped:
         notes.append("An estimated AR(1) coefficient was truncated at 0.99 in absolute value.")
     return result("fgls", f"Feasible GLS (Parks-Kmenta): {y}", n, summary, tabs, _tscs_charts(S, r), notes)
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Hausman-Taylor estimator: random-effects efficiency with endogenous regressors, time-invariant ones included
+# ---------------------------------------------------------------------------------------------------------------
+def hausman_taylor(df, spec):
+    y = need(spec, "y", "dependent variable")
+    x1 = as_list(spec.get("x1") or []); x2 = as_list(spec.get("x2") or []); z1 = as_list(spec.get("z1") or []); z2 = as_list(spec.get("z2") or [])
+    if not (x1 or x2):
+        raise OESError("Give at least one time-varying regressor (exogenous or endogenous).")
+    allv = x1 + x2 + z1 + z2
+    d, unit, time, N, T = _panel(df, spec, [y] + allv)
+    X = x1 + x2
+    if len(x1) < len(z2):
+        raise OESError(f"The model is not identified: the number of exogenous time-varying regressors ({len(x1)}) must be at least the number of endogenous time-invariant regressors ({len(z2)}).")
+    u = d["_u"].to_numpy(int); n = len(d)
+    for v in z1 + z2:
+        if d.groupby("_u")[v].std().fillna(0).max() > 1e-10:
+            raise OESError(f"{v} varies within units; list it as a time-varying regressor.")
+    for v in X:
+        if d.groupby("_u")[v].std().fillna(0).max() <= 1e-10:
+            raise OESError(f"{v} does not vary within units; list it as a time-invariant regressor.")
+    Ti = np.bincount(u).astype(float)
+    if (Ti < 2).any():
+        raise OESError("Every unit needs at least two periods.")
+    gm = lambda M: pd.DataFrame(np.asarray(M, float)).groupby(u).transform("mean").to_numpy()
+    Y = d[y].to_numpy(float); Xm = d[X].to_numpy(float); Xw = Xm - gm(Xm); Yw = Y - gm(Y[:, None])[:, 0]
+    bw = np.linalg.lstsq(Xw, Yw, rcond=None)[0]; ew = Yw - Xw @ bw
+    se2 = float(ew @ ew) / (n - N - len(X))
+    # between step: group-mean residuals on the time-invariant regressors, instrumented by the means of the exogenous time-varying ones
+    ob = d.groupby("_u")[[y] + X + z1 + z2].mean(); di = ob[y].to_numpy() - ob[X].to_numpy() @ bw
+    if z1 or z2:
+        Zm = np.column_stack([np.ones(N), ob[z1 + z2].to_numpy()]); Am = np.column_stack([np.ones(N), ob[x1].to_numpy() if x1 else np.zeros((N, 0)), ob[z1].to_numpy() if z1 else np.zeros((N, 0))])
+        Pz = Am @ np.linalg.lstsq(Am, Zm, rcond=None)[0]; gam = np.linalg.solve(Pz.T @ Zm, Pz.T @ di); rs = di - Zm @ gam
+    else:
+        rs = di - di.mean()
+    su2 = float(np.mean(rs ** 2 - se2 / Ti))
+    if su2 <= 0:
+        su2 = 1e-8
+    theta = 1 - np.sqrt(se2 / (se2 + Ti * su2))                       # weight on the unit mean that is removed (theta_i = 1 - sqrt(s_e2 / (s_e2 + T_i s_u2)))
+    cols = X + z1 + z2; W = np.column_stack([np.ones(n), d[cols].to_numpy(float)])
+    th = theta[u][:, None]; Wt = W - th * gm(W); Yt = Y - th[:, 0] * gm(Y[:, None])[:, 0]
+    IV = np.column_stack([np.ones(n), Xw] + ([gm(d[x1].to_numpy(float))] if x1 else []) + ([d[z1].to_numpy(float)] if z1 else []))
+    PW = IV @ np.linalg.lstsq(IV, Wt, rcond=None)[0]; b = np.linalg.solve(PW.T @ Wt, PW.T @ Yt)
+    e = Yt - Wt @ b; s2e = float(e @ e) / (n - W.shape[1])
+    V = s2e * np.linalg.inv(PW.T @ Wt); se = np.sqrt(np.diag(V)); names = ["const"] + cols
+    # Hausman test of HT against the within estimator, on the time-varying coefficients
+    bh = b[1:1 + len(X)]; Vh = V[1:1 + len(X), 1:1 + len(X)]; Vw = se2 * np.linalg.inv(Xw.T @ Xw); dd = bw - bh; Vd = Vw - Vh
+    ev, evec = np.linalg.eigh((Vd + Vd.T) / 2); pos = ev > 1e-12; H = float(((evec[:, pos].T @ dd) ** 2 / ev[pos]).sum()); dfh = int(pos.sum())
+    # over-identification: HT against the within estimator is the test of the extra instruments (the means of x1 and the z1 variables)
+    role = {**{v: "time-varying, exogenous" for v in x1}, **{v: "time-varying, endogenous" for v in x2}, **{v: "time-invariant, exogenous" for v in z1}, **{v: "time-invariant, endogenous" for v in z2}, "const": ""}
+    rows = [[nm, role[nm], f(b[i], 4), f(se[i], 4), f(b[i] / se[i], 2), f(2 * stats.norm.sf(abs(b[i] / se[i])), 4)] for i, nm in enumerate(names)]
+    tabs = [table(f"Hausman-Taylor estimates (dependent variable: {y})", ["Variable", "Role", "Coefficient", "s.e.", "z", "p-value"], rows,
+                  "Instruments: the deviations of all time-varying regressors from their unit means, the unit means of the exogenous time-varying regressors, and the exogenous time-invariant regressors. Standard errors assume the random-effects error structure.")]
+    wrows = [[nm, f(bw[i], 4), f(np.sqrt(Vw[i, i]), 4), f(bh[i], 4), f(np.sqrt(Vh[i, i]), 4)] for i, nm in enumerate(X)]
+    tabs.append(table("Time-varying coefficients: within (fixed effects) and Hausman-Taylor", ["Variable", "Within", "s.e.", "Hausman-Taylor", "s.e."], wrows, "The within estimator ignores the time-invariant regressors and is consistent whatever the correlation with the unit effect."))
+    tabs.append(tests_table([test_row(f"Hausman test: within against Hausman-Taylor ({dfh} df)", H, stats.chi2.sf(H, max(dfh, 1)), "H0: the Hausman-Taylor classification is valid (the extra instruments are exogenous)")],
+                            title="Specification test"))
+    tabs.append(table("Variance components", ["Component", "Estimate"], [["sigma_e (idiosyncratic)", f(np.sqrt(se2), 4)], ["sigma_u (unit effect)", f(np.sqrt(su2), 4)], ["rho = sigma_u^2 / (sigma_u^2 + sigma_e^2)", f(su2 / (su2 + se2), 4)],
+                                                      ["theta (weight removed from unit means)", f(float(theta.mean()), 4)]], "A large share of the variance is between units; theta near 1 means the estimator is close to the within estimator."))
+    return result("hausman_taylor", f"Hausman-Taylor: {y}", n, [stat("Observations", n), stat("Units", N), stat("Hausman test p-value", float(stats.chi2.sf(H, max(dfh, 1))), 4), stat("rho", su2 / (su2 + se2), 3)], tabs, [],
+                  ["The classification of each variable as exogenous or endogenous is an assumption; the Hausman test checks it only partly.", "Time-invariant endogenous variables are identified only because some time-varying variables are assumed uncorrelated with the unit effect."])
