@@ -471,6 +471,15 @@ MODELS += [
                  sel("cov", "Standard errors", [["robust", "Robust (sandwich)"], ["model", "Model-based"]], "robust")],
          example=dict(file=ME + "pension_participation.csv", spec=dict(y="prate", x=["mrate", "ltotemp", "age", "sole"], family="binomial", link="logit")),
          check=dict(table=0, row=1, col=1)),
+    dict(id="systems", group="Microeconometrics", name="Systems of equations: SUR and three-stage least squares", guide="microeconometrics-guide/systems-sur-3sls.html", fn=micro.systems,
+         fields=[sel("estimator", "Estimator", [["sur", "SUR (seemingly unrelated regressions)"], ["3sls", "Three-stage least squares"], ["ols", "Equation-by-equation OLS"]], "sur"),
+                 col("y1", "Equation 1: outcome"), cols("x1", "Equation 1: explanatory variables"), col("y2", "Equation 2: outcome"), cols("x2", "Equation 2: explanatory variables"),
+                 col("y3", "Equation 3: outcome (optional)", required=False), cols("x3", "Equation 3: explanatory variables", required=False),
+                 col("y4", "Equation 4: outcome (optional)", required=False), cols("x4", "Equation 4: explanatory variables", required=False),
+                 cols("endog", "Endogenous regressors (3SLS only)", required=False), cols("inst", "Additional instruments (3SLS only)", required=False),
+                 sel("iterate", "Iterate to convergence", [["no", "No (one step)"], ["yes", "Yes (maximum likelihood)"]], "no")],
+         example=dict(file=ME + "sleep_work.csv", spec=dict(estimator="sur", y1="sleep", x1=["educ", "age", "male", "yngkid", "gdhlth"], y2="totwrk", x2=["educ", "age", "male", "union", "south"])),
+         check=dict(table=0, row=1, col=1)),
 ]
 
 CE = "oes/examples/"

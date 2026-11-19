@@ -1157,3 +1157,149 @@ def glm(df, spec):
              "For a fractional outcome in [0, 1] use the binomial family with a logit link (Papke-Wooldridge); for a positive skewed outcome use gamma with a log link.",
              "The coefficient is on the link scale; use the marginal effects for the effect on the mean."]
     return result("glm", f"Generalised linear model: {y}", n, summary, tabs, [ch], notes)
+
+
+def systems(df, spec):
+    """System of equations: equation-by-equation OLS, seemingly unrelated regressions (SUR) or three-stage least squares (3SLS)."""
+    est = _choice(spec, "estimator", ["ols", "sur", "3sls"], "sur", "The estimator")
+    iterate = _choice(spec, "iterate", ["no", "yes"], "no", "Iteration")
+    eqs = []
+    for i in (1, 2, 3, 4):
+        yv, xv = spec.get(f"y{i}"), as_list(spec.get(f"x{i}"))
+        if yv in (None, "") and not xv:
+            continue
+        if yv in (None, ""):
+            raise OESError(f"Equation {i} has explanatory variables but no outcome.")
+        if not xv:
+            raise OESError(f"Equation {i} needs at least one explanatory variable.")
+        if yv in xv:
+            raise OESError(f"In equation {i} the outcome {yv} is also an explanatory variable.")
+        eqs.append((yv, xv))
+    if len(eqs) < 2:
+        raise OESError("A system needs at least two equations: fill in outcome 1 and 2 with their explanatory variables.")
+    ys = [e[0] for e in eqs]
+    if len(set(ys)) < len(ys):
+        raise OESError("Each equation needs its own outcome variable.")
+    endog, inst = as_list(spec.get("endog")), as_list(spec.get("inst"))
+    allx = list(dict.fromkeys(c for _, xv in eqs for c in xv))
+    if est == "3sls":
+        if not endog:
+            raise OESError("Three-stage least squares needs the endogenous regressors: choose them in 'Endogenous regressors'.")
+        bad = [c for c in endog if c not in allx]
+        if bad:
+            raise OESError("Endogenous regressors must appear as explanatory variables in some equation: " + ", ".join(bad))
+    exog = [c for c in allx if c not in endog]
+    zvars = list(dict.fromkeys(exog + inst))
+    if est == "3sls" and not [c for c in inst if c not in allx]:
+        pass
+    cols_all = list(dict.fromkeys(ys + allx + inst + endog))
+    d = numeric(df, cols_all).reset_index(drop=True)
+    n, M = len(d), len(eqs)
+    ones = np.ones((n, 1))
+    Xs = [np.column_stack([ones, d[xv].to_numpy(float)]) for _, xv in eqs]
+    Yv = [d[yv].to_numpy(float) for yv, _ in eqs]
+    names = [["const"] + xv for _, xv in eqs]
+    ks = [x.shape[1] for x in Xs]
+    if n < 3 * max(ks):
+        raise OESError("Too few observations for this system.")
+    if est == "3sls":
+        Z = np.column_stack([ones, d[zvars].to_numpy(float)]) if zvars else ones
+        if np.linalg.matrix_rank(Z) < Z.shape[1]:
+            raise OESError("The instruments are collinear.")
+        for j, (yv, xv) in enumerate(eqs):
+            ne = len([c for c in xv if c in endog])
+            ni = Z.shape[1] - 1 - len([c for c in xv if c not in endog])
+            if ne > ni:
+                raise OESError(f"Equation {j + 1} is under-identified: {ne} endogenous regressor(s) but only {max(ni, 0)} excluded instrument(s). Add instruments or drop endogenous regressors.")
+        PZ = Z @ np.linalg.pinv(Z.T @ Z) @ Z.T
+        Xh = [PZ @ x for x in Xs]
+    else:
+        Xh = Xs
+    # first stage: equation by equation (OLS or 2SLS)
+    b0 = [np.linalg.lstsq(Xh[j].T @ Xs[j], Xh[j].T @ Yv[j], rcond=None)[0] for j in range(M)]
+    res = np.column_stack([Yv[j] - Xs[j] @ b0[j] for j in range(M)])
+    S = res.T @ res / n
+    if est == "ols":
+        bs = b0
+        Vs = [np.linalg.inv(Xh[j].T @ Xs[j]) * float(S[j, j]) for j in range(M)]
+        Vfull = None
+        beta = np.concatenate(b0)
+    else:
+        ktot = sum(ks)
+        for it in range(200 if iterate == "yes" else 1):
+            if np.linalg.matrix_rank(S) < M:
+                raise OESError("The residual covariance matrix is singular: an equation is an exact linear combination of the others.")
+            Si = np.linalg.inv(S)
+            A = np.zeros((ktot, ktot)); r = np.zeros(ktot)
+            ofs = np.r_[0, np.cumsum(ks)]
+            for a in range(M):
+                for b_ in range(M):
+                    A[ofs[a]:ofs[a + 1], ofs[b_]:ofs[b_ + 1]] = Si[a, b_] * (Xh[a].T @ Xh[b_])
+                r[ofs[a]:ofs[a + 1]] = sum(Si[a, b_] * (Xh[a].T @ Yv[b_]) for b_ in range(M))
+            beta_new = np.linalg.solve(A, r)
+            res = np.column_stack([Yv[j] - Xs[j] @ beta_new[ofs[j]:ofs[j + 1]] for j in range(M)])
+            S_new = res.T @ res / n
+            done = np.max(np.abs(S_new - S)) < 1e-10
+            S = S_new
+            if done and iterate == "yes":
+                break
+        beta = beta_new
+        Vfull = np.linalg.inv(A)
+        bs = [beta[ofs[j]:ofs[j + 1]] for j in range(M)]
+    ofs = np.r_[0, np.cumsum(ks)]
+    tabs = []
+    for j in range(M):
+        bj = bs[j]
+        sej = np.sqrt(np.diag(Vs[j])) if est == "ols" else np.sqrt(np.diag(Vfull)[ofs[j]:ofs[j + 1]])
+        tabs.append(coef_table(names[j], bj, sej, dist="z", title=f"Equation {j + 1}: {eqs[j][0]}",
+                               note={"ols": "Equation-by-equation OLS.", "sur": "Seemingly unrelated regressions (feasible GLS)" + (", iterated to convergence (maximum likelihood)." if iterate == "yes" else ", one step."),
+                                     "3sls": "Three-stage least squares; endogenous regressors: " + ", ".join(endog) + "."}[est]))
+    # equation summary
+    rows = []
+    for j in range(M):
+        e = Yv[j] - Xs[j] @ bs[j]
+        tss = float(((Yv[j] - Yv[j].mean()) ** 2).sum())
+        rows.append([eqs[j][0], n, ks[j], f(float(np.sqrt(e @ e / n))), f(1 - float(e @ e) / tss, 4)])
+    tabs.append(table("Equation summary", ["Equation", "Observations", "Parameters", "RMSE", "R-squared"], rows, "R-squared can be negative for 3SLS, where the instrumented fit is not an orthogonal projection."))
+    # residual correlation and the Breusch-Pagan LM test of diagonal covariance
+    res_ols = np.column_stack([Yv[j] - Xs[j] @ b0[j] for j in range(M)])
+    C = np.corrcoef(res_ols.T)
+    lm = float(n * sum(C[a, b_] ** 2 for a in range(M) for b_ in range(a)))
+    dfl = M * (M - 1) // 2
+    tabs.append(table("Correlation of the equation residuals", ["Equation"] + ys, [[ys[a]] + [f(C[a, b_], 4) for b_ in range(M)] for a in range(M)],
+                      "Residuals from the first stage (OLS or 2SLS). SUR gains efficiency only if these correlations are not zero and the regressors differ across equations."))
+    drows = [test_row(f"Breusch-Pagan LM test of independent equations ({dfl} df)", lm, stats.chi2.sf(lm, dfl), "H0: the equation errors are uncorrelated (SUR = OLS)")]
+    same = all(set(eqs[0][1]) == set(e[1]) for e in eqs)
+    if est != "ols" and same and est == "sur":
+        drows.append(["Identical regressors in every equation", "yes", None, "SUR then equals equation-by-equation OLS; there is no efficiency gain"])
+    if est == "3sls":
+        # Sargan-type overidentification test, equation by equation (2SLS residuals)
+        PZ_ = Z @ np.linalg.pinv(Z.T @ Z) @ Z.T
+        for j in range(M):
+            e = Yv[j] - Xs[j] @ b0[j]
+            ne = len([c for c in eqs[j][1] if c in endog]); ni = Z.shape[1] - 1 - len([c for c in eqs[j][1] if c not in endog])
+            if ni - ne > 0:
+                sg = float(n * (e @ PZ_ @ e) / (e @ e))
+                drows.append(test_row(f"Sargan overidentification test, equation {j + 1} ({ni - ne} df)", sg, stats.chi2.sf(sg, ni - ne), "H0: all instruments are valid"))
+            else:
+                drows.append([f"Equation {j + 1}: exactly identified", "-", None, "no overidentification test is possible"])
+    tabs.append(tests_table(drows))
+    # compare with OLS equation by equation
+    if est != "ols":
+        b_ols = [np.linalg.lstsq(Xs[j], Yv[j], rcond=None)[0] for j in range(M)]
+        cmp_rows = []
+        for j in range(M):
+            for i, nm in enumerate(names[j]):
+                sej = np.sqrt(np.diag(Vfull)[ofs[j] + i])
+                se_o = float(np.sqrt(np.linalg.inv(Xs[j].T @ Xs[j])[i, i] * ((Yv[j] - Xs[j] @ b_ols[j]) ** 2).sum() / n))
+                cmp_rows.append([f"Eq {j + 1}: {nm}", f(b_ols[j][i]), f(se_o), f(bs[j][i]), f(sej)])
+        tabs.append(table("Comparison with equation-by-equation OLS", ["Coefficient", "OLS", "OLS s.e.", est.upper(), f"{est.upper()} s.e."], cmp_rows,
+                          "OLS standard errors use the divisor n for comparability."))
+    ch = chart("Coefficient of the first explanatory variable in each equation", [f"{eqs[j][0]} ~ {eqs[j][1][0]}" for j in range(M)],
+               [("OLS", [float(np.linalg.lstsq(Xs[j], Yv[j], rcond=None)[0][1]) for j in range(M)]), (est.upper(), [float(bs[j][1]) for j in range(M)])], "", "Coefficient", kind="bar")
+    summary = [stat("Observations", n), stat("Equations", M), stat("Estimator", est.upper() if est != "ols" else "OLS"), stat("Breusch-Pagan LM", lm)]
+    notes = [f"System of {M} equations estimated by {est.upper()} on {n} observations.",
+             "SUR is more efficient than OLS when the equation errors are correlated and the equations do not have identical regressors. "
+             "3SLS combines instrumental variables (for endogenous regressors) with the SUR weighting; it is more efficient than 2SLS if the system is correctly specified, "
+             "but a specification error in one equation can contaminate the others, so compare with 2SLS equation by equation."]
+    return result("systems", f"System of equations ({est.upper()})", n, summary, tabs, [ch], notes)
