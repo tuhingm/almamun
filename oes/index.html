@@ -268,7 +268,7 @@ function renderGroups() {
   $("groups").innerHTML = groups.map(g => `<button type="button" data-g="${esc(g)}" aria-pressed="${g === GROUP}">${esc(g)} <span class="hint">${pool.filter(m => m.group === g).length}</span></button>`).join("");
   $("groups").querySelectorAll("button").forEach(b => b.onclick = () => { GROUP = b.dataset.g; renderGroups(); firstOf(GROUP); });
   $("models").innerHTML = pool.filter(m => m.group === GROUP).map(m =>
-    `<button type="button" data-id="${m.id}" aria-pressed="${MODEL && MODEL.id === m.id}">${esc(m.name)}<small>${m.code} · ${esc(exName(m))}</small></button>`).join("");
+    `<button type="button" data-id="${m.id}" aria-pressed="${MODEL && MODEL.id === m.id}">${esc(m.name)}<small>${m.code ? esc(m.code) + " · " : ""}${esc(exName(m))}</small></button>`).join("");
   $("models").querySelectorAll("button").forEach(b => b.onclick = () => chooseModel(b.dataset.id, true));
 }
 // switching the division or group selects the first method there, so the specification below always matches the tab shown
