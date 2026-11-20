@@ -156,3 +156,49 @@ def test_stacking_errors():
     with pytest.raises(OESError, match="test share"): ml_extra.stacking(d, dict(y="y", x=["x1"], test_share=0.8))
     with pytest.raises(OESError, match="more than one role"): ml_extra.stacking(d, dict(y="y", x=["y"]))
     with pytest.raises(OESError, match="too small"): ml_extra.stacking(d.iloc[:60], dict(y="y", x=["x1"], folds=10))
+
+
+# ------------------------------------------------------------------ heterogeneity (BLP, GATES, CLAN)
+def _het_data(n=2000, tau=lambda x: 1 + 2 * x[:, 0], seed=0, p=0.5):
+    rng = np.random.default_rng(seed); X = rng.normal(size=(n, 3)); D = (rng.random(n) < p).astype(float)
+    Y = 0.5 * X[:, 1] + X[:, 2] + D * tau(X) + rng.normal(size=n); return pd.DataFrame(dict(y=Y, d=D, x1=X[:, 0], x2=X[:, 1], x3=X[:, 2]))
+
+
+def _hrun(d, **kw): return ml_extra.hetero(d, dict(y="y", treat="d", x=["x1", "x2", "x3"], **kw))
+def hrow(r, i, name): return next(x for x in r["tables"][i]["rows"] if x[0].startswith(name))
+
+
+def test_hetero_registered():
+    m = o.BY_ID["hetero"]; assert m["group"] == "Machine learning" and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+def test_hetero_detects_and_sorts_true_heterogeneity():
+    r = _hrun(_het_data(n=3000), splits=10); b1, b2 = hrow(r, 0, "Average"), hrow(r, 0, "Heterogeneity")
+    assert abs(float(b1[1]) - 1.0) < 0.2 and 0.6 < float(b2[1]) < 1.4 and float(b2[5]) < 0.01
+    g = [float(x[1]) for x in r["tables"][1]["rows"][:4]]; assert g == sorted(g) and g[3] - g[0] > 2.0 and float(r["tables"][1]["rows"][4][5]) < 0.01
+    cl = hrow(r, 2, "x1"); assert float(cl[3]) > 1.0 and float(cl[5]) < 0.01 and abs(float(hrow(r, 2, "x3")[3])) < 0.4
+
+
+def test_hetero_no_heterogeneity_gives_loading_near_zero_and_rare_rejection():
+    rej, cover = 0, 0
+    for s in range(30):
+        r = _hrun(_het_data(n=500, tau=lambda x: np.ones(len(x)) * 1.0, seed=50 + s), splits=5, seed=s); rej += float(hrow(r, 0, "Heterogeneity")[5]) < 0.05
+        b = hrow(r, 0, "Average"); cover += float(b[3]) < 1.0 < float(b[4])
+    assert rej <= 4 and cover >= 24
+
+
+def test_hetero_average_effect_matches_difference_in_means():
+    d = _het_data(n=3000, seed=3); r = _hrun(d, splits=10); dim = d.y[d.d == 1].mean() - d.y[d.d == 0].mean(); assert abs(float(hrow(r, 0, "Average")[1]) - dim) < 0.25
+
+
+def test_hetero_unbalanced_treatment_and_reproducible():
+    d = _het_data(n=1500, seed=4, p=0.25); a = _hrun(d, splits=5, seed=2); b = _hrun(d, splits=5, seed=2)
+    assert a["tables"] == b["tables"] and abs(a["summary"][1]["value"] - 0.25) < 0.03
+
+
+def test_hetero_errors():
+    d = _het_data(n=300)
+    with pytest.raises(OESError, match="0/1"): ml_extra.hetero(d.assign(d=d.d * 2), dict(y="y", treat="d", x=["x1"]))
+    with pytest.raises(OESError, match="more than one role"): ml_extra.hetero(d, dict(y="y", treat="d", x=["d", "x1"]))
+    with pytest.raises(OESError, match="at least"): ml_extra.hetero(d.iloc[:50], dict(y="y", treat="d", x=["x1"], groups=4))
+    with pytest.raises(OESError, match="not found"): ml_extra.hetero(d, dict(y="y", treat="d", x=["zz"]))

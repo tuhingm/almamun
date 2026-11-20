@@ -318,6 +318,9 @@ MODELS += [
     dict(id="stacking", group="Machine learning", name="Stacking: the super learner", guide="ml-guide/stacking.html", fn=ml_extra.stacking,
          fields=[col("y", "Outcome to predict"), cols("x", "Predictors"), col("time", "Time column (time-ordered validation)", required=False), num("test_share", "Test share", 0.25), num("folds", "Cross-validation folds", 5)],
          example=dict(file=MLD + "mlb1.csv", spec=dict(y="lsalary", x="__all__"))),
+    dict(id="hetero", group="Machine learning", name="Heterogeneous effects in experiments: BLP, GATES and CLAN", guide="ml-guide/heterogeneity-gates.html", fn=ml_extra.hetero,
+         fields=[col("y", "Outcome"), col("treat", "Treatment (0/1, randomised)"), cols("x", "Covariates"), num("groups", "Groups", 4), num("splits", "Random splits", 20), num("seed", "Random seed", 0)],
+         example=dict(file=CI + "nsw_mediation.csv", spec=dict(y="re78", treat="train", x=["age", "educ", "black", "hisp", "married", "nodegree", "re74", "re75"], groups=4, splits=20))),
 ]
 
 # ------------------------------------------------------------------ Bayesian

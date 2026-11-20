@@ -207,3 +207,74 @@ def stacking(df, spec):
     summary = [stat("Observations", len(d)), stat("Learners", len(L)), stat("Test RMSE, super learner", rm(ens), 4), stat("Test RMSE, best single learner (chosen on the test set)", min(rm(T[:, j]) for j in range(len(names))), 4), stat("Test R-squared, super learner", r2(ens), 4), stat("Largest weight", names[int(np.argmax(w))])]
     ch = [chart("Super learner weights", names, [("Weight", [float(v) for v in w])], "Learner", "Weight", kind="bar")]
     return result("stacking", f"Stacking (super learner) for {y}", len(d), summary, [tab, ctab], ch, ["The super learner is asymptotically as good as the best weighted combination of its learners (an oracle inequality), so it protects against picking the wrong model, not against omitting a useful learner.", "Report the test results, not the cross-validated risk of the combination."])
+
+
+# ------------------------------------------------------------------------------------------------------------------
+# Heterogeneous treatment effects in an experiment: BLP, GATES and CLAN (Chernozhukov, Demirer, Duflo and Fernandez-Val 2018)
+# ------------------------------------------------------------------------------------------------------------------
+def _wls_hc(Z, y, w):
+    sw = np.sqrt(w); Zw, yw = Z * sw[:, None], y * sw
+    A = np.linalg.pinv(Zw.T @ Zw); b = A @ (Zw.T @ yw); e = yw - Zw @ b; n, k = Zw.shape
+    V = A @ (Zw.T * (e ** 2)) @ Zw @ A * n / max(n - k, 1)
+    return b, np.sqrt(np.clip(np.diag(V), 0, None)), V
+
+
+def hetero(df, spec):
+    y = need(spec, "y", "outcome"); t = need(spec, "treat", "treatment (0/1)"); x = as_list(need(spec, "x", "covariates")); distinct([y], [t], x)
+    G = int_option(spec, "groups", 4, 2, 10, "Number of groups"); S = int_option(spec, "splits", 20, 5, 200, "Number of data splits"); seed = int_option(spec, "seed", 0, 0, 10 ** 6, "Random seed")
+    d = df[[c for c in [y, t] + x if c in df.columns]]
+    miss = [c for c in [y, t] + x if c not in df.columns]
+    if miss:
+        raise OESError("Column(s) not found in the data: " + ", ".join(miss))
+    d = d.apply(pd.to_numeric, errors="coerce").dropna().reset_index(drop=True); n = len(d)
+    if d[t].nunique() != 2 or not set(np.unique(d[t])) <= {0.0, 1.0}:
+        raise OESError("The treatment must be a 0/1 indicator with both values present.")
+    if n < 20 * G:
+        raise OESError(f"With {G} groups the data need at least {20 * G} observations; {n} were found.")
+    from sklearn.ensemble import RandomForestRegressor
+    Y, D, X = d[y].to_numpy(float), d[t].to_numpy(float), d[x].to_numpy(float); p = float(D.mean()); alpha = 0.025
+    rng = np.random.default_rng(seed); z = stats.norm.ppf(1 - alpha / 2)
+    blp = np.zeros((S, 2, 3)); gat = np.zeros((S, G + 1, 3)); clan = np.zeros((S, len(x), 3)); cl_means = np.zeros((S, len(x), 2))      # estimate, se, p
+    for s in range(S):
+        idx = rng.permutation(n); half = n // 2; A, Mn = idx[:half], idx[half:]
+        # stratify so that both arms are present in each half
+        if D[A].sum() < 5 or (1 - D[A]).sum() < 5:
+            A, Mn = idx[::2], idx[1::2]
+        rf = lambda: RandomForestRegressor(n_estimators=100, min_samples_leaf=5, max_features=0.5, random_state=int(rng.integers(1 << 30)), n_jobs=1)
+        m1 = rf().fit(X[A][D[A] == 1], Y[A][D[A] == 1]); m0 = rf().fit(X[A][D[A] == 0], Y[A][D[A] == 0])
+        B = m0.predict(X[Mn]); Sx = m1.predict(X[Mn]) - B
+        if Sx.std() < 1e-10:
+            Sx = Sx + rng.normal(scale=1e-6, size=len(Sx))
+        Dm, Ym = D[Mn], Y[Mn]; dd = Dm - p; w = np.full(len(Mn), 1 / (p * (1 - p)))
+        Z = np.column_stack([np.ones(len(Mn)), B, Sx, dd, dd * (Sx - Sx.mean())]); b, se, _ = _wls_hc(Z, Ym, w)
+        for k, j in enumerate((3, 4)):
+            blp[s, k] = [b[j], se[j], 2 * stats.norm.sf(abs(b[j] / se[j])) if se[j] > 0 else 1.0]
+        ranks = stats.rankdata(Sx, method="ordinal"); grp = np.minimum(((ranks - 1) * G // len(Sx)).astype(int), G - 1)
+        Gm = np.column_stack([(grp == k).astype(float) * dd for k in range(G)]); Z2 = np.column_stack([np.ones(len(Mn)), B, Sx, Gm]); b2, se2, V2 = _wls_hc(Z2, Ym, w)
+        for k in range(G):
+            gat[s, k] = [b2[3 + k], se2[3 + k], 2 * stats.norm.sf(abs(b2[3 + k] / se2[3 + k])) if se2[3 + k] > 0 else 1.0]
+        c = np.zeros(len(b2)); c[3 + G - 1], c[3] = 1, -1; dif = float(c @ b2); sed = float(np.sqrt(max(c @ V2 @ c, 0)))
+        gat[s, G] = [dif, sed, 2 * stats.norm.sf(abs(dif / sed)) if sed > 0 else 1.0]
+        for j in range(len(x)):
+            hi, lo = X[Mn][grp == G - 1, j], X[Mn][grp == 0, j]; df_ = float(hi.mean() - lo.mean()); sd = float(np.sqrt(hi.var(ddof=1) / len(hi) + lo.var(ddof=1) / len(lo)))
+            clan[s, j] = [df_, sd, 2 * stats.norm.sf(abs(df_ / sd)) if sd > 0 else 1.0]; cl_means[s, j] = [hi.mean(), lo.mean()]
+    def agg(a):  # median estimate, median se, adjusted p-value (twice the median p, capped at one)
+        m = np.median(a[..., 0], axis=0); se = np.median(a[..., 1], axis=0); pv = np.minimum(1.0, 2 * np.median(a[..., 2], axis=0)); return m, se, pv
+    m1_, s1_, p1_ = agg(blp); mg, sg, pg = agg(gat); mc, sc, pc = agg(clan)
+    ci = lambda m, s_: (f(float(m - z * s_), 4), f(float(m + z * s_), 4))
+    nm = ["Average treatment effect (beta1)", "Heterogeneity loading (beta2)"]
+    btab = table(f"Best linear predictor of the effect of {t} on {y}", ["Coefficient", "Estimate", "Std. error", "95% CI low", "95% CI high", "Adjusted p-value"],
+                 [[nm[k], f(float(m1_[k]), 4), f(float(s1_[k]), 4), *ci(m1_[k], s1_[k]), f(float(p1_[k]), 4)] for k in range(2)],
+                 f"Medians over {S} random splits of the data; the p-value is twice the median p-value (Chernozhukov et al. 2018). beta2 = 1 means the machine-learning proxy of the effect is perfect, and beta2 = 0 means it carries no information about heterogeneity.")
+    glab = [f"Group {k + 1} (least affected)" if k == 0 else (f"Group {k + 1} (most affected)" if k == G - 1 else f"Group {k + 1}") for k in range(G)] + [f"Group {G} minus group 1"]
+    gtab = table("Sorted group average treatment effects (GATES)", ["Group", "Effect", "Std. error", "95% CI low", "95% CI high", "Adjusted p-value"],
+                 [[glab[k], f(float(mg[k]), 4), f(float(sg[k]), 4), *ci(mg[k], sg[k]), f(float(pg[k]), 4)] for k in range(G + 1)],
+                 f"Groups are quantiles of the predicted effect, formed in the estimation half of each split; medians over {S} splits.")
+    order = np.argsort(pc)
+    ctab = table(f"Classification analysis (CLAN): covariate means in the most and least affected groups", ["Covariate", "Group " + str(G) + " mean", "Group 1 mean", "Difference", "Std. error", "Adjusted p-value"],
+                 [[x[j], f(float(np.median(cl_means[:, j, 0])), 4), f(float(np.median(cl_means[:, j, 1])), 4), f(float(mc[j]), 4), f(float(sc[j]), 4), f(float(pc[j]), 4)] for j in order],
+                 "Which covariates separate the people with the largest predicted effects from those with the smallest. Medians over splits; p-values are not adjusted for the number of covariates.")
+    charts = [chart("Group average treatment effects", list(range(1, G + 1)), [("GATES", [float(v) for v in mg[:G]]), ("Average effect", [float(m1_[0])] * G)], "Group (by predicted effect)", "Effect", kind="line")]
+    summary = [stat("Observations", n), stat("Treated share", p, 4), stat("Average effect", float(m1_[0]), 4), stat("Heterogeneity loading", float(m1_[1]), 4), stat("p-value of heterogeneity loading", float(p1_[1]), 4), stat(f"Group {G} minus group 1", float(mg[G]), 4), stat("p-value of the difference", float(pg[G]), 4)]
+    return result("hetero", f"Heterogeneity of the effect of {t} on {y}", n, summary, [btab, gtab, ctab], charts,
+                  ["The treatment must be randomised, or ignorable with a known propensity score: the estimates here assume the treatment share is the same for everyone.", "The groups are formed from a predicted effect, so the results are about the proxy; the data splitting makes the inference valid whatever the quality of the proxy."])
