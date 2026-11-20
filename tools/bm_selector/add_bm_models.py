@@ -78,8 +78,8 @@ def tree_bayes(path):
 
 
 def leaf_pos(i, label):
-    w = int(min(max(84, 8 * len(label) + 20), 150))
-    return [830 if i % 2 == 0 else 942, 228 + 68 * (i // 2), w, label]
+    """Extra Bayesian leaves form one column under the 'More methods' node, clear of the Markov-guide node on the left."""
+    return [886, 364 + 68 * i, int(min(max(84, 8 * len(label) + 20), 150)), label]
 
 
 def extend_bayes(path):
@@ -92,15 +92,17 @@ def extend_bayes(path):
             assert "}},\nN:{" in s
             s = s.replace("}},\nN:{", f"}},\n{mdl}}},\nN:{{", 1)
             s = re.sub(r"(GUIDE:\{[^}]*)\}", lambda m: m.group(1) + f",{k}:{js(slug)}}}", s, count=1)
-            x, y, w, lab = leaf_pos(base + i, label)
+            x, y, w, lab = leaf_pos(i, label)
             s = re.sub(r"(N:\{.*?)(\},\nE:\[)", lambda m: m.group(1) + f",\n {k}:[{x},{y},{w},{js(lab)},1]" + m.group(2), s, count=1, flags=re.S)
             last = list(re.finditer(r"\['oth','\w+','[^']*'\]", s))[-1]
             s = s[:last.end()] + f",['oth','{k}',{js(edge)}]" + s[last.end():]
             m = re.search(r"qx:\{t:'What is your goal\?',o:\[.*?\]\]\}", s, flags=re.S)
             assert m, "qx block not found"
             s = s[:m.end() - 2] + f",[{js(q)},{js(mdl.split('name:')[1].split(',short')[0].strip(chr(39)))},{js(k)}]" + s[m.end() - 2:]
-    rows = (base + len(EXTRA_BAYES) + 1) // 2
-    need_h = max(462, 228 + 68 * (rows - 1) + 60)
+    for i, (k, (slug, mdl, label, edge, q)) in enumerate(EXTRA_BAYES.items()):
+        x, y, w, lab = leaf_pos(i, label)
+        s = re.sub(rf" {k}:\[\d+,\d+,\d+,'[^']*',1\]", f" {k}:[{x},{y},{w},{js(lab)},1]", s)
+    need_h = max(462, 364 + 68 * (len(EXTRA_BAYES) - 1) + 40)
     s = re.sub(r"vb:'0 0 1080 \d+'", f"vb:'0 0 1080 {need_h}'", s, count=1)
     path.write_text(s)
 
