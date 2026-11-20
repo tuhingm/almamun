@@ -363,6 +363,116 @@ function prepare(text, opts) {
           ready: {numericVars, completeRows, totalRows: rows.length}};
 }
 
-const api = {prepare, parseNumber, dateFamily};
+
+// ------------------------------------------------------------------ optional cleaning (the user chooses each action)
+function quantile(sorted, p) { const x = (sorted.length - 1) * p, lo = Math.floor(x), hi = Math.ceil(x); return sorted[lo] + (sorted[hi] - sorted[lo]) * (x - lo); }
+const tidy = v => String(Number(v.toPrecision(12)));
+function summarize(names, rows) {
+  const columns = names.map((n, j) => {
+    const v = rows.map(r => r[j]), blank = v.filter(x => x === "").length, filled = v.filter(x => x !== "");
+    const type = !filled.length ? "empty" : filled.every(x => Number.isFinite(Number(x))) ? "numeric" : "text";
+    return {name: n, type, missing: blank, pctMissing: v.length ? blank / v.length : 0, notes: []};
+  });
+  const num = columns.map((c, j) => c.type === "numeric" ? j : -1).filter(j => j >= 0);
+  return {columns, ready: {numericVars: num.length, completeRows: rows.filter(r => num.every(j => r[j] !== "")).length, totalRows: rows.length}};
+}
+/* advanced(csv, opts, structure): opts = {drop:[names], duplicates:bool, fill:{name:{method,value}}, flag:bool,
+ *   outlier:{method:"winsor"|"trim", lo, hi, cols:[names]}, dropMissing:bool}.  Order: drop, duplicates, fill, outliers, dropMissing.
+ * fill methods: mean, median, mode, constant, ffill, bfill, interp (the last three run within each unit of a panel). */
+function advanced(csv, o, structure) {
+  o = o || {};
+  const log = [], warnings = [];
+  let rows = tokenize(csv, ","), names = rows.shift();
+  rows = rows.filter(r => r.some(v => v !== ""));
+  const n0 = rows.length;
+  const isNum = j => rows.some(r => r[j] !== "") && rows.every(r => r[j] === "" || Number.isFinite(Number(r[j])));
+
+  if (o.drop && o.drop.length) {
+    const keep = names.map((n, j) => o.drop.includes(n) ? -1 : j).filter(j => j >= 0);
+    if (keep.length < 2) throw new Error("Keep at least two variables.");
+    rows = rows.map(r => keep.map(j => r[j])); names = keep.map(j => names[j]);
+    log.push(`Dropped ${o.drop.length} variable${o.drop.length > 1 ? "s" : ""}: ${o.drop.join(", ")}.`);
+  }
+  if (o.duplicates) {
+    const seen = new Set(); const before = rows.length;
+    rows = rows.filter(r => { const k = JSON.stringify(r); if (seen.has(k)) return false; seen.add(k); return true; });
+    log.push(`Removed ${before - rows.length} exact duplicate row${before - rows.length === 1 ? "" : "s"}.`);
+  }
+  // fill missing values
+  const flags = [];
+  const unitJ = structure && structure.unit ? names.indexOf(structure.unit) : -1;
+  const groups = () => { const g = new Map(); rows.forEach((r, i) => { const k = unitJ >= 0 ? r[unitJ] : ""; if (!g.has(k)) g.set(k, []); g.get(k).push(i); }); return [...g.values()]; };
+  for (const [col, spec] of Object.entries(o.fill || {})) {
+    const j = names.indexOf(col), method = spec && spec.method;
+    if (j < 0 || !method || method === "none") continue;
+    const miss = rows.map(r => r[j] === "");
+    const nMiss = miss.filter(Boolean).length;
+    if (!nMiss) continue;
+    const numeric = isNum(j);
+    if (nMiss / rows.length > 0.3) warnings.push(`"${col}" was ${(100 * nMiss / rows.length).toFixed(0)}% missing before filling. Filled values will dominate the estimate; consider whether the filling assumption is believable.`);
+    if (["mean", "median", "interp"].includes(method) && !numeric) { warnings.push(`"${col}" is not numeric, so ${method} filling was skipped.`); continue; }
+    let desc = method;
+    if (["mean", "median", "mode", "constant"].includes(method)) {
+      let val;
+      const vals = rows.map(r => r[j]).filter(x => x !== "");
+      if (method === "constant") { val = String(spec.value == null ? "" : spec.value).trim(); if (val === "" || (numeric && !Number.isFinite(Number(val)))) { warnings.push(`"${col}": the constant to fill with is empty or not a number, so it was skipped.`); continue; } }
+      else if (method === "mode") { const c = new Map(); vals.forEach(v => c.set(v, (c.get(v) || 0) + 1)); val = [...c.entries()].sort((a, b) => b[1] - a[1])[0][0]; }
+      else { const nums = vals.map(Number).sort((a, b) => a - b); val = tidy(method === "mean" ? nums.reduce((a, b) => a + b, 0) / nums.length : quantile(nums, 0.5)); }
+      rows.forEach(r => { if (r[j] === "") r[j] = val; });
+      desc = `${method === "constant" ? "the constant" : "the " + method} (${val})`;
+    } else {
+      for (const idx of groups()) {
+        if (method === "ffill") { let last = ""; idx.forEach(i => { if (rows[i][j] === "") rows[i][j] = last; else last = rows[i][j]; }); }
+        else if (method === "bfill") { let next = ""; for (let k = idx.length - 1; k >= 0; k--) { const i = idx[k]; if (rows[i][j] === "") rows[i][j] = next; else next = rows[i][j]; } }
+        else if (method === "interp") {
+          const known = idx.filter(i => rows[i][j] !== "");
+          for (let q = 0; q + 1 < known.length; q++) {
+            const a = known[q], b = known[q + 1], pa = idx.indexOf(a), pb = idx.indexOf(b), ya = Number(rows[a][j]), yb = Number(rows[b][j]);
+            for (let k = pa + 1; k < pb; k++) rows[idx[k]][j] = tidy(ya + (yb - ya) * (k - pa) / (pb - pa));
+          }
+        }
+      }
+      desc = {ffill: "the previous value", bfill: "the next value", interp: "linear interpolation"}[method] + (unitJ >= 0 ? ` within each ${names[unitJ]}` : "");
+    }
+    const left = rows.filter(r => r[j] === "").length, done = nMiss - left;
+    log.push(`Filled ${done} of ${nMiss} missing value${nMiss > 1 ? "s" : ""} in "${col}" with ${desc}.` + (left ? ` ${left} could not be filled (no earlier or later value) and stay blank.` : ""));
+    if (o.flag && done) flags.push([col, miss]);
+  }
+  for (const [col, miss] of flags) {
+    let nm = col + "_imputed"; while (names.includes(nm)) nm += "_flag";
+    names.push(nm); rows.forEach((r, i) => r.push(miss[i] && r[names.indexOf(col)] !== "" ? "1" : "0"));
+  }
+  if (flags.length) log.push(`Added ${flags.length} 0/1 column${flags.length > 1 ? "s" : ""} marking which values were filled.`);
+
+  // outliers
+  const ou = o.outlier;
+  if (ou && ou.method && ou.method !== "none" && (ou.cols || []).length) {
+    const lo = Number(ou.lo), hi = Number(ou.hi);
+    if (!(lo >= 0 && lo < hi && hi <= 100)) throw new Error("The outlier percentiles must satisfy 0 ≤ lower < upper ≤ 100.");
+    const out = new Set();
+    for (const col of ou.cols) {
+      const j = names.indexOf(col); if (j < 0 || !isNum(j)) continue;
+      const vals = rows.map(r => r[j]).filter(x => x !== "").map(Number).sort((a, b) => a - b);
+      if (vals.length < 4) continue;
+      const a = quantile(vals, lo / 100), b = quantile(vals, hi / 100); let n = 0;
+      rows.forEach((r, i) => {
+        if (r[j] === "") return; const v = Number(r[j]);
+        if (v < a || v > b) { n++; if (ou.method === "winsor") r[j] = tidy(Math.min(Math.max(v, a), b)); else out.add(i); }
+      });
+      log.push(`"${col}": ${n} value${n === 1 ? "" : "s"} outside the ${lo}th to ${hi}th percentile (${tidy(a)} to ${tidy(b)}) ${ou.method === "winsor" ? "set to the nearest bound (winsorized)" : "marked for removal"}.`);
+    }
+    if (ou.method === "trim" && out.size) { rows = rows.filter((_, i) => !out.has(i)); log.push(`Trimmed ${out.size} row${out.size > 1 ? "s" : ""} containing such values.`); warnings.push(`Trimming removed ${out.size} observations. This changes the sample, so say so in your paper.`); }
+  }
+  if (o.dropMissing) {
+    const before = rows.length; rows = rows.filter(r => r.every(v => v !== ""));
+    log.push(`Dropped ${before - rows.length} row${before - rows.length === 1 ? "" : "s"} with a missing value in any column.`);
+    if (before && (before - rows.length) / before > 0.2) warnings.push(`Dropping rows with any missing value removed ${(100 * (before - rows.length) / before).toFixed(0)}% of the observations. Models already skip incomplete rows among the columns you choose, so this is usually not needed.`);
+  }
+  if (!rows.length) throw new Error("No rows remain with these options.");
+  const out = [names.map(csvCell).join(",")].concat(rows.map(r => r.map(csvCell).join(","))).join("\n") + "\n";
+  return Object.assign({csv: out, rows: rows.length, cols: names.length, rowsIn: n0, log, warnings}, summarize(names, rows));
+}
+
+const api = {prepare, advanced, parseNumber, dateFamily};
 if (typeof module !== "undefined" && module.exports) module.exports = api; else root.OESPrepare = api;
 })(typeof self !== "undefined" ? self : this);

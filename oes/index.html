@@ -39,6 +39,7 @@ h2{font:800 22px/1.25 Manrope;letter-spacing:-.4px;margin:0 0 6px}h3{font:800 15
 .btn,.btn2{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:8px;padding:10px 16px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.btn{background:var(--navy);color:#fff}.btn2{background:#e9eef8;color:var(--navy)}.btn:disabled,.btn2:disabled{opacity:.45;cursor:not-allowed}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .prep-opt{display:flex;gap:10px;align-items:flex-start;margin:12px 0 0;padding:10px 12px;border:1px solid #cfe0f5;background:#f3f8ff;border-radius:9px;font-size:13px;cursor:pointer}.prep-opt input{margin-top:3px;accent-color:var(--navy)}
 .prep{border:1px solid #cfe0f5;border-radius:10px;background:#fff;padding:14px 16px;margin-top:12px;font-size:13px}.prep h3{font-family:inherit;margin:0 0 6px;font-size:15px;color:var(--navy)}.prep h4{margin:12px 0 4px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}.prep ul{margin:0;padding-left:18px}.prep li{margin:3px 0}.prep ul.warn li{color:#7a4a00}.prep .prep-sum{margin:0}.prep details{margin-top:10px}.prep summary{cursor:pointer;font-weight:700;color:var(--navy)}.prep table{border-collapse:collapse;margin-top:6px;font-size:12px}.prep th,.prep td{border-bottom:1px solid #e1e7f1;padding:3px 10px;text-align:left}.prep .row{margin-top:12px}
+.prep-adv{margin-top:12px;border:1px solid #cfe0f5;border-radius:9px;padding:8px 12px;background:#fafcff}.prep-adv>summary{font-weight:800}.adv-chk{display:flex;gap:8px;align-items:flex-start;margin:6px 0;cursor:pointer}.adv-chk input{margin-top:3px;accent-color:var(--navy)}.adv-fill-grid{display:grid;gap:6px;margin:6px 0}.adv-row{display:grid;grid-template-columns:minmax(120px,1.3fr) minmax(150px,1fr) minmax(90px,.6fr);gap:8px;align-items:center}.adv-row select,.adv-row input,.adv-out select,.adv-out input{font:inherit;font-size:12px;padding:5px 7px;border:1px solid #c9d3e3;border-radius:6px;background:#fff}.adv-out{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:12px}.adv-out input{width:70px}.adv-list{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px}.adv-list label{white-space:nowrap}@media(max-width:700px){.adv-row{grid-template-columns:1fr}}
 .drop{border:1.5px dashed #aebbd0;border-radius:10px;background:#f8faff;padding:18px;text-align:center;font-size:13px;color:var(--muted);margin-top:12px}.drop.over{border-color:var(--navy);background:var(--tint)}
 .hint{font-size:11.5px;color:#6b7891}.pill{display:inline-block;font-size:11px;font-weight:700;color:var(--navy);background:var(--tint);border-radius:20px;padding:2px 10px;margin-left:6px}
 .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 18px}.field{display:grid;gap:4px;margin:8px 0}.field>label,.field>span.l{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#596780}.field select,.field input:not([type=checkbox]){width:100%;min-height:38px;padding:7px 10px;border:1px solid #ccd6e5;border-radius:7px;background:#fff;color:var(--ink);font-size:13px}.field .req{color:var(--bad)}
@@ -82,7 +83,7 @@ footer{background:#00205b;color:#dce7f6;padding:25px 0;font-size:12px}footer .fo
 
 <section class="step" id="s-data"><span class="stepno">02 · Data</span><h2>Load data</h2><p class="sub">Use the dataset from the model's guide, or upload your own CSV or Excel file with one column per variable (and unit and time columns for panel data). Uploaded files are checked and prepared for estimation automatically. For more control, use the <a href="data-cleaning.html" style="text-decoration:underline">Data Cleaning Lab</a>.</p>
 <div class="row"><button class="btn" id="load-ex" type="button" disabled>Load the guide example</button><label class="btn2" for="file">Upload a CSV or Excel file</label><input type="file" id="file" accept=".csv,.txt,.tsv,.xlsx,.xls,text/csv,text/plain" hidden><span class="hint" id="data-info">No data loaded.</span></div>
-<label class="prep-opt" for="auto-prep"><input type="checkbox" id="auto-prep" checked><span><b>Make my data estimation-ready</b> <span class="hint">On upload, OES fixes numbers written as text, dates, column names and sort order, finds the unit and time columns, and lists any problems. It never fills in missing values or deletes observations. Turn off to use your file exactly as it is.</span></span></label>
+<label class="prep-opt" for="auto-prep"><input type="checkbox" id="auto-prep" checked><span><b>Make my data estimation-ready</b> <span class="hint">On upload, OES fixes numbers written as text, dates, column names and sort order, finds the unit and time columns, and lists any problems. By default it never fills in missing values or deletes observations; filling, outlier handling, duplicate removal and dropping variables are optional choices under “More cleaning options”. Turn off to use your file exactly as it is.</span></span></label>
 <div class="drop" id="drop">or drop a CSV or Excel file here</div>
 <div class="prep" id="prep" hidden aria-live="polite"></div>
 <div class="table-wrap" id="preview" hidden></div>
@@ -135,7 +136,7 @@ footer{background:#00205b;color:#dce7f6;padding:25px 0;font-size:12px}footer .fo
 <div><b>Bayesian and regime-switching models</b>The Bayesian VARs follow the ECB's BEAR toolbox (Minnesota, Normal-Wishart, Independent Normal-Wishart and Normal-diffuse priors, FAVAR, steady-state, panel, TVP, stochastic-volatility, mixed-frequency and threshold VARs). Markov-switching models are estimated by maximum likelihood; the regression and AR versions reproduce Stata's and Hamilton's published estimates.</div>
 <div><b>The same code as the guides</b>Difference GMM, the panel ARDL estimators, the causal designs and double machine learning use the helper files published with the guides. Static panel models reproduce linearmodels, including its small-sample scaling.</div>
 <div><b>What is not here</b>DSGE models are solved and estimated in Dynare; see the <a href="../dsge-guide/index.html" style="text-decoration:underline">DSGE Guide</a>. The causal forest is a doubly robust forest, not EconML's implementation, which does not run in a browser.</div>
-<div><b>Automatic data preparation</b>Uploaded CSV and Excel files are checked and prepared for estimation in your browser: numbers written as text (1,234.50, 1.234,5, $12, 12%), missing-value codes, yes/no columns, dates, column names and sort order are fixed, the unit and time columns are found, and problems such as an unbalanced panel, duplicate unit-period rows, gaps in time or codes like -999 are listed. Missing values are never filled in and no observation is deleted. You can download the prepared file or switch the option off. For manual cleaning use the <a href="data-cleaning.html" style="text-decoration:underline">Data Cleaning Lab</a>.</div>
+<div><b>Automatic data preparation</b>Uploaded CSV and Excel files are checked and prepared for estimation in your browser: numbers written as text (1,234.50, 1.234,5, $12, 12%), missing-value codes, yes/no columns, dates, column names and sort order are fixed, the unit and time columns are found, and problems such as an unbalanced panel, duplicate unit-period rows, gaps in time or codes like -999 are listed. Missing values are not filled in and no observation is deleted unless you choose that under More cleaning options (fill by mean, median, most common value, previous or next value, interpolation or a constant; winsorize or trim outliers; remove duplicates; drop variables). Every action goes into a cleaning log you can download, together with the prepared file. You can also switch the option off. For manual cleaning with before-and-after statistics use the <a href="data-cleaning.html" style="text-decoration:underline">Data Cleaning Lab</a>.</div>
 <div><b>Large files</b>Everything runs on your computer, so very large datasets and the forest-based methods take longer. Fewer trees or folds speed them up.</div>
 <div><b>Gemini development workspace</b>Use the <a href="ai-studio.html" style="text-decoration:underline;color:var(--navy)">OES AI Studio</a> to work directly with the OES source code through the Gemini API, review proposed improvements, and submit approved changes through GitHub pull requests.</div>
 </div>
@@ -399,7 +400,7 @@ function loadUpload(name, text, notes) {
     try {
       const res = OESPrepare.prepare(text);
       res.changes.unshift(...LAST.notes);
-      PREP = {name, res};
+      PREP = {name, res, adv: null, opts: null};
       setData(name, res.csv);
       const st = res.structure;                                   // preselect the unit and time columns the checks found
       if (MODEL && (st.time || st.unit)) renderFields({unit: st.kind === "panel" ? st.unit : undefined, time: st.time || undefined});
@@ -410,10 +411,66 @@ function loadUpload(name, text, notes) {
   setData(name, text);
   renderPrep();
 }
+const FILL_LABEL = {none: "Leave missing", mean: "Mean", median: "Median", mode: "Most common value", interp: "Linear interpolation", ffill: "Previous value", bfill: "Next value", constant: "A constant…"};
+function advHTML(res, o) {
+  o = o || {};
+  const cols = res.columns, num = cols.filter(c => c.type === "numeric"), miss = cols.filter(c => c.missing > 0 && c.type !== "empty");
+  const meths = c => c.type === "numeric" ? ["none", "mean", "median", "mode", "interp", "ffill", "bfill", "constant"] : ["none", "mode", "ffill", "bfill", "constant"];
+  const chk = (id, on, label, hint) => `<label class="adv-chk"><input type="checkbox" id="${id}" ${on ? "checked" : ""}><span>${label}${hint ? ` <span class="hint">${hint}</span>` : ""}</span></label>`;
+  const list = (cls, items, on) => `<div class="adv-list">${items.map(c => `<label><input type="checkbox" class="${cls}" data-col="${esc(c.name)}" ${(on || []).includes(c.name) ? "checked" : ""}> ${esc(c.name)}</label>`).join("")}</div>`;
+  const ou = o.outlier || {};
+  return `<details class="prep-adv" ${PREP.opts ? "open" : ""}><summary>More cleaning options (optional)</summary>
+<p class="hint">Nothing here runs unless you choose it, and every action is written to the cleaning log. Apply these before creating variables in step 3, because applying again restarts that step.</p>
+<h4>Sample</h4>
+${chk("adv-dup", o.duplicates, "Remove exact duplicate rows", "Keeps the first copy. Identical rows can be genuine in survey data.")}
+${chk("adv-dropmiss", o.dropMissing, "Drop rows with a missing value in any column", "Changes the sample. Models already skip incomplete rows among the columns you choose.")}
+<h4>Fill missing values</h4>
+${miss.length ? `<div class="adv-fill-grid">${miss.map((c, i) => { const f = (o.fill || {})[c.name] || {}; return `<div class="adv-row"><span>${esc(c.name)} <span class="hint">${c.missing.toLocaleString()} missing (${(100 * c.pctMissing).toFixed(1)}%)</span></span><select class="adv-fill" data-col="${esc(c.name)}">${meths(c).map(m => `<option value="${m}" ${f.method === m ? "selected" : ""}>${FILL_LABEL[m]}</option>`).join("")}</select><input class="adv-val" value="${esc(f.value || "")}" placeholder="constant" inputmode="decimal"></div>`; }).join("")}</div>
+${chk("adv-flag", o.flag, "Add a 0/1 column marking each filled variable", "Lets you check that filled values do not drive a result.")}
+<p class="hint">Previous value, next value and interpolation work within each unit of a panel, in the current row order (sorted by time).</p>` : `<p class="hint">No column has missing values.</p>`}
+<h4>Outliers</h4>
+<div class="adv-out"><select id="adv-out-method"><option value="none">Leave as they are</option><option value="winsor" ${ou.method === "winsor" ? "selected" : ""}>Winsorize (cap at the percentiles)</option><option value="trim" ${ou.method === "trim" ? "selected" : ""}>Trim (remove rows outside the percentiles)</option></select>
+<label>lower percentile <input id="adv-out-lo" type="number" min="0" max="100" step="0.5" value="${ou.lo ?? 1}"></label><label>upper percentile <input id="adv-out-hi" type="number" min="0" max="100" step="0.5" value="${ou.hi ?? 99}"></label></div>
+${num.length ? `<p class="hint" style="margin:6px 0 2px">Apply to these variables:</p>${list("adv-out-col", num, ou.cols)}` : ""}
+<h4>Drop variables</h4>
+${list("adv-drop", cols.filter(c => c.type !== "empty"), o.drop)}
+<div class="row"><button class="btn" id="adv-apply" type="button">Apply these options</button><button class="btn2" id="adv-reset" type="button">Reset to the automatic result</button></div>
+</details>`;
+}
+function readAdv() {
+  const o = {duplicates: $("adv-dup").checked, dropMissing: $("adv-dropmiss").checked, flag: !!($("adv-flag") && $("adv-flag").checked), fill: {}, drop: [],
+    outlier: {method: $("adv-out-method").value, lo: $("adv-out-lo").value, hi: $("adv-out-hi").value, cols: []}};
+  document.querySelectorAll(".adv-fill").forEach(sel => { if (sel.value !== "none") o.fill[sel.dataset.col] = {method: sel.value, value: sel.closest(".adv-row").querySelector(".adv-val").value}; });
+  document.querySelectorAll(".adv-out-col:checked").forEach(c => o.outlier.cols.push(c.dataset.col));
+  document.querySelectorAll(".adv-drop:checked").forEach(c => o.drop.push(c.dataset.col));
+  return o;
+}
+function useCleaned(csv, rows, cols) {
+  setData(PREP.name, csv);
+  $("data-info").innerHTML = `<b>${esc(PREP.name)}</b>: ${rows.toLocaleString()} rows, ${cols} columns (prepared)`;
+}
+function applyAdvanced() {
+  const o = readAdv();
+  try { PREP.adv = OESPrepare.advanced(PREP.res.csv, o, PREP.res.structure); PREP.opts = o; }
+  catch (e) { showErr(e.message); return; }
+  hideErr(); useCleaned(PREP.adv.csv, PREP.adv.rows, PREP.adv.cols); renderPrep();
+}
+function resetAdvanced() { PREP.adv = null; PREP.opts = null; hideErr(); useCleaned(PREP.res.csv, PREP.res.rows, PREP.res.cols); renderPrep(); }
+function cleaningLog() {
+  const base = PREP.res, A = PREP.adv, f = A || base, nl = "\n";
+  const lines = ["OES cleaning log", "File: " + PREP.name, "Date: " + new Date().toISOString().slice(0, 10), "Rows in: " + base.rowsIn + "   Rows out: " + f.rows + "   Columns out: " + f.cols, "",
+    "Automatic preparation", ...(base.changes.length ? base.changes.map(x => "- " + x) : ["- nothing needed fixing"]), ""];
+  if (A) lines.push("Options chosen by the user", ...(A.log.length ? A.log.map(x => "- " + x) : ["- none"]), "");
+  const w = base.warnings.concat(A ? A.warnings : []);
+  if (w.length) lines.push("Flagged for checking", ...w.map(x => "- " + x), "");
+  lines.push("Missing values were not filled and no observations were deleted unless listed above.");
+  return lines.join(nl) + nl;
+}
 function renderPrep() {
   const box = $("prep");
   if (!PREP) { box.hidden = true; box.innerHTML = ""; return; }
-  const r = PREP.res, st = r.structure, li = a => a.map(x => `<li>${esc(x)}</li>`).join("");
+  const base = PREP.res, A = PREP.adv, r = A || base, st = base.structure, li = a => a.map(x => `<li>${esc(x)}</li>`).join("");
+  const warnings = base.warnings.concat(A ? A.warnings : []);
   const layout = st.kind === "panel" ? `Panel data: unit <b>${esc(st.unit)}</b>, time <b>${esc(st.time)}</b> (${st.units} units, ${st.periods} periods${st.balanced ? ", balanced" : ", unbalanced"}).`
     : st.kind === "time series" ? `Time series: time column <b>${esc(st.time)}</b> (${st.periods} periods).`
     : st.kind === "unclear" ? "Time column found, but no unit column: choose the unit yourself if this is a panel."
@@ -421,12 +478,17 @@ function renderPrep() {
   box.hidden = false;
   box.innerHTML = `<h3>Estimation-ready check</h3>
 <p class="prep-sum"><b>${r.rows.toLocaleString()}</b> rows, <b>${r.cols}</b> columns, <b>${r.ready.numericVars}</b> numeric variables; <b>${r.ready.completeRows.toLocaleString()}</b> rows have no missing numeric value. ${layout} Each model uses only the columns you choose and skips rows that are incomplete in those columns.</p>
-${r.changes.length ? `<h4>What was fixed</h4><ul>${li(r.changes)}</ul>` : `<p class="hint" style="margin:8px 0 0">Nothing needed fixing: the file was already estimation-ready.</p>`}
-${r.warnings.length ? `<h4>Please check</h4><ul class="warn">${li(r.warnings)}</ul>` : ""}
+${base.changes.length ? `<h4>What was fixed automatically</h4><ul>${li(base.changes)}</ul>` : `<p class="hint" style="margin:8px 0 0">Nothing needed fixing: the file was already estimation-ready.</p>`}
+${A && A.log.length ? `<h4>Options you applied</h4><ul>${li(A.log)}</ul>` : ""}
+${warnings.length ? `<h4>Please check</h4><ul class="warn">${li(warnings)}</ul>` : ""}
 <details><summary>Columns (${r.cols})</summary><table><thead><tr><th>Column</th><th>Type</th><th>Missing</th></tr></thead><tbody>${r.columns.map(c => `<tr><td>${esc(c.name)}</td><td>${c.type}</td><td>${c.missing ? c.missing.toLocaleString() + " (" + (100 * c.pctMissing).toFixed(1) + "%)" : "0"}</td></tr>`).join("")}</tbody></table></details>
-<div class="row"><button class="btn2" id="prep-dl" type="button">Download the prepared CSV</button><button class="btn2" id="prep-undo" type="button">Use my original file instead</button></div>`;
-  $("prep-dl").onclick = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([r.csv], {type: "text/csv"})); a.download = PREP.name.replace(/\.[^.]+$/, "") + "_prepared.csv"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); };
+${advHTML(base, PREP.opts)}
+<div class="row"><button class="btn2" id="prep-dl" type="button">Download the prepared CSV</button><button class="btn2" id="prep-log" type="button">Download the cleaning log</button><button class="btn2" id="prep-undo" type="button">Use my original file instead</button></div>`;
+  const stem = PREP.name.replace(/\.[^.]+$/, "");
+  $("prep-dl").onclick = () => download(stem + "_prepared.csv", r.csv, "text/csv");
+  $("prep-log").onclick = () => download(stem + "_cleaning_log.txt", cleaningLog(), "text/plain");
   $("prep-undo").onclick = () => { $("auto-prep").checked = false; if (LAST) loadUpload(LAST.name, LAST.text, LAST.notes); };
+  $("adv-apply").onclick = applyAdvanced; $("adv-reset").onclick = resetAdvanced;
 }
 $("auto-prep").onchange = () => { if (LAST) loadUpload(LAST.name, LAST.text, LAST.notes); };
 function loadSheetJS() {

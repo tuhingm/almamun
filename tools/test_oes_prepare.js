@@ -70,4 +70,21 @@ t("repeated periods without a unit are not reordered", () => {
   const r = P.prepare("year,y,x\n2001,1,1\n2000,2,2\n2001,3,3\n2000,4,4\n");
   assert.ok(r.csv.startsWith("year,y,x\n2001,1,1\n2000,2,2")); assert.strictEqual(r.structure.kind, "unclear");
 });
+t("advanced: fill (median, ffill/interp within unit, flag), outliers, drop", () => {
+  const csv = "id,year,y,x,z\nA,1,1,5,a\nA,2,,6,\nA,3,3,,a\nB,1,10,7,b\nB,2,,8,b\nB,3,30,1000,b\n";
+  const st = {unit: "id", time: "year"};
+  const a = P.advanced(csv, {fill: {y: {method: "interp"}, x: {method: "median"}, z: {method: "mode"}}, flag: true}, st);
+  const row = i => a.csv.split("\n")[i + 1].split(",");
+  assert.deepStrictEqual(row(1).slice(2, 5), ["2", "6", "b"]);     // A year 2 (mode of z is b): y interpolated 1..3
+  assert.deepStrictEqual(row(4).slice(2, 4), ["20", "8"]);          // B year 2: y interpolated 10..30
+  assert.strictEqual(row(2)[3], "7");                               // x median of 5,6,7,8,1000 = 7
+  assert.ok(a.csv.split("\n")[0].includes("y_imputed") && row(1)[5] === "1" && row(0)[5] === "0");
+  const f = P.advanced(csv, {fill: {y: {method: "ffill"}}}, st); assert.strictEqual(f.csv.split("\n")[2].split(",")[2], "1");
+  const w = P.advanced(csv, {outlier: {method: "winsor", lo: 0, hi: 80, cols: ["x"]}}, st); assert.ok(Number(w.csv.split("\n")[6].split(",")[3]) < 1000);
+  const tr = P.advanced(csv, {outlier: {method: "trim", lo: 0, hi: 80, cols: ["x"]}}, st); assert.strictEqual(tr.rows, 5);
+  const dm = P.advanced(csv, {dropMissing: true}, st); assert.strictEqual(dm.rows, 3);
+  const dr = P.advanced(csv, {drop: ["z"]}, st); assert.strictEqual(dr.cols, 4);
+  assert.throws(() => P.advanced(csv, {outlier: {method: "winsor", lo: 50, hi: 10, cols: ["x"]}}, st));
+  assert.strictEqual(P.advanced("a,b\n1,2\n1,2\n", {duplicates: true}, {}).rows, 1);
+});
 t("errors", () => { assert.throws(() => P.prepare("")); assert.throws(() => P.prepare("a,b\n")); });
