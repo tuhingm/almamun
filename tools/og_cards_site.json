@@ -384,6 +384,12 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/ml-guide/double-selection.jpg",
+  "kicker": "Machine Learning Guide · Model guide",
+  "title": "Double-Selection LASSO: Inference on One Variable with Many Controls",
+  "sub": "You want the effect of one variable and have dozens of possible controls, perhaps more than observations, and need valid standard…"
+ },
+ {
   "out": "assets/og/ml-guide/enet.jpg",
   "kicker": "Machine Learning Guide · Model guide",
   "title": "Elastic Net",

@@ -321,6 +321,9 @@ MODELS += [
     dict(id="hetero", group="Machine learning", name="Heterogeneous effects in experiments: BLP, GATES and CLAN", guide="ml-guide/heterogeneity-gates.html", fn=ml_extra.hetero,
          fields=[col("y", "Outcome"), col("treat", "Treatment (0/1, randomised)"), cols("x", "Covariates"), num("groups", "Groups", 4), num("splits", "Random splits", 20), num("seed", "Random seed", 0)],
          example=dict(file=CI + "nsw_mediation.csv", spec=dict(y="re78", treat="train", x=["age", "educ", "black", "hisp", "married", "nodegree", "re74", "re75"], groups=4, splits=20))),
+    dict(id="dsel", group="Machine learning", name="Double-selection LASSO (post-double-selection inference)", guide="ml-guide/double-selection.html", fn=ml_extra.dsel,
+         fields=[col("y", "Outcome"), col("treat", "Treatment or target variable"), cols("x", "Potential controls"), num("c", "Penalty constant c", 1.1)],
+         example=dict(file=MLD + "growth.csv", spec=dict(y="growth", treat="gdpsh465", x="__all__"))),
 ]
 
 # ------------------------------------------------------------------ Bayesian

@@ -1560,5 +1560,21 @@
    "label": "Treated share",
    "value": 0.4157
   }
+ },
+ "dsel": {
+  "nobs": 90,
+  "table_index": 0,
+  "table": "Effect of gdpsh465 on growth",
+  "row": "No controls",
+  "row_index": 0,
+  "col": "Estimate",
+  "col_index": 1,
+  "value": 0.00132,
+  "rtol": 0.05,
+  "seconds": 1.2,
+  "summary": {
+   "label": "Double-selection estimate",
+   "value": -0.05001
+  }
  }
 }
