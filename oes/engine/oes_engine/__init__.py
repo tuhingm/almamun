@@ -587,6 +587,10 @@ MODELS += [
          fields=[col("y", "Dependent variable"), cols("x1", "Time-varying, exogenous", required=False), cols("x2", "Time-varying, endogenous", required=False), cols("z1", "Time-invariant, exogenous", required=False),
                  cols("z2", "Time-invariant, endogenous", required=False), UNIT, PTIME],
          example=dict(file=PD + "psid_wages.csv", spec=dict(y="lwage", x1=["occ", "south", "smsa", "ind"], x2=["exp", "exp2", "wks", "ms", "union"], z1=["fem", "blk"], z2=["ed"], unit="id", time="year"))),
+    dict(id="punitroot", group="Panel data", name="Panel unit-root tests (Levin-Lin-Chu type, IPS, Fisher, Hadri)", guide="panel-data-guide/panel-unit-root.html", fn=panel_extra.punitroot,
+         fields=[col("y", "Variable to test"), UNIT, PTIME, sel("trend", "Deterministic terms", [["c", "Constant"], ["ct", "Constant and trend"]], "c"), sel("ic", "Lag criterion", [["aic", "AIC"], ["bic", "BIC"]], "aic"),
+                 num("maxlag", "Maximum lags", 2), sel("demean", "Remove cross-sectional means", [["no", "No"], ["yes", "Yes"]], "no"), num("sims", "Simulation replications", 200), num("seed", "Random seed", 0)],
+         example=dict(file=PD + "inflation_panel.csv", spec=dict(y="inflation", unit="country", time="year", sims=100))),
 ]
 
 MODELS += [

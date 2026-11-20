@@ -462,6 +462,12 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/panel-data-guide/panel-unit-root.jpg",
+  "kicker": "Panel Data Guide · Model guide",
+  "title": "Panel Unit-Root and Stationarity Tests",
+  "sub": "You have a panel of long series, such as inflation or output across countries, and need to know whether the variable is…"
+ },
+ {
   "out": "assets/og/panel-data-guide/pcoint.jpg",
   "kicker": "Panel Data Guide · Model guide",
   "title": "Panel Cointegration Tests",

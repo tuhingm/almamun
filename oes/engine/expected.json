@@ -1356,5 +1356,21 @@
    "label": "Hausman test p-value",
    "value": 0.1491
   }
+ },
+ "punitroot": {
+  "nobs": 1156,
+  "table_index": 0,
+  "table": "Panel unit-root and stationarity tests: inflation (constant, 34 units)",
+  "row": "Levin-Lin-Chu type (common unit root)",
+  "row_index": 0,
+  "col": "Statistic",
+  "col_index": 1,
+  "value": -16.352,
+  "rtol": 0.001,
+  "seconds": 1.5,
+  "summary": {
+   "label": "Share of units rejecting at 5%",
+   "value": 0.676
+  }
  }
 }

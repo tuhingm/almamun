@@ -874,3 +874,142 @@ def hausman_taylor(df, spec):
                                                       ["theta (weight removed from unit means)", f(float(theta.mean()), 4)]], "A large share of the variance is between units; theta near 1 means the estimator is close to the within estimator."))
     return result("hausman_taylor", f"Hausman-Taylor: {y}", n, [stat("Observations", n), stat("Units", N), stat("Hausman test p-value", float(stats.chi2.sf(H, max(dfh, 1))), 4), stat("rho", su2 / (su2 + se2), 3)], tabs, [],
                   ["The classification of each variable as exogenous or endogenous is an assumption; the Hausman test checks it only partly.", "Time-invariant endogenous variables are identified only because some time-varying variables are assumed uncorrelated with the unit effect."])
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Panel unit-root and stationarity tests: Levin-Lin-Chu type, Im-Pesaran-Shin, Fisher-type, Hadri
+# ---------------------------------------------------------------------------------------------------------------
+def _pur_adf(y, p, det):
+    """ADF regression of dy on y(-1), p lagged differences and deterministic terms. Returns t, e-tilde parts (for LLC) and sigma."""
+    dy = np.diff(y); n = len(dy) - p
+    if n < p + 6:
+        return None
+    Z = [np.ones(n)] + ([np.arange(1, n + 1, dtype=float)] if det == "ct" else []) + [dy[p - j: len(dy) - j] for j in range(1, p + 1)]
+    Z = np.column_stack(Z); yt = dy[p:]; yl = y[p: len(y) - 1]
+    X = np.column_stack([yl, Z]); b = np.linalg.lstsq(X, yt, rcond=None)[0]; e = yt - X @ b
+    dfree = n - X.shape[1]; s2 = float(e @ e) / dfree
+    try:
+        se = np.sqrt(s2 * np.linalg.inv(X.T @ X)[0, 0])
+    except np.linalg.LinAlgError:
+        return None
+    Q = np.eye(n) - Z @ np.linalg.pinv(Z)
+    ea, va = Q @ yt, Q @ yl
+    return dict(t=float(b[0] / se), rho=float(b[0]), n=n, s=float(np.sqrt(s2)), e=ea / np.sqrt(s2), v=va / np.sqrt(s2), bic=n * np.log(float(e @ e) / n) + X.shape[1] * np.log(n))
+
+
+def _pur_select(y, maxlag, det, ic):
+    best = None
+    nmax = len(y) - 1 - maxlag
+    for p in range(maxlag + 1):
+        # common effective sample for comparing lag lengths
+        yy = y[maxlag - p:]
+        r = _pur_adf(yy, p, det)
+        if r is None:
+            continue
+        k = 1 + (2 if det == "ct" else 1) + p
+        n = r["n"]; rss = (r["s"] ** 2) * (n - k)
+        val = n * np.log(rss / n) + k * (np.log(n) if ic == "bic" else 2)
+        if best is None or val < best[0]:
+            best = (val, p)
+    if best is None:
+        return None, None
+    return best[1], _pur_adf(y, best[1], det)
+
+
+def _pur_llc(parts):
+    e = np.concatenate([q["e"] for q in parts]); v = np.concatenate([q["v"] for q in parts])
+    d = float(v @ e) / float(v @ v); r = e - d * v; s2 = float(r @ r) / (len(e) - 1)
+    return d / np.sqrt(s2 / float(v @ v)), len(e)
+
+
+def _pur_hadri(Y, det, hetero):
+    T, N = Y.shape; tt = np.arange(1, T + 1, dtype=float)
+    Xd = np.column_stack([np.ones(T)] + ([tt] if det == "ct" else []))
+    E = Y - Xd @ np.linalg.lstsq(Xd, Y, rcond=None)[0]
+    S = np.cumsum(E, axis=0); num = (S ** 2).sum(axis=0) / T ** 2
+    s2 = (E ** 2).sum(axis=0) / T if hetero else np.full(N, (E ** 2).sum() / (N * T))
+    LM = float(np.mean(num / s2)); xi, z2 = (1 / 6, 1 / 45) if det == "c" else (1 / 15, 11 / 6300)
+    return LM, float(np.sqrt(N) * (LM - xi) / np.sqrt(z2))
+
+
+def _pur_sim_moments(T, maxlag, ic, det, reps, rng, cache):
+    """Mean and variance of the individual ADF t statistic under a random walk, for a series of length T, with the lag order chosen by the same criterion (cached)."""
+    key = (T, maxlag, ic, det)
+    if key not in cache:
+        ts = []
+        for _ in range(reps):
+            r = _pur_select(np.cumsum(rng.standard_normal(T + 50))[50:], maxlag, det, ic)[1]
+            if r is not None:
+                ts.append(r["t"])
+        cache[key] = (float(np.mean(ts)), float(np.var(ts)))
+    return cache[key]
+
+
+def punitroot(df, spec):
+    from statsmodels.tsa.stattools import mackinnonp
+    y = need(spec, "y", "variable to test")
+    d, unit, time, N, T = _panel(df, spec, [y])
+    det = _choice(spec, "trend", ["c", "ct"], "c", "Deterministic terms"); ic = _choice(spec, "ic", ["aic", "bic"], "aic", "Lag criterion")
+    maxlag = int_option(spec, "maxlag", 2, 0, 8, "Maximum lags"); reps = int_option(spec, "sims", 200, 50, 2000, "Simulation replications")
+    demean = _choice(spec, "demean", ["no", "yes"], "no", "Cross-sectional demeaning"); seed = int_option(spec, "seed", 0, 0, 10 ** 6, "Random seed")
+    names = d.drop_duplicates("_u").sort_values("_u")[unit].astype(str).tolist()
+    series = [g.sort_values("_ti")[y].to_numpy(float) for _, g in d.groupby("_u", sort=True)]
+    if demean == "yes":
+        if len({len(s) for s in series}) != 1:
+            raise OESError("Cross-sectional demeaning needs a balanced panel.")
+        M = np.column_stack(series); series = list((M - M.mean(axis=1, keepdims=True)).T)
+    mint = 10 + maxlag
+    if min(len(s) for s in series) < mint:
+        raise OESError(f"Panel unit-root tests need at least {mint} periods for every unit with {maxlag} lags (shortest unit has {min(len(s) for s in series)}).")
+    if N < 4:
+        raise OESError("Panel unit-root tests need at least 4 units.")
+    rng = np.random.default_rng(seed); cache = {}
+    ind, parts, lags = [], [], []
+    for s in series:
+        p, r = _pur_select(s, maxlag, det, ic)
+        if r is None:
+            raise OESError("A unit has too few usable observations for the chosen number of lags.")
+        ind.append(r); parts.append(r); lags.append(p)
+    tt = np.array([r["t"] for r in ind]); Ts = [len(s) for s in series]
+    pv = np.array([mackinnonp(t, regression=det, N=1) for t in tt])
+    # Im-Pesaran-Shin t-bar, standardised with simulated moments for each unit's length and lag order
+    mom = np.array([_pur_sim_moments(Ts[i], maxlag, ic, det, max(reps, 200), rng, cache) for i in range(N)])
+    tbar = float(tt.mean()); Wt = float(np.sqrt(N) * (tbar - mom[:, 0].mean()) / np.sqrt(mom[:, 1].mean()))
+    p_ips = float(stats.norm.cdf(Wt))
+    # Fisher-type combinations of the individual p-values
+    P = float(-2 * np.log(np.clip(pv, 1e-12, 1)).sum()); p_P = float(stats.chi2.sf(P, 2 * N))
+    Z = float(stats.norm.ppf(np.clip(pv, 1e-12, 1 - 1e-12)).sum() / np.sqrt(N)); p_Z = float(stats.norm.cdf(Z))
+    # Levin-Lin-Chu pooled t, calibrated by simulation of the same statistic under independent random walks
+    tl, nl = _pur_llc(parts)
+    sims = []
+    for _ in range(reps):
+        pr = []
+        for i in range(N):
+            r = _pur_select(np.cumsum(rng.standard_normal(Ts[i] + 50))[50:], maxlag, det, ic)[1]
+            if r is not None:
+                pr.append(r)
+        sims.append(_pur_llc(pr)[0])
+    sims = np.array(sims); z_llc = float((tl - sims.mean()) / sims.std(ddof=1)); p_llc = float(stats.norm.cdf(z_llc))
+    # Hadri stationarity test (null: all panels stationary)
+    hetero = _choice(spec, "hadri_variance", ["common", "unit"], "common", "Hadri variance") == "unit"
+    Hl = None
+    if len({len(s) for s in series}) == 1:
+        Yb = np.column_stack(series); LM, Zh = _pur_hadri(Yb, det, hetero); Hl = (LM, Zh, float(stats.norm.sf(Zh)))
+    lab = "constant" if det == "c" else "constant and trend"
+    rows = [["Levin-Lin-Chu type (common unit root)", f(tl, 3), f(z_llc, 3), f(p_llc, 4), "H0: all series have a unit root; H1: all are stationary with a common rho"],
+            ["Im-Pesaran-Shin t-bar (W)", f(tbar, 3), f(Wt, 3), f(p_ips, 4), "H0: all series have a unit root; H1: some are stationary"],
+            ["Fisher-type, inverse chi-squared (P)", f(P, 2), f(P, 2), f(p_P, 4), "H0: all series have a unit root; H1: some are stationary"],
+            ["Fisher-type, inverse normal (Z)", f(Z, 3), f(Z, 3), f(p_Z, 4), "H0: all series have a unit root; H1: some are stationary"]]
+    if Hl:
+        rows.append(["Hadri LM (stationarity)", f(Hl[0], 4), f(Hl[1], 3), f(Hl[2], 4), "H0: all series are stationary; H1: some have a unit root"])
+    tabs = [table(f"Panel unit-root and stationarity tests: {y} ({lab}, {N} units)", ["Test", "Statistic", "Standardised (z)", "p-value", "Hypotheses"], rows,
+                  "The first four tests have a unit root under the null (reject for stationarity); Hadri has stationarity under the null. Null distributions of the Levin-Lin-Chu type and IPS statistics are simulated for the panel's own dimensions and lag orders, assuming independence across units.")]
+    ur = [[names[i], Ts[i], lags[i], f(tt[i], 3), f(pv[i], 4), "stationary" if pv[i] < 0.05 else "unit root"] for i in range(N)]
+    tabs.append(table("Unit-by-unit augmented Dickey-Fuller tests", ["Unit", "T", "Lags", "t-statistic", "p-value (MacKinnon)", "5% decision"], ur,
+                      "Lags chosen by " + ic.upper() + f" up to {maxlag}. The decision uses the individual p-value only and ignores the multiplicity of {N} tests."))
+    share = float((pv < 0.05).mean())
+    ch = [chart("Individual ADF p-values by unit", names, [("p-value", pv)], "", "p-value", kind="bar")]
+    short = [f"The Fisher-type tests use asymptotic MacKinnon p-values, which are unreliable when T is as short as {min(Ts)}; the IPS and Levin-Lin-Chu type tests use null distributions simulated for the panel's own length, so prefer them here."] if min(Ts) < 30 else []
+    notes = short + ["The tests assume independence across units; common shocks make them over-reject. Cross-sectional demeaning removes a common time effect but not other forms of dependence.",
+             "A rejection by IPS or Fisher means at least one unit is stationary, not that all are."]
+    return result("punitroot", f"Panel unit-root tests: {y}", sum(Ts), [stat("Units", N), stat("Share of units rejecting at 5%", share, 3), stat("IPS W-statistic", Wt, 3), stat("IPS p-value", p_ips, 4)], tabs, ch, notes)
