@@ -42,6 +42,12 @@
   "sub": "A series or a relationship that may have shifted at unknown dates, and you want probabilities for the number and the dates of the…"
  },
  {
+  "out": "assets/og/bayesian-guide/count-regression.jpg",
+  "kicker": "Bayesian Guide · Model guide",
+  "title": "Bayesian Count Regression",
+  "sub": "An outcome that counts events (visits, arrests, patents, accidents) where you want rate ratios with intervals, a check that the…"
+ },
+ {
   "out": "assets/og/bayesian-guide/favar.jpg",
   "kicker": "Bayesian Guide · Model guide",
   "title": "Factor-Augmented VAR (FAVAR)",

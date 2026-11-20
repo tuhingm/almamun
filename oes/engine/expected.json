@@ -1704,5 +1704,21 @@
    "label": "Posterior mean of the signal-to-noise ratio",
    "value": 2.373
   }
+ },
+ "bayes_count": {
+  "nobs": 4000,
+  "table_index": 0,
+  "table": "Posterior of the coefficients (negative binomial)",
+  "row": "const",
+  "row_index": 0,
+  "col": "Coefficient (mean)",
+  "col_index": 1,
+  "value": 0.661167,
+  "rtol": 0.05,
+  "seconds": 1.9,
+  "summary": {
+   "label": "Mean of the count",
+   "value": 2.906
+  }
  }
 }

@@ -483,3 +483,70 @@ def test_bsts_errors():
     with pytest.raises(OESError, match="constant"): bayes_more.bsts(d.assign(y=3.0), dict(y="y"))
     with pytest.raises(OESError, match="Forecasts need"): bayes_more.bsts(d.assign(x=np.arange(60.0)), dict(y="y", x=["x"], horizon=3))
     with pytest.raises(OESError, match="Column"): bayes_more.bsts(d, dict(y="zz"))
+
+
+# ---------------------------------------------------------------------------------------- Bayesian count regression
+def _count_data(n=800, alpha=0.0, seed=0, b=(0.5, 0.4, -0.3)):
+    rng = np.random.default_rng(seed); x1, x2 = rng.normal(size=n), rng.normal(size=n)
+    mu = np.exp(b[0] + b[1] * x1 + b[2] * x2)
+    y = rng.poisson(mu) if alpha == 0 else rng.poisson(rng.gamma(1 / alpha, mu * alpha))
+    return pd.DataFrame(dict(y=y, x1=x1, x2=x2))
+
+
+def test_bayes_count_registered():
+    m = o.BY_ID["bayes_count"]; assert m["group"] == "Bayesian" and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+def test_bayes_count_matches_maximum_likelihood():
+    import statsmodels.api as sm
+    d = _count_data(alpha=0.5, seed=2)
+    r = bayes_more.bayes_count(d, dict(y="y", x=["x1", "x2"], draws=1500, burn=500)); rows = {x[0]: x for x in tab(r, "Posterior of the coefficients")["rows"]}
+    ml = sm.NegativeBinomial(d.y, sm.add_constant(d[["x1", "x2"]])).fit(disp=0)
+    for j, v in enumerate(["const", "x1", "x2"]): assert rows[v][1] == pytest.approx(ml.params.iloc[j], abs=0.04)
+    p = bayes_more.bayes_count(d, dict(y="y", x=["x1", "x2"], family="poisson", draws=1500, burn=500))
+    gl = sm.GLM(d.y, sm.add_constant(d[["x1", "x2"]]), family=sm.families.Poisson()).fit()
+    for j, v in enumerate(["const", "x1", "x2"]): assert {x[0]: x for x in tab(p, "Posterior of the coefficients")["rows"]}[v][1] == pytest.approx(gl.params.iloc[j], abs=0.03)
+
+
+def test_bayes_count_recovers_truth_and_dispersion():
+    r = bayes_more.bayes_count(_count_data(n=2000, alpha=0.6, seed=4), dict(y="y", x=["x1", "x2"], draws=1500, burn=500))
+    rows = {x[0]: x for x in tab(r, "Posterior of the coefficients")["rows"]}
+    for v, t in (("const", 0.5), ("x1", 0.4), ("x2", -0.3)): assert abs(rows[v][1] - t) < 3.5 * rows[v][2] + 0.01
+    a = tab(r, "Overdispersion")["rows"][0]; assert a[3] < 0.6 < a[4]
+
+
+def test_bayes_count_waic_and_predictive_check_choose_the_right_family():
+    r = bayes_more.bayes_count(_count_data(n=1000, alpha=1.0, seed=6), dict(y="y", x=["x1", "x2"], draws=800, burn=300))
+    cmp_ = tab(r, "Model comparison")["rows"]; assert cmp_[0][3] < -10 and cmp_[1][3] == 0                      # Poisson is far worse
+    pc = tab(r, "Posterior predictive check")["rows"]; assert pc[0][6] < 0.01 and pc[1][6] > 0.05                 # Poisson cannot reproduce the variance
+    r0 = bayes_more.bayes_count(_count_data(n=1000, alpha=0.0, seed=7), dict(y="y", x=["x1", "x2"], draws=800, burn=300))
+    assert tab(r0, "Posterior predictive check")["rows"][0][6] > 0.01
+    assert tab(r0, "Overdispersion")["rows"][0][3] < 0.1
+
+
+def test_bayes_count_exposure_and_marginal_effects():
+    rng = np.random.default_rng(8); n = 1500; x = rng.normal(size=n); expo = rng.uniform(0.5, 4, n); mu = expo * np.exp(0.2 + 0.5 * x)
+    d = pd.DataFrame(dict(y=rng.poisson(mu), x=x, e=expo))
+    r = bayes_more.bayes_count(d, dict(y="y", x=["x"], exposure="e", family="poisson", draws=800, burn=300)); rows = {q[0]: q for q in tab(r, "Posterior of the coefficients")["rows"]}
+    assert abs(rows["x"][1] - 0.5) < 3.5 * rows["x"][2] and abs(rows["const"][1] - 0.2) < 3.5 * rows["const"][2]
+    ame = tab(r, "Average marginal effects")["rows"][0]; assert ame[3] <= (mu * 0.5).mean() <= ame[4]
+
+
+def test_bayes_count_coverage():
+    cover = 0; R = 20
+    for s in range(R):
+        r = bayes_more.bayes_count(_count_data(n=300, alpha=0.5, seed=100 + s), dict(y="y", x=["x1", "x2"], draws=400, burn=200, seed=s))
+        row = {x[0]: x for x in tab(r, "Posterior of the coefficients")["rows"]}["x1"]; cover += row[4] <= np.exp(0.4) <= row[5]
+    assert cover / R >= 0.8
+
+
+def test_bayes_count_errors():
+    d = _count_data(n=100)
+    for spec, msg in [(dict(y="y", x=["x1"], family="zz"), "Choose the family"), (dict(y="y", x=["x1"], prior_sd=0), "positive"), (dict(y="y", x=["y"]), "more than one role")]:
+        with pytest.raises(OESError, match=msg): bayes_more.bayes_count(d, spec)
+    with pytest.raises(OESError, match="count"): bayes_more.bayes_count(d.assign(y=d.y + 0.5), dict(y="y", x=["x1"]))
+    with pytest.raises(OESError, match="count"): bayes_more.bayes_count(d.assign(y=-d.y - 1), dict(y="y", x=["x1"]))
+    with pytest.raises(OESError, match="zero everywhere"): bayes_more.bayes_count(d.assign(y=0), dict(y="y", x=["x1"]))
+    with pytest.raises(OESError, match="constant"): bayes_more.bayes_count(d.assign(x1=1.0), dict(y="y", x=["x1"]))
+    with pytest.raises(OESError, match="Too few"): bayes_more.bayes_count(d.head(15), dict(y="y", x=["x1", "x2"]))
+    with pytest.raises(OESError, match="exposure"): bayes_more.bayes_count(d.assign(e=0.0), dict(y="y", x=["x1"], exposure="e"))

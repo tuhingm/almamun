@@ -1043,3 +1043,195 @@ def bsts(df, spec):
     notes = [f"Series standardised for the prior; results in the original units. Inverse-gamma({pa:g}, {pb:g}) prior on the variance of each state component in standardised units (prior guess for its s.d.: {np.sqrt(pb):g} of the s.d. of the series) and a weak inverse-gamma({pa:g}, 0.001) prior on the irregular variance, diffuse prior on the initial states. "
              "States are sampled jointly from their banded Gaussian conditional (perturbation sampling), so no Kalman filter loop is needed. Missing values are treated as unobserved and the model fills them in."]
     return result("bsts", f"Bayesian structural time series: {y_}", int(obs.sum()), summary, tabs, charts, notes)
+
+
+# ================================================================================================ Bayesian count models
+def _count_ll(y, eta, family, r=None):
+    """Pointwise log-likelihood of a Poisson (family 'poisson') or negative binomial (NB2, dispersion alpha = 1 / r) model."""
+    from scipy.special import gammaln
+    mu = np.exp(np.clip(eta, -30, 30))
+    if family == "poisson":
+        return y * eta - mu - gammaln(y + 1)
+    return gammaln(y + r) - gammaln(r) - gammaln(y + 1) + r * (np.log(r) - np.log(r + mu)) + y * (eta - np.log(r + mu))
+
+
+def _count_post(Z, y, off, family, s_b, b0):
+    """Return log posterior and its gradient in (beta, log r) (log r only for the negative binomial)."""
+    from scipy.special import digamma
+    k = Z.shape[1]
+    ps = np.r_[np.full(k, s_b), 2.0]
+    def lp(th):
+        b = th[:k]; eta = Z @ b + off
+        r = np.exp(th[k]) if family == "nbinom" else None
+        pr = -0.5 * (((b - b0) / s_b) ** 2).sum()
+        if family == "nbinom":
+            pr += -0.5 * ((th[k] - 1.0) / 2.0) ** 2
+        return float(_count_ll(y, eta, family, r).sum() + pr)
+    def grad(th):
+        b = th[:k]; eta = Z @ b + off; mu = np.exp(np.clip(eta, -30, 30))
+        if family == "poisson":
+            return Z.T @ (y - mu) - (b - b0) / s_b ** 2
+        r = np.exp(th[k])
+        gb = Z.T @ ((y - mu) * r / (r + mu)) - (b - b0) / s_b ** 2
+        gr = r * (digamma(y + r) - digamma(r) + np.log(r) - np.log(r + mu) + 1 - (r + y) / (r + mu)).sum() - (th[k] - 1.0) / 4.0
+        return np.r_[gb, gr]
+    return lp, grad
+
+
+def _count_sample(Z, y, off, family, s_b, b0, ndraw, burn, rng, init_jitter=0.0):
+    from scipy.optimize import minimize
+    k = Z.shape[1]; d = k + (1 if family == "nbinom" else 0)
+    lp, grad = _count_post(Z, y, off, family, s_b, b0)
+    th0 = np.r_[b0 * 0 + np.r_[np.log(max(y.mean(), 0.1)), np.zeros(k - 1)], ([0.0] if family == "nbinom" else [])]
+    res = minimize(lambda t: -lp(t), th0, jac=lambda t: -grad(t), method="BFGS", options=dict(maxiter=500, gtol=1e-6))
+    m = res.x
+    H = np.zeros((d, d)); e = 1e-4
+    for i in range(d):
+        a = m.copy(); a[i] += e; b_ = m.copy(); b_[i] -= e
+        H[:, i] = -(grad(a) - grad(b_)) / (2 * e)
+    H = (H + H.T) / 2
+    try:
+        Sig = np.linalg.inv(H + 1e-9 * np.eye(d)); Lc = np.linalg.cholesky(Sig)
+    except np.linalg.LinAlgError:
+        raise OESError("The posterior is too flat to build a proposal: drop collinear or near-constant regressors.")
+    nu = 6.0
+    def lprop(t):
+        r_ = np.linalg.solve(Lc, t - m); return -(nu + d) / 2 * np.log1p(r_ @ r_ / nu)
+    cur = m + init_jitter * (Lc @ rng.standard_normal(d)); lcur = lp(cur) - lprop(cur)
+    out = np.empty((ndraw, d)); acc = 0
+    for it in range(burn + ndraw):
+        w = rng.chisquare(nu) / nu
+        prop = m + Lc @ rng.standard_normal(d) / np.sqrt(w)
+        lq = lp(prop) - lprop(prop)
+        if np.log(rng.random()) < lq - lcur:
+            cur, lcur = prop, lq; acc += it >= burn
+        if it >= burn:
+            out[it - burn] = cur
+    return out, acc / ndraw, m
+
+
+def bayes_count(df, spec):
+    import statsmodels.api as sm
+    from .bayes_extra import _rhat_ess
+    from scipy.special import logsumexp
+    y_ = need(spec, "y", "count outcome")
+    x = as_list(need(spec, "x", "explanatory variables"))
+    ex = spec.get("exposure")
+    distinct([y_], x + ([ex] if ex else []))
+    d = numeric(df, [y_] + x + ([ex] if ex else []))
+    Y = d[y_].to_numpy(float)
+    if (Y < 0).any() or (Y != np.round(Y)).any():
+        raise OESError(f"{y_} must be a count: non-negative whole numbers.")
+    if Y.max() == 0:
+        raise OESError(f"{y_} is zero everywhere.")
+    X = d[x].to_numpy(float); n, k = X.shape
+    if (X.std(0) == 0).any():
+        raise OESError("An explanatory variable is constant: drop it (the model has a constant).")
+    if n < 10 * (k + 1):
+        raise OESError(f"Too few observations ({n}) for {k} explanatory variables.")
+    off = np.zeros(n)
+    if ex:
+        e_ = d[ex].to_numpy(float)
+        if (e_ <= 0).any():
+            raise OESError("The exposure must be positive.")
+        off = np.log(e_)
+    fam = str(spec.get("family", "nbinom"))
+    if fam not in ("poisson", "nbinom"):
+        raise OESError("Choose the family: poisson or nbinom.")
+    ndraw = int_option(spec, "draws", 2000, 200, 50000, "Draws per chain")
+    burn = int_option(spec, "burn", 500, 0, 50000, "Burn-in")
+    nch = int_option(spec, "chains", 2, 2, 8, "Chains")
+    seed = int_option(spec, "seed", 0, 0, 10 ** 9, "Random seed")
+    sb = float_option(spec, "prior_sd", 5.0, "Prior standard deviation")
+    if sb <= 0:
+        raise OESError("The prior standard deviation must be positive.")
+    xm, xs = X.mean(0), X.std(0)
+    Z = np.column_stack([np.ones(n), (X - xm) / xs])
+    b0 = np.r_[np.log(max((Y / np.exp(off)).mean(), 1e-3)), np.zeros(k)]
+    fits = {}
+    for fm in ("poisson", "nbinom"):
+        ch = [_count_sample(Z, Y, off, fm, sb, b0, ndraw, burn, np.random.default_rng(seed + 1000 * c + (0 if fm == "poisson" else 7)), init_jitter=0.0 if c == 0 else 1.0) for c in range(nch)]
+        fits[fm] = ch
+    def to_orig(Th):
+        B = Th[:, :k + 1].copy(); B[:, 1:] = Th[:, 1:k + 1] / xs; B[:, 0] = Th[:, 0] - B[:, 1:] @ xm
+        return B
+    ch = fits[fam]; Th = np.vstack([c[0] for c in ch]); acc = float(np.mean([c[1] for c in ch]))
+    B = to_orig(Th); names = ["const"] + x
+    mle = None
+    try:
+        Xc = sm.add_constant(X)
+        if fam == "poisson":
+            mle = sm.GLM(Y, Xc, family=sm.families.Poisson(), offset=off).fit()
+        else:
+            mle = sm.NegativeBinomial(Y, Xc, offset=off).fit(disp=0, maxiter=200)
+    except Exception:
+        mle = None
+    rows = []
+    for j, v in enumerate(names):
+        irr = np.exp(B[:, j]); lo, hi = np.percentile(irr, [2.5, 97.5])
+        rows.append([v, f(B[:, j].mean()), f(B[:, j].std(ddof=1)), f(irr.mean()) if j else "", f(lo) if j else "", f(hi) if j else "", f((B[:, j] > 0).mean(), 3) if j else "",
+                     f(float(np.exp(mle.params[j]))) if (mle is not None and j) else ("" if j else f(float(mle.params[0]) if mle is not None else np.nan))])
+    tabs = [table(f"Posterior of the coefficients ({'Poisson' if fam == 'poisson' else 'negative binomial'})",
+                  ["Variable", "Coefficient (mean)", "Std. dev.", "Rate ratio (mean)", "2.5%", "97.5%", "P(> 0)", "Maximum likelihood rate ratio"], rows,
+                  "Rate ratio = exp(coefficient): the multiplicative change in the expected count for a one-unit increase in the variable. The 2.5% and 97.5% columns are the interval of the rate ratio. The last column is the classical estimate from statsmodels.")]
+    if fam == "nbinom":
+        al = np.exp(-Th[:, k + 1]); a_lo, a_hi = np.percentile(al, [2.5, 97.5])
+        mal = float(mle.params[-1]) if mle is not None else np.nan
+        tabs.append(table("Overdispersion", ["Parameter", "Mean", "Median", "2.5%", "97.5%", "Maximum likelihood"],
+                          [["alpha (variance = mean + alpha * mean^2)", f(al.mean()), f(np.median(al)), f(a_lo), f(a_hi), f(mal)]],
+                          "alpha = 0 is the Poisson model. A posterior far from zero means that counts vary more than a Poisson allows."))
+    # posterior predictive checks and WAIC for both families
+    rng = np.random.default_rng(seed + 99)
+    sel = rng.choice(len(Th), size=min(400, len(Th)), replace=False)
+    pp = {}; waic = {}; lppd_i = {}
+    for fm in ("poisson", "nbinom"):
+        T_ = np.vstack([c[0] for c in fits[fm]]); S_ = T_[rng.choice(len(T_), size=min(600, len(T_)), replace=False)]
+        LL = np.empty((len(S_), n)); rep = np.empty((len(S_), n))
+        for s_i, t in enumerate(S_):
+            eta = Z @ t[:k + 1] + off
+            r_ = np.exp(t[k + 1]) if fm == "nbinom" else None
+            LL[s_i] = _count_ll(Y, eta, fm, r_)
+            mu = np.exp(np.clip(eta, -30, 30))
+            rep[s_i] = rng.poisson(mu) if fm == "poisson" else rng.poisson(rng.gamma(r_, mu / r_))
+        lp_i = logsumexp(LL, axis=0) - np.log(len(S_)); pw = LL.var(axis=0, ddof=1)
+        el = lp_i - pw; waic[fm] = (el.sum(), pw.sum()); lppd_i[fm] = el; pp[fm] = rep
+    zero_o = (Y == 0).mean(); var_o = Y.var(ddof=1); mx_o = Y.max()
+    rows = []
+    for fm, lab in (("poisson", "Poisson"), ("nbinom", "Negative binomial")):
+        rep = pp[fm]; z = (rep == 0).mean(1); v = rep.var(1, ddof=1); mxx = rep.max(1)
+        rows.append([lab, f(zero_o, 4), f(z.mean(), 4), f(min((z >= zero_o).mean(), (z <= zero_o).mean()) * 2, 3),
+                     f(var_o, 3), f(v.mean(), 3), f(min((v >= var_o).mean(), (v <= var_o).mean()) * 2, 3),
+                     f(mx_o, 0), f(mxx.mean(), 1)])
+    tabs.append(table("Posterior predictive check", ["Model", "Zeros (observed)", "Zeros (predicted)", "p-value", "Variance (observed)", "Variance (predicted)", "p-value", "Max (observed)", "Max (predicted)"], rows,
+                      "Counts are simulated from the posterior and compared with the data. A p-value near 0 (two-sided) means the model cannot reproduce that feature of the data."))
+    dd = lppd_i["nbinom"] - lppd_i["poisson"]
+    tabs.append(table("Model comparison (WAIC, higher elpd is better)", ["Model", "elpd (WAIC)", "Effective parameters", "Difference from the best", "Std. error of the difference"],
+                      [[lab, f(waic[fm][0], 1), f(waic[fm][1], 1), f(waic[fm][0] - max(waic["poisson"][0], waic["nbinom"][0]), 1), (f(float(np.sqrt(n * dd.var(ddof=1))), 1) if waic[fm][0] < max(waic["poisson"][0], waic["nbinom"][0]) else "")]
+                       for fm, lab in (("poisson", "Poisson"), ("nbinom", "Negative binomial"))],
+                      "WAIC (Watanabe 2010) estimates the out-of-sample log predictive density. A difference of more than two or three standard errors is clear."))
+    # average marginal effects on the expected count
+    Bs = B[sel]; Xo = np.column_stack([np.ones(n), X]); mus = np.exp(np.clip(Xo @ Bs.T + off[:, None], -30, 30))
+    ame = np.array([(Bs[:, j] * mus).mean(0) for j in range(1, k + 1)])
+    tabs.append(table("Average marginal effects on the expected count", ["Variable", "Mean", "Std. dev.", "2.5%", "97.5%"],
+                      [[x[j], f(ame[j].mean()), f(ame[j].std(ddof=1)), f(np.percentile(ame[j], 2.5)), f(np.percentile(ame[j], 97.5))] for j in range(k)],
+                      "Change in the expected count per one-unit increase, averaged over the sample (exposure included): the rate ratio translated to counts."))
+    diag = []
+    for j, v in enumerate(names):
+        rh, ess = _rhat_ess([to_orig(c[0])[:, j] for c in ch]); diag.append([v, rh, ess])
+    if fam == "nbinom":
+        rh, ess = _rhat_ess([np.exp(-c[0][:, k + 1]) for c in ch]); diag.append(["alpha", rh, ess])
+    wst = sorted(diag, key=lambda r_: r_[2])[:8]
+    tabs.append(table("MCMC convergence diagnostics", ["Parameter", "R-hat", "Effective sample size"], [[r_[0], f(r_[1], 3), f(r_[2], 0)] for r_ in wst],
+                      f"The {len(wst)} parameters with the smallest effective sample size (of {len(diag)}). Independence Metropolis-Hastings with a Student-t proposal at the posterior mode; acceptance rate {acc:.2f}."))
+    kmax = int(min(np.percentile(Y, 99.5), 15)) + 1
+    ks = np.arange(0, kmax + 1)
+    obs_p = [(Y == i).mean() for i in ks]
+    charts = [chart(f"Distribution of {y_}: data and posterior predictive", [str(i) for i in ks],
+                    [("Data", obs_p), ("Poisson", [(pp["poisson"] == i).mean() for i in ks]), ("Negative binomial", [(pp["nbinom"] == i).mean() for i in ks])], "count", "share of observations", kind="bar")]
+    order = np.argsort(-np.abs(Th[:, 1:k + 1].mean(0)))
+    charts.append(chart("Rate ratio of a one-s.d. increase in each regressor (posterior mean)", [x[j] for j in order], [("Rate ratio", [float(np.exp(Th[:, 1 + j]).mean()) for j in order])], "", "rate ratio", kind="bar"))
+    summary = [stat("Observations", n), stat("Family", "Poisson" if fam == "poisson" else "negative binomial"), stat("Mean of the count", float(Y.mean()), 3), stat("Variance of the count", float(var_o), 3),
+               stat("Share of zeros", float(zero_o), 3), stat("Acceptance rate", acc, 2), stat("Largest R-hat", max(float(r_[1]) for r_ in diag), 3), stat("Smallest effective sample size", min(float(r_[2]) for r_ in diag), 0)]
+    return result("bayes_count", f"Bayesian count regression: {y_}", n, summary, tabs, charts,
+                  [f"Regressors are standardised for the prior (N(0, {sb:g}^2) on each slope; the constant is centred at the log mean count" + ("; the log of the overdispersion parameter has a N(1, 2^2) prior on log(1/alpha)" if fam == "nbinom" else "") +
+                   f"). {nch} chains of {ndraw} draws after {burn} burn-in. Both families are fitted for the predictive check and the WAIC comparison, whichever one is shown above."])

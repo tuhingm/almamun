@@ -21,9 +21,9 @@ from build_courses import md_to_html  # noqa: E402
 
 SECTIONS = {
     "bayesian": dict(folder="bayesian-guide", name="Bayesian Research Guide", short="Bayesian Guide",
-                     order=["bvar", "bayes-reg", "favar", "steady-state", "panel-var", "tvp-var", "sv-var", "mixed-frequency", "threshold-var", "blp", "sign-bvar", "hier-panel", "bma", "bayes-logit", "bayes-shrinkage", "change-points", "quantile-regression", "structural-time-series"],
+                     order=["bvar", "bayes-reg", "favar", "steady-state", "panel-var", "tvp-var", "sv-var", "mixed-frequency", "threshold-var", "blp", "sign-bvar", "hier-panel", "bma", "bayes-logit", "bayes-shrinkage", "change-points", "quantile-regression", "structural-time-series", "count-regression"],
                      data=["time-series-guide/examples/money.csv", "oes/examples/us_macro.csv", "oes/examples/mixed_frequency.csv",
-                           "panel-data-guide/examples/garrett.csv", "ml-guide/examples/wage2.csv", "microeconometrics-guide/examples/mroz.csv"]),
+                           "panel-data-guide/examples/garrett.csv", "ml-guide/examples/wage2.csv", "microeconometrics-guide/examples/mroz.csv", "microeconometrics-guide/examples/doctor_visits.csv", "microeconometrics-guide/examples/arrests.csv"]),
     "markov": dict(folder="markov-guide", name="Markov-Switching Research Guide", short="Markov Guide",
                    order=["ms-ar", "ms-regression", "ms-var", "ms-panel-var", "ms-tvtp"],
                    data=["oes/examples/hamilton_gnp.csv", "oes/examples/fedfunds.csv", "oes/examples/us_macro.csv",

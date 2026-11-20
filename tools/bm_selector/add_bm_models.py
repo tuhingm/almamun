@@ -56,6 +56,10 @@ EXTRA_BAYES = {
                                              "Split a series into a level, a trend and a seasonal pattern, fill in missing observations and forecast with an interval that carries every source of uncertainty. The Bayesian version gives a posterior for each component and for every forecast.",
                                              ["Choose the components", "Estimate and compare with the Kalman filter", "Check the sampler", "Fill in a gap", "Seasonal pattern and forecast", "Test the forecast on held-out data"]),
              "Structural time series", "level, trend, seasonal", "I want to decompose, interpolate or forecast a series"),
+    "BCOUNT": ("count-regression", model("BCOUNT", "Bayesian count regression", "Count regression", "The outcome counts events: visits, arrests, patents, accidents",
+                                         "Rate ratios with credible intervals for a count outcome, a posterior predictive check of the zeros and the spread, and a WAIC comparison of the Poisson and the negative binomial, so the choice of the model is tested, not assumed.",
+                                         ["Choose the family", "Estimate and read the rate ratios", "Predictive check and WAIC", "Marginal effects", "Prior sensitivity", "Do you need zero inflation?"]),
+               "Count regression", "event counts", "The outcome counts events and I want rate ratios and a fit check"),
 }
 MARKOV = {
     "MSTVTP": ("ms-tvtp", model("MSTVTP", "Markov switching with time-varying transition probabilities", "MS with TVTP", "Hidden regimes, and an observed variable that moves the probability of switching",

@@ -710,6 +710,12 @@ MODELS += [
                  num("prior_scale", "Prior guess for each component's s.d., share of the s.d. of y", 0.01),
                  num("draws", "Draws per chain", 1500), num("burn", "Burn-in", 500), num("chains", "Chains", 2), num("seed", "Random seed", 0)],
          example=dict(file="bayesian-guide/examples/airline.csv", spec=dict(y="lpass", time="month", trend="trend", seasonal=12, horizon=12, draws=800, burn=300))),
+    dict(id="bayes_count", group="Bayesian", name="Bayesian count regression (Poisson, negative binomial)", guide="bayesian-guide/count-regression.html", fn=bayes_more.bayes_count,
+         fields=[col("y", "Count outcome"), cols("x", "Explanatory variables"), col("exposure", "Exposure (optional, e.g. person-years)", required=False),
+                 sel("family", "Family", [["nbinom", "Negative binomial (overdispersed)"], ["poisson", "Poisson"]], "nbinom"),
+                 num("prior_sd", "Prior s.d. of the coefficients per s.d. of x", 5),
+                 num("draws", "Draws per chain", 2000), num("burn", "Burn-in", 500), num("chains", "Chains", 2), num("seed", "Random seed", 0)],
+         example=dict(file="bayesian-guide/examples/doctor_visits.csv", spec=dict(y="mdvis", x=["lncoins", "idp", "lpi", "fmde", "physlm", "disea", "hlthg", "hlthf", "hlthp"], draws=800, burn=300))),
 ]
 
 STAT_MODELS = stat_registry.build(col, cols, num, sel)       # the Statistics Division: its own page, registered like every other model
