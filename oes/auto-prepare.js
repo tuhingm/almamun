@@ -340,7 +340,7 @@ function prepare(text, opts) {
   let numericVars = 0;
   info.forEach((c, j) => {
     const v = colVals(j), blank = v.filter(x => x === "").length;
-    c.missing = blank; c.pctMissing = v.length ? blank / v.length : 0;
+    c.missing = blank; c.pctMissing = v.length ? blank / v.length : 0; c.distinct = new Set(v.filter(x => x !== "")).size;
     if (c.type === "numeric") {
       numericVars++;
       const nums = v.filter(x => x !== "").map(Number);
@@ -366,12 +366,13 @@ function prepare(text, opts) {
 
 // ------------------------------------------------------------------ optional cleaning (the user chooses each action)
 function quantile(sorted, p) { const x = (sorted.length - 1) * p, lo = Math.floor(x), hi = Math.ceil(x); return sorted[lo] + (sorted[hi] - sorted[lo]) * (x - lo); }
+const ord = n => { const k = n % 100, m = n % 10; return n + (k >= 11 && k <= 13 ? "th" : m === 1 ? "st" : m === 2 ? "nd" : m === 3 ? "rd" : "th"); };
 const tidy = v => String(Number(v.toPrecision(12)));
 function summarize(names, rows) {
   const columns = names.map((n, j) => {
     const v = rows.map(r => r[j]), blank = v.filter(x => x === "").length, filled = v.filter(x => x !== "");
     const type = !filled.length ? "empty" : filled.every(x => Number.isFinite(Number(x))) ? "numeric" : "text";
-    return {name: n, type, missing: blank, pctMissing: v.length ? blank / v.length : 0, notes: []};
+    return {name: n, type, missing: blank, pctMissing: v.length ? blank / v.length : 0, distinct: new Set(filled).size, notes: []};
   });
   const num = columns.map((c, j) => c.type === "numeric" ? j : -1).filter(j => j >= 0);
   return {columns, ready: {numericVars: num.length, completeRows: rows.filter(r => num.every(j => r[j] !== "")).length, totalRows: rows.length}};
@@ -459,7 +460,7 @@ function advanced(csv, o, structure) {
         if (r[j] === "") return; const v = Number(r[j]);
         if (v < a || v > b) { n++; if (ou.method === "winsor") r[j] = tidy(Math.min(Math.max(v, a), b)); else out.add(i); }
       });
-      log.push(`"${col}": ${n} value${n === 1 ? "" : "s"} outside the ${lo}th to ${hi}th percentile (${tidy(a)} to ${tidy(b)}) ${ou.method === "winsor" ? "set to the nearest bound (winsorized)" : "marked for removal"}.`);
+      log.push(`"${col}": ${n} value${n === 1 ? "" : "s"} outside the ${ord(lo)} to ${ord(hi)} percentile (${tidy(a)} to ${tidy(b)}) ${ou.method === "winsor" ? "set to the nearest bound (winsorized)" : "marked for removal"}.`);
     }
     if (ou.method === "trim" && out.size) { rows = rows.filter((_, i) => !out.has(i)); log.push(`Trimmed ${out.size} row${out.size > 1 ? "s" : ""} containing such values.`); warnings.push(`Trimming removed ${out.size} observations. This changes the sample, so say so in your paper.`); }
   }
