@@ -270,6 +270,12 @@
   "sub": "Logit, probit and the other models for binary, count, censored and choice outcomes: marginal effects, tests and the text for the paper."
  },
  {
+  "out": "assets/og/microeconometrics-guide/iv-probit.jpg",
+  "kicker": "Microeconometrics Guide · Model guide",
+  "title": "IV Probit and the Control Function (Endogenous Regressors in a Binary Model)",
+  "sub": "A binary outcome (employment, participation, adoption) with a regressor that is correlated with the error, and a valid instrument…"
+ },
+ {
   "out": "assets/og/microeconometrics-guide/logit-probit.jpg",
   "kicker": "Microeconometrics Guide · Model guide",
   "title": "Logit and Probit Regression",
