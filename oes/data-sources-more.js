@@ -35,7 +35,7 @@
         { id: "ECB_POLICY_RATE", label: "Euro area main refinancing rate (daily, %)", freq: "D", fixed: { code: "U2", name: "Euro area" }, url: (e, s) => ECB + "FM/B.U2.EUR.4F.KR.MRR_FR.LEV?startPeriod=" + s + "&format=csvdata", ent: "REF_AREA" },
         { id: "ECB_HICP_INFL", label: "Euro area inflation, HICP (monthly, % y/y)", freq: "M", fixed: { code: "U2", name: "Euro area" }, url: (e, s) => ECB + "ICP/M.U2.N.000000.4.ANR?startPeriod=" + s + "&format=csvdata", ent: "REF_AREA" },
         { id: "ECB_UNEMP", label: "Euro area unemployment rate (monthly, %)", freq: "M", fixed: { code: "I9", name: "Euro area" }, url: (e, s) => ECB + "LFSI/M.I9.S.UNEHRT.TOTAL0.15_74.T?startPeriod=" + s + "&format=csvdata", ent: "REF_AREA" },
-        { id: "ECB_GDP_GROWTH", label: "Euro area real GDP growth (quarterly, % y/y)", freq: "Q", fixed: { code: "I9", name: "Euro area" }, url: (e, s) => ECB + "MNA/Q.Y.I9.W2.S1.S1.B.B1GQ._Z._Z._Z.EUR.LR.GY?startPeriod=" + s + "&format=csvdata", ent: "REF_AREA" }
+        { id: "ECB_GDP_GROWTH", label: "Euro area real GDP growth (quarterly, % y/y)", freq: "Q", fixed: { code: "I9", name: "Euro area" }, url: (e, s) => ECB + "MNA/Q.Y.I9.W2.S1.S1.B.B1GQ._Z._Z._Z.EUR.LR.GY?startPeriod=" + s + "&format=csvdata", ent: "REF_AREA" },
         { id: "ECB_CORE_INFL", label: "Euro area core inflation, HICP excl. energy and food (monthly, % y/y)", freq: "M", fixed: { code: "U2", name: "Euro area" }, url: (e, s) => ECB + "ICP/M.U2.N.XEF000.4.ANR?startPeriod=" + s + "&format=csvdata", ent: "REF_AREA" },
         { id: "ECB_EURIBOR_3M", label: "3-month Euribor (monthly, %)", freq: "M", fixed: { code: "U2", name: "Euro area" }, url: (e, s) => ECB + "FM/M.U2.EUR.RT.MM.EURIBOR3MD_.HSTA?startPeriod=" + s + "&format=csvdata", ent: "REF_AREA" },
         { id: "ECB_M3_GROWTH", label: "Euro area M3 money supply growth (monthly, % y/y)", freq: "M", fixed: { code: "U2", name: "Euro area" }, url: (e, s) => ECB + "BSI/M.U2.Y.V.M30.X.I.U2.2300.Z01.A?startPeriod=" + s + "&format=csvdata", ent: "REF_AREA" },
@@ -48,7 +48,7 @@
       indicators: [
         { id: "ES_REAL_GDP", label: "Real GDP (annual, chain-linked 2010 million euro)", freq: "A", needs: true, url: (e, s) => EUS + "nama_10_gdp/A.CLV10_MEUR.B1GQ." + e.join("+") + "?startPeriod=" + s + "&format=SDMX-CSV", ent: "geo" },
         { id: "ES_UNEMP", label: "Unemployment rate (annual, % of active population, 15–74)", freq: "A", needs: true, url: (e, s) => EUS + "une_rt_a/A.Y15-74.PC_ACT.T." + e.join("+") + "?startPeriod=" + s + "&format=SDMX-CSV", ent: "geo" },
-        { id: "ES_HICP_INFL", label: "Inflation, HICP all items (monthly, % y/y)", freq: "M", needs: true, url: (e, s) => EUS + "prc_hicp_manr/M.RCH_A.CP00." + e.join("+") + "?startPeriod=" + s + "&format=SDMX-CSV", ent: "geo" }
+        { id: "ES_HICP_INFL", label: "Inflation, HICP all items (monthly, % y/y)", freq: "M", needs: true, url: (e, s) => EUS + "prc_hicp_manr/M.RCH_A.CP00." + e.join("+") + "?startPeriod=" + s + "&format=SDMX-CSV", ent: "geo" },
         { id: "ES_GDP_CURRENT", label: "GDP at current prices (annual, million euro)", freq: "A", needs: true, url: (e, s) => EUS + "nama_10_gdp/A.CP_MEUR.B1GQ." + e.join("+") + "?startPeriod=" + s + "&format=SDMX-CSV", ent: "geo" },
         { id: "ES_GDP_GROWTH", label: "Real GDP growth (annual, % change on previous year)", freq: "A", needs: true, url: (e, s) => EUS + "nama_10_gdp/A.CLV_PCH_PRE.B1GQ." + e.join("+") + "?startPeriod=" + s + "&format=SDMX-CSV", ent: "geo" },
         { id: "ES_GDP_PC", label: "Real GDP per capita (annual, chain-linked 2010 euro)", freq: "A", needs: true, url: (e, s) => EUS + "nama_10_pc/A.CLV10_EUR_HAB.B1GQ." + e.join("+") + "?startPeriod=" + s + "&format=SDMX-CSV", ent: "geo" },
@@ -72,7 +72,7 @@
       indicators: [
         { id: "BIS_POLICY_RATE", label: "Central bank policy rate (monthly, %)", freq: "M", needs: true, url: (e, s) => BIS + "WS_CBPOL/1.0/M." + e.join("+") + "?startPeriod=" + s + "&format=csv", ent: "REF_AREA" },
         { id: "BIS_REER", label: "Real effective exchange rate, broad basket (monthly, index)", freq: "M", needs: true, url: (e, s) => BIS + "WS_EER/1.0/M.R.B." + e.join("+") + "?startPeriod=" + s + "&format=csv", ent: "REF_AREA" },
-        { id: "BIS_CPI", label: "Consumer prices (monthly, index)", freq: "M", needs: true, url: (e, s) => BIS + "WS_LONG_CPI/1.0/M." + e.join("+") + ".628?startPeriod=" + s + "&format=csv", ent: "REF_AREA" }
+        { id: "BIS_CPI", label: "Consumer prices (monthly, index)", freq: "M", needs: true, url: (e, s) => BIS + "WS_LONG_CPI/1.0/M." + e.join("+") + ".628?startPeriod=" + s + "&format=csv", ent: "REF_AREA" },
         { id: "BIS_NEER", label: "Nominal effective exchange rate, broad basket (monthly, index)", freq: "M", needs: true, url: (e, s) => BIS + "WS_EER/1.0/M.N.B." + e.join("+") + "?startPeriod=" + s + "&format=csv", ent: "REF_AREA" },
         { id: "BIS_PROP_PRICES", label: "Residential property prices (quarterly, index)", freq: "Q", needs: true, url: (e, s) => BIS + "WS_SPP/1.0/Q." + e.join("+") + ".N.628?startPeriod=" + s + "&format=csv", ent: "REF_AREA" },
         { id: "BIS_USD_RATE", label: "Exchange rate against the US dollar (monthly average, local currency per USD)", freq: "M", needs: true, url: (e, s) => BIS + "WS_XRU/1.0/M." + e.join("+") + "?startPeriod=" + s + "&format=csv", ent: "REF_AREA" },
