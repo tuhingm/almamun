@@ -74,3 +74,79 @@ def classify(df, spec):
     return result("classify", f"Classification of {y}", len(d), [stat("Observations", len(d)), stat("Predictors", len(x)), stat("Share of ones", float(Y.mean()), 4), stat("Best model by AUC", best), stat("Best AUC", _auc(Y[te], p), 4), stat("Youden cut-off", cut, 3)],
                   tabs, charts, ["AUC is the probability that a random positive receives a higher score than a random negative. Accuracy depends on the cut-off and on the class balance; report AUC, Brier score and calibration together.",
                                  "The hold-out test set is used once. Tuning (the LASSO penalty) is done by cross-validation on the training set."])
+
+
+# ------------------------------------------------------------------------------------------------------------------
+# Interpretation of a fitted model: permutation importance, partial dependence and interaction strength
+# ------------------------------------------------------------------------------------------------------------------
+def _pd_curve(model, Xr, j, grid):
+    out = []
+    for v in grid:
+        Z = Xr.copy(); Z[:, j] = v; out.append(float(model.predict(Z).mean()))
+    return np.array(out)
+
+
+def _pd_at(model, Xs, cols):
+    """Partial dependence of the columns in cols, evaluated at each row of Xs (one prediction call)."""
+    n = len(Xs); Z = np.tile(Xs, (n, 1))
+    for c in cols:
+        Z[:, c] = np.repeat(Xs[:, c], n)
+    return model.predict(Z).reshape(n, n).mean(1)
+
+
+def interpret(df, spec):
+    d, y, x, ts = _xy(df, spec)
+    kind = str(spec.get("model") or "rf")
+    if kind not in ("rf", "gb"):
+        raise OESError("The model must be rf (random forest) or gb (gradient boosting).")
+    share = float_option(spec, "test_share", 0.25, "Test share")
+    if not 0.05 <= share <= 0.5:
+        raise OESError("The test share must be between 0.05 and 0.5.")
+    reps = int_option(spec, "repeats", 20, 5, 200, "Permutation repeats"); top = int_option(spec, "top", 3, 1, 6, "Number of variables to profile")
+    if len(x) < 2:
+        raise OESError("Choose at least two predictors.")
+    top = min(top, len(x))
+    from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
+    X, Y = d[x].astype(float).to_numpy(), d[y].astype(float).to_numpy(); tr, te = _split(len(d), ts, share)
+    m = (RandomForestRegressor(n_estimators=200, min_samples_leaf=5, max_features=0.5, random_state=0, n_jobs=1) if kind == "rf"
+         else GradientBoostingRegressor(n_estimators=300, learning_rate=0.05, max_depth=3, subsample=0.8, random_state=0)).fit(X[tr], Y[tr])
+    def r2(Xt): e = Y[te] - m.predict(Xt); return 1 - float(e @ e) / float(((Y[te] - Y[tr].mean()) ** 2).sum())
+    base = r2(X[te]); rng = np.random.default_rng(0); imp = np.zeros((len(x), reps))
+    nt = len(te); den = float(((Y[te] - Y[tr].mean()) ** 2).sum())
+    for j in range(len(x)):
+        Zs = np.tile(X[te], (reps, 1))                                     # all repetitions in one prediction call
+        for r in range(reps):
+            Zs[r * nt:(r + 1) * nt, j] = rng.permutation(X[te][:, j])
+        pr = m.predict(Zs).reshape(reps, nt); imp[j] = base - (1 - ((Y[te][None, :] - pr) ** 2).sum(1) / den)
+    mi, si = imp.mean(1), imp.std(1, ddof=1); order = np.argsort(-mi)
+    import statsmodels.api as sm
+    Z = (X[tr] - X[tr].mean(0)) / np.where(X[tr].std(0) == 0, 1, X[tr].std(0)); ols = sm.OLS(Y[tr], sm.add_constant(Z)).fit(); beta = ols.params[1:]
+    rho = float(stats.spearmanr(mi, np.abs(beta))[0]) if len(x) > 2 else float("nan")
+    tabs = [table(f"Permutation importance on the test set ({'random forest' if kind == 'rf' else 'gradient boosting'}; test R-squared {base:.4f})", ["Predictor", "Importance (fall in test R-squared)", "Std. dev. over repeats", "Share of total", "Standardised OLS coefficient"],
+                  [[x[j], f(mi[j], 4), f(si[j], 4), f(float(max(mi[j], 0) / max(mi.clip(0).sum(), 1e-12)), 4), f(float(beta[j]), 4)] for j in order],
+                  f"Each predictor is shuffled on the test set {reps} times; importance is how much the fit falls. Correlated predictors share importance, so a small value does not mean a variable is unrelated to the outcome.")]
+    sub = rng.choice(len(tr), size=min(80, len(tr)), replace=False); Xs = X[tr][sub]; charts = []; prof = []; pdc = {}
+    for j in order[:top]:
+        grid = np.quantile(X[tr][:, j], np.linspace(0.05, 0.95, 10)); grid = np.unique(grid); pdv = _pd_curve(m, Xs, j, grid); pdc[j] = (grid, pdv)
+        slope = float(np.polyfit(grid, pdv, 1)[0]) if len(grid) > 2 else float("nan")
+        lin = float(np.corrcoef(grid, pdv)[0, 1] ** 2) if len(grid) > 2 and pdv.std() > 0 else float("nan")
+        prof.append([x[j], f(float(grid[0]), 3), f(float(grid[-1]), 3), f(float(pdv[0]), 4), f(float(pdv[-1]), 4), f(float(pdv.max() - pdv.min()), 4), f(lin, 3)])
+        charts.append(chart(f"Partial dependence of {y} on {x[j]}", [float(v) for v in grid], [("Partial dependence", [float(v) for v in pdv])], x[j], y, kind="line"))
+    tabs.append(table("Partial dependence profiles (5th to 95th percentile of each predictor)", ["Predictor", "From", "To", "Prediction at start", "Prediction at end", "Range", "R-squared of a straight line"], prof,
+                      "The average prediction when the predictor is set to each value and the others keep their observed values. An R-squared of a straight line near 1 means the effect is close to linear."))
+    inter = []
+    if top >= 2:
+        idx = list(order[:top]); pj = {}
+        for j in idx:
+            pj[j] = _pd_at(m, Xs, [j])
+        for a in range(len(idx)):
+            for b in range(a + 1, len(idx)):
+                j, k = idx[a], idx[b]; pjk = _pd_at(m, Xs, [j, k])
+                c = lambda v: v - v.mean(); den = float(np.sum(c(pjk) ** 2))
+                h2 = float(np.sum((c(pjk) - c(pj[j]) - c(pj[k])) ** 2) / den) if den > 0 else float("nan")
+                inter.append([f"{x[j]} and {x[k]}", f(h2, 4), f(float(np.sqrt(max(h2, 0))), 4)])
+        tabs.append(table("Interaction strength between the leading predictors (Friedman's H statistic)", ["Pair", "H-squared", "H"], inter,
+                          f"The share of the variance of the joint partial dependence that is not explained by the two separate partial dependences, on {len(Xs)} training observations. 0 means the two effects add up."))
+    summary = [stat("Observations", len(d)), stat("Predictors", len(x)), stat("Test R-squared", base, 4), stat("Most important predictor", x[int(order[0])]), stat("Rank correlation with |OLS coefficient|", rho, 3)]
+    return result("interpret", f"Interpretation of the {'forest' if kind == 'rf' else 'boosting'} model for {y}", len(d), summary, tabs, charts,
+                  ["Importance, partial dependence and interaction strength describe the fitted model, not the economy. They are causal only if the model is a causal one.", "Permutation importance is computed on data the model has not seen, so it does not reward overfitting."])

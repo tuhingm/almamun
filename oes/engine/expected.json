@@ -1512,5 +1512,21 @@
    "label": "Share of ones",
    "value": 0.8762
   }
+ },
+ "interpret": {
+  "nobs": 663,
+  "table_index": 0,
+  "table": "Permutation importance on the test set (random forest; test R-squared 0.2646)",
+  "row": "KWW",
+  "row_index": 0,
+  "col": "Importance (fall in test R-squared)",
+  "col_index": 1,
+  "value": 0.0757,
+  "rtol": 0.05,
+  "seconds": 1.0,
+  "summary": {
+   "label": "Test R-squared",
+   "value": 0.2646
+  }
  }
 }

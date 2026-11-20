@@ -396,6 +396,12 @@
   "sub": "LASSO, ridge, elastic net, random forest, XGBoost or double machine learning, chosen by tests on your data."
  },
  {
+  "out": "assets/og/ml-guide/interpretation.jpg",
+  "kicker": "Machine Learning Guide · Model guide",
+  "title": "Interpreting a Machine-Learning Model: Importance, Partial Dependence and Interactions",
+  "sub": "A forest or boosting model predicts well and you must say which variables matter, how they matter and whether they interact.…"
+ },
+ {
   "out": "assets/og/ml-guide/krls.jpg",
   "kicker": "Machine Learning Guide · Model guide",
   "title": "Kernel-Based Regularized Least Squares (KRLS)",
