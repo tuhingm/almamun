@@ -375,3 +375,37 @@ def test_spectral_errors():
     d = pd.read_csv(os.path.join(OX, "us_macro.csv"))
     assert "60" in o.run("spectral", d.head(30).to_csv(index=False), dict(y="gdp_growth"))["error"]
     assert "Choose" in o.run("spectral", d.to_csv(index=False), dict(y="gdp_growth", detrend="cubic"))["error"]
+
+
+# ------------------------------------------------------------------ time-varying-parameter regression
+def test_tvp_registered():
+    m = o.BY_ID["tvp_regression"]
+    assert os.path.exists(os.path.join(ROOT, m["guide"])) and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+def test_tvp_recovers_a_drifting_coefficient_and_a_constant_one():
+    rng = np.random.default_rng(31); n = 300; x1 = rng.standard_normal(n); x2 = rng.standard_normal(n)
+    b1 = np.cumsum(.08 * rng.standard_normal(n)) + 1.0; y = 0.5 + b1 * x1 + 0.7 * x2 + 0.5 * rng.standard_normal(n)
+    r = ts_extra.tvp_regression(pd.DataFrame({"y": y, "x1": x1, "x2": x2}), dict(y="y", x=["x1", "x2"]))
+    est1 = np.array(r["charts"][1]["series"][0]["y"], float); est2 = np.array(r["charts"][2]["series"][0]["y"], float)
+    assert np.corrcoef(est1, b1)[0, 1] > 0.9                                   # the drifting slope is tracked
+    assert np.std(est2) < 0.15 and abs(est2.mean() - 0.7) < 0.15              # the constant slope stays constant
+    var = {row[0]: row[1] for row in r["tables"][0]["rows"]}
+    assert var["sigma2.x1"] > 10 * var["sigma2.x2"] and abs(var["sigma2.obs"] - 0.25) < 0.1
+
+
+def test_tvp_constant_model_ols_column_matches_statsmodels_and_loglik_improves():
+    import statsmodels.api as sm
+    d = pd.read_csv(os.path.join(OX, "phillips.csv")); r = ts_extra.tvp_regression(d, dict(y="inflation", x=["inflation_lag", "unemp"], time="date"))
+    ols = sm.OLS(d.inflation, sm.add_constant(d[["inflation_lag", "unemp"]])).fit()
+    got = {row[0]: row[1] for row in table_(r, "Coefficients")["rows"]}
+    assert got["inflation_lag"] == pytest.approx(ols.params["inflation_lag"], abs=1e-3) and got["unemp"] == pytest.approx(ols.params["unemp"], abs=1e-3)
+    ll = {row[0]: row[1] for row in table_(r, "Model comparison")["rows"]}; assert ll["Time-varying coefficients"] > ll["Constant coefficients"]
+
+
+def table_(r, prefix): return next(t for t in r["tables"] if t["title"].startswith(prefix))
+
+
+def test_tvp_errors():
+    d = pd.read_csv(os.path.join(OX, "phillips.csv"))
+    assert "60" in o.run("tvp_regression", d.head(30).to_csv(index=False), dict(y="inflation", x=["unemp"]))["error"]

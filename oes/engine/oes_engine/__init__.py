@@ -577,6 +577,9 @@ MODELS += [
          fields=[col("y", "Series"), col("x", "Second series for coherence", required=False), TIME, num("ppy", "Periods per year (4 quarterly, 12 monthly)", 4),
                  sel("detrend", "Detrend", [["linear", "Linear trend"], ["mean", "Mean only"], ["none", "None"]], "linear"), num("segment", "Welch segment length", "")],
          example=dict(file=OX + "us_macro.csv", spec=dict(y="gdp_growth", x="unemp", time="date", ppy=4, detrend="linear"))),
+    dict(id="tvp_regression", group="Time series", name="Time-varying-parameter regression (Kalman filter)", guide="time-series-guide/time-varying-parameters.html", fn=ts_extra.tvp_regression,
+         fields=[col("y", "Dependent variable"), cols("x", "Regressors"), TIME],
+         example=dict(file=OX + "phillips.csv", spec=dict(y="inflation", x=["inflation_lag", "unemp"], time="date"))),
 ]
 
 MODELS += [
