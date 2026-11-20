@@ -13,7 +13,6 @@ stat = json.loads((ROOT / "oes/engine/stat_catalog.json").read_text())["models"]
 total, groups = len(econ) + len(stat), len({m["group"] for m in econ + stat})
 page = ROOT / "oes/index.html"
 s = page.read_text()
-s = re.sub(r"run \d+ methods \(\d+ econometric models and \d+ statistical methods\)", f"run {total} methods ({len(econ)} econometric models and {len(stat)} statistical methods)", s)
-s = re.sub(r'(<strong id="n-models">)\d+(</strong> methods</span><span><strong>)\d+(</strong> method groups)', rf"\g<1>{total}\g<2>{groups}\g<3>", s)
+s = re.sub(r'(<strong id="n-models">)[\d+]+(</strong> models</span><span><strong>)\d+(</strong> method groups)', rf"\g<1>{total // 10 * 10}+\g<2>{groups}\g<3>", s)
 page.write_text(s)
 print(f"OES page: {total} methods ({len(econ)} econometric, {len(stat)} statistical) in {groups} groups")

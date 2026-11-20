@@ -262,6 +262,20 @@ for p in pages:
         page["mainEntity"] = {"@id": SITE + "#person"}
         page["about"] = {"@id": SITE + "#person"}
     graph = [page, person, website]
+    if rel == "oes/index.html":
+        econ = json.loads((ROOT / "oes/engine/catalog.json").read_text())["models"]
+        stat = json.loads((ROOT / "oes/engine/stat_catalog.json").read_text())["models"]
+        groups = list(dict.fromkeys(m["group"] for m in econ + stat))
+        graph.append({"@type": ["WebApplication", "SoftwareApplication"], "@id": url + "#app",
+                      "name": "Open Econometric Systems (OES)", "url": url,
+                      "applicationCategory": "EducationalApplication", "applicationSubCategory": "Econometrics and statistics",
+                      "operatingSystem": "Any (runs in a web browser)", "browserRequirements": "Requires JavaScript and WebAssembly",
+                      "isAccessibleForFree": True, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+                      "description": f"Run {(len(econ) + len(stat)) // 10 * 10}+ econometric and statistical models on your own data in the browser: "
+                                     + ", ".join(g.lower() for g in groups) + ".",
+                      "featureList": groups, "author": {"@id": SITE + "#person"}, "creator": {"@id": SITE + "#person"},
+                      "inLanguage": "en"})
+        page["mainEntity"] = {"@id": url + "#app"}
     if len(crumbs) > 1:
         page["breadcrumb"] = {"@id": url + "#breadcrumb"}
         graph.append({"@type": "BreadcrumbList", "@id": url + "#breadcrumb",
