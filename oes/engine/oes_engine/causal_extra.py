@@ -5,7 +5,7 @@ import pandas as pd
 from scipy import stats
 from scipy.optimize import linprog, minimize
 
-from .core import (OESError, as_list, chart, check_columns, distinct, f, float_option, int_option, need, numeric, result, stat, table, time_order)
+from .core import (test_row, tests_table, OESError, as_list, chart, check_columns, distinct, f, float_option, int_option, need, numeric, result, stat, table, time_order)
 
 
 def _panel(df, spec, y, extra=()):
@@ -320,3 +320,101 @@ def bartik(df, spec):
     notes = ["Shift-share instrument: initial industry shares times national industry shocks. Identification rests on share exogeneity (Goldsmith-Pinkham, Sorkin and Swift 2020) or shock exogeneity (Borusyak, Hull and Jaravel 2022); the diagnostics differ.",
              "Report which assumption you rely on and use the shock-level standard error."]
     return result("bartik", f"Shift-share IV: {y} on {x}", L, summary, tabs, ch, notes)
+
+
+# ------------------------------------------------------------------------------------------------------------------
+# Weak-instrument-robust inference: Anderson-Rubin, LM and conditional likelihood ratio confidence sets, LIML
+# ------------------------------------------------------------------------------------------------------------------
+def _partial(M, C):
+    """Residuals of the columns of M after regressing on C (which includes the constant)."""
+    return M - C @ np.linalg.lstsq(C, M, rcond=None)[0]
+
+
+def _sqrtm_inv(A):
+    w, V = np.linalg.eigh(A); return V @ np.diag(1 / np.sqrt(w)) @ V.T
+
+
+def _wiv_parts(y, x, Z, b0, Om, ZZi_half, Pi_hat_num):
+    """S and T vectors of Andrews, Moreira and Stock (2006) for the null beta = b0."""
+    bv = np.array([1.0, -b0]); av = np.array([b0, 1.0]); Omi = np.linalg.inv(Om)
+    S = Pi_hat_num @ bv / np.sqrt(bv @ Om @ bv); T = Pi_hat_num @ Omi @ av / np.sqrt(av @ Omi @ av)
+    return S, T
+
+
+def _clr_p(S, T, Sd):
+    """Conditional likelihood ratio p-value of Moreira (2003): the null distribution of the statistic given T, simulated with common draws Sd of S ~ N(0, I)."""
+    qT = float(T @ T); qS = float(S @ S); qST = float(S @ T)
+    lr = lambda QS, QST: 0.5 * (QS - qT + np.sqrt(np.maximum((QS + qT) ** 2 - 4 * (QS * qT - QST ** 2), 0)))
+    obs = lr(qS, qST); QS = (Sd ** 2).sum(1); QST = Sd @ T
+    return float(np.mean(lr(QS, QST) >= obs))
+
+
+def weakiv(df, spec):
+    y = need(spec, "outcome", "outcome"); x = need(spec, "treat", "endogenous regressor"); zs = as_list(need(spec, "instruments", "instrument(s)")); cs = as_list(spec.get("controls") or [])
+    distinct([y, x], zs, cs)
+    miss = [c for c in [y, x] + zs + cs if c not in df.columns]
+    if miss:
+        raise OESError("Column(s) not found in the data: " + ", ".join(miss))
+    d = numeric(df, [y, x] + zs + cs); n = len(d); k = len(zs)
+    level = float(spec.get("level") or 0.95)
+    if not 0.5 <= level < 1:
+        raise OESError("The confidence level must be between 0.5 and 1.")
+    reps = int_option(spec, "sims", 1000, 200, 20000, "Simulation replications"); seed = int_option(spec, "seed", 0, 0, 10 ** 6, "Random seed")
+    if n < 3 * (k + len(cs) + 2):
+        raise OESError("Too few observations for this number of instruments and controls.")
+    one = np.ones((n, 1)); C = np.column_stack([one] + ([d[cs].to_numpy(float)] if cs else []))
+    Y = _partial(d[[y, x]].to_numpy(float), C); Z = _partial(d[zs].to_numpy(float), C)
+    if np.linalg.matrix_rank(Z) < k:
+        raise OESError("The instruments are collinear (after partialling out the controls).")
+    dof = n - C.shape[1] - k
+    ZZ = Z.T @ Z; Pi = np.linalg.solve(ZZ, Z.T @ Y)                       # reduced form (k x 2)
+    E = Y - Z @ Pi; Om = E.T @ E / dof
+    ZZh = _sqrtm_inv(ZZ); Num = ZZh @ Z.T @ Y                          # (Z'Z)^{-1/2} Z'Y, k x 2, for the S and T vectors
+    # 2SLS and LIML
+    PZ = Z @ np.linalg.solve(ZZ, Z.T); xh = PZ @ Y[:, 1]
+    b2 = float(xh @ Y[:, 0] / (xh @ Y[:, 1])); u2 = Y[:, 0] - b2 * Y[:, 1]; s2 = float(u2 @ u2) / (n - C.shape[1] - 1)
+    se2 = np.sqrt(s2 / float(xh @ Y[:, 1]))
+    Wm = np.column_stack([Y[:, 0], Y[:, 1]]); A = Wm.T @ Wm; B = Wm.T @ (Wm - PZ @ Wm)
+    kappa = float(np.min(np.real(np.linalg.eigvals(np.linalg.solve(B, A)))))                                    # LIML k-class
+    Mk = np.eye(n) - kappa * (np.eye(n) - PZ); bl = float(Y[:, 1] @ Mk @ Y[:, 0] / (Y[:, 1] @ Mk @ Y[:, 1])); ul = Y[:, 0] - bl * Y[:, 1]
+    sel = float(ul @ ul) / (n - C.shape[1] - 1); sel_se = float(np.sqrt(sel / (Y[:, 1] @ Mk @ Y[:, 1])))
+    # first stage
+    fs = Y[:, 1] - Z @ Pi[:, 1]; Ffs = float((Pi[:, 1] @ ZZ @ Pi[:, 1]) / k / (float(fs @ fs) / dof)); pF = float(stats.f.sf(Ffs, k, dof))
+    # grid inversion for AR, LM and CLR
+    se0 = se2 if np.isfinite(se2) and se2 > 0 else 1.0
+    half = max(40 * se0, 5 * abs(b2), 1.0); lo, hi = b2 - half, b2 + half; grid = np.linspace(lo, hi, 1201)
+    rng = np.random.default_rng(seed); Sd = rng.standard_normal((reps, k)); ar = np.empty(len(grid)); lm = np.empty(len(grid)); clr = np.empty(len(grid))
+    for i, b0 in enumerate(grid):
+        S, T = _wiv_parts(None, None, Z, b0, Om, ZZh, Num)
+        ar[i] = stats.chi2.sf(float(S @ S), k)
+        lmv = float((S @ T) ** 2 / (T @ T)); lm[i] = stats.chi2.sf(lmv, 1)
+        clr[i] = _clr_p(S, T, Sd) if k > 1 else lm[i]
+    a = 1 - level
+    def cset(p):
+        ok = p > a
+        if ok.all(): return "unbounded (the whole grid)"
+        if not ok.any(): return "empty"
+        idx = np.where(ok)[0]; segs = np.split(idx, np.where(np.diff(idx) > 1)[0] + 1)
+        out = []
+        for sg in segs:
+            l = "-inf" if sg[0] == 0 else f"{grid[sg[0]]:.3f}"; h = "inf" if sg[-1] == len(grid) - 1 else f"{grid[sg[-1]]:.3f}"; out.append(f"[{l}, {h}]")
+        return " U ".join(out)
+    z = stats.norm.ppf(0.5 + level / 2)
+    est = table(f"Effect of {x} on {y}: point estimates and weak-instrument-robust confidence sets", ["Method", "Estimate", "Std. err.", f"{int(round(level * 100))}% confidence set"],
+                [["2SLS (Wald interval)", f(b2, 4), f(se2, 4), f"[{b2 - z * se2:.3f}, {b2 + z * se2:.3f}]"], ["LIML (Wald interval)", f(bl, 4), f(sel_se, 4), f"[{bl - z * sel_se:.3f}, {bl + z * sel_se:.3f}]"],
+                 ["Anderson-Rubin", "", "", cset(ar)], ["Lagrange multiplier (Kleibergen)", "", "", cset(lm)], ["Conditional likelihood ratio (Moreira)" if k > 1 else "Conditional likelihood ratio (= LM with one instrument)", "", "", cset(clr)]],
+                "Homoskedastic errors. The AR, LM and CLR sets are valid whatever the strength of the instruments; the Wald intervals are not. The grid is wide (at least 40 standard errors either side of 2SLS); a set that reaches its edge is reported with an infinite end.")
+    fst = table("First stage", ["Statistic", "Value"], [["First-stage F (joint significance of the instruments)", f(Ffs, 2)], ["p-value", f(pF, 4)], ["Number of instruments", k], ["Partial R-squared", f(float((Pi[:, 1] @ ZZ @ Pi[:, 1]) / float(Y[:, 1] @ Y[:, 1])), 4)],
+                                                      ["Rule of thumb", "F < 10: weak (Staiger-Stock); AR, LM or CLR sets should be reported"]])
+    S0 = _wiv_parts(None, None, Z, 0.0, Om, ZZh, Num)[0]; AR0 = float(S0 @ S0)
+    rows_t = [test_row("Anderson-Rubin test of beta = 0", AR0, float(stats.chi2.sf(AR0, k)), f"chi-squared({k}); valid with weak instruments")]
+    if k > 1:
+        from scipy.optimize import minimize_scalar
+        mn = minimize_scalar(lambda b0: float((lambda S: S @ S)(_wiv_parts(None, None, Z, b0, Om, ZZh, Num)[0])), bounds=(grid[0], grid[-1]), method="bounded", options=dict(xatol=1e-9))
+        arm = min(float(mn.fun), float(np.min([stats.chi2.isf(v, k) if v > 0 else np.inf for v in ar])))
+        rows_t.append(test_row(f"Overidentification (minimum of the AR statistic, {k - 1} df)", arm, float(stats.chi2.sf(arm, k - 1)), "H0: all instruments are valid; a rejection makes the AR set narrow or empty"))
+    tests = tests_table(rows_t, title="Tests")
+    ch = [chart("p-value of the test of each value of the coefficient", list(grid), [("Anderson-Rubin", ar), ("LM", lm)] + ([("CLR", clr)] if k > 1 else []), f"Value of the coefficient on {x}", "p-value", kind="line")]
+    notes = ["The sets are for homoskedastic errors; with heteroskedasticity use a robust version (for example in Stata, weakiv or ivreg2 with robust options).",
+             "With more instruments than endogenous regressors, the AR test also has power against invalid instruments, so a rejection does not by itself show an effect."]
+    return result("weakiv", f"Weak-instrument-robust inference: effect of {x} on {y}", n, [stat("Observations", n), stat("2SLS estimate", b2, 4), stat("LIML estimate", bl, 4), stat("First-stage F", Ffs, 2), stat("Instruments", k)], [est, fst, tests], ch, notes)

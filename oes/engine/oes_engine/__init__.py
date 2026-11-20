@@ -518,6 +518,9 @@ MODELS += [
          fields=[col("y", "Outcome"), col("x", "Endogenous variable"), cols("shares", "Initial industry shares (one column per industry)"), num("shocks", "Industry shocks (comma-separated, in the order of the share columns)", ""),
                  cols("controls", "Controls", required=False)],
          example=dict(file=CE + "shiftshare.csv", spec=dict(y="dy", x="dx", shares=["share_%d" % i for i in range(1, 61)], shocks="0.0488,-0.0333,-0.1236,0.0050,-0.0012,0.0200,0.1599,-0.0827,0.1836,-0.0420,-0.0827,0.1521,0.1407,0.0583,0.0484,-0.0651,0.1687,-0.0155,0.0787,-0.0534,-0.0304,-0.0182,0.1980,0.0610,0.0978,-0.0517,-0.0176,0.0100,-0.0759,0.0436,0.0152,0.0930,0.0000,-0.0198,0.1069,-0.0313,0.0109,0.0365,-0.0230,-0.0143,0.1044,-0.1253,0.0507,-0.1275,0.1389,-0.2460,-0.0570,-0.1034,0.0927,0.0241,-0.0149,0.0479,0.3004,-0.0136,-0.0935,0.0754,-0.0107,0.0125,-0.1818,0.0238"))),
+    dict(id="weakiv", group="Causal inference", name="Weak-instrument-robust IV inference (AR, LM, CLR, LIML)", guide="causal-inference-guide/weak-iv.html", fn=causal_extra.weakiv,
+         fields=[col("outcome", "Outcome"), col("treat", "Endogenous regressor"), cols("instruments", "Instruments"), cols("controls", "Controls", required=False), num("level", "Confidence level", 0.95), num("sims", "Simulation draws for the CLR test", 1000), num("seed", "Random seed", 0)],
+         example=dict(file=CI + "card_full.csv", spec=dict(outcome="lwage", treat="educ", instruments=["nearc4", "nearc2"], controls=["exper", "expersq", "black", "smsa", "south"]))),
 ]
 
 MODELS += [

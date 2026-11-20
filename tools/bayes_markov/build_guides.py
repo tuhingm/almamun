@@ -30,6 +30,10 @@ SECTIONS = {
                          "panel-data-guide/examples/garrett.csv"]),
     "micro": dict(folder="microeconometrics-guide", name="Microeconometrics Research Guide", short="Microeconometrics Guide",
                   order=["logit-probit", "ordered-logit-probit", "multinomial-logit", "tobit", "heckman", "count-models", "zero-inflated-hurdle", "glm-fractional", "systems-sur-3sls", "panel-logit-probit", "iv-probit", "conditional-mixed-logit"], data=[]),
+    "causal": dict(folder="causal-inference-guide", src="tools/causal_selector/guides", name="Causal Inference Research Guide", short="Causal Guide",
+                   order=['did', 'staggered', 'gsc', 'scm', 'its', 'rdd', 'iv', 'eventstudy', 'sdid', 'matching', 'bartik', 'weak-iv'],
+                   static={"did": "DiD", "staggered": "Staggered DiD", "gsc": "GSC", "scm": "Synthetic control", "its": "ITS", "rdd": "RDD", "iv": "IV", "eventstudy": "Event study", "sdid": "Synthetic DiD", "matching": "Matching / IPW / DR", "bartik": "Shift-share IV"},
+                   data=[]),
     # local projections: two more guides in the existing Time-Series and Panel-Data guides (hubs are built by their own tools)
     "lp": dict(folder="time-series-guide", name="Empirical Research Guide (Time Series)", short="Time-Series Guide",
                order=["ols", "ardl", "nardl", "var", "vecm", "gmm", "lp", "svar", "bp", "tar", "str", "arima", "garch", "quantile", "cointegration", "wavelet", "unit-root", "trend-cycle", "forecast-comparison", "spillovers", "granger-causality", "seasonality", "long-memory", "factor-models", "spectral-analysis", "time-varying-parameters"], static=dict(ols="OLS", ardl="ARDL", nardl="NARDL", var="VAR", vecm="VECM", gmm="2SLS / GMM"),
@@ -81,6 +85,11 @@ def run_blocks(out, slug, body):
     return body, cells
 
 
+def gdir(key):
+    """Folder of the Markdown sources of a section (the Causal guides live with the Causal tool)."""
+    return ROOT / SECTIONS[key]['src'] if SECTIONS[key].get('src') else HERE / 'guides' / key
+
+
 def meta_of(path):
     head = path.read_text().split("\n---\n", 1)[0]
     return {k.strip(): v.strip() for k, v in (l.split(":", 1) for l in head.strip().splitlines())}
@@ -89,7 +98,7 @@ def meta_of(path):
 def build(key, slug, metas):
     S = SECTIONS[key]
     out = ROOT / S["folder"]
-    text = (HERE / "guides" / key / f"{slug}.md").read_text()
+    text = (gdir(key) / f"{slug}.md").read_text()
     head, body = text.split("\n---\n", 1)
     meta = metas[slug]
     body, cells = run_blocks(out, slug, body)
@@ -126,7 +135,7 @@ def main():
     (out / "examples").mkdir(parents=True, exist_ok=True)
     for f in S["data"]:
         shutil.copy(ROOT / f, out / "examples" / pathlib.Path(f).name)
-    metas = {s: meta_of(HERE / "guides" / key / f"{s}.md") for s in S["order"] if (HERE / "guides" / key / f"{s}.md").exists()}
+    metas = {s: meta_of(gdir(key) / f"{s}.md") for s in S["order"] if (gdir(key) / f"{s}.md").exists()}
     for s in (sys.argv[2:] or list(metas)):
         build(key, s, metas)
 
