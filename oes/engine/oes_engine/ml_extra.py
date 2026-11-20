@@ -278,3 +278,76 @@ def hetero(df, spec):
     summary = [stat("Observations", n), stat("Treated share", p, 4), stat("Average effect", float(m1_[0]), 4), stat("Heterogeneity loading", float(m1_[1]), 4), stat("p-value of heterogeneity loading", float(p1_[1]), 4), stat(f"Group {G} minus group 1", float(mg[G]), 4), stat("p-value of the difference", float(pg[G]), 4)]
     return result("hetero", f"Heterogeneity of the effect of {t} on {y}", n, summary, [btab, gtab, ctab], charts,
                   ["The treatment must be randomised, or ignorable with a known propensity score: the estimates here assume the treatment share is the same for everyone.", "The groups are formed from a predicted effect, so the results are about the proxy; the data splitting makes the inference valid whatever the quality of the proxy."])
+
+
+# ------------------------------------------------------------------------------------------------------------------
+# Double-selection LASSO (Belloni, Chernozhukov and Hansen 2014) with the plug-in penalty of the "rigorous LASSO" (hdm package)
+# ------------------------------------------------------------------------------------------------------------------
+def _rlasso(y, X, c=1.1, K=15):
+    """Indices of the controls selected by the rigorous LASSO: penalty 2 c sqrt(n) Phi^-1(1 - g / (2 p)) with g = 0.1 / log(n), penalty loadings
+    from iterated post-LASSO residuals (heteroskedasticity-robust), as in the R package hdm."""
+    from sklearn.linear_model import Lasso
+    n, p = X.shape
+    gam = 0.1 / np.log(n); lam0 = 2 * c * np.sqrt(n) * stats.norm.ppf(1 - gam / (2 * p))
+    Xc, yc = X - X.mean(0), y - y.mean()
+    sd = Xc.std(0); ok = np.where(sd > 1e-12)[0]
+    if len(ok) == 0:
+        return np.array([], int)
+    cor = np.array([abs(np.corrcoef(Xc[:, j], yc)[0, 1]) if sd[j] > 1e-12 else 0.0 for j in range(p)])
+    Z = np.column_stack([np.ones(n), Xc[:, np.argsort(-cor)[:5]]]); e = yc - Z @ np.linalg.lstsq(Z, yc, rcond=None)[0]
+    ups = np.sqrt((Xc ** 2 * e[:, None] ** 2).mean(0)); ups[ups < 1e-12] = 1e-12; old = None; sel = np.array([], int)
+    for _ in range(K):
+        m = Lasso(alpha=lam0 / (2 * n), fit_intercept=False, max_iter=100000, tol=1e-10).fit(Xc / ups, yc); sel = np.where(np.abs(m.coef_) > 1e-10)[0]
+        if len(sel) == 0:
+            e = yc
+        else:
+            Zs = Xc[:, sel]; e = (yc - Zs @ np.linalg.lstsq(Zs, yc, rcond=None)[0]) * np.sqrt(n / max(n - len(sel), 1))
+        if old is not None and set(sel) == set(old):
+            break
+        ups = np.sqrt((Xc ** 2 * e[:, None] ** 2).mean(0)); ups[ups < 1e-12] = 1e-12; old = sel
+    return sel
+
+
+def _ols_effect(y, d, X, cols):
+    """OLS of y on d and the controls in cols; heteroskedasticity-robust standard error with the degrees-of-freedom factor n / (n - k) of the hdm package (k = target plus controls)."""
+    n = len(y); Z = np.column_stack([np.ones(n), d] + ([X[:, cols]] if len(cols) else []))
+    A = np.linalg.pinv(Z.T @ Z); b = A @ (Z.T @ y); e = y - Z @ b; V = A @ (Z.T * e ** 2) @ Z @ A * n / max(n - 1 - len(cols), 1)
+    return float(b[1]), float(np.sqrt(max(V[1, 1], 0)))
+
+
+def dsel(df, spec):
+    y = need(spec, "y", "outcome"); t = need(spec, "treat", "treatment (target) variable"); x = as_list(need(spec, "x", "potential controls")); distinct([y], [t], x)
+    miss = [c for c in [y, t] + x if c not in df.columns]
+    if miss:
+        raise OESError("Column(s) not found in the data: " + ", ".join(miss))
+    d = df[[y, t] + x].apply(pd.to_numeric, errors="coerce").dropna().reset_index(drop=True); n = len(d)
+    if n < 30:
+        raise OESError(f"Double selection needs at least 30 complete observations; {n} were found.")
+    cc = float_option(spec, "c", 1.1, "Penalty constant c")
+    if not 0.5 <= cc <= 3:
+        raise OESError("The penalty constant c must be between 0.5 and 3 (1.1 is the standard choice).")
+    Y, D, X = d[y].to_numpy(float), d[t].to_numpy(float), d[x].to_numpy(float); p = len(x)
+    sy, sd_ = _rlasso(Y, X, cc), _rlasso(D, X, cc); un = sorted(set(sy) | set(sd_))
+    from sklearn.linear_model import LassoCV
+    def cvsel(v):
+        m = LassoCV(cv=5, n_alphas=60, max_iter=20000, tol=1e-4, random_state=0).fit((X - X.mean(0)) / np.where(X.std(0) > 0, X.std(0), 1), v - v.mean()); return np.where(np.abs(m.coef_) > 1e-10)[0]
+    cy, cd = cvsel(Y), cvsel(D); cun = sorted(set(cy) | set(cd))
+    rows = []
+    def add(name, cols, feasible=True):
+        if not feasible:
+            rows.append([name, "n/a", "", "", "", "too many controls"]); return None
+        b, s = _ols_effect(Y, D, X, list(cols)); rows.append([name, f(b, 5), f(s, 5), f(b - 1.96 * s, 5), f(b + 1.96 * s, 5), len(cols)]); return b, s
+    add("No controls", []); add("All controls (OLS)", list(range(p)), feasible=p + 2 < n - 2)
+    add("Single selection: controls chosen for the outcome only", list(sy)); add("Single selection: controls chosen for the treatment only", list(sd_))
+    ds = add("Double selection (plug-in LASSO)", un); add("Double selection with cross-validated LASSO (for comparison)", cun)
+    tab = table(f"Effect of {t} on {y}", ["Estimator", "Estimate", "Robust std. error", "95% CI low", "95% CI high", "Controls"], rows,
+                "Robust standard errors with the n/(n - k) factor of the R package hdm. The plug-in penalty has a theoretical justification; the cross-validated row is shown because it is common practice, but its selection is not covered by the theory.")
+    sel_rows = [[x[j], "yes" if j in sy else "", "yes" if j in sd_ else "", "yes" if j in un else ""] for j in un]
+    stab = table("Selected controls (plug-in penalty)", ["Control", "Selected for the outcome", "Selected for the treatment", "In the final regression"], sel_rows or [["none", "", "", ""]],
+                 f"{len(sy)} controls selected in the outcome equation, {len(sd_)} in the treatment equation, {len(un)} in the union out of {p}.")
+    b0, s0 = ds
+    summary = [stat("Observations", n), stat("Potential controls", p), stat("Selected for the outcome", len(sy)), stat("Selected for the treatment", len(sd_)), stat("Union (final controls)", len(un)),
+               stat("Double-selection estimate", b0, 5), stat("Robust std. error", s0, 5), stat("t-statistic", b0 / s0 if s0 > 0 else float("nan"), 3), stat("p-value", float(2 * stats.norm.sf(abs(b0 / s0))) if s0 > 0 else float("nan"), 4)]
+    ch = [chart("Estimates and 95% intervals", [r[0].split(" (")[0][:28] for r in rows if r[1] != "n/a"], [("Estimate", [float(r[1]) for r in rows if r[1] != "n/a"])], "Estimator", "Estimate", kind="bar")]
+    return result("dsel", f"Double-selection LASSO: effect of {t} on {y}", n, summary, [tab, stab], ch,
+                  ["Selecting controls for the outcome alone omits controls that matter for the treatment and biases the estimate; the union of the two selections protects against this (Belloni, Chernozhukov and Hansen 2014).", "The theory needs approximately sparse effects of the controls on both the outcome and the treatment, and a treatment that is not too well predicted by the controls."])

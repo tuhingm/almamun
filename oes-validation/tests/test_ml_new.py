@@ -202,3 +202,56 @@ def test_hetero_errors():
     with pytest.raises(OESError, match="more than one role"): ml_extra.hetero(d, dict(y="y", treat="d", x=["d", "x1"]))
     with pytest.raises(OESError, match="at least"): ml_extra.hetero(d.iloc[:50], dict(y="y", treat="d", x=["x1"], groups=4))
     with pytest.raises(OESError, match="not found"): ml_extra.hetero(d, dict(y="y", treat="d", x=["zz"]))
+
+
+# ------------------------------------------------------------------ double-selection LASSO
+def _ds_sim(n=200, p=100, seed=0, alpha=0.5):
+    rng = np.random.default_rng(seed); idx = np.arange(p); Sg = 0.5 ** np.abs(idx[:, None] - idx[None, :]); X = rng.multivariate_normal(np.zeros(p), Sg, size=n)
+    th = 1.0 / (idx + 1) ** 2; d = X @ th * 3 + rng.normal(size=n); y = alpha * d + X @ (th * 3) + rng.normal(size=n)
+    return X, d, y
+
+
+def test_dsel_registered():
+    m = o.BY_ID["dsel"]; assert m["group"] == "Machine learning" and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+def test_dsel_reproduces_published_hdm_growth_result():
+    # Belloni, Chernozhukov and Hansen (2014) / hdm::rlassoEffect(method = "double selection") on GrowthData: -0.05001 (s.e. 0.01579)
+    d = pd.read_csv(os.path.join(MX, "growth.csv")); r = ml_extra.dsel(d, dict(y="growth", treat="gdpsh465", x=[c for c in d.columns if c not in ("growth", "gdpsh465")]))
+    row = row_(r, "Double selection (plug-in")
+    assert abs(float(row[1]) + 0.05001) < 6e-5 and abs(float(row[2]) - 0.01579) < 6e-5 and int(row[5]) == 7
+
+
+def row_(r, name): return next(x for x in r["tables"][0]["rows"] if x[0].startswith(name))
+
+
+def test_dsel_matches_manual_post_selection_ols():
+    X, d, y = _ds_sim(seed=3); df = pd.DataFrame(X, columns=[f"x{j}" for j in range(X.shape[1])]); df["d"], df["y"] = d, y
+    r = ml_extra.dsel(df, dict(y="y", treat="d", x=list(df.columns[:-2])))
+    sel = sorted(set(ml_extra._rlasso(y, X)) | set(ml_extra._rlasso(d, X))); Z = np.column_stack([np.ones(len(y)), d, X[:, sel]]); b = np.linalg.lstsq(Z, y, rcond=None)[0]
+    assert abs(float(row_(r, "Double selection (plug-in")[1]) - b[1]) < 1e-5 and int(row_(r, "Double selection (plug-in")[5]) == len(sel)
+
+
+def test_dsel_monte_carlo_coverage_and_naive_failure():
+    cov_ds = cov_nc = 0; R = 60
+    for s in range(R):
+        X, d, y = _ds_sim(n=200, p=100, seed=500 + s); df = pd.DataFrame(X, columns=[f"x{j}" for j in range(100)]); df["d"], df["y"] = d, y
+        r = ml_extra.dsel(df, dict(y="y", treat="d", x=list(df.columns[:100])))
+        a = row_(r, "Double selection (plug-in"); b = row_(r, "No controls")
+        cov_ds += float(a[3]) < 0.5 < float(a[4]); cov_nc += float(b[3]) < 0.5 < float(b[4])
+    assert cov_ds / R >= 0.85 and cov_nc / R <= 0.1
+
+
+def test_dsel_recovers_effect_and_selects_signal_variables():
+    X, d, y = _ds_sim(n=400, p=60, seed=7, alpha=1.0); df = pd.DataFrame(X, columns=[f"x{j}" for j in range(60)]); df["d"], df["y"] = d, y
+    r = ml_extra.dsel(df, dict(y="y", treat="d", x=list(df.columns[:60]))); b = row_(r, "Double selection (plug-in"); assert abs(float(b[1]) - 1.0) < 0.15
+    sel = [x[0] for x in r["tables"][1]["rows"]]; assert "x0" in sel and len(sel) < 20
+
+
+def test_dsel_p_larger_than_n_has_no_full_ols_and_errors():
+    X, d, y = _ds_sim(n=60, p=120, seed=5); df = pd.DataFrame(X, columns=[f"x{j}" for j in range(120)]); df["d"], df["y"] = d, y
+    r = ml_extra.dsel(df, dict(y="y", treat="d", x=list(df.columns[:120]))); assert row_(r, "All controls")[1] == "n/a"
+    with pytest.raises(OESError, match="more than one role"): ml_extra.dsel(df, dict(y="y", treat="d", x=["d", "x0"]))
+    with pytest.raises(OESError, match="penalty constant"): ml_extra.dsel(df, dict(y="y", treat="d", x=["x0"], c=9))
+    with pytest.raises(OESError, match="not found"): ml_extra.dsel(df, dict(y="y", treat="d", x=["nope"]))
+    with pytest.raises(OESError, match="at least 30"): ml_extra.dsel(df.iloc[:20], dict(y="y", treat="d", x=["x0", "x1"]))
