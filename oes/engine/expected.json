@@ -1720,5 +1720,21 @@
    "label": "Mean of the count",
    "value": 2.906
   }
+ },
+ "bayes_ms": {
+  "nobs": 135,
+  "table_index": 0,
+  "table": "Posterior of the regime parameters",
+  "row": "Regime 1",
+  "row_index": 0,
+  "col": "Mean",
+  "col_index": 2,
+  "value": -0.20519,
+  "rtol": 0.001,
+  "seconds": 7.8,
+  "summary": {
+   "label": "Largest R-hat",
+   "value": 1.031
+  }
  }
 }

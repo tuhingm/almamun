@@ -282,6 +282,12 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Dynare code, real output and sample text."
  },
  {
+  "out": "assets/og/markov-guide/bayesian-ms.jpg",
+  "kicker": "Markov-Switching Guide · Model guide",
+  "title": "Bayesian Markov-Switching Regression",
+  "sub": "Hidden regimes (recession and expansion, calm and turbulent, high and low inflation) where you want probabilities for the…"
+ },
+ {
   "out": "assets/og/markov-guide/index.jpg",
   "kicker": "Markov-Switching Guide",
   "title": "Which Markov-switching model fits your data?",

@@ -550,3 +550,69 @@ def test_bayes_count_errors():
     with pytest.raises(OESError, match="constant"): bayes_more.bayes_count(d.assign(x1=1.0), dict(y="y", x=["x1"]))
     with pytest.raises(OESError, match="Too few"): bayes_more.bayes_count(d.head(15), dict(y="y", x=["x1", "x2"]))
     with pytest.raises(OESError, match="exposure"): bayes_more.bayes_count(d.assign(e=0.0), dict(y="y", x=["x1"], exposure="e"))
+
+
+# ---------------------------------------------------------------------------------------- Bayesian Markov-switching regression
+def _ms_data(n=300, mus=(-1.0, 2.0), sig=(1.0, 1.0), p=((0.9, 0.1), (0.15, 0.85)), seed=0, slope=None):
+    rng = np.random.default_rng(seed); s = np.zeros(n, int); x = rng.normal(size=n)
+    for t in range(1, n): s[t] = rng.choice(2, p=p[s[t - 1]])
+    y = np.array(mus)[s] + np.array(sig)[s] * rng.normal(size=n) + (0 if slope is None else slope * x)
+    return pd.DataFrame(dict(t=np.arange(n), y=y, x=x, s=s)), s
+
+
+def test_bayes_ms_registered():
+    m = o.BY_ID["bayes_ms"]; assert m["group"] == "Markov switching" and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+def test_bayes_ms_recovers_regimes_and_transition_matrix():
+    d, s = _ms_data(n=400, seed=1)
+    r = bayes_more.bayes_ms(d, dict(y="y", time="t", switching_variance="no", draws=1200, burn=500))
+    rows = [x for x in tab(r, "Posterior of the regime parameters")["rows"] if x[1] == "Intercept"]
+    assert abs(rows[0][2] + 1.0) < 3 * rows[0][3] + 0.05 and abs(rows[1][2] - 2.0) < 3 * rows[1][3] + 0.05
+    pr = {x[0]: x for x in tab(r, "Transition probabilities")["rows"]}
+    assert abs(pr["1 -> 1"][1] - 0.9) < 0.08 and abs(pr["2 -> 2"][1] - 0.85) < 0.1
+    ch = r["charts"][0]; p1 = np.array(ch["series"][0]["y"], float); assert ((p1 > 0.5) == (s == 0)).mean() > 0.93
+    assert S(r)["Smallest effective sample size"] > 150
+
+
+def test_bayes_ms_matches_maximum_likelihood():
+    d, _ = _ms_data(n=400, seed=3)
+    r = bayes_more.bayes_ms(d, dict(y="y", time="t", switching_variance="yes", draws=1200, burn=500))
+    for x in tab(r, "Posterior of the regime parameters")["rows"]:
+        if x[6] != "n/a": assert float(x[2]) == pytest.approx(float(x[6]), abs=0.25)
+
+
+def test_bayes_ms_variance_switching_and_ordering():
+    d, s = _ms_data(n=500, mus=(0.0, 0.0), sig=(0.5, 2.5), seed=5)
+    r = bayes_more.bayes_ms(d, dict(y="y", time="t", switching_variance="yes", order="variance", draws=1200, burn=500))
+    sd = [x for x in tab(r, "Posterior of the regime parameters")["rows"] if x[1] == "Std. deviation"]
+    assert abs(sd[0][2] - 0.5) < 0.2 and abs(sd[1][2] - 2.5) < 0.5
+    p1 = np.array(r["charts"][0]["series"][0]["y"], float); assert ((p1 > 0.5) == (s == 0)).mean() > 0.85
+
+
+def test_bayes_ms_slopes_common_and_switching():
+    d, s = _ms_data(n=400, seed=7, slope=1.5)
+    r = bayes_more.bayes_ms(d, dict(y="y", x=["x"], time="t", switching_variance="no", draws=1000, burn=400))
+    sl = [x for x in tab(r, "Posterior of the regime parameters")["rows"] if x[1] == "x"]; assert len(sl) == 1 and abs(sl[0][2] - 1.5) < 3 * sl[0][3] + 0.05
+    r2 = bayes_more.bayes_ms(d, dict(y="y", x=["x"], time="t", switching_slopes="yes", switching_variance="no", draws=800, burn=400))
+    assert len([x for x in tab(r2, "Posterior of the regime parameters")["rows"] if x[1] == "x"]) == 2
+
+
+def test_bayes_ms_no_false_regimes_in_noise_and_coverage():
+    rng = np.random.default_rng(11); d = pd.DataFrame(dict(t=np.arange(200), y=rng.normal(size=200)))
+    r = bayes_more.bayes_ms(d, dict(y="y", time="t", switching_variance="no", draws=800, burn=400))
+    rows = [x for x in tab(r, "Posterior of the regime parameters")["rows"] if x[1] == "Intercept"]; assert rows[1][4] - rows[0][5] < 1.0 and abs(rows[1][2] - rows[0][2]) < 1.5
+    hit = 0; R = 12
+    for k in range(R):
+        dd, _ = _ms_data(n=250, seed=50 + k); rr = bayes_more.bayes_ms(dd, dict(y="y", time="t", switching_variance="no", draws=500, burn=300, seed=k))
+        a = [x for x in tab(rr, "Posterior of the regime parameters")["rows"] if x[1] == "Intercept"]; hit += (a[0][4] <= -1 <= a[0][5]) and (a[1][4] <= 2 <= a[1][5])
+    assert hit / R >= 0.75
+
+
+def test_bayes_ms_errors():
+    d, _ = _ms_data(n=100)
+    for spec, msg in [(dict(y="y", order="zz"), "Order the regimes"), (dict(y="y", order="variance", switching_variance="no"), "switching variance"), (dict(y="y", prior_sd=0), "positive"),
+                      (dict(y="y", switching_slopes="yes"), "no slopes"), (dict(y="y", regimes=7), "Number of regimes"), (dict(y="y", ar=3, x=["x"]), "Too few")]:
+        with pytest.raises(OESError, match=msg): bayes_more.bayes_ms(d if spec.get("ar") is None else d.head(50), spec)
+    with pytest.raises(OESError, match="constant"): bayes_more.bayes_ms(d.assign(y=1.0), dict(y="y"))
+    with pytest.raises(OESError, match="not found"): bayes_more.bayes_ms(d, dict(y="y", reference="zz"))

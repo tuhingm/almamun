@@ -69,6 +69,33 @@ MARKOV = {
 }
 
 
+EXTRA_MARKOV = {
+    "BMS": ("bayesian-ms", model("BMS", "Bayesian Markov-switching regression", "Bayesian MS regression", "Hidden regimes, and you want probabilities for the regimes, the transition probabilities and the durations",
+                                 "A Gibbs sampler for the Markov-switching regression gives a posterior for every regime parameter, for the transition probabilities, for the expected durations and for the regime of every period, with exact small-sample intervals and a prior you can state.",
+                                 ["Estimate with the Gibbs sampler", "Date the regimes against a reference", "Let the variance switch", "Prior on staying in a regime", "Slopes that switch", "Simulation check"]),
+            [290, 364, 170, "Bayesian MS regression"], "posterior", "Hidden regimes, with a posterior for the dates, probabilities and durations"),
+}
+
+
+def extend_markov(path):
+    s = path.read_text()
+    for k, (slug, mdl, node, edge, q) in EXTRA_MARKOV.items():
+        if f"\n {k}:{{name:" in s:
+            continue
+        assert "}},\nN:{" in s
+        s = s.replace("}},\nN:{", f"}},\n{mdl}}},\nN:{{", 1)
+        s = re.sub(r"(GUIDE:\{[^}]*)\}", lambda m: m.group(1) + f",{k}:{js(slug)}}}", s, count=1)
+        x, y, w, lab = node
+        s = re.sub(r"(N:\{.*?)(\},\nE:\[)", lambda m: m.group(1) + f",\n {k}:[{x},{y},{w},{js(lab)},1]" + m.group(2), s, count=1, flags=re.S)
+        s = s.replace("['q2','MSTVTP','switching driver']", f"['q2','MSTVTP','switching driver'],['q2','{k}',{js(edge)}]", 1)
+        m = re.search(r"q2:\{t:'What is the structure of your data\?',o:\[.*?\]\]\}", s, flags=re.S)
+        assert m, "q2 block not found"
+        s = s[:m.end() - 2] + f",[{js(mdl.split('name:')[1].split(',short')[0].strip(chr(39)))},{js(q)},{js(k)}]" + s[m.end() - 2:]
+    need_h = max(330, max(v[2][1] for v in EXTRA_MARKOV.values()) + 56)
+    s = re.sub(r"vb:'0 0 880 \d+'", f"vb:'0 0 880 {need_h}'", s, count=1)
+    path.write_text(s)
+
+
 def run(path, items, key):
     s = path.read_text()
     for k, (slug, mdl, node) in items.items():
@@ -150,7 +177,9 @@ def main():
             if hub == "bayesian":
                 positions_bayes(p)
                 extend_bayes(p)
-    print("registered:", ", ".join(list(BAYES) + list(EXTRA_BAYES) + list(MARKOV)))
+            else:
+                extend_markov(p)
+    print("registered:", ", ".join(list(BAYES) + list(EXTRA_BAYES) + list(MARKOV) + list(EXTRA_MARKOV)))
 
 
 if __name__ == "__main__":

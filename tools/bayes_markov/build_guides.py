@@ -25,7 +25,7 @@ SECTIONS = {
                      data=["time-series-guide/examples/money.csv", "oes/examples/us_macro.csv", "oes/examples/mixed_frequency.csv",
                            "panel-data-guide/examples/garrett.csv", "ml-guide/examples/wage2.csv", "microeconometrics-guide/examples/mroz.csv", "microeconometrics-guide/examples/doctor_visits.csv", "microeconometrics-guide/examples/arrests.csv"]),
     "markov": dict(folder="markov-guide", name="Markov-Switching Research Guide", short="Markov Guide",
-                   order=["ms-ar", "ms-regression", "ms-var", "ms-panel-var", "ms-tvtp"],
+                   order=["ms-ar", "ms-regression", "ms-var", "ms-panel-var", "ms-tvtp", "bayesian-ms"],
                    data=["oes/examples/hamilton_gnp.csv", "oes/examples/fedfunds.csv", "oes/examples/us_macro.csv",
                          "panel-data-guide/examples/garrett.csv"]),
     "micro": dict(folder="microeconometrics-guide", name="Microeconometrics Research Guide", short="Microeconometrics Guide",

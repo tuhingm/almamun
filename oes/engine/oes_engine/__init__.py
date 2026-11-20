@@ -716,6 +716,15 @@ MODELS += [
                  num("prior_sd", "Prior s.d. of the coefficients per s.d. of x", 5),
                  num("draws", "Draws per chain", 2000), num("burn", "Burn-in", 500), num("chains", "Chains", 2), num("seed", "Random seed", 0)],
          example=dict(file="bayesian-guide/examples/doctor_visits.csv", spec=dict(y="mdvis", x=["lncoins", "idp", "lpi", "fmde", "physlm", "disea", "hlthg", "hlthf", "hlthp"], draws=800, burn=300))),
+    dict(id="bayes_ms", group="Markov switching", name="Bayesian Markov-switching regression (Gibbs sampler)", guide="markov-guide/bayesian-ms.html", fn=bayes_more.bayes_ms,
+         fields=[col("y", "Dependent variable"), cols("x", "Regressors (optional)", required=False), TIME, num("ar", "Autoregressive lags", 0), num("regimes", "Number of regimes", 2),
+                 sel("switching_variance", "Switching variance", [["yes", "Yes"], ["no", "No"]], "no"),
+                 sel("switching_slopes", "Switching slopes", [["no", "No: only the intercept switches"], ["yes", "Yes"]], "no"),
+                 sel("order", "Order the regimes by", [["mean", "Intercept (low to high)"], ["variance", "Variance (low to high)"]], "mean"),
+                 col("reference", "Reference 0/1 series, e.g. recession dates (optional)", required=False, help="Compared with regime 1"),
+                 num("prior_sd", "Prior s.d. of the standardised coefficients", 5), num("prior_stay", "Extra prior weight on staying in a regime", 0),
+                 num("draws", "Draws per chain", 3000), num("burn", "Burn-in", 1000), num("chains", "Chains", 2), num("seed", "Random seed", 0)],
+         example=dict(file=OX + "hamilton_gnp.csv", spec=dict(y="gnp_growth", time="date", reference="nber_recession", draws=1500, burn=500))),
 ]
 
 STAT_MODELS = stat_registry.build(col, cols, num, sel)       # the Statistics Division: its own page, registered like every other model

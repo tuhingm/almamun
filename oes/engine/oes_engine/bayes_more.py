@@ -1235,3 +1235,234 @@ def bayes_count(df, spec):
     return result("bayes_count", f"Bayesian count regression: {y_}", n, summary, tabs, charts,
                   [f"Regressors are standardised for the prior (N(0, {sb:g}^2) on each slope; the constant is centred at the log mean count" + ("; the log of the overdispersion parameter has a N(1, 2^2) prior on log(1/alpha)" if fam == "nbinom" else "") +
                    f"). {nch} chains of {ndraw} draws after {burn} burn-in. Both families are fitted for the predictive check and the WAIC comparison, whichever one is shown above."])
+
+
+# ================================================================================================ Bayesian Markov-switching regression
+def _ms_ffbs(lik, P, rng):
+    """Hamilton filter and backward sampling of the regime path (Chib 1996). lik is T x K (densities, not logs)."""
+    T, K = lik.shape
+    pi = np.linalg.solve(np.vstack([(np.eye(K) - P).T, np.ones(K)]).T @ np.vstack([(np.eye(K) - P).T, np.ones(K)]) + 1e-12 * np.eye(K), np.vstack([(np.eye(K) - P).T, np.ones(K)]).T @ np.r_[np.zeros(K), 1.0])
+    pi = np.clip(pi, 1e-8, None); pi /= pi.sum()
+    al = np.empty((T, K)); pred = pi
+    for t in range(T):
+        a = pred * lik[t]; s = a.sum()
+        a = a / s if s > 0 else np.full(K, 1.0 / K)
+        al[t] = a; pred = a @ P
+    s = np.empty(T, dtype=int)
+    s[-1] = rng.choice(K, p=al[-1])
+    for t in range(T - 2, -1, -1):
+        w = al[t] * P[:, s[t + 1]]; tot = w.sum()
+        s[t] = rng.choice(K, p=w / tot) if tot > 0 else rng.choice(K)
+    return s
+
+
+def _ms_chain(ys, W, K, sw_slopes, sw_var, order, ndraw, burn, rng, prior_sd, b0v, a0v, stay, init_s):
+    """Gibbs sampler: regime path by forward filtering backward sampling, regression coefficients by (weighted) normal updates,
+    variances by inverse gammas, transition rows by Dirichlet draws. Labels are fixed by ordering the regime intercepts (or variances)."""
+    T = len(ys); q = W.shape[1]
+    nb = K * (1 + q) if sw_slopes else K + q
+    s = init_s.copy()
+    sig2 = np.ones(K)
+    P = np.full((K, K), 1.0 / K) + stay * np.eye(K); P /= P.sum(1, keepdims=True)
+    beta = np.zeros(nb)
+    out = dict(mu=[], slp=[], sig=[], P=[], S=np.zeros((T, K)), relabel=0)
+    def design(s):
+        D = np.zeros((T, K)); D[np.arange(T), s] = 1.0
+        if sw_slopes:
+            return np.hstack([D] + [D * W[:, [j]] for j in range(q)])
+        return np.hstack([D, W])
+    def unpack(b):
+        if sw_slopes:
+            return b[:K], np.vstack([b[K * (1 + j):K * (2 + j)] for j in range(q)]).T if q else np.zeros((K, 0))
+        return b[:K], (np.tile(b[K:], (K, 1)) if q else np.zeros((K, 0)))
+    for it in range(burn + ndraw):
+        mu, sl = unpack(beta)
+        mean_t = mu[None, :] + W @ sl.T if q else np.tile(mu, (T, 1))                 # T x K
+        lik = np.exp(-0.5 * (ys[:, None] - mean_t) ** 2 / sig2[None, :]) / np.sqrt(sig2)[None, :]
+        s = _ms_ffbs(lik, P, rng)
+        Z = design(s)
+        wv = 1.0 / sig2[s]
+        prec = (Z * wv[:, None]).T @ Z + np.eye(nb) / prior_sd ** 2
+        cov = np.linalg.inv(prec); cov = (cov + cov.T) / 2
+        beta = rng.multivariate_normal(cov @ ((Z * wv[:, None]).T @ ys), cov)
+        mu, sl = unpack(beta)
+        res = ys - mu[s] - ((W * sl[s]).sum(1) if q else 0.0)
+        if sw_var:
+            for j in range(K):
+                m = s == j
+                sig2[j] = _ig(rng, a0v + 0.5 * m.sum(), b0v + 0.5 * float((res[m] ** 2).sum()))
+        else:
+            sig2[:] = _ig(rng, a0v + 0.5 * T, b0v + 0.5 * float((res ** 2).sum()))
+        cnt = np.zeros((K, K))
+        np.add.at(cnt, (s[:-1], s[1:]), 1.0)
+        for i in range(K):
+            P[i] = rng.dirichlet(1.0 + stay * (np.arange(K) == i) + cnt[i])
+        key = mu if order == "mean" else sig2
+        perm = np.argsort(key)
+        if (perm != np.arange(K)).any():
+            inv = np.empty(K, dtype=int); inv[perm] = np.arange(K)
+            s = inv[s]; sig2 = sig2[perm]; P = P[np.ix_(perm, perm)]
+            if sw_slopes:
+                beta = np.concatenate([beta[K * b_:K * (b_ + 1)][perm] for b_ in range(1 + q)])
+            else:
+                beta = np.r_[beta[:K][perm], beta[K:]]
+            if it >= burn:
+                out["relabel"] += 1
+        if it >= burn:
+            mu, sl = unpack(beta)
+            out["mu"].append(mu.copy()); out["slp"].append(sl.copy()); out["sig"].append(np.sqrt(sig2).copy()); out["P"].append(P.copy())
+            out["S"][np.arange(T), s] += 1.0
+    out["S"] /= ndraw
+    return {k_: (np.array(v) if k_ in ("mu", "slp", "sig", "P") else v) for k_, v in out.items()}
+
+
+def bayes_ms(df, spec):
+    from .bayes_extra import _rhat_ess
+    from .timeseries import _series_frame
+    import statsmodels.api as sm
+    y_ = need(spec, "y", "dependent variable")
+    xs = as_list(spec.get("x"))
+    distinct([y_], xs)
+    ar = int_option(spec, "ar", 0, 0, 8, "Autoregressive lags")
+    K = int_option(spec, "regimes", 2, 2, 4, "Number of regimes")
+    sw_s = str(spec.get("switching_slopes", "no")).lower() in ("yes", "true", "1")
+    sw_v = str(spec.get("switching_variance", "yes")).lower() in ("yes", "true", "1")
+    ref = spec.get("reference")
+    cols_ = [y_] + xs + ([ref] if ref else [])
+    d, labels = _series_frame(df, spec, cols_)
+    if ref and ref not in d.columns:
+        raise OESError(f"Reference column {ref} not found.")
+    yv = d[y_].to_numpy(float)
+    n0 = len(yv)
+    if n0 < 40 + 10 * (ar + len(xs)):
+        raise OESError(f"Too few observations ({n0}) for {K} regimes with {ar} lags and {len(xs)} regressors: at least {40 + 10 * (ar + len(xs))} are needed.")
+    if yv.std() == 0:
+        raise OESError("The series is constant.")
+    cols_w, names_w = [], []
+    for j in range(1, ar + 1):
+        cols_w.append(np.r_[np.full(j, np.nan), yv[:-j]]); names_w.append(f"{y_}(t-{j})")
+    for v in xs:
+        cols_w.append(d[v].to_numpy(float)); names_w.append(v)
+    Wm = np.column_stack(cols_w) if cols_w else np.zeros((n0, 0))
+    keep = ~np.isnan(Wm).any(1) if cols_w else np.ones(n0, bool)
+    yv, Wm = yv[keep], Wm[keep]; lab = [l for l, k_ in zip(labels, keep) if k_]
+    refv = d[ref].to_numpy(float)[keep] if ref else None
+    n = len(yv)
+    if sw_s and not names_w:
+        raise OESError("There are no slopes to switch: add regressors or autoregressive lags, or set switching slopes to no.")
+    order = str(spec.get("order", "mean" if True else "variance"))
+    if order not in ("mean", "variance"):
+        raise OESError("Order the regimes by mean or variance.")
+    if order == "variance" and not sw_v:
+        raise OESError("Ordering by variance needs a switching variance.")
+    ndraw = int_option(spec, "draws", 3000, 200, 30000, "Draws per chain")
+    burn = int_option(spec, "burn", 1000, 0, 30000, "Burn-in")
+    nch = int_option(spec, "chains", 2, 2, 6, "Chains")
+    seed = int_option(spec, "seed", 0, 0, 10 ** 9, "Random seed")
+    psd = float_option(spec, "prior_sd", 5.0, "Prior standard deviation")
+    stay = float_option(spec, "prior_stay", 0.0, "Extra prior weight on staying in a regime")
+    if psd <= 0 or stay < 0:
+        raise OESError("The prior standard deviation must be positive and the prior weight on staying cannot be negative.")
+    ym, ysd = yv.mean(), yv.std()
+    wm, wsd = (Wm.mean(0), np.where(Wm.std(0) > 0, Wm.std(0), 1.0)) if Wm.shape[1] else (np.zeros(0), np.ones(0))
+    ys = (yv - ym) / ysd; Ws = (Wm - wm) / wsd
+    qn = np.quantile(ys, np.linspace(0, 1, K + 1)[1:-1]) if K > 1 else []
+    chains = []
+    for c in range(nch):
+        rng = np.random.default_rng(seed + 1000 * c)
+        init = np.digitize(ys, qn) if c == 0 else rng.integers(0, K, n)
+        chains.append(_ms_chain(ys, Ws, K, sw_s, sw_v, order, ndraw, burn, rng, psd, 1.0, 2.0, stay, init))
+    MU = np.vstack([c["mu"] for c in chains]); SL = np.vstack([c["slp"] for c in chains]); SG = np.vstack([c["sig"] for c in chains]); PP = np.vstack([c["P"] for c in chains])
+    S = np.mean([c["S"] for c in chains], axis=0)
+    q = Ws.shape[1]
+    def orig(MUc, SLc, SGc):
+        slo = SLc * ysd / wsd[None, None, :] if q else SLc
+        mu = ym + ysd * MUc                                      # intercept at the mean of the regressors
+        return mu, slo, SGc * ysd
+    mu_o, sl_o, sg_o = orig(MU, SL, SG)
+    # maximum-likelihood comparison (statsmodels), regimes matched by the ordering variable
+    ml = {}
+    try:
+        endog = pd.Series(yv); exo = pd.DataFrame(Wm) if Wm.shape[1] else None
+        mr = sm.tsa.MarkovRegression(endog, k_regimes=K, trend="c", exog=exo, switching_exog=sw_s, switching_variance=sw_v)
+        best = None
+        for sd_ in (0, 1):
+            try:
+                r_ = mr.fit(disp=False, maxiter=400, search_reps=20, search_scale=1.0) if sd_ == 0 else mr.fit(disp=False, maxiter=400)
+                best = r_ if best is None or r_.llf > best.llf else best
+            except Exception:
+                pass
+        if best is not None:
+            pr = best.params
+            cst = np.array([pr[f"const[{j}]"] for j in range(K)])
+            sg = np.sqrt(np.array([pr[f"sigma2[{j}]"] for j in range(K)])) if sw_v else np.full(K, np.sqrt(pr["sigma2"]))
+            key = cst if order == "mean" else sg
+            o_ = np.argsort(key); ml = dict(mu=cst[o_], sg=sg[o_], llf=float(best.llf))
+            pm = np.array(best.regime_transition)[..., 0] if False else None
+    except Exception:
+        ml = {}
+    rows = []
+    for j in range(K):
+        for nm, arr, mlv in (("Intercept" if not q else "Level at the mean of the regressors", mu_o[:, j], ml.get("mu", [None] * K)[j] if (ml and not q) else None), ("Std. deviation", sg_o[:, j] if sw_v else sg_o[:, 0], ml.get("sg", [None] * K)[j] if (ml and not q) else None)):
+            if nm == "Std. deviation" and not sw_v and j > 0:
+                continue
+            rows.append([f"Regime {j + 1}" if not (nm == "Std. deviation" and not sw_v) else "All regimes", nm, f(arr.mean()), f(arr.std(ddof=1)), f(np.percentile(arr, 2.5)), f(np.percentile(arr, 97.5)), f(mlv) if mlv is not None else "n/a"])
+        if q:
+            for i, nm in enumerate(names_w):
+                if sw_s or j == 0:
+                    a_ = sl_o[:, j, i]; rows.append([f"Regime {j + 1}" if sw_s else "All regimes", nm, f(a_.mean()), f(a_.std(ddof=1)), f(np.percentile(a_, 2.5)), f(np.percentile(a_, 97.5)), "n/a"])
+    tabs = [table("Posterior of the regime parameters", ["Regime", "Parameter", "Mean", "Std. dev.", "2.5%", "97.5%", "Maximum likelihood"], rows,
+                  f"Regimes ordered by {'their intercepts' if order == 'mean' else 'their variances'}, which fixes the labelling. The maximum-likelihood column is the classical estimate from statsmodels, matched by the same ordering.")]
+    prow = []
+    for i in range(K):
+        for j in range(K):
+            v = PP[:, i, j]; prow.append([f"{i + 1} -> {j + 1}", f(v.mean(), 4), f(v.std(ddof=1), 4), f(np.percentile(v, 2.5), 4), f(np.percentile(v, 97.5), 4)])
+    tabs.append(table("Transition probabilities", ["From -> to", "Mean", "Std. dev.", "2.5%", "97.5%"], prow, "Probability of moving from the regime in one period to the regime in the next."))
+    dur = 1.0 / np.clip(1 - PP[:, np.arange(K), np.arange(K)], 1e-9, None)
+    erg = np.empty((len(PP), K))
+    for i, P_ in enumerate(PP):
+        A = np.vstack([(np.eye(K) - P_).T, np.ones(K)]); erg[i] = np.linalg.lstsq(A, np.r_[np.zeros(K), 1.0], rcond=None)[0]
+    tabs.append(table("Expected duration and long-run share of each regime", ["Regime", "Duration (periods), mean", "median", "2.5%", "97.5%", "Long-run share, mean", "2.5%", "97.5%"],
+                      [[f"Regime {j + 1}", f(dur[:, j].mean(), 2), f(np.median(dur[:, j]), 2), f(np.percentile(dur[:, j], 2.5), 2), f(np.percentile(dur[:, j], 97.5), 2),
+                        f(erg[:, j].mean(), 3), f(np.percentile(erg[:, j], 2.5), 3), f(np.percentile(erg[:, j], 97.5), 3)] for j in range(K)],
+                      "Duration = 1 / (1 - p_jj). The long-run share is the stationary distribution of the chain; its interval comes from the posterior of the transition matrix."))
+    # episodes of regime 1
+    ep = []; low = S[:, 0] > 0.5; t = 0
+    while t < n:
+        if low[t]:
+            u = t
+            while u + 1 < n and low[u + 1]:
+                u += 1
+            ep.append([lab[t], lab[u], u - t + 1, f(S[t:u + 1, 0].mean(), 3)]); t = u + 1
+        else:
+            t += 1
+    if ep:
+        tabs.append(table("Episodes of regime 1 (smoothed probability above 0.5)", ["From", "To", "Length", "Mean probability"], ep[:40],
+                          "Dated from the full-sample posterior probabilities; an episode is a run of periods in which regime 1 is more likely than not."))
+    if ref:
+        rv = refv.astype(float); dec = (S[:, 0] > 0.5).astype(float)
+        agree = float((dec == rv).mean()); tp = float(((dec == 1) & (rv == 1)).sum() / max(rv.sum(), 1)); fp = float(((dec == 1) & (rv == 0)).sum() / max((rv == 0).sum(), 1))
+        tabs.append(table(f"Agreement with the reference series {ref}", ["Measure", "Value"],
+                          [["Share of periods classified the same", f(agree, 3)], ["Reference periods that fall in regime 1", f(tp, 3)], ["Other periods that fall in regime 1", f(fp, 3)],
+                           ["Correlation of the regime-1 probability with the reference", f(float(np.corrcoef(S[:, 0], rv)[0, 1]), 3)]]))
+    diag = []
+    for j in range(K):
+        for nm, a_ in (("Intercept", [orig(c["mu"], c["slp"], c["sig"])[0][:, j] for c in chains]), ("Std. deviation", [orig(c["mu"], c["slp"], c["sig"])[2][:, j] if sw_v else orig(c["mu"], c["slp"], c["sig"])[2][:, 0] for c in chains])):
+            rh, ess = _rhat_ess(a_); diag.append([f"Regime {j + 1}", nm, rh, ess])
+        rh, ess = _rhat_ess([c["P"][:, j, j] for c in chains]); diag.append([f"Regime {j + 1}", "Staying probability", rh, ess])
+    relab = np.mean([c["relabel"] / ndraw for c in chains])
+    tabs.append(table("MCMC convergence diagnostics", ["Regime", "Parameter", "R-hat", "Effective sample size"], [[r_[0], r_[1], f(r_[2], 3), f(r_[3], 0)] for r_ in diag],
+                      f"{nch} chains of {ndraw} draws after {burn} burn-in. In {100 * relab:.1f}% of the draws the labels had to be reordered to keep the regimes ordered; a high share means that the regimes are weakly separated."))
+    charts = [chart("Smoothed probability of each regime", lab, [(f"Regime {j + 1}", S[:, j]) for j in range(K)], "", "probability")]
+    mean_path = (S * (ym + ysd * MU.mean(0))[None, :]).sum(1) if not q else None
+    if q == 0:
+        charts.append(chart(f"{y_} and the regime-weighted mean", lab, [("Series", yv), ("Posterior mean of the regime mean", mean_path)], "", y_))
+    else:
+        fit = np.array([(S[t_] * (mu_o.mean(0) + (sl_o.mean(0) * (Wm[t_] - wm)[None, :]).sum(1))).sum() for t_ in range(n)])
+        charts.append(chart(f"{y_} and the regime-weighted fit", lab, [("Series", yv), ("Fit", fit)], "", y_))
+    summary = [stat("Observations", n), stat("Regimes", K), stat("Lags and regressors", len(names_w)), stat("Largest R-hat", max(float(r_[2]) for r_ in diag), 3),
+               stat("Smallest effective sample size", min(float(r_[3]) for r_ in diag), 0), stat("Draws relabelled (%)", 100 * float(relab), 1)]
+    notes = [f"Bayesian Markov-switching regression (Albert and Chib 1993; Chib 1996; Kim and Nelson 1999): the regime path is sampled by forward filtering and backward sampling, "
+             f"the coefficients by a normal update, the variances by inverse gammas and each row of the transition matrix by a Dirichlet draw. Prior: N(0, {psd:g}^2) on standardised coefficients, "
+             f"inverse-gamma(2, 1) on standardised variances, Dirichlet(1" + (f" + {stay:g} on the diagonal" if stay else "") + ") on each row. Intercepts (levels at the mean of the regressors)" + (", slopes" if sw_s else "") + (" and variances" if sw_v else "") + " switch."]
+    return result("bayes_ms", f"Bayesian Markov-switching regression: {y_}", n, summary, tabs, charts, notes)
