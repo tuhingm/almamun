@@ -605,3 +605,132 @@ def wavelet(df, spec):
     summary = [stat("Observations", n), stat("Periods", f"{period[0]:.0f} to {period[-1]:.0f}"), stat("Share significant", float(sig.sum() / mask.sum()), 3), stat("Null share (mean)", float(fa.mean()), 3)]
     return result("wavelet", f"Wavelet coherence: {xn} and {yn}", n, summary, tabs, ch,
                   ["Morlet wavelet (w0 = 6), smoothing over time and three neighbouring scales (Torrence and Webster 1999); significance by Monte Carlo from AR(1) nulls. The coherence heat map in the guide is shown here as averages by period and by sub-period."])
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Unit-root and stationarity tests: ADF, DF-GLS, Phillips-Perron, KPSS, Zivot-Andrews
+# ---------------------------------------------------------------------------------------------------------------
+def _dfgls_stat(y, trend, k):
+    """Elliott-Rothenberg-Stock DF-GLS t statistic with k lagged differences (GLS-detrended series)."""
+    T = len(y)
+    z = np.ones((T, 1)) if trend == "c" else np.column_stack([np.ones(T), np.arange(1, T + 1)])
+    ab = 1 - (7.0 if trend == "c" else 13.5) / T
+    ya = np.r_[y[0], y[1:] - ab * y[:-1]]; za = np.vstack([z[:1], z[1:] - ab * z[:-1]])
+    beta = np.linalg.lstsq(za, ya, rcond=None)[0]; yd = y - z @ beta
+    return _adf_nodet(yd, k)
+
+
+def _adf_nodet(yd, k, return_ic=False):
+    dy = np.diff(yd); T = len(dy)
+    idx = np.arange(k, T)
+    X = [yd[idx]]                                   # y_{t-1}
+    for j in range(1, k + 1):
+        X.append(dy[idx - j])
+    X = np.column_stack(X); yy = dy[idx]
+    b = np.linalg.lstsq(X, yy, rcond=None)[0]; e = yy - X @ b
+    s2 = e @ e / (len(yy) - X.shape[1]); se = np.sqrt(s2 * np.linalg.inv(X.T @ X)[0, 0])
+    if return_ic:
+        return b[0] / se, np.log(e @ e / len(yy)), X.shape[1], len(yy)
+    return b[0] / se
+
+
+def _pp(y, regression, q):
+    """Phillips-Perron Z_t statistic (Newey-West long-run variance with q lags)."""
+    T = len(y) - 1
+    X = [y[:-1]]
+    if regression in ("c", "ct"):
+        X.append(np.ones(T))
+    if regression == "ct":
+        X.append(np.arange(1, T + 1))
+    X = np.column_stack(X); yy = y[1:]
+    b = np.linalg.lstsq(X, yy, rcond=None)[0]; u = yy - X @ b
+    k = X.shape[1]; s2 = u @ u / (T - k); se = np.sqrt(s2 * np.linalg.inv(X.T @ X)[0, 0])
+    tstat = (b[0] - 1) / se
+    g0 = u @ u / T; lam2 = g0 + 2 * sum((1 - j / (q + 1)) * (u[j:] @ u[:-j]) / T for j in range(1, q + 1))
+    z = np.sqrt(g0 / lam2) * tstat - 0.5 * (lam2 - g0) / np.sqrt(lam2) * (T * se / np.sqrt(s2))
+    return z, tstat
+
+
+def unitroot(df, spec):
+    from statsmodels.tsa.stattools import adfuller, kpss, zivot_andrews
+    from statsmodels.tsa.adfvalues import mackinnonp
+    y = need(spec, "y", "series")
+    d, labels = _series_frame(df, spec, [y])
+    x = d[y].to_numpy(float); n = len(x)
+    if n < 40:
+        raise OESError("Unit-root tests need at least 40 observations.")
+    maxlag = int_option(spec, "maxlag", 8, 0, 24, "Maximum lag"); ic = spec.get("ic") or "bic"
+    if ic not in ("aic", "bic"):
+        raise OESError("Choose AIC or BIC for the lag length.")
+    sims = int_option(spec, "sims", 200, 50, 1000, "Simulation replications (DF-GLS critical values)")
+    rng = np.random.default_rng(int(spec.get("seed") or 0))
+    forms = [("level", x), ("first difference", np.diff(x))]
+    q = int(4 * (n / 100) ** (2 / 9))
+    rows = []; dfg = []
+    for lab, z in forms:
+        for reg, rl in (("c", "constant"), ("ct", "constant + trend")):
+            a = adfuller(z, maxlag=maxlag, regression=reg, autolag=ic.upper())
+            rows.append(["ADF", lab, rl, f(a[0], 3), int(a[2]), f(a[1], 4), f(a[4]["5%"], 3), "yes" if a[1] < .05 else "no"])
+    for lab, z in forms:
+        for reg, rl in (("c", "constant"), ("ct", "constant + trend")):
+            zt, _ = _pp(z, reg, q); p = float(mackinnonp(zt, regression=reg, N=1))
+            rows.append(["Phillips-Perron", lab, rl, f(zt, 3), q, f(p, 4), None, "yes" if p < .05 else "no"])
+    # DF-GLS with simulated critical values under the unit-root null
+    for lab, z in forms:
+        T = len(z)
+        for reg, rl in (("c", "constant"), ("ct", "constant + trend")):
+            ics = []
+            T1 = T
+            zz = z
+            ab = 1 - (7.0 if reg == "c" else 13.5) / T1
+            Z = np.ones((T1, 1)) if reg == "c" else np.column_stack([np.ones(T1), np.arange(1, T1 + 1)])
+            ya = np.r_[zz[0], zz[1:] - ab * zz[:-1]]; za = np.vstack([Z[:1], Z[1:] - ab * Z[:-1]])
+            yd = zz - Z @ np.linalg.lstsq(za, ya, rcond=None)[0]
+            dy = np.diff(yd)
+            for k in range(maxlag + 1):
+                idx = np.arange(maxlag, len(dy)); Xk = [yd[idx]] + [dy[idx - j] for j in range(1, k + 1)]
+                Xk = np.column_stack(Xk); yk = dy[idx]; e = yk - Xk @ np.linalg.lstsq(Xk, yk, rcond=None)[0]
+                m = len(yk); pen = (2 if ic == "aic" else np.log(m)) * (k + 1) / m
+                ics.append(np.log(e @ e / m) + pen)
+            kopt = int(np.argmin(ics)); st = _adf_nodet(yd, kopt)
+            sim = np.array([_dfgls_stat(np.cumsum(rng.standard_normal(T1)), reg, kopt) for _ in range(sims)])
+            cv5 = float(np.percentile(sim, 5)); p = float((sim <= st).mean())
+            rows.append(["DF-GLS", lab, rl, f(st, 3), kopt, f(max(p, 1 / sims), 3), f(cv5, 3), "yes" if st < cv5 else "no"])
+    ur = table("Unit-root tests (H0: unit root)", ["Test", "Series form", "Deterministics", "Statistic", "Lags", "p-value", "5% critical value", "Rejects unit root at 5%"], rows,
+               "Reject the unit root when the statistic is more negative than the critical value. ADF lags chosen by " + ic.upper() + f"; Phillips-Perron uses {q} Newey-West lags and MacKinnon p-values; DF-GLS p-values and critical values are simulated ({sims} random walks of the same length).")
+    krows = []
+    for lab, z in forms:
+        for reg, rl in (("c", "level"), ("ct", "trend")):
+            k_ = kpss(z, regression=reg, nlags=int(4 * (len(z) / 100) ** 0.25))
+            krows.append(["KPSS", lab, f"stationary around a {rl}", f(k_[0], 3), int(k_[2]), f(k_[1], 4), f(k_[3]["5%"], 3), "yes" if k_[0] > k_[3]["5%"] else "no"])
+    kt = table("Stationarity test (H0: stationary)", ["Test", "Series form", "H0", "Statistic", "Lags", "p-value", "5% critical value", "Rejects stationarity at 5%"], krows,
+               "KPSS reverses the null. Rejecting stationarity in levels while not rejecting it in first differences points to I(1). The p-value is interpolated and truncated to the range 0.01 to 0.10.")
+    za = zivot_andrews(x, maxlag=maxlag, regression="c", autolag=ic.upper()); zt_ = zivot_andrews(x, maxlag=maxlag, regression="ct", autolag=ic.upper())
+    zrows = []
+    for lab, r in (("break in the level", za), ("break in level and trend", zt_)):
+        zrows.append([lab, f(r[0], 3), f(r[1], 4), f(r[2]["5%"], 3), labels[int(r[4])] if 0 <= int(r[4]) < n else str(r[4]), int(r[3]), "yes" if r[0] < r[2]["5%"] else "no"])
+    zat = table("Zivot-Andrews test (one structural break, H0: unit root without break)", ["Break allowed in", "Statistic", "p-value", "5% critical value", "Break date", "Lags", "Rejects unit root at 5%"], zrows,
+                "Applied to the level of the series. The break date is the one that gives the strongest evidence against the unit root.")
+    # verdict
+    def rej(rowlist, lab):
+        return [r[-1] == "yes" for r in rowlist if r[1] == lab]
+    adf_lev = rej([r for r in rows if r[0] == "ADF"], "level"); adf_dif = rej([r for r in rows if r[0] == "ADF"], "first difference")
+    kp_lev = rej(krows, "level"); kp_dif = rej(krows, "first difference")
+    n_unit_lev = sum(1 for r in rows if r[1] == "level" and r[-1] == "no") + sum(kp_lev)
+    n_stat_dif = sum(1 for r in rows if r[1] == "first difference" and r[-1] == "yes") + sum(1 for v in kp_dif if not v)
+    tot_lev = sum(1 for r in rows if r[1] == "level") + len(kp_lev); tot_dif = sum(1 for r in rows if r[1] == "first difference") + len(kp_dif)
+    if n_unit_lev >= 0.75 * tot_lev and n_stat_dif >= 0.75 * tot_dif:
+        verdict = "I(1): a unit root in levels, stationary in first differences"
+    elif n_unit_lev <= 0.25 * tot_lev:
+        verdict = "I(0): stationary in levels"
+    elif n_unit_lev >= 0.75 * tot_lev:
+        verdict = "Not stationary in first differences: check for I(2) or a break"
+    else:
+        verdict = "Mixed evidence: the tests disagree (a break or a near-unit root is likely)"
+    vt = table("Summary of the evidence", ["Statement", "Tests in favour", "Out of"],
+               [["Unit root in levels", n_unit_lev, tot_lev], ["Stationary in first differences", n_stat_dif, tot_dif]], "Counts ADF, Phillips-Perron, DF-GLS (reject = stationary) and KPSS (not reject = stationary) in both deterministic specifications.")
+    xs_ = np.arange(n)
+    ch = [chart(f"{y}: level", labels, [(y, x)]), chart(f"{y}: first difference", labels[1:], [("first difference", np.diff(x))])]
+    summary = [stat("Observations", n), stat("Conclusion", verdict), stat("ADF p-value (level, constant)", float(rows[0][5]), 3), stat("KPSS p-value (level)", float(krows[0][5]), 3)]
+    return result("unitroot", f"Unit-root and stationarity tests: {y}", n, summary, [ur, kt, zat, vt], ch,
+                  ["Run the tests on levels and first differences. A conclusion of I(1) means you should difference the series or model it with cointegration.", "Seasonal unit roots and the Lee-Strazicich LM test are not part of the OES version."])

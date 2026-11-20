@@ -1188,5 +1188,21 @@
    "label": "Log-likelihood",
    "value": -184.5067
   }
+ },
+ "unitroot": {
+  "nobs": 202,
+  "table_index": 0,
+  "table": "Unit-root tests (H0: unit root)",
+  "row": "ADF",
+  "row_index": 0,
+  "col": "Statistic",
+  "col_index": 3,
+  "value": -2.354,
+  "rtol": 0.001,
+  "seconds": 0.1,
+  "summary": {
+   "label": "ADF p-value (level, constant)",
+   "value": 0.155
+  }
  }
 }

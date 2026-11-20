@@ -540,6 +540,10 @@ MODELS += [
     dict(id="wavelet", group="Time series", name="Wavelet coherence", guide="time-series-guide/wavelet.html", fn=ts_extra.wavelet,
          fields=[col("x", "First series"), col("y", "Second series"), TIME, num("pmin", "Shortest period", 16), num("pmax", "Longest period", ""), num("sims", "Simulation replications", 100), num("seed", "Random seed", 0)],
          example=dict(file=OX + "wavelet_us.csv", spec=dict(x="infl", y="m2", time="date", pmin=16, pmax=256, sims=60))),
+    dict(id="unitroot", group="Time series", name="Unit-root and stationarity tests (ADF, DF-GLS, PP, KPSS, Zivot-Andrews)", guide="time-series-guide/unit-root.html", fn=ts_extra.unitroot,
+         fields=[col("y", "Series"), TIME, num("maxlag", "Maximum lag", 8), sel("ic", "Lag selection", [["bic", "BIC"], ["aic", "AIC"]], "bic"),
+                 num("sims", "Simulation replications (DF-GLS critical values)", 200), num("seed", "Random seed", 0)],
+         example=dict(file=OX + "us_macro.csv", spec=dict(y="tbilrate", time="date", maxlag=8, ic="bic", sims=100))),
 ]
 
 MODELS += [

@@ -4,7 +4,8 @@
 set -e
 cd "$(dirname "$0")/.."
 python3 tools/bayes_markov/build_guides.py "$1" "$2"
-python3 tools/bayes_markov/build_hubs.py "$1"
+# the time-series and panel-data guides (sections lp, plp) have hand-built hubs; the others are generated
+if python3 -c "import sys; sys.path.insert(0,'tools/bayes_markov'); from build_hubs import HUBS; sys.exit(0 if '$1' in HUBS else 1)"; then python3 tools/bayes_markov/build_hubs.py "$1"; fi
 python3 tools/oes_sync.py --local --only="$3"
 python3 tools/oes_counts.py
 python3 tools/author_note.py
