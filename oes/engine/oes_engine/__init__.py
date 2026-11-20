@@ -315,6 +315,9 @@ MODELS += [
          fields=[col("y", "Outcome to predict"), cols("x", "Predictors"), sel("model", "Model", [["rf", "Random forest"], ["gb", "Gradient boosting"]], "rf"), col("time", "Time column (time-ordered validation)", required=False),
                  num("test_share", "Test share", 0.25), num("repeats", "Permutation repeats", 20), num("top", "Predictors to profile", 3)],
          example=dict(file=MLD + "wage2.csv", spec=dict(y="lwage", x=["hours", "IQ", "KWW", "educ", "exper", "tenure", "age", "married", "black", "south", "urban", "sibs", "brthord", "meduc", "feduc"], top=3))),
+    dict(id="stacking", group="Machine learning", name="Stacking: the super learner", guide="ml-guide/stacking.html", fn=ml_extra.stacking,
+         fields=[col("y", "Outcome to predict"), cols("x", "Predictors"), col("time", "Time column (time-ordered validation)", required=False), num("test_share", "Test share", 0.25), num("folds", "Cross-validation folds", 5)],
+         example=dict(file=MLD + "mlb1.csv", spec=dict(y="lsalary", x="__all__"))),
 ]
 
 # ------------------------------------------------------------------ Bayesian

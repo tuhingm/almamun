@@ -426,6 +426,12 @@
   "sub": "Linear, many small effects. Step-by-step guide with Python code and real output."
  },
  {
+  "out": "assets/og/ml-guide/stacking.jpg",
+  "kicker": "Machine Learning Guide · Model guide",
+  "title": "Stacking: The Super Learner",
+  "sub": "Several reasonable models predict differently and you do not want to bet on one of them. Step-by-step guide with Python code and…"
+ },
+ {
   "out": "assets/og/ml-guide/svr.jpg",
   "kicker": "Machine Learning Guide · Model guide",
   "title": "Support Vector Regression",

@@ -111,3 +111,48 @@ def test_interpret_boosting_option_and_errors():
     with pytest.raises(OESError, match="rf"): ml_extra.interpret(d, dict(y="y", x=["x1", "x2"], model="svm"))
     with pytest.raises(OESError, match="at least two"): ml_extra.interpret(d, dict(y="y", x=["x1"]))
     with pytest.raises(OESError, match="more than one role"): ml_extra.interpret(d, dict(y="y", x=["y", "x1"]))
+
+
+# ------------------------------------------------------------------ stacking
+def _stack_data(kind, n=1200, seed=0):
+    rng = np.random.default_rng(seed); X = rng.normal(size=(n, 4)); e = rng.normal(size=n) * 0.4
+    y = {"linear": 1 + X @ np.array([1.0, -0.5, 0.3, 0.0]) + e, "nonlinear": np.sin(2 * X[:, 0]) * 2 + (X[:, 1] > 0) * 1.5 + X[:, 2] * X[:, 3] + e}[kind]
+    return pd.DataFrame(dict(y=y, x1=X[:, 0], x2=X[:, 1], x3=X[:, 2], x4=X[:, 3]))
+
+
+def _wts(r): return {x[0]: float(x[1]) for x in r["tables"][0]["rows"][:6]}
+
+
+def test_stacking_registered():
+    m = o.BY_ID["stacking"]; assert m["group"] == "Machine learning" and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+def test_nnls_weights_recover_known_mixture():
+    rng = np.random.default_rng(0); P = rng.normal(size=(500, 3)); y = 0.7 * P[:, 0] + 0.3 * P[:, 1]; w = ml_extra._nnls_weights(P, y)
+    assert np.allclose(w, [0.7, 0.3, 0.0], atol=1e-8) and abs(w.sum() - 1) < 1e-12 and (w >= 0).all()
+
+
+def test_stacking_weights_follow_the_truth():
+    lin = _wts(ml_extra.stacking(_stack_data("linear"), dict(y="y", x=["x1", "x2", "x3", "x4"]))); non = _wts(ml_extra.stacking(_stack_data("nonlinear"), dict(y="y", x=["x1", "x2", "x3", "x4"])))
+    assert lin["OLS"] + lin["LASSO"] + lin["Ridge"] > 0.7 and non["Random forest"] + non["Gradient boosting"] + non["k nearest neighbours"] > 0.85 and abs(sum(non.values()) - 1) < 1e-3
+
+
+def test_stacking_is_close_to_best_single_learner_out_of_sample():
+    ratio = []
+    for s in range(4):
+        r = ml_extra.stacking(_stack_data("nonlinear", n=1500, seed=10 + s), dict(y="y", x=["x1", "x2", "x3", "x4"])); sm = {x["label"]: float(x["value"]) for x in r["summary"] if x["label"].startswith("Test RMSE")}
+        ratio.append(sm["Test RMSE, super learner"] / sm["Test RMSE, best single learner (chosen on the test set)"])
+    assert np.mean(ratio) < 1.05
+
+
+def test_stacking_equal_weights_row_and_correlation_matrix():
+    r = ml_extra.stacking(_stack_data("linear", n=600), dict(y="y", x=["x1", "x2", "x3", "x4"], folds=4)); C = np.array([[float(v) for v in x[1:]] for x in r["tables"][1]["rows"]])
+    assert np.allclose(C, C.T, atol=1e-3) and np.allclose(np.diag(C), 1) and r["tables"][0]["rows"][-1][0] == "Equal weights"
+
+
+def test_stacking_errors():
+    d = _stack_data("linear", n=200)
+    with pytest.raises(OESError, match="folds"): ml_extra.stacking(d, dict(y="y", x=["x1"], folds=20))
+    with pytest.raises(OESError, match="test share"): ml_extra.stacking(d, dict(y="y", x=["x1"], test_share=0.8))
+    with pytest.raises(OESError, match="more than one role"): ml_extra.stacking(d, dict(y="y", x=["y"]))
+    with pytest.raises(OESError, match="too small"): ml_extra.stacking(d.iloc[:60], dict(y="y", x=["x1"], folds=10))

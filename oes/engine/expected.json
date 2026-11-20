@@ -1528,5 +1528,21 @@
    "label": "Test R-squared",
    "value": 0.2646
   }
+ },
+ "stacking": {
+  "nobs": 353,
+  "table_index": 0,
+  "table": "Learner weights, cross-validated risk and test performance",
+  "row": "OLS",
+  "row_index": 0,
+  "col": "Weight",
+  "col_index": 1,
+  "value": 0.0,
+  "rtol": 0.05,
+  "seconds": 1.5,
+  "summary": {
+   "label": "Test RMSE, super learner",
+   "value": 0.6322
+  }
  }
 }
