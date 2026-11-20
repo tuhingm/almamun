@@ -169,3 +169,48 @@ def test_forecast_eval_errors():
     assert "forecasts" in o.run("forecast_eval", d.to_csv(index=False), dict(y="inflation", window=187, h=4))["error"].lower()
     assert "benchmark" in o.run("forecast_eval", d.to_csv(index=False), dict(y="inflation", benchmark="oracle"))["error"].lower()
     assert "loss" in o.run("forecast_eval", d.to_csv(index=False), dict(y="inflation", loss="huber"))["error"].lower()
+
+
+# ------------------------------------------------------------------ connectedness (Diebold-Yilmaz)
+RET = os.path.join(ROOT, "time-series-guide", "examples", "returns.csv")
+def rets(): return pd.read_csv(RET)
+
+
+def test_connectedness_registered():
+    m = o.BY_ID["connectedness"]
+    assert os.path.exists(os.path.join(ROOT, m["guide"])) and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+def test_gfevd_equals_orthogonal_fevd_when_errors_uncorrelated_and_rows_sum_to_one():
+    from statsmodels.tsa.api import VAR
+    rng = np.random.default_rng(8); n = 600; A = np.array([[.5, .2], [.1, .4]]); y = np.zeros((n, 2))
+    for t in range(1, n): y[t] = A @ y[t - 1] + rng.standard_normal(2) * [1, 2]
+    res = VAR(y).fit(1)
+    # force a diagonal error covariance: the generalised and the Cholesky decompositions then coincide
+    res.sigma_u = np.diag(np.diag(np.asarray(res.sigma_u)))
+    g = ts_extra._gfevd(res, 10)
+    assert np.allclose(g.sum(1), 1)
+    fe = VAR(y).fit(1).fevd(10).decomp                      # shape (k, H, k); uses the Cholesky of the estimated sigma
+    # with diagonal sigma the Cholesky FEVD is the same as GFEVD of the diagonal model; verify with a hand computation
+    S = np.asarray(res.sigma_u); Ah = [np.linalg.matrix_power(A_, 1) for A_ in [res.coefs[0]]]
+    Phi = [np.linalg.matrix_power(res.coefs[0], h) for h in range(10)]
+    num = np.array([[sum((Phi[h][i, j]) ** 2 * S[j, j] for h in range(10)) for j in range(2)] for i in range(2)])
+    assert np.allclose(g, num / num.sum(1, keepdims=True), atol=1e-10)
+
+
+def test_gfevd_does_not_depend_on_variable_order():
+    from statsmodels.tsa.api import VAR
+    x = rets()[["sp500_return", "ip_growth", "d_fedfunds"]].to_numpy(float)
+    g1 = ts_extra._gfevd(VAR(x).fit(2), 10); perm = [2, 0, 1]; g2 = ts_extra._gfevd(VAR(x[:, perm]).fit(2), 10)
+    assert np.allclose(g1[np.ix_(perm, perm)], g2, atol=1e-10)
+
+
+def test_connectedness_independent_series_have_low_connectedness():
+    rng = np.random.default_rng(6); df = pd.DataFrame(rng.standard_normal((400, 3)), columns=list("abc"))
+    r = ts_extra.connectedness(df, dict(x=["a", "b", "c"]))
+    assert next(s["value"] for s in r["summary"] if s["label"] == "Total connectedness (%)") < 8
+
+
+def test_connectedness_errors():
+    assert "two" in o.run("connectedness", rets().to_csv(index=False), dict(x=["sp500_return"]))["error"]
+    assert "60" in o.run("connectedness", rets().head(30).to_csv(index=False), dict(x=["sp500_return", "ip_growth"]))["error"]

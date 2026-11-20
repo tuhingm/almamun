@@ -1232,5 +1232,21 @@
   "value": 2.8793,
   "rtol": 0.001,
   "seconds": 1.1
+ },
+ "connectedness": {
+  "nobs": 420,
+  "table_index": 0,
+  "table": "Connectedness table (VAR(1), horizon 10, % of forecast-error variance)",
+  "row": "sp500_return",
+  "row_index": 0,
+  "col": "from sp500_return",
+  "col_index": 1,
+  "value": 84.0,
+  "rtol": 0.001,
+  "seconds": 0.1,
+  "summary": {
+   "label": "Total connectedness (%)",
+   "value": 19.3
+  }
  }
 }
