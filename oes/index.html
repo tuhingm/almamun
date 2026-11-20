@@ -4,19 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0033A0">
-<meta name="description" content="Open Econometric Systems: run 173 methods (142 econometric models and 31 statistical methods) on your own data, free, in your browser: every model of the four research guides plus Bayesian VARs and…">
+<meta name="description" content="Open Econometric Systems: run 173 models in 17 method groups free in your browser: time series, panel, causal, Bayesian VARs, ML and statistics.">
 <title>Open Econometric Systems | Tuhin Al Mamun</title>
 <link rel="canonical" href="https://tuhingm.github.io/almamun/oes/">
 <meta property="og:locale" content="en_US">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta name="author" content="Tuhin G. M. Al Mamun">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Tuhin Al Mamun, Ph.D.">
-<meta property="og:title" content="Open Econometric Systems | Tuhin Al Mamun"><meta property="og:description" content="Open Econometric Systems: run 173 methods (142 econometric models and 31 statistical methods) on your own data, free, in your browser: every model of the four research guides plus Bayesian VARs and…">
+<meta property="og:title" content="Open Econometric Systems | Tuhin Al Mamun"><meta property="og:description" content="Open Econometric Systems: run 173 models in 17 method groups free in your browser: time series, panel, causal, Bayesian VARs, ML and statistics.">
 <meta property="og:url" content="https://tuhingm.github.io/almamun/oes/"><meta property="og:image" content="https://tuhingm.github.io/almamun/assets/og/oes/index.jpg?v=4">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="og:image:type" content="image/jpeg"><meta property="og:image:alt" content="Preview card: Open Econometric Systems | Tuhin Al Mamun">
-<meta name="twitter:title" content="Open Econometric Systems | Tuhin Al Mamun"><meta name="twitter:description" content="Open Econometric Systems: run 173 methods (142 econometric models and 31 statistical methods) on your own data, free, in your browser: every model of the four research guides plus Bayesian VARs and…"><meta name="twitter:image" content="https://tuhingm.github.io/almamun/assets/og/oes/index.jpg?v=4"><meta name="twitter:image:alt" content="Preview card: Open Econometric Systems | Tuhin Al Mamun">
+<meta name="twitter:title" content="Open Econometric Systems | Tuhin Al Mamun"><meta name="twitter:description" content="Open Econometric Systems: run 173 models in 17 method groups free in your browser: time series, panel, causal, Bayesian VARs, ML and statistics."><meta name="twitter:image" content="https://tuhingm.github.io/almamun/assets/og/oes/index.jpg?v=4"><meta name="twitter:image:alt" content="Preview card: Open Econometric Systems | Tuhin Al Mamun">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml"><link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png"><link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -37,6 +37,9 @@ h2{font:800 22px/1.25 Manrope;letter-spacing:-.4px;margin:0 0 6px}h3{font:800 15
 .models{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}.models button{text-align:left;border:1px solid var(--line);background:#fff;border-radius:10px;padding:11px 13px;font-size:13px;font-weight:700;color:var(--ink);line-height:1.35;transition:border-color .15s,background .15s}.models button:hover{border-color:var(--sky2);background:#f7fbff}.models button[aria-pressed=true]{border-color:var(--navy);background:var(--tint);color:var(--navy)}.models button small{display:block;font-weight:500;font-size:11px;color:var(--muted);margin-top:2px}
 .chosen{margin-top:14px;padding:12px 14px;border-radius:10px;background:#f5f7fc;border:1px solid #e1e7f1;font-size:13px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}.chosen a{color:var(--navy);font-weight:700;text-decoration:underline}
 .btn,.btn2{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:8px;padding:10px 16px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.btn{background:var(--navy);color:#fff}.btn2{background:#e9eef8;color:var(--navy)}.btn:disabled,.btn2:disabled{opacity:.45;cursor:not-allowed}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.prep-opt{display:flex;gap:10px;align-items:flex-start;margin:12px 0 0;padding:10px 12px;border:1px solid #cfe0f5;background:#f3f8ff;border-radius:9px;font-size:13px;cursor:pointer}.prep-opt input{margin-top:3px;accent-color:var(--navy)}
+.prep{border:1px solid #cfe0f5;border-radius:10px;background:#fff;padding:14px 16px;margin-top:12px;font-size:13px}.prep h3{font-family:inherit;margin:0 0 6px;font-size:15px;color:var(--navy)}.prep h4{margin:12px 0 4px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}.prep ul{margin:0;padding-left:18px}.prep li{margin:3px 0}.prep ul.warn{margin:8px 0}.prep ul.warn li{color:#7a4a00}.prep .prep-sum{margin:0}.prep details{margin-top:10px}.prep summary{cursor:pointer;font-weight:700;color:var(--navy)}.prep table{border-collapse:collapse;margin-top:6px;font-size:12px}.prep th,.prep td{border-bottom:1px solid #e1e7f1;padding:3px 10px;text-align:left}.prep .row{margin-top:12px}
+.prep-adv,.prep-fixed{margin-top:10px}.prep-adv>summary,.prep-fixed>summary{cursor:pointer;font-weight:700;color:var(--navy)}.adv-q{display:grid;grid-template-columns:minmax(150px,.5fr) 1fr;gap:10px;align-items:center;margin:10px 0}.adv-q select{font:inherit;font-size:13px;padding:6px 8px;border:1px solid #c9d3e3;border-radius:6px;background:#fff}.prep-links{margin:12px 0 0;font-size:12px;color:var(--muted)}.linkbtn,.prep-links button{background:none;border:0;padding:0;font:inherit;color:var(--navy);text-decoration:underline;cursor:pointer}.linkbtn{font-size:12px;margin-left:6px}@media(max-width:700px){.adv-q{grid-template-columns:1fr}}
 .drop{border:1.5px dashed #aebbd0;border-radius:10px;background:#f8faff;padding:18px;text-align:center;font-size:13px;color:var(--muted);margin-top:12px}.drop.over{border-color:var(--navy);background:var(--tint)}
 .hint{font-size:11.5px;color:#6b7891}.pill{display:inline-block;font-size:11px;font-weight:700;color:var(--navy);background:var(--tint);border-radius:20px;padding:2px 10px;margin-left:6px}
 .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 18px}.field{display:grid;gap:4px;margin:8px 0}.field>label,.field>span.l{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#596780}.field select,.field input:not([type=checkbox]){width:100%;min-height:38px;padding:7px 10px;border:1px solid #ccd6e5;border-radius:7px;background:#fff;color:var(--ink);font-size:13px}.field .req{color:var(--bad)}
@@ -62,13 +65,13 @@ footer{background:#00205b;color:#dce7f6;padding:25px 0;font-size:12px}footer .fo
 <link rel="stylesheet" href="../assets/css/site-header.css">
 <link rel="stylesheet" href="../assets/css/share.css">
 <link rel="stylesheet" href="../assets/css/author-note.css">
-<script type="application/ld+json" id="site-ld">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://tuhingm.github.io/almamun/oes/#webpage","url":"https://tuhingm.github.io/almamun/oes/","name":"Open Econometric Systems | Tuhin Al Mamun","description":"Open Econometric Systems: run 173 methods (142 econometric models and 31 statistical methods) on your own data, free, in your browser: every model of the four research guides plus Bayesian VARs and…","isPartOf":{"@id":"https://tuhingm.github.io/almamun/#website"},"inLanguage":"en","author":{"@id":"https://tuhingm.github.io/almamun/#person"},"copyrightHolder":{"@id":"https://tuhingm.github.io/almamun/#person"},"primaryImageOfPage":{"@type":"ImageObject","url":"https://tuhingm.github.io/almamun/assets/og/oes/index.jpg"},"breadcrumb":{"@id":"https://tuhingm.github.io/almamun/oes/#breadcrumb"}},{"@type":"Person","@id":"https://tuhingm.github.io/almamun/#person","name":"Tuhin G. M. Al Mamun","alternateName":["Tuhin Al Mamun","Tuhin","Tuhin G M Al Mamun","Tuhin G.M. Al Mamun","Tuhin GM Al Mamun","T. G. M. Al Mamun","TGM Al Mamun","Al Mamun Tuhin","Tuhin Al Mamun, Ph.D.","Dr. Tuhin Al Mamun"],"givenName":"Tuhin","familyName":"Al Mamun","honorificSuffix":"Ph.D.","url":"https://tuhingm.github.io/almamun/","image":"https://tuhingm.github.io/almamun/assets/og-image.jpg","jobTitle":"Economist and Quantitative Researcher","description":"Economist and quantitative researcher working on monetary and fiscal policy, DSGE and HANK models, environmental economics and econometrics.","alumniOf":{"@type":"CollegeOrUniversity","name":"Hannam University","address":"Daejeon, South Korea"},"hasCredential":{"@type":"EducationalOccupationalCredential","credentialCategory":"degree","name":"Ph.D. in Economics","recognizedBy":{"@type":"CollegeOrUniversity","name":"Hannam University"}},"nationality":{"@type":"Country","name":"Bangladesh"},"knowsAbout":["Monetary policy","Fiscal policy","Macroeconomics","DSGE models","Heterogeneous Agent New Keynesian (HANK) models","Bayesian estimation","Econometrics","Time-series econometrics","Panel data econometrics","Causal inference","Environmental economics","Climate economics","Statistics"],"sameAs":["https://orcid.org/0009-0005-0275-6922","https://scholar.google.com/citations?user=CMV8R_0AAAAJ&hl=en","https://www.scopus.com/authid/detail.uri?authorId=59544050900","https://www.linkedin.com/in/tuhinecon/","https://sites.google.com/view/tuhin2022/profile","https://www.researchgate.net/profile/Tuhin-G-M-Al-Mamun","https://github.com/tuhingm"]},{"@type":"WebSite","@id":"https://tuhingm.github.io/almamun/#website","url":"https://tuhingm.github.io/almamun/","name":"Tuhin G. M. Al Mamun, Ph.D.","alternateName":["Tuhin Al Mamun","TGM Al Mamun"],"publisher":{"@id":"https://tuhingm.github.io/almamun/#person"},"inLanguage":"en"},{"@type":"BreadcrumbList","@id":"https://tuhingm.github.io/almamun/oes/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://tuhingm.github.io/almamun/"},{"@type":"ListItem","position":2,"name":"Open Econometric Systems","item":"https://tuhingm.github.io/almamun/oes/"}]}]}</script>
+<script type="application/ld+json" id="site-ld">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://tuhingm.github.io/almamun/oes/#webpage","url":"https://tuhingm.github.io/almamun/oes/","name":"Open Econometric Systems | Tuhin Al Mamun","description":"Open Econometric Systems: run 173 models in 17 method groups free in your browser: time series, panel, causal, Bayesian VARs, ML and statistics.","isPartOf":{"@id":"https://tuhingm.github.io/almamun/#website"},"inLanguage":"en","author":{"@id":"https://tuhingm.github.io/almamun/#person"},"copyrightHolder":{"@id":"https://tuhingm.github.io/almamun/#person"},"primaryImageOfPage":{"@type":"ImageObject","url":"https://tuhingm.github.io/almamun/assets/og/oes/index.jpg"},"mainEntity":{"@id":"https://tuhingm.github.io/almamun/oes/#app"},"breadcrumb":{"@id":"https://tuhingm.github.io/almamun/oes/#breadcrumb"}},{"@type":"Person","@id":"https://tuhingm.github.io/almamun/#person","name":"Tuhin G. M. Al Mamun","alternateName":["Tuhin Al Mamun","Tuhin","Tuhin G M Al Mamun","Tuhin G.M. Al Mamun","Tuhin GM Al Mamun","T. G. M. Al Mamun","TGM Al Mamun","Al Mamun Tuhin","Tuhin Al Mamun, Ph.D.","Dr. Tuhin Al Mamun"],"givenName":"Tuhin","familyName":"Al Mamun","honorificSuffix":"Ph.D.","url":"https://tuhingm.github.io/almamun/","image":"https://tuhingm.github.io/almamun/assets/og-image.jpg","jobTitle":"Economist and Quantitative Researcher","description":"Economist and quantitative researcher working on monetary and fiscal policy, DSGE and HANK models, environmental economics and econometrics.","alumniOf":{"@type":"CollegeOrUniversity","name":"Hannam University","address":"Daejeon, South Korea"},"hasCredential":{"@type":"EducationalOccupationalCredential","credentialCategory":"degree","name":"Ph.D. in Economics","recognizedBy":{"@type":"CollegeOrUniversity","name":"Hannam University"}},"nationality":{"@type":"Country","name":"Bangladesh"},"knowsAbout":["Monetary policy","Fiscal policy","Macroeconomics","DSGE models","Heterogeneous Agent New Keynesian (HANK) models","Bayesian estimation","Econometrics","Time-series econometrics","Panel data econometrics","Causal inference","Environmental economics","Climate economics","Statistics"],"sameAs":["https://orcid.org/0009-0005-0275-6922","https://scholar.google.com/citations?user=CMV8R_0AAAAJ&hl=en","https://www.scopus.com/authid/detail.uri?authorId=59544050900","https://www.linkedin.com/in/tuhinecon/","https://sites.google.com/view/tuhin2022/profile","https://www.researchgate.net/profile/Tuhin-G-M-Al-Mamun","https://github.com/tuhingm"]},{"@type":"WebSite","@id":"https://tuhingm.github.io/almamun/#website","url":"https://tuhingm.github.io/almamun/","name":"Tuhin G. M. Al Mamun, Ph.D.","alternateName":["Tuhin Al Mamun","TGM Al Mamun"],"publisher":{"@id":"https://tuhingm.github.io/almamun/#person"},"inLanguage":"en"},{"@type":["WebApplication","SoftwareApplication"],"@id":"https://tuhingm.github.io/almamun/oes/#app","name":"Open Econometric Systems (OES)","url":"https://tuhingm.github.io/almamun/oes/","applicationCategory":"EducationalApplication","applicationSubCategory":"Econometrics and statistics","operatingSystem":"Any (runs in a web browser)","browserRequirements":"Requires JavaScript and WebAssembly","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Run 173 econometric and statistical models on your own data in the browser: time series, panel data, causal inference, machine learning, bayesian, markov switching, microeconometrics, finance, productivity and spatial, nonparametric and robust, analysis of variance, nonparametric statistics, multivariate analysis, survival analysis, mixed-effects and longitudinal, resampling and simulation, meta-analysis.","featureList":["Time series","Panel data","Causal inference","Machine learning","Bayesian","Markov switching","Microeconometrics","Finance","Productivity and spatial","Nonparametric and robust","Analysis of variance","Nonparametric statistics","Multivariate analysis","Survival analysis","Mixed-effects and longitudinal","Resampling and simulation","Meta-analysis"],"author":{"@id":"https://tuhingm.github.io/almamun/#person"},"creator":{"@id":"https://tuhingm.github.io/almamun/#person"},"inLanguage":"en"},{"@type":"BreadcrumbList","@id":"https://tuhingm.github.io/almamun/oes/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://tuhingm.github.io/almamun/"},{"@type":"ListItem","position":2,"name":"Open Econometric Systems","item":"https://tuhingm.github.io/almamun/oes/"}]}]}</script>
 </head>
 <body>
 <header class="site-header"><div class="wrap nav"><a class="brand" href="../index.html" aria-label="Tuhin G. M. Al Mamun — home">TGM <span>AL MAMUN</span></a><button id="menu" type="button" aria-expanded="false" aria-controls="nav">Menu</button><nav id="nav" aria-label="Main navigation"><a href="../index.html">Home</a><a href="../teaching/index.html">Teaching Courses</a><a href="../working-papers/index.html">Working Papers</a><a href="../time-series-guide/index.html">Time Series</a><a href="../panel-data-guide/index.html">Panel Data</a><a href="../causal-inference-guide/index.html">Causal Inference</a><a href="../dsge-guide/index.html">DSGE</a><a href="../ml-guide/index.html">Machine Learning</a><div class="dd"><button type="button" class="dd-btn" aria-expanded="false" aria-haspopup="true">More Guides</button><div class="dd-menu"><a href="../bayesian-guide/index.html">Bayesian</a><a href="../markov-guide/index.html">Markov Switching</a><a href="../microeconometrics-guide/index.html">Microeconometrics</a><a href="../finance-guide/index.html">Finance</a><a href="../productivity-guide/index.html">Productivity</a><a href="../nonparametric-guide/index.html">Nonparametric</a></div></div><a href="../oes/index.html" class="current" aria-current="page">Open Econometric Systems</a></nav></div></header>
 <section class="hero"><div class="wrap"><div class="kicker">Open-source econometric workspace</div><h1>Open Econometric Systems</h1>
-<p class="lead">Every model in the Time-Series, Panel Data, Causal Inference, and Machine Learning guides is ready to run. Bayesian VAR and Markov-Switching models are also included. Choose a model and load its example dataset or upload your own CSV file. Get estimation results, diagnostic tests, statistical outputs, and charts. No installation or external software is required. Python runs directly in your browser.</p>
-<div class="meta"><span><strong id="n-models">173</strong> methods</span><span><strong>17</strong> method groups</span><span>Runs in your browser: <strong>your data stays on your device</strong></span><span><strong>Free</strong> and open source</span></div><aside class="author-note" aria-label="Author's note"><span class="an-label">Author's note</span><p>The model menu, the default specifications, and the tests and inference settings in Open Econometric Systems are my own design. I built them from my training and research in econometrics, and I implemented and tested every estimator myself. The estimators are standard methods from the literature, documented in each model's guide.</p><span class="an-sign">— Tuhin G. M. Al Mamun, Ph.D.</span></aside></div></section>
+<p class="lead">Run 173 models in 17 method groups: every model in the Time-Series, Panel Data, Causal Inference and Machine Learning guides, plus Bayesian VARs, Markov-switching, microeconometrics, nonparametric and robust methods, finance, productivity and spatial models, and a statistics division (ANOVA, multivariate, survival, mixed models, resampling, meta-analysis). Choose a model and load its example dataset or upload your own CSV file. Get estimation results, diagnostic tests and charts. No installation or external software is required. Python runs directly in your browser.</p>
+<div class="meta"><span><strong id="n-models">173</strong> models</span><span><strong>17</strong> method groups</span><span>Runs in your browser: <strong>your data stays on your device</strong></span><span><strong>Free</strong> and open source</span></div><aside class="author-note" aria-label="Author's note"><span class="an-label">Author's note</span><p>The model menu, the default specifications, and the tests and inference settings in Open Econometric Systems are my own design. I built them from my training and research in econometrics, and I implemented and tested every estimator myself. The estimators are standard methods from the literature, documented in each model's guide.</p><span class="an-sign">— Tuhin G. M. Al Mamun, Ph.D.</span></aside></div></section>
 <main class="wrap">
 
 <section class="step" id="s-model"><span class="stepno">01 · Model</span><h2>Choose a model or statistical method</h2><p class="sub">Each model links to its guide, which explains when to use it and how to write up the results. The Bayesian and Markov-switching groups have their own guides, the <a href="../bayesian-guide/index.html" style="text-decoration:underline">Bayesian Guide</a> and the <a href="../markov-guide/index.html" style="text-decoration:underline">Markov-Switching Guide</a>.</p>
@@ -78,9 +81,11 @@ footer{background:#00205b;color:#dce7f6;padding:25px 0;font-size:12px}footer .fo
 <div class="chosen" id="chosen" hidden></div>
 </section>
 
-<section class="step" id="s-data"><span class="stepno">02 · Data</span><h2>Load data</h2><p class="sub">Use the dataset from the model's guide, or your own CSV file with one column per variable (and unit and time columns for panel data).</p>
-<div class="row"><button class="btn" id="load-ex" type="button" disabled>Load the guide example</button><label class="btn2" for="file">Upload a CSV file</label><input type="file" id="file" accept=".csv,.txt,text/csv,text/plain" hidden><span class="hint" id="data-info">No data loaded.</span></div>
-<div class="drop" id="drop">or drop a CSV file here</div>
+<section class="step" id="s-data"><span class="stepno">02 · Data</span><h2>Load data</h2><p class="sub">Use the dataset from the model's guide, or upload your own CSV or Excel file (one column per variable; add unit and time columns for panel data). Uploaded files are checked and prepared automatically. For manual cleaning, see the <a href="data-cleaning.html" style="text-decoration:underline">Data Cleaning Lab</a>.</p>
+<div class="row"><button class="btn" id="load-ex" type="button" disabled>Load the guide example</button><label class="btn2" for="file">Upload a CSV or Excel file</label><input type="file" id="file" accept=".csv,.txt,.tsv,.xlsx,.xls,text/csv,text/plain" hidden><span class="hint" id="data-info">No data loaded.</span></div>
+<label class="prep-opt" for="auto-prep"><input type="checkbox" id="auto-prep" checked><span><b>Make my data estimation-ready</b> <span class="hint">Fixes formats, finds the unit and time columns and flags problems. Nothing is filled in or deleted unless you choose it.</span></span></label>
+<div class="drop" id="drop">or drop a CSV or Excel file here</div>
+<div class="prep" id="prep" hidden aria-live="polite"></div>
 <div class="table-wrap" id="preview" hidden></div>
 </section>
 
@@ -131,6 +136,7 @@ footer{background:#00205b;color:#dce7f6;padding:25px 0;font-size:12px}footer .fo
 <div><b>Bayesian and regime-switching models</b>The Bayesian VARs follow the ECB's BEAR toolbox (Minnesota, Normal-Wishart, Independent Normal-Wishart and Normal-diffuse priors, FAVAR, steady-state, panel, TVP, stochastic-volatility, mixed-frequency and threshold VARs). Markov-switching models are estimated by maximum likelihood; the regression and AR versions reproduce Stata's and Hamilton's published estimates.</div>
 <div><b>The same code as the guides</b>Difference GMM, the panel ARDL estimators, the causal designs and double machine learning use the helper files published with the guides. Static panel models reproduce linearmodels, including its small-sample scaling.</div>
 <div><b>What is not here</b>DSGE models are solved and estimated in Dynare; see the <a href="../dsge-guide/index.html" style="text-decoration:underline">DSGE Guide</a>. The causal forest is a doubly robust forest, not EconML's implementation, which does not run in a browser.</div>
+<div><b>Automatic data preparation</b>Uploaded CSV and Excel files are checked in your browser: numbers and dates written as text, missing-value codes, column names and sort order are fixed, the unit and time columns are found, and problems such as an unbalanced panel or duplicate unit-and-period rows are listed. Missing values are not filled and no observation is deleted unless you ask for it. A cleaning log and the prepared file can be downloaded. For manual cleaning use the <a href="data-cleaning.html" style="text-decoration:underline">Data Cleaning Lab</a>.</div>
 <div><b>Large files</b>Everything runs on your computer, so very large datasets and the forest-based methods take longer. Fewer trees or folds speed them up.</div>
 <div><b>Gemini development workspace</b>Use the <a href="ai-studio.html" style="text-decoration:underline;color:var(--navy)">OES AI Studio</a> to work directly with the OES source code through the Gemini API, review proposed improvements, and submit approved changes through GitHub pull requests.</div>
 </div>
@@ -165,6 +171,7 @@ footer{background:#00205b;color:#dce7f6;padding:25px 0;font-size:12px}footer .fo
 </section>
 \n</main>
 <footer><div class="wrap foot"><span><b>Tuhin G. M. Al Mamun, Ph.D.</b> · Open Econometric Systems</span><span><a href="https://github.com/tuhingm/open-econometric-systems" target="_blank" rel="noopener">Source code</a> · © <span id="year"></span></span></div></footer>
+<script src="auto-prepare.js"></script>
 <script>
 (() => {
 const $ = id => document.getElementById(id);
@@ -373,17 +380,135 @@ $("load-ex").onclick = async () => {
   const ex = MODEL.example;
   try {
     const r = await fetch("../" + ex.file); if (!r.ok) throw new Error("Could not download the example (" + r.status + ").");
+    PREP = null; LAST = null; renderPrep();
     setData(ex.file.split("/").pop(), await r.text());
     OPS = JSON.parse(JSON.stringify(ex.ops || [])); renderOps(); renderOpForm(); renderFields(ex.spec);
     $("s-spec").scrollIntoView({behavior: "smooth"});
   } catch (e) { showErr(e.message); }
 };
+// ----------------------------------------------------------------------------- upload and automatic preparation
+let PREP = null, LAST = null;     // PREP: the prepared copy in use; LAST: the file as uploaded (before preparation)
+function decodeBytes(buf) {       // UTF-8 first; Korean Excel exports are often EUC-KR, older Windows files windows-1252
+  try { return {text: new TextDecoder("utf-8", {fatal: true}).decode(buf), enc: "UTF-8"}; } catch (e) { /* not UTF-8 */ }
+  for (const enc of ["euc-kr", "windows-1252"]) { try { return {text: new TextDecoder(enc, {fatal: true}).decode(buf), enc}; } catch (e) { /* next */ } }
+  return {text: new TextDecoder("utf-8").decode(buf), enc: "UTF-8"};
+}
+function loadUpload(name, text, notes, ov) {
+  LAST = {name, text, notes: notes || []};
+  hideErr();
+  if ($("auto-prep").checked) {
+    try {
+      const res = OESPrepare.prepare(text, ov || {});
+      res.changes.unshift(...LAST.notes);
+      PREP = {name, res, adv: null, opts: null, ov: ov || null};
+      setData(name, res.csv);
+      const st = res.structure;                                   // preselect the unit and time columns the checks found
+      if (MODEL && (st.time || st.unit)) renderFields({unit: st.kind === "panel" ? st.unit : undefined, time: st.time || undefined});
+      $("data-info").innerHTML = `<b>${esc(name)}</b>: ${res.rows.toLocaleString()} rows, ${res.cols} columns (prepared)`;
+      renderPrep(); return;
+    } catch (e) { PREP = null; showErr("The file could not be prepared automatically (" + e.message + "). It is shown as uploaded."); }
+  } else PREP = null;
+  setData(name, text);
+  renderPrep();
+}
+function advHTML(res, o) {
+  o = o || {};
+  const st = res.structure, timeAware = st.kind === "panel" || st.kind === "time series";
+  const nMiss = res.columns.filter(c => c.missing > 0 && c.type === "numeric").length;
+  return `<details class="prep-adv" ${PREP.opts ? "open" : ""}><summary>Fix missing or extreme values (optional)</summary>
+<div class="adv-q"><label for="adv-miss">Missing values${nMiss ? ` <span class="hint">in ${nMiss} variable${nMiss > 1 ? "s" : ""}</span>` : ""}</label>
+<select id="adv-miss"><option value="none">Leave as they are (recommended)</option><option value="median" ${o.miss === "median" ? "selected" : ""}>Fill with the typical value (median)</option>${timeAware ? `<option value="interp" ${o.miss === "interp" ? "selected" : ""}>Fill from neighbouring periods (interpolation)</option>` : ""}</select></div>
+<div class="adv-q"><label for="adv-out">Extreme values</label>
+<select id="adv-out"><option value="none">Leave as they are (recommended)</option><option value="winsor" ${o.out === "winsor" ? "selected" : ""}>Cap at the 1st and 99th percentiles</option></select></div>
+<p class="hint">Models already skip rows with missing values in the columns you choose, so you usually do not need this. Every change is written to the cleaning log.</p>
+<div class="row"><button class="btn" id="adv-apply" type="button">Apply</button><button class="btn2" id="adv-reset" type="button">Undo</button></div>
+</details>`;
+}
+function readAdv() {         // two plain choices become the engine's options
+  const miss = $("adv-miss").value, out = $("adv-out").value, cols = PREP.res.columns, st = PREP.res.structure;
+  const skip = new Set([st.time, st.unit]);
+  const o = {miss, out, fill: {}, outlier: {method: "none", lo: 1, hi: 99, cols: []}};
+  if (miss !== "none") cols.forEach(c => { if (c.type === "numeric" && c.missing > 0 && !skip.has(c.name)) o.fill[c.name] = {method: miss}; });
+  if (out === "winsor") { o.outlier.method = "winsor"; cols.forEach(c => { if (c.type === "numeric" && !skip.has(c.name) && c.distinct > 2) o.outlier.cols.push(c.name); }); }
+  return o;
+}
+function useCleaned(csv, rows, cols) {
+  setData(PREP.name, csv);
+  $("data-info").innerHTML = `<b>${esc(PREP.name)}</b>: ${rows.toLocaleString()} rows, ${cols} columns (prepared)`;
+}
+function applyAdvanced() {
+  const o = readAdv();
+  try { PREP.adv = OESPrepare.advanced(PREP.res.csv, o, PREP.res.structure); PREP.opts = o; }
+  catch (e) { showErr(e.message); return; }
+  hideErr(); useCleaned(PREP.adv.csv, PREP.adv.rows, PREP.adv.cols); renderPrep();
+}
+function resetAdvanced() { PREP.adv = null; PREP.opts = null; hideErr(); useCleaned(PREP.res.csv, PREP.res.rows, PREP.res.cols); renderPrep(); }
+function cleaningLog() {
+  const base = PREP.res, A = PREP.adv, f = A || base, nl = "\n";
+  const lines = ["OES cleaning log", "File: " + PREP.name, "Date: " + new Date().toISOString().slice(0, 10), "Rows in: " + base.rowsIn + "   Rows out: " + f.rows + "   Columns out: " + f.cols, "",
+    "Automatic preparation", ...(base.changes.length ? base.changes.map(x => "- " + x) : ["- nothing needed fixing"]), ""];
+  if (A) lines.push("Options chosen by the user", ...(A.log.length ? A.log.map(x => "- " + x) : ["- none"]), "");
+  const w = base.warnings.concat(A ? A.warnings : []);
+  if (w.length) lines.push("Flagged for checking", ...w.map(x => "- " + x), "");
+  lines.push("Missing values were not filled and no observations were deleted unless listed above.");
+  return lines.join(nl) + nl;
+}
+function renderPrep() {
+  const box = $("prep");
+  if (!PREP) { box.hidden = true; box.innerHTML = ""; return; }
+  const base = PREP.res, A = PREP.adv, r = A || base, st = base.structure, li = a => a.map(x => `<li>${esc(x)}</li>`).join("");
+  const warnings = base.warnings.concat(A ? A.warnings : []);
+  const layout = st.kind === "panel" ? `Panel: <b>${esc(st.unit)}</b> × <b>${esc(st.time)}</b> (${st.units} units, ${st.periods} periods${st.balanced ? "" : ", unbalanced"})`
+    : st.kind === "time series" ? `Time series: <b>${esc(st.time)}</b> (${st.periods} periods)`
+    : st.kind === "unclear" ? "Time column found, no unit column"
+    : "Cross-section";
+  box.hidden = false;
+  box.innerHTML = `<h3>${warnings.length ? "Your data is ready: please check " + warnings.length + (warnings.length > 1 ? " things" : " thing") : "Your data is ready"}</h3>
+<p class="prep-sum">${r.rows.toLocaleString()} rows · ${r.cols} columns · ${layout} <button class="linkbtn" id="lay-toggle" type="button">Not right? Change</button></p>
+<div class="adv-q" id="lay-box" hidden><label>Unit (country, firm, id …)</label><select id="lay-unit">${layoutOpts(base, st.unit)}</select><label>Time (year, date …)</label><select id="lay-time">${layoutOpts(base, st.time)}</select></div>
+${warnings.length ? `<ul class="warn">${li(warnings)}</ul>` : ""}
+${base.changes.length || (A && A.log.length) ? `<details class="prep-fixed"><summary>What was fixed (${base.changes.length + (A ? A.log.length : 0)})</summary><ul>${li(base.changes.concat(A ? A.log : []))}</ul></details>` : ""}
+${advHTML(base, PREP.opts)}
+<p class="prep-links"><button id="prep-dl" type="button">Download prepared file</button> · <button id="prep-log" type="button">Download cleaning log</button> · <button id="prep-undo" type="button">Use my original file instead</button></p>`;
+  const stem = PREP.name.replace(/\.[^.]+$/, "");
+  $("prep-dl").onclick = () => download(stem + "_prepared.csv", r.csv, "text/csv");
+  $("prep-log").onclick = () => download(stem + "_cleaning_log.txt", cleaningLog(), "text/plain");
+  $("prep-undo").onclick = () => { $("auto-prep").checked = false; if (LAST) loadUpload(LAST.name, LAST.text, LAST.notes); };
+  $("adv-apply").onclick = applyAdvanced; $("adv-reset").onclick = resetAdvanced;
+  $("lay-toggle").onclick = () => { $("lay-box").hidden = !$("lay-box").hidden; };
+  $("lay-unit").onchange = $("lay-time").onchange = relayout;
+}
+function layoutOpts(res, cur) {
+  return `<option value="">(none)</option>` + res.columns.filter(c => c.type !== "empty").map(c => `<option value="${esc(c.name)}" ${c.name === cur ? "selected" : ""}>${esc(c.name)}</option>`).join("");
+}
+function relayout() {         // the user corrected the unit or time column: prepare the original file again with that choice
+  const keep = PREP.opts, ov = {unit: $("lay-unit").value, time: $("lay-time").value};
+  loadUpload(LAST.name, LAST.text, LAST.notes, ov);
+  if (PREP && keep) { try { PREP.adv = OESPrepare.advanced(PREP.res.csv, keep, PREP.res.structure); PREP.opts = keep; useCleaned(PREP.adv.csv, PREP.adv.rows, PREP.adv.cols); } catch (e) { showErr(e.message); } }
+  renderPrep(); if (PREP) $("lay-box").hidden = false;
+}
+$("auto-prep").onchange = () => { if (LAST) loadUpload(LAST.name, LAST.text, LAST.notes); };
+function loadSheetJS() {
+  return window.XLSX ? Promise.resolve() : new Promise((ok, bad) => {
+    const sc = document.createElement("script"); sc.src = "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"; sc.onload = ok;
+    sc.onerror = () => bad(new Error("The Excel reader could not be loaded. Save the sheet as CSV and upload that instead."));
+    document.head.appendChild(sc);
+  });
+}
+async function readExcel(f) {
+  await loadSheetJS();
+  const wb = XLSX.read(await f.arrayBuffer(), {type: "array"});
+  const sheet = wb.SheetNames[0];
+  loadUpload(f.name.replace(/\.xlsx?$/i, "") + ".csv", XLSX.utils.sheet_to_csv(wb.Sheets[sheet]),
+    [`Read the first sheet, "${sheet}"` + (wb.SheetNames.length > 1 ? ` (the workbook has ${wb.SheetNames.length} sheets; to use another, move it first or save it as CSV).` : ".")]);
+}
 function readFile(f) {
   if (!f) return;
   if (f.size > 60e6) return showErr("The file is larger than 60 MB; please use a smaller extract.");
+  if (/\.xlsx?$/i.test(f.name)) { readExcel(f).catch(e => showErr(e.message)); return; }
   const rd = new FileReader();
-  rd.onload = () => { try { setData(f.name, String(rd.result)); hideErr(); } catch (e) { showErr(e.message); } };
-  rd.readAsText(f);
+  rd.onload = () => { try { const d = decodeBytes(rd.result); loadUpload(f.name, d.text, d.enc === "UTF-8" ? [] : [`The file was not UTF-8; read it as ${d.enc} text.`]); } catch (e) { showErr(e.message); } };
+  rd.readAsArrayBuffer(f);
 }
 $("file").onchange = e => readFile(e.target.files[0]);
 const drop = $("drop");
