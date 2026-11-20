@@ -49,6 +49,8 @@ TS = "time-series-guide/examples/"
 PD = "panel-data-guide/examples/"
 CI = "causal-inference-guide/examples/"
 MLD = "ml-guide/examples/"
+_HP_B = ["lnox", "rooms", "dist", "radial", "proptax", "stratio", "lowstat", "lcrime"]
+_HP_X = _HP_B + ["sq_" + b for b in _HP_B] + [a + "_x_" + b for i, a in enumerate(_HP_B) for b in _HP_B[i + 1:]]   # 44 regressors of hprice2_poly.csv
 ME = "microeconometrics-guide/examples/"
 LAG4 = [1, 2, 3, 4]
 
@@ -681,6 +683,18 @@ MODELS += [
                  num("prior_sd", "Prior s.d. of each slope, per one-s.d. change in x", 2.5),
                  num("draws", "Draws per chain", 2000), num("burn", "Burn-in", 1000), num("chains", "Chains", 2), num("seed", "Random seed", 0)],
          example=dict(file="microeconometrics-guide/examples/mroz.csv", spec=dict(y="inlf", x=["nwifeinc", "educ", "exper", "age", "kidslt6", "kidsge6"]))),
+    dict(id="bayes_shrink", group="Bayesian", name="Bayesian shrinkage regression (horseshoe, lasso, ridge priors)", guide="bayesian-guide/bayes-shrinkage.html", fn=bayes_more.bayes_shrink,
+         fields=[col("y", "Dependent variable"), cols("x", "Regressors (many)"),
+                 sel("prior", "Prior", [["horseshoe", "Horseshoe"], ["lasso", "Bayesian lasso"], ["ridge", "Ridge (normal, half-Cauchy scale)"]], "horseshoe"),
+                 num("tau", "Global scale tau (horseshoe, ridge; blank = estimated)", ""), num("lasso_lambda", "Lasso penalty (blank = estimated)", ""),
+                 num("threshold", "Negligible effect: share of the s.d. of y per s.d. of x", 0.05),
+                 num("draws", "Draws per chain", 2000), num("burn", "Burn-in", 1000), num("chains", "Chains", 2), num("seed", "Random seed", 0)],
+         example=dict(file="bayesian-guide/examples/hprice2_poly.csv", spec=dict(y="lprice", x=_HP_X, draws=1000, burn=500))),
+    dict(id="changepoint", group="Bayesian", name="Bayesian change points (exact posterior, regressions allowed)", guide="bayesian-guide/change-points.html", fn=bayes_more.changepoint,
+         fields=[col("y", "Series"), cols("x", "Regressors that may change (optional)", required=False), TIME,
+                 num("expected_breaks", "Expected number of breaks (prior)", 1), num("min_segment", "Minimum regime length (blank = default)", ""),
+                 num("max_breaks", "Largest number of breaks considered (blank = automatic)", ""), num("prior_scale", "Prior scale c (blank = n)", "")],
+         example=dict(file="bayesian-guide/examples/nile.csv", spec=dict(y="flow", time="year"))),
 ]
 
 STAT_MODELS = stat_registry.build(col, cols, num, sel)       # the Statistics Division: its own page, registered like every other model

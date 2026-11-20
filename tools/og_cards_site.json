@@ -12,6 +12,12 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/bayesian-guide/bayes-shrinkage.jpg",
+  "kicker": "Bayesian Guide · Model guide",
+  "title": "Bayesian Shrinkage Regression (Horseshoe, Lasso, Ridge)",
+  "sub": "Many regressors relative to the sample (interactions, polynomials, dozens of controls), and you want estimates that do not…"
+ },
+ {
   "out": "assets/og/bayesian-guide/blp.jpg",
   "kicker": "Bayesian Guide · Model guide",
   "title": "Bayesian Local Projections",
@@ -28,6 +34,12 @@
   "kicker": "Bayesian Guide · Model guide",
   "title": "Bayesian VAR with Minnesota and Normal-Wishart Priors",
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
+ },
+ {
+  "out": "assets/og/bayesian-guide/change-points.jpg",
+  "kicker": "Bayesian Guide · Model guide",
+  "title": "Bayesian Change Points",
+  "sub": "A series or a relationship that may have shifted at unknown dates, and you want probabilities for the number and the dates of the…"
  },
  {
   "out": "assets/og/bayesian-guide/favar.jpg",

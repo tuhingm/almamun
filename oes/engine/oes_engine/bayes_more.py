@@ -342,3 +342,313 @@ def bayes_binary(df, spec):
                stat("Area under the ROC curve", auc, 3)]
     return result("bayes_binary", f"Bayesian {link}: {y}", n, summary, tabs, charts,
                   [f"Independent N(0, s^2) prior on each slope per one-standard-deviation change in x with s = {s:g} (Gelman et al. 2008); N(0, 10^2) on the centred constant."])
+
+
+# ================================================================================================ Bayesian shrinkage regression
+def _ig(rng, shape, scale):
+    return scale / rng.gamma(shape, size=np.shape(scale) or None)
+
+
+def _shrink_chain(Xs, yc, prior, ndraw, burn, rng, tau_fixed, lam_fixed, init_scale=1.0):
+    """Gibbs sampler for y = X b + e on standardised regressors. prior: horseshoe (Makalic and Schmidt 2016), lasso
+    (Park and Casella 2008) or ridge (normal prior with a half-Cauchy global scale)."""
+    n, p = Xs.shape
+    XtX, Xty = Xs.T @ Xs, Xs.T @ yc
+    s2 = float(yc @ yc / n) * 0.5
+    lam2 = np.ones(p) * init_scale; nu = np.ones(p); tau2 = 1.0 if tau_fixed is None else tau_fixed ** 2; xi = 1.0
+    tau_j2 = np.ones(p)
+    lam_l = 1.0 if lam_fixed is None else lam_fixed
+    B, S2, T2, KP, LAM = (np.empty((ndraw, p)), np.empty(ndraw), np.empty(ndraw), np.empty((ndraw, p)), np.empty(ndraw))
+    for it in range(burn + ndraw):
+        if prior == "lasso":
+            dinv = 1 / tau_j2
+        else:
+            dinv = 1 / (tau2 * (lam2 if prior == "horseshoe" else 1.0))
+            dinv = np.broadcast_to(dinv, (p,)) if np.ndim(dinv) == 0 else dinv
+        A = XtX + np.diag(dinv)
+        L = np.linalg.cholesky(A)
+        mean = np.linalg.solve(A, Xty)
+        b = mean + np.sqrt(s2) * np.linalg.solve(L.T, rng.standard_normal(p))
+        e = yc - Xs @ b
+        if prior == "lasso":
+            s2 = 1 / rng.gamma((n - 1 + p) / 2, 2 / (e @ e + b @ (dinv * b)))
+            mu = np.sqrt(lam_l ** 2 * s2 / np.maximum(b ** 2, 1e-300))
+            tau_j2 = 1 / np.maximum(rng.wald(mu, lam_l ** 2), 1e-12)
+            if lam_fixed is None:
+                lam_l = np.sqrt(rng.gamma(1.0 + p, 1 / (0.1 + tau_j2.sum() / 2)))
+        else:
+            s2 = 1 / rng.gamma((n - 1 + p) / 2, 2 / (e @ e + b @ (dinv * b)))
+            if prior == "horseshoe":
+                lam2 = 1 / rng.gamma(1.0, 1 / (1 / nu + b ** 2 / (2 * tau2 * s2)))
+                nu = 1 / rng.gamma(1.0, 1 / (1 + 1 / lam2))
+            if tau_fixed is None:
+                lam_eff = lam2 if prior == "horseshoe" else np.ones(p)
+                tau2 = 1 / rng.gamma((p + 1) / 2, 1 / (1 / xi + np.sum(b ** 2 / lam_eff) / (2 * s2)))
+                xi = 1 / rng.gamma(1.0, 1 / (1 + 1 / tau2))
+        if it >= burn:
+            i = it - burn
+            B[i], S2[i], T2[i] = b, s2, tau2
+            KP[i] = 1 / (1 + n * tau2 * (lam2 if prior == "horseshoe" else 1.0)) if prior != "lasso" else np.nan
+            LAM[i] = lam_l
+    return B, S2, T2, KP, LAM
+
+
+def bayes_shrink(df, spec):
+    from .bayes import post_table, _geweke
+    from .bayes_extra import _rhat_ess
+    import statsmodels.api as sm
+    y = need(spec, "y", "dependent variable")
+    x = as_list(need(spec, "x", "regressors"))
+    distinct([y], x)
+    d = numeric(df, [y] + x)
+    Y = d[y].to_numpy(float); X = d[x].to_numpy(float)
+    n, p = X.shape
+    prior = spec.get("prior", "horseshoe")
+    if prior not in ("horseshoe", "lasso", "ridge"):
+        raise OESError("Choose the prior: horseshoe, lasso or ridge.")
+    if (X.std(0) == 0).any():
+        raise OESError("A regressor is constant: drop it (the model has a constant).")
+    if n < p + 5:
+        raise OESError(f"Too few observations ({n}) for {p} regressors.")
+    if p < 2:
+        raise OESError("Choose at least two regressors.")
+    ndraw = int_option(spec, "draws", 2000, 200, 50000, "Draws per chain")
+    burn = int_option(spec, "burn", 1000, 0, 50000, "Burn-in")
+    nch = int_option(spec, "chains", 2, 2, 8, "Chains")
+    seed = int_option(spec, "seed", 0, 0, 10 ** 9, "Random seed")
+    thr = float_option(spec, "threshold", 0.05, "Negligible effect")
+    tau_f = spec.get("tau"); lam_f = spec.get("lasso_lambda")
+    tau_f = None if tau_f in (None, "") else float_option(spec, "tau", 1.0, "Global scale")
+    lam_f = None if lam_f in (None, "") else float_option(spec, "lasso_lambda", 1.0, "Lasso penalty")
+    if thr <= 0:
+        raise OESError("The negligible-effect threshold must be positive.")
+    xm, xs = X.mean(0), X.std(0, ddof=0)
+    Xs = (X - xm) / xs
+    ym, ysd = Y.mean(), Y.std()
+    yc = (Y - ym)
+    chains = []
+    for c in range(nch):
+        rng = np.random.default_rng(seed + 1000 * c)
+        chains.append(_shrink_chain(Xs, yc, prior, ndraw, burn, rng, tau_f, lam_f, init_scale=1.0 if c == 0 else 5.0))
+    Bs = np.vstack([c[0] for c in chains]); S2 = np.concatenate([c[1] for c in chains]); KP = np.vstack([c[3] for c in chains])
+    Bo = Bs / xs                                            # coefficients in the original units
+    const = ym - Bo @ xm
+    names = ["const"] + x
+    notneg = (np.abs(Bs) > thr * ysd).mean(0)
+    q = np.percentile(Bo, [2.5, 97.5], axis=0)
+    shr = KP.mean(0) if prior != "lasso" else None
+    ols = sm.OLS(Y, sm.add_constant(X)).fit()
+    rows = []
+    for j in np.argsort(-np.abs(Bs.mean(0))):
+        v = x[j]
+        rows.append([v, f(Bo[:, j].mean()), f(Bo[:, j].std(ddof=1)), f(q[0, j]), f(q[1, j]), f((Bo[:, j] > 0).mean(), 3), f(notneg[j], 3),
+                     "yes" if (q[0, j] > 0 or q[1, j] < 0) else "no"] + ([f(shr[j], 3)] if shr is not None else []))
+    heads = ["Variable", "Mean", "Std. dev.", "2.5%", "97.5%", "P(> 0)", "P(non-negligible)", "Interval excludes 0"] + (["Shrinkage"] if shr is not None else [])
+    tabs = [table(f"Posterior of the coefficients ({prior} prior)", heads, rows,
+                  "Sorted by the size of the standardised posterior mean. P(non-negligible) = posterior probability that a one-s.d. change in the regressor moves y by more than " + f"{thr:g} of its s.d." +
+                  (" Shrinkage = posterior mean of 1/(1 + n tau^2 lambda^2) (Piironen and Vehtari 2017): near 1 means the coefficient is pulled to zero, near 0 left alone." if shr is not None else ""))]
+    tabs.append(table("Ordinary least squares for comparison", ["Variable", "OLS coef.", "OLS std. err.", "Posterior mean", "Ratio (posterior / OLS)"],
+                      [[v, f(ols.params[j + 1]), f(ols.bse[j + 1]), f(Bo[:, j].mean()), f(Bo[:, j].mean() / ols.params[j + 1] if ols.params[j + 1] != 0 else np.nan, 3)] for j, v in enumerate(x)],
+                      "The ratio is the share of the OLS coefficient that survives the shrinkage."))
+    eff = float(notneg.sum())
+    ch_o = [c[0] / xs for c in chains]
+    diag = []
+    for j, v in enumerate(x):
+        rh, ess = _rhat_ess([c[:, j] for c in ch_o]); diag.append([v, rh, ess, _geweke(ch_o[0][:, j])])
+    rh_s, ess_s = _rhat_ess([c[1] for c in chains]); diag.append(["sigma^2", rh_s, ess_s, _geweke(chains[0][1])])
+    worst = sorted(diag, key=lambda r_: r_[2])[:10]
+    rows = [[r_[0], f(r_[1], 3), f(r_[2], 0), f(r_[3], 2)] for r_ in worst]
+    tabs.append(table("MCMC convergence diagnostics", ["Parameter", "R-hat", "Effective sample size", "Geweke z (chain 1)"], rows,
+                      f"The {len(worst)} parameters with the smallest effective sample size (of {len(diag)}). R-hat above 1.05 or an effective sample size of a few dozen means the chains have not mixed; the horseshoe needs more draws than a normal prior."))
+    top = np.argsort(-np.abs(Bs.mean(0)))[:8]
+    sens = []
+    for pr_ in ("horseshoe", "lasso", "ridge"):
+        c_ = _shrink_chain(Xs, yc, pr_, 800, 400, np.random.default_rng(seed + 11), None, None)
+        sens.append([pr_] + [f(v) for v in (c_[0].mean(0) / xs)[top]])
+    sens.append(["OLS"] + [f(v) for v in ols.params[1:][top]])
+    tabs.append(table(f"Prior sensitivity: posterior means of the {len(top)} largest coefficients", ["Prior"] + [x[j] for j in top], sens,
+                      "Each row is a separate run of 800 draws with the default hyperparameters. The ridge prior shrinks all coefficients by the same factor; the horseshoe and lasso shrink small ones more."))
+    order = np.argsort(-np.abs(Bs.mean(0)))[:20]
+    charts = [chart("Standardised coefficients: posterior mean against OLS (20 largest)", [x[j] for j in order],
+                    [("Posterior mean", Bs.mean(0)[order]), ("OLS", (ols.params[1:] * xs)[order])], "", "effect of a one-s.d. change in x", kind="bar")]
+    if shr is not None:
+        charts.append(chart("Shrinkage of the 20 largest coefficients (1 = pulled to zero)", [x[j] for j in order], [("shrinkage", shr[order])], "", "shrinkage", kind="bar"))
+    else:
+        charts.append(chart("Probability that the effect is non-negligible", [x[j] for j in order], [("P(non-negligible)", notneg[order])], "", "probability", kind="bar"))
+    fit = ym + Xs @ Bs.mean(0)
+    r2 = 1 - ((Y - fit) ** 2).sum() / ((Y - ym) ** 2).sum()
+    summary = [stat("Observations", n), stat("Regressors", p), stat("Prior", prior), stat("In-sample R-squared", r2, 4),
+               stat("Posterior mean of sigma", float(np.sqrt(S2).mean())), stat("Effective number of non-negligible coefficients", eff, 2),
+               stat("Largest R-hat", max(float(r_[1]) for r_ in diag), 3), stat("Smallest effective sample size", min(float(r_[2]) for r_ in diag), 0)]
+    notes = [f"Regressors are standardised for the prior and the coefficients reported in the original units. {nch} chains of {ndraw} draws after {burn} burn-in."
+             + (f" Global scale tau fixed at {tau_f:g}." if tau_f is not None and prior != "lasso" else "") + (f" Lasso penalty fixed at {lam_f:g}." if lam_f is not None and prior == "lasso" else "")]
+    return result("bayes_shrink", f"Bayesian shrinkage regression ({prior}): {y}", n, summary, tabs, charts, notes)
+
+
+# ================================================================================================ Bayesian change points
+def _lse(a, axis=None):
+    a = np.asarray(a, float)
+    m = np.max(a, axis=axis, keepdims=True)
+    m = np.where(np.isfinite(m), m, 0.0)
+    with np.errstate(divide="ignore"):
+        out = np.log(np.sum(np.exp(a - m), axis=axis, keepdims=True)) + m
+    return out.squeeze(axis) if axis is not None else float(out.squeeze())
+
+
+def _seg_logml(y, Z, minseg, c, a0, b0):
+    """log marginal likelihood of every segment y[t:s] (0 <= t < s <= n) under y = Z b + e, b | s2 ~ N(0, s2 c (Z'Z)^-1),
+    s2 ~ IG(a0, b0). Returns an (n+1) x (n+1) array with -inf where the segment is shorter than minseg."""
+    from scipy.special import gammaln
+    n, k1 = Z.shape
+    cy2 = np.concatenate([[0.0], np.cumsum(y * y)]); cZy = np.vstack([np.zeros(k1), np.cumsum(Z * y[:, None], axis=0)])
+    cZZ = np.concatenate([np.zeros((1, k1, k1)), np.cumsum(Z[:, :, None] * Z[:, None, :], axis=0)])
+    T, S = np.meshgrid(np.arange(n + 1), np.arange(n + 1), indexing="ij")
+    ok = (S - T) >= minseg
+    t_, s_ = T[ok], S[ok]; L = (s_ - t_).astype(float)
+    A = cZZ[s_] - cZZ[t_] + 1e-9 * np.eye(k1); r = cZy[s_] - cZy[t_]; yy = cy2[s_] - cy2[t_]
+    bh = np.linalg.solve(A, r[:, :, None])[:, :, 0]
+    bn = b0 + 0.5 * (yy - c / (1 + c) * (r * bh).sum(1)); an = a0 + L / 2
+    out = np.full((n + 1, n + 1), -np.inf)
+    out[t_, s_] = -L / 2 * np.log(2 * np.pi) + a0 * np.log(b0) - an * np.log(bn) + gammaln(an) - gammaln(a0) - k1 / 2 * np.log1p(c)
+    return out
+
+
+def _cp_posterior(logm, n, p, kmax):
+    """Exact posterior over partitions with independent Bernoulli(p) breaks between observations (Fearnhead 2006; Barry and Hartigan 1993)."""
+    lp, lq = np.log(p), np.log1p(-p)
+    W = lambda t, s: logm[t, s] + (s - t - 1) * lq
+    F = np.full((kmax + 1, n + 1), -np.inf); F[0, 0] = 0.0
+    for s in range(1, n):
+        t = np.arange(0, s)
+        w = logm[t, s] + (s - t - 1) * lq + lp
+        for k in range(1, kmax + 1):
+            F[k, s] = _lse(F[k - 1, t] + w)
+    tt = np.arange(0, n)
+    last = logm[tt, n] + (n - tt - 1) * lq
+    Z = np.array([_lse(F[k, tt] + last) for k in range(kmax + 1)])
+    B = np.full((kmax + 1, n + 1), -np.inf)
+    B[0, tt] = last
+    for t in range(n - 1, -1, -1):
+        s = np.arange(t + 1, n)
+        if len(s) == 0:
+            continue
+        w = logm[t, s] + (s - t - 1) * lq + lp
+        for k in range(1, kmax + 1):
+            B[k, t] = _lse(B[k - 1, s] + w)
+    return F, B, Z
+
+
+def changepoint(df, spec):
+    from scipy.special import gammaln
+    y_ = need(spec, "y", "series")
+    xs = as_list(spec.get("x")) if spec.get("x") not in (None, "", []) else []
+    distinct([y_], xs)
+    tcol = spec.get("time")
+    cols = [y_] + xs
+    if tcol:
+        from .core import check_columns, time_order
+        check_columns(df, [tcol]); df = time_order(df, tcol)
+    d = numeric(df, cols, keep=[tcol] if tcol else []).reset_index(drop=True)
+    labels = d[tcol].astype(str).tolist() if tcol else [str(i + 1) for i in range(len(d))]
+    n = len(d); k1 = 1 + len(xs)
+    if n < 10:
+        raise OESError("At least 10 observations are needed to look for change points.")
+    if n > 700:
+        raise OESError("At most 700 observations are supported (the exact algorithm is quadratic in n).")
+    minseg = int_option(spec, "min_segment", max(5, 3 * k1), 2, n // 2, "Minimum segment length")
+    if minseg < k1 + 1:
+        raise OESError(f"The minimum segment length must be at least {k1 + 1} (the number of coefficients plus one).")
+    eb = float_option(spec, "expected_breaks", 1.0, "Expected number of breaks")
+    if eb <= 0 or eb >= n - 1:
+        raise OESError("The expected number of breaks must be positive and below n - 1.")
+    kmax = int_option(spec, "max_breaks", min(10, n // minseg), 1, 15, "Maximum number of breaks")
+    cg = float_option(spec, "prior_scale", float(n), "Prior scale c")
+    if cg <= 0:
+        raise OESError("The prior scale c must be positive.")
+    y = d[y_].to_numpy(float); ym, ysd = y.mean(), y.std()
+    if ysd == 0:
+        raise OESError("The series is constant.")
+    ys = (y - ym) / ysd
+    Z = np.column_stack([np.ones(n)] + [(d[c].to_numpy(float) - d[c].mean()) / (d[c].std() if d[c].std() > 0 else 1.0) for c in xs])
+    a0, b0 = 1.0, 0.1
+    p = eb / (n - 1)
+    logm = _seg_logml(ys, Z, minseg, cg, a0, b0)
+    F, B, Zk = _cp_posterior(logm, n, p, kmax)
+    lpy = _lse(Zk)
+    pk = np.exp(Zk - lpy)
+    # exact marginal probability of a break after observation t (t = 1 .. n-1)
+    pb = np.zeros(n + 1)
+    for t in range(1, n):
+        v = []
+        for k in range(1, kmax + 1):
+            for j in range(0, kmax - k + 1):
+                v.append(F[k, t] + B[j, t])
+        pb[t] = np.exp(_lse(np.array(v)) - lpy) if v else 0.0
+    # null model (no break) and Bayes factors against it
+    lq = np.log1p(-p)
+    null = logm[0, n] + (n - 1) * lq
+    # most probable partition (at most kmax breaks) by dynamic programming over the number of breaks
+    lp_, lq_ = np.log(p), lq
+    V = np.full((kmax + 1, n + 1), -np.inf); V[0, 0] = 0.0; bp = np.zeros((kmax + 1, n + 1), int)
+    for s in range(1, n):
+        t = np.arange(0, s)
+        for k in range(1, kmax + 1):
+            sc = V[k - 1, t] + logm[t, s] + (s - t - 1) * lq_ + lp_
+            i = int(np.argmax(sc)); V[k, s], bp[k, s] = sc[i], t[i]
+    tt = np.arange(0, n)
+    fin = [np.max(V[k, tt] + logm[tt, n] + (n - tt - 1) * lq_) for k in range(kmax + 1)]
+    kbest = int(np.argmax(fin)); vbest = fin[kbest]
+    cps, s, k = [], int(tt[np.argmax(V[kbest, tt] + logm[tt, n] + (n - tt - 1) * lq_)]), kbest
+    while k > 0:
+        cps.append(s); s = int(bp[k, s]); k -= 1
+    cps = sorted(cps)
+    bounds = [0] + cps + [n]
+    nm = [x_ for x_ in ["const"] + xs]
+    segrows, fitted = [], np.zeros(n)
+    for i in range(len(bounds) - 1):
+        t, s = bounds[i], bounds[i + 1]
+        Zs, yv = Z[t:s], ys[t:s]; L = s - t
+        A = Zs.T @ Zs + 1e-9 * np.eye(k1); bh = np.linalg.solve(A, Zs.T @ yv); sh = cg / (1 + cg)
+        bn = b0 + 0.5 * (yv @ yv - sh * (Zs.T @ yv) @ bh); an = a0 + L / 2
+        cov = np.linalg.inv(A) * sh * bn / an
+        scale = np.sqrt(np.diag(cov)); q = stats.t.ppf([0.025, 0.975], 2 * an)
+        mu = sh * bh
+        sig = np.sqrt(bn / (an - 1)) * ysd
+        for j in range(k1):
+            # coefficients on the original scale: slopes divide by the regressor's scale; the constant is the level of y at the mean of x
+            m_, sd_ = mu[j] * ysd + (ym if j == 0 else 0.0), scale[j] * ysd * np.sqrt(2 * an / (2 * an - 2))
+            sc_ = 1.0 if j == 0 else (d[xs[j - 1]].std() if d[xs[j - 1]].std() > 0 else 1.0)
+            if j > 0:
+                m_, sd_ = m_ / sc_, sd_ / sc_
+            lo, hi = m_ + q[0] * (scale[j] * ysd / sc_), m_ + q[1] * (scale[j] * ysd / sc_)
+            segrows.append([f"{i + 1}", f"{labels[t]} to {labels[s - 1]}", int(L), nm[j], f(m_), f(sd_), f(lo), f(hi), f(sig) if j == 0 else ""])
+        fitted[t:s] = ym + ysd * (Zs @ mu) if k1 == 1 else np.nan
+    tabs = [table("Posterior probability of the number of breaks", ["Breaks", "Posterior prob.", "Prior prob.", "Log Bayes factor against no break"],
+                  [[kk, f(pk[kk], 4), f(float(np.exp(stats.binom.logpmf(kk, n - 1, p))), 4), (f(float(Zk[kk] - Zk[0]), 2) if np.isfinite(Zk[kk]) else "not possible") if kk else "0"] for kk in range(kmax + 1)],
+                  f"Exact (no simulation): all segmentations with at most {kmax} breaks and segments of at least {minseg} observations are summed. The prior puts an independent break probability of {p:.4f} between consecutive observations (expected number of breaks {eb:g}).")]
+    top = np.argsort(-pb)[:10]
+    tabs.append(table("Posterior probability of a break after each date (10 highest)", ["After", "Before", "Posterior prob."],
+                      [[labels[t - 1], labels[t], f(pb[t], 4)] for t in top if pb[t] > 1e-4]))
+    tabs.append(table("Most probable segmentation: coefficients in each regime", ["Regime", "Period", "Observations", "Parameter", "Mean", "Std. dev.", "2.5%", "97.5%", "Residual s.d."], segrows,
+                      f"Posterior of each regime given the segmentation with the highest posterior probability ({len(cps)} break{"" if len(cps) == 1 else "s"}; log posterior of the segmentation relative to no break: {vbest - null:.2f})."))
+    sens = []
+    for e_ in (0.5, 1.0, 2.0, 4.0):
+        for c_ in (n / 10, float(n), 10.0 * n):
+            lm2 = _seg_logml(ys, Z, minseg, c_, a0, b0)
+            F2, B2, Z2 = _cp_posterior(lm2, n, e_ / (n - 1), kmax)
+            pk2 = np.exp(Z2 - _lse(Z2)); mp = int(np.argmax(pk2))
+            sens.append([f"{e_:g}", f"{c_:g}", f(1 - pk2[0], 3), mp, f(float(np.dot(np.arange(kmax + 1), pk2)), 2)])
+    tabs.append(table("Prior sensitivity", ["Expected breaks (prior)", "Prior scale c", "P(at least one break)", "Most probable number", "Posterior mean number"], sens,
+                      "Rows re-run the exact calculation with other priors on the number of breaks and on the size of the coefficients."))
+    charts = [chart("Posterior probability of a break after each date", labels[:-1], [("P(break)", pb[1:n])], tcol or "observation", "probability", kind="bar")]
+    if k1 == 1:
+        charts.append(chart("Series and most probable regime means", labels, [(y_, y), ("regime mean", fitted)], tcol or "observation", y_))
+    summary = [stat("Observations", n), stat("Posterior mean number of breaks", float(np.dot(np.arange(kmax + 1), pk)), 3),
+               stat("Most probable number of breaks", int(np.argmax(pk))), stat("P(at least one break)", 1 - pk[0], 4),
+               stat("Breaks in the most probable segmentation", len(cps)),
+               stat("Dates of the most probable breaks (last date of each regime)", ", ".join(labels[t - 1] for t in cps) if cps else "none")]
+    notes = []
+    if pk[kmax] > 0.05:
+        notes.append(f"The posterior puts {pk[kmax]:.2f} of its probability on the largest number of breaks considered ({kmax}); raise 'largest number of breaks' or the minimum regime length.")
+    return result("changepoint", f"Bayesian change points: {y_}", n, summary, tabs, charts,
+                  notes + ["Conjugate normal-inverse-gamma regime models (g-prior with c = " + f"{cg:g}" + " on the standardised data; IG(1, 0.1) on the standardised variance); every regime has its own coefficients and variance. Breaks are independent Bernoulli events between consecutive observations."])

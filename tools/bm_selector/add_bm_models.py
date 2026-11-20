@@ -40,6 +40,14 @@ EXTRA_BAYES = {
                                     "The outcome is binary (works or not, defaults or not). A Bayesian logit or probit reports the effect on the probability with credible intervals computed draw by draw, takes a prior, and keeps working when maximum likelihood fails, as with a rare outcome or perfect separation.",
                                     ["Choose the link and the prior", "Estimate and check the chains", "Odds ratios and marginal effects", "Posterior predictive check", "Prior and link sensitivity", "Separation and small samples"]),
                "Bayesian logit/probit", "binary outcome", "A yes/no outcome and I want probabilities and a prior"),
+    "SHRINK": ("bayes-shrinkage", model("SHRINK", "Bayesian shrinkage regression (horseshoe, lasso, ridge)", "Shrinkage regression", "Many regressors relative to the sample: interactions, polynomials, dozens of controls",
+                                        "OLS overfits when the model has almost as many parameters as observations. A shrinkage prior pulls the coefficients the data do not support towards zero and leaves the supported ones alone, and the posterior reports how sure you are about each.",
+                                        ["Choose the prior", "Estimate and find the effects", "Compare with OLS", "Check the sampler", "Prior sensitivity", "Out-of-sample prediction"]),
+               "Shrinkage regression", "many regressors", "I have more regressors than I can trust OLS with"),
+    "CPT": ("change-points", model("CPT", "Bayesian change points", "Change points", "A level or a relationship that shifted at unknown dates",
+                                   "A series or a relationship may have shifted at dates you do not know. The posterior over all segmentations is computed exactly, so you get the probability of 0, 1, 2 ... breaks and the probability of a break after each date, with regime coefficients, and no sampler to check.",
+                                   ["Choose the prior on the number of breaks", "Number of breaks", "Break dates and regimes", "Compare with Bai-Perron", "Prior sensitivity", "False-alarm check"]),
+            "Change points", "unknown dates", "A level or a relationship shifted at dates I do not know"),
 }
 MARKOV = {
     "MSTVTP": ("ms-tvtp", model("MSTVTP", "Markov switching with time-varying transition probabilities", "MS with TVTP", "Hidden regimes, and an observed variable that moves the probability of switching",
@@ -78,8 +86,8 @@ def tree_bayes(path):
 
 
 def leaf_pos(i, label):
-    w = int(min(max(84, 8 * len(label) + 20), 150))
-    return [830 if i % 2 == 0 else 942, 228 + 68 * (i // 2), w, label]
+    """Extra Bayesian leaves form one column under the 'More methods' node, clear of the Markov-guide node on the left."""
+    return [886, 364 + 68 * i, int(min(max(84, 8 * len(label) + 20), 150)), label]
 
 
 def extend_bayes(path):
@@ -92,15 +100,17 @@ def extend_bayes(path):
             assert "}},\nN:{" in s
             s = s.replace("}},\nN:{", f"}},\n{mdl}}},\nN:{{", 1)
             s = re.sub(r"(GUIDE:\{[^}]*)\}", lambda m: m.group(1) + f",{k}:{js(slug)}}}", s, count=1)
-            x, y, w, lab = leaf_pos(base + i, label)
+            x, y, w, lab = leaf_pos(i, label)
             s = re.sub(r"(N:\{.*?)(\},\nE:\[)", lambda m: m.group(1) + f",\n {k}:[{x},{y},{w},{js(lab)},1]" + m.group(2), s, count=1, flags=re.S)
             last = list(re.finditer(r"\['oth','\w+','[^']*'\]", s))[-1]
             s = s[:last.end()] + f",['oth','{k}',{js(edge)}]" + s[last.end():]
             m = re.search(r"qx:\{t:'What is your goal\?',o:\[.*?\]\]\}", s, flags=re.S)
             assert m, "qx block not found"
             s = s[:m.end() - 2] + f",[{js(q)},{js(mdl.split('name:')[1].split(',short')[0].strip(chr(39)))},{js(k)}]" + s[m.end() - 2:]
-    rows = (base + len(EXTRA_BAYES) + 1) // 2
-    need_h = max(462, 228 + 68 * (rows - 1) + 60)
+    for i, (k, (slug, mdl, label, edge, q)) in enumerate(EXTRA_BAYES.items()):
+        x, y, w, lab = leaf_pos(i, label)
+        s = re.sub(rf" {k}:\[\d+,\d+,\d+,'[^']*',1\]", f" {k}:[{x},{y},{w},{js(lab)},1]", s)
+    need_h = max(462, 364 + 68 * (len(EXTRA_BAYES) - 1) + 40)
     s = re.sub(r"vb:'0 0 1080 \d+'", f"vb:'0 0 1080 {need_h}'", s, count=1)
     path.write_text(s)
 

@@ -180,3 +180,166 @@ def test_binary_marginal_effect_dummy_and_errors():
     with pytest.raises(OESError, match="constant"): bayes_more.bayes_binary(d.assign(c=2.0), dict(y="y", x=["x", "c"]))
     with pytest.raises(OESError, match="Too few"): bayes_more.bayes_binary(d.head(8), dict(y="y", x=["x"]))
     with pytest.raises(OESError, match="between 2 and 8"): bayes_more.bayes_binary(d, dict(y="y", x=["x"], chains=1))
+
+
+# ------------------------------------------------------------------------------------------------ Bayesian shrinkage regression
+def _sparse_data(n=100, p=30, k=3, beta=1.0, sd=1.0, seed=0):
+    rng = np.random.default_rng(seed); X = rng.normal(size=(n, p)); b = np.zeros(p); b[:k] = beta
+    return pd.DataFrame(np.column_stack([X @ b + rng.normal(scale=sd, size=n), X]), columns=["y"] + [f"x{i}" for i in range(p)]), b
+
+
+def _shr_rows(r, title="Posterior of the coefficients"):
+    return {x_[0]: x_ for x_ in next(t for t in r["tables"] if t["title"].startswith(title))["rows"]}
+
+
+def test_shrink_registered():
+    m = o.BY_ID["bayes_shrink"]; assert m["group"] == "Bayesian" and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+    assert len(m["example"]["spec"]["x"]) == 44
+
+
+def test_ridge_matches_exact_conjugate_posterior():
+    """Ridge with a fixed global scale and p(sigma^2) proportional to 1/sigma^2 has an exact Student-t posterior."""
+    d, _ = _sparse_data(n=80, p=4, k=2, seed=2); x = [f"x{i}" for i in range(4)]; tau = 0.7
+    r = bayes_more.bayes_shrink(d, dict(y="y", x=x, prior="ridge", tau=tau, draws=6000, burn=500, chains=2))
+    X = d[x].to_numpy(); xs = X.std(0); Xs = (X - X.mean(0)) / xs; yc = d["y"].to_numpy() - d["y"].mean(); n = 80
+    A = Xs.T @ Xs + np.eye(4) / tau ** 2; m = np.linalg.solve(A, Xs.T @ yc); sc2 = (yc @ yc - m @ A @ m) / (n - 1) * np.linalg.inv(A).diagonal()
+    sd = np.sqrt(sc2 * (n - 1) / (n - 3))                                     # Student-t with n - 1 degrees of freedom (flat intercept integrated out)
+    rows = _shr_rows(r)
+    for j, v in enumerate(x):
+        assert rows[v][1] == pytest.approx(m[j] / xs[j], abs=0.03 * sd[j] / xs[j] * 3 + 1e-3)
+        assert rows[v][2] == pytest.approx(sd[j] / xs[j], rel=0.06)
+
+
+def test_lasso_matches_grid_posterior():
+    """Bayesian lasso with a fixed penalty (p = 2): Gibbs sampler against numerical integration over (b1, b2, sigma)."""
+    d, _ = _sparse_data(n=40, p=2, k=1, beta=0.8, seed=5); lam = 6.0; n = 40
+    r = bayes_more.bayes_shrink(d, dict(y="y", x=["x0", "x1"], prior="lasso", lasso_lambda=lam, draws=8000, burn=1000))
+    X = d[["x0", "x1"]].to_numpy(); xs = X.std(0); Xs = (X - X.mean(0)) / xs; yc = d["y"].to_numpy() - d["y"].mean()
+    g = np.linspace(-1.6, 2.0, 361); B1, B2 = np.meshgrid(g, g, indexing="ij"); sig = np.exp(np.linspace(-1.5, 1.2, 160))
+    rss = ((yc[:, None, None] - Xs[:, [0]][:, :, None] * B1[None] - Xs[:, [1]][:, :, None] * B2[None]) ** 2).sum(0)
+    l1 = np.abs(B1) + np.abs(B2); post = np.zeros_like(B1); ds = np.gradient(np.log(sig))
+    for sg, w in zip(sig, ds):
+        post += w * sg ** 2 * sg ** (-(n - 1)) * sg ** (-2) * (lam / (2 * sg)) ** 2 * np.exp(-rss / (2 * sg ** 2) - lam * l1 / sg)
+    post /= post.sum(); m1 = (post * B1).sum(); s1 = np.sqrt((post * B1 ** 2).sum() - m1 ** 2); m2 = (post * B2).sum()
+    rows = _shr_rows(r)
+    assert rows["x0"][1] * xs[0] == pytest.approx(m1, abs=0.02) and rows["x0"][2] * xs[0] == pytest.approx(s1, rel=0.08)
+    assert rows["x1"][1] * xs[1] == pytest.approx(m2, abs=0.02)
+
+
+def test_shrink_limits_ols_and_zero():
+    d, _ = _sparse_data(n=120, p=5, k=2, seed=7); x = [f"x{i}" for i in range(5)]
+    import statsmodels.api as sm
+    ols = sm.OLS(d["y"], sm.add_constant(d[x])).fit()
+    r = bayes_more.bayes_shrink(d, dict(y="y", x=x, prior="horseshoe", tau=50, draws=3000))
+    rows = _shr_rows(r)
+    assert all(rows[v][1] == pytest.approx(ols.params[v], abs=0.12 * ols.bse[v] + 0.005) for v in x)       # diffuse global scale -> OLS
+    r0 = bayes_more.bayes_shrink(d, dict(y="y", x=x, prior="lasso", lasso_lambda=4000, draws=2000))
+    assert all(abs(_shr_rows(r0)[v][1]) < 0.02 for v in x)                                               # enormous penalty -> zero
+
+
+@pytest.mark.parametrize("prior", ["horseshoe", "lasso"])
+def test_shrink_monte_carlo_sparse_recovery(prior):
+    err_s, err_o, tp, fp = [], [], [], []
+    for s in range(12):
+        d, b = _sparse_data(n=80, p=30, k=3, beta=1.0, sd=1.0, seed=50 + s)
+        r = bayes_more.bayes_shrink(d, dict(y="y", x=[f"x{i}" for i in range(30)], prior=prior, draws=700, burn=400, seed=s))
+        rows = _shr_rows(r); est = np.array([rows[f"x{i}"][1] for i in range(30)])
+        import statsmodels.api as sm
+        ols = sm.OLS(d["y"], sm.add_constant(d[[f"x{i}" for i in range(30)]])).fit().params.to_numpy()[1:]
+        err_s.append(np.sum((est - b) ** 2)); err_o.append(np.sum((ols - b) ** 2))
+        tp.append(np.mean([rows[f"x{i}"][7] == "yes" for i in range(3)])); fp.append(np.mean([rows[f"x{i}"][7] == "yes" for i in range(3, 30)]))
+    # the horseshoe is the better sparse-signal prior; the Bayesian lasso shrinks the true coefficients too (Carvalho et al. 2010)
+    assert np.mean(err_s) < {"horseshoe": 0.35, "lasso": 0.6}[prior] * np.mean(err_o) and np.mean(tp) > 0.95 and np.mean(fp) < 0.06
+
+
+def test_shrink_errors():
+    d, _ = _sparse_data(n=60, p=4)
+    for spec, msg in [(dict(y="y", x=["x0", "x1"], prior="zz"), "prior"), (dict(y="y", x=["x0"]), "at least two"), (dict(y="y", x=["x0", "x1"], threshold=-1), "positive"),
+                      (dict(y="y", x=["x0", "x1"], chains=1), "between 2 and 8")]:
+        with pytest.raises(OESError, match=msg): bayes_more.bayes_shrink(d, spec)
+    with pytest.raises(OESError, match="constant"): bayes_more.bayes_shrink(d.assign(c=1.0), dict(y="y", x=["x0", "c"]))
+    with pytest.raises(OESError, match="Too few"): bayes_more.bayes_shrink(d.head(6), dict(y="y", x=["x0", "x1", "x2", "x3"]))
+
+
+# ------------------------------------------------------------------------------------------------ Bayesian change points
+def _brute_changepoint(y, Z, minseg, c, a0, b0, p, kmax):
+    """All partitions by enumeration, with segment marginal likelihoods from the multivariate Student-t form of the conjugate model."""
+    n = len(y); k1 = Z.shape[1]; cache = {}
+    def lm(t, s):
+        if (t, s) not in cache:
+            Zs = Z[t:s]; V = c * np.linalg.inv(Zs.T @ Zs + 1e-9 * np.eye(k1)); S = (b0 / a0) * (np.eye(s - t) + Zs @ V @ Zs.T)
+            cache[(t, s)] = stats.multivariate_t.logpdf(y[t:s], loc=np.zeros(s - t), shape=S, df=2 * a0)
+        return cache[(t, s)]
+    res = {}
+    for mask in itertools.product([0, 1], repeat=n - 1):
+        cps = [i + 1 for i, m in enumerate(mask) if m]; k = len(cps)
+        if k > kmax: continue
+        b = [0] + cps + [n]
+        if any(b[i + 1] - b[i] < minseg for i in range(len(b) - 1)): continue
+        res[tuple(cps)] = sum(lm(b[i], b[i + 1]) for i in range(len(b) - 1)) + k * np.log(p) + (n - 1 - k) * np.log1p(-p)
+    mx = max(res.values()); w = {k_: np.exp(v - mx) for k_, v in res.items()}; tot = sum(w.values())
+    return {k_: v / tot for k_, v in w.items()}
+
+
+def test_changepoint_registered():
+    m = o.BY_ID["changepoint"]; assert m["group"] == "Bayesian" and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+@pytest.mark.parametrize("with_x", [False, True])
+def test_changepoint_matches_brute_force_enumeration(with_x):
+    rng = np.random.default_rng(3); n = 13
+    x = rng.normal(size=n); y = np.r_[rng.normal(0, 1, 6), rng.normal(2.5, 1, 7)] + (0.8 * x if with_x else 0)
+    d = pd.DataFrame(dict(y=y, x=x)); eb, minseg, kmax = 1.5, 3 if with_x else 2, 4
+    spec = dict(y="y", min_segment=minseg, expected_breaks=eb, max_breaks=kmax); spec.update(dict(x=["x"]) if with_x else {})
+    r = bayes_more.changepoint(d, spec)
+    ys = (y - y.mean()) / y.std(); Z = np.column_stack([np.ones(n)] + ([(x - x.mean()) / pd.Series(x).std()] if with_x else []))
+    post = _brute_changepoint(ys, Z, minseg, float(n), 1.0, 0.1, eb / (n - 1), kmax)
+    pk = np.zeros(kmax + 1); pb = np.zeros(n + 1)
+    for cps, w in post.items():
+        pk[len(cps)] += w
+        for t in cps: pb[t] += w
+    got = {row[0]: row[1] for row in tab(r, "Posterior probability of the number")["rows"]}
+    for k in range(kmax + 1): assert got[k] == pytest.approx(pk[k], abs=2e-4)
+    top = {row[1]: row[2] for row in tab(r, "Posterior probability of a break")["rows"]}
+    for t in np.argsort(-pb)[:3]:
+        assert top[str(t + 1)] == pytest.approx(pb[t], abs=2e-4)
+    best = max(post, key=post.get); assert S(r)["Breaks in the most probable segmentation"] == len(best)
+
+
+def test_changepoint_nile_break_in_1898():
+    """The Nile flow (Cobb 1978; Balke 1993): a fall in the mean flow around 1898."""
+    d = pd.read_csv(os.path.join(BX, "nile.csv")); r = bayes_more.changepoint(d, dict(y="flow", time="year"))
+    s = S(r); assert s["Dates of the most probable breaks (last date of each regime)"] == "1898" and s["Most probable number of breaks"] == 1
+    seg = {row[0]: row for row in tab(r, "Most probable segmentation")["rows"]}
+    assert seg["1"][4] == pytest.approx(d[d.year <= 1898].flow.mean(), abs=6) and seg["2"][4] == pytest.approx(d[d.year > 1898].flow.mean(), abs=4)
+    assert tab(r, "Posterior probability of a break")["rows"][0][:2] == ["1898", "1899"]
+
+
+def test_changepoint_monte_carlo():
+    near, null_ok = 0, 0; R = 30
+    for s in range(R):
+        rng = np.random.default_rng(900 + s); n = 120
+        y = np.r_[rng.normal(0, 1, 60), rng.normal(1.3, 1, 60)]
+        r = bayes_more.changepoint(pd.DataFrame(dict(y=y)), dict(y="y"))
+        top = tab(r, "Posterior probability of a break")["rows"][0]; near += abs(int(top[1]) - 61) <= 8
+        y0 = rng.normal(size=n); r0 = bayes_more.changepoint(pd.DataFrame(dict(y=y0)), dict(y="y"))
+        null_ok += S(r0)["P(at least one break)"] < 0.5
+    assert near / R >= 0.85 and null_ok / R >= 0.8
+
+
+def test_changepoint_slope_change_with_regressor():
+    rng = np.random.default_rng(5); n = 150; x = rng.normal(size=n); b = np.r_[np.full(80, 0.2), np.full(70, 1.5)]
+    d = pd.DataFrame(dict(y=1 + b * x + rng.normal(scale=0.5, size=n), x=x)); r = bayes_more.changepoint(d, dict(y="y", x=["x"]))
+    assert abs(int(tab(r, "Posterior probability of a break")["rows"][0][1]) - 81) <= 6
+    seg = [row for row in tab(r, "Most probable segmentation")["rows"] if row[3] == "x"]
+    assert seg[0][4] == pytest.approx(0.2, abs=0.15) and seg[1][4] == pytest.approx(1.5, abs=0.25)
+
+
+def test_changepoint_errors():
+    d = pd.DataFrame(dict(y=np.random.default_rng(0).normal(size=60), x=np.arange(60.0)))
+    for spec, msg in [(dict(y="y", expected_breaks=0), "positive"), (dict(y="y", prior_scale=-1), "positive"), (dict(y="y", x=["x"], min_segment=2), "at least"), (dict(y="y", min_segment=1), "between 2"),
+                      (dict(y="y", max_breaks=0), "between")]:
+        with pytest.raises(OESError, match=msg): bayes_more.changepoint(d, spec)
+    with pytest.raises(OESError, match="At least 10"): bayes_more.changepoint(d.head(8), dict(y="y"))
+    with pytest.raises(OESError, match="constant"): bayes_more.changepoint(d.assign(y=1.0), dict(y="y"))
+    with pytest.raises(OESError, match="Column"): bayes_more.changepoint(d, dict(y="y", time="zz"))
