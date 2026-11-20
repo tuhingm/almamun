@@ -343,3 +343,74 @@ def test_changepoint_errors():
     with pytest.raises(OESError, match="At least 10"): bayes_more.changepoint(d.head(8), dict(y="y"))
     with pytest.raises(OESError, match="constant"): bayes_more.changepoint(d.assign(y=1.0), dict(y="y"))
     with pytest.raises(OESError, match="Column"): bayes_more.changepoint(d, dict(y="y", time="zz"))
+
+
+# ---------------------------------------------------------------------------------------- Bayesian quantile regression
+def _qr_data(n=400, seed=1):
+    rng = np.random.default_rng(seed); x = rng.uniform(0, 2, n)
+    return pd.DataFrame(dict(y=1 + 2 * x + (0.5 + x) * rng.normal(size=n), x=x))
+
+
+def test_bayes_qr_registered():
+    m = o.BY_ID["bayes_qr"]; assert m["group"] == "Bayesian" and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+def test_bayes_qr_matches_frequentist_quantreg():
+    import statsmodels.api as sm
+    d = pd.read_csv(os.path.join(BX, "engel.csv")); r = bayes_more.bayes_qr(d, dict(y="foodexp", x=["income"], draws=1500, burn=500))
+    for row in tab(r, "Posterior of the coefficients")["rows"]:
+        if row[1] == "income":
+            fq = sm.QuantReg(d.foodexp, sm.add_constant(d.income)).fit(q=float(row[0]), max_iter=5000).params["income"]
+            assert row[2] == pytest.approx(fq, abs=0.03)
+
+
+def test_bayes_qr_recovers_location_scale_truth():
+    """y = 1 + 2x + (0.5 + x) e: the quantile-tau slope is 2 + z_tau and the intercept 1 + 0.5 z_tau."""
+    r = bayes_more.bayes_qr(_qr_data(n=800), dict(y="y", x=["x"], quantiles="0.1, 0.5, 0.9", draws=1500, burn=500))
+    for row in tab(r, "Posterior of the coefficients")["rows"]:
+        z = stats.norm.ppf(float(row[0])); truth = 2 + z if row[1] == "x" else 1 + 0.5 * z
+        assert abs(row[2] - truth) < 3 * row[3] + 0.1
+
+
+def test_bayes_qr_heterogeneity_detected_and_absent():
+    r = bayes_more.bayes_qr(_qr_data(n=500), dict(y="y", x=["x"], quantiles="0.1, 0.9", draws=800, burn=400))
+    row = tab(r, "Does the effect differ")["rows"][0]; assert row[4] > 0 and row[6] > 0.99                        # lower 2.5% bound above zero
+    rng = np.random.default_rng(8); x = rng.normal(size=500); d = pd.DataFrame(dict(y=1 + x + rng.normal(size=500), x=x))
+    r0 = bayes_more.bayes_qr(d, dict(y="y", x=["x"], quantiles="0.1, 0.9", draws=800, burn=400))
+    row0 = tab(r0, "Does the effect differ")["rows"][0]; assert row0[4] < 0 < row0[5]
+
+
+def test_bayes_qr_calibration_and_convergence():
+    r = bayes_more.bayes_qr(_qr_data(), dict(y="y", x=["x"], draws=800, burn=400))
+    for row in tab(r, "Calibration")["rows"]: assert row[2] < 0.04
+    assert S(r)["Largest R-hat"] < 1.1
+
+
+def test_bayes_qr_monte_carlo_coverage():
+    """95% intervals for the median slope cover the truth in most replications once the draws are rescaled to the sandwich covariance."""
+    cover = 0; R = 24
+    for s in range(R):
+        rng = np.random.default_rng(300 + s); x = rng.normal(size=150); y = 1 + 1.5 * x + rng.standard_t(5, 150)
+        r = bayes_more.bayes_qr(pd.DataFrame(dict(y=y, x=x)), dict(y="y", x=["x"], quantiles="0.5", draws=400, burn=200, seed=s))
+        row = [q for q in tab(r, "Posterior of the coefficients")["rows"] if q[1] == "x"][0]; cover += row[4] <= 1.5 <= row[5]
+    assert cover / R >= 0.85
+
+
+def test_bayes_qr_adjustment_widens_and_matches_bootstrap():
+    import statsmodels.api as sm
+    d = pd.read_csv(os.path.join(BX, "engel.csv")); sp = dict(y="foodexp", x=["income"], quantiles="0.5", draws=1500, burn=500)
+    sd = lambda r: next(q[3] for q in tab(r, "Posterior of the coefficients")["rows"] if q[1] == "income")
+    a, raw = sd(bayes_more.bayes_qr(d, sp)), sd(bayes_more.bayes_qr(d, dict(sp, adjust="no")))
+    assert a > 1.5 * raw
+    X = sm.add_constant(d.income.values); y = d.foodexp.values; rng = np.random.default_rng(0)
+    bs = [sm.QuantReg(y[i], X[i]).fit(q=0.5, max_iter=5000).params[1] for i in (rng.integers(0, len(d), len(d)) for _ in range(200))]
+    assert a == pytest.approx(np.std(bs), rel=0.4)
+
+
+def test_bayes_qr_errors():
+    d = _qr_data(60)
+    for spec, msg in [(dict(y="y", x=["x"], quantiles="0, 0.5"), "strictly"), (dict(y="y", x=["x"], quantiles="a"), "numbers"), (dict(y="y", x=["x"], prior_sd=0), "positive"),
+                      (dict(y="y", x=["y"]), "more than one role")]:
+        with pytest.raises(OESError, match=msg): bayes_more.bayes_qr(d, spec)
+    with pytest.raises(OESError, match="constant"): bayes_more.bayes_qr(d.assign(x=1.0), dict(y="y", x=["x"]))
+    with pytest.raises(OESError, match="Too few"): bayes_more.bayes_qr(d.head(8), dict(y="y", x=["x"]))

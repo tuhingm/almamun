@@ -695,6 +695,14 @@ MODELS += [
                  num("expected_breaks", "Expected number of breaks (prior)", 1), num("min_segment", "Minimum regime length (blank = default)", ""),
                  num("max_breaks", "Largest number of breaks considered (blank = automatic)", ""), num("prior_scale", "Prior scale c (blank = n)", "")],
          example=dict(file="bayesian-guide/examples/nile.csv", spec=dict(y="flow", time="year"))),
+    dict(id="bayes_qr", group="Bayesian", name="Bayesian quantile regression (asymmetric Laplace)", guide="bayesian-guide/quantile-regression.html", fn=bayes_more.bayes_qr,
+         fields=[col("y", "Dependent variable"), cols("x", "Regressors"),
+                 sel("quantiles", "Quantiles", [["0.1, 0.25, 0.5, 0.75, 0.9", "10, 25, 50, 75, 90%"], ["0.1, 0.5, 0.9", "10, 50, 90%"], ["0.05, 0.5, 0.95", "5, 50, 95%"],
+                                                ["0.25, 0.5, 0.75", "25, 50, 75%"], ["0.5", "Median only"]], "0.1, 0.25, 0.5, 0.75, 0.9"),
+                 sel("adjust", "Interval adjustment", [["yes", "Sandwich rescaling (recommended)"], ["no", "Raw asymmetric-Laplace posterior"]], "yes"),
+                 num("prior_sd", "Prior s.d. of the standardised coefficients", 10),
+                 num("draws", "Draws per chain", 2000), num("burn", "Burn-in", 1000), num("chains", "Chains", 2), num("seed", "Random seed", 0)],
+         example=dict(file="bayesian-guide/examples/engel.csv", spec=dict(y="foodexp", x=["income"], draws=1000, burn=500))),
 ]
 
 STAT_MODELS = stat_registry.build(col, cols, num, sel)       # the Statistics Division: its own page, registered like every other model

@@ -1672,5 +1672,21 @@
    "label": "Posterior mean number of breaks",
    "value": 1.079
   }
+ },
+ "bayes_qr": {
+  "nobs": 235,
+  "table_index": 0,
+  "table": "Posterior of the coefficients at each quantile",
+  "row": "0.1",
+  "row_index": 0,
+  "col": "Mean",
+  "col_index": 2,
+  "value": 112.700837,
+  "rtol": 0.05,
+  "seconds": 1.7,
+  "summary": {
+   "label": "Largest R-hat",
+   "value": 1.017
+  }
  }
 }

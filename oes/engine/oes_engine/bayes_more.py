@@ -652,3 +652,142 @@ def changepoint(df, spec):
         notes.append(f"The posterior puts {pk[kmax]:.2f} of its probability on the largest number of breaks considered ({kmax}); raise 'largest number of breaks' or the minimum regime length.")
     return result("changepoint", f"Bayesian change points: {y_}", n, summary, tabs, charts,
                   notes + ["Conjugate normal-inverse-gamma regime models (g-prior with c = " + f"{cg:g}" + " on the standardised data; IG(1, 0.1) on the standardised variance); every regime has its own coefficients and variance. Breaks are independent Bernoulli events between consecutive observations."])
+
+
+# ================================================================================================ Bayesian quantile regression
+def _qr_chain(Xs, ys, tau, ndraw, burn, rng, prior_sd, init=None):
+    """Gibbs sampler for the asymmetric-Laplace quantile regression (Kozumi and Kobayashi 2011), standardised data."""
+    n, k = Xs.shape
+    th = (1 - 2 * tau) / (tau * (1 - tau)); t2 = 2.0 / (tau * (1 - tau))
+    B0inv = np.eye(k) / prior_sd ** 2
+    beta = np.zeros(k) if init is None else init.copy()
+    sig = 1.0
+    a0, b0 = 1e-3, 1e-3
+    out_b = np.empty((ndraw, k)); out_s = np.empty(ndraw)
+    for it in range(ndraw + burn):
+        r = ys - Xs @ beta
+        a = np.maximum(r ** 2 / (t2 * sig), 1e-12)
+        b = th ** 2 / (t2 * sig) + 2.0 / sig
+        w = rng.wald(np.sqrt(b / a), b)                     # w = 1 / v
+        v = 1.0 / w
+        prec = (Xs * (w / (t2 * sig))[:, None]).T @ Xs + B0inv
+        cov = np.linalg.inv(prec); cov = (cov + cov.T) / 2
+        mean = cov @ (Xs.T @ (w * (ys - th * v)) / (t2 * sig))
+        beta = rng.multivariate_normal(mean, cov)
+        r = ys - Xs @ beta - th * v
+        sig = _ig(rng, 1.5 * n + a0, float((r ** 2 * w).sum() / (2 * t2) + v.sum() + b0))
+        if it >= burn:
+            out_b[it - burn] = beta; out_s[it - burn] = sig
+    return out_b, out_s
+
+
+def _qr_adjust(Bs, Xs, ys, tau):
+    """Rescale the draws so their covariance is the sandwich covariance of the quantile-regression estimator (Yang, Wang and He 2016):
+    tau (1 - tau) D1^-1 D0 D1^-1 / n, with D1 estimated by a kernel (Powell 1991) at the posterior mean."""
+    n, k = Xs.shape
+    m = Bs.mean(0); r = ys - Xs @ m
+    z = stats.norm.ppf(tau)
+    hq = n ** (-1 / 3) * stats.norm.ppf(0.975) ** (2 / 3) * (1.5 * stats.norm.pdf(z) ** 2 / (2 * z ** 2 + 1)) ** (1 / 3)
+    hq = min(hq, 0.45 * min(tau, 1 - tau) * 2) if min(tau, 1 - tau) < hq else hq
+    b = float(np.quantile(r, min(tau + hq, 0.999)) - np.quantile(r, max(tau - hq, 0.001)))
+    if not np.isfinite(b) or b <= 0:
+        return Bs
+    K = (np.abs(r) < b)
+    D1 = (Xs * K[:, None]).T @ Xs / (2 * b * n); D0 = Xs.T @ Xs / n
+    try:
+        D1i = np.linalg.inv(D1)
+    except np.linalg.LinAlgError:
+        return Bs
+    Sa = tau * (1 - tau) * D1i @ D0 @ D1i / n
+    Sp = np.cov(Bs.T).reshape(k, k)
+    try:
+        La = np.linalg.cholesky((Sa + Sa.T) / 2); Lp = np.linalg.cholesky((Sp + Sp.T) / 2)
+    except np.linalg.LinAlgError:
+        return Bs
+    return m + (Bs - m) @ (La @ np.linalg.inv(Lp)).T
+
+
+def bayes_qr(df, spec):
+    from .bayes import _geweke
+    from .bayes_extra import _rhat_ess
+    import statsmodels.api as sm
+    y = need(spec, "y", "dependent variable")
+    x = as_list(need(spec, "x", "regressors"))
+    distinct([y], x)
+    d = numeric(df, [y] + x)
+    Y = d[y].to_numpy(float); X = d[x].to_numpy(float)
+    n, p = X.shape
+    raw = spec.get("quantiles", "0.1, 0.25, 0.5, 0.75, 0.9")
+    try:
+        qs = sorted({float(t) for t in (raw if isinstance(raw, (list, tuple)) else str(raw).replace(";", ",").split(",")) if str(t).strip() != ""})
+    except ValueError:
+        raise OESError("Quantiles must be numbers between 0 and 1, separated by commas.")
+    if not qs or len(qs) > 9 or any(q_ <= 0 or q_ >= 1 for q_ in qs):
+        raise OESError("Give between 1 and 9 quantiles strictly between 0 and 1, for example 0.1, 0.5, 0.9.")
+    if (X.std(0) == 0).any():
+        raise OESError("A regressor is constant: drop it (the model has a constant).")
+    if n < 5 * (p + 1):
+        raise OESError(f"Too few observations ({n}) for {p} regressors.")
+    ndraw = int_option(spec, "draws", 2000, 200, 50000, "Draws per chain")
+    burn = int_option(spec, "burn", 1000, 0, 50000, "Burn-in")
+    nch = int_option(spec, "chains", 2, 2, 8, "Chains")
+    seed = int_option(spec, "seed", 0, 0, 10 ** 9, "Random seed")
+    psd = float_option(spec, "prior_sd", 10.0, "Prior standard deviation")
+    adj = str(spec.get("adjust", "yes")).lower() not in ("no", "false", "0")
+    if psd <= 0:
+        raise OESError("The prior standard deviation must be positive.")
+    xm, xs = X.mean(0), X.std(0)
+    ym, ysd = Y.mean(), Y.std()
+    Xs = np.column_stack([np.ones(n), (X - xm) / xs]); ys = (Y - ym) / ysd
+    names = ["const"] + x
+
+    def to_orig(Bs):
+        B = Bs.copy()
+        B[:, 1:] = Bs[:, 1:] * ysd / xs
+        B[:, 0] = ym + ysd * Bs[:, 0] - B[:, 1:] @ xm
+        return B
+
+    post = {}; rows = []; diag = []; calib = []
+    for qi, tau in enumerate(qs):
+        ch = [_qr_chain(Xs, ys, tau, ndraw, burn, np.random.default_rng(seed + 1000 * c + qi), psd, init=None if c == 0 else np.random.default_rng(seed + 7 * c).normal(0, 1, p + 1)) for c in range(nch)]
+        Braw = np.vstack([c[0] for c in ch])
+        B = to_orig(_qr_adjust(Braw, Xs, ys, tau) if adj else Braw); post[tau] = B
+        fq = sm.QuantReg(Y, sm.add_constant(X)).fit(q=tau, max_iter=5000)
+        pe = B.mean(0); lo, hi = np.percentile(B, [2.5, 97.5], axis=0)
+        for j, v in enumerate(names):
+            rows.append([f"{tau:g}", v, f(pe[j]), f(B[:, j].std(ddof=1)), f(lo[j]), f(hi[j]), f((B[:, j] > 0).mean(), 3), f(fq.params[j])])
+        for j, v in enumerate(names):
+            rh, ess = _rhat_ess([to_orig(c[0])[:, j] for c in ch]); diag.append([f"{tau:g}", v, rh, ess])
+        fit = np.column_stack([np.ones(n), X]) @ pe
+        calib.append([f"{tau:g}", f((Y <= fit).mean(), 3), f(abs((Y <= fit).mean() - tau), 3)])
+    tabs = [table("Posterior of the coefficients at each quantile",
+                  ["Quantile", "Variable", "Mean", "Std. dev.", "2.5%", "97.5%", "P(> 0)", "Frequentist quantile regression"], rows,
+                  f"Asymmetric-Laplace likelihood, normal prior with s.d. {psd:g} on the standardised coefficients, {nch} chains of {ndraw} draws after {burn} burn-in. " + ("Draws rescaled to the sandwich covariance of the quantile-regression estimator (Yang, Wang and He 2016), so intervals have the right width. " if adj else "Draws NOT rescaled: asymmetric-Laplace intervals are usually too narrow. ") + "The last column is the ordinary (check-function) quantile-regression estimate, which the posterior mean should be close to.")]
+    if len(qs) >= 2:
+        lo_q, hi_q = qs[0], qs[-1]
+        rows = []
+        for j in range(1, p + 1):
+            dif = post[hi_q][:, j] - post[lo_q][:, j]
+            a_, b_ = np.percentile(dif, [2.5, 97.5])
+            rows.append([names[j], f(post[lo_q][:, j].mean()), f(post[hi_q][:, j].mean()), f(dif.mean()), f(a_), f(b_), f((dif > 0).mean(), 3)])
+        tabs.append(table(f"Does the effect differ between the {lo_q:g} and the {hi_q:g} quantile?",
+                          ["Variable", f"Slope at {lo_q:g}", f"Slope at {hi_q:g}", "Difference", "2.5%", "97.5%", "P(difference > 0)"], rows,
+                          "A difference whose interval excludes zero means the regressor changes the spread or the skew of the outcome, not only its centre."))
+    tabs.append(table("Calibration: share of observations below the fitted quantile", ["Quantile", "Share below", "Gap"], calib,
+                      "A well-fitted quantile line has the share below it close to the quantile itself."))
+    worst = sorted(diag, key=lambda r_: r_[3])[:10]
+    tabs.append(table("MCMC convergence diagnostics", ["Quantile", "Parameter", "R-hat", "Effective sample size"],
+                      [[r_[0], r_[1], f(r_[2], 3), f(r_[3], 0)] for r_ in worst],
+                      f"The {len(worst)} parameters with the smallest effective sample size (of {len(diag)}). Extreme quantiles mix more slowly; add draws if the effective sample size is below a few hundred."))
+    ols = sm.OLS(Y, sm.add_constant(X)).fit()
+    charts = []
+    for j in range(1, min(p, 3) + 1):
+        m_ = [post[t_][:, j].mean() for t_ in qs]
+        band = ([np.percentile(post[t_][:, j], 2.5) for t_ in qs], [np.percentile(post[t_][:, j], 97.5) for t_ in qs])
+        charts.append(chart(f"Effect of {names[j]} across the distribution of {y}", [f"{t_:g}" for t_ in qs],
+                            [("Posterior mean", m_), ("OLS", [ols.params[j]] * len(qs))], "quantile", "coefficient", band=band))
+    worst_r = max(float(r_[2]) for r_ in diag)
+    summary = [stat("Observations", n), stat("Regressors", p), stat("Quantiles", ", ".join(f"{t_:g}" for t_ in qs)),
+               stat("Largest R-hat", worst_r, 3), stat("Smallest effective sample size", min(float(r_[3]) for r_ in diag), 0)]
+    return result("bayes_qr", f"Bayesian quantile regression: {y}", n, summary, tabs, charts,
+                  ["Kozumi-Kobayashi (2011) location-scale mixture of the asymmetric Laplace distribution. The working likelihood gives the right centre for the quantile but not the right spread, so by default the draws are rescaled to the sandwich covariance (Yang, Wang and He 2016); set the adjustment to no to see the raw posterior. Each quantile is a separate model, so differences between quantiles treat their estimates as independent, which slightly overstates the uncertainty of the difference."])

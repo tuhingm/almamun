@@ -72,6 +72,12 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/bayesian-guide/quantile-regression.jpg",
+  "kicker": "Bayesian Guide · Model guide",
+  "title": "Bayesian Quantile Regression",
+  "sub": "The effect of a regressor may differ between low and high values of the outcome, and you want probabilities, not only a median…"
+ },
+ {
   "out": "assets/og/bayesian-guide/sign-bvar.jpg",
   "kicker": "Bayesian Guide · Model guide",
   "title": "Sign-Restricted Bayesian VAR",

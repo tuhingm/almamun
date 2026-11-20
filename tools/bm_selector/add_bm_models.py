@@ -48,6 +48,10 @@ EXTRA_BAYES = {
                                    "A series or a relationship may have shifted at dates you do not know. The posterior over all segmentations is computed exactly, so you get the probability of 0, 1, 2 ... breaks and the probability of a break after each date, with regime coefficients, and no sampler to check.",
                                    ["Choose the prior on the number of breaks", "Number of breaks", "Break dates and regimes", "Compare with Bai-Perron", "Prior sensitivity", "False-alarm check"]),
             "Change points", "unknown dates", "A level or a relationship shifted at dates I do not know"),
+    "QREG": ("quantile-regression", model("QREG", "Bayesian quantile regression", "Quantile regression", "The effect of a regressor may differ between low and high values of the outcome",
+                                          "The mean hides who gains and who does not. Bayesian quantile regression estimates the effect at several quantiles, gives a posterior and a probability that the effects differ, and rescales the intervals so they have the right width.",
+                                          ["Choose the quantiles", "Estimate at each quantile", "Do the effects differ", "Correct the intervals", "Check the sampler", "Simulation coverage"]),
+             "Quantile regression", "effect differs", "The effect may differ between low and high outcomes"),
 }
 MARKOV = {
     "MSTVTP": ("ms-tvtp", model("MSTVTP", "Markov switching with time-varying transition probabilities", "MS with TVTP", "Hidden regimes, and an observed variable that moves the probability of switching",
