@@ -36,6 +36,12 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/bayesian-guide/change-points.jpg",
+  "kicker": "Bayesian Guide · Model guide",
+  "title": "Bayesian Change Points",
+  "sub": "A series or a relationship that may have shifted at unknown dates, and you want probabilities for the number and the dates of the…"
+ },
+ {
   "out": "assets/og/bayesian-guide/favar.jpg",
   "kicker": "Bayesian Guide · Model guide",
   "title": "Factor-Augmented VAR (FAVAR)",

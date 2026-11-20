@@ -690,6 +690,11 @@ MODELS += [
                  num("threshold", "Negligible effect: share of the s.d. of y per s.d. of x", 0.05),
                  num("draws", "Draws per chain", 2000), num("burn", "Burn-in", 1000), num("chains", "Chains", 2), num("seed", "Random seed", 0)],
          example=dict(file="bayesian-guide/examples/hprice2_poly.csv", spec=dict(y="lprice", x=_HP_X, draws=1000, burn=500))),
+    dict(id="changepoint", group="Bayesian", name="Bayesian change points (exact posterior, regressions allowed)", guide="bayesian-guide/change-points.html", fn=bayes_more.changepoint,
+         fields=[col("y", "Series"), cols("x", "Regressors that may change (optional)", required=False), TIME,
+                 num("expected_breaks", "Expected number of breaks (prior)", 1), num("min_segment", "Minimum regime length (blank = default)", ""),
+                 num("max_breaks", "Largest number of breaks considered (blank = automatic)", ""), num("prior_scale", "Prior scale c (blank = n)", "")],
+         example=dict(file="bayesian-guide/examples/nile.csv", spec=dict(y="flow", time="year"))),
 ]
 
 STAT_MODELS = stat_registry.build(col, cols, num, sel)       # the Statistics Division: its own page, registered like every other model
