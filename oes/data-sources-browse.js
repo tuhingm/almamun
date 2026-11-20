@@ -72,12 +72,19 @@
     const doc = new DOMParser().parseFromString(await getText(PROV[k].struct(f), 180000), "application/xml");
     const lists = new Map();
     for (const cl of tags(doc, "Codelist")) lists.set(cl.getAttribute("id"), tags(cl, "Code").map(c => ({ id: c.getAttribute("id"), name: nameOf(c) })));
+    const concepts = new Map();
+    for (const c of tags(doc, "Concept")) { const en = first(c, "Enumeration"), r = en && first(en, "Ref"); if (r) concepts.set(c.getAttribute("id"), r.getAttribute("id")); }
     const dsd = first(doc, "DataStructure");
     if (!dsd) throw new Error("This dataset has no structure information.");
     const dl = first(dsd, "DimensionList");
     const dims = tags(dl, "Dimension").filter(d => d.parentNode === dl).map(d => {
       const en = first(d, "Enumeration"), ref = en && first(en, "Ref");
-      return { id: d.getAttribute("id"), pos: +d.getAttribute("position") || 0, codes: ref ? (lists.get(ref.getAttribute("id")) || []) : [] };
+      let codes = ref ? (lists.get(ref.getAttribute("id")) || []) : [];
+      if (!codes.length) {                                   // IMF: the code list is declared on the concept, not on the dimension
+        const ci = first(d, "ConceptIdentity"), cr = ci && first(ci, "Ref"), cid = cr && cr.getAttribute("id");
+        if (cid && concepts.has(cid)) codes = lists.get(concepts.get(cid)) || [];
+      }
+      return { id: d.getAttribute("id"), pos: +d.getAttribute("position") || 0, codes };
     }).sort((a, b) => a.pos - b.pos);
     if (!dims.length) throw new Error("This dataset has no selectable dimensions.");
     return dims;
