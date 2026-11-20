@@ -1624,5 +1624,21 @@
    "label": "Expected model size",
    "value": 8.05
   }
+ },
+ "bayes_binary": {
+  "nobs": 753,
+  "table_index": 0,
+  "table": "Posterior of the coefficients (logit, normal prior with s.d. 2.5 per one-s.d. change in x)",
+  "row": "const",
+  "row_index": 0,
+  "col": "Mean",
+  "col_index": 1,
+  "value": 0.851502,
+  "rtol": 0.05,
+  "seconds": 0.6,
+  "summary": {
+   "label": "Share of ones",
+   "value": 0.568
+  }
  }
 }

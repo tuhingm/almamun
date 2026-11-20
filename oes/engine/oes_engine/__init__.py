@@ -675,6 +675,12 @@ MODELS += [
                  sel("method", "Method", [["auto", "Exact for 14 or fewer regressors, else MC3"], ["exact", "Exact enumeration (up to 18)"], ["mc3", "MC3 sampler"]], "auto"),
                  num("draws", "MC3 iterations (more than 14 regressors)", 20000), num("burn", "MC3 burn-in", 5000), num("seed", "Random seed", 0)],
          example=dict(file="bayesian-guide/examples/wage2.csv", spec=dict(y="lwage", x=["IQ", "KWW", "educ", "exper", "tenure", "age", "married", "black", "south", "urban", "sibs", "brthord", "meduc", "feduc"]))),
+    dict(id="bayes_binary", group="Bayesian", name="Bayesian logit and probit (MCMC, marginal effects)", guide="bayesian-guide/bayes-logit.html", fn=bayes_more.bayes_binary,
+         fields=[col("y", "Binary outcome (0/1)"), cols("x", "Explanatory variables"),
+                 sel("link", "Link", [["logit", "Logit (Metropolis-Hastings)"], ["probit", "Probit (Albert-Chib Gibbs sampler)"]], "logit"),
+                 num("prior_sd", "Prior s.d. of each slope, per one-s.d. change in x", 2.5),
+                 num("draws", "Draws per chain", 2000), num("burn", "Burn-in", 1000), num("chains", "Chains", 2), num("seed", "Random seed", 0)],
+         example=dict(file="microeconometrics-guide/examples/mroz.csv", spec=dict(y="inlf", x=["nwifeinc", "educ", "exper", "age", "kidslt6", "kidsge6"]))),
 ]
 
 STAT_MODELS = stat_registry.build(col, cols, num, sel)       # the Statistics Division: its own page, registered like every other model

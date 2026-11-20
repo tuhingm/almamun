@@ -36,6 +36,10 @@ EXTRA_BAYES = {
                          "You have more candidate regressors than you can defend one by one, and choosing a single model by testing hides how much the answer depends on the choice. Model averaging weights every combination of regressors by its posterior probability and reports the probability that each variable belongs.",
                          ["Choose the g-prior and the model prior", "Posterior inclusion probabilities", "Best models and model size", "Compare with the full regression", "Prior sensitivity", "Check the search (MC3)"]),
             "Model averaging", "which variables", "Many candidate regressors and I do not know which belong"),
+    "BLOGIT": ("bayes-logit", model("BLOGIT", "Bayesian logit and probit", "Bayesian logit/probit", "A yes/no outcome, with probabilities for the effects and a prior",
+                                    "The outcome is binary (works or not, defaults or not). A Bayesian logit or probit reports the effect on the probability with credible intervals computed draw by draw, takes a prior, and keeps working when maximum likelihood fails, as with a rare outcome or perfect separation.",
+                                    ["Choose the link and the prior", "Estimate and check the chains", "Odds ratios and marginal effects", "Posterior predictive check", "Prior and link sensitivity", "Separation and small samples"]),
+               "Bayesian logit/probit", "binary outcome", "A yes/no outcome and I want probabilities and a prior"),
 }
 MARKOV = {
     "MSTVTP": ("ms-tvtp", model("MSTVTP", "Markov switching with time-varying transition probabilities", "MS with TVTP", "Hidden regimes, and an observed variable that moves the probability of switching",
