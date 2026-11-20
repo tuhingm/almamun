@@ -3,7 +3,7 @@
   "use strict";
   const WB_BASE = "https://api.worldbank.org/v2";
   const CATALOG_TTL = 7 * 24 * 60 * 60 * 1000;
-  const MAX_RETRIES = 3;
+  const MAX_RETRIES = 5;
   const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
   const notify = (fn, message, detail) => { if (typeof fn === "function") fn(message, detail || {}); };
   const cache = {
@@ -50,7 +50,7 @@
     let lastError;
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), opts.timeout || 30000);
+      const timeout = setTimeout(() => controller.abort(), opts.timeout || 60000);
       try {
         const response = await fetch(url, {
           method: "GET",
@@ -76,14 +76,14 @@
       } catch (error) {
         clearTimeout(timeout);
         lastError = error;
-        const retryable = error.name === "AbortError" || error.status === 429 || (error.status >= 500);
+        const retryable = error.name === "AbortError" || error instanceof TypeError || error.status === 429 || (error.status >= 500);
         if (!retryable || attempt === MAX_RETRIES) {
           if (error instanceof TypeError || error.name === "AbortError") {
-            throw new Error("Browser request failed. This may be a CORS, network, or timeout restriction. Test the World Bank connection from this GitHub Pages page. Details: " + error.message);
+            throw new Error("The World Bank server did not answer after several tries. Its data service is sometimes slow or overloaded, so this is usually temporary: wait a few minutes and try again, or fetch fewer countries and a shorter year range.");
           }
           throw error;
         }
-        await sleep(Math.min(8000, 700 * Math.pow(2, attempt)));
+        await sleep(Math.min(15000, 1500 * Math.pow(2, attempt)));
       }
     }
     throw lastError || new Error("World Bank request failed.");
