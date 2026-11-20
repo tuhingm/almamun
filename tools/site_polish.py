@@ -271,7 +271,7 @@ for p in pages:
                       "applicationCategory": "EducationalApplication", "applicationSubCategory": "Econometrics and statistics",
                       "operatingSystem": "Any (runs in a web browser)", "browserRequirements": "Requires JavaScript and WebAssembly",
                       "isAccessibleForFree": True, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
-                      "description": f"Run {(len(econ) + len(stat)) // 10 * 10}+ econometric and statistical models on your own data in the browser: "
+                      "description": f"Run {len(econ) + len(stat)} econometric and statistical models on your own data in the browser: "
                                      + ", ".join(g.lower() for g in groups) + ".",
                       "featureList": groups, "author": {"@id": SITE + "#person"}, "creator": {"@id": SITE + "#person"},
                       "inLanguage": "en"})
