@@ -7,13 +7,16 @@
   <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/bma.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/bvar.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/change-points.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/count-regression.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/favar.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/hier-panel.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/mixed-frequency.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/panel-var.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/quantile-regression.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/sign-bvar.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/steady-state.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/structural-time-series.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/sv-var.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/threshold-var.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/tvp-var.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
@@ -44,9 +47,19 @@
   <url><loc>https://tuhingm.github.io/almamun/dsge-guide/rbc.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/dsge-guide/soe.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/dsge-guide/zlb.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/finance-guide/bubbles.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/finance-guide/capm.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/finance-guide/dcc.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/finance-guide/</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/finance-guide/portfolio.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/finance-guide/var-es.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/finance-guide/volatility-forecasts.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/finance-guide/yield-curve.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/handbook/</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/</loc><lastmod>2026-11-20</lastmod><priority>1.0</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/markov-guide/bayesian-ms.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/markov-guide/</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/markov-guide/markov-chain.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/markov-guide/ms-ar.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/markov-guide/ms-panel-var.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/markov-guide/ms-regression.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
@@ -84,6 +97,15 @@
   <url><loc>https://tuhingm.github.io/almamun/ml-guide/stacking.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/ml-guide/svr.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/ml-guide/xgb.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/nonparametric-guide/extreme-values.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/nonparametric-guide/</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/nonparametric-guide/kernel-density.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/nonparametric-guide/kernel-regression.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/nonparametric-guide/multiple-testing.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/nonparametric-guide/partially-linear.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/nonparametric-guide/robust-regression.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/nonparametric-guide/splines.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/nonparametric-guide/wild-cluster-bootstrap.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/oes/ai-studio.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/oes/data-cleaning.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/oes/</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
@@ -113,6 +135,13 @@
   <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/re.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/spatial.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/panel-data-guide/twfe.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/productivity-guide/dea.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/productivity-guide/growth-regressions.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/productivity-guide/</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/productivity-guide/malmquist.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/productivity-guide/production-cost-function.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/productivity-guide/spatial-regression.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/productivity-guide/stochastic-frontier.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/research-guide/ardl.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/research-guide/gmm.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/research-guide/</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>

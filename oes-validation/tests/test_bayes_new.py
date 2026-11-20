@@ -343,3 +343,371 @@ def test_changepoint_errors():
     with pytest.raises(OESError, match="At least 10"): bayes_more.changepoint(d.head(8), dict(y="y"))
     with pytest.raises(OESError, match="constant"): bayes_more.changepoint(d.assign(y=1.0), dict(y="y"))
     with pytest.raises(OESError, match="Column"): bayes_more.changepoint(d, dict(y="y", time="zz"))
+
+
+# ---------------------------------------------------------------------------------------- Bayesian quantile regression
+def _qr_data(n=400, seed=1):
+    rng = np.random.default_rng(seed); x = rng.uniform(0, 2, n)
+    return pd.DataFrame(dict(y=1 + 2 * x + (0.5 + x) * rng.normal(size=n), x=x))
+
+
+def test_bayes_qr_registered():
+    m = o.BY_ID["bayes_qr"]; assert m["group"] == "Bayesian" and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+def test_bayes_qr_matches_frequentist_quantreg():
+    import statsmodels.api as sm
+    d = pd.read_csv(os.path.join(BX, "engel.csv")); r = bayes_more.bayes_qr(d, dict(y="foodexp", x=["income"], draws=1500, burn=500))
+    for row in tab(r, "Posterior of the coefficients")["rows"]:
+        if row[1] == "income":
+            fq = sm.QuantReg(d.foodexp, sm.add_constant(d.income)).fit(q=float(row[0]), max_iter=5000).params["income"]
+            assert row[2] == pytest.approx(fq, abs=0.03)
+
+
+def test_bayes_qr_recovers_location_scale_truth():
+    """y = 1 + 2x + (0.5 + x) e: the quantile-tau slope is 2 + z_tau and the intercept 1 + 0.5 z_tau."""
+    r = bayes_more.bayes_qr(_qr_data(n=800), dict(y="y", x=["x"], quantiles="0.1, 0.5, 0.9", draws=1500, burn=500))
+    for row in tab(r, "Posterior of the coefficients")["rows"]:
+        z = stats.norm.ppf(float(row[0])); truth = 2 + z if row[1] == "x" else 1 + 0.5 * z
+        assert abs(row[2] - truth) < 3 * row[3] + 0.1
+
+
+def test_bayes_qr_heterogeneity_detected_and_absent():
+    r = bayes_more.bayes_qr(_qr_data(n=500), dict(y="y", x=["x"], quantiles="0.1, 0.9", draws=800, burn=400))
+    row = tab(r, "Does the effect differ")["rows"][0]; assert row[4] > 0 and row[6] > 0.99                        # lower 2.5% bound above zero
+    rng = np.random.default_rng(8); x = rng.normal(size=500); d = pd.DataFrame(dict(y=1 + x + rng.normal(size=500), x=x))
+    r0 = bayes_more.bayes_qr(d, dict(y="y", x=["x"], quantiles="0.1, 0.9", draws=800, burn=400))
+    row0 = tab(r0, "Does the effect differ")["rows"][0]; assert row0[4] < 0 < row0[5]
+
+
+def test_bayes_qr_calibration_and_convergence():
+    r = bayes_more.bayes_qr(_qr_data(), dict(y="y", x=["x"], draws=800, burn=400))
+    for row in tab(r, "Calibration")["rows"]: assert row[2] < 0.04
+    assert S(r)["Largest R-hat"] < 1.1
+
+
+def test_bayes_qr_monte_carlo_coverage():
+    """95% intervals for the median slope cover the truth in most replications once the draws are rescaled to the sandwich covariance."""
+    cover = 0; R = 24
+    for s in range(R):
+        rng = np.random.default_rng(300 + s); x = rng.normal(size=150); y = 1 + 1.5 * x + rng.standard_t(5, 150)
+        r = bayes_more.bayes_qr(pd.DataFrame(dict(y=y, x=x)), dict(y="y", x=["x"], quantiles="0.5", draws=400, burn=200, seed=s))
+        row = [q for q in tab(r, "Posterior of the coefficients")["rows"] if q[1] == "x"][0]; cover += row[4] <= 1.5 <= row[5]
+    assert cover / R >= 0.85
+
+
+def test_bayes_qr_adjustment_widens_and_matches_bootstrap():
+    import statsmodels.api as sm
+    d = pd.read_csv(os.path.join(BX, "engel.csv")); sp = dict(y="foodexp", x=["income"], quantiles="0.5", draws=1500, burn=500)
+    sd = lambda r: next(q[3] for q in tab(r, "Posterior of the coefficients")["rows"] if q[1] == "income")
+    a, raw = sd(bayes_more.bayes_qr(d, sp)), sd(bayes_more.bayes_qr(d, dict(sp, adjust="no")))
+    assert a > 1.5 * raw
+    X = sm.add_constant(d.income.values); y = d.foodexp.values; rng = np.random.default_rng(0)
+    bs = [sm.QuantReg(y[i], X[i]).fit(q=0.5, max_iter=5000).params[1] for i in (rng.integers(0, len(d), len(d)) for _ in range(200))]
+    assert a == pytest.approx(np.std(bs), rel=0.4)
+
+
+def test_bayes_qr_errors():
+    d = _qr_data(60)
+    for spec, msg in [(dict(y="y", x=["x"], quantiles="0, 0.5"), "strictly"), (dict(y="y", x=["x"], quantiles="a"), "numbers"), (dict(y="y", x=["x"], prior_sd=0), "positive"),
+                      (dict(y="y", x=["y"]), "more than one role")]:
+        with pytest.raises(OESError, match=msg): bayes_more.bayes_qr(d, spec)
+    with pytest.raises(OESError, match="constant"): bayes_more.bayes_qr(d.assign(x=1.0), dict(y="y", x=["x"]))
+    with pytest.raises(OESError, match="Too few"): bayes_more.bayes_qr(d.head(8), dict(y="y", x=["x"]))
+
+
+# ---------------------------------------------------------------------------------------- Bayesian structural time series
+def _ll_data(n=150, se=1.0, sl=0.3, seed=0):
+    rng = np.random.default_rng(seed); mu = np.cumsum(rng.normal(scale=sl, size=n)) + 10
+    return pd.DataFrame(dict(y=mu + rng.normal(scale=se, size=n))), mu
+
+
+def test_bsts_registered():
+    m = o.BY_ID["bsts"]; assert m["group"] == "Bayesian" and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+def test_bsts_nile_matches_kalman_mle():
+    """Posterior variance components and level against the Kalman-filter maximum likelihood (Durbin and Koopman: 15099 and 1469)."""
+    import statsmodels.api as sm
+    d = pd.read_csv(os.path.join(BX, "nile.csv")); r = bayes_more.bsts(d, dict(y="flow", time="year", draws=2500, burn=800))
+    rows = {x[0]: x for x in tab(r, "Posterior of the standard deviations")["rows"]}
+    assert rows["Irregular (observation noise)"][1] == pytest.approx(np.sqrt(15099), rel=0.12)
+    assert rows["Level"][1] == pytest.approx(np.sqrt(1469), rel=0.4) and rows["Level"][3] < np.sqrt(1469) < rows["Level"][4]
+    ml = sm.tsa.UnobservedComponents(d.flow, "local level").fit(disp=0)
+    assert abs(ml.smoothed_state[0][-1] - tab(r, "States")["rows"][0][1]) < 35
+
+
+def test_bsts_level_recovers_truth_and_coverage():
+    cov = []
+    for s in range(12):
+        d, mu = _ll_data(seed=s); r = bayes_more.bsts(d, dict(y="y", draws=500, burn=250, seed=s, prior_scale=0.1))
+        last = tab(r, "States")["rows"][0]; cov.append(last[3] <= mu[-1] <= last[4])
+    assert np.mean(cov) >= 0.75
+    est = []
+    for s in range(6):
+        d, mu = _ll_data(seed=40 + s); r = bayes_more.bsts(d, dict(y="y", draws=500, burn=250, prior_scale=0.1, seed=s))
+        est.append([x for x in tab(r, "Posterior of the standard deviations")["rows"] if x[0].startswith("Irregular")][0][1])
+    assert np.mean(est) == pytest.approx(1.0, abs=0.12)
+
+
+def test_bsts_seasonal_recovered_and_forecast_calibrated():
+    rng = np.random.default_rng(2); T = 120; pat = np.tile([3, 1, -1, -3.0], T // 4)
+    y = 0.05 * np.arange(T) + pat + rng.normal(scale=0.5, size=T)
+    d = pd.DataFrame(dict(y=y[:100])); r = bayes_more.bsts(d, dict(y="y", trend="trend", seasonal=4, horizon=20, draws=600, burn=300))
+    sea = tab(r, "Seasonal effects")["rows"]; est = np.array([row[1] for row in sea])
+    assert np.allclose(est, pat[96:100], atol=0.6)
+    fc = tab(r, "Forecast")["rows"]; inside = np.mean([row[3] <= y[100 + i] <= row[4] for i, row in enumerate(fc)])
+    assert inside >= 0.8
+
+
+def test_bsts_missing_values_filled_in():
+    d, mu = _ll_data(n=100, seed=5); d.loc[40:49, "y"] = np.nan
+    r = bayes_more.bsts(d, dict(y="y", draws=500, burn=250, prior_scale=0.1)); assert S(r)["Missing values filled in"] == 10
+    ch = r["charts"][0]; lvl = np.array(ch["series"][1]["y"], float); lo = np.array(ch["band"]["lo"], float); hi = np.array(ch["band"]["hi"], float)
+    assert (lo[40:50] <= mu[40:50] + 1e-9).mean() > 0.7 and (mu[40:50] <= hi[40:50] + 1e-9).mean() > 0.7
+    assert (hi[40:50] - lo[40:50]).mean() > (hi[:40] - lo[:40]).mean()                      # wider where there is no data
+
+
+def test_bsts_regression_coefficient():
+    rng = np.random.default_rng(9); n = 200; x = rng.normal(size=n); mu = np.cumsum(rng.normal(scale=0.1, size=n))
+    d = pd.DataFrame(dict(y=mu + 2.0 * x + rng.normal(scale=0.5, size=n), x=x))
+    r = bayes_more.bsts(d, dict(y="y", x=["x"], draws=500, burn=250, prior_scale=0.1)); row = [q for q in tab(r, "States")["rows"] if q[0].startswith("Coefficient")][0]
+    assert abs(row[1] - 2.0) < 3 * row[2]
+
+
+def test_bsts_errors():
+    d, _ = _ll_data(n=60)
+    for spec, msg in [(dict(y="y", trend="zz"), "Choose the trend"), (dict(y="y", seasonal=1), "0 \\(none\\)"), (dict(y="y", prior_scale=0), "positive"),
+                      (dict(y="y", horizon=500), "Forecast horizon"), (dict(y="y", seasonal=40), "Too few")]:
+        with pytest.raises(OESError, match=msg): bayes_more.bsts(d, spec)
+    with pytest.raises(OESError, match="constant"): bayes_more.bsts(d.assign(y=3.0), dict(y="y"))
+    with pytest.raises(OESError, match="Forecasts need"): bayes_more.bsts(d.assign(x=np.arange(60.0)), dict(y="y", x=["x"], horizon=3))
+    with pytest.raises(OESError, match="Column"): bayes_more.bsts(d, dict(y="zz"))
+
+
+# ---------------------------------------------------------------------------------------- Bayesian count regression
+def _count_data(n=800, alpha=0.0, seed=0, b=(0.5, 0.4, -0.3)):
+    rng = np.random.default_rng(seed); x1, x2 = rng.normal(size=n), rng.normal(size=n)
+    mu = np.exp(b[0] + b[1] * x1 + b[2] * x2)
+    y = rng.poisson(mu) if alpha == 0 else rng.poisson(rng.gamma(1 / alpha, mu * alpha))
+    return pd.DataFrame(dict(y=y, x1=x1, x2=x2))
+
+
+def test_bayes_count_registered():
+    m = o.BY_ID["bayes_count"]; assert m["group"] == "Bayesian" and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+def test_bayes_count_matches_maximum_likelihood():
+    import statsmodels.api as sm
+    d = _count_data(alpha=0.5, seed=2)
+    r = bayes_more.bayes_count(d, dict(y="y", x=["x1", "x2"], draws=1500, burn=500)); rows = {x[0]: x for x in tab(r, "Posterior of the coefficients")["rows"]}
+    ml = sm.NegativeBinomial(d.y, sm.add_constant(d[["x1", "x2"]])).fit(disp=0)
+    for j, v in enumerate(["const", "x1", "x2"]): assert rows[v][1] == pytest.approx(ml.params.iloc[j], abs=0.04)
+    p = bayes_more.bayes_count(d, dict(y="y", x=["x1", "x2"], family="poisson", draws=1500, burn=500))
+    gl = sm.GLM(d.y, sm.add_constant(d[["x1", "x2"]]), family=sm.families.Poisson()).fit()
+    for j, v in enumerate(["const", "x1", "x2"]): assert {x[0]: x for x in tab(p, "Posterior of the coefficients")["rows"]}[v][1] == pytest.approx(gl.params.iloc[j], abs=0.03)
+
+
+def test_bayes_count_recovers_truth_and_dispersion():
+    r = bayes_more.bayes_count(_count_data(n=2000, alpha=0.6, seed=4), dict(y="y", x=["x1", "x2"], draws=1500, burn=500))
+    rows = {x[0]: x for x in tab(r, "Posterior of the coefficients")["rows"]}
+    for v, t in (("const", 0.5), ("x1", 0.4), ("x2", -0.3)): assert abs(rows[v][1] - t) < 3.5 * rows[v][2] + 0.01
+    a = tab(r, "Overdispersion")["rows"][0]; assert a[3] < 0.6 < a[4]
+
+
+def test_bayes_count_waic_and_predictive_check_choose_the_right_family():
+    r = bayes_more.bayes_count(_count_data(n=1000, alpha=1.0, seed=6), dict(y="y", x=["x1", "x2"], draws=800, burn=300))
+    cmp_ = tab(r, "Model comparison")["rows"]; assert cmp_[0][3] < -10 and cmp_[1][3] == 0                      # Poisson is far worse
+    pc = tab(r, "Posterior predictive check")["rows"]; assert pc[0][6] < 0.01 and pc[1][6] > 0.05                 # Poisson cannot reproduce the variance
+    r0 = bayes_more.bayes_count(_count_data(n=1000, alpha=0.0, seed=7), dict(y="y", x=["x1", "x2"], draws=800, burn=300))
+    assert tab(r0, "Posterior predictive check")["rows"][0][6] > 0.01
+    assert tab(r0, "Overdispersion")["rows"][0][3] < 0.1
+
+
+def test_bayes_count_exposure_and_marginal_effects():
+    rng = np.random.default_rng(8); n = 1500; x = rng.normal(size=n); expo = rng.uniform(0.5, 4, n); mu = expo * np.exp(0.2 + 0.5 * x)
+    d = pd.DataFrame(dict(y=rng.poisson(mu), x=x, e=expo))
+    r = bayes_more.bayes_count(d, dict(y="y", x=["x"], exposure="e", family="poisson", draws=800, burn=300)); rows = {q[0]: q for q in tab(r, "Posterior of the coefficients")["rows"]}
+    assert abs(rows["x"][1] - 0.5) < 3.5 * rows["x"][2] and abs(rows["const"][1] - 0.2) < 3.5 * rows["const"][2]
+    ame = tab(r, "Average marginal effects")["rows"][0]; assert ame[3] <= (mu * 0.5).mean() <= ame[4]
+
+
+def test_bayes_count_coverage():
+    cover = 0; R = 20
+    for s in range(R):
+        r = bayes_more.bayes_count(_count_data(n=300, alpha=0.5, seed=100 + s), dict(y="y", x=["x1", "x2"], draws=400, burn=200, seed=s))
+        row = {x[0]: x for x in tab(r, "Posterior of the coefficients")["rows"]}["x1"]; cover += row[4] <= np.exp(0.4) <= row[5]
+    assert cover / R >= 0.8
+
+
+def test_bayes_count_errors():
+    d = _count_data(n=100)
+    for spec, msg in [(dict(y="y", x=["x1"], family="zz"), "Choose the family"), (dict(y="y", x=["x1"], prior_sd=0), "positive"), (dict(y="y", x=["y"]), "more than one role")]:
+        with pytest.raises(OESError, match=msg): bayes_more.bayes_count(d, spec)
+    with pytest.raises(OESError, match="count"): bayes_more.bayes_count(d.assign(y=d.y + 0.5), dict(y="y", x=["x1"]))
+    with pytest.raises(OESError, match="count"): bayes_more.bayes_count(d.assign(y=-d.y - 1), dict(y="y", x=["x1"]))
+    with pytest.raises(OESError, match="zero everywhere"): bayes_more.bayes_count(d.assign(y=0), dict(y="y", x=["x1"]))
+    with pytest.raises(OESError, match="constant"): bayes_more.bayes_count(d.assign(x1=1.0), dict(y="y", x=["x1"]))
+    with pytest.raises(OESError, match="Too few"): bayes_more.bayes_count(d.head(15), dict(y="y", x=["x1", "x2"]))
+    with pytest.raises(OESError, match="exposure"): bayes_more.bayes_count(d.assign(e=0.0), dict(y="y", x=["x1"], exposure="e"))
+
+
+# ---------------------------------------------------------------------------------------- Bayesian Markov-switching regression
+def _ms_data(n=300, mus=(-1.0, 2.0), sig=(1.0, 1.0), p=((0.9, 0.1), (0.15, 0.85)), seed=0, slope=None):
+    rng = np.random.default_rng(seed); s = np.zeros(n, int); x = rng.normal(size=n)
+    for t in range(1, n): s[t] = rng.choice(2, p=p[s[t - 1]])
+    y = np.array(mus)[s] + np.array(sig)[s] * rng.normal(size=n) + (0 if slope is None else slope * x)
+    return pd.DataFrame(dict(t=np.arange(n), y=y, x=x, s=s)), s
+
+
+def test_bayes_ms_registered():
+    m = o.BY_ID["bayes_ms"]; assert m["group"] == "Markov switching" and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+def test_bayes_ms_recovers_regimes_and_transition_matrix():
+    d, s = _ms_data(n=400, seed=1)
+    r = bayes_more.bayes_ms(d, dict(y="y", time="t", switching_variance="no", draws=1200, burn=500))
+    rows = [x for x in tab(r, "Posterior of the regime parameters")["rows"] if x[1] == "Intercept"]
+    assert abs(rows[0][2] + 1.0) < 3 * rows[0][3] + 0.05 and abs(rows[1][2] - 2.0) < 3 * rows[1][3] + 0.05
+    pr = {x[0]: x for x in tab(r, "Transition probabilities")["rows"]}
+    assert abs(pr["1 -> 1"][1] - 0.9) < 0.08 and abs(pr["2 -> 2"][1] - 0.85) < 0.1
+    ch = r["charts"][0]; p1 = np.array(ch["series"][0]["y"], float); assert ((p1 > 0.5) == (s == 0)).mean() > 0.93
+    assert S(r)["Smallest effective sample size"] > 150
+
+
+def test_bayes_ms_matches_maximum_likelihood():
+    d, _ = _ms_data(n=400, seed=3)
+    r = bayes_more.bayes_ms(d, dict(y="y", time="t", switching_variance="yes", draws=1200, burn=500))
+    for x in tab(r, "Posterior of the regime parameters")["rows"]:
+        if x[6] != "n/a": assert float(x[2]) == pytest.approx(float(x[6]), abs=0.25)
+
+
+def test_bayes_ms_variance_switching_and_ordering():
+    d, s = _ms_data(n=500, mus=(0.0, 0.0), sig=(0.5, 2.5), seed=5)
+    r = bayes_more.bayes_ms(d, dict(y="y", time="t", switching_variance="yes", order="variance", draws=1200, burn=500))
+    sd = [x for x in tab(r, "Posterior of the regime parameters")["rows"] if x[1] == "Std. deviation"]
+    assert abs(sd[0][2] - 0.5) < 0.2 and abs(sd[1][2] - 2.5) < 0.5
+    p1 = np.array(r["charts"][0]["series"][0]["y"], float); assert ((p1 > 0.5) == (s == 0)).mean() > 0.85
+
+
+def test_bayes_ms_slopes_common_and_switching():
+    d, s = _ms_data(n=400, seed=7, slope=1.5)
+    r = bayes_more.bayes_ms(d, dict(y="y", x=["x"], time="t", switching_variance="no", draws=1000, burn=400))
+    sl = [x for x in tab(r, "Posterior of the regime parameters")["rows"] if x[1] == "x"]; assert len(sl) == 1 and abs(sl[0][2] - 1.5) < 3 * sl[0][3] + 0.05
+    r2 = bayes_more.bayes_ms(d, dict(y="y", x=["x"], time="t", switching_slopes="yes", switching_variance="no", draws=800, burn=400))
+    assert len([x for x in tab(r2, "Posterior of the regime parameters")["rows"] if x[1] == "x"]) == 2
+
+
+def test_bayes_ms_no_false_regimes_in_noise_and_coverage():
+    rng = np.random.default_rng(11); d = pd.DataFrame(dict(t=np.arange(200), y=rng.normal(size=200)))
+    r = bayes_more.bayes_ms(d, dict(y="y", time="t", switching_variance="no", draws=800, burn=400))
+    rows = [x for x in tab(r, "Posterior of the regime parameters")["rows"] if x[1] == "Intercept"]; assert rows[1][4] - rows[0][5] < 1.0 and abs(rows[1][2] - rows[0][2]) < 1.5
+    hit = 0; R = 12
+    for k in range(R):
+        dd, _ = _ms_data(n=250, seed=50 + k); rr = bayes_more.bayes_ms(dd, dict(y="y", time="t", switching_variance="no", draws=500, burn=300, seed=k))
+        a = [x for x in tab(rr, "Posterior of the regime parameters")["rows"] if x[1] == "Intercept"]; hit += (a[0][4] <= -1 <= a[0][5]) and (a[1][4] <= 2 <= a[1][5])
+    assert hit / R >= 0.75
+
+
+def test_bayes_ms_errors():
+    d, _ = _ms_data(n=100)
+    for spec, msg in [(dict(y="y", order="zz"), "Order the regimes"), (dict(y="y", order="variance", switching_variance="no"), "switching variance"), (dict(y="y", prior_sd=0), "positive"),
+                      (dict(y="y", switching_slopes="yes"), "no slopes"), (dict(y="y", regimes=7), "Number of regimes"), (dict(y="y", ar=3, x=["x"]), "Too few")]:
+        with pytest.raises(OESError, match=msg): bayes_more.bayes_ms(d if spec.get("ar") is None else d.head(50), spec)
+    with pytest.raises(OESError, match="constant"): bayes_more.bayes_ms(d.assign(y=1.0), dict(y="y"))
+    with pytest.raises(OESError, match="not found"): bayes_more.bayes_ms(d, dict(y="y", reference="zz"))
+
+
+# ---------------------------------------------------------------- Markov chain transition model (model 48)
+def _chain(P, n, seed, units=1):
+    rng = np.random.default_rng(seed)
+    K = len(P)
+    rows = []
+    for u in range(units):
+        s = rng.integers(K)
+        for t in range(n):
+            rows.append((u, t, s))
+            s = rng.choice(K, p=P[s])
+    return pd.DataFrame(rows, columns=["u", "t", "s"])
+
+
+def _tab(r, title):
+    return next(t for t in r["tables"] if t["title"].startswith(title))
+
+
+def test_mc_posterior_mean_is_dirichlet_formula():
+    df = _chain([[.9, .1], [.3, .7]], 400, 1)
+    r = o.run("bayes_mc", df.to_csv(index=False), dict(state="s", time="t"))
+    tr = _tab(r, "Transition")["rows"]
+    N = np.zeros((2, 2))
+    v = df["s"].to_numpy()
+    for a, b in zip(v[:-1], v[1:]):
+        N[a, b] += 1
+    A = N + 1
+    assert abs(tr[0][4] - A[0, 0] / A[0].sum()) < 0.002
+    assert abs(tr[3][3] - N[1, 1] / N[1].sum()) < 1e-6
+
+
+def test_mc_stationary_and_first_passage_exact():
+    P = [[.9, .1], [.3, .7]]
+    df = _chain(P, 3000, 2)
+    r = o.run("bayes_mc", df.to_csv(index=False), dict(state="s", time="t"))
+    st = _tab(r, "Stationary")["rows"]
+    assert abs(st[0][2] - 0.75) < 0.05 and abs(st[1][2] - 0.25) < 0.05
+    assert abs(st[0][6] - 10) < 2.0 and abs(st[1][6] - 1 / 0.3) < 0.6
+    fp = _tab(r, "Mean first")["rows"]
+    assert abs(float(fp[0][2].split()[0]) - 10) < 2.0         # 0 -> 1 takes 1/0.1 periods
+    assert abs(float(fp[1][1].split()[0]) - 1 / 0.3) < 0.6
+
+
+def test_mc_three_states_known_stationary():
+    P = np.array([[.8, .15, .05], [.1, .8, .1], [.05, .25, .7]])
+    w, v = np.linalg.eig(P.T)
+    pi = np.real(v[:, np.argmax(np.real(w))]); pi /= pi.sum()
+    df = _chain(P, 600, 3, units=10)
+    r = o.run("bayes_mc", df.to_csv(index=False), dict(state="s", id="u", time="t"))
+    st = _tab(r, "Stationary")["rows"]
+    for i in range(3):
+        assert st[i][3] - 0.02 <= pi[i] <= st[i][4] + 0.02
+
+
+def test_mc_coverage_of_stay_probability():
+    hit = 0
+    for k in range(20):
+        r = o.run("bayes_mc", _chain([[.85, .15], [.25, .75]], 300, 100 + k).to_csv(index=False), dict(state="s", time="t", draws=800))
+        tr = _tab(r, "Transition")["rows"]
+        hit += tr[0][6] <= .85 <= tr[0][7]
+    assert hit >= 16
+
+
+def test_mc_tests_detect_dependence_and_nonhomogeneity():
+    df = _chain([[.9, .1], [.3, .7]], 1000, 4)
+    r = o.run("bayes_mc", df.to_csv(index=False), dict(state="s", time="t"))
+    ts = _tab(r, "Specification")["rows"]
+    assert ts[0][3] < 1e-6 and ts[1][3] > 0.001
+    a = _chain([[.9, .1], [.3, .7]], 500, 5); b = _chain([[.5, .5], [.5, .5]], 500, 6); b["t"] += 500
+    r = o.run("bayes_mc", pd.concat([a, b]).to_csv(index=False), dict(state="s", time="t"))
+    assert _tab(r, "Specification")["rows"][1][3] < 1e-6
+
+
+def test_mc_iid_chain_not_flagged():
+    rng = np.random.default_rng(7)
+    df = pd.DataFrame(dict(t=np.arange(1500), s=rng.integers(0, 3, 1500)))
+    r = o.run("bayes_mc", df.to_csv(index=False), dict(state="s", time="t"))
+    assert _tab(r, "Specification")["rows"][0][3] > 0.001
+
+
+def test_mc_continuous_state_cut_into_bins():
+    rng = np.random.default_rng(8)
+    x = np.cumsum(rng.normal(size=800))
+    r = o.run("bayes_mc", pd.DataFrame(dict(t=np.arange(800), x=x)).to_csv(index=False), dict(state="x", time="t", bins=4))
+    assert len(_tab(r, "Stationary")["rows"]) == 4 and abs(sum(row[2] for row in _tab(r, "Stationary")["rows"]) - 1) < 1e-4
+
+
+def test_mc_errors():
+    df = pd.DataFrame(dict(t=range(30), s=[0] * 30))
+    for sp, msg in [(dict(state="s", time="t"), "only one value"), (dict(state="zz", time="t"), "not found")]:
+        r = o.run("bayes_mc", df.to_csv(index=False), sp)
+        assert msg in r["error"]
+    r = o.run("bayes_mc", pd.DataFrame(dict(t=range(8), s=[0, 1] * 4)).to_csv(index=False), dict(state="s", time="t"))
+    assert "transitions" in r["error"]

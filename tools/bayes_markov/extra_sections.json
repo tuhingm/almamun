@@ -1,0 +1,182 @@
+{
+ "finance": {
+  "entries": [
+   {
+    "slug": "capm",
+    "situation": "Do a market factor, or several, explain the returns of stocks, funds or portfolios, and is there any alpha left?",
+    "method": "Factor-pricing regressions and the GRS test",
+    "data": [
+     "oes/examples/capm.csv"
+    ]
+   },
+   {
+    "slug": "var-es",
+    "situation": "How much can a portfolio lose on a bad day, and was the risk model right?",
+    "method": "Value at risk and expected shortfall",
+    "data": [
+     "oes/examples/crspday.csv"
+    ]
+   },
+   {
+    "slug": "dcc",
+    "situation": "Do the correlations between assets change over time, and do they rise in a crisis?",
+    "method": "DCC-GARCH",
+    "data": [
+     "oes/examples/crspday.csv"
+    ]
+   },
+   {
+    "slug": "portfolio",
+    "situation": "How should I split money across assets, and does the optimised portfolio really beat equal weights out of sample?",
+    "method": "Portfolio optimisation",
+    "data": [
+     "oes/examples/eustock.csv"
+    ]
+   },
+   {
+    "slug": "volatility-forecasts",
+    "situation": "Which volatility model forecasts best, and is the difference statistically meaningful?",
+    "method": "Volatility forecast evaluation",
+    "data": [
+     "oes/examples/crspday.csv"
+    ]
+   },
+   {
+    "slug": "bubbles",
+    "situation": "Are prices growing faster than a random walk, and when did the explosive episodes start and end?",
+    "method": "Bubble tests (SADF and GSADF)",
+    "data": [
+     "oes/examples/shiller.csv"
+    ]
+   },
+   {
+    "slug": "yield-curve",
+    "situation": "How do I summarise the yield curve with a few factors and forecast it?",
+    "method": "Nelson-Siegel yield curve",
+    "data": [
+     "oes/examples/irates.csv"
+    ]
+   }
+  ]
+ },
+ "productivity": {
+  "entries": [
+   {
+    "slug": "stochastic-frontier",
+    "situation": "How inefficient are firms or farms relative to the best practice, once luck and measurement error are separated from inefficiency?",
+    "method": "Stochastic frontier analysis",
+    "data": [
+     "oes/examples/ricefarms.csv"
+    ]
+   },
+   {
+    "slug": "dea",
+    "situation": "Which units (firms, regions, hospitals, schools) do best with their inputs, and which peers should the others learn from?",
+    "method": "Data envelopment analysis",
+    "data": [
+     "oes/examples/produc_1986.csv"
+    ]
+   },
+   {
+    "slug": "malmquist",
+    "situation": "Did productivity grow over time, and was it catch-up to the frontier or a shift of the frontier itself?",
+    "method": "Malmquist productivity index",
+    "data": [
+     "oes/examples/produc.csv"
+    ]
+   },
+   {
+    "slug": "growth-regressions",
+    "situation": "Do poor countries catch up with rich ones, and does the Solow model explain income differences across countries?",
+    "method": "Growth regressions (Solow and convergence)",
+    "data": [
+     "oes/examples/growthdj.csv"
+    ]
+   },
+   {
+    "slug": "production-cost-function",
+    "situation": "What are the output elasticities, the returns to scale and the cost structure of an industry?",
+    "method": "Production and cost functions",
+    "data": [
+     "oes/examples/electricity1970.csv"
+    ]
+   },
+   {
+    "slug": "spatial-regression",
+    "situation": "Do neighbouring areas resemble each other, and do outcomes spill over from one area to the next?",
+    "method": "Spatial regression (SAR and SEM)",
+    "data": [
+     "oes/examples/columbus.csv"
+    ]
+   }
+  ]
+ },
+ "nonparam": {
+  "entries": [
+   {
+    "slug": "kernel-regression",
+    "situation": "You do not know the shape of the relation between an outcome and a regressor and want to estimate it without assuming a functional form",
+    "method": "Kernel regression",
+    "data": [
+     "oes/examples/cps71.csv"
+    ]
+   },
+   {
+    "slug": "partially-linear",
+    "situation": "You want the effect of some regressors in a linear way while letting one control enter in an unknown, smooth way",
+    "method": "Partially linear model",
+    "data": [
+     "oes/examples/engel95.csv"
+    ]
+   },
+   {
+    "slug": "splines",
+    "situation": "You want a smooth curve through noisy data, with the smoothness chosen from the data and a test of whether a straight line would do",
+    "method": "Penalised splines",
+    "data": [
+     "oes/examples/mcycle.csv"
+    ]
+   },
+   {
+    "slug": "robust-regression",
+    "situation": "A few observations may be outliers or high-leverage points and you want estimates that they cannot move",
+    "method": "Robust regression",
+    "data": [
+     "oes/examples/hills.csv"
+    ]
+   },
+   {
+    "slug": "wild-cluster-bootstrap",
+    "situation": "Errors are correlated within groups, and with few groups the usual cluster-robust test is unreliable",
+    "method": "Cluster-robust inference and the wild bootstrap",
+    "data": [
+     "oes/examples/petersencl.csv"
+    ]
+   },
+   {
+    "slug": "kernel-density",
+    "situation": "You want to see the shape of a distribution, including whether it has more than one mode, without assuming a family",
+    "method": "Kernel density estimation",
+    "data": [
+     "oes/examples/faithful.csv"
+    ]
+   },
+   {
+    "slug": "multiple-testing",
+    "situation": "You run many tests at once and want to control the false discoveries among the ones you report",
+    "method": "Multiple testing and false discovery rate",
+    "data": [
+     "oes/examples/coralpval.csv"
+    ]
+   },
+   {
+    "slug": "extreme-values",
+    "situation": "You care about the far tail of a distribution (large losses, floods, claims) and need probabilities and levels beyond most of the data",
+    "method": "Extreme value theory",
+    "data": [
+     "oes/examples/danish.csv"
+    ]
+   }
+  ]
+ }
+}

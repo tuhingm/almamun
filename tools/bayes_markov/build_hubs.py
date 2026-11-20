@@ -62,7 +62,28 @@ HUBS = {
                ("A yes/no outcome with a regressor that is correlated with the error and a valid instrument", "IV probit", "iv-probit"),
                ("People choosing one option among several with prices and attributes (travel mode, brand, site)", "Conditional and mixed logit", "conditional-mixed-logit")],
         other=("Your outcome is a continuous variable observed over time or across units?", "Use the <a href=\"../time-series-guide/index.html\">Time-Series Guide</a> or the <a href=\"../panel-data-guide/index.html\">Panel-Data Guide</a>.")),
+    "finance": dict(
+        title="Which finance model fits your question?",
+        lead="Finance questions are about returns, risk and prices: are returns explained by the market, how much can a portfolio lose, how volatile and how correlated are assets, is there a bubble, what does the yield curve say. "
+             "Find your question in the table, then follow the guide: each takes a real dataset through the model, tests, diagnostics and the text for the paper.",
+        table=[], other=("Your question is about hidden regimes in a series?", "Use the <a href=\"../markov-guide/index.html\">Markov-Switching Guide</a>.")),
+    "productivity": dict(
+        title="Which productivity or spatial model fits your data?",
+        lead="Productivity analysis asks how much output firms, farms or regions get from their inputs and why some get more: frontiers, efficiency scores, TFP growth, growth regressions, production and cost functions, and spatial spillovers. "
+             "Find your question in the table, then follow the guide: each takes a real dataset through the model, tests, diagnostics and the text for the paper.",
+        table=[], other=("Your data are a panel of firms or countries with a causal question?", "Use the <a href=\"../panel-data-guide/index.html\">Panel-Data Guide</a>.")),
+    "nonparam": dict(
+        title="Which nonparametric or robust method fits your data?",
+        lead="When you do not want to assume a functional form, or when outliers, clusters or heavy tails make the usual formulas unreliable, these methods let the data speak: kernel and spline regression, partially linear models, robust regression, the wild bootstrap, density estimation, multiple testing and extreme values. "
+             "Find your problem in the table, then follow the guide: each takes a real dataset through the method, tests, diagnostics and the text for the paper.",
+        table=[], other=("You want to predict, not to describe a relationship?", "Use the <a href=\"../ml-guide/index.html\">Machine Learning Guide</a>.")),
 }
+
+import json as _json
+_EX = HERE / "extra_sections.json"
+if _EX.exists():
+    for _k, _v in _json.loads(_EX.read_text()).items():
+        HUBS[_k]["table"] = list(HUBS[_k]["table"]) + [(e["situation"], e["method"], e["slug"]) for e in _v["entries"]]
 
 CSS = """
 .hubtab{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:13.5px;margin:12px 0 8px}

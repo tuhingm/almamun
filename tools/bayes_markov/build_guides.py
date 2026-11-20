@@ -21,15 +21,18 @@ from build_courses import md_to_html  # noqa: E402
 
 SECTIONS = {
     "bayesian": dict(folder="bayesian-guide", name="Bayesian Research Guide", short="Bayesian Guide",
-                     order=["bvar", "bayes-reg", "favar", "steady-state", "panel-var", "tvp-var", "sv-var", "mixed-frequency", "threshold-var", "blp", "sign-bvar", "hier-panel", "bma", "bayes-logit", "bayes-shrinkage", "change-points"],
+                     order=["bvar", "bayes-reg", "favar", "steady-state", "panel-var", "tvp-var", "sv-var", "mixed-frequency", "threshold-var", "blp", "sign-bvar", "hier-panel", "bma", "bayes-logit", "bayes-shrinkage", "change-points", "quantile-regression", "structural-time-series", "count-regression"],
                      data=["time-series-guide/examples/money.csv", "oes/examples/us_macro.csv", "oes/examples/mixed_frequency.csv",
-                           "panel-data-guide/examples/garrett.csv", "ml-guide/examples/wage2.csv", "microeconometrics-guide/examples/mroz.csv"]),
+                           "panel-data-guide/examples/garrett.csv", "ml-guide/examples/wage2.csv", "microeconometrics-guide/examples/mroz.csv", "microeconometrics-guide/examples/doctor_visits.csv", "microeconometrics-guide/examples/arrests.csv"]),
     "markov": dict(folder="markov-guide", name="Markov-Switching Research Guide", short="Markov Guide",
-                   order=["ms-ar", "ms-regression", "ms-var", "ms-panel-var", "ms-tvtp"],
+                   order=["ms-ar", "ms-regression", "ms-var", "ms-panel-var", "ms-tvtp", "bayesian-ms", "markov-chain"],
                    data=["oes/examples/hamilton_gnp.csv", "oes/examples/fedfunds.csv", "oes/examples/us_macro.csv",
-                         "panel-data-guide/examples/garrett.csv"]),
+                         "panel-data-guide/examples/garrett.csv", "microeconometrics-guide/examples/wagepan_union.csv"]),
     "micro": dict(folder="microeconometrics-guide", name="Microeconometrics Research Guide", short="Microeconometrics Guide",
                   order=["logit-probit", "ordered-logit-probit", "multinomial-logit", "tobit", "heckman", "count-models", "zero-inflated-hurdle", "glm-fractional", "systems-sur-3sls", "panel-logit-probit", "iv-probit", "conditional-mixed-logit"], data=[]),
+    "finance": dict(folder="finance-guide", name="Finance Research Guide", short="Finance Guide", order=[], data=[]),
+    "productivity": dict(folder="productivity-guide", name="Productivity and Spatial Research Guide", short="Productivity Guide", order=[], data=[]),
+    "nonparam": dict(folder="nonparametric-guide", name="Nonparametric and Robust Research Guide", short="Nonparametric Guide", order=[], data=[]),
     "causal": dict(folder="causal-inference-guide", src="tools/causal_selector/guides", name="Causal Inference Research Guide", short="Causal Guide",
                    order=['did', 'staggered', 'gsc', 'scm', 'its', 'rdd', 'iv', 'eventstudy', 'sdid', 'matching', 'bartik', 'weak-iv', 'experiments', 'mediation', 'lee-bounds', 'quantile-effects'],
                    static={"did": "DiD", "staggered": "Staggered DiD", "gsc": "GSC", "scm": "Synthetic control", "its": "ITS", "rdd": "RDD", "iv": "IV", "eventstudy": "Event study", "sdid": "Synthetic DiD", "matching": "Matching / IPW / DR", "bartik": "Shift-share IV"},
@@ -86,6 +89,15 @@ def run_blocks(out, slug, body):
     finally:
         os.chdir(cwd)
     return body, cells
+
+
+# sections that grow model by model: tools/bayes_markov/extra_sections.json (written by tools/add_guide_entry.py)
+import json as _json
+_EX = HERE / "extra_sections.json"
+if _EX.exists():
+    for _k, _v in _json.loads(_EX.read_text()).items():
+        SECTIONS[_k]["order"] = SECTIONS[_k]["order"] + [e["slug"] for e in _v["entries"] if e["slug"] not in SECTIONS[_k]["order"]]
+        SECTIONS[_k]["data"] = SECTIONS[_k]["data"] + [d for e in _v["entries"] for d in e.get("data", []) if d not in SECTIONS[_k]["data"]]
 
 
 def gdir(key):

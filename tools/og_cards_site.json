@@ -42,6 +42,12 @@
   "sub": "A series or a relationship that may have shifted at unknown dates, and you want probabilities for the number and the dates of the…"
  },
  {
+  "out": "assets/og/bayesian-guide/count-regression.jpg",
+  "kicker": "Bayesian Guide · Model guide",
+  "title": "Bayesian Count Regression",
+  "sub": "An outcome that counts events (visits, arrests, patents, accidents) where you want rate ratios with intervals, a check that the…"
+ },
+ {
   "out": "assets/og/bayesian-guide/favar.jpg",
   "kicker": "Bayesian Guide · Model guide",
   "title": "Factor-Augmented VAR (FAVAR)",
@@ -72,6 +78,12 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/bayesian-guide/quantile-regression.jpg",
+  "kicker": "Bayesian Guide · Model guide",
+  "title": "Bayesian Quantile Regression",
+  "sub": "The effect of a regressor may differ between low and high values of the outcome, and you want probabilities, not only a median…"
+ },
+ {
   "out": "assets/og/bayesian-guide/sign-bvar.jpg",
   "kicker": "Bayesian Guide · Model guide",
   "title": "Sign-Restricted Bayesian VAR",
@@ -82,6 +94,12 @@
   "kicker": "Bayesian Guide · Model guide",
   "title": "Mean-Adjusted (Steady-State) Bayesian VAR",
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
+ },
+ {
+  "out": "assets/og/bayesian-guide/structural-time-series.jpg",
+  "kicker": "Bayesian Guide · Model guide",
+  "title": "Bayesian Structural Time Series",
+  "sub": "A series with a drifting level, a trend or a seasonal pattern that you want to decompose, interpolate over gaps or forecast with…"
  },
  {
   "out": "assets/og/bayesian-guide/sv-var.jpg",
@@ -264,10 +282,70 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Dynare code, real output and sample text."
  },
  {
+  "out": "assets/og/finance-guide/bubbles.jpg",
+  "kicker": "Finance Guide · Model guide",
+  "title": "Explosive Bubble Tests (SADF and GSADF)",
+  "sub": "You want to test whether a price or a price ratio has episodes of explosive growth faster than a random walk, and date the start…"
+ },
+ {
+  "out": "assets/og/finance-guide/capm.jpg",
+  "kicker": "Finance Guide · Model guide",
+  "title": "Factor-Pricing Regressions and the GRS Test",
+  "sub": "You want to know whether a market factor, or several factors, explain the average returns of stocks, industries or funds, and…"
+ },
+ {
+  "out": "assets/og/finance-guide/dcc.jpg",
+  "kicker": "Finance Guide · Model guide",
+  "title": "Dynamic Conditional Correlation (DCC-GARCH)",
+  "sub": "You want to know whether the correlation between assets is constant, how it moves over time, and whether it rises when markets…"
+ },
+ {
+  "out": "assets/og/finance-guide/index.jpg",
+  "kicker": "Finance Guide",
+  "title": "Which finance model fits your question?",
+  "sub": "Factor pricing, value at risk, volatility and correlation, portfolios, bubbles and the yield curve: tests on real data and the text for the paper."
+ },
+ {
+  "out": "assets/og/finance-guide/portfolio.jpg",
+  "kicker": "Finance Guide · Model guide",
+  "title": "Portfolio Optimisation and Out-of-Sample Comparison",
+  "sub": "You must decide how to split money across assets, and want to know whether an optimised portfolio beats equal weights once…"
+ },
+ {
+  "out": "assets/og/finance-guide/var-es.jpg",
+  "kicker": "Finance Guide · Model guide",
+  "title": "Value at Risk and Expected Shortfall",
+  "sub": "You need to say how much a portfolio can lose on a bad day, compare risk models, and show a regulator or a reader that the model…"
+ },
+ {
+  "out": "assets/og/finance-guide/volatility-forecasts.jpg",
+  "kicker": "Finance Guide · Model guide",
+  "title": "Volatility Forecast Evaluation",
+  "sub": "You have several volatility models (GARCH, EWMA, rolling windows) and want to know which forecasts best, and whether the…"
+ },
+ {
+  "out": "assets/og/finance-guide/yield-curve.jpg",
+  "kicker": "Finance Guide · Model guide",
+  "title": "Nelson-Siegel Yield Curve",
+  "sub": "You have yields at several maturities and want to summarise the curve with a few interpretable factors (level, slope, curvature)…"
+ },
+ {
+  "out": "assets/og/markov-guide/bayesian-ms.jpg",
+  "kicker": "Markov-Switching Guide · Model guide",
+  "title": "Bayesian Markov-Switching Regression",
+  "sub": "Hidden regimes (recession and expansion, calm and turbulent, high and low inflation) where you want probabilities for the…"
+ },
+ {
   "out": "assets/og/markov-guide/index.jpg",
   "kicker": "Markov-Switching Guide",
   "title": "Which Markov-switching model fits your data?",
   "sub": "Hamilton's regime model, regression, VAR and panel VAR with hidden regimes: tests, regime dates and the text for the paper."
+ },
+ {
+  "out": "assets/og/markov-guide/markov-chain.jpg",
+  "kicker": "Markov-Switching Guide · Model guide",
+  "title": "Markov Chain Transition Model",
+  "sub": "The state is observed (union member or not, a wage band, a credit rating) and you want transition probabilities, long-run shares…"
  },
  {
   "out": "assets/og/markov-guide/ms-ar.jpg",
@@ -492,6 +570,60 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/nonparametric-guide/extreme-values.jpg",
+  "kicker": "Nonparametric Guide · Model guide",
+  "title": "Extreme Value Theory",
+  "sub": "You care about the far tail of a distribution (large losses, floods, claims) and need probabilities and levels beyond most of the…"
+ },
+ {
+  "out": "assets/og/nonparametric-guide/index.jpg",
+  "kicker": "Nonparametric Guide",
+  "title": "Which nonparametric or robust method fits your data?",
+  "sub": "Kernel and spline regression, partially linear models, robust regression, wild bootstrap, density estimation, multiple testing and extreme values."
+ },
+ {
+  "out": "assets/og/nonparametric-guide/kernel-density.jpg",
+  "kicker": "Nonparametric Guide · Model guide",
+  "title": "Kernel Density Estimation",
+  "sub": "You want to see the shape of a distribution, including whether it has more than one mode, without assuming a family. Step-by-step…"
+ },
+ {
+  "out": "assets/og/nonparametric-guide/kernel-regression.jpg",
+  "kicker": "Nonparametric Guide · Model guide",
+  "title": "Kernel Regression",
+  "sub": "You do not know the shape of the relation between an outcome and a regressor and want to estimate it without assuming a…"
+ },
+ {
+  "out": "assets/og/nonparametric-guide/multiple-testing.jpg",
+  "kicker": "Nonparametric Guide · Model guide",
+  "title": "Multiple Testing and False Discovery Rate",
+  "sub": "You run many tests at once and want to control the false discoveries among the ones you report. Step-by-step guide with Python…"
+ },
+ {
+  "out": "assets/og/nonparametric-guide/partially-linear.jpg",
+  "kicker": "Nonparametric Guide · Model guide",
+  "title": "Partially Linear Model",
+  "sub": "You want the effect of some regressors in a linear way while letting one control enter in an unknown, smooth way. Step-by-step…"
+ },
+ {
+  "out": "assets/og/nonparametric-guide/robust-regression.jpg",
+  "kicker": "Nonparametric Guide · Model guide",
+  "title": "Robust Regression",
+  "sub": "A few observations may be outliers or high-leverage points and you want estimates that they cannot move. Step-by-step guide with…"
+ },
+ {
+  "out": "assets/og/nonparametric-guide/splines.jpg",
+  "kicker": "Nonparametric Guide · Model guide",
+  "title": "Penalised Splines",
+  "sub": "You want a smooth curve through noisy data, with the smoothness chosen from the data and a test of whether a straight line would…"
+ },
+ {
+  "out": "assets/og/nonparametric-guide/wild-cluster-bootstrap.jpg",
+  "kicker": "Nonparametric Guide · Model guide",
+  "title": "Cluster-Robust Inference and the Wild Bootstrap",
+  "sub": "Errors are correlated within groups, and with few groups the usual cluster-robust test is unreliable. Step-by-step guide with…"
+ },
+ {
   "out": "assets/og/panel-data-guide/csardl.jpg",
   "kicker": "Panel Data Guide · Model guide",
   "title": "Cross-Sectionally Augmented ARDL",
@@ -640,5 +772,47 @@
   "kicker": "Panel Data Guide · Model guide",
   "title": "Two-Way Fixed Effects with Clustered Standard Errors",
   "sub": "Unit and time effects are both needed and errors are correlated within units or across units. Step-by-step guide with Python code…"
+ },
+ {
+  "out": "assets/og/productivity-guide/dea.jpg",
+  "kicker": "Productivity Guide · Model guide",
+  "title": "Data Envelopment Analysis",
+  "sub": "You have several inputs and outputs for a set of comparable units and want an efficiency score and a list of peers for each…"
+ },
+ {
+  "out": "assets/og/productivity-guide/growth-regressions.jpg",
+  "kicker": "Productivity Guide · Model guide",
+  "title": "Growth Regressions: Solow and Convergence",
+  "sub": "You have cross-country (or cross-region) data on income, investment, population growth and schooling and want to test the Solow…"
+ },
+ {
+  "out": "assets/og/productivity-guide/index.jpg",
+  "kicker": "Productivity Guide",
+  "title": "Which productivity or spatial model fits your data?",
+  "sub": "Stochastic frontiers, DEA, Malmquist indexes, growth regressions, production and cost functions and spatial models, step by step."
+ },
+ {
+  "out": "assets/og/productivity-guide/malmquist.jpg",
+  "kicker": "Productivity Guide · Model guide",
+  "title": "Malmquist Productivity Index",
+  "sub": "You have a panel of units with inputs and outputs over several periods and want productivity growth split into catch-up to the…"
+ },
+ {
+  "out": "assets/og/productivity-guide/production-cost-function.jpg",
+  "kicker": "Productivity Guide · Model guide",
+  "title": "Production and Cost Functions",
+  "sub": "You want the output elasticities, returns to scale or cost structure of an industry from data on inputs, output or costs.…"
+ },
+ {
+  "out": "assets/og/productivity-guide/spatial-regression.jpg",
+  "kicker": "Productivity Guide · Model guide",
+  "title": "Spatial Regression: Moran's I, Spatial Lag and Spatial Error",
+  "sub": "Your observations are places (neighbourhoods, regions, countries) and you suspect that nearby places are alike or that outcomes…"
+ },
+ {
+  "out": "assets/og/productivity-guide/stochastic-frontier.jpg",
+  "kicker": "Productivity Guide · Model guide",
+  "title": "Stochastic Frontier Analysis",
+  "sub": "You have inputs and output for many firms, farms or plants and want to measure how far each is below the best practice…"
  }
 ]

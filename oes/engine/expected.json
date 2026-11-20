@@ -1672,5 +1672,417 @@
    "label": "Posterior mean number of breaks",
    "value": 1.079
   }
+ },
+ "bayes_qr": {
+  "nobs": 235,
+  "table_index": 0,
+  "table": "Posterior of the coefficients at each quantile",
+  "row": "0.1",
+  "row_index": 0,
+  "col": "Mean",
+  "col_index": 2,
+  "value": 112.700837,
+  "rtol": 0.05,
+  "seconds": 1.7,
+  "summary": {
+   "label": "Largest R-hat",
+   "value": 1.017
+  }
+ },
+ "bsts": {
+  "nobs": 144,
+  "table_index": 0,
+  "table": "Posterior of the standard deviations of the components",
+  "row": "Irregular (observation noise)",
+  "row_index": 0,
+  "col": "Mean",
+  "col_index": 1,
+  "value": 0.012471,
+  "rtol": 0.05,
+  "seconds": 2.5,
+  "summary": {
+   "label": "Posterior mean of the signal-to-noise ratio",
+   "value": 2.373
+  }
+ },
+ "bayes_count": {
+  "nobs": 4000,
+  "table_index": 0,
+  "table": "Posterior of the coefficients (negative binomial)",
+  "row": "const",
+  "row_index": 0,
+  "col": "Coefficient (mean)",
+  "col_index": 1,
+  "value": 0.661167,
+  "rtol": 0.05,
+  "seconds": 1.9,
+  "summary": {
+   "label": "Mean of the count",
+   "value": 2.906
+  }
+ },
+ "bayes_ms": {
+  "nobs": 135,
+  "table_index": 0,
+  "table": "Posterior of the regime parameters",
+  "row": "Regime 1",
+  "row_index": 0,
+  "col": "Mean",
+  "col_index": 2,
+  "value": -0.20519,
+  "rtol": 0.001,
+  "seconds": 7.8,
+  "summary": {
+   "label": "Largest R-hat",
+   "value": 1.031
+  }
+ },
+ "bayes_mc": {
+  "nobs": 3815,
+  "table_index": 0,
+  "table": "Transition probabilities (row = from, column = to)",
+  "row": "0",
+  "row_index": 0,
+  "col": "ML",
+  "col_index": 3,
+  "value": 0.911196,
+  "rtol": 0.001,
+  "seconds": 0.2,
+  "summary": {
+   "label": "Shorrocks mobility",
+   "value": 0.362
+  }
+ },
+ "capm": {
+  "nobs": 516,
+  "table_index": 0,
+  "table": "Alpha and factor loadings (Newey-West standard errors for alpha)",
+  "row": "rfood",
+  "row_index": 0,
+  "col": "Alpha",
+  "col_index": 1,
+  "value": 0.339177,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "GRS F",
+   "value": 2.61
+  }
+ },
+ "var_es": {
+  "nobs": 2028,
+  "table_index": 0,
+  "table": "Out-of-sample value at risk at the 99% level (2028 days)",
+  "row": "Historical simulation",
+  "row_index": 0,
+  "col": "Violation rate (%)",
+  "col_index": 2,
+  "value": 1.42998,
+  "rtol": 0.001,
+  "seconds": 0.1,
+  "summary": {
+   "label": "Tail probability",
+   "value": 0.01
+  }
+ },
+ "dcc": {
+  "nobs": 2528,
+  "table_index": 0,
+  "table": "Step 1: univariate GARCH(1,1) for each series",
+  "row": "ibm",
+  "row_index": 0,
+  "col": "Mean",
+  "col_index": 1,
+  "value": 0.000765,
+  "rtol": 0.001,
+  "seconds": 0.5,
+  "summary": {
+   "label": "DCC a",
+   "value": 0.0093
+  }
+ },
+ "portfolio": {
+  "nobs": 1859,
+  "table_index": 0,
+  "table": "Portfolio weights and in-sample performance (annualised)",
+  "row": "Equal weights",
+  "row_index": 0,
+  "col": "r_dax",
+  "col_index": 1,
+  "value": 0.25,
+  "rtol": 0.001,
+  "seconds": 1.0,
+  "summary": {
+   "label": "Max-Sharpe in-sample Sharpe",
+   "value": 1.405
+  }
+ },
+ "vol_eval": {
+  "nobs": 2028,
+  "table_index": 0,
+  "table": "Out-of-sample loss (2028 days, squared return as the volatility proxy)",
+  "row": "GARCH(1,1)",
+  "row_index": 0,
+  "col": "MSE x 1e8",
+  "col_index": 1,
+  "value": 3.315174,
+  "rtol": 0.001,
+  "seconds": 0.1
+ },
+ "bubble": {
+  "nobs": 1830,
+  "table_index": 0,
+  "table": "Tests for explosive behaviour",
+  "row": "SADF (right-tailed ADF, expanding window)",
+  "row_index": 0,
+  "col": "Statistic",
+  "col_index": 1,
+  "value": 3.461887,
+  "rtol": 0.001,
+  "seconds": 3.2,
+  "summary": {
+   "label": "SADF",
+   "value": 3.462
+  }
+ },
+ "nelson_siegel": {
+  "nobs": 531,
+  "table_index": 0,
+  "table": "Factors (estimated date by date)",
+  "row": "Level (beta 0)",
+  "row_index": 0,
+  "col": "Mean",
+  "col_index": 1,
+  "value": 6.139914,
+  "rtol": 0.001,
+  "seconds": 0.1,
+  "summary": {
+   "label": "lambda",
+   "value": 0.1384
+  }
+ },
+ "sfa": {
+  "nobs": 1026,
+  "table_index": 0,
+  "table": "Stochastic production frontier: half-normal inefficiency",
+  "row": "Constant",
+  "row_index": 0,
+  "col": "Estimate",
+  "col_index": 1,
+  "value": 4.9853,
+  "rtol": 0.001,
+  "seconds": 13.2,
+  "summary": {
+   "label": "Mean efficiency",
+   "value": 0.867
+  }
+ },
+ "dea": {
+  "nobs": 48,
+  "table_index": 0,
+  "table": "DEA efficiency scores (input-oriented)",
+  "row": "Technical efficiency, constant returns (CCR)",
+  "row_index": 0,
+  "col": "Mean",
+  "col_index": 1,
+  "value": 0.862283,
+  "rtol": 0.001,
+  "seconds": 0.1,
+  "summary": {
+   "label": "Mean CCR efficiency",
+   "value": 0.862
+  }
+ },
+ "malmquist": {
+  "nobs": 816,
+  "table_index": 0,
+  "table": "Malmquist productivity index by period (geometric mean over units)",
+  "row": "1970 to 1971",
+  "row_index": 0,
+  "col": "TFP change",
+  "col_index": 1,
+  "value": 1.004427,
+  "rtol": 0.001,
+  "seconds": 1.3,
+  "summary": {
+   "label": "Mean TFP change",
+   "value": 1.0016
+  }
+ },
+ "growth": {
+  "nobs": 98,
+  "table_index": 0,
+  "table": "Income per worker in levels (Mankiw-Romer-Weil)",
+  "row": "Constant",
+  "row_index": 0,
+  "col": "Coefficient",
+  "col_index": 1,
+  "value": 6.844414,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Capital share (restricted)",
+   "value": 0.338
+  }
+ },
+ "prodfun": {
+  "nobs": 158,
+  "table_index": 0,
+  "table": "Cobb-Douglas cost function",
+  "row": "Constant",
+  "row_index": 0,
+  "col": "Coefficient",
+  "col_index": 1,
+  "value": 3.071619,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "R-squared",
+   "value": 0.982
+  }
+ },
+ "spatial_cs": {
+  "nobs": 49,
+  "table_index": 0,
+  "table": "OLS",
+  "row": "Constant",
+  "row_index": 0,
+  "col": "Coefficient",
+  "col_index": 1,
+  "value": 68.618961,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Moran's I of residuals",
+   "value": 0.331
+  }
+ },
+ "kernreg": {
+  "nobs": 205,
+  "table_index": 0,
+  "table": "Fit and leave-one-out cross-validation",
+  "row": "Polynomial of degree 1 (linear)",
+  "row_index": 0,
+  "col": "CV error (MSE)",
+  "col_index": 2,
+  "value": 0.39111,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Bandwidth",
+   "value": 3.2713
+  }
+ },
+ "plm": {
+  "nobs": 1655,
+  "table_index": 0,
+  "table": "Partially linear model (Robinson 1988)",
+  "row": "nkids",
+  "row_index": 0,
+  "col": "Coefficient",
+  "col_index": 1,
+  "value": 0.05478,
+  "rtol": 0.001,
+  "seconds": 5.2,
+  "summary": {
+   "label": "nkids coefficient",
+   "value": 0.0548
+  }
+ },
+ "pspline": {
+  "nobs": 133,
+  "table_index": 0,
+  "table": "Penalised spline fit (P-spline, Eilers and Marx 1996)",
+  "row": "Smoothing parameter lambda",
+  "row_index": 0,
+  "col": "Value",
+  "col_index": 1,
+  "value": 0.562341,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Effective df",
+   "value": 11.64
+  }
+ },
+ "robreg": {
+  "nobs": 35,
+  "table_index": 0,
+  "table": "Coefficients by estimator",
+  "row": "Constant",
+  "row_index": 0,
+  "col": "OLS",
+  "col_index": 1,
+  "value": -8.992039,
+  "rtol": 0.001,
+  "seconds": 0.4,
+  "summary": {
+   "label": "MM scale",
+   "value": 3.7617
+  }
+ },
+ "wildboot": {
+  "nobs": 5000,
+  "table_index": 0,
+  "table": "Inference on x",
+  "row": "Conventional (homoskedastic)",
+  "row_index": 0,
+  "col": "Standard error",
+  "col_index": 1,
+  "value": 0.028583,
+  "rtol": 0.001,
+  "seconds": 0.3,
+  "summary": {
+   "label": "x coefficient",
+   "value": 1.0348
+  }
+ },
+ "kde": {
+  "nobs": 272,
+  "table_index": 0,
+  "table": "Bandwidth selectors",
+  "row": "Scott (1.06 s n^-1/5)",
+  "row_index": 0,
+  "col": "Bandwidth",
+  "col_index": 1,
+  "value": 4.696458,
+  "rtol": 0.001,
+  "seconds": 0.1,
+  "summary": {
+   "label": "Bandwidth",
+   "value": 2.6374
+  }
+ },
+ "fdr": {
+  "nobs": 3072,
+  "table_index": 2,
+  "table": "Null proportion and false discoveries",
+  "row": "Estimated share of true null hypotheses (pi0, Storey)",
+  "row_index": 0,
+  "col": "Value",
+  "col_index": 1,
+  "value": 0.419903,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Estimated pi0",
+   "value": 0.42
+  }
+ },
+ "evt": {
+  "nobs": 2167,
+  "table_index": 0,
+  "table": "Generalised Pareto fit to the exceedances",
+  "row": "Threshold u",
+  "row_index": 0,
+  "col": "Estimate",
+  "col_index": 1,
+  "value": 10.0,
+  "rtol": 0.001,
+  "seconds": 0.1,
+  "summary": {
+   "label": "Threshold",
+   "value": 10.0
+  }
  }
 }

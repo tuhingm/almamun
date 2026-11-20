@@ -48,6 +48,18 @@ EXTRA_BAYES = {
                                    "A series or a relationship may have shifted at dates you do not know. The posterior over all segmentations is computed exactly, so you get the probability of 0, 1, 2 ... breaks and the probability of a break after each date, with regime coefficients, and no sampler to check.",
                                    ["Choose the prior on the number of breaks", "Number of breaks", "Break dates and regimes", "Compare with Bai-Perron", "Prior sensitivity", "False-alarm check"]),
             "Change points", "unknown dates", "A level or a relationship shifted at dates I do not know"),
+    "QREG": ("quantile-regression", model("QREG", "Bayesian quantile regression", "Quantile regression", "The effect of a regressor may differ between low and high values of the outcome",
+                                          "The mean hides who gains and who does not. Bayesian quantile regression estimates the effect at several quantiles, gives a posterior and a probability that the effects differ, and rescales the intervals so they have the right width.",
+                                          ["Choose the quantiles", "Estimate at each quantile", "Do the effects differ", "Correct the intervals", "Check the sampler", "Simulation coverage"]),
+             "Quantile regression", "effect differs", "The effect may differ between low and high outcomes"),
+    "BSTS": ("structural-time-series", model("BSTS", "Bayesian structural time series", "Structural time series", "A series with a drifting level, trend or seasonal pattern to decompose, interpolate or forecast",
+                                             "Split a series into a level, a trend and a seasonal pattern, fill in missing observations and forecast with an interval that carries every source of uncertainty. The Bayesian version gives a posterior for each component and for every forecast.",
+                                             ["Choose the components", "Estimate and compare with the Kalman filter", "Check the sampler", "Fill in a gap", "Seasonal pattern and forecast", "Test the forecast on held-out data"]),
+             "Structural time series", "level, trend, seasonal", "I want to decompose, interpolate or forecast a series"),
+    "BCOUNT": ("count-regression", model("BCOUNT", "Bayesian count regression", "Count regression", "The outcome counts events: visits, arrests, patents, accidents",
+                                         "Rate ratios with credible intervals for a count outcome, a posterior predictive check of the zeros and the spread, and a WAIC comparison of the Poisson and the negative binomial, so the choice of the model is tested, not assumed.",
+                                         ["Choose the family", "Estimate and read the rate ratios", "Predictive check and WAIC", "Marginal effects", "Prior sensitivity", "Do you need zero inflation?"]),
+               "Count regression", "event counts", "The outcome counts events and I want rate ratios and a fit check"),
 }
 MARKOV = {
     "MSTVTP": ("ms-tvtp", model("MSTVTP", "Markov switching with time-varying transition probabilities", "MS with TVTP", "Hidden regimes, and an observed variable that moves the probability of switching",
@@ -55,6 +67,37 @@ MARKOV = {
                                 ["Estimate the constant-probability model", "Estimate with time-varying probabilities", "What the driver does to the probabilities", "Regime dates against a reference", "Permutation test", "Driver and start-value robustness"]),
                [800, 296, 150, "MS with TVTP"]),
 }
+
+
+EXTRA_MARKOV = {
+    "BMS": ("bayesian-ms", model("BMS", "Bayesian Markov-switching regression", "Bayesian MS regression", "Hidden regimes, and you want probabilities for the regimes, the transition probabilities and the durations",
+                                 "A Gibbs sampler for the Markov-switching regression gives a posterior for every regime parameter, for the transition probabilities, for the expected durations and for the regime of every period, with exact small-sample intervals and a prior you can state.",
+                                 ["Estimate with the Gibbs sampler", "Date the regimes against a reference", "Let the variance switch", "Prior on staying in a regime", "Slopes that switch", "Simulation check"]),
+            [290, 364, 170, "Bayesian MS regression"], "posterior", "Hidden regimes, with a posterior for the dates, probabilities and durations"),
+    "MCH": ("markov-chain", model("MCH", "Markov chain transition model", "Markov chain", "The states are observed (union or not, a wage band, a rating) and you want transition probabilities, long-run shares and mobility",
+                                  "When the state is observed, not hidden, the transition matrix is estimated from counts of moves. A Dirichlet posterior gives intervals for every probability, for the long-run distribution, the expected durations, the first-passage times and a mobility index, with tests of the Markov and the homogeneity assumptions.",
+                                  ["Estimate the transition matrix", "Long-run shares and durations", "First-passage times", "Test the assumptions", "Cut a continuous variable into states", "Prior sensitivity"]),
+            [500, 364, 170, "Markov chain"], "observed states", "The states are observed and I want transition probabilities and long-run shares"),
+}
+
+
+def extend_markov(path):
+    s = path.read_text()
+    for k, (slug, mdl, node, edge, q) in EXTRA_MARKOV.items():
+        if f"\n {k}:{{name:" in s:
+            continue
+        assert "}},\nN:{" in s
+        s = s.replace("}},\nN:{", f"}},\n{mdl}}},\nN:{{", 1)
+        s = re.sub(r"(GUIDE:\{[^}]*)\}", lambda m: m.group(1) + f",{k}:{js(slug)}}}", s, count=1)
+        x, y, w, lab = node
+        s = re.sub(r"(N:\{.*?)(\},\nE:\[)", lambda m: m.group(1) + f",\n {k}:[{x},{y},{w},{js(lab)},1]" + m.group(2), s, count=1, flags=re.S)
+        s = s.replace("['q2','MSTVTP','switching driver']", f"['q2','MSTVTP','switching driver'],['q2','{k}',{js(edge)}]", 1)
+        m = re.search(r"q2:\{t:'What is the structure of your data\?',o:\[.*?\]\]\}", s, flags=re.S)
+        assert m, "q2 block not found"
+        s = s[:m.end() - 2] + f",[{js(mdl.split('name:')[1].split(',short')[0].strip(chr(39)))},{js(q)},{js(k)}]" + s[m.end() - 2:]
+    need_h = max(330, max(v[2][1] for v in EXTRA_MARKOV.values()) + 56)
+    s = re.sub(r"vb:'0 0 880 \d+'", f"vb:'0 0 880 {need_h}'", s, count=1)
+    path.write_text(s)
 
 
 def run(path, items, key):
@@ -138,7 +181,9 @@ def main():
             if hub == "bayesian":
                 positions_bayes(p)
                 extend_bayes(p)
-    print("registered:", ", ".join(list(BAYES) + list(EXTRA_BAYES) + list(MARKOV)))
+            else:
+                extend_markov(p)
+    print("registered:", ", ".join(list(BAYES) + list(EXTRA_BAYES) + list(MARKOV) + list(EXTRA_MARKOV)))
 
 
 if __name__ == "__main__":
