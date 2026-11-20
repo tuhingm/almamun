@@ -138,3 +138,85 @@ def test_errors_are_reported_not_raised():
     assert "error" in r and "separation" in r["error"]
     assert "at least one" in o.run("logit_probit", d.to_csv(index=False), dict(y="GRADE", x=[]))["error"]
     assert "too few" in o.run("logit_probit", d.head(8).to_csv(index=False), dict(y="GRADE", x=["GPA", "TUCE", "PSI"]))["error"]
+
+
+# ------------------------------------------------------------------ ordered logit and probit
+HX = ["InflMedium", "InflHigh", "TypeApartment", "TypeAtrium", "TypeTerrace", "ContHigh"]
+def housing(**kw):
+    spec = dict(y="Sat", x=HX); spec.update(kw)
+    return o.run("ordered", open(os.path.join(ME, "housing.csv")).read(), spec)
+
+
+def test_ordered_matches_published_MASS_housing_results():
+    # Venables and Ripley, MASS, polr(Sat ~ Infl + Type + Cont, weights = Freq): coefficients, standard errors, cut-points, deviance
+    r = housing()
+    pub = dict(InflMedium=(0.5664, 0.1047), InflHigh=(1.2888, 0.1272), TypeApartment=(-0.5724, 0.1192),
+               TypeAtrium=(-0.3662, 0.1552), TypeTerrace=(-1.0910, 0.1515), ContHigh=(0.3603, 0.0955))
+    for name, (b, se) in pub.items():
+        x = row(r, "Coefficient", name)
+        assert x[1] == pytest.approx(b, abs=5e-4) and x[2] == pytest.approx(se, abs=5e-4)
+    cp = table(r, "Cut-points")["rows"]
+    assert cp[0][1] == pytest.approx(-0.4961, abs=5e-4) and cp[1][1] == pytest.approx(0.6907, abs=5e-4)
+    assert -2 * summ(r, "Log-likelihood") == pytest.approx(3479.149, abs=5e-3)
+
+
+def test_ordered_logit_equals_an_independent_likelihood_maximisation():
+    from scipy.optimize import minimize
+    d = pd.read_csv(os.path.join(ME, "housing.csv")); X = d[HX].to_numpy(float); yy = d.Sat.to_numpy() - 1
+    def nll(t):
+        b, c1, g = t[:6], t[6], np.exp(t[7]); cuts = [c1, c1 + g]; xb = X @ b
+        F = lambda z: 1 / (1 + np.exp(-z))
+        cum = np.column_stack([np.zeros(len(xb)), F(cuts[0] - xb), F(cuts[1] - xb), np.ones(len(xb))])
+        return -np.log(np.diff(cum, axis=1)[np.arange(len(yy)), yy]).sum()
+    best = minimize(nll, np.zeros(8), method="BFGS", options={"gtol": 1e-8})
+    r = housing()
+    assert -best.fun == pytest.approx(summ(r, "Log-likelihood"), abs=1e-3)
+    assert best.x[:6] == pytest.approx([row(r, "Coefficient", c)[1] for c in HX], abs=2e-3)
+
+
+def test_ordered_marginal_effects_sum_to_zero_across_categories_and_match_by_hand():
+    r = housing()
+    for c in HX:
+        assert sum(x[2] for x in table(r, "Average marginal effects")["rows"] if x[0] == c) == pytest.approx(0, abs=1e-5)
+    d = pd.read_csv(os.path.join(ME, "housing.csv")); X = d[HX].to_numpy(float)
+    b = np.array([row(r, "Coefficient", c)[1] for c in HX]); cp = [x[1] for x in table(r, "Cut-points")["rows"]]
+    F = lambda z: 1 / (1 + np.exp(-z))
+    def p3(M): xb = M @ b; return 1 - F(cp[1] - xb)
+    X1, X0 = X.copy(), X.copy(); X1[:, 1], X0[:, 1] = 1, 0
+    by_hand = (p3(X1) - p3(X0)).mean()
+    got = next(x for x in table(r, "Average marginal effects")["rows"] if x[0] == "InflHigh" and x[1] == "y = 3.0")[2]
+    assert got == pytest.approx(by_hand, abs=2e-4)
+
+
+@pytest.mark.parametrize("link", ["logit", "probit"])
+def test_ordered_recovers_known_parameters_from_simulated_data(link):
+    rng = np.random.default_rng(11); n = 30000
+    x1, x2 = rng.normal(size=n), rng.binomial(1, .5, n); xb = 0.9 * x1 - 0.6 * x2
+    e = rng.logistic(size=n) if link == "logit" else rng.normal(size=n)
+    ystar = xb + e; y = 1 + (ystar > -0.7) + (ystar > 0.4) + (ystar > 1.5)
+    r = o.run("ordered", pd.DataFrame({"y": y, "x1": x1, "x2": x2}).to_csv(index=False), dict(y="y", x=["x1", "x2"], link=link))
+    for name, b in [("x1", 0.9), ("x2", -0.6)]:
+        x = row(r, "Coefficient", name); assert abs(x[1] - b) < 4 * x[2]
+    cp = [x[1] for x in table(r, "Cut-points")["rows"]]
+    assert cp == pytest.approx([-0.7, 0.4, 1.5], abs=0.08)
+
+
+def test_brant_test_accepts_parallel_lines_and_rejects_non_parallel_data():
+    rng = np.random.default_rng(5); n = 6000; x = rng.normal(size=n)
+    ystar = x + rng.logistic(size=n); good = 1 + (ystar > -.5) + (ystar > .8)
+    u = rng.logistic(size=n)
+    bad = 1 + (1.8 * x + u > -.5) + (0.2 * x + u > .8)                                  # the slope differs between the two cut-points
+    pv = lambda y: next(t for t in o.run("ordered", pd.DataFrame({"y": y, "x": x}).to_csv(index=False), dict(y="y", x=["x"]))["tables"] if t["title"].startswith("Specification"))["rows"][1][2]
+    assert pv(good) > 0.01 and pv(bad) < 0.001
+
+
+def test_ordered_errors_and_example_reference():
+    d = pd.read_csv(os.path.join(ME, "housing.csv"))
+    run = lambda df, **kw: o.run("ordered", df.to_csv(index=False), dict(y="Sat", x=["InflHigh", "ContHigh"], **kw))
+    assert "binary" in run(d.assign(Sat=(d.Sat > 1) * 1))["error"]
+    assert "3 to 10" in run(d.assign(Sat=np.arange(len(d)) % 15))["error"]
+    assert "at least 5" in run(d.assign(Sat=np.where(np.arange(len(d)) < 3, 4, d.Sat)))["error"]
+    assert "collinear" in run(d.assign(InflHigh=1))["error"]
+    e = EXPECTED["ordered"]; m = o.BY_ID["ordered"]
+    r = o.run("ordered", open(os.path.join(ROOT, m["example"]["file"])).read(), dict(m["example"]["spec"]))
+    assert r["tables"][e["table_index"]]["rows"][e["row_index"]][e["col_index"]] == pytest.approx(e["value"], rel=e["rtol"])

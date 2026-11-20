@@ -1012,5 +1012,21 @@
    "label": "Log-likelihood",
    "value": -12.8896
   }
+ },
+ "ordered": {
+  "nobs": 1681,
+  "table_index": 0,
+  "table": "Coefficient estimates",
+  "row": "InflMedium",
+  "row_index": 0,
+  "col": "Coef.",
+  "col_index": 1,
+  "value": 0.566363,
+  "rtol": 0.001,
+  "seconds": 0.2,
+  "summary": {
+   "label": "Log-likelihood",
+   "value": -1739.5746
+  }
  }
 }
