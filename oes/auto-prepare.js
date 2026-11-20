@@ -353,7 +353,7 @@ function prepare(text, opts) {
         const hit = nums.filter(x => x === s).length;
         if (hit) {
           const others = nums.filter(x => x !== s).map(Math.abs).sort((a, b) => a - b), med = others.length ? others[others.length >> 1] : 0;
-          if (med < Math.abs(s) / 20) { c.notes.push("code " + s); warn(`"${c.name}" contains ${hit} value${hit > 1 ? "s" : ""} equal to ${s}, which is often a code for "missing" in survey data. They were NOT changed; replace them with blanks if that is what they mean.`); }
+          if (med < Math.abs(s) / 20) { c.notes.push("code " + s); warn(`"${c.name}" contains ${hit} value${hit > 1 ? "s" : ""} equal to ${s}, which is often a code for "missing" in survey data. ${hit > 1 ? "They were" : "It was"} NOT changed; replace ${hit > 1 ? "them" : "it"} with a blank if that is what it means.`); }
         }
       }
     }
