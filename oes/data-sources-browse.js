@@ -28,6 +28,12 @@
       struct: f => "https://sdmx.oecd.org/public/rest/dataflow/" + f.agency + "/" + f.id + "/" + f.version + "?references=descendants",
       data: (f, key, s) => "https://sdmx.oecd.org/public/rest/data/" + f.agency + "," + f.id + "," + f.version + "/" + key + "?startPeriod=" + s + "&format=csvfilewithlabels"
     },
+    imf: {
+      name: "IMF", site: "https://data.imf.org/", xml: true,
+      list: "https://api.imf.org/external/sdmx/2.1/dataflow/all/all/latest?detail=allstubs",
+      struct: f => "https://api.imf.org/external/sdmx/2.1/dataflow/" + f.agency + "/" + f.id + "/" + f.version + "?references=descendants",
+      data: (f, key, s) => "https://api.imf.org/external/sdmx/2.1/data/" + f.agency + "," + f.id + "," + f.version + "/" + key + "?startPeriod=" + s
+    },
     bis: {
       name: "BIS", site: "https://data.bis.org/",
       list: "https://stats.bis.org/api/v2/structure/dataflow/BIS/*/*?format=sdmx-2.1",
@@ -86,6 +92,14 @@
     }
     if (f || r.length) { r.push(f); rows.push(r); }
     return rows;
+  }
+  function xmlRows(text, dims) {
+    const doc = new DOMParser().parseFromString(text, "application/xml"), ids = dims.map(d => d.id), out = [[...ids, "TIME_PERIOD", "OBS_VALUE"]];
+    for (const se of tags(doc, "Series")) {
+      const base = ids.map(i => se.getAttribute(i) || "");
+      for (const o of Array.from(se.children).filter(c => c.localName === "Obs")) out.push([...base, o.getAttribute("TIME_PERIOD") || "", o.getAttribute("OBS_VALUE") || ""]);
+    }
+    return out;
   }
   const csvOut = (h, rows) => { const q = v => '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"'; return [h.map(q).join(","), ...rows.map(r => r.map(q).join(","))].join("\r\n"); };
   function save(name, content, type) { const u = URL.createObjectURL(new Blob([content], { type })); const a = document.createElement("a"); a.href = u; a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(u), 1000); }
@@ -146,7 +160,7 @@
       try {
         const url = P.data(flow, key, s), text = await getText(url, 180000);
         if (!text) return status("The provider returned no data for this selection.", true);
-        const rows = parseCsv(text), h = rows[0] || [], ti = h.indexOf("TIME_PERIOD"), vi = h.indexOf("OBS_VALUE");
+        const rows = P.xml ? xmlRows(text, dims) : parseCsv(text), h = rows[0] || [], ti = h.indexOf("TIME_PERIOD"), vi = h.indexOf("OBS_VALUE");
         if (ti < 0 || vi < 0) throw new Error("Unexpected response format.");
         const dimCols = dims.map(d => h.indexOf(d.id)).filter(i => i >= 0);
         const headers = [...dimCols.map(i => h[i]), "time", "value"];
