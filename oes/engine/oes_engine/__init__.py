@@ -439,6 +439,11 @@ MODELS += [
                  sel("cov", "Standard errors", [["oim", "Conventional"], ["robust", "Robust (HC1)"]], "oim")],
          example=dict(file=ME + "housing.csv", spec=dict(y="Sat", x=["InflMedium", "InflHigh", "TypeApartment", "TypeAtrium", "TypeTerrace", "ContHigh"], link="logit", cov="oim")),
          check=dict(table=0, row=0, col=1)),
+    dict(id="multinomial", group="Microeconometrics", name="Multinomial logit (unordered outcome)", guide="microeconometrics-guide/multinomial-logit.html", fn=micro.multinomial,
+         fields=[col("y", "Outcome variable (category code, 3 to 10 categories)"), cols("x", "Explanatory variables"),
+                 num("base", "Base category (blank = the lowest code)", "")],
+         example=dict(file=ME + "beps.csv", spec=dict(y="vote", x=["age", "econ_national", "econ_household", "europe", "political_knowledge", "female"], base=0)),
+         check=dict(table=0, row=1, col=1)),
 ]
 
 CE = "oes/examples/"

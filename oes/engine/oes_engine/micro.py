@@ -361,3 +361,151 @@ def ordered(df, spec):
     if link == "logit" and len(drows) > 1 and drows[1][2] is not None and drows[1][2] < 0.05:
         notes.append("The Brant test rejects proportional odds: the effect of some regressor differs between cut-points. Consider a generalised ordered logit, or collapse categories.")
     return result("ordered", f"Ordered {link}: {y}", n, summary, tabs, [ch], notes)
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+# multinomial logit
+# ---------------------------------------------------------------------------------------------------------------------
+def _softmax_probs(X1, B):
+    """X1: n x (k+1) with a constant, B: (k+1) x (J-1) coefficients of the non-base categories. Returns n x J (base first)."""
+    z = np.column_stack([np.zeros(len(X1)), X1 @ B])
+    z -= z.max(axis=1, keepdims=True)
+    e = np.exp(z)
+    return e / e.sum(axis=1, keepdims=True)
+
+
+def _mnl_fit(Yc, X1, J):
+    import statsmodels.api as sm_
+    res = sm_.MNLogit(Yc, X1).fit(method="newton", disp=0, maxiter=200)
+    B = np.asarray(res.params, float)
+    return res, B
+
+
+def multinomial(df, spec):
+    """Multinomial logit for an unordered outcome with 3 to 10 categories."""
+    y = need(spec, "y", "outcome variable (category code)")
+    xs = as_list(spec.get("x"))
+    if not xs:
+        raise OESError("Choose at least one explanatory variable.")
+    distinct(y, xs)
+    d = numeric(df, [y] + xs).reset_index(drop=True)
+    levels = np.sort(d[y].unique())
+    J = len(levels)
+    if J < 3:
+        raise OESError(f"The outcome {y} has {J} distinct values; use the logit/probit model for a binary outcome.")
+    if J > 10:
+        raise OESError(f"The outcome {y} has {J} distinct values. A multinomial logit suits 3 to 10 categories.")
+    base = spec.get("base")
+    base = levels[0] if base in (None, "") else float(base)
+    if base not in levels:
+        raise OESError(f"The base category {base:g} is not a value of {y}.")
+    order = [base] + [v for v in levels if v != base]
+    n, k = len(d), len(xs)
+    counts = np.array([(d[y] == v).sum() for v in order])
+    if counts.min() < 10:
+        raise OESError("Every category needs at least 10 observations. Combine the sparse categories and try again.")
+    if n < 10 * k * (J - 1) / 2:
+        raise OESError(f"{n} observations are too few for {k * (J - 1)} slopes; reduce the regressors or the categories.")
+    code = {v: i for i, v in enumerate(order)}
+    Yc = d[y].map(code).to_numpy()
+    X1 = sm.add_constant(d[xs].astype(float), has_constant="add")
+    names = ["const"] + xs
+    try:
+        res, B = _mnl_fit(Yc, X1, J)
+    except Exception as e:
+        raise OESError("The multinomial logit did not converge: " + ("a regressor predicts a category perfectly (separation) or the regressors are collinear." if "singular" in str(e).lower() or "perfect" in str(e).lower() else str(e)))
+    if not res.mle_retvals.get("converged", True):
+        raise OESError("The maximum-likelihood iterations did not converge. Check for separation or near-collinear regressors.")
+    Vfull = np.asarray(res.cov_params(), float)           # ordered equation by equation
+    se = np.sqrt(np.diag(Vfull)).reshape(J - 1, k + 1).T
+    ll = float(res.llf)
+    ll0 = float((counts * np.log(counts / n)).sum())
+    lr = 2 * (ll - ll0)
+    lr_df = k * (J - 1)
+    X1n = np.asarray(X1, float)
+    probs = _softmax_probs(X1n, B)
+    pred = probs.argmax(axis=1)
+    tabs = []
+    for j in range(1, J):
+        lab = f"{f(order[j], 6)} vs base {f(base, 6)}"
+        tabs.append(coef_table(names, B[:, j - 1], se[:, j - 1], dist="z", title=f"Equation: {y} = {lab}",
+                               note="Log of the relative risk ratio of the category against the base category. Compare categories through the marginal effects, not coefficient by coefficient." if j == 1 else None))
+    rr = []
+    for j in range(1, J):
+        for i in range(1, k + 1):
+            b_, s_ = B[i, j - 1], se[i, j - 1]
+            rr.append([f"{f(order[j], 6)} vs {f(base, 6)}", xs[i - 1], f(np.exp(b_)), f(np.exp(b_) * s_), f(np.exp(b_ - 1.96 * s_)), f(np.exp(b_ + 1.96 * s_))])
+    tabs.append(table("Relative risk ratios", ["Category vs base", "Variable", "RRR", "Std. err.", "95% CI low", "95% CI high"], rr,
+                      "exp(coefficient): the factor by which the probability of the category relative to the base changes for a one-unit rise in the regressor."))
+    dummy = [bool(set(d[c].unique()) <= {0, 1}) for c in xs]
+
+    def ame_vec(theta):
+        Bt = theta.reshape(J - 1, k + 1).T
+        out = np.zeros((k, J))
+        for i in range(k):
+            if dummy[i]:
+                A1, A0 = X1n.copy(), X1n.copy()
+                A1[:, i + 1], A0[:, i + 1] = 1, 0
+                out[i] = (_softmax_probs(A1, Bt) - _softmax_probs(A0, Bt)).mean(axis=0)
+            else:
+                P = _softmax_probs(X1n, Bt)
+                slope = np.column_stack([np.zeros(n)] + [np.full(n, Bt[i + 1, j]) for j in range(J - 1)])
+                out[i] = (P * (slope - (P * slope).sum(axis=1, keepdims=True))).mean(axis=0)
+        return out.ravel()
+    theta = B.T.ravel()
+    ame = ame_vec(theta)
+    Jm = _num_jac(ame_vec, theta)
+    se_ame = np.sqrt(np.maximum(np.diag(Jm @ Vfull @ Jm.T), 0))
+    rows = []
+    for i in range(k):
+        for j in range(J):
+            a, s_ = ame[i * J + j], se_ame[i * J + j]
+            rows.append([xs[i], f"{y} = {f(order[j], 6)}", f(a), f(s_), f(a / s_, 4) if s_ > 0 else None, f(2 * stats.norm.sf(abs(a / s_)), 4) if s_ > 0 else None,
+                         "discrete change 0 to 1" if dummy[i] else "derivative"])
+    tabs.append(table("Average marginal effects on each category probability", ["Variable", "Category", "dPr/dx", "Std. err.", "z", "p-value", "Type"], rows,
+                      "Delta-method standard errors. For each regressor the effects across categories add to zero."))
+    # classification table
+    conf = np.zeros((J, J), int)
+    for a_, b_ in zip(Yc, pred):
+        conf[a_, b_] += 1
+    tabs.append(table("Classification (rows: actual, columns: predicted)", ["Actual"] + [f"Predicted {f(v, 6)}" for v in order],
+                      [[f(order[i], 6)] + [int(c) for c in conf[i]] for i in range(J)],
+                      f"Share correctly classified = {np.trace(conf) / n:.3f}; the benchmark of always predicting the largest category is {counts.max() / n:.3f}."))
+    drows = [test_row(f"Likelihood-ratio test, all slopes zero ({lr_df} df)", lr, stats.chi2.sf(lr, lr_df), "H0: the model is no better than the category frequencies")]
+    # Hausman-McFadden test of independence of irrelevant alternatives: drop one category at a time
+    iia = []
+    if J >= 3:
+        for drop in range(1, J):
+            keep = [c for c in range(J) if c != drop]
+            m_ = np.isin(Yc, keep)
+            remap = {c: i for i, c in enumerate(keep)}
+            Yr = np.array([remap[c] for c in Yc[m_]])
+            try:
+                rr_, Br = _mnl_fit(Yr, X1n[m_], J - 1)
+                Vr = np.asarray(rr_.cov_params(), float)
+            except Exception:
+                continue
+            kept_eq = [c - 1 for c in keep if c != 0]              # equations (non-base) that remain, in the full model
+            idx_f = np.concatenate([np.arange(e * (k + 1), (e + 1) * (k + 1)) for e in kept_eq])
+            diff = Br.T.ravel() - theta[idx_f]
+            Vd = Vr - Vfull[np.ix_(idx_f, idx_f)]
+            try:
+                H = float(diff @ np.linalg.pinv(Vd) @ diff)
+                rk = int(np.linalg.matrix_rank(Vd))
+                if H < 0:
+                    iia.append((f(order[drop], 6), None, None, "Hausman statistic is negative (a known problem of the test)"))
+                else:
+                    iia.append((f(order[drop], 6), H, float(stats.chi2.sf(H, rk)), f"{rk} df"))
+            except Exception:
+                continue
+    for lab, H, p_, det in iia:
+        drows.append(test_row(f"Hausman-McFadden IIA test, category {lab} dropped", H, p_, det) if H is not None else [f"Hausman-McFadden IIA test, category {lab} dropped", None, None, det])
+    tabs.append(tests_table(drows, note="IIA: the odds of two categories do not depend on the other categories available. The Hausman-McFadden test is known to have poor size and can be negative; treat it as a warning, not proof."))
+    obs = counts / n
+    prd = probs.mean(axis=0)
+    ch = chart("Observed and predicted category shares", [f(v, 6) if not isinstance(f(v, 6), float) or f(v, 6) % 1 else str(int(v)) for v in order], [("Observed", obs), ("Predicted (average)", prd)], y, "Share of observations", kind="bar")
+    summary = [stat("Observations", n), stat("Categories", J), stat("Log-likelihood", ll), stat("LR chi-squared", lr), stat("McFadden pseudo R-squared", 1 - ll / ll0),
+               stat("Share correctly classified", float(np.trace(conf) / n), 3)]
+    notes = [f"Multinomial logit of {y} ({J} categories, base = {f(base, 6)}) on {', '.join(xs)}, {n} observations.",
+             "The coefficients of each equation compare one category with the base; changing the base changes the coefficients but not the fitted probabilities or the marginal effects."]
+    return result("multinomial", f"Multinomial logit: {y}", n, summary, tabs, [ch], notes)

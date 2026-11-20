@@ -220,3 +220,66 @@ def test_ordered_errors_and_example_reference():
     e = EXPECTED["ordered"]; m = o.BY_ID["ordered"]
     r = o.run("ordered", open(os.path.join(ROOT, m["example"]["file"])).read(), dict(m["example"]["spec"]))
     assert r["tables"][e["table_index"]]["rows"][e["row_index"]][e["col_index"]] == pytest.approx(e["value"], rel=e["rtol"])
+
+
+# ------------------------------------------------------------------ multinomial logit
+BX = ["age", "econ_national", "econ_household", "europe", "political_knowledge", "female"]
+def beps(**kw):
+    spec = dict(y="vote", x=BX, base=0); spec.update(kw)
+    return o.run("multinomial", open(os.path.join(ME, "beps.csv")).read(), spec)
+
+
+def test_multinomial_equals_an_independent_likelihood_maximisation():
+    from scipy.optimize import minimize
+    d = pd.read_csv(os.path.join(ME, "beps.csv")); X = sm.add_constant(d[BX]).to_numpy(float); yy = d.vote.to_numpy().astype(int)
+    def nll(t):
+        B = t.reshape(7, 2); z = np.column_stack([np.zeros(len(X)), X @ B]); z -= z.max(1, keepdims=True)
+        lp = z - np.log(np.exp(z).sum(1, keepdims=True)); return -lp[np.arange(len(yy)), yy].sum()
+    best = minimize(nll, np.zeros(14), method="BFGS", options={"gtol": 1e-7, "maxiter": 2000})
+    r = beps()
+    assert -best.fun == pytest.approx(summ(r, "Log-likelihood"), abs=1e-3)
+    assert best.x.reshape(7, 2)[:, 0] == pytest.approx([x[1] for x in table(r, "Equation: vote = 1.0")["rows"]], abs=5e-3)
+
+
+def test_multinomial_changing_the_base_changes_coefficients_but_not_probabilities():
+    a, b = beps(base=0), beps(base=2)
+    assert summ(a, "Log-likelihood") == pytest.approx(summ(b, "Log-likelihood"), abs=1e-4)
+    ame = lambda r, v, c: next(x for x in table(r, "Average marginal effects")["rows"] if x[0] == v and x[1] == f"vote = {c}.0")[2]
+    for c in (0, 1, 2):
+        assert ame(a, "econ_national", c) == pytest.approx(ame(b, "econ_national", c), abs=1e-4)
+    assert row(a, "Equation: vote = 1.0", "age")[1] != row(b, "Equation: vote = 1.0", "age")[1]
+
+
+def test_multinomial_marginal_effects_sum_to_zero_and_match_by_hand():
+    r = beps()
+    for v in BX:
+        assert sum(x[2] for x in table(r, "Average marginal effects")["rows"] if x[0] == v) == pytest.approx(0, abs=1e-5)
+    d = pd.read_csv(os.path.join(ME, "beps.csv")); X = sm.add_constant(d[BX]).to_numpy(float)
+    B = np.column_stack([[x[1] for x in table(r, f"Equation: vote = {c}.0")["rows"]] for c in (1, 2)])
+    def P(M): z = np.column_stack([np.zeros(len(M)), M @ B]); e = np.exp(z); return e / e.sum(1, keepdims=True)
+    X1, X0 = X.copy(), X.copy(); X1[:, 6], X0[:, 6] = 1, 0
+    by_hand = (P(X1) - P(X0)).mean(0)
+    got = [next(x for x in table(r, "Average marginal effects")["rows"] if x[0] == "female" and x[1] == f"vote = {c}.0")[2] for c in (0, 1, 2)]
+    assert got == pytest.approx(list(by_hand), abs=2e-4)
+
+
+def test_multinomial_recovers_known_parameters_from_simulated_data():
+    rng = np.random.default_rng(3); n = 40000; x1, x2 = rng.normal(size=n), rng.binomial(1, .5, n)
+    B = np.array([[0.2, -0.4], [0.8, -0.5], [-0.6, 0.7]])           # rows: const, x1, x2; columns: categories 1 and 2
+    z = np.column_stack([np.zeros(n), np.column_stack([np.ones(n), x1, x2]) @ B]); pr = np.exp(z) / np.exp(z).sum(1, keepdims=True)
+    yy = np.array([rng.choice(3, p=p) for p in pr])
+    r = o.run("multinomial", pd.DataFrame({"y": yy, "x1": x1, "x2": x2}).to_csv(index=False), dict(y="y", x=["x1", "x2"], base=0))
+    for c, col_ in ((1, 0), (2, 1)):
+        for i, name in enumerate(["const", "x1", "x2"]):
+            x = row(r, f"Equation: y = {c}.0", name); assert abs(x[1] - B[i, col_]) < 4 * x[2]
+
+
+def test_multinomial_errors_and_example_reference():
+    d = pd.read_csv(os.path.join(ME, "beps.csv"))
+    run = lambda df, **kw: o.run("multinomial", df.to_csv(index=False), dict(y="vote", x=["age", "europe"], **kw))
+    assert "binary" in run(d.assign(vote=(d.vote > 0) * 1))["error"]
+    assert "not a value" in run(d, base=7)["error"]
+    assert "at least 10" in run(d.assign(vote=np.where(np.arange(len(d)) < 4, 3, d.vote)))["error"]
+    e = EXPECTED["multinomial"]; m = o.BY_ID["multinomial"]
+    r = o.run("multinomial", open(os.path.join(ROOT, m["example"]["file"])).read(), dict(m["example"]["spec"]))
+    assert r["tables"][e["table_index"]]["rows"][e["row_index"]][e["col_index"]] == pytest.approx(e["value"], rel=e["rtol"])
