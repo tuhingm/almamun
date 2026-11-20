@@ -141,3 +141,58 @@ def test_experiment_errors():
     assert "Column(s) not found" in o.run("experiment", d.to_csv(index=False), dict(ES, covariates=["nope"]))["error"]
     few = d.iloc[:60].assign(train=[1.0] * 3 + [0.0] * 57)
     assert "at least 5" in o.run("experiment", few.to_csv(index=False), dict(outcome="re78", treat="train"))["error"]
+
+
+# ---- causal mediation -------------------------------------------------------------------------------------------
+def nswm(): return pd.read_csv(os.path.join(CX, "nsw_mediation.csv"))
+MS = dict(outcome="re78", treat="train", mediator="employed78", covariates=COV, boot=99)
+def mrow(r, name): return next(x for x in r["tables"][0]["rows"] if x[0].startswith(name))
+
+
+def test_mediation_registered():
+    m = o.BY_ID["mediation"]; assert m["group"] == "Causal inference" and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+def test_mediation_product_of_coefficients_and_total_effect_identity():
+    import statsmodels.api as sm
+    d = nswm(); r = causal_extra.mediation(d, MS); X = d[COV]
+    a = sm.OLS(d.employed78, sm.add_constant(pd.concat([d.train, X], axis=1))).fit().params["train"]
+    yfit = sm.OLS(d.re78, sm.add_constant(pd.concat([d.train, d.employed78, X], axis=1))).fit(); b, c = yfit.params["employed78"], yfit.params["train"]
+    tot = sm.OLS(d.re78, sm.add_constant(pd.concat([d.train, X], axis=1))).fit().params["train"]
+    assert float(mrow(r, "ACME")[1]) == pytest.approx(a * b, abs=1e-3) and float(mrow(r, "ADE")[1]) == pytest.approx(c, abs=1e-3)
+    assert float(mrow(r, "Total")[1]) == pytest.approx(tot, abs=1e-3)
+
+
+def med_sim(seed, n=800, rho=0.0, a=0.6, b=1.0, c=0.5, kap=0.0):
+    rng = np.random.default_rng(seed); T = (rng.uniform(size=n) < 0.5).astype(float); e1 = rng.normal(size=n); e2 = rho * e1 + np.sqrt(1 - rho ** 2) * rng.normal(size=n)
+    M = a * T + e1; Y = c * T + b * M + kap * T * M + e2; return pd.DataFrame(dict(y=Y, t=T, m=M))
+SM = dict(outcome="y", treat="t", mediator="m", boot=99)
+
+
+def test_mediation_recovers_effects_and_covers_truth_under_ignorability():
+    cov = 0; R = 120
+    for s in range(R):
+        r = causal_extra.mediation(med_sim(s, n=400), SM); row = mrow(r, "ACME")
+        cov += float(row[3]) <= 0.6 * 1.0 <= float(row[4])
+    assert 0.88 <= cov / R <= 0.995
+    r = causal_extra.mediation(med_sim(1, n=4000), SM); assert float(mrow(r, "ACME")[1]) == pytest.approx(0.6, abs=0.06) and float(mrow(r, "ADE")[1]) == pytest.approx(0.5, abs=0.06)
+
+
+def test_mediation_interaction_recovers_effects_by_treatment_arm():
+    r = causal_extra.mediation(med_sim(2, n=6000, kap=0.5), dict(SM, interaction="yes"))
+    assert float(mrow(r, "ACME, control")[1]) == pytest.approx(0.6 * 1.0, abs=0.07) and float(mrow(r, "ACME, treated")[1]) == pytest.approx(0.6 * 1.5, abs=0.09)
+
+
+def test_mediation_sensitivity_curve_passes_through_truth_and_zero_at_rho_star():
+    rho0 = 0.5; r = causal_extra.mediation(med_sim(3, n=20000, rho=rho0), SM)
+    srows = next(t for t in r["tables"] if t["title"].startswith("Sensitivity"))["rows"]; at = {float(x[0]): float(x[1]) for x in srows}
+    assert float(mrow(r, "ACME")[1]) > 0.6 + 0.2                       # naive estimate is biased upward by the confounding
+    assert at[0.5] == pytest.approx(0.6, abs=0.05)                      # the curve at the true rho gives the true ACME
+    rstar = next(x["value"] for x in r["summary"] if x["label"].startswith("rho at which")); sign = np.sign(at[0.9]); assert np.sign(at[-0.9]) != sign and 0 < abs(rstar) < 0.9
+
+
+def test_mediation_errors():
+    d = nswm()
+    assert "0/1" in o.run("mediation", d.assign(train=d.train * 2).to_csv(index=False), MS)["error"]
+    assert "does not vary" in o.run("mediation", d.assign(employed78=1.0).to_csv(index=False), MS)["error"]
+    assert "Column(s) not found" in o.run("mediation", d.to_csv(index=False), dict(MS, mediator="nope"))["error"]

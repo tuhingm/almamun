@@ -524,6 +524,10 @@ MODELS += [
     dict(id="experiment", group="Causal inference", name="Randomised experiments: balance, adjustment, randomisation inference, power", guide="causal-inference-guide/experiments.html", fn=causal_extra.experiment,
          fields=[col("outcome", "Outcome"), col("treat", "Treatment (0/1)"), cols("covariates", "Pre-treatment covariates", required=False), num("draws", "Randomisation draws", 2000), num("seed", "Random seed", 0)],
          example=dict(file=CI + "nsw_experiment.csv", spec=dict(outcome="re78", treat="train", covariates=["age", "educ", "black", "hisp", "married", "nodegree", "re74", "re75"], draws=2000))),
+    dict(id="mediation", group="Causal inference", name="Causal mediation analysis (ACME, ADE, sensitivity)", guide="causal-inference-guide/mediation.html", fn=causal_extra.mediation,
+         fields=[col("outcome", "Outcome"), col("treat", "Treatment (0/1)"), col("mediator", "Mediator"), cols("covariates", "Pre-treatment covariates", required=False), sel("interaction", "Treatment-by-mediator interaction", [["no", "No"], ["yes", "Yes"]], "no"),
+                 num("boot", "Bootstrap replications", 500), num("seed", "Random seed", 0)],
+         example=dict(file=CI + "nsw_mediation.csv", spec=dict(outcome="re78", treat="train", mediator="employed78", covariates=["age", "educ", "black", "hisp", "married", "nodegree", "re74", "re75"], boot=300))),
 ]
 
 MODELS += [
