@@ -52,7 +52,8 @@ HUBS = {
         table=[("A yes/no outcome (passed, defaulted, employed, adopted)", "Logit and probit", "logit-probit"),
                ("An outcome with ordered categories (low, medium, high; a rating from 1 to 5)", "Ordered logit and probit", "ordered-logit-probit"),
                ("A choice among three or more unordered alternatives (party, transport mode, occupation)", "Multinomial logit", "multinomial-logit"),
-               ("An outcome that piles up at zero or at another limit (hours, spending, number of events)", "Tobit", "tobit")],
+               ("An outcome that piles up at zero or at another limit (hours, spending, number of events)", "Tobit", "tobit"),
+               ("An outcome observed only for a self-selected part of the sample (wages of workers)", "Heckman selection", "heckman")],
         other=("Your outcome is a continuous variable observed over time or across units?", "Use the <a href=\"../time-series-guide/index.html\">Time-Series Guide</a> or the <a href=\"../panel-data-guide/index.html\">Panel-Data Guide</a>.")),
 }
 

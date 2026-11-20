@@ -449,6 +449,11 @@ MODELS += [
                  num("lower", "Lower limit (blank = none)", 0), num("upper", "Upper limit (blank = none)", "")],
          example=dict(file=ME + "affairs.csv", spec=dict(y="affairs", x=["age", "yearsmarried", "religiousness", "occupation", "rating"], lower=0)),
          check=dict(table=0, row=1, col=1)),
+    dict(id="heckman", group="Microeconometrics", name="Heckman sample-selection model", guide="microeconometrics-guide/heckman.html", fn=micro.heckman,
+         fields=[col("y", "Outcome (blank when not selected)"), cols("x", "Outcome-equation variables"), col("sel", "Selection indicator (1 = outcome observed)"),
+                 cols("z", "Selection-equation variables (include an exclusion restriction)")],
+         example=dict(file=ME + "mroz.csv", spec=dict(y="lwage", x=["educ", "exper", "expersq"], sel="inlf", z=["educ", "exper", "expersq", "age", "kidslt6", "kidsge6", "nwifeinc"])),
+         check=dict(table=0, row=1, col=1)),
 ]
 
 CE = "oes/examples/"

@@ -1060,5 +1060,21 @@
    "label": "Log-likelihood",
    "value": -705.5762
   }
+ },
+ "heckman": {
+  "nobs": 753,
+  "table_index": 0,
+  "table": "Outcome equation (maximum likelihood)",
+  "row": "educ",
+  "row_index": 1,
+  "col": "Coef.",
+  "col_index": 1,
+  "value": 0.10835,
+  "rtol": 0.001,
+  "seconds": 0.4,
+  "summary": {
+   "label": "Log-likelihood",
+   "value": -832.885
+  }
  }
 }

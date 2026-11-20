@@ -246,6 +246,12 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/microeconometrics-guide/heckman.jpg",
+  "kicker": "Microeconometrics Guide · Model guide",
+  "title": "Heckman Sample-Selection Model",
+  "sub": "An outcome you observe only for a self-selected part of the sample, such as wages for women who work, and you want the effect for…"
+ },
+ {
   "out": "assets/og/microeconometrics-guide/index.jpg",
   "kicker": "Microeconometrics Guide",
   "title": "Which microeconometric model fits your outcome?",
