@@ -1007,3 +1007,55 @@ def granger_ty(df, spec):
 def _ty_design(data, L):
     T, k = data.shape
     return np.column_stack([np.ones(T - L)] + [data[L - l:T - l, j] for l in range(1, L + 1) for j in range(k)])
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Seasonal decomposition (STL), seasonality tests and seasonal adjustment
+# ---------------------------------------------------------------------------------------------------------------
+def seasonal(df, spec):
+    import statsmodels.api as sm
+    from statsmodels.tsa.seasonal import STL
+    y = need(spec, "y", "series")
+    d, labels = _series_frame(df, spec, [y])
+    x = d[y].to_numpy(float); n = len(x)
+    m = int_option(spec, "period", 4, 2, 52, "Seasonal period")
+    if n < 3 * m + 4:
+        raise OESError(f"The series is too short for a seasonal period of {m}: at least {3 * m + 4} observations are needed.")
+    mode = spec.get("mode") or "multiplicative"
+    if mode not in ("additive", "multiplicative"):
+        raise OESError("Choose additive or multiplicative.")
+    if mode == "multiplicative" and (x <= 0).any():
+        raise OESError("A multiplicative decomposition needs a positive series; choose additive.")
+    robust = (spec.get("robust") or "yes") == "yes"
+    z = np.log(x) if mode == "multiplicative" else x
+    res = STL(z, period=m, robust=robust, seasonal=int_option(spec, "swindow", 7, 3, 101, "Seasonal window") | 1).fit()
+    S, T_, R = np.asarray(res.seasonal), np.asarray(res.trend), np.asarray(res.resid)
+    Fs = max(0.0, 1 - R.var() / (S + R).var()); Ft = max(0.0, 1 - R.var() / (T_ + R).var())
+    # test for seasonality: F test of period dummies in a regression of the detrended series
+    det = z - T_; per = np.arange(n) % m
+    D = np.column_stack([(per == j).astype(float) for j in range(m)])
+    ols = sm.OLS(det, D).fit(); Fst = ((det - det.mean()) @ (det - det.mean()) - ols.ssr) / (m - 1) / (ols.ssr / (n - m)); pF = stats.f.sf(Fst, m - 1, n - m)
+    kw = stats.kruskal(*[det[per == j] for j in range(m)])
+    adj = np.exp(z - S) if mode == "multiplicative" else z - S
+    factors = np.exp(S[:m]) if mode == "multiplicative" else S[:m]
+    # seasonal pattern by period (average over the sample) and stability of its amplitude
+    srow = []
+    thirds = np.array_split(np.arange(n), 3)
+    for j in range(m):
+        vals = [(np.exp(S[i]) if mode == "multiplicative" else S[i]) for i in range(n) if per[i] == j]
+        srow.append([f"period {j + 1}", f(np.mean(vals), 4), f(np.min(vals), 4), f(np.max(vals), 4)])
+    amp = [float(np.ptp([np.mean([S[i] for i in th if per[i] == j]) for j in range(m)])) for th in thirds]
+    tabs = [table(f"Seasonal factors ({mode})", ["Position in the cycle", "Mean factor", "Minimum", "Maximum"], srow,
+                  "Multiplicative factors are ratios to the trend (1.00 = no effect); additive factors are in the units of the series. The first observation is position 1.")]
+    tabs.append(table("Strength and tests", ["Statistic", "Value", "p-value"],
+                      [["Seasonal strength (0 to 1)", f(Fs, 3), None], ["Trend strength (0 to 1)", f(Ft, 3), None], ["F test of seasonal dummies (detrended)", f(Fst, 2), f(pF, 4)],
+                       ["Kruskal-Wallis test across periods", f(kw[0], 2), f(kw[1], 4)]],
+                      "Strength = 1 - Var(remainder) / Var(component + remainder) (Wang, Smith and Hyndman). The tests are for equal means across the positions of the cycle."))
+    tabs.append(table("Is the seasonal pattern stable?", ["Part of the sample", "Seasonal amplitude (max - min of the mean factor, log units)" if mode == "multiplicative" else "Seasonal amplitude (max - min)"],
+                      [[f"Part {i + 1} (to {labels[th[-1]]})", f(a, 4)] for i, (th, a) in enumerate(zip(thirds, amp))], "A changing amplitude means the pattern evolves; STL allows this, fixed dummies do not."))
+    ch = [chart(f"{y}: original, trend and seasonally adjusted", labels, [(y, x), ("trend", np.exp(T_) if mode == "multiplicative" else T_), ("seasonally adjusted", adj)]),
+          chart("Seasonal component", labels, [("seasonal", np.exp(S) if mode == "multiplicative" else S)])]
+    return result("seasonal", f"Seasonal decomposition (STL): {y}", n, [stat("Observations", n), stat("Seasonal strength", Fs, 3), stat("Trend strength", Ft, 3),
+                  stat("Seasonality test p-value", float(pF), 4)], tabs, ch,
+                  ["STL is a descriptive filter: it is not the X-13 ARIMA-SEATS procedure used by statistical agencies, and it does not adjust for trading days or holidays.",
+                   "Seasonally adjust before estimating only if the seasonal pattern is not part of the question; otherwise include seasonal terms in the model."])

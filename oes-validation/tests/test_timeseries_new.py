@@ -253,3 +253,38 @@ def test_granger_ty_detects_true_causality_and_is_not_fooled_by_random_walks():
 def test_granger_ty_errors():
     assert "two" in o.run("granger_ty", money().to_csv(index=False), dict(x=["log_price"]))["error"]
     assert "AIC" in o.run("granger_ty", money().to_csv(index=False), dict(x=["log_price", "log_m2"], ic="xx"))["error"]
+
+
+# ------------------------------------------------------------------ seasonal decomposition
+GAS = os.path.join(OX, "uk_gas.csv")
+def gas(): return pd.read_csv(GAS)
+
+
+def test_seasonal_registered():
+    m = o.BY_ID["seasonal"]
+    assert os.path.exists(os.path.join(ROOT, m["guide"])) and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+def test_seasonal_strength_and_adjusted_series_match_statsmodels_stl():
+    from statsmodels.tsa.seasonal import STL
+    d = gas(); r = ts_extra.seasonal(d, dict(y="gas", time="date", period=4))
+    z = np.log(d.gas.to_numpy(float)); res = STL(z, period=4, robust=True, seasonal=7).fit()
+    Fs = max(0, 1 - res.resid.var() / (res.seasonal + res.resid).var())
+    assert next(s["value"] for s in r["summary"] if s["label"] == "Seasonal strength") == pytest.approx(Fs, abs=5e-4)
+    adj = r["charts"][0]["series"][2]["y"]; assert np.allclose(adj, np.round(np.exp(z - res.seasonal), 6), atol=1e-4)
+
+
+def test_seasonal_pattern_recovered_and_white_noise_not_seasonal():
+    rng = np.random.default_rng(9); n = 160; t = np.arange(n); fac = np.array([1.3, 0.9, 0.6, 1.2]); fac = fac / fac.mean()
+    x = (50 + .5 * t) * fac[t % 4] * np.exp(.02 * rng.standard_normal(n))
+    r = ts_extra.seasonal(pd.DataFrame({"x": x}), dict(y="x", period=4))
+    got = np.array([row[1] for row in r["tables"][0]["rows"]], float); assert np.allclose(got, fac / np.exp(np.log(fac).mean()), atol=0.03)      # STL factors have geometric mean one
+    w = ts_extra.seasonal(pd.DataFrame({"x": 10 + rng.standard_normal(n)}), dict(y="x", period=4, mode="additive"))
+    assert next(s["value"] for s in w["summary"] if s["label"] == "Seasonality test p-value") > 0.01
+
+
+def test_seasonal_errors():
+    d = gas()
+    assert "positive" in o.run("seasonal", d.assign(gas=d.gas - 200).to_csv(index=False), dict(y="gas"))["error"]
+    assert "short" in o.run("seasonal", d.head(10).to_csv(index=False), dict(y="gas", period=4))["error"]
+    assert "Choose" in o.run("seasonal", d.to_csv(index=False), dict(y="gas", mode="mixed"))["error"]
