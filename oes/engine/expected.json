@@ -1076,5 +1076,21 @@
    "label": "Log-likelihood",
    "value": -832.885
   }
+ },
+ "count": {
+  "nobs": 4000,
+  "table_index": 0,
+  "table": "Coefficient estimates",
+  "row": "lncoins",
+  "row_index": 1,
+  "col": "Coef.",
+  "col_index": 1,
+  "value": -0.060317,
+  "rtol": 0.001,
+  "seconds": 0.1,
+  "summary": {
+   "label": "Log-likelihood",
+   "value": -8621.7735
+  }
  }
 }

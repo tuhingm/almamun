@@ -454,6 +454,11 @@ MODELS += [
                  cols("z", "Selection-equation variables (include an exclusion restriction)")],
          example=dict(file=ME + "mroz.csv", spec=dict(y="lwage", x=["educ", "exper", "expersq"], sel="inlf", z=["educ", "exper", "expersq", "age", "kidslt6", "kidsge6", "nwifeinc"])),
          check=dict(table=0, row=1, col=1)),
+    dict(id="count", group="Microeconometrics", name="Poisson and negative-binomial regression (counts)", guide="microeconometrics-guide/count-models.html", fn=micro.count,
+         fields=[col("y", "Count outcome"), cols("x", "Explanatory variables"), sel("family", "Model", [["poisson", "Poisson"], ["negbin", "Negative binomial (NB2)"]], "poisson"),
+                 sel("cov", "Standard errors", [["robust", "Robust (sandwich)"], ["model", "Model-based"]], "robust"), col("exposure", "Exposure variable (optional)", required=False)],
+         example=dict(file=ME + "doctor_visits.csv", spec=dict(y="mdvis", x=["lncoins", "idp", "lpi", "fmde", "physlm", "disea", "hlthg", "hlthf", "hlthp"], family="negbin")),
+         check=dict(table=0, row=1, col=1)),
 ]
 
 CE = "oes/examples/"
