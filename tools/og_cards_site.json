@@ -90,6 +90,12 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/bayesian-guide/structural-time-series.jpg",
+  "kicker": "Bayesian Guide · Model guide",
+  "title": "Bayesian Structural Time Series",
+  "sub": "A series with a drifting level, a trend or a seasonal pattern that you want to decompose, interpolate over gaps or forecast with…"
+ },
+ {
   "out": "assets/og/bayesian-guide/sv-var.jpg",
   "kicker": "Bayesian Guide · Model guide",
   "title": "Stochastic-Volatility VAR (SV-VAR)",

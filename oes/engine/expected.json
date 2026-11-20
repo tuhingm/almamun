@@ -1688,5 +1688,21 @@
    "label": "Largest R-hat",
    "value": 1.017
   }
+ },
+ "bsts": {
+  "nobs": 144,
+  "table_index": 0,
+  "table": "Posterior of the standard deviations of the components",
+  "row": "Irregular (observation noise)",
+  "row_index": 0,
+  "col": "Mean",
+  "col_index": 1,
+  "value": 0.012471,
+  "rtol": 0.05,
+  "seconds": 2.5,
+  "summary": {
+   "label": "Posterior mean of the signal-to-noise ratio",
+   "value": 2.373
+  }
  }
 }

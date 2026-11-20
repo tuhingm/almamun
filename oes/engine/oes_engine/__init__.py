@@ -703,6 +703,13 @@ MODELS += [
                  num("prior_sd", "Prior s.d. of the standardised coefficients", 10),
                  num("draws", "Draws per chain", 2000), num("burn", "Burn-in", 1000), num("chains", "Chains", 2), num("seed", "Random seed", 0)],
          example=dict(file="bayesian-guide/examples/engel.csv", spec=dict(y="foodexp", x=["income"], draws=1000, burn=500))),
+    dict(id="bsts", group="Bayesian", name="Bayesian structural time series (local level / trend, seasonal, forecasts)", guide="bayesian-guide/structural-time-series.html", fn=bayes_more.bsts,
+         fields=[col("y", "Series (blank cells are filled in)"), cols("x", "Regressors (optional, no forecast with them)", required=False), TIME,
+                 sel("trend", "Trend", [["level", "Local level (random walk)"], ["trend", "Local linear trend (random-walk slope)"]], "level"),
+                 num("seasonal", "Seasonal period (0 = none; 12 monthly, 4 quarterly)", 0), num("horizon", "Forecast horizon (periods)", 0),
+                 num("prior_scale", "Prior guess for each component's s.d., share of the s.d. of y", 0.01),
+                 num("draws", "Draws per chain", 1500), num("burn", "Burn-in", 500), num("chains", "Chains", 2), num("seed", "Random seed", 0)],
+         example=dict(file="bayesian-guide/examples/airline.csv", spec=dict(y="lpass", time="month", trend="trend", seasonal=12, horizon=12, draws=800, burn=300))),
 ]
 
 STAT_MODELS = stat_registry.build(col, cols, num, sel)       # the Statistics Division: its own page, registered like every other model

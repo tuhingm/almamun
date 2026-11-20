@@ -791,3 +791,255 @@ def bayes_qr(df, spec):
                stat("Largest R-hat", worst_r, 3), stat("Smallest effective sample size", min(float(r_[3]) for r_ in diag), 0)]
     return result("bayes_qr", f"Bayesian quantile regression: {y}", n, summary, tabs, charts,
                   ["Kozumi-Kobayashi (2011) location-scale mixture of the asymmetric Laplace distribution. The working likelihood gives the right centre for the quantile but not the right spread, so by default the draws are rescaled to the sandwich covariance (Yang, Wang and He 2016); set the adjustment to no to see the raw posterior. Each quantile is a separate model, so differences between quantiles treat their estimates as independent, which slightly overstates the uncertainty of the difference."])
+
+
+# ================================================================================================ Bayesian structural time series
+def _bsts_layout(T, trend, s):
+    """Index of each state: interleaved by time (level, slope, seasonal) so that the precision matrix is banded."""
+    m = 1 + (1 if trend else 0) + (1 if s > 1 else 0)
+    return m, (lambda t, c: t * m + c)
+
+
+def _bsts_gibbs(ys, X, obs, trend, s, T, ndraw, burn, rng, prior_b, prior_a, init_scale=1.0, b_irr=0.001):
+    """Gibbs sampler for y_t = level_t + seasonal_t + x_t'b + e_t with random-walk level, optional random-walk slope and seasonal.
+    The states are drawn jointly from their banded Gaussian conditional (perturbation sampling), the variances from inverse gammas."""
+    import scipy.sparse as sp
+    from scipy.linalg import cholesky_banded, cho_solve_banded
+    n = len(ys)
+    m, ix = _bsts_layout(T, trend, s)
+    N = T * m
+    lv = lambda t: ix(t, 0)
+    sl = (lambda t: ix(t, 1)) if trend else None
+    se = (lambda t: ix(t, 1 + (1 if trend else 0))) if s > 1 else None
+    big = 1e4
+    rows_i, rows_j, rows_v, kind = [], [], [], []             # sparse design A: one row per constraint
+    r = 0
+    def add(cols, vals, k):
+        nonlocal r
+        for c_, v_ in zip(cols, vals):
+            rows_i.append(r); rows_j.append(c_); rows_v.append(v_)
+        kind.append(k); r += 1
+    for t in range(n):
+        if obs[t]:
+            add([lv(t)] + ([se(t)] if se else []), [1.0] + ([1.0] if se else []), 0)          # observation
+    for t in range(T - 1):
+        add([lv(t + 1), lv(t)] + ([sl(t)] if trend else []), [1.0, -1.0] + ([-1.0] if trend else []), 1)          # level
+    if trend:
+        for t in range(T - 1):
+            add([sl(t + 1), sl(t)], [1.0, -1.0], 2)                                                                   # slope
+    if s > 1:
+        for t in range(s - 1, T):
+            add([se(t - j) for j in range(s)], [1.0] * s, 3)                                                           # seasonal sum
+    first = r
+    add([lv(0)], [1.0], 4)                                                                                            # diffuse initial level
+    if trend:
+        add([sl(0)], [1.0], 5)
+    if s > 1:
+        for j in range(s - 1):
+            add([se(j)], [1.0], 6)
+    A = sp.csr_matrix((rows_v, (rows_i, rows_j)), shape=(r, N))
+    kind = np.array(kind)
+    nobs_rows = int((kind == 0).sum())
+    obs_idx = np.where(obs)[0]
+    prec_diag = np.ones(r)
+    Q0 = None
+    nb = X.shape[1] if X is not None else 0
+    beta = np.zeros(nb)
+    v_e, v_l, v_s, v_g = 0.1, 0.01, 0.001, 0.001
+    out = dict(lvl=[], slp=[], sea=[], sig=[], beta=[])
+    # state prior means: initial level at y_1
+    y1 = ys[obs_idx[0]]
+    for it in range(ndraw + burn):
+        w = np.empty(r)
+        w[kind == 0] = 1.0 / v_e; w[kind == 1] = 1.0 / v_l; w[kind == 2] = 1.0 / v_s; w[kind == 3] = 1.0 / v_g
+        w[kind >= 4] = 1.0 / big
+        yy = ys[obs_idx] - (X[obs_idx] @ beta if nb else 0.0)
+        c = np.zeros(r); c[kind == 0] = yy; c[kind == 4] = y1
+        sw = np.sqrt(w)
+        Q = (A.T @ sp.diags(w) @ A).tocsc()
+        rhs = A.T @ (w * c + sw * rng.standard_normal(r))
+        D = Q.todia(); offs = D.offsets; bw = int(max(-offs.min(), 0))
+        ab = np.zeros((bw + 1, N))
+        for k_, o in enumerate(offs):
+            if o <= 0:
+                d_ = -o; ab[d_, :N - d_] = D.data[k_, :N - d_]
+        cb = cholesky_banded(ab, lower=True)
+        z = cho_solve_banded((cb, True), rhs)
+        mu = z[0::m]; col = 1
+        slp = z[col::m] if trend else None; col += 1 if trend else 0
+        sea = z[col::m] if s > 1 else None
+        fit = mu + (sea if s > 1 else 0.0)
+        if nb:
+            res_b = ys[obs_idx] - fit[obs_idx]
+            Xo = X[obs_idx]
+            P = Xo.T @ Xo / v_e + np.eye(nb) / 100.0
+            Pc = np.linalg.inv(P); Pc = (Pc + Pc.T) / 2
+            beta = rng.multivariate_normal(Pc @ (Xo.T @ res_b / v_e), Pc)
+            e = res_b - Xo @ beta
+        else:
+            e = ys[obs_idx] - fit[obs_idx]
+        v_e = _ig(rng, prior_a + 0.5 * len(e), b_irr + 0.5 * float((e ** 2).sum()))
+        dl = mu[1:] - mu[:-1] - (slp[:-1] if trend else 0.0)
+        v_l = _ig(rng, prior_a + 0.5 * len(dl), prior_b + 0.5 * float((dl ** 2).sum()))
+        if trend:
+            ds = slp[1:] - slp[:-1]
+            v_s = _ig(rng, prior_a + 0.5 * len(ds), prior_b + 0.5 * float((ds ** 2).sum()))
+        if s > 1:
+            cs = np.array([sea[t - s + 1:t + 1].sum() for t in range(s - 1, T)])
+            v_g = _ig(rng, prior_a + 0.5 * len(cs), prior_b + 0.5 * float((cs ** 2).sum()))
+        if it >= burn:
+            out["lvl"].append(mu); out["sig"].append([v_e, v_l, v_s if trend else 0.0, v_g if s > 1 else 0.0])
+            if trend: out["slp"].append(slp)
+            if s > 1: out["sea"].append(sea)
+            out["beta"].append(beta.copy())
+    return {k: (np.array(v) if len(v) else None) for k, v in out.items()}
+
+
+def bsts(df, spec):
+    import statsmodels.api as sm
+    from .bayes import _geweke
+    from .bayes_extra import _rhat_ess
+    from .core import check_columns, time_order
+    y_ = need(spec, "y", "series")
+    xs = as_list(spec.get("x"))
+    distinct([y_], xs)
+    tcol = spec.get("time")
+    if tcol:
+        check_columns(df, [tcol] + [y_] + xs); df = time_order(df, tcol)
+    else:
+        check_columns(df, [y_] + xs)
+    d = df.reset_index(drop=True)
+    y = pd.to_numeric(d[y_], errors="coerce").to_numpy(float)
+    n0 = len(d)
+    labels = d[tcol].astype(str).tolist() if tcol else [str(i + 1) for i in range(n0)]
+    trend = str(spec.get("trend", "level")) == "trend"
+    if str(spec.get("trend", "level")) not in ("level", "trend"):
+        raise OESError("Choose the trend: level or trend.")
+    s = int_option(spec, "seasonal", 0, 0, 52, "Seasonal period")
+    if s == 1:
+        raise OESError("The seasonal period must be 0 (none) or at least 2.")
+    h = int_option(spec, "horizon", 0, 0, 120, "Forecast horizon")
+    if xs and h > 0:
+        raise OESError("Forecasts need future values of the regressors: set the horizon to 0 or drop the regressors.")
+    obs = np.isfinite(y)
+    if xs:
+        Xd = d[xs].apply(pd.to_numeric, errors="coerce")
+        if Xd.isna().any().any():
+            raise OESError("The regressors have missing values: drop those rows or fill them in.")
+        Xr = Xd.to_numpy(float); Xr = (Xr - Xr.mean(0)) / np.where(Xr.std(0) > 0, Xr.std(0), 1.0)
+        xm, xsd = Xd.to_numpy(float).mean(0), Xd.to_numpy(float).std(0)
+        if (xsd == 0).any():
+            raise OESError("A regressor is constant: drop it.")
+    else:
+        Xr = None
+    if obs.sum() < max(15, 2 * s + 5):
+        raise OESError(f"Too few observations ({int(obs.sum())}) for this model: at least {max(15, 2 * s + 5)} are needed.")
+    if n0 + h > 400:
+        raise OESError("At most 400 time points (observations plus forecast horizon) are supported.")
+    ym, ysd = np.nanmean(y), np.nanstd(y)
+    if ysd == 0:
+        raise OESError("The series is constant.")
+    ys = np.full(n0 + h, np.nan); ys[:n0] = (y - ym) / ysd
+    obs_f = np.isfinite(ys)
+    ys0 = np.where(obs_f, ys, 0.0)
+    Xf = None if Xr is None else Xr
+    ndraw = int_option(spec, "draws", 1500, 200, 20000, "Draws per chain")
+    burn = int_option(spec, "burn", 500, 0, 20000, "Burn-in")
+    nch = int_option(spec, "chains", 2, 2, 6, "Chains")
+    seed = int_option(spec, "seed", 0, 0, 10 ** 9, "Random seed")
+    pb = float_option(spec, "prior_scale", 0.01, "Prior scale of the components")
+    if pb <= 0:
+        raise OESError("The prior scale of the variances must be positive.")
+    pb = pb ** 2                                          # prior mean variance of each component, in standardised units
+    T = n0 + h
+    pa = 1.0
+    if xs:
+        Xf = np.vstack([Xr, np.zeros((h, Xr.shape[1]))]) if h else Xr
+    chains = [_bsts_gibbs(ys0, Xf, obs_f, trend, s, T, ndraw, burn, np.random.default_rng(seed + 1000 * c), pb, pa) for c in range(nch)]  # the irregular term has a weak prior (b = 0.001)
+    cat = lambda k: None if chains[0][k] is None else np.vstack([c[k] for c in chains])
+    LV, SG = cat("lvl"), cat("sig"); SL, SE, BE = cat("slp"), cat("sea"), cat("beta")
+    SD = np.sqrt(SG) * ysd
+    rng = np.random.default_rng(seed + 77)
+    names = ["Irregular (observation noise)", "Level", "Slope", "Seasonal"]
+    use = [0, 1] + ([2] if trend else []) + ([3] if s > 1 else [])
+    ml = sm.tsa.UnobservedComponents(pd.Series(y[:n0]), "local linear trend" if trend else "local level",
+                                     seasonal=s if s > 1 else None).fit(disp=0) if not xs else None
+    mle = {}
+    if ml is not None:
+        pn = list(ml.params.index)
+        for lab, key in ((0, "irregular"), (1, "level"), (2, "trend"), (3, "seasonal")):
+            for nm in pn:
+                if nm.endswith(key) and nm.startswith("sigma2"):
+                    mle[lab] = float(np.sqrt(ml.params[nm]))
+    rows = []; diag = []
+    for j in use:
+        v = SD[:, j]
+        per = [np.sqrt(c["sig"][:, j]) * ysd for c in chains]
+        rh, ess = _rhat_ess(per)
+        diag.append([names[j], rh, ess, _geweke(per[0])])
+        rows.append([names[j], f(v.mean()), f(np.median(v)), f(np.percentile(v, 2.5)), f(np.percentile(v, 97.5)), f(mle[j]) if j in mle else "n/a"])
+    tabs = [table("Posterior of the standard deviations of the components", ["Component", "Mean", "Median", "2.5%", "97.5%", "Maximum likelihood (Kalman filter)"], rows,
+                  "Standard deviations in the units of the series. The maximum-likelihood column is the classical estimate from the same model; it is a point estimate and can be exactly zero for a component, where the posterior still gives a range.")]
+    lvl_o = LV[:, :T] * ysd + ym
+    tr_m = lvl_o.mean(0); tr_lo, tr_hi = np.percentile(lvl_o, [2.5, 97.5], axis=0)
+    ratio = SD[:, 1] / SD[:, 0]
+    lastrows = [["Level at the last observation", f(lvl_o[:, n0 - 1].mean()), f(lvl_o[:, n0 - 1].std(ddof=1)), f(np.percentile(lvl_o[:, n0 - 1], 2.5)), f(np.percentile(lvl_o[:, n0 - 1], 97.5))]]
+    if trend:
+        sl_o = SL[:, :T] * ysd
+        lastrows.append(["Slope at the last observation (per period)", f(sl_o[:, n0 - 1].mean()), f(sl_o[:, n0 - 1].std(ddof=1)), f(np.percentile(sl_o[:, n0 - 1], 2.5)), f(np.percentile(sl_o[:, n0 - 1], 97.5))])
+        lastrows.append(["Probability that the slope is positive", f((sl_o[:, n0 - 1] > 0).mean(), 3), "", "", ""])
+    if xs:
+        bo = BE * ysd / xsd
+        for j, v in enumerate(xs):
+            lastrows.append([f"Coefficient of {v}", f(bo[:, j].mean()), f(bo[:, j].std(ddof=1)), f(np.percentile(bo[:, j], 2.5)), f(np.percentile(bo[:, j], 97.5))])
+    tabs.append(table("States and coefficients", ["Quantity", "Mean", "Std. dev.", "2.5%", "97.5%"], lastrows))
+    sea_o = None
+    if s > 1:
+        sea_o = SE[:, :T] * ysd
+        sm_ = sea_o[:, n0 - s:n0]
+        tabs.append(table(f"Seasonal effects over the last {s} periods", ["Period", "Mean", "2.5%", "97.5%"],
+                          [[labels[n0 - s + i], f(sm_[:, i].mean()), f(np.percentile(sm_[:, i], 2.5)), f(np.percentile(sm_[:, i], 97.5))] for i in range(s)],
+                          "Effects add to the level; over a full cycle they sum to about zero."))
+    # fitted, residuals
+    fit = lvl_o[:, :n0] + (sea_o[:, :n0] if sea_o is not None else 0.0)
+    if xs:
+        fit = fit + (Xr @ (BE * ysd).T).T
+    sd_e = SD[:, 0]
+    oi = np.where(obs)[0]
+    zres = ((y[oi] - fit[:, oi].mean(0)) / sd_e.mean())
+    from statsmodels.stats.diagnostic import acorr_ljungbox
+    lag = min(10, max(2, len(oi) // 5))
+    lb = acorr_ljungbox(zres, lags=[lag], return_df=True)
+    ac1 = float(np.corrcoef(zres[1:], zres[:-1])[0, 1])
+    tabs.append(table("Residual check", ["Check", "Value", "Detail"],
+                      [["Standardised residuals: share beyond +-2", f((np.abs(zres) > 2).mean(), 3), "about 0.05 if the model fits"],
+                       ["First-order autocorrelation", f(ac1, 3), "near 0 if the components capture the dynamics"],
+                       [f"Ljung-Box p-value ({lag} lags)", f(float(lb['lb_pvalue'].iloc[0]), 4), "a small value means remaining dynamics"],
+                       ["Signal-to-noise ratio (level s.d. / irregular s.d.), posterior mean", f(ratio.mean(), 3), "how fast the level moves relative to the noise"]],
+                      "These residuals come from the smoothed states, which have already adapted to the data: they are somewhat too small and negatively autocorrelated by construction. Use them to spot gross problems; for an honest test of forecasts, hold out the last observations and compare (see the guide)."))
+    charts = []
+    xlab = labels + [f"+{i + 1}" for i in range(h)]
+    charts.append(chart(f"{y_} and the posterior level (95% band)", labels, [("Series", np.where(obs, y, np.nan)), ("Level", tr_m[:n0])], "", y_, band=(tr_lo[:n0], tr_hi[:n0])))
+    if h:
+        ye = lvl_o[:, n0:] + (sea_o[:, n0:] if sea_o is not None else 0.0) + rng.standard_normal((len(LV), h)) * sd_e[:, None]
+        pm = ye.mean(0); pl, ph = np.percentile(ye, [2.5, 97.5], axis=0)
+        k0 = max(0, n0 - 3 * max(s, 4))
+        tabs.append(table(f"Forecast for the next {h} periods", ["Step", "Mean", "Std. dev.", "2.5%", "97.5%"],
+                          [[f"+{i + 1}", f(pm[i]), f(ye[:, i].std(ddof=1)), f(pl[i]), f(ph[i])] for i in range(h)],
+                          "Predictive distribution of the observation: includes the uncertainty of the level, the slope, the seasonal and the noise."))
+        charts.append(chart("Forecast and 95% predictive band", labels[k0:] + [f"+{i + 1}" for i in range(h)],
+                            [("Series", list(y[k0:n0]) + [np.nan] * h), ("Forecast", [np.nan] * (n0 - 1 - k0) + [fit[:, n0 - 1].mean()] + list(pm))],
+                            "", y_, band=([np.nan] * (n0 - 1 - k0) + [fit[:, n0 - 1].mean()] + list(pl), [np.nan] * (n0 - 1 - k0) + [fit[:, n0 - 1].mean()] + list(ph))))
+    if s > 1:
+        charts.append(chart("Seasonal effect over the last cycle (95% band)", [labels[n0 - s + i] for i in range(s)], [("Seasonal", sm_.mean(0))], "", "effect",
+                            band=(np.percentile(sm_, 2.5, axis=0), np.percentile(sm_, 97.5, axis=0))))
+    miss = int((~obs).sum())
+    summary = [stat("Observations", int(obs.sum())), stat("Trend", "local linear trend" if trend else "local level"), stat("Seasonal period", s if s > 1 else "none")]
+    if miss: summary.append(stat("Missing values filled in", miss))
+    summary += [stat("Posterior mean of the signal-to-noise ratio", float(ratio.mean()), 3), stat("Largest R-hat", max(float(r_[1]) for r_ in diag), 3), stat("Smallest effective sample size", min(float(r_[2]) for r_ in diag), 0)]
+    tabs.append(table("MCMC convergence diagnostics (variance components)", ["Component", "R-hat", "Effective sample size", "Geweke z (chain 1)"],
+                      [[r_[0], f(r_[1], 3), f(r_[2], 0), f(r_[3], 2)] for r_ in diag],
+                      f"{nch} chains of {ndraw} draws after {burn} burn-in. The states are drawn jointly in one block, so mixing is usually good; the variances of weakly identified components mix slowest."))
+    notes = [f"Series standardised for the prior; results in the original units. Inverse-gamma({pa:g}, {pb:g}) prior on the variance of each state component in standardised units (prior guess for its s.d.: {np.sqrt(pb):g} of the s.d. of the series) and a weak inverse-gamma({pa:g}, 0.001) prior on the irregular variance, diffuse prior on the initial states. "
+             "States are sampled jointly from their banded Gaussian conditional (perturbation sampling), so no Kalman filter loop is needed. Missing values are treated as unobserved and the model fills them in."]
+    return result("bsts", f"Bayesian structural time series: {y_}", int(obs.sum()), summary, tabs, charts, notes)

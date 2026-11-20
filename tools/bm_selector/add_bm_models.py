@@ -52,6 +52,10 @@ EXTRA_BAYES = {
                                           "The mean hides who gains and who does not. Bayesian quantile regression estimates the effect at several quantiles, gives a posterior and a probability that the effects differ, and rescales the intervals so they have the right width.",
                                           ["Choose the quantiles", "Estimate at each quantile", "Do the effects differ", "Correct the intervals", "Check the sampler", "Simulation coverage"]),
              "Quantile regression", "effect differs", "The effect may differ between low and high outcomes"),
+    "BSTS": ("structural-time-series", model("BSTS", "Bayesian structural time series", "Structural time series", "A series with a drifting level, trend or seasonal pattern to decompose, interpolate or forecast",
+                                             "Split a series into a level, a trend and a seasonal pattern, fill in missing observations and forecast with an interval that carries every source of uncertainty. The Bayesian version gives a posterior for each component and for every forecast.",
+                                             ["Choose the components", "Estimate and compare with the Kalman filter", "Check the sampler", "Fill in a gap", "Seasonal pattern and forecast", "Test the forecast on held-out data"]),
+             "Structural time series", "level, trend, seasonal", "I want to decompose, interpolate or forecast a series"),
 }
 MARKOV = {
     "MSTVTP": ("ms-tvtp", model("MSTVTP", "Markov switching with time-varying transition probabilities", "MS with TVTP", "Hidden regimes, and an observed variable that moves the probability of switching",

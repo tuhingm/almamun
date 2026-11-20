@@ -414,3 +414,72 @@ def test_bayes_qr_errors():
         with pytest.raises(OESError, match=msg): bayes_more.bayes_qr(d, spec)
     with pytest.raises(OESError, match="constant"): bayes_more.bayes_qr(d.assign(x=1.0), dict(y="y", x=["x"]))
     with pytest.raises(OESError, match="Too few"): bayes_more.bayes_qr(d.head(8), dict(y="y", x=["x"]))
+
+
+# ---------------------------------------------------------------------------------------- Bayesian structural time series
+def _ll_data(n=150, se=1.0, sl=0.3, seed=0):
+    rng = np.random.default_rng(seed); mu = np.cumsum(rng.normal(scale=sl, size=n)) + 10
+    return pd.DataFrame(dict(y=mu + rng.normal(scale=se, size=n))), mu
+
+
+def test_bsts_registered():
+    m = o.BY_ID["bsts"]; assert m["group"] == "Bayesian" and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+def test_bsts_nile_matches_kalman_mle():
+    """Posterior variance components and level against the Kalman-filter maximum likelihood (Durbin and Koopman: 15099 and 1469)."""
+    import statsmodels.api as sm
+    d = pd.read_csv(os.path.join(BX, "nile.csv")); r = bayes_more.bsts(d, dict(y="flow", time="year", draws=2500, burn=800))
+    rows = {x[0]: x for x in tab(r, "Posterior of the standard deviations")["rows"]}
+    assert rows["Irregular (observation noise)"][1] == pytest.approx(np.sqrt(15099), rel=0.12)
+    assert rows["Level"][1] == pytest.approx(np.sqrt(1469), rel=0.4) and rows["Level"][3] < np.sqrt(1469) < rows["Level"][4]
+    ml = sm.tsa.UnobservedComponents(d.flow, "local level").fit(disp=0)
+    assert abs(ml.smoothed_state[0][-1] - tab(r, "States")["rows"][0][1]) < 35
+
+
+def test_bsts_level_recovers_truth_and_coverage():
+    cov = []
+    for s in range(12):
+        d, mu = _ll_data(seed=s); r = bayes_more.bsts(d, dict(y="y", draws=500, burn=250, seed=s, prior_scale=0.1))
+        last = tab(r, "States")["rows"][0]; cov.append(last[3] <= mu[-1] <= last[4])
+    assert np.mean(cov) >= 0.75
+    est = []
+    for s in range(6):
+        d, mu = _ll_data(seed=40 + s); r = bayes_more.bsts(d, dict(y="y", draws=500, burn=250, prior_scale=0.1, seed=s))
+        est.append([x for x in tab(r, "Posterior of the standard deviations")["rows"] if x[0].startswith("Irregular")][0][1])
+    assert np.mean(est) == pytest.approx(1.0, abs=0.12)
+
+
+def test_bsts_seasonal_recovered_and_forecast_calibrated():
+    rng = np.random.default_rng(2); T = 120; pat = np.tile([3, 1, -1, -3.0], T // 4)
+    y = 0.05 * np.arange(T) + pat + rng.normal(scale=0.5, size=T)
+    d = pd.DataFrame(dict(y=y[:100])); r = bayes_more.bsts(d, dict(y="y", trend="trend", seasonal=4, horizon=20, draws=600, burn=300))
+    sea = tab(r, "Seasonal effects")["rows"]; est = np.array([row[1] for row in sea])
+    assert np.allclose(est, pat[96:100], atol=0.6)
+    fc = tab(r, "Forecast")["rows"]; inside = np.mean([row[3] <= y[100 + i] <= row[4] for i, row in enumerate(fc)])
+    assert inside >= 0.8
+
+
+def test_bsts_missing_values_filled_in():
+    d, mu = _ll_data(n=100, seed=5); d.loc[40:49, "y"] = np.nan
+    r = bayes_more.bsts(d, dict(y="y", draws=500, burn=250, prior_scale=0.1)); assert S(r)["Missing values filled in"] == 10
+    ch = r["charts"][0]; lvl = np.array(ch["series"][1]["y"], float); lo = np.array(ch["band"]["lo"], float); hi = np.array(ch["band"]["hi"], float)
+    assert (lo[40:50] <= mu[40:50] + 1e-9).mean() > 0.7 and (mu[40:50] <= hi[40:50] + 1e-9).mean() > 0.7
+    assert (hi[40:50] - lo[40:50]).mean() > (hi[:40] - lo[:40]).mean()                      # wider where there is no data
+
+
+def test_bsts_regression_coefficient():
+    rng = np.random.default_rng(9); n = 200; x = rng.normal(size=n); mu = np.cumsum(rng.normal(scale=0.1, size=n))
+    d = pd.DataFrame(dict(y=mu + 2.0 * x + rng.normal(scale=0.5, size=n), x=x))
+    r = bayes_more.bsts(d, dict(y="y", x=["x"], draws=500, burn=250, prior_scale=0.1)); row = [q for q in tab(r, "States")["rows"] if q[0].startswith("Coefficient")][0]
+    assert abs(row[1] - 2.0) < 3 * row[2]
+
+
+def test_bsts_errors():
+    d, _ = _ll_data(n=60)
+    for spec, msg in [(dict(y="y", trend="zz"), "Choose the trend"), (dict(y="y", seasonal=1), "0 \\(none\\)"), (dict(y="y", prior_scale=0), "positive"),
+                      (dict(y="y", horizon=500), "Forecast horizon"), (dict(y="y", seasonal=40), "Too few")]:
+        with pytest.raises(OESError, match=msg): bayes_more.bsts(d, spec)
+    with pytest.raises(OESError, match="constant"): bayes_more.bsts(d.assign(y=3.0), dict(y="y"))
+    with pytest.raises(OESError, match="Forecasts need"): bayes_more.bsts(d.assign(x=np.arange(60.0)), dict(y="y", x=["x"], horizon=3))
+    with pytest.raises(OESError, match="Column"): bayes_more.bsts(d, dict(y="zz"))
