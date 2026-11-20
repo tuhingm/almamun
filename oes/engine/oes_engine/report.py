@@ -50,6 +50,9 @@ def plot(result, prefix="", ncols=3, size=(3.3, 2.4)):
     fig, axes = plt.subplots(nrow, ncol, figsize=(size[0] * ncol, size[1] * nrow), squeeze=False)
     for ax, c in zip(axes.ravel(), found):
         x = list(range(len(c["x"])))
+        numeric_x = c.get("kind") == "scatter" and all(isinstance(v, (int, float)) for v in c["x"])
+        if numeric_x:
+            x = list(c["x"])                         # a scatter plot of two numeric variables uses the values themselves
         if c.get("band"):
             lo = [v if v is not None else float("nan") for v in c["band"]["lo"]]
             hi = [v if v is not None else float("nan") for v in c["band"]["hi"]]
@@ -66,9 +69,12 @@ def plot(result, prefix="", ncols=3, size=(3.3, 2.4)):
                     ax.plot(x, y, "o", ms=3.2, color="#d9661f", label=s["name"])
                 else:
                     ax.plot(x, y, lw=1.3, label=s["name"])
-        step = max(1, len(x) // 5)
-        ax.set_xticks(x[::step])
-        ax.set_xticklabels([str(v) for v in c["x"][::step]], fontsize=7)
+        if numeric_x:
+            ax.set_xlabel(c.get("xlabel", ""), fontsize=7); ax.set_ylabel(c.get("ylabel", ""), fontsize=7)
+        else:
+            step = max(1, len(x) // 5)
+            ax.set_xticks(x[::step])
+            ax.set_xticklabels([str(v) for v in c["x"][::step]], fontsize=7)
         ax.set_title(c["title"], fontsize=8)
         if len(c["series"]) > 1:
             ax.legend(fontsize=6)

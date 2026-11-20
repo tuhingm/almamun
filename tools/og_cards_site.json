@@ -366,6 +366,12 @@
   "sub": "The outcome is a yes/no event (approval, default, participation) and you want predicted probabilities, a cut-off and an honest…"
  },
  {
+  "out": "assets/og/ml-guide/clustering.jpg",
+  "kicker": "Machine Learning Guide · Model guide",
+  "title": "Clustering: k-Means, Gaussian Mixtures and Ward, with a Test of Whether the Clusters Are Real",
+  "sub": "You want to group countries, firms or households by several characteristics and need to say how many groups there are and whether…"
+ },
+ {
   "out": "assets/og/ml-guide/dml-irm.jpg",
   "kicker": "Machine Learning Guide · Model guide",
   "title": "Double Machine Learning: Interactive Model",
