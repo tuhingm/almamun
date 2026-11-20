@@ -1656,5 +1656,21 @@
    "label": "In-sample R-squared",
    "value": 0.8737
   }
+ },
+ "changepoint": {
+  "nobs": 100,
+  "table_index": 0,
+  "table": "Posterior probability of the number of breaks",
+  "row": "0",
+  "row_index": 0,
+  "col": "Posterior prob.",
+  "col_index": 1,
+  "value": 0.0,
+  "rtol": 0.05,
+  "seconds": 0.3,
+  "summary": {
+   "label": "Posterior mean number of breaks",
+   "value": 1.079
+  }
  }
 }

@@ -44,6 +44,10 @@ EXTRA_BAYES = {
                                         "OLS overfits when the model has almost as many parameters as observations. A shrinkage prior pulls the coefficients the data do not support towards zero and leaves the supported ones alone, and the posterior reports how sure you are about each.",
                                         ["Choose the prior", "Estimate and find the effects", "Compare with OLS", "Check the sampler", "Prior sensitivity", "Out-of-sample prediction"]),
                "Shrinkage regression", "many regressors", "I have more regressors than I can trust OLS with"),
+    "CPT": ("change-points", model("CPT", "Bayesian change points", "Change points", "A level or a relationship that shifted at unknown dates",
+                                   "A series or a relationship may have shifted at dates you do not know. The posterior over all segmentations is computed exactly, so you get the probability of 0, 1, 2 ... breaks and the probability of a break after each date, with regime coefficients, and no sampler to check.",
+                                   ["Choose the prior on the number of breaks", "Number of breaks", "Break dates and regimes", "Compare with Bai-Perron", "Prior sensitivity", "False-alarm check"]),
+            "Change points", "unknown dates", "A level or a relationship shifted at dates I do not know"),
 }
 MARKOV = {
     "MSTVTP": ("ms-tvtp", model("MSTVTP", "Markov switching with time-varying transition probabilities", "MS with TVTP", "Hidden regimes, and an observed variable that moves the probability of switching",

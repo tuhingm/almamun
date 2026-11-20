@@ -259,3 +259,87 @@ def test_shrink_errors():
         with pytest.raises(OESError, match=msg): bayes_more.bayes_shrink(d, spec)
     with pytest.raises(OESError, match="constant"): bayes_more.bayes_shrink(d.assign(c=1.0), dict(y="y", x=["x0", "c"]))
     with pytest.raises(OESError, match="Too few"): bayes_more.bayes_shrink(d.head(6), dict(y="y", x=["x0", "x1", "x2", "x3"]))
+
+
+# ------------------------------------------------------------------------------------------------ Bayesian change points
+def _brute_changepoint(y, Z, minseg, c, a0, b0, p, kmax):
+    """All partitions by enumeration, with segment marginal likelihoods from the multivariate Student-t form of the conjugate model."""
+    n = len(y); k1 = Z.shape[1]; cache = {}
+    def lm(t, s):
+        if (t, s) not in cache:
+            Zs = Z[t:s]; V = c * np.linalg.inv(Zs.T @ Zs + 1e-9 * np.eye(k1)); S = (b0 / a0) * (np.eye(s - t) + Zs @ V @ Zs.T)
+            cache[(t, s)] = stats.multivariate_t.logpdf(y[t:s], loc=np.zeros(s - t), shape=S, df=2 * a0)
+        return cache[(t, s)]
+    res = {}
+    for mask in itertools.product([0, 1], repeat=n - 1):
+        cps = [i + 1 for i, m in enumerate(mask) if m]; k = len(cps)
+        if k > kmax: continue
+        b = [0] + cps + [n]
+        if any(b[i + 1] - b[i] < minseg for i in range(len(b) - 1)): continue
+        res[tuple(cps)] = sum(lm(b[i], b[i + 1]) for i in range(len(b) - 1)) + k * np.log(p) + (n - 1 - k) * np.log1p(-p)
+    mx = max(res.values()); w = {k_: np.exp(v - mx) for k_, v in res.items()}; tot = sum(w.values())
+    return {k_: v / tot for k_, v in w.items()}
+
+
+def test_changepoint_registered():
+    m = o.BY_ID["changepoint"]; assert m["group"] == "Bayesian" and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+@pytest.mark.parametrize("with_x", [False, True])
+def test_changepoint_matches_brute_force_enumeration(with_x):
+    rng = np.random.default_rng(3); n = 13
+    x = rng.normal(size=n); y = np.r_[rng.normal(0, 1, 6), rng.normal(2.5, 1, 7)] + (0.8 * x if with_x else 0)
+    d = pd.DataFrame(dict(y=y, x=x)); eb, minseg, kmax = 1.5, 3 if with_x else 2, 4
+    spec = dict(y="y", min_segment=minseg, expected_breaks=eb, max_breaks=kmax); spec.update(dict(x=["x"]) if with_x else {})
+    r = bayes_more.changepoint(d, spec)
+    ys = (y - y.mean()) / y.std(); Z = np.column_stack([np.ones(n)] + ([(x - x.mean()) / pd.Series(x).std()] if with_x else []))
+    post = _brute_changepoint(ys, Z, minseg, float(n), 1.0, 0.1, eb / (n - 1), kmax)
+    pk = np.zeros(kmax + 1); pb = np.zeros(n + 1)
+    for cps, w in post.items():
+        pk[len(cps)] += w
+        for t in cps: pb[t] += w
+    got = {row[0]: row[1] for row in tab(r, "Posterior probability of the number")["rows"]}
+    for k in range(kmax + 1): assert got[k] == pytest.approx(pk[k], abs=2e-4)
+    top = {row[1]: row[2] for row in tab(r, "Posterior probability of a break")["rows"]}
+    for t in np.argsort(-pb)[:3]:
+        assert top[str(t + 1)] == pytest.approx(pb[t], abs=2e-4)
+    best = max(post, key=post.get); assert S(r)["Breaks in the most probable segmentation"] == len(best)
+
+
+def test_changepoint_nile_break_in_1898():
+    """The Nile flow (Cobb 1978; Balke 1993): a fall in the mean flow around 1898."""
+    d = pd.read_csv(os.path.join(BX, "nile.csv")); r = bayes_more.changepoint(d, dict(y="flow", time="year"))
+    s = S(r); assert s["Dates of the most probable breaks (last date of each regime)"] == "1898" and s["Most probable number of breaks"] == 1
+    seg = {row[0]: row for row in tab(r, "Most probable segmentation")["rows"]}
+    assert seg["1"][4] == pytest.approx(d[d.year <= 1898].flow.mean(), abs=6) and seg["2"][4] == pytest.approx(d[d.year > 1898].flow.mean(), abs=4)
+    assert tab(r, "Posterior probability of a break")["rows"][0][:2] == ["1898", "1899"]
+
+
+def test_changepoint_monte_carlo():
+    near, null_ok = 0, 0; R = 30
+    for s in range(R):
+        rng = np.random.default_rng(900 + s); n = 120
+        y = np.r_[rng.normal(0, 1, 60), rng.normal(1.3, 1, 60)]
+        r = bayes_more.changepoint(pd.DataFrame(dict(y=y)), dict(y="y"))
+        top = tab(r, "Posterior probability of a break")["rows"][0]; near += abs(int(top[1]) - 61) <= 8
+        y0 = rng.normal(size=n); r0 = bayes_more.changepoint(pd.DataFrame(dict(y=y0)), dict(y="y"))
+        null_ok += S(r0)["P(at least one break)"] < 0.5
+    assert near / R >= 0.85 and null_ok / R >= 0.8
+
+
+def test_changepoint_slope_change_with_regressor():
+    rng = np.random.default_rng(5); n = 150; x = rng.normal(size=n); b = np.r_[np.full(80, 0.2), np.full(70, 1.5)]
+    d = pd.DataFrame(dict(y=1 + b * x + rng.normal(scale=0.5, size=n), x=x)); r = bayes_more.changepoint(d, dict(y="y", x=["x"]))
+    assert abs(int(tab(r, "Posterior probability of a break")["rows"][0][1]) - 81) <= 6
+    seg = [row for row in tab(r, "Most probable segmentation")["rows"] if row[3] == "x"]
+    assert seg[0][4] == pytest.approx(0.2, abs=0.15) and seg[1][4] == pytest.approx(1.5, abs=0.25)
+
+
+def test_changepoint_errors():
+    d = pd.DataFrame(dict(y=np.random.default_rng(0).normal(size=60), x=np.arange(60.0)))
+    for spec, msg in [(dict(y="y", expected_breaks=0), "positive"), (dict(y="y", prior_scale=-1), "positive"), (dict(y="y", x=["x"], min_segment=2), "at least"), (dict(y="y", min_segment=1), "between 2"),
+                      (dict(y="y", max_breaks=0), "between")]:
+        with pytest.raises(OESError, match=msg): bayes_more.changepoint(d, spec)
+    with pytest.raises(OESError, match="At least 10"): bayes_more.changepoint(d.head(8), dict(y="y"))
+    with pytest.raises(OESError, match="constant"): bayes_more.changepoint(d.assign(y=1.0), dict(y="y"))
+    with pytest.raises(OESError, match="Column"): bayes_more.changepoint(d, dict(y="y", time="zz"))
