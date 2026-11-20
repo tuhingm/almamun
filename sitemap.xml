@@ -97,6 +97,15 @@
   <url><loc>https://tuhingm.github.io/almamun/ml-guide/stacking.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/ml-guide/svr.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/ml-guide/xgb.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/nonparametric-guide/extreme-values.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/nonparametric-guide/</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/nonparametric-guide/kernel-density.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/nonparametric-guide/kernel-regression.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/nonparametric-guide/multiple-testing.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/nonparametric-guide/partially-linear.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/nonparametric-guide/robust-regression.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/nonparametric-guide/splines.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/nonparametric-guide/wild-cluster-bootstrap.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/oes/ai-studio.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/oes/data-cleaning.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/oes/</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>

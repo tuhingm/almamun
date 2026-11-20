@@ -15,7 +15,7 @@ import pandas as pd
 
 from . import bayes, bayes_extra, bayes_more, breaks, causal, causal_extra, lp, markov, micro, ml, panel, pthreshold, pvar, smooth, statespace_var, svar, tar, timeseries, ts_extra
 from . import panel_extra, ml_extra
-from . import finance, productivity
+from . import finance, nonparam, productivity
 from . import stat_registry
 from .core import OESError, read_csv, time_order
 from .report import frame, plot, show, summary, tables
@@ -788,6 +788,33 @@ MODELS += [
     dict(id="spatial_cs", group="Productivity and spatial", name="Spatial regression: Moran's I, spatial lag and spatial error", guide="productivity-guide/spatial-regression.html", fn=productivity.spatial,
          fields=[col("y", "Dependent variable"), cols("x", "Regressors"), col("x_coord", "Coordinate x (or longitude)"), col("y_coord", "Coordinate y (or latitude)"), num("neighbours", "Nearest neighbours in the weights matrix", 5)],
          example=dict(file=PR + "columbus.csv", spec=dict(y="crime", x=["inc", "hoval"], x_coord="x", y_coord="y", neighbours=5))),
+    dict(id="kernreg", group="Nonparametric and robust", name="Kernel and local linear regression: bandwidth by cross-validation", guide="nonparametric-guide/kernel-regression.html", fn=nonparam.kernreg,
+         fields=[col("y", "Outcome"), col("x", "Regressor (one variable)"), sel("degree", "Local polynomial", [["1", "Local linear"], ["0", "Local constant (Nadaraya-Watson)"]], "1"), sel("kernel", "Kernel", [["gaussian", "Gaussian"], ["epanechnikov", "Epanechnikov"]], "gaussian"),
+                 num("bandwidth", "Bandwidth (blank = cross-validation)", ""), num("reps", "Bootstrap replications for the linearity test", 199), num("seed", "Random seed", 0)],
+         example=dict(file=NP + "cps71.csv", spec=dict(y="logwage", x="age", reps=99))),
+    dict(id="plm", group="Nonparametric and robust", name="Partially linear model (Robinson): parametric effects with a flexible control", guide="nonparametric-guide/partially-linear.html", fn=nonparam.plm,
+         fields=[col("y", "Outcome"), cols("x", "Parametric regressors"), col("z", "Variable with an unknown functional form")],
+         example=dict(file=NP + "engel95.csv", spec=dict(y="food", x=["nkids", "logwages"], z="logexp"))),
+    dict(id="pspline", group="Nonparametric and robust", name="Penalised splines and additive models (P-splines, GCV)", guide="nonparametric-guide/splines.html", fn=nonparam.pspline,
+         fields=[col("y", "Outcome"), col("x", "Variable to smooth"), cols("z", "Linear covariates (optional)", required=False), num("knots", "Number of knots", 20), num("lambda", "Smoothing parameter (blank = generalised cross-validation)", "")],
+         example=dict(file=NP + "mcycle.csv", spec=dict(y="accel", x="times"))),
+    dict(id="robreg", group="Nonparametric and robust", name="Robust regression: Huber, bisquare, LAD and MM estimators", guide="nonparametric-guide/robust-regression.html", fn=nonparam.robreg,
+         fields=[col("y", "Outcome"), cols("x", "Regressors"), col("label", "Observation label (optional)", required=False), num("flag", "Flag observations beyond this many robust standard deviations", 2.5), num("seed", "Random seed", 0)],
+         example=dict(file=NP + "hills.csv", spec=dict(y="time", x=["dist", "climb"], label="race"))),
+    dict(id="wildboot", group="Nonparametric and robust", name="Cluster-robust inference and the wild cluster bootstrap", guide="nonparametric-guide/wild-cluster-bootstrap.html", fn=nonparam.wildboot,
+         fields=[col("y", "Outcome"), cols("x", "Regressors"), col("cluster", "Cluster identifier"), col("test", "Variable to test (blank = first regressor)", required=False),
+                 sel("weights", "Bootstrap weights", [["rademacher", "Rademacher (+1 or -1)"], ["webb", "Webb six-point (few clusters)"]], "rademacher"), num("null", "Null value", 0), num("reps", "Bootstrap replications", 999), num("seed", "Random seed", 0)],
+         example=dict(file=NP + "petersencl.csv", spec=dict(y="y", x=["x"], cluster="firm", reps=499))),
+    dict(id="kde", group="Nonparametric and robust", name="Kernel density estimation: bandwidth selection and test of modes", guide="nonparametric-guide/kernel-density.html", fn=nonparam.kde,
+         fields=[col("x", "Variable"), num("bandwidth", "Bandwidth (blank = Sheather-Jones)", ""), sel("log", "Take logs", [["no", "No"], ["yes", "Yes"]], "no"), num("modes", "Null number of modes for Silverman's test", 1), num("reps", "Bootstrap replications (0 = skip the test)", 100), num("seed", "Random seed", 0)],
+         example=dict(file=NP + "faithful.csv", spec=dict(x="waiting", reps=100))),
+    dict(id="fdr", group="Nonparametric and robust", name="Multiple testing: Bonferroni, Holm, Benjamini-Hochberg and q-values", guide="nonparametric-guide/multiple-testing.html", fn=nonparam.fdr,
+         fields=[col("p", "Column of p-values"), col("label", "Name of each test (optional)", required=False), num("alpha", "Level", 0.05)],
+         example=dict(file=NP + "coralpval.csv", spec=dict(p="p", label="id", alpha=0.05))),
+    dict(id="evt", group="Nonparametric and robust", name="Extreme value analysis: generalised Pareto tail, Hill estimator and return levels", guide="nonparametric-guide/extreme-values.html", fn=nonparam.evt,
+         fields=[col("x", "Variable (losses, claims, returns)"), sel("tail", "Tail", [["upper", "Upper tail (large values)"], ["lower", "Lower tail (large negative values)"]], "upper"), sel("returns", "Convert a price series to log returns", [["no", "No"], ["yes", "Yes"]], "no"),
+                 num("threshold", "Threshold (blank = use the quantile)", ""), num("quantile", "Threshold quantile", 0.95)],
+         example=dict(file=NP + "danish.csv", spec=dict(x="claim", threshold=10))),
 ]
 
 STAT_MODELS = stat_registry.build(col, cols, num, sel)       # the Statistics Division: its own page, registered like every other model

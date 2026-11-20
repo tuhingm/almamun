@@ -110,5 +110,73 @@
     ]
    }
   ]
+ },
+ "nonparam": {
+  "entries": [
+   {
+    "slug": "kernel-regression",
+    "situation": "You do not know the shape of the relation between an outcome and a regressor and want to estimate it without assuming a functional form",
+    "method": "Kernel regression",
+    "data": [
+     "oes/examples/cps71.csv"
+    ]
+   },
+   {
+    "slug": "partially-linear",
+    "situation": "You want the effect of some regressors in a linear way while letting one control enter in an unknown, smooth way",
+    "method": "Partially linear model",
+    "data": [
+     "oes/examples/engel95.csv"
+    ]
+   },
+   {
+    "slug": "splines",
+    "situation": "You want a smooth curve through noisy data, with the smoothness chosen from the data and a test of whether a straight line would do",
+    "method": "Penalised splines",
+    "data": [
+     "oes/examples/mcycle.csv"
+    ]
+   },
+   {
+    "slug": "robust-regression",
+    "situation": "A few observations may be outliers or high-leverage points and you want estimates that they cannot move",
+    "method": "Robust regression",
+    "data": [
+     "oes/examples/hills.csv"
+    ]
+   },
+   {
+    "slug": "wild-cluster-bootstrap",
+    "situation": "Errors are correlated within groups, and with few groups the usual cluster-robust test is unreliable",
+    "method": "Cluster-robust inference and the wild bootstrap",
+    "data": [
+     "oes/examples/petersencl.csv"
+    ]
+   },
+   {
+    "slug": "kernel-density",
+    "situation": "You want to see the shape of a distribution, including whether it has more than one mode, without assuming a family",
+    "method": "Kernel density estimation",
+    "data": [
+     "oes/examples/faithful.csv"
+    ]
+   },
+   {
+    "slug": "multiple-testing",
+    "situation": "You run many tests at once and want to control the false discoveries among the ones you report",
+    "method": "Multiple testing and false discovery rate",
+    "data": [
+     "oes/examples/coralpval.csv"
+    ]
+   },
+   {
+    "slug": "extreme-values",
+    "situation": "You care about the far tail of a distribution (large losses, floods, claims) and need probabilities and levels beyond most of the data",
+    "method": "Extreme value theory",
+    "data": [
+     "oes/examples/danish.csv"
+    ]
+   }
+  ]
  }
 }

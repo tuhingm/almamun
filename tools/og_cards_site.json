@@ -570,6 +570,60 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/nonparametric-guide/extreme-values.jpg",
+  "kicker": "Nonparametric Guide · Model guide",
+  "title": "Extreme Value Theory",
+  "sub": "You care about the far tail of a distribution (large losses, floods, claims) and need probabilities and levels beyond most of the…"
+ },
+ {
+  "out": "assets/og/nonparametric-guide/index.jpg",
+  "kicker": "Nonparametric Guide",
+  "title": "Which nonparametric or robust method fits your data?",
+  "sub": "Kernel and spline regression, partially linear models, robust regression, wild bootstrap, density estimation, multiple testing and extreme values."
+ },
+ {
+  "out": "assets/og/nonparametric-guide/kernel-density.jpg",
+  "kicker": "Nonparametric Guide · Model guide",
+  "title": "Kernel Density Estimation",
+  "sub": "You want to see the shape of a distribution, including whether it has more than one mode, without assuming a family. Step-by-step…"
+ },
+ {
+  "out": "assets/og/nonparametric-guide/kernel-regression.jpg",
+  "kicker": "Nonparametric Guide · Model guide",
+  "title": "Kernel Regression",
+  "sub": "You do not know the shape of the relation between an outcome and a regressor and want to estimate it without assuming a…"
+ },
+ {
+  "out": "assets/og/nonparametric-guide/multiple-testing.jpg",
+  "kicker": "Nonparametric Guide · Model guide",
+  "title": "Multiple Testing and False Discovery Rate",
+  "sub": "You run many tests at once and want to control the false discoveries among the ones you report. Step-by-step guide with Python…"
+ },
+ {
+  "out": "assets/og/nonparametric-guide/partially-linear.jpg",
+  "kicker": "Nonparametric Guide · Model guide",
+  "title": "Partially Linear Model",
+  "sub": "You want the effect of some regressors in a linear way while letting one control enter in an unknown, smooth way. Step-by-step…"
+ },
+ {
+  "out": "assets/og/nonparametric-guide/robust-regression.jpg",
+  "kicker": "Nonparametric Guide · Model guide",
+  "title": "Robust Regression",
+  "sub": "A few observations may be outliers or high-leverage points and you want estimates that they cannot move. Step-by-step guide with…"
+ },
+ {
+  "out": "assets/og/nonparametric-guide/splines.jpg",
+  "kicker": "Nonparametric Guide · Model guide",
+  "title": "Penalised Splines",
+  "sub": "You want a smooth curve through noisy data, with the smoothness chosen from the data and a test of whether a straight line would…"
+ },
+ {
+  "out": "assets/og/nonparametric-guide/wild-cluster-bootstrap.jpg",
+  "kicker": "Nonparametric Guide · Model guide",
+  "title": "Cluster-Robust Inference and the Wild Bootstrap",
+  "sub": "Errors are correlated within groups, and with few groups the usual cluster-robust test is unreliable. Step-by-step guide with…"
+ },
+ {
   "out": "assets/og/panel-data-guide/csardl.jpg",
   "kicker": "Panel Data Guide · Model guide",
   "title": "Cross-Sectionally Augmented ARDL",
