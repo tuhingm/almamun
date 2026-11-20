@@ -509,3 +509,138 @@ def multinomial(df, spec):
     notes = [f"Multinomial logit of {y} ({J} categories, base = {f(base, 6)}) on {', '.join(xs)}, {n} observations.",
              "The coefficients of each equation compare one category with the base; changing the base changes the coefficients but not the fitted probabilities or the marginal effects."]
     return result("multinomial", f"Multinomial logit: {y}", n, summary, tabs, [ch], notes)
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+# Tobit (censored regression)
+# ---------------------------------------------------------------------------------------------------------------------
+def _tobit_nll(t, X, y, lo, hi):
+    b, s = t[:-1], np.exp(t[-1])
+    xb = X @ b
+    ll = np.zeros(len(y))
+    cl = y <= lo if lo is not None else np.zeros(len(y), bool)
+    cu = y >= hi if hi is not None else np.zeros(len(y), bool)
+    mid = ~(cl | cu)
+    if cl.any():
+        ll[cl] = stats.norm.logcdf((lo - xb[cl]) / s)
+    if cu.any():
+        ll[cu] = stats.norm.logsf((hi - xb[cu]) / s)
+    ll[mid] = stats.norm.logpdf((y[mid] - xb[mid]) / s) - t[-1]
+    return -ll.sum()
+
+
+def _tobit_means(xb, s, lo, hi):
+    """E[y*], E[y | uncensored] and E[y] for the Tobit model with limits lo and hi (None = no limit)."""
+    a = np.full_like(xb, -np.inf) if lo is None else (lo - xb) / s
+    b = np.full_like(xb, np.inf) if hi is None else (hi - xb) / s
+    Pa, Pb = stats.norm.cdf(a), stats.norm.cdf(b)
+    pa = np.where(np.isfinite(a), stats.norm.pdf(a), 0.0)
+    pb = np.where(np.isfinite(b), stats.norm.pdf(b), 0.0)
+    prob = np.maximum(Pb - Pa, 1e-300)
+    cond = xb + s * (pa - pb) / prob
+    total = (0.0 if lo is None else Pa * lo) + prob * cond + (0.0 if hi is None else (1 - Pb) * hi)
+    return xb, cond, total, prob
+
+
+def tobit(df, spec):
+    """Tobit regression for an outcome censored from below and/or above at known limits."""
+    from statsmodels.tools.numdiff import approx_hess
+    y = need(spec, "y", "outcome variable")
+    xs = as_list(spec.get("x"))
+    if not xs:
+        raise OESError("Choose at least one explanatory variable.")
+    distinct(y, xs)
+    lo = float_option(spec, "lower", 0.0, "The lower limit") if spec.get("lower", 0) not in (None, "") else None
+    hi = float_option(spec, "upper", None, "The upper limit") if spec.get("upper") not in (None, "") else None
+    if lo is None and hi is None:
+        raise OESError("Give a lower limit, an upper limit or both: a Tobit model needs censoring.")
+    if lo is not None and hi is not None and lo >= hi:
+        raise OESError("The lower limit must be below the upper limit.")
+    d = numeric(df, [y] + xs).reset_index(drop=True)
+    Y = d[y].to_numpy(float)
+    if lo is not None and (Y < lo).any():
+        raise OESError(f"{y} has values below the lower limit {lo:g}; a censored outcome cannot go below its limit.")
+    if hi is not None and (Y > hi).any():
+        raise OESError(f"{y} has values above the upper limit {hi:g}.")
+    cl = (Y <= lo) if lo is not None else np.zeros(len(Y), bool)
+    cu = (Y >= hi) if hi is not None else np.zeros(len(Y), bool)
+    n, k = len(d), len(xs)
+    if not (cl | cu).any():
+        raise OESError("No observation is at a limit, so the data are not censored: use OLS.")
+    if (~(cl | cu)).sum() < 3 * (k + 2):
+        raise OESError("Too few uncensored observations to estimate the model.")
+    X = sm.add_constant(d[xs].astype(float), has_constant="add")
+    names = list(X.columns)
+    Xn = np.asarray(X, float)
+    keep = ~(cl | cu)
+    b0 = np.linalg.lstsq(Xn[keep], Y[keep], rcond=None)[0]
+    s0 = max(float(np.std(Y[keep] - Xn[keep] @ b0)), 1e-3)
+    from scipy import optimize
+    fun = lambda t: _tobit_nll(t, Xn, Y, lo, hi)
+    opt = optimize.minimize(fun, np.r_[b0, np.log(s0)], method="BFGS", options={"gtol": 1e-7, "maxiter": 2000})
+    opt = optimize.minimize(fun, opt.x, method="BFGS", options={"gtol": 1e-8, "maxiter": 2000})
+    if not np.isfinite(opt.fun) or np.linalg.norm(opt.jac) > 1e-2 * max(1, n):
+        raise OESError("The Tobit likelihood did not converge. Check the limits and the scale of the variables.")
+    t = opt.x
+    H = approx_hess(t, fun)
+    try:
+        V = np.linalg.inv(H)
+    except np.linalg.LinAlgError:
+        raise OESError("The information matrix is singular: the regressors are collinear or a regressor predicts the censoring perfectly.")
+    if np.any(np.diag(V) <= 0):
+        raise OESError("The information matrix is not positive definite; the estimate is not a maximum.")
+    se_all = np.sqrt(np.diag(V))
+    beta, s = t[:-1], float(np.exp(t[-1]))
+    se_sigma = s * se_all[-1]                                   # delta method for exp(log sigma)
+    ll = -float(opt.fun)
+    nll0 = optimize.minimize(lambda u: _tobit_nll(u, Xn[:, :1], Y, lo, hi), np.r_[Y.mean(), np.log(Y.std() + 1e-6)], method="BFGS")
+    lr = 2 * (ll + float(nll0.fun))
+    cof = coef_table(names, beta, se_all[:-1], dist="z", note="Tobit maximum likelihood. The coefficients are effects on the LATENT (uncensored) outcome; "
+                     "the marginal effects below are effects on the observed outcome.")
+    cof["rows"].append(["sigma", f(s), f(se_sigma), f(s / se_sigma, 4), f(2 * stats.norm.sf(abs(s / se_sigma)), 4), f(s - 1.96 * se_sigma), f(s + 1.96 * se_sigma)])
+    tabs = [cof]
+    dummy = [bool(set(d[c].unique()) <= {0, 1}) for c in xs]
+
+    def me_vec(theta):
+        b_, s_ = theta[:-1], np.exp(theta[-1])
+        out = np.zeros((k, 3))
+        for i in range(k):
+            if dummy[i]:
+                A1, A0 = Xn.copy(), Xn.copy(); A1[:, i + 1], A0[:, i + 1] = 1, 0
+                m1, m0 = _tobit_means(A1 @ b_, s_, lo, hi), _tobit_means(A0 @ b_, s_, lo, hi)
+                out[i] = [b_[i + 1], (m1[1] - m0[1]).mean(), (m1[2] - m0[2]).mean()]
+            else:
+                h = 1e-4 * max(Xn[:, i + 1].std(), 1e-8)
+                A1, A0 = Xn.copy(), Xn.copy(); A1[:, i + 1] += h; A0[:, i + 1] -= h
+                m1, m0 = _tobit_means(A1 @ b_, s_, lo, hi), _tobit_means(A0 @ b_, s_, lo, hi)
+                out[i] = [b_[i + 1], ((m1[1] - m0[1]) / (2 * h)).mean(), ((m1[2] - m0[2]) / (2 * h)).mean()]
+        return out.ravel()
+    me = me_vec(t)
+    Jm = _num_jac(me_vec, t)
+    sem = np.sqrt(np.maximum(np.diag(Jm @ V @ Jm.T), 0))
+    rows = []
+    for i in range(k):
+        for j, lab in enumerate(["Latent outcome E[y*]", "Uncensored outcome E[y | not censored]", "Observed outcome E[y]"]):
+            a, s_ = me[i * 3 + j], sem[i * 3 + j]
+            rows.append([xs[i], lab, f(a), f(s_), f(a / s_, 4) if s_ > 0 else None, f(2 * stats.norm.sf(abs(a / s_)), 4) if s_ > 0 else None])
+    tabs.append(table("Average marginal effects (McDonald-Moffitt decomposition)", ["Variable", "Effect on", "dE/dx", "Std. err.", "z", "p-value"], rows,
+                      "The effect on the observed outcome splits into an effect on the probability of being uncensored and an effect on the level of the uncensored outcome. Delta-method standard errors."))
+    ols = sm.OLS(Y, X).fit(cov_type="HC1")
+    tabs.append(table("Comparison with OLS on all observations", ["Variable", "Tobit coef.", "OLS coef.", "Tobit / OLS"],
+                      [[names[i], f(beta[i]), f(ols.params.iloc[i]), f(beta[i] / ols.params.iloc[i], 3)] for i in range(1, k + 1)],
+                      "OLS on a censored outcome is attenuated toward zero; the Tobit coefficient is larger in absolute value. The Tobit coefficient is the effect on the latent outcome, OLS estimates something between that and the effect on the observed outcome."))
+    # generalised-residual (score) test of normality / homoskedasticity is omitted: report fit of the censoring share instead
+    xb = Xn @ beta
+    pr_cens = (stats.norm.cdf((lo - xb) / s) if lo is not None else 0.0) + (stats.norm.sf((hi - xb) / s) if hi is not None else 0.0)
+    drows = [test_row(f"Likelihood-ratio test, all slopes zero ({k} df)", lr, stats.chi2.sf(lr, k), "H0: the slopes are all zero (constant and sigma free)"),
+             ["Share censored: observed against predicted", f(float((cl | cu).mean())), f(float(np.mean(pr_cens))), "the two should be close"]]
+    tabs.append(tests_table(drows))
+    mt = _tobit_means(xb, s, lo, hi)[2]
+    q = pd.qcut(pd.Series(xb).rank(method="first"), 10, labels=False)
+    ch = chart("Observed and predicted mean outcome by decile of the linear index", [str(i + 1) for i in range(10)],
+               [("Observed", [Y[q == g].mean() for g in range(10)]), ("Predicted E[y]", [mt[q == g].mean() for g in range(10)])], "Decile of x'b", y, kind="bar")
+    summary = [stat("Observations", n), stat("Censored at the limits", int((cl | cu).sum())), stat("Log-likelihood", ll), stat("Sigma", s), stat("LR chi-squared", lr)]
+    notes = [f"Tobit of {y} on {', '.join(xs)}: {n} observations, {int((cl | cu).sum())} censored ({(cl | cu).mean():.0%}), limits: lower {lo if lo is not None else 'none'}, upper {hi if hi is not None else 'none'}.",
+             "The Tobit model assumes that the same process decides whether the outcome is above the limit and how large it is, and that the latent errors are normal and homoskedastic. "
+             "If a separate decision creates the zeros (for example, whether to have an affair at all), a hurdle or Heckman model is more appropriate."]
+    return result("tobit", f"Tobit regression: {y}", n, summary, tabs, [ch], notes)

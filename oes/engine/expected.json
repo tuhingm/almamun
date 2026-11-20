@@ -1044,5 +1044,21 @@
    "label": "Log-likelihood",
    "value": -1365.4524
   }
+ },
+ "tobit": {
+  "nobs": 601,
+  "table_index": 0,
+  "table": "Coefficient estimates",
+  "row": "age",
+  "row_index": 1,
+  "col": "Coef.",
+  "col_index": 1,
+  "value": -0.179333,
+  "rtol": 0.001,
+  "seconds": 0.2,
+  "summary": {
+   "label": "Log-likelihood",
+   "value": -705.5762
+  }
  }
 }

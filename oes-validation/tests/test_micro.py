@@ -283,3 +283,62 @@ def test_multinomial_errors_and_example_reference():
     e = EXPECTED["multinomial"]; m = o.BY_ID["multinomial"]
     r = o.run("multinomial", open(os.path.join(ROOT, m["example"]["file"])).read(), dict(m["example"]["spec"]))
     assert r["tables"][e["table_index"]]["rows"][e["row_index"]][e["col_index"]] == pytest.approx(e["value"], rel=e["rtol"])
+
+
+# ------------------------------------------------------------------ Tobit
+TX = ["age", "yearsmarried", "religiousness", "occupation", "rating"]
+def affairs(**kw):
+    spec = dict(y="affairs", x=TX, lower=0); spec.update(kw)
+    return o.run("tobit", open(os.path.join(ME, "affairs.csv")).read(), spec)
+
+
+def test_tobit_matches_published_AER_affairs_results():
+    # Kleiber and Zeileis, Applied Econometrics with R: tobit(affairs ~ age + yearsmarried + religiousness + occupation + rating)
+    r = affairs()
+    pub = dict(const=(8.1742, 2.7414), age=(-0.1793, 0.0791), yearsmarried=(0.5541, 0.1345), religiousness=(-1.6862, 0.4038), occupation=(0.3261, 0.2544), rating=(-2.2850, 0.4078))
+    for name, (b, se) in pub.items():
+        x = row(r, "Coefficient", name); assert x[1] == pytest.approx(b, abs=5e-4) and x[2] == pytest.approx(se, abs=1e-3)
+    assert row(r, "Coefficient", "sigma")[1] == pytest.approx(np.exp(2.1099), abs=2e-3)
+    assert summ(r, "Log-likelihood") == pytest.approx(-705.576, abs=5e-3)
+
+
+def test_tobit_equals_independent_likelihood_and_mcdonald_moffitt_identity():
+    from scipy.optimize import minimize
+    d = pd.read_csv(os.path.join(ME, "affairs.csv")); X = np.column_stack([np.ones(len(d)), d[TX].to_numpy(float)]); y = d.affairs.to_numpy(float)
+    def nll(t):
+        xb, s = X @ t[:-1], np.exp(t[-1]); c = y <= 0
+        return -(stats.norm.logcdf(-xb[c] / s).sum() + (stats.norm.logpdf((y[~c] - xb[~c]) / s) - t[-1]).sum())
+    best = minimize(nll, np.r_[np.linalg.lstsq(X, y, rcond=None)[0], 2.0], method="BFGS", options={"gtol": 1e-8})
+    r = affairs()
+    assert -best.fun == pytest.approx(summ(r, "Log-likelihood"), abs=1e-3)
+    # observed-outcome marginal effect = latent coefficient x average probability of being uncensored (left censoring only)
+    b, s = best.x[:-1], np.exp(best.x[-1]); pu = stats.norm.cdf(X @ b / s).mean()
+    obs = next(x for x in table(r, "Average marginal effects")["rows"] if x[0] == "rating" and x[1].startswith("Observed"))[2]
+    assert obs == pytest.approx(b[5] * pu, abs=2e-3)
+
+
+def test_tobit_coefficients_are_larger_than_ols_on_censored_data():
+    for x in table(affairs(), "Comparison with OLS")["rows"]:
+        assert abs(x[1]) > abs(x[2]) and x[3] > 2
+
+
+@pytest.mark.parametrize("lower,upper", [(0.0, None), (0.0, 6.0)])
+def test_tobit_recovers_known_parameters_from_simulated_data(lower, upper):
+    rng = np.random.default_rng(2); n = 8000; x1, x2 = rng.normal(size=n), rng.binomial(1, .5, n)
+    ystar = 1.0 + 2.0 * x1 - 1.0 * x2 + rng.normal(scale=2.0, size=n); y = np.maximum(ystar, lower)
+    if upper is not None: y = np.minimum(y, upper)
+    r = o.run("tobit", pd.DataFrame({"y": y, "x1": x1, "x2": x2}).to_csv(index=False), dict(y="y", x=["x1", "x2"], lower=lower, upper=upper if upper is not None else ""))
+    for name, b in [("const", 1.0), ("x1", 2.0), ("x2", -1.0), ("sigma", 2.0)]:
+        x = row(r, "Coefficient", name); assert abs(x[1] - b) < 4 * x[2]
+
+
+def test_tobit_errors_and_example_reference():
+    d = pd.read_csv(os.path.join(ME, "affairs.csv"))
+    run = lambda df, **kw: o.run("tobit", df.to_csv(index=False), dict(y="affairs", x=["age", "rating"], **kw))
+    assert "needs censoring" in run(d, lower="", upper="")["error"]
+    assert "not censored" in run(d.assign(affairs=d.affairs + 1), lower=0)["error"]
+    assert "below the lower limit" in run(d.assign(affairs=d.affairs - 1), lower=0)["error"]
+    assert "must be below" in run(d, lower=5, upper=2)["error"]
+    e = EXPECTED["tobit"]; m = o.BY_ID["tobit"]
+    r = o.run("tobit", open(os.path.join(ROOT, m["example"]["file"])).read(), dict(m["example"]["spec"]))
+    assert r["tables"][e["table_index"]]["rows"][e["row_index"]][e["col_index"]] == pytest.approx(e["value"], rel=e["rtol"])
