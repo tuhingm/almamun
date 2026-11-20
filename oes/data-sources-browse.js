@@ -83,6 +83,11 @@
       if (!codes.length) {                                   // IMF: the code list is declared on the concept, not on the dimension
         const ci = first(d, "ConceptIdentity"), cr = ci && first(ci, "Ref"), cid = cr && cr.getAttribute("id");
         if (cid && concepts.has(cid)) codes = lists.get(concepts.get(cid)) || [];
+        if (!codes.length) {                                 // last resort: match the code list by name (CL_<DIMENSION>)
+          const did = d.getAttribute("id"), alt = did === "FREQUENCY" ? "CL_FREQ" : "CL_" + did;
+          const hit = lists.has(alt) ? alt : Array.from(lists.keys()).find(k => k.endsWith("_" + did));
+          if (hit) codes = lists.get(hit);
+        }
       }
       return { id: d.getAttribute("id"), pos: +d.getAttribute("position") || 0, codes };
     }).sort((a, b) => a.pos - b.pos);
