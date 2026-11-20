@@ -1860,5 +1860,101 @@
    "label": "lambda",
    "value": 0.1384
   }
+ },
+ "sfa": {
+  "nobs": 1026,
+  "table_index": 0,
+  "table": "Stochastic production frontier: half-normal inefficiency",
+  "row": "Constant",
+  "row_index": 0,
+  "col": "Estimate",
+  "col_index": 1,
+  "value": 4.9853,
+  "rtol": 0.001,
+  "seconds": 13.2,
+  "summary": {
+   "label": "Mean efficiency",
+   "value": 0.867
+  }
+ },
+ "dea": {
+  "nobs": 48,
+  "table_index": 0,
+  "table": "DEA efficiency scores (input-oriented)",
+  "row": "Technical efficiency, constant returns (CCR)",
+  "row_index": 0,
+  "col": "Mean",
+  "col_index": 1,
+  "value": 0.862283,
+  "rtol": 0.001,
+  "seconds": 0.1,
+  "summary": {
+   "label": "Mean CCR efficiency",
+   "value": 0.862
+  }
+ },
+ "malmquist": {
+  "nobs": 816,
+  "table_index": 0,
+  "table": "Malmquist productivity index by period (geometric mean over units)",
+  "row": "1970 to 1971",
+  "row_index": 0,
+  "col": "TFP change",
+  "col_index": 1,
+  "value": 1.004427,
+  "rtol": 0.001,
+  "seconds": 1.3,
+  "summary": {
+   "label": "Mean TFP change",
+   "value": 1.0016
+  }
+ },
+ "growth": {
+  "nobs": 98,
+  "table_index": 0,
+  "table": "Income per worker in levels (Mankiw-Romer-Weil)",
+  "row": "Constant",
+  "row_index": 0,
+  "col": "Coefficient",
+  "col_index": 1,
+  "value": 6.844414,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Capital share (restricted)",
+   "value": 0.338
+  }
+ },
+ "prodfun": {
+  "nobs": 158,
+  "table_index": 0,
+  "table": "Cobb-Douglas cost function",
+  "row": "Constant",
+  "row_index": 0,
+  "col": "Coefficient",
+  "col_index": 1,
+  "value": 3.071619,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "R-squared",
+   "value": 0.982
+  }
+ },
+ "spatial_cs": {
+  "nobs": 49,
+  "table_index": 0,
+  "table": "OLS",
+  "row": "Constant",
+  "row_index": 0,
+  "col": "Coefficient",
+  "col_index": 1,
+  "value": 68.618961,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Moran's I of residuals",
+   "value": 0.331
+  }
  }
 }

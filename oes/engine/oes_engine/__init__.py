@@ -15,7 +15,7 @@ import pandas as pd
 
 from . import bayes, bayes_extra, bayes_more, breaks, causal, causal_extra, lp, markov, micro, ml, panel, pthreshold, pvar, smooth, statespace_var, svar, tar, timeseries, ts_extra
 from . import panel_extra, ml_extra
-from . import finance
+from . import finance, productivity
 from . import stat_registry
 from .core import OESError, read_csv, time_order
 from .report import frame, plot, show, summary, tables
@@ -760,6 +760,34 @@ MODELS += [
          fields=[cols("yields", "Yield columns (one per maturity)"), num("maturities", "Maturities in months, in the same order (comma-separated)", "1,3,6,12,36,60,120"), TIME,
                  num("lambda", "lambda per month (blank = estimate)", ""), num("horizon", "Forecast horizon (months)", 12)],
          example=dict(file=FI + "irates.csv", spec=dict(yields=["r1", "r3", "r6", "r12", "r36", "r60", "r120"], maturities="1,3,6,12,36,60,120", time="month"))),
+    dict(id="sfa", group="Productivity and spatial", name="Stochastic frontier analysis: technical efficiency", guide="productivity-guide/stochastic-frontier.html", fn=productivity.sfa,
+         fields=[col("y", "Output"), cols("x", "Inputs"), cols("z", "Variables that shift inefficiency (optional, heteroskedastic u)", required=False), col("group", "Group for efficiency summaries (optional)", required=False),
+                 sel("frontier", "Frontier", [["production", "Production (output frontier)"], ["cost", "Cost (cost frontier)"]], "production"),
+                 sel("distribution", "Distribution of inefficiency", [["half-normal", "Half-normal"], ["exponential", "Exponential"], ["truncated", "Truncated normal"]], "half-normal"),
+                 sel("log", "Take logs of output and inputs", [["yes", "Yes (Cobb-Douglas frontier)"], ["no", "No (already in logs)"]], "yes")],
+         example=dict(file=PR + "ricefarms.csv", spec=dict(y="goutput", x=["size", "seed", "urea", "totlabor"], group="region"))),
+    dict(id="dea", group="Productivity and spatial", name="Data envelopment analysis: efficiency scores and peers", guide="productivity-guide/dea.html", fn=productivity.dea,
+         fields=[cols("inputs", "Inputs"), cols("outputs", "Outputs"), col("label", "Unit name (optional)", required=False),
+                 sel("orientation", "Orientation", [["input", "Input (minimise inputs)"], ["output", "Output (maximise outputs)"]], "input"),
+                 sel("super", "Super-efficiency ranking", [["no", "No"], ["yes", "Yes"]], "no")],
+         example=dict(file=PR + "produc_1986.csv", spec=dict(inputs=["pc", "emp"], outputs=["gsp"], label="state", super="yes"))),
+    dict(id="malmquist", group="Productivity and spatial", name="Malmquist productivity index: catch-up and frontier shift", guide="productivity-guide/malmquist.html", fn=productivity.malmquist,
+         fields=[cols("inputs", "Inputs"), cols("outputs", "Outputs"), col("id", "Unit identifier"), col("time", "Time identifier"),
+                 sel("orientation", "Orientation", [["input", "Input"], ["output", "Output"]], "input")],
+         example=dict(file=PR + "produc.csv", spec=dict(inputs=["pc", "emp"], outputs=["gsp"], id="state", time="year"))),
+    dict(id="growth", group="Productivity and spatial", name="Growth regressions: augmented Solow model and convergence", guide="productivity-guide/growth-regressions.html", fn=productivity.growth,
+         fields=[col("y0", "Initial income per worker"), col("y1", "Final income per worker"), col("invest", "Investment rate (percent of GDP)"), col("popgrowth", "Population growth (percent a year)"),
+                 col("school", "Human capital proxy, e.g. schooling (percent, optional)", required=False), col("sample", "Sample filter column (optional)", required=False), num("sample_value", "Keep rows where the filter column equals", ""),
+                 num("years", "Years between the two income observations", 25), num("gd", "g + delta", 0.05)],
+         example=dict(file=PR + "growthdj.csv", spec=dict(y0="gdp60", y1="gdp85", invest="invest", popgrowth="popgrowth", school="school", sample="oil", sample_value="no"))),
+    dict(id="prodfun", group="Productivity and spatial", name="Production and cost functions: elasticities and returns to scale", guide="productivity-guide/production-cost-function.html", fn=productivity.prodfun,
+         fields=[col("y", "Output (production) or total cost (cost function)"), cols("x", "Inputs (production) or input prices (cost)"), col("output", "Output quantity (cost function only)", required=False),
+                 sel("kind", "Function", [["production", "Production"], ["cost", "Cost"]], "production"),
+                 sel("form", "Functional form", [["cobb-douglas", "Cobb-Douglas"], ["translog", "Translog"]], "cobb-douglas"), col("normalise", "Price to divide by, imposing homogeneity (cost, optional)", required=False)],
+         example=dict(file=PR + "electricity1970.csv", spec=dict(y="cost", output="output", x=["labor", "capital", "fuel"], kind="cost", form="cobb-douglas"))),
+    dict(id="spatial_cs", group="Productivity and spatial", name="Spatial regression: Moran's I, spatial lag and spatial error", guide="productivity-guide/spatial-regression.html", fn=productivity.spatial,
+         fields=[col("y", "Dependent variable"), cols("x", "Regressors"), col("x_coord", "Coordinate x (or longitude)"), col("y_coord", "Coordinate y (or latitude)"), num("neighbours", "Nearest neighbours in the weights matrix", 5)],
+         example=dict(file=PR + "columbus.csv", spec=dict(y="crime", x=["inc", "hoval"], x_coord="x", y_coord="y", neighbours=5))),
 ]
 
 STAT_MODELS = stat_registry.build(col, cols, num, sel)       # the Statistics Division: its own page, registered like every other model

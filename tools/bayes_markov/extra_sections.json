@@ -58,5 +58,57 @@
     ]
    }
   ]
+ },
+ "productivity": {
+  "entries": [
+   {
+    "slug": "stochastic-frontier",
+    "situation": "How inefficient are firms or farms relative to the best practice, once luck and measurement error are separated from inefficiency?",
+    "method": "Stochastic frontier analysis",
+    "data": [
+     "oes/examples/ricefarms.csv"
+    ]
+   },
+   {
+    "slug": "dea",
+    "situation": "Which units (firms, regions, hospitals, schools) do best with their inputs, and which peers should the others learn from?",
+    "method": "Data envelopment analysis",
+    "data": [
+     "oes/examples/produc_1986.csv"
+    ]
+   },
+   {
+    "slug": "malmquist",
+    "situation": "Did productivity grow over time, and was it catch-up to the frontier or a shift of the frontier itself?",
+    "method": "Malmquist productivity index",
+    "data": [
+     "oes/examples/produc.csv"
+    ]
+   },
+   {
+    "slug": "growth-regressions",
+    "situation": "Do poor countries catch up with rich ones, and does the Solow model explain income differences across countries?",
+    "method": "Growth regressions (Solow and convergence)",
+    "data": [
+     "oes/examples/growthdj.csv"
+    ]
+   },
+   {
+    "slug": "production-cost-function",
+    "situation": "What are the output elasticities, the returns to scale and the cost structure of an industry?",
+    "method": "Production and cost functions",
+    "data": [
+     "oes/examples/electricity1970.csv"
+    ]
+   },
+   {
+    "slug": "spatial-regression",
+    "situation": "Do neighbouring areas resemble each other, and do outcomes spill over from one area to the next?",
+    "method": "Spatial regression (SAR and SEM)",
+    "data": [
+     "oes/examples/columbus.csv"
+    ]
+   }
+  ]
  }
 }

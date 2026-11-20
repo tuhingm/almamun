@@ -718,5 +718,47 @@
   "kicker": "Panel Data Guide · Model guide",
   "title": "Two-Way Fixed Effects with Clustered Standard Errors",
   "sub": "Unit and time effects are both needed and errors are correlated within units or across units. Step-by-step guide with Python code…"
+ },
+ {
+  "out": "assets/og/productivity-guide/dea.jpg",
+  "kicker": "Productivity Guide · Model guide",
+  "title": "Data Envelopment Analysis",
+  "sub": "You have several inputs and outputs for a set of comparable units and want an efficiency score and a list of peers for each…"
+ },
+ {
+  "out": "assets/og/productivity-guide/growth-regressions.jpg",
+  "kicker": "Productivity Guide · Model guide",
+  "title": "Growth Regressions: Solow and Convergence",
+  "sub": "You have cross-country (or cross-region) data on income, investment, population growth and schooling and want to test the Solow…"
+ },
+ {
+  "out": "assets/og/productivity-guide/index.jpg",
+  "kicker": "Productivity Guide",
+  "title": "Which productivity or spatial model fits your data?",
+  "sub": "Stochastic frontiers, DEA, Malmquist indexes, growth regressions, production and cost functions and spatial models, step by step."
+ },
+ {
+  "out": "assets/og/productivity-guide/malmquist.jpg",
+  "kicker": "Productivity Guide · Model guide",
+  "title": "Malmquist Productivity Index",
+  "sub": "You have a panel of units with inputs and outputs over several periods and want productivity growth split into catch-up to the…"
+ },
+ {
+  "out": "assets/og/productivity-guide/production-cost-function.jpg",
+  "kicker": "Productivity Guide · Model guide",
+  "title": "Production and Cost Functions",
+  "sub": "You want the output elasticities, returns to scale or cost structure of an industry from data on inputs, output or costs.…"
+ },
+ {
+  "out": "assets/og/productivity-guide/spatial-regression.jpg",
+  "kicker": "Productivity Guide · Model guide",
+  "title": "Spatial Regression: Moran's I, Spatial Lag and Spatial Error",
+  "sub": "Your observations are places (neighbourhoods, regions, countries) and you suspect that nearby places are alike or that outcomes…"
+ },
+ {
+  "out": "assets/og/productivity-guide/stochastic-frontier.jpg",
+  "kicker": "Productivity Guide · Model guide",
+  "title": "Stochastic Frontier Analysis",
+  "sub": "You have inputs and output for many firms, farms or plants and want to measure how far each is below the best practice…"
  }
 ]
