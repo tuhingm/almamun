@@ -544,6 +544,12 @@ MODELS += [
          fields=[col("y", "Series"), TIME, num("maxlag", "Maximum lag", 8), sel("ic", "Lag selection", [["bic", "BIC"], ["aic", "AIC"]], "bic"),
                  num("sims", "Simulation replications (DF-GLS critical values)", 200), num("seed", "Random seed", 0)],
          example=dict(file=OX + "us_macro.csv", spec=dict(y="tbilrate", time="date", maxlag=8, ic="bic", sims=100))),
+    dict(id="unobserved", group="Time series", name="Unobserved components: trend-cycle decomposition (with HP and Hamilton filters)", guide="time-series-guide/trend-cycle.html", fn=ts_extra.unobserved,
+         fields=[col("y", "Series (a level, e.g. log GDP)"), TIME, sel("log", "Take 100 x log first", [["no", "No"], ["yes", "Yes"]], "no"),
+                 sel("trend", "Trend", [["smooth trend", "Smooth trend (integrated random walk)"], ["local linear trend", "Local linear trend"], ["random walk with drift", "Random walk with drift"]], "smooth trend"),
+                 sel("cycle", "Add a stochastic cycle", [["yes", "Yes"], ["no", "No"]], "yes"), num("ppy", "Periods per year (4 = quarterly, 12 = monthly)", 4),
+                 num("pmin", "Shortest cycle (periods)", 6), num("pmax", "Longest cycle (periods)", 40)],
+         example=dict(file=OX + "us_gdp_level.csv", spec=dict(y="gdp_level", time="date", log="no", trend="smooth trend", cycle="yes", ppy=4, pmin=6, pmax=40))),
 ]
 
 MODELS += [

@@ -32,8 +32,8 @@ SECTIONS = {
                   order=["logit-probit", "ordered-logit-probit", "multinomial-logit", "tobit", "heckman", "count-models", "zero-inflated-hurdle", "glm-fractional", "systems-sur-3sls", "panel-logit-probit", "iv-probit", "conditional-mixed-logit"], data=[]),
     # local projections: two more guides in the existing Time-Series and Panel-Data guides (hubs are built by their own tools)
     "lp": dict(folder="time-series-guide", name="Empirical Research Guide (Time Series)", short="Time-Series Guide",
-               order=["ols", "ardl", "nardl", "var", "vecm", "gmm", "lp", "svar", "bp", "tar", "str", "arima", "garch", "quantile", "cointegration", "wavelet", "unit-root"], static=dict(ols="OLS", ardl="ARDL", nardl="NARDL", var="VAR", vecm="VECM", gmm="2SLS / GMM"),
-               data=["oes/examples/us_macro.csv"]),
+               order=["ols", "ardl", "nardl", "var", "vecm", "gmm", "lp", "svar", "bp", "tar", "str", "arima", "garch", "quantile", "cointegration", "wavelet", "unit-root", "trend-cycle"], static=dict(ols="OLS", ardl="ARDL", nardl="NARDL", var="VAR", vecm="VECM", gmm="2SLS / GMM"),
+               data=["oes/examples/us_macro.csv", "oes/examples/us_gdp_level.csv"]),
     "plp": dict(folder="panel-data-guide", name="Panel Data Research Guide", short="Panel-Data Guide",
                 order=["pols", "re", "fe", "gmm", "fedk", "mg", "diff", "pmg", "csardl", "plp", "pthresh"],
                 static=dict(pols="Pooled OLS", re="Random effects", fe="Fixed effects", gmm="GMM", fedk="FE-DK", mg="MG / CCE", diff="Δ model", pmg="PMG", csardl="CS-ARDL"),
