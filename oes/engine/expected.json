@@ -1092,5 +1092,21 @@
    "label": "Log-likelihood",
    "value": -8621.7735
   }
+ },
+ "zero_count": {
+  "nobs": 2725,
+  "table_index": 0,
+  "table": "Count equation",
+  "row": "pcnv",
+  "row_index": 1,
+  "col": "Coef.",
+  "col_index": 1,
+  "value": 0.327349,
+  "rtol": 0.001,
+  "seconds": 1.2,
+  "summary": {
+   "label": "Log-likelihood",
+   "value": -2139.2327
+  }
  }
 }

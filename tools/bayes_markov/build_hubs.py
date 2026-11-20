@@ -54,7 +54,8 @@ HUBS = {
                ("A choice among three or more unordered alternatives (party, transport mode, occupation)", "Multinomial logit", "multinomial-logit"),
                ("An outcome that piles up at zero or at another limit (hours, spending, number of events)", "Tobit", "tobit"),
                ("An outcome observed only for a self-selected part of the sample (wages of workers)", "Heckman selection", "heckman"),
-               ("A count outcome: doctor visits, patents, accidents, arrests", "Poisson and negative binomial", "count-models")],
+               ("A count outcome: doctor visits, patents, accidents, arrests", "Poisson and negative binomial", "count-models"),
+               ("A count with many zeros that a Poisson or negative binomial cannot reproduce", "Zero-inflated and hurdle", "zero-inflated-hurdle")],
         other=("Your outcome is a continuous variable observed over time or across units?", "Use the <a href=\"../time-series-guide/index.html\">Time-Series Guide</a> or the <a href=\"../panel-data-guide/index.html\">Panel-Data Guide</a>.")),
 }
 

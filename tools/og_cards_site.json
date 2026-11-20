@@ -288,6 +288,12 @@
   "sub": "An outcome that piles up at a limit, usually zero (hours worked, spending, number of affairs), explained by one or more…"
  },
  {
+  "out": "assets/og/microeconometrics-guide/zero-inflated-hurdle.jpg",
+  "kicker": "Microeconometrics Guide · Model guide",
+  "title": "Zero-Inflated and Hurdle Count Models",
+  "sub": "A count outcome with more zeros than a Poisson or negative-binomial model predicts, where the zeros may come from a separate…"
+ },
+ {
   "out": "assets/og/ml-guide/causal-forest.jpg",
   "kicker": "Machine Learning Guide · Model guide",
   "title": "Causal Forest",
