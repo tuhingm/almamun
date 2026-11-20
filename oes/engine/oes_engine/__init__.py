@@ -573,6 +573,10 @@ MODELS += [
     dict(id="factors", group="Time series", name="Factor model (principal components, Bai-Ng number of factors)", guide="time-series-guide/factor-models.html", fn=ts_extra.factors,
          fields=[cols("x", "Variables (five or more, stationary)"), TIME, num("kmax", "Maximum factors", 8), num("r", "Number of factors to extract (blank = IC_p2)", "")],
          example=dict(file=OX + "inflation_countries.csv", spec=dict(x=['USA', 'CAN', 'MEX', 'CHL', 'COL', 'GBR', 'FRA', 'DEU', 'ITA', 'ESP', 'NLD', 'BEL', 'AUT', 'SWE', 'NOR', 'DNK', 'FIN', 'CHE', 'IRL', 'PRT', 'GRC', 'HUN', 'JPN', 'KOR', 'AUS', 'NZL', 'IND', 'IDN', 'THA', 'MYS', 'PHL', 'ZAF', 'ISR', 'EGY'], time="date", kmax=6))),
+    dict(id="spectral", group="Time series", name="Spectral analysis (cycles, coherence)", guide="time-series-guide/spectral-analysis.html", fn=ts_extra.spectral,
+         fields=[col("y", "Series"), col("x", "Second series for coherence", required=False), TIME, num("ppy", "Periods per year (4 quarterly, 12 monthly)", 4),
+                 sel("detrend", "Detrend", [["linear", "Linear trend"], ["mean", "Mean only"], ["none", "None"]], "linear"), num("segment", "Welch segment length", "")],
+         example=dict(file=OX + "us_macro.csv", spec=dict(y="gdp_growth", x="unemp", time="date", ppy=4, detrend="linear"))),
 ]
 
 MODELS += [

@@ -345,3 +345,33 @@ def test_factors_errors():
     assert "five" in o.run("factors", d.to_csv(index=False), dict(x=["USA", "CAN", "MEX"]))["error"]
     assert "smaller" in o.run("factors", d.to_csv(index=False), dict(x=["USA", "CAN", "MEX", "CHL", "COL", "GBR"], r=6))["error"]
     assert "30" in o.run("factors", d.head(20).to_csv(index=False), dict(x=list(d.columns[1:9])))["error"]
+
+
+# ------------------------------------------------------------------ spectral analysis
+def test_spectral_registered():
+    m = o.BY_ID["spectral"]
+    assert os.path.exists(os.path.join(ROOT, m["guide"])) and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+def test_spectral_finds_known_cycle_and_matches_scipy_welch():
+    from scipy import signal
+    rng = np.random.default_rng(3); n = 400; t = np.arange(n); x = np.sin(2 * np.pi * t / 20) + .5 * rng.standard_normal(n)   # period 20 periods = 5 years (ppy 4)
+    r = ts_extra.spectral(pd.DataFrame({"x": x}), dict(y="x", ppy=4, detrend="mean", segment=100))
+    assert next(s["value"] for s in r["summary"] if s["label"] == "Dominant period (years)") == pytest.approx(5.0, abs=0.5)
+    fr, P = signal.welch(x - x.mean(), fs=1.0, nperseg=100, window="hann", noverlap=50, detrend=False)
+    assert r["charts"][0]["series"][0]["y"][0] == pytest.approx(round(P[1], 6), rel=1e-4)
+
+
+def test_spectral_coherence_is_high_for_related_series_and_low_for_independent():
+    rng = np.random.default_rng(4); n = 600; t = np.arange(n); c = np.sin(2 * np.pi * t / 24)
+    a = c + .3 * rng.standard_normal(n); b = np.roll(c, 3) + .3 * rng.standard_normal(n); z = rng.standard_normal(n)
+    hi = ts_extra.spectral(pd.DataFrame({"a": a, "b": b}), dict(y="a", x="b", ppy=4, segment=120, detrend="mean"))
+    lo = ts_extra.spectral(pd.DataFrame({"a": a, "z": z}), dict(y="a", x="z", ppy=4, segment=120, detrend="mean"))
+    c_hi = max(hi["charts"][1]["series"][0]["y"]); c_lo = max(lo["charts"][1]["series"][0]["y"])
+    assert c_hi > 0.8 and c_lo < 0.65
+
+
+def test_spectral_errors():
+    d = pd.read_csv(os.path.join(OX, "us_macro.csv"))
+    assert "60" in o.run("spectral", d.head(30).to_csv(index=False), dict(y="gdp_growth"))["error"]
+    assert "Choose" in o.run("spectral", d.to_csv(index=False), dict(y="gdp_growth", detrend="cubic"))["error"]
