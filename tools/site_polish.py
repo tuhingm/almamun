@@ -97,12 +97,26 @@ def set_meta(s, key, value, attr="property"):
     return re.sub(r'(<link rel="canonical" href="[^"]*">)', lambda m: m.group(1) + "\n" + tag, s, count=1)
 
 
+GROUP_LABEL = "More Guides"
+GROUPED = {"bayesian-guide", "markov-guide", "microeconometrics-guide", "finance-guide", "productivity-guide", "nonparametric-guide"}
+
+
 def header(root, section):
-    links = []
+    """Top menu. The newer method guides sit under one dropdown ("More Guides") so the bar stays short."""
+    links, group, placed = [], [], False
     for label, target, sec in NAV:
         cur = sec is not None and sec == section
         attrs = ' class="current" aria-current="page"' if cur else ""
-        links.append(f'<a href="{root}{target}"{attrs}>{label}</a>')
+        a = f'<a href="{root}{target}"{attrs}>{label}</a>'
+        if sec in GROUPED:
+            group.append(a)
+            if not placed:
+                links.append("@@GROUP@@"); placed = True
+        else:
+            links.append(a)
+    dd = (f'<div class="dd"><button type="button" class="dd-btn{" current" if section in GROUPED else ""}" aria-expanded="false" aria-haspopup="true">'
+          f'{GROUP_LABEL}</button><div class="dd-menu">' + "".join(group) + '</div></div>')
+    links = [dd if x == "@@GROUP@@" else x for x in links]
     return ('<header class="site-header"><div class="wrap nav"><a class="brand" href="' + root + 'index.html" '
             'aria-label="Tuhin G. M. Al Mamun — home">TGM <span>AL MAMUN</span></a>'
             '<button id="menu" type="button" aria-expanded="false" aria-controls="nav">Menu</button>'
@@ -161,6 +175,8 @@ for p in pages:
     css = f'<link rel="stylesheet" href="{root}assets/css/site-header.css">'
     if "site-header.css" not in s:
         s = s.replace("</head>", css + "\n</head>", 1)
+    if "nav-dropdown.js" not in s:
+        s = s.replace("</body>", f'<script src="{root}assets/js/nav-dropdown.js" defer></script>\n</body>', 1)
     if not any(k in s for k in ("course.js", "mobile-nav.js", "getElementById('menu')")):
         s = s.replace("</body>", f'<script src="{root}assets/js/mobile-nav.js" defer></script>\n</body>', 1)
 
