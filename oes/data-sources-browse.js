@@ -181,7 +181,7 @@
           if (r.length < h.length - 3 || !r[ti]) continue;
           if (parseInt(r[ti].slice(0, 4), 10) > e) continue;
           const v = r[vi] === "" ? null : Number(r[vi]);
-          out.push([...dimCols.map(i => r[i]), r[ti], Number.isFinite(v) ? v : null]);
+          out.push([...dimCols.map(i => r[i]), String(r[ti]).replace(/^(\d{4})-M(\d{2})$/, "$1-$2"), Number.isFinite(v) ? v : null]);
           if (out.length > 500000) throw new Error("More than 500,000 observations. Pick fewer values or a later start year.");
         }
         if (!out.length) return status("No observations in " + s + "–" + e + ".", true);
