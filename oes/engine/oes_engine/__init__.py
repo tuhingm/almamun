@@ -521,6 +521,9 @@ MODELS += [
     dict(id="weakiv", group="Causal inference", name="Weak-instrument-robust IV inference (AR, LM, CLR, LIML)", guide="causal-inference-guide/weak-iv.html", fn=causal_extra.weakiv,
          fields=[col("outcome", "Outcome"), col("treat", "Endogenous regressor"), cols("instruments", "Instruments"), cols("controls", "Controls", required=False), num("level", "Confidence level", 0.95), num("sims", "Simulation draws for the CLR test", 1000), num("seed", "Random seed", 0)],
          example=dict(file=CI + "card_full.csv", spec=dict(outcome="lwage", treat="educ", instruments=["nearc4", "nearc2"], controls=["exper", "expersq", "black", "smsa", "south"]))),
+    dict(id="experiment", group="Causal inference", name="Randomised experiments: balance, adjustment, randomisation inference, power", guide="causal-inference-guide/experiments.html", fn=causal_extra.experiment,
+         fields=[col("outcome", "Outcome"), col("treat", "Treatment (0/1)"), cols("covariates", "Pre-treatment covariates", required=False), num("draws", "Randomisation draws", 2000), num("seed", "Random seed", 0)],
+         example=dict(file=CI + "nsw_experiment.csv", spec=dict(outcome="re78", treat="train", covariates=["age", "educ", "black", "hisp", "married", "nodegree", "re74", "re75"], draws=2000))),
 ]
 
 MODELS += [

@@ -418,3 +418,77 @@ def weakiv(df, spec):
     notes = ["The sets are for homoskedastic errors; with heteroskedasticity use a robust version (for example in Stata, weakiv or ivreg2 with robust options).",
              "With more instruments than endogenous regressors, the AR test also has power against invalid instruments, so a rejection does not by itself show an effect."]
     return result("weakiv", f"Weak-instrument-robust inference: effect of {x} on {y}", n, [stat("Observations", n), stat("2SLS estimate", b2, 4), stat("LIML estimate", bl, 4), stat("First-stage F", Ffs, 2), stat("Instruments", k)], [est, fst, tests], ch, notes)
+
+
+# ------------------------------------------------------------------------------------------------------------------
+# Randomised experiments: balance, Neyman and regression-adjusted effects, Lin (2013) estimator, randomisation inference, power
+# ------------------------------------------------------------------------------------------------------------------
+def _hc2(X, y):
+    n, k = X.shape; XtXi = np.linalg.inv(X.T @ X); b = XtXi @ X.T @ y; e = y - X @ b
+    h = np.einsum("ij,jk,ik->i", X, XtXi, X); h = np.minimum(h, 1 - 1e-8)
+    V = XtXi @ (X.T * (e ** 2 / (1 - h))) @ X @ XtXi
+    return b, V, e
+
+
+def experiment(df, spec):
+    y = need(spec, "outcome", "outcome"); t = need(spec, "treat", "treatment indicator"); xs = as_list(spec.get("covariates") or []); distinct([y, t], xs)
+    miss = [c for c in [y, t] + xs if c not in df.columns]
+    if miss:
+        raise OESError("Column(s) not found in the data: " + ", ".join(miss))
+    d = numeric(df, [y, t] + xs); n = len(d)
+    if not set(np.unique(d[t])) <= {0.0, 1.0} or d[t].nunique() != 2:
+        raise OESError("The treatment must be a 0/1 indicator with both values present.")
+    draws = int_option(spec, "draws", 2000, 200, 50000, "Randomisation draws"); seed = int_option(spec, "seed", 0, 0, 10 ** 6, "Random seed")
+    T = d[t].to_numpy(float); Y = d[y].to_numpy(float); n1 = int(T.sum()); n0 = n - n1
+    if min(n1, n0) < 5:
+        raise OESError("Each arm needs at least 5 units.")
+    # Neyman difference in means
+    ate = float(Y[T == 1].mean() - Y[T == 0].mean()); se_n = float(np.sqrt(Y[T == 1].var(ddof=1) / n1 + Y[T == 0].var(ddof=1) / n0))
+    # regression adjustment (additive) and Lin (2013) interacted estimator, HC2 standard errors
+    rows = [["Difference in means (Neyman)", f(ate, 4), f(se_n, 4), f(ate / se_n, 2), f(2 * stats.norm.sf(abs(ate / se_n)), 4)]]
+    est = {"diff": (ate, se_n)}
+    if xs:
+        Xc = d[xs].to_numpy(float); Xc = Xc - Xc.mean(0)
+        A = np.column_stack([np.ones(n), T, Xc]); b, V, _ = _hc2(A, Y); se = float(np.sqrt(V[1, 1])); est["adj"] = (float(b[1]), se)
+        rows.append(["Regression adjustment (covariates, HC2)", f(b[1], 4), f(se, 4), f(b[1] / se, 2), f(2 * stats.norm.sf(abs(b[1] / se)), 4)])
+        L = np.column_stack([np.ones(n), T, Xc, Xc * T[:, None]]); bl, Vl, _ = _hc2(L, Y); sel = float(np.sqrt(Vl[1, 1])); est["lin"] = (float(bl[1]), sel)
+        rows.append(["Lin (2013) interacted adjustment (HC2)", f(bl[1], 4), f(sel, 4), f(bl[1] / sel, 2), f(2 * stats.norm.sf(abs(bl[1] / sel)), 4)])
+    key = "lin" if xs else "diff"
+    # randomisation inference under the sharp null of no effect for any unit (complete randomisation)
+    rng = np.random.default_rng(seed)
+    if xs:
+        stat_fn = lambda tt: _lin_t(Y, tt, Xc)
+        tobs = _lin_t(Y, T, Xc)
+    else:
+        stat_fn = lambda tt: float(Y[tt == 1].mean() - Y[tt == 0].mean()); tobs = ate
+    sims = np.empty(draws)
+    for i in range(draws):
+        sims[i] = stat_fn(rng.permutation(T))
+    p_ri = float((np.sum(np.abs(sims) >= abs(tobs) - 1e-12) + 1) / (draws + 1))
+    lab = "Lin-adjusted effect" if xs else "difference in means"
+    tabs = [table(f"Average treatment effect of {t} on {y}", ["Estimator", "Estimate", "Std. err.", "t", "p-value"], rows,
+                  f"{n1} treated and {n0} control units. Neyman variance for the difference in means; HC2 (leverage-corrected) for the regression estimators, which are consistent for the average effect even if the effects differ across units.")]
+    tabs.append(tests_table([test_row(f"Randomisation inference: sharp null of no effect ({draws} draws, {lab})", tobs, p_ri, "p-value of the two-sided test against the permutation distribution")], title="Randomisation test"))
+    # balance
+    if xs:
+        brows = []
+        for v in xs:
+            x = d[v].to_numpy(float); m1, m0 = x[T == 1].mean(), x[T == 0].mean(); sd = np.sqrt((x[T == 1].var(ddof=1) + x[T == 0].var(ddof=1)) / 2)
+            tt = (m1 - m0) / np.sqrt(x[T == 1].var(ddof=1) / n1 + x[T == 0].var(ddof=1) / n0)
+            brows.append([v, f(m1, 3), f(m0, 3), f((m1 - m0) / sd if sd > 0 else 0.0, 3), f(2 * stats.norm.sf(abs(tt)), 4)])
+        Xa = np.column_stack([np.ones(n), d[xs].to_numpy(float)]); bt = np.linalg.lstsq(Xa, T, rcond=None)[0]; e = T - Xa @ bt
+        k = len(xs); rss = float(e @ e); tss = float(((T - T.mean()) ** 2).sum()); Fj = ((tss - rss) / k) / (rss / (n - k - 1)); pF = float(stats.f.sf(Fj, k, n - k - 1))
+        tabs.append(table("Covariate balance", ["Covariate", "Mean, treated", "Mean, control", "Standardised difference", "p-value"], brows, "A joint F test of the covariates predicting treatment: F = " + f"{Fj:.2f}, p = {pF:.3f}. Standardised differences above 0.1 deserve a look, though some imbalance is expected by chance."))
+    # power
+    sdp = float(np.sqrt(((n1 - 1) * Y[T == 1].var(ddof=1) + (n0 - 1) * Y[T == 0].var(ddof=1)) / (n - 2))); se_eq = sdp * np.sqrt(1 / n1 + 1 / n0)
+    mde = float((stats.norm.ppf(0.975) + stats.norm.ppf(0.8)) * se_eq)
+    tabs.append(table("Precision and power", ["Quantity", "Value"], [["Control-group mean of the outcome", f(float(Y[T == 0].mean()), 4)], ["Pooled standard deviation of the outcome", f(sdp, 4)], ["Minimum detectable effect (80% power, 5% test)", f(mde, 4)], ["MDE as a share of the control mean", f(mde / abs(Y[T == 0].mean()), 3) if Y[T == 0].mean() != 0 else "n/a"]],
+                      "Computed for the difference in means with equal variances; covariate adjustment lowers the standard error and the MDE when the covariates predict the outcome."))
+    ch = [chart("Randomisation distribution of the test statistic", list(range(len(sims))), [("Permutation draws (sorted)", np.sort(sims)), ("Observed", [tobs] * len(sims))], "Draw", "Statistic", kind="line")]
+    notes = ["The randomisation test assumes complete randomisation of the observed number of treated units; with stratified or clustered designs, permute within strata or clusters.", "Covariates must be measured before treatment; adjusting for post-treatment variables can bias the effect."]
+    return result("experiment", f"Randomised experiment: effect of {t} on {y}", n, [stat("Observations", n), stat("Treated", n1), stat("Effect", est[key][0], 4), stat("Std. err.", est[key][1], 4), stat("Randomisation p-value", p_ri, 4)], tabs, ch, notes)
+
+
+def _lin_t(Y, T, Xc):
+    n = len(Y); L = np.column_stack([np.ones(n), T, Xc, Xc * T[:, None]])
+    return float(np.linalg.lstsq(L, Y, rcond=None)[0][1])

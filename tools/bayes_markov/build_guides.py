@@ -31,7 +31,7 @@ SECTIONS = {
     "micro": dict(folder="microeconometrics-guide", name="Microeconometrics Research Guide", short="Microeconometrics Guide",
                   order=["logit-probit", "ordered-logit-probit", "multinomial-logit", "tobit", "heckman", "count-models", "zero-inflated-hurdle", "glm-fractional", "systems-sur-3sls", "panel-logit-probit", "iv-probit", "conditional-mixed-logit"], data=[]),
     "causal": dict(folder="causal-inference-guide", src="tools/causal_selector/guides", name="Causal Inference Research Guide", short="Causal Guide",
-                   order=['did', 'staggered', 'gsc', 'scm', 'its', 'rdd', 'iv', 'eventstudy', 'sdid', 'matching', 'bartik', 'weak-iv'],
+                   order=['did', 'staggered', 'gsc', 'scm', 'its', 'rdd', 'iv', 'eventstudy', 'sdid', 'matching', 'bartik', 'weak-iv', 'experiments'],
                    static={"did": "DiD", "staggered": "Staggered DiD", "gsc": "GSC", "scm": "Synthetic control", "its": "ITS", "rdd": "RDD", "iv": "IV", "eventstudy": "Event study", "sdid": "Synthetic DiD", "matching": "Matching / IPW / DR", "bartik": "Shift-share IV"},
                    data=[]),
     # local projections: two more guides in the existing Time-Series and Panel-Data guides (hubs are built by their own tools)

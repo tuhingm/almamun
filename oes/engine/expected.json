@@ -1432,5 +1432,21 @@
    "label": "2SLS estimate",
    "value": 0.1704
   }
+ },
+ "experiment": {
+  "nobs": 445,
+  "table_index": 0,
+  "table": "Average treatment effect of train on re78",
+  "row": "Difference in means (Neyman)",
+  "row_index": 0,
+  "col": "Estimate",
+  "col_index": 1,
+  "value": 1.7943,
+  "rtol": 0.001,
+  "seconds": 0.4,
+  "summary": {
+   "label": "Effect",
+   "value": 1.6216
+  }
  }
 }
