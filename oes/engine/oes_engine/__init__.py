@@ -595,6 +595,9 @@ MODELS += [
          fields=[col("y", "Variable that may be caused"), col("x", "Variable that may cause it"), UNIT, PTIME, num("lags", "Lags", 1), sel("diff_y", "First-difference the caused variable", [["no", "No"], ["yes", "Yes"]], "no"),
                  sel("diff_x", "First-difference the causing variable", [["no", "No"], ["yes", "Yes"]], "no")],
          example=dict(file=PD + "garrett.csv", spec=dict(y="gdp_growth", x="unem", unit="country", time="year", lags=1, diff_x="yes"))),
+    dict(id="cre", group="Panel data", name="Correlated random effects (Mundlak) and robust Hausman test", guide="panel-data-guide/mundlak-cre.html", fn=panel_extra.cre,
+         fields=[col("y", "Dependent variable"), cols("x", "Time-varying regressors"), cols("z", "Time-invariant regressors", required=False), UNIT, PTIME, sel("time_effects", "Period dummies", [["yes", "Yes"], ["no", "No"]], "yes")],
+         example=dict(file=PD + "wagepan_full.csv", spec=dict(y="lwage", x=["union", "married", "expersq"], z=["educ", "black", "hisp"], unit="nr", time="year"))),
 ]
 
 MODELS += [

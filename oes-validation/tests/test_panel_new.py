@@ -196,3 +196,68 @@ def test_dh_errors():
     assert "periods" in o.run("dh_causality", dh_panel(T=10).to_csv(index=False), dict(sp, lags=3))["error"]
     assert "at least 3 units" in o.run("dh_causality", dh_panel(N=2).to_csv(index=False), sp)["error"]
     assert "Lags" in o.run("dh_causality", d.to_csv(index=False), dict(sp, lags=9))["error"]
+
+
+# ---- correlated random effects (Mundlak) ------------------------------------------------------------------------
+def wage(): return pd.read_csv(os.path.join(PD, "wagepan_full.csv"))
+WS = dict(y="lwage", x=["union", "married", "expersq"], z=["educ", "black", "hisp"], unit="nr", time="year")
+def crow(r, tab, var): return next(x for x in r["tables"][tab]["rows"] if x[0] == var)
+
+
+def test_cre_registered():
+    m = o.BY_ID["cre"]; assert m["group"] == "Panel data" and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+def test_cre_within_coefficients_match_published_fixed_effects():
+    # Wooldridge (2010), Table 14.2 (wagepan, with year dummies): FE union .0800, married .0467, expersq -.0052
+    r = panel_extra.cre(wage(), WS)
+    assert float(crow(r, 1, "union")[1]) == pytest.approx(0.0800, abs=6e-4) and float(crow(r, 1, "married")[1]) == pytest.approx(0.0467, abs=6e-4) and float(crow(r, 1, "expersq")[1]) == pytest.approx(-0.0052, abs=6e-5)
+
+
+def test_cre_equals_fe_on_time_varying_and_between_minus_within_on_means():
+    d = wage(); r = panel_extra.cre(d, dict(y="lwage", x=["union", "married"], unit="nr", time="year", time_effects="no"))
+    cr = {x[0]: float(x[1]) for x in r["tables"][0]["rows"]}; fe = {x[0]: float(x[1]) for x in r["tables"][1]["rows"]}
+    g = d.groupby("nr"); xb = g[["union", "married"]].mean(); yb = g.lwage.mean()
+    bb = np.linalg.lstsq(np.column_stack([np.ones(len(xb)), xb.to_numpy()]), yb.to_numpy(), rcond=None)[0][1:]
+    dw = d[["union", "married"]] - g[["union", "married"]].transform("mean"); bw = np.linalg.lstsq(dw.to_numpy(), (d.lwage - g.lwage.transform("mean")).to_numpy(), rcond=None)[0]
+    for i, v in enumerate(["union", "married"]):
+        assert cr[v] == pytest.approx(bw[i], abs=2e-4) and cr["mean of " + v] == pytest.approx(bb[i] - bw[i], abs=2e-4)
+
+
+def test_cre_random_effects_matches_re_model():
+    d = wage(); r = panel_extra.cre(d, dict(WS, time_effects="no"))
+    re = o.run("re", d.to_csv(index=False), dict(y="lwage", x=["union", "married", "expersq", "educ", "black", "hisp"], unit="nr", time="year"))
+    for i, v in enumerate(["union", "married", "expersq"]):
+        row = next(x for x in re["tables"][0]["rows"] if x[0] == v)
+        assert float(crow(r, 1, v)[3]) == pytest.approx(row[1], abs=2e-4)
+
+
+def test_cre_mundlak_test_matches_statsmodels_cluster_wald():
+    import statsmodels.api as sm
+    d = wage(); r = panel_extra.cre(d, dict(y="lwage", x=["union", "married"], unit="nr", time="year", time_effects="no"))
+    X = d[["union", "married"]].copy(); X["mu"] = d.groupby("nr").union.transform("mean"); X["mm"] = d.groupby("nr").married.transform("mean")
+    m = sm.OLS(d.lwage, sm.add_constant(X)).fit(cov_type="cluster", cov_kwds=dict(groups=d.nr))
+    b = m.params[["mu", "mm"]].to_numpy(); V = m.cov_params().loc[["mu", "mm"], ["mu", "mm"]].to_numpy(); W = float(b @ np.linalg.solve(V, b))
+    assert float(r["tables"][2]["rows"][0][1]) == pytest.approx(W, rel=0.02)
+
+
+def cre_sim(corr, seed=0, N=300, T=6):
+    rng = np.random.default_rng(seed); u = rng.normal(size=N); rows = []
+    for i in range(N):
+        for t in range(T):
+            x = corr * u[i] + rng.normal(); rows.append((i, t, 1 + 0.5 * x + u[i] + rng.normal(), x))
+    return pd.DataFrame(rows, columns=["id", "t", "y", "x"])
+
+
+def test_cre_detects_correlated_effects_and_corrects_re():
+    sp = dict(y="y", x=["x"], unit="id", time="t", time_effects="no")
+    r = panel_extra.cre(cre_sim(1.0), sp); assert float(r["tables"][2]["rows"][0][2]) < 0.001
+    assert abs(float(crow(r, 1, "x")[1]) - 0.5) < 0.05 and abs(float(crow(r, 1, "x")[3]) - 0.5) > 0.1          # FE near truth, RE biased
+    assert float(panel_extra.cre(cre_sim(0.0, seed=3), sp)["tables"][2]["rows"][0][2]) > 0.05
+
+
+def test_cre_errors():
+    d = wage()
+    assert "does not vary within units" in o.run("cre", d.to_csv(index=False), dict(WS, x=["educ"], z=[]))["error"]
+    assert "varies within units" in o.run("cre", d.to_csv(index=False), dict(WS, x=["union", "expersq"], z=["married"]))["error"]
+    assert "Period dummies" in o.run("cre", d.to_csv(index=False), dict(WS, time_effects="x"))["error"]

@@ -1074,3 +1074,69 @@ def dh_causality(df, spec):
     notes = ["Both variables must be stationary: difference them first if they have unit roots.", "Granger causality is predictive content, not a causal effect: an omitted variable that moves both series produces it too.",
              "The test is for the null of no causality in every unit; a rejection does not say in which units causality holds."]
     return result("dh_causality", f"Panel Granger causality: {x} and {y}", int(N * Te), [stat("Units", N), stat("T per unit", Te), stat(f"W-bar ({x} to {y})", Wb, 3), stat("Z-tilde p-value", 2 * stats.norm.sf(abs(Zt)) if Zt is not None else None, 4)], tabs, ch, notes)
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Correlated random effects (Mundlak / Chamberlain): random effects with unit means, and the robust Mundlak test
+# ---------------------------------------------------------------------------------------------------------------
+def _cluster_ols(X, y, g):
+    n, k = X.shape; XtXi = np.linalg.pinv(X.T @ X); b = XtXi @ X.T @ y; e = y - X @ b
+    G = len(np.unique(g)); S = np.zeros((k, k))
+    for gi in np.unique(g):
+        m = g == gi; s = X[m].T @ e[m]; S += np.outer(s, s)
+    V = XtXi @ S @ XtXi * (G / (G - 1)) * ((n - 1) / (n - k))
+    return b, V, e
+
+
+def cre(df, spec):
+    y = need(spec, "y", "dependent variable"); xs = as_list(need(spec, "x", "time-varying regressors")); zs = as_list(spec.get("z") or [])
+    distinct([y], xs + zs)
+    d, unit, time, N, T = _panel(df, spec, [y] + xs + zs)
+    tw = _choice(spec, "time_effects", ["yes", "no"], "yes", "Period dummies")
+    u = d["_u"].to_numpy(int)
+    for v in xs:
+        if d.groupby("_u")[v].std().fillna(0).max() <= 1e-10:
+            raise OESError(f"{v} does not vary within units; list it among the time-invariant regressors.")
+    for v in zs:
+        if d.groupby("_u")[v].std().fillna(0).max() > 1e-10:
+            raise OESError(f"{v} varies within units; list it among the time-varying regressors.")
+    gm = lambda M: pd.DataFrame(np.asarray(M, float)).groupby(u).transform("mean").to_numpy()
+    X = d[xs].to_numpy(float); Y = d[y].to_numpy(float); Xb = gm(X)
+    dum = pd.get_dummies(d["_ti"], drop_first=True).to_numpy(float) if tw == "yes" and T > 1 else np.zeros((len(d), 0))
+    dn = [f"period {int(v)}" for v in sorted(d["_ti"].unique())[1:]] if dum.shape[1] else []
+    Z = d[zs].to_numpy(float) if zs else np.zeros((len(d), 0))
+    one = np.ones((len(d), 1))
+    if len(d) < 3 * (1 + len(xs) * 2 + len(zs)):
+        raise OESError("Too few observations for this number of regressors.")
+    # CRE: pooled OLS on x, unit means of x, z and period dummies, clustered by unit
+    Wc = np.column_stack([one, X, Xb, Z, dum]); bc, Vc, _ = _cluster_ols(Wc, Y, u)
+    nm = ["const"] + xs + [f"mean of {v}" for v in xs] + zs + dn
+    k = len(xs); seC = np.sqrt(np.diag(Vc))
+    # Mundlak test: joint significance of the unit means (cluster-robust Wald)
+    bm = bc[1 + k: 1 + 2 * k]; Vm = Vc[1 + k: 1 + 2 * k, 1 + k: 1 + 2 * k]; Wm = float(bm @ np.linalg.solve(Vm, bm)); pm = float(stats.chi2.sf(Wm, k))
+    # fixed effects (within) with period dummies, clustered
+    Dm = np.column_stack([X, dum]); Dw = Dm - gm(Dm); Yw = Y - gm(Y[:, None])[:, 0]
+    bf, Vf, ef = _cluster_ols(Dw, Yw, u); seF = np.sqrt(np.diag(Vf))
+    # random effects (Swamy-Arora), clustered
+    ew = Yw - Dw @ bf; se2 = float(ew @ ew) / (len(d) - N - Dm.shape[1])
+    Ti = np.bincount(u).astype(float); Wr = np.column_stack([one, X, Z, dum])
+    ob = pd.DataFrame(np.column_stack([Y, Wr])).groupby(u).mean().to_numpy(); bb = np.linalg.lstsq(ob[:, 1:], ob[:, 0], rcond=None)[0]; rb = ob[:, 0] - ob[:, 1:] @ bb
+    su2 = max(float(rb @ rb) / max(N - ob.shape[1], 1) - se2 / float(np.mean(Ti)), 0.0)
+    th = (1 - np.sqrt(se2 / (se2 + Ti * su2)))[u][:, None]
+    Wt = Wr - th * gm(Wr); Yt = Y - th[:, 0] * gm(Y[:, None])[:, 0]; br, Vr, _ = _cluster_ols(Wt, Yt, u); seR = np.sqrt(np.diag(Vr))
+    # classical Hausman-type contrast on the time-varying coefficients, cluster-robust via the Mundlak equivalence is the test above
+    tab = []
+    for i, nme in enumerate(nm):
+        tab.append([nme, f(bc[i], 4), f(seC[i], 4), f(bc[i] / seC[i], 2), f(2 * stats.norm.sf(abs(bc[i] / seC[i])), 4)])
+    cre_t = table(f"Correlated random effects (Mundlak) estimates, dependent variable: {y}", ["Variable", "Coefficient", "Cluster s.e.", "z", "p-value"], tab,
+                  "The coefficients on the time-varying variables equal the fixed-effects estimates; the coefficient on the unit mean is the between effect minus the within effect. The coefficients on the time-invariant variables are identified from between-unit variation.")
+    cmp_rows = []
+    for i, v in enumerate(xs):
+        cmp_rows.append([v, f(bf[i], 4), f(seF[i], 4), f(br[1 + i], 4), f(seR[1 + i], 4), f(bc[1 + i], 4), f(seC[1 + i], 4), f(bc[1 + k + i], 4), f(seC[1 + k + i], 4)])
+    cmp_t = table("Time-varying coefficients: fixed effects, random effects, correlated random effects", ["Variable", "FE", "s.e.", "RE", "s.e.", "CRE (within)", "s.e.", "Mean of x (between - within)", "s.e."], cmp_rows,
+                  "All standard errors are cluster-robust by unit. If the unit means have zero coefficients, random effects and fixed effects estimate the same thing.")
+    tests = tests_table([test_row(f"Mundlak test: unit means of the time-varying regressors are jointly zero ({k} df)", Wm, pm, "H0: the unit effect is uncorrelated with the regressors, so random effects is consistent (cluster-robust Wald)")], title="Specification test")
+    var_t = table("Variance components (random effects)", ["Component", "Estimate"], [["sigma_e (idiosyncratic)", f(np.sqrt(se2), 4)], ["sigma_u (unit effect)", f(np.sqrt(su2), 4)], ["rho", f(su2 / (su2 + se2 + 1e-300), 4)], ["theta (mean)", f(float(th.mean()), 4)]])
+    ch = [chart("Within and random-effects coefficients", xs, [("Fixed effects", bf[:k]), ("Random effects", br[1: 1 + k])], "", "Coefficient", kind="bar")]
+    notes = ["The Mundlak test is robust to heteroskedasticity and serial correlation, unlike the classical Hausman test.", "A rejection means the random-effects estimates of the time-varying coefficients are inconsistent; use the within (CRE) estimates for them."]
+    return result("cre", f"Correlated random effects: {y}", len(d), [stat("Observations", len(d)), stat("Units", N), stat("Mundlak chi-squared", Wm, 3), stat("Mundlak p-value", pm, 4)], [cre_t, cmp_t, tests, var_t], ch, notes)
