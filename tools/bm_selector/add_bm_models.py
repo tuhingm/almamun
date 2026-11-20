@@ -74,6 +74,10 @@ EXTRA_MARKOV = {
                                  "A Gibbs sampler for the Markov-switching regression gives a posterior for every regime parameter, for the transition probabilities, for the expected durations and for the regime of every period, with exact small-sample intervals and a prior you can state.",
                                  ["Estimate with the Gibbs sampler", "Date the regimes against a reference", "Let the variance switch", "Prior on staying in a regime", "Slopes that switch", "Simulation check"]),
             [290, 364, 170, "Bayesian MS regression"], "posterior", "Hidden regimes, with a posterior for the dates, probabilities and durations"),
+    "MCH": ("markov-chain", model("MCH", "Markov chain transition model", "Markov chain", "The states are observed (union or not, a wage band, a rating) and you want transition probabilities, long-run shares and mobility",
+                                  "When the state is observed, not hidden, the transition matrix is estimated from counts of moves. A Dirichlet posterior gives intervals for every probability, for the long-run distribution, the expected durations, the first-passage times and a mobility index, with tests of the Markov and the homogeneity assumptions.",
+                                  ["Estimate the transition matrix", "Long-run shares and durations", "First-passage times", "Test the assumptions", "Cut a continuous variable into states", "Prior sensitivity"]),
+            [500, 364, 170, "Markov chain"], "observed states", "The states are observed and I want transition probabilities and long-run shares"),
 }
 
 

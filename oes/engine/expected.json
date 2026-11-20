@@ -1736,5 +1736,21 @@
    "label": "Largest R-hat",
    "value": 1.031
   }
+ },
+ "bayes_mc": {
+  "nobs": 3815,
+  "table_index": 0,
+  "table": "Transition probabilities (row = from, column = to)",
+  "row": "0",
+  "row_index": 0,
+  "col": "ML",
+  "col_index": 3,
+  "value": 0.911196,
+  "rtol": 0.001,
+  "seconds": 0.2,
+  "summary": {
+   "label": "Shorrocks mobility",
+   "value": 0.362
+  }
  }
 }

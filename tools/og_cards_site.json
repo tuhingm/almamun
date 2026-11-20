@@ -294,6 +294,12 @@
   "sub": "Hamilton's regime model, regression, VAR and panel VAR with hidden regimes: tests, regime dates and the text for the paper."
  },
  {
+  "out": "assets/og/markov-guide/markov-chain.jpg",
+  "kicker": "Markov-Switching Guide · Model guide",
+  "title": "Markov Chain Transition Model",
+  "sub": "The state is observed (union member or not, a wage band, a credit rating) and you want transition probabilities, long-run shares…"
+ },
+ {
   "out": "assets/og/markov-guide/ms-ar.jpg",
   "kicker": "Markov-Switching Guide · Model guide",
   "title": "Markov-Switching Autoregression (Hamilton)",

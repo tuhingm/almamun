@@ -725,6 +725,10 @@ MODELS += [
                  num("prior_sd", "Prior s.d. of the standardised coefficients", 5), num("prior_stay", "Extra prior weight on staying in a regime", 0),
                  num("draws", "Draws per chain", 3000), num("burn", "Burn-in", 1000), num("chains", "Chains", 2), num("seed", "Random seed", 0)],
          example=dict(file=OX + "hamilton_gnp.csv", spec=dict(y="gnp_growth", time="date", reference="nber_recession", draws=1500, burn=500))),
+    dict(id="bayes_mc", group="Markov switching", name="Markov chain transition model (Bayesian, stationary distribution, mobility)", guide="markov-guide/markov-chain.html", fn=bayes_more.bayes_mc,
+         fields=[col("state", "State variable (categories, or a continuous variable to be cut into states)"), col("id", "Unit (optional)", required=False), TIME,
+                 num("bins", "States for a continuous variable", 4), num("prior", "Dirichlet prior weight per cell", 1), num("draws", "Posterior draws", 4000), num("seed", "Random seed", 0)],
+         example=dict(file=ME + "wagepan_union.csv", spec=dict(state="union", id="nr", time="year"))),
 ]
 
 STAT_MODELS = stat_registry.build(col, cols, num, sel)       # the Statistics Division: its own page, registered like every other model

@@ -4,7 +4,7 @@ import pandas as pd
 from scipy import stats
 from scipy.special import gammaln
 
-from .core import (OESError, as_list, chart, distinct, f, int_option, float_option, need, result, stat, table, numeric)
+from .core import (OESError, as_list, check_columns, chart, distinct, f, int_option, float_option, need, result, stat, table, numeric)
 
 
 # ================================================================================================ Bayesian model averaging
@@ -1466,3 +1466,122 @@ def bayes_ms(df, spec):
              f"the coefficients by a normal update, the variances by inverse gammas and each row of the transition matrix by a Dirichlet draw. Prior: N(0, {psd:g}^2) on standardised coefficients, "
              f"inverse-gamma(2, 1) on standardised variances, Dirichlet(1" + (f" + {stay:g} on the diagonal" if stay else "") + ") on each row. Intercepts (levels at the mean of the regressors)" + (", slopes" if sw_s else "") + (" and variances" if sw_v else "") + " switch."]
     return result("bayes_ms", f"Bayesian Markov-switching regression: {y_}", n, summary, tabs, charts, notes)
+
+
+# ================================================================================================ Markov chain transition model
+def _stationary(P):
+    K = P.shape[-1]
+    A = np.vstack([np.swapaxes(P, -1, -2) - np.eye(K), np.ones(K)]) if P.ndim == 2 else None
+    b = np.zeros(K + 1)
+    b[-1] = 1.0
+    return np.linalg.lstsq(A, b, rcond=None)[0]
+
+
+def _first_passage(P):
+    K = P.shape[0]
+    M = np.zeros((K, K))
+    for j in range(K):
+        idx = [i for i in range(K) if i != j]
+        Q = P[np.ix_(idx, idx)]
+        m = np.linalg.solve(np.eye(K - 1) - Q, np.ones(K - 1))
+        M[idx, j] = m
+    for j in range(K):                                          # mean recurrence time 1/pi_j on the diagonal
+        M[j, j] = 1 + P[j, [i for i in range(K) if i != j]] @ M[[i for i in range(K) if i != j], j]
+    return M
+
+
+def bayes_mc(df, spec):
+    st = need(spec, "state", "state variable")
+    idc = spec.get("id") or None
+    tm = spec.get("time") or None
+    bins = int_option(spec, "bins", 4, 2, 10, "Number of states for a continuous variable")
+    draws = int_option(spec, "draws", 4000, 500, 50000, "Posterior draws")
+    seed = int_option(spec, "seed", 0, 0, 10 ** 9, "Random seed")
+    a0 = float_option(spec, "prior", 1.0, "Dirichlet prior weight per cell")
+    cols_ = [st] + ([idc] if idc else []) + ([tm] if tm else [])
+    check_columns(df, cols_)
+    d = df[cols_].dropna().copy()
+    if tm:
+        d = d.sort_values(([idc] if idc else []) + [tm], kind="stable")
+    s = d[st]
+    sn = pd.to_numeric(s, errors="coerce")
+    if sn.notna().all() and sn.nunique() > 12:
+        codes = pd.qcut(sn.rank(method="first"), bins, labels=False)
+        lo = sn.groupby(codes).min()
+        hi = sn.groupby(codes).max()
+        names = [f"S{i + 1} [{lo[i]:.3g}, {hi[i]:.3g}]" for i in range(bins)]
+        d["_s"] = codes.astype(int)
+    else:
+        cats = sorted(s.unique(), key=lambda v: (str(type(v)), v))
+        names = [str(c) for c in cats]
+        d["_s"] = s.map({c: i for i, c in enumerate(cats)}).astype(int)
+    K = len(names)
+    if K < 2:
+        raise OESError("The state variable has only one value.")
+    g = d.groupby(idc) if idc else [(None, d)]
+    N = np.zeros((K, K))
+    Nt = {}
+    for _, gg in g:
+        v = gg["_s"].to_numpy()
+        tv = gg[tm].to_numpy() if tm else np.arange(len(v))
+        for a, b, t in zip(v[:-1], v[1:], tv[1:]):
+            N[a, b] += 1
+            Nt.setdefault(t, np.zeros((K, K)))[a, b] += 1
+    n = int(N.sum())
+    if n < 10 * K:
+        raise OESError(f"Only {n} transitions for {K} states: at least {10 * K} are needed.")
+    if (N.sum(1) == 0).any() and a0 == 0:
+        raise OESError("A state is never left in the data; use a positive prior weight.")
+    rng = np.random.default_rng(seed)
+    A = N + a0
+    Pm = A / A.sum(1, keepdims=True)
+    P_ml = N / np.maximum(N.sum(1, keepdims=True), 1)
+    Pd = np.stack([rng.dirichlet(A[i], size=draws) for i in range(K)], axis=1)       # draws x K x K
+    PI = np.array([_stationary(p) for p in Pd])
+    FP = np.array([_first_passage(p) for p in Pd])
+    sh = (K - np.trace(Pd, axis1=1, axis2=2)) / (K - 1)
+    dur = 1 / np.maximum(1 - np.diagonal(Pd, axis1=1, axis2=2), 1e-9)
+    q = lambda x: np.percentile(x, [2.5, 97.5], axis=0)
+    # tests
+    rowN = N.sum(1)
+    colp = N.sum(0) / N.sum()
+    with np.errstate(divide="ignore", invalid="ignore"):
+        ll1 = np.nansum(np.where(N > 0, N * np.log(P_ml), 0.0))
+        ll0 = np.nansum(np.where(N > 0, N * np.log(colp)[None, :], 0.0))
+    lr0 = 2 * (ll1 - ll0)
+    df0 = (K - 1) ** 2
+    tests = [["Independence (zero-order) against first-order Markov", lr0, df0, stats.chi2.sf(lr0, df0)]]
+    ts = sorted(Nt)
+    if len(ts) >= 4:
+        h = len(ts) // 2
+        N1 = sum(Nt[t] for t in ts[:h])
+        N2 = sum(Nt[t] for t in ts[h:])
+        def _ll(M):
+            P = M / np.maximum(M.sum(1, keepdims=True), 1)
+            return float(np.sum(np.where(M > 0, M * np.log(np.where(P > 0, P, 1)), 0.0)))
+        lrh = 2 * (_ll(N1) + _ll(N2) - _ll(N1 + N2))
+        dfh = int(((N1.sum(1) > 0) & (N2.sum(1) > 0)).sum() * (K - 1))
+        tests.append([f"Time homogeneity: first against second half of the periods", lrh, dfh, stats.chi2.sf(lrh, dfh)])
+    rows = []
+    for i in range(K):
+        for j in range(K):
+            lo_, hi_ = np.percentile(Pd[:, i, j], [2.5, 97.5])
+            rows.append([names[i], names[j], int(N[i, j]), P_ml[i, j], Pd[:, i, j].mean(), Pd[:, i, j].std(), lo_, hi_])
+    tabs = [table("Transition probabilities (row = from, column = to)", ["From", "To", "Count", "ML", "Posterior mean", "Posterior s.d.", "2.5%", "97.5%"], rows,
+                  f"Dirichlet({a0:g}) prior on each row; {draws} posterior draws; {n} transitions."),
+            table("Stationary distribution (long-run shares) and persistence",
+                  ["State", "Observed share", "Long-run share", "2.5%", "97.5%", "Stay probability", "Expected duration", "Dur. 2.5%", "Dur. 97.5%"],
+                  [[names[i], (d["_s"] == i).mean(), PI[:, i].mean(), q(PI)[0][i], q(PI)[1][i], Pd[:, i, i].mean(), dur[:, i].mean(), q(dur)[0][i], q(dur)[1][i]] for i in range(K)],
+                  "Duration = 1 / (1 - stay probability), in periods."),
+            table("Mean first-passage times (periods to reach the column state, from the row state)", ["From \\ To"] + names,
+                  [[names[i]] + [f"{np.median(FP[:, i, j]):.2f}" + f" ({np.percentile(FP[:, i, j], 2.5):.1f}-{np.percentile(FP[:, i, j], 97.5):.1f})" for j in range(K)] for i in range(K)],
+                  "Posterior median and 95% interval. The diagonal is the mean recurrence time."),
+            table("Mobility", ["Index", "ML", "Posterior mean", "2.5%", "97.5%"],
+                  [["Shorrocks (K - trace P)/(K - 1)", (K - np.trace(P_ml)) / (K - 1), sh.mean(), *np.percentile(sh, [2.5, 97.5])]]),
+            table("Specification tests", ["Test", "LR statistic", "df", "p-value"], tests)]
+    ch = [chart("Long-run shares and observed shares", names, [("Observed", [(d["_s"] == i).mean() for i in range(K)]), ("Long-run (posterior mean)", PI.mean(0))], "State", "Share", "bar"),
+          chart("Probability of staying in each state", names, [("Stay probability", [Pd[:, i, i].mean() for i in range(K)])], "State", "Probability", "bar",
+                band=([q(np.stack([Pd[:, i, i] for i in range(K)], 1))[0][i] for i in range(K)], [q(np.stack([Pd[:, i, i] for i in range(K)], 1))[1][i] for i in range(K)]))]
+    summ = [stat("Transitions", n), stat("States", K), stat("Shorrocks mobility", float(sh.mean()), 3), stat("Mixing time (1/(1-2nd eigenvalue))", float(1 / max(1 - np.sort(np.abs(np.linalg.eigvals(Pm)))[-2], 1e-9)), 2)]
+    return result("bayes_mc", "Markov chain transition model (Bayesian Dirichlet posterior)", n, summ, tabs, ch,
+                  [f"States: {', '.join(names)}.", "Transitions are counted within each unit in time order. Long-run shares and first-passage times are computed for every posterior draw of the matrix."])

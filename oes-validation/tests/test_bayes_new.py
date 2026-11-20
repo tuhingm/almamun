@@ -616,3 +616,98 @@ def test_bayes_ms_errors():
         with pytest.raises(OESError, match=msg): bayes_more.bayes_ms(d if spec.get("ar") is None else d.head(50), spec)
     with pytest.raises(OESError, match="constant"): bayes_more.bayes_ms(d.assign(y=1.0), dict(y="y"))
     with pytest.raises(OESError, match="not found"): bayes_more.bayes_ms(d, dict(y="y", reference="zz"))
+
+
+# ---------------------------------------------------------------- Markov chain transition model (model 48)
+def _chain(P, n, seed, units=1):
+    rng = np.random.default_rng(seed)
+    K = len(P)
+    rows = []
+    for u in range(units):
+        s = rng.integers(K)
+        for t in range(n):
+            rows.append((u, t, s))
+            s = rng.choice(K, p=P[s])
+    return pd.DataFrame(rows, columns=["u", "t", "s"])
+
+
+def _tab(r, title):
+    return next(t for t in r["tables"] if t["title"].startswith(title))
+
+
+def test_mc_posterior_mean_is_dirichlet_formula():
+    df = _chain([[.9, .1], [.3, .7]], 400, 1)
+    r = o.run("bayes_mc", df.to_csv(index=False), dict(state="s", time="t"))
+    tr = _tab(r, "Transition")["rows"]
+    N = np.zeros((2, 2))
+    v = df["s"].to_numpy()
+    for a, b in zip(v[:-1], v[1:]):
+        N[a, b] += 1
+    A = N + 1
+    assert abs(tr[0][4] - A[0, 0] / A[0].sum()) < 0.002
+    assert abs(tr[3][3] - N[1, 1] / N[1].sum()) < 1e-6
+
+
+def test_mc_stationary_and_first_passage_exact():
+    P = [[.9, .1], [.3, .7]]
+    df = _chain(P, 3000, 2)
+    r = o.run("bayes_mc", df.to_csv(index=False), dict(state="s", time="t"))
+    st = _tab(r, "Stationary")["rows"]
+    assert abs(st[0][2] - 0.75) < 0.05 and abs(st[1][2] - 0.25) < 0.05
+    assert abs(st[0][6] - 10) < 2.0 and abs(st[1][6] - 1 / 0.3) < 0.6
+    fp = _tab(r, "Mean first")["rows"]
+    assert abs(float(fp[0][2].split()[0]) - 10) < 2.0         # 0 -> 1 takes 1/0.1 periods
+    assert abs(float(fp[1][1].split()[0]) - 1 / 0.3) < 0.6
+
+
+def test_mc_three_states_known_stationary():
+    P = np.array([[.8, .15, .05], [.1, .8, .1], [.05, .25, .7]])
+    w, v = np.linalg.eig(P.T)
+    pi = np.real(v[:, np.argmax(np.real(w))]); pi /= pi.sum()
+    df = _chain(P, 600, 3, units=10)
+    r = o.run("bayes_mc", df.to_csv(index=False), dict(state="s", id="u", time="t"))
+    st = _tab(r, "Stationary")["rows"]
+    for i in range(3):
+        assert st[i][3] - 0.02 <= pi[i] <= st[i][4] + 0.02
+
+
+def test_mc_coverage_of_stay_probability():
+    hit = 0
+    for k in range(20):
+        r = o.run("bayes_mc", _chain([[.85, .15], [.25, .75]], 300, 100 + k).to_csv(index=False), dict(state="s", time="t", draws=800))
+        tr = _tab(r, "Transition")["rows"]
+        hit += tr[0][6] <= .85 <= tr[0][7]
+    assert hit >= 16
+
+
+def test_mc_tests_detect_dependence_and_nonhomogeneity():
+    df = _chain([[.9, .1], [.3, .7]], 1000, 4)
+    r = o.run("bayes_mc", df.to_csv(index=False), dict(state="s", time="t"))
+    ts = _tab(r, "Specification")["rows"]
+    assert ts[0][3] < 1e-6 and ts[1][3] > 0.001
+    a = _chain([[.9, .1], [.3, .7]], 500, 5); b = _chain([[.5, .5], [.5, .5]], 500, 6); b["t"] += 500
+    r = o.run("bayes_mc", pd.concat([a, b]).to_csv(index=False), dict(state="s", time="t"))
+    assert _tab(r, "Specification")["rows"][1][3] < 1e-6
+
+
+def test_mc_iid_chain_not_flagged():
+    rng = np.random.default_rng(7)
+    df = pd.DataFrame(dict(t=np.arange(1500), s=rng.integers(0, 3, 1500)))
+    r = o.run("bayes_mc", df.to_csv(index=False), dict(state="s", time="t"))
+    assert _tab(r, "Specification")["rows"][0][3] > 0.001
+
+
+def test_mc_continuous_state_cut_into_bins():
+    rng = np.random.default_rng(8)
+    x = np.cumsum(rng.normal(size=800))
+    r = o.run("bayes_mc", pd.DataFrame(dict(t=np.arange(800), x=x)).to_csv(index=False), dict(state="x", time="t", bins=4))
+    assert len(_tab(r, "Stationary")["rows"]) == 4 and abs(sum(row[2] for row in _tab(r, "Stationary")["rows"]) - 1) < 1e-4
+
+
+def test_mc_errors():
+    df = pd.DataFrame(dict(t=range(30), s=[0] * 30))
+    for sp, msg in [(dict(state="s", time="t"), "only one value"), (dict(state="zz", time="t"), "not found")]:
+        r = o.run("bayes_mc", df.to_csv(index=False), sp)
+        assert msg in r["error"]
+    r = o.run("bayes_mc", pd.DataFrame(dict(t=range(8), s=[0, 1] * 4)).to_csv(index=False), dict(state="s", time="t"))
+    assert "transitions" in r["error"]
