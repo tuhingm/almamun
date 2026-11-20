@@ -30,6 +30,13 @@ BAYES = {
                                  ["Look at the heterogeneity", "Gibbs sampler and convergence", "Partial pooling", "Out-of-sample check", "Prior and leave-one-out sensitivity", "Write up the pooling"]),
              [830, 296, 140, "Hierarchical panel"]),
 }
+# models added after the first release: key -> (slug, model, leaf label, edge label, question text); leaves are laid out automatically
+EXTRA_BAYES = {
+    "BMA": ("bma", model("BMA", "Bayesian model averaging", "Model averaging", "Many candidate regressors and no theory that says which belong",
+                         "You have more candidate regressors than you can defend one by one, and choosing a single model by testing hides how much the answer depends on the choice. Model averaging weights every combination of regressors by its posterior probability and reports the probability that each variable belongs.",
+                         ["Choose the g-prior and the model prior", "Posterior inclusion probabilities", "Best models and model size", "Compare with the full regression", "Prior sensitivity", "Check the search (MC3)"]),
+            "Model averaging", "which variables", "Many candidate regressors and I do not know which belong"),
+}
 MARKOV = {
     "MSTVTP": ("ms-tvtp", model("MSTVTP", "Markov switching with time-varying transition probabilities", "MS with TVTP", "Hidden regimes, and an observed variable that moves the probability of switching",
                                 "The regimes are hidden, but you think an observed variable (a policy rate, a spread, a confidence index) changes the probability of moving between them. A logit lets the probabilities depend on that variable, and tests whether the dependence is real.",
@@ -66,6 +73,34 @@ def tree_bayes(path):
     path.write_text(s)
 
 
+def leaf_pos(i, label):
+    w = int(min(max(84, 8 * len(label) + 20), 150))
+    return [830 if i % 2 == 0 else 942, 228 + 68 * (i // 2), w, label]
+
+
+def extend_bayes(path):
+    s = path.read_text()
+    base = 3                                                 # BLP, SIGN, HIER have fixed positions above
+    for i, (k, (slug, mdl, label, edge, q)) in enumerate(EXTRA_BAYES.items()):
+        if f"\n {k}:{{name:" in s:
+            pass
+        else:
+            assert "}},\nN:{" in s
+            s = s.replace("}},\nN:{", f"}},\n{mdl}}},\nN:{{", 1)
+            s = re.sub(r"(GUIDE:\{[^}]*)\}", lambda m: m.group(1) + f",{k}:{js(slug)}}}", s, count=1)
+            x, y, w, lab = leaf_pos(base + i, label)
+            s = re.sub(r"(N:\{.*?)(\},\nE:\[)", lambda m: m.group(1) + f",\n {k}:[{x},{y},{w},{js(lab)},1]" + m.group(2), s, count=1, flags=re.S)
+            last = list(re.finditer(r"\['oth','\w+','[^']*'\]", s))[-1]
+            s = s[:last.end()] + f",['oth','{k}',{js(edge)}]" + s[last.end():]
+            m = re.search(r"qx:\{t:'What is your goal\?',o:\[.*?\]\]\}", s, flags=re.S)
+            assert m, "qx block not found"
+            s = s[:m.end() - 2] + f",[{js(q)},{js(mdl.split('name:')[1].split(',short')[0].strip(chr(39)))},{js(k)}]" + s[m.end() - 2:]
+    rows = (base + len(EXTRA_BAYES) + 1) // 2
+    need_h = max(462, 228 + 68 * (rows - 1) + 60)
+    s = re.sub(r"vb:'0 0 1080 \d+'", f"vb:'0 0 1080 {need_h}'", s, count=1)
+    path.write_text(s)
+
+
 def tree_markov(path):
     s = path.read_text()
     if "['q2','MSTVTP'" in s:
@@ -88,7 +123,8 @@ def main():
             run(p, items, hub); treefn(p)
             if hub == "bayesian":
                 positions_bayes(p)
-    print("registered:", ", ".join(list(BAYES) + list(MARKOV)))
+                extend_bayes(p)
+    print("registered:", ", ".join(list(BAYES) + list(EXTRA_BAYES) + list(MARKOV)))
 
 
 if __name__ == "__main__":

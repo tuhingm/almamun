@@ -1608,5 +1608,21 @@
    "label": "Penalty alpha",
    "value": 0.01
   }
+ },
+ "bma": {
+  "nobs": 663,
+  "table_index": 0,
+  "table": "Posterior inclusion probabilities and coefficients (averaged over models)",
+  "row": "urban",
+  "row_index": 0,
+  "col": "PIP",
+  "col_index": 1,
+  "value": 1.0,
+  "rtol": 0.05,
+  "seconds": 0.4,
+  "summary": {
+   "label": "Expected model size",
+   "value": 8.05
+  }
  }
 }
