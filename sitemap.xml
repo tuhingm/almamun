@@ -2,6 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/bayes-reg.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/blp.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
+  <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/bma.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/bvar.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/favar.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>
   <url><loc>https://tuhingm.github.io/almamun/bayesian-guide/hier-panel.html</loc><lastmod>2026-11-20</lastmod><priority>0.5</priority></url>

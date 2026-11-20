@@ -13,7 +13,7 @@ import warnings
 import numpy as np
 import pandas as pd
 
-from . import bayes, bayes_extra, breaks, causal, causal_extra, lp, markov, micro, ml, panel, pthreshold, pvar, smooth, statespace_var, svar, tar, timeseries, ts_extra
+from . import bayes, bayes_extra, bayes_more, breaks, causal, causal_extra, lp, markov, micro, ml, panel, pthreshold, pvar, smooth, statespace_var, svar, tar, timeseries, ts_extra
 from . import panel_extra, ml_extra
 from . import stat_registry
 from .core import OESError, read_csv, time_order
@@ -667,6 +667,14 @@ MODELS += [
                  col("lat", "Latitude (alternative to the neighbour list)", required=False), col("lon", "Longitude (alternative to the neighbour list)", required=False),
                  num("knn", "Nearest neighbours (coordinates only)", 5), num("sims", "Simulation draws for the effects", 500), num("seed", "Random seed", 0)],
          example=dict(file=OX + "produc_nb.csv", spec=dict(y="log_gsp", x=["log_pcap", "log_pc", "log_emp", "unemp"], unit="state", time="year", neighbours="neighbours"))),
+    dict(id="bma", group="Bayesian", name="Bayesian model averaging (g-prior, PIPs, MC3)", guide="bayesian-guide/bma.html", fn=bayes_more.bma,
+         fields=[col("y", "Dependent variable"), cols("x", "Candidate regressors"),
+                 sel("g", "g-prior", [["bric", "BRIC: g = max(n, k^2)"], ["uip", "Unit information: g = n"], ["ric", "Risk inflation: g = k^2"]], "bric"),
+                 sel("model_prior", "Model prior", [["random", "Random inclusion probability (beta-binomial)"], ["uniform", "Uniform over models"], ["binomial", "Binomial, fixed expected size"]], "random"),
+                 num("expected_size", "Expected model size (binomial prior; blank = k/2)", ""), num("top", "Best models to list", 10),
+                 sel("method", "Method", [["auto", "Exact for 14 or fewer regressors, else MC3"], ["exact", "Exact enumeration (up to 18)"], ["mc3", "MC3 sampler"]], "auto"),
+                 num("draws", "MC3 iterations (more than 14 regressors)", 20000), num("burn", "MC3 burn-in", 5000), num("seed", "Random seed", 0)],
+         example=dict(file="bayesian-guide/examples/wage2.csv", spec=dict(y="lwage", x=["IQ", "KWW", "educ", "exper", "tenure", "age", "married", "black", "south", "urban", "sibs", "brthord", "meduc", "feduc"]))),
 ]
 
 STAT_MODELS = stat_registry.build(col, cols, num, sel)       # the Statistics Division: its own page, registered like every other model

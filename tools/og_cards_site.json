@@ -12,6 +12,12 @@
   "sub": "You want impulse responses without a full VAR, with smoother, more precise estimates at long horizons and probability statements…"
  },
  {
+  "out": "assets/og/bayesian-guide/bma.jpg",
+  "kicker": "Bayesian Guide · Model guide",
+  "title": "Bayesian Model Averaging",
+  "sub": "Many candidate regressors and no theory that says which belong in the model. Step-by-step guide with Python code and real output."
+ },
+ {
   "out": "assets/og/bayesian-guide/bvar.jpg",
   "kicker": "Bayesian Guide · Model guide",
   "title": "Bayesian VAR with Minnesota and Normal-Wishart Priors",
