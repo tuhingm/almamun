@@ -34,6 +34,9 @@ SECTIONS = {
                    order=['did', 'staggered', 'gsc', 'scm', 'its', 'rdd', 'iv', 'eventstudy', 'sdid', 'matching', 'bartik', 'weak-iv', 'experiments', 'mediation', 'lee-bounds', 'quantile-effects'],
                    static={"did": "DiD", "staggered": "Staggered DiD", "gsc": "GSC", "scm": "Synthetic control", "its": "ITS", "rdd": "RDD", "iv": "IV", "eventstudy": "Event study", "sdid": "Synthetic DiD", "matching": "Matching / IPW / DR", "bartik": "Shift-share IV"},
                    data=[]),
+    "ml": dict(folder="ml-guide", src="tools/ml_selector/guides", name="Machine Learning Research Guide", short="Machine Learning Guide",
+               order=["lasso", "ridge", "enet", "rf", "xgb", "svr", "krls", "dml-plr", "dml-irm", "dml-iv", "causal-forest", "classification", "interpretation", "stacking", "heterogeneity-gates", "double-selection", "clustering", "neural-network"],
+               data=[]),
     # local projections: two more guides in the existing Time-Series and Panel-Data guides (hubs are built by their own tools)
     "lp": dict(folder="time-series-guide", name="Empirical Research Guide (Time Series)", short="Time-Series Guide",
                order=["ols", "ardl", "nardl", "var", "vecm", "gmm", "lp", "svar", "bp", "tar", "str", "arima", "garch", "quantile", "cointegration", "wavelet", "unit-root", "trend-cycle", "forecast-comparison", "spillovers", "granger-causality", "seasonality", "long-memory", "factor-models", "spectral-analysis", "time-varying-parameters"], static=dict(ols="OLS", ardl="ARDL", nardl="NARDL", var="VAR", vecm="VECM", gmm="2SLS / GMM"),

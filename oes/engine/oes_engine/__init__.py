@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 
 from . import bayes, bayes_extra, breaks, causal, causal_extra, lp, markov, micro, ml, panel, pthreshold, pvar, smooth, statespace_var, svar, tar, timeseries, ts_extra
-from . import panel_extra
+from . import panel_extra, ml_extra
 from . import stat_registry
 from .core import OESError, read_csv, time_order
 from .report import frame, plot, show, summary, tables
@@ -305,6 +305,12 @@ MODELS = [
                  num("n_estimators", "Number of trees", 300), num("min_leaf", "Minimum leaf size", 20),
                  num("trees", "Trees in the nuisance forests", 100)],
          example=dict(file=MLD + "k401_irm.csv", spec=dict(y="net_tfa", treat="e401", x="__all__"))),
+]
+
+MODELS += [
+    dict(id="classify", group="Machine learning", name="Classification: logit, L1 logit, random forest, boosting (ROC, calibration)", guide="ml-guide/classification.html", fn=ml_extra.classify,
+         fields=[col("y", "Binary outcome (0/1)"), cols("x", "Predictors"), col("time", "Time column (time-ordered validation)", required=False), num("test_share", "Test share", 0.25), num("n_estimators", "Number of trees", 200)],
+         example=dict(file=MLD + "loanapp.csv", spec=dict(y="approve", x=["white", "married", "male", "dep", "sch", "hrat", "obrat", "loanprc", "unem", "cosign", "chist", "pubrec", "mortlat1", "mortlat2", "vr"]))),
 ]
 
 # ------------------------------------------------------------------ Bayesian
