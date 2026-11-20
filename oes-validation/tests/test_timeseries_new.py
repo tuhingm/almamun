@@ -319,3 +319,29 @@ def test_longmemory_errors_and_summary():
     assert "100" in o.run("longmemory", d.head(50).to_csv(index=False), dict(y="inflation"))["error"]
     assert "Choose" in o.run("longmemory", d.to_csv(index=False), dict(y="inflation", transform="cube"))["error"]
     assert "between" in o.run("longmemory", d.to_csv(index=False), dict(y="inflation", power=0.95))["error"]
+
+
+# ------------------------------------------------------------------ factor model
+def test_factors_registered():
+    m = o.BY_ID["factors"]
+    assert os.path.exists(os.path.join(ROOT, m["guide"])) and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+def test_factors_eigenvalues_match_sklearn_pca_and_recover_true_factors():
+    from sklearn.decomposition import PCA
+    rng = np.random.default_rng(14); T, N, r = 150, 60, 2
+    F = rng.standard_normal((T, r)); L = rng.standard_normal((N, r)); X = F @ L.T + .7 * rng.standard_normal((T, N))
+    df = pd.DataFrame(X, columns=[f"v{i}" for i in range(N)])
+    res = ts_extra.factors(df, dict(x=list(df.columns), kmax=6))
+    assert next(s["value"] for s in res["summary"] if s["label"] == "Factors (IC_p2)") == 2
+    Z = (X - X.mean(0)) / X.std(0); ev = PCA(n_components=6).fit(Z).explained_variance_ * (T - 1) / T
+    got = [row[5] for row in res["tables"][0]["rows"][1:]]; assert np.allclose(got, ev, atol=2e-3)
+    Fh = np.array([s["y"] for s in res["charts"][0]["series"]]).T
+    R2 = 1 - np.linalg.lstsq(Fh, F, rcond=None)[1] / ((F - F.mean(0)) ** 2).sum(0); assert (R2 > .95).all()
+
+
+def test_factors_errors():
+    d = pd.read_csv(os.path.join(OX, "inflation_countries.csv"))
+    assert "five" in o.run("factors", d.to_csv(index=False), dict(x=["USA", "CAN", "MEX"]))["error"]
+    assert "smaller" in o.run("factors", d.to_csv(index=False), dict(x=["USA", "CAN", "MEX", "CHL", "COL", "GBR"], r=6))["error"]
+    assert "30" in o.run("factors", d.head(20).to_csv(index=False), dict(x=list(d.columns[1:9])))["error"]

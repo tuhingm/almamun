@@ -1292,5 +1292,21 @@
    "label": "GPH d",
    "value": 0.758
   }
+ },
+ "factors": {
+  "nobs": 34,
+  "table_index": 0,
+  "table": "Number of factors (Bai-Ng criteria)",
+  "row": "0",
+  "row_index": 0,
+  "col": "Residual variance V(k)",
+  "col_index": 1,
+  "value": 1.0,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Variance explained by the factors used (%)",
+   "value": 78.4
+  }
  }
 }
