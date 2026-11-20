@@ -658,6 +658,7 @@ $("test-run").onclick = async () => {
 // ----------------------------------------------------------------------------- start
 Promise.all([fetch("engine/catalog.json", {cache: "no-cache"}).then(r => r.json()), fetch("engine/stat_catalog.json", {cache: "no-cache"}).then(r => r.json())]).then(([c, sc]) => {
   c.models = c.models.concat(sc.models); CAT = c; $("n-models").textContent = c.models.length;
+  try { const h = sessionStorage.getItem("oesHandoff"); if (h) { sessionStorage.removeItem("oesHandoff"); const o = JSON.parse(h); setTimeout(() => { loadUpload(o.name, o.csv, ["Received from the Data Cleaning Lab"]); $("s-data").scrollIntoView(); }, 300); } } catch (e) { /* no hand-off */ }
   renderGroups(); renderOps(); renderOpForm(); renderFields();
   const h = location.hash.slice(1);
   if (h === "statistics") { DIV = "stat"; GROUP = null; renderGroups(); $("s-model").scrollIntoView(); }
