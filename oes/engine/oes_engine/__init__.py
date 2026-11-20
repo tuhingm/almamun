@@ -583,6 +583,13 @@ MODELS += [
 ]
 
 MODELS += [
+    dict(id="hausman_taylor", group="Panel data", name="Hausman-Taylor estimator (endogenous and time-invariant regressors)", guide="panel-data-guide/hausman-taylor.html", fn=panel_extra.hausman_taylor,
+         fields=[col("y", "Dependent variable"), cols("x1", "Time-varying, exogenous", required=False), cols("x2", "Time-varying, endogenous", required=False), cols("z1", "Time-invariant, exogenous", required=False),
+                 cols("z2", "Time-invariant, endogenous", required=False), UNIT, PTIME],
+         example=dict(file=PD + "psid_wages.csv", spec=dict(y="lwage", x1=["occ", "south", "smsa", "ind"], x2=["exp", "exp2", "wks", "ms", "union"], z1=["fem", "blk"], z2=["ed"], unit="id", time="year"))),
+]
+
+MODELS += [
     dict(id="twfe", group="Panel data", name="Two-way fixed effects: clustering, wild bootstrap, placebo", guide="panel-data-guide/twfe.html", fn=panel_extra.twfe,
          fields=[col("y", "Dependent variable"), cols("x", "Regressors (the first is tested with the bootstrap)"), UNIT, PTIME, num("boot", "Wild cluster bootstrap draws", 499), num("placebo", "Placebo experiment draws (0 = skip)", 200), num("seed", "Random seed", 0)],
          example=dict(file=PD + "cigar.csv", spec=dict(y="log_sales", x=["log_price", "log_income"], unit="state", time="year", boot=299, placebo=100))),
