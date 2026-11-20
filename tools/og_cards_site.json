@@ -450,6 +450,12 @@
   "sub": "Test your panel and follow the path to pooled OLS, FE/RE, GMM, Mean Group, PMG or CS-ARDL. Real examples and Python code."
  },
  {
+  "out": "assets/og/panel-data-guide/interactive-fixed-effects.jpg",
+  "kicker": "Panel Data Guide · Model guide",
+  "title": "Interactive Fixed Effects (Bai 2009)",
+  "sub": "Units respond differently to common shocks that you cannot observe, so two-way fixed effects leaves cross-sectional dependence in…"
+ },
+ {
   "out": "assets/og/panel-data-guide/lectures/macro-panel-econometrics.jpg",
   "kicker": "Panel Data Guide · Lecture",
   "title": "Supplementary Lecture: Macroeconomic Panel Econometrics",
@@ -495,7 +501,7 @@
   "out": "assets/og/panel-data-guide/plp.jpg",
   "kicker": "Panel Data Guide · Model guide",
   "title": "Panel Local Projections",
-  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
+  "sub": "You want the dynamic response of an outcome to a shock in a panel of units, horizon by horizon, with unit fixed effects.…"
  },
  {
   "out": "assets/og/panel-data-guide/pmg.jpg",
@@ -519,7 +525,7 @@
   "out": "assets/og/panel-data-guide/pthresh.jpg",
   "kicker": "Panel Data Guide · Model guide",
   "title": "Panel Threshold Regression (Hansen)",
-  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
+  "sub": "The effect of a regressor may differ above and below a threshold in another variable, and you want to estimate where the…"
  },
  {
   "out": "assets/og/panel-data-guide/re.jpg",

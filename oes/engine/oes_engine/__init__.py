@@ -598,6 +598,10 @@ MODELS += [
     dict(id="cre", group="Panel data", name="Correlated random effects (Mundlak) and robust Hausman test", guide="panel-data-guide/mundlak-cre.html", fn=panel_extra.cre,
          fields=[col("y", "Dependent variable"), cols("x", "Time-varying regressors"), cols("z", "Time-invariant regressors", required=False), UNIT, PTIME, sel("time_effects", "Period dummies", [["yes", "Yes"], ["no", "No"]], "yes")],
          example=dict(file=PD + "wagepan_full.csv", spec=dict(y="lwage", x=["union", "married", "expersq"], z=["educ", "black", "hisp"], unit="nr", time="year"))),
+    dict(id="ife", group="Panel data", name="Interactive fixed effects (Bai 2009): common factors with unit-specific loadings", guide="panel-data-guide/interactive-fixed-effects.html", fn=panel_extra.ife,
+         fields=[col("y", "Dependent variable"), cols("x", "Regressors"), UNIT, PTIME, num("factors", "Number of factors", 2), sel("effects", "Additive effects removed first", [["twoway", "Unit and period"], ["unit", "Unit only"], ["none", "None"]], "twoway"),
+                 num("rmax", "Largest number of factors compared", 5)],
+         example=dict(file=PD + "cigar.csv", spec=dict(y="log_sales", x=["log_price", "log_income"], unit="state", time="year", factors=2))),
 ]
 
 MODELS += [

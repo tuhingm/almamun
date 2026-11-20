@@ -261,3 +261,63 @@ def test_cre_errors():
     assert "does not vary within units" in o.run("cre", d.to_csv(index=False), dict(WS, x=["educ"], z=[]))["error"]
     assert "varies within units" in o.run("cre", d.to_csv(index=False), dict(WS, x=["union", "expersq"], z=["married"]))["error"]
     assert "Period dummies" in o.run("cre", d.to_csv(index=False), dict(WS, time_effects="x"))["error"]
+
+
+# ---- interactive fixed effects (Bai 2009) ----------------------------------------------------------------------
+def ife_sim(seed=0, N=60, T=50, beta=(1.0, -0.5), r=1):
+    rng = np.random.default_rng(seed); F = rng.normal(size=(T, r)); L = rng.normal(size=(N, r)); a = rng.normal(size=N); g = rng.normal(size=T)
+    X1 = 0.8 * (F @ L.T) + rng.normal(size=(T, N)) + 0.5 * a; X2 = 0.6 * (F @ rng.normal(size=(r, N))) + rng.normal(size=(T, N))
+    Y = beta[0] * X1 + beta[1] * X2 + F @ L.T + a + g[:, None] + 0.5 * rng.normal(size=(T, N))
+    rows = [(i, t, Y[t, i], X1[t, i], X2[t, i]) for i in range(N) for t in range(T)]
+    return pd.DataFrame(rows, columns=["u", "t", "y", "x1", "x2"]), F
+IS = dict(y="y", x=["x1", "x2"], unit="u", time="t")
+def ifecoef(r): return np.array([float(x[1]) for x in r["tables"][0]["rows"]])
+
+
+def test_ife_registered():
+    m = o.BY_ID["ife"]; assert m["group"] == "Panel data" and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+def test_ife_without_factors_is_two_way_fixed_effects():
+    d, _ = ife_sim(); r0 = panel_extra.ife(d, dict(IS, factors=0))
+    Y = d.pivot(index="t", columns="u", values="y").to_numpy(); X = [d.pivot(index="t", columns="u", values=v).to_numpy() for v in ["x1", "x2"]]
+    dm = lambda A: A - A.mean(0) - A.mean(1, keepdims=True) + A.mean()
+    b = np.linalg.lstsq(np.column_stack([dm(a).ravel() for a in X]), dm(Y).ravel(), rcond=None)[0]
+    assert ifecoef(r0) == pytest.approx(b, abs=1e-3)
+    import statsmodels.api as sm                                             # same estimate from least squares with unit and period dummies
+    m = sm.OLS(d.y, pd.concat([d[['x1', 'x2']], pd.get_dummies(d.u, prefix='u', drop_first=True).astype(float), pd.get_dummies(d.t, prefix='t', drop_first=True).astype(float)], axis=1).assign(c=1.0)).fit()
+    assert ifecoef(r0) == pytest.approx(m.params[['x1', 'x2']].to_numpy(), abs=1e-3)
+
+
+def test_ife_matches_concentrated_objective_minimiser():
+    from scipy.optimize import minimize
+    d, _ = ife_sim(seed=2, N=30, T=30); r = panel_extra.ife(d, dict(IS, factors=1))
+    Y = d.pivot(index="t", columns="u", values="y").to_numpy(); X = [d.pivot(index="t", columns="u", values=v).to_numpy() for v in ["x1", "x2"]]
+    dm = lambda A: A - A.mean(0) - A.mean(1, keepdims=True) + A.mean(); Y = dm(Y); X = [dm(a) for a in X]
+    def ssr(b):
+        E = Y - b[0] * X[0] - b[1] * X[1]; ev = np.linalg.eigvalsh(E.T @ E); return float(ev[:-1].sum())          # sum of all but the largest eigenvalue
+    m = minimize(ssr, np.zeros(2), method="Nelder-Mead", options=dict(xatol=1e-7, fatol=1e-10, maxiter=4000))
+    assert ifecoef(r) == pytest.approx(m.x, abs=2e-3)
+
+
+def test_ife_recovers_beta_where_two_way_fe_is_biased():
+    d, F = ife_sim(); b1 = ifecoef(panel_extra.ife(d, dict(IS, factors=1))); b0 = ifecoef(panel_extra.ife(d, dict(IS, factors=0)))
+    assert np.abs(b1 - np.array([1.0, -0.5])).max() < 0.05 and np.abs(b0 - np.array([1.0, -0.5])).max() > 0.1
+
+
+def test_ife_chooses_true_number_of_factors_in_clean_design():
+    d, _ = ife_sim(seed=4, r=2); r = panel_extra.ife(d, dict(IS, factors=2, rmax=4))
+    assert next(x["value"] for x in r["summary"] if x["label"] == "IC chooses") == 2
+
+
+def test_ife_reduces_residual_cross_section_dependence():
+    d, _ = ife_sim(); r = panel_extra.ife(d, dict(IS, factors=1)); rows = r["tables"][2]["rows"]
+    assert float(rows[1][3]) < 0.5 * float(rows[0][3])
+
+
+def test_ife_errors():
+    d, _ = ife_sim()
+    assert "balanced" in o.run("ife", d.iloc[1:].to_csv(index=False), IS)["error"]
+    assert "at least 10" in o.run("ife", ife_sim(N=8)[0].to_csv(index=False), IS)["error"]
+    assert "Number of factors" in o.run("ife", d.to_csv(index=False), dict(IS, factors=9))["error"]
+    assert "Additive effects" in o.run("ife", d.to_csv(index=False), dict(IS, effects="x"))["error"]
