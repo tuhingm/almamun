@@ -480,6 +480,12 @@ MODELS += [
                  sel("iterate", "Iterate to convergence", [["no", "No (one step)"], ["yes", "Yes (maximum likelihood)"]], "no")],
          example=dict(file=ME + "sleep_work.csv", spec=dict(estimator="sur", y1="sleep", x1=["educ", "age", "male", "yngkid", "gdhlth"], y2="totwrk", x2=["educ", "age", "male", "union", "south"])),
          check=dict(table=0, row=1, col=1)),
+    dict(id="paneldiscrete", group="Microeconometrics", name="Panel logit and probit (pooled, random effects, fixed effects)", guide="microeconometrics-guide/panel-logit-probit.html", fn=micro.paneldiscrete,
+         fields=[col("y", "Binary outcome (0/1)"), cols("x", "Explanatory variables"), col("id", "Unit identifier"),
+                 sel("estimator", "Estimator", [["re", "Random effects"], ["cre", "Correlated random effects (Mundlak)"], ["fe", "Fixed effects (conditional logit)"], ["pooled", "Pooled (clustered errors)"]], "cre"),
+                 sel("link", "Link", [["logit", "Logit"], ["probit", "Probit"]], "logit")],
+         example=dict(file=ME + "wagepan_union.csv", spec=dict(y="union", x=["married", "educ", "black", "hisp", "exper", "expersq"], id="nr", estimator="cre", link="logit")),
+         check=dict(table=0, row=1, col=1)),
 ]
 
 CE = "oes/examples/"

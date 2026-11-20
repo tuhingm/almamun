@@ -584,3 +584,55 @@ def test_systems_errors():
         assert msg in sleepwork(**kw)["error"]
     assert "under-identified" in o.run("systems", open(os.path.join(ME, "openness.csv")).read(),
         dict(estimator="3sls", y1="inf", x1=["open", "lpcinc"], y2="open", x2=["inf", "lpcinc", "lland"], endog=["open", "inf"]))["error"]
+
+
+# ------------------------------------------------------------------ panel logit and probit
+def wage_union(**kw):
+    spec = dict(o.BY_ID["paneldiscrete"]["example"]["spec"]); spec.update(kw)
+    return o.run("paneldiscrete", open(os.path.join(ME, "wagepan_union.csv")).read(), spec)
+
+
+def test_fixed_effects_logit_matches_statsmodels_conditional_logit():
+    from statsmodels.discrete.conditional_models import ConditionalLogit
+    d = pd.read_csv(os.path.join(ME, "wagepan_union.csv")); xs = ["married", "exper", "expersq"]
+    m = ConditionalLogit(d.union, d[xs], groups=d.nr).fit(disp=0)
+    r = wage_union(estimator="fe")
+    for c in xs:
+        assert row(r, "Fixed-effects", c)[1] == pytest.approx(m.params[c], abs=2e-4)
+        assert row(r, "Fixed-effects", c)[2] == pytest.approx(m.bse[c], rel=2e-3)
+
+
+def test_pooled_matches_statsmodels_clustered_and_re_likelihood_by_integration():
+    from scipy import integrate
+    d = pd.read_csv(os.path.join(ME, "wagepan_union.csv")); xs = ["married", "educ", "black", "hisp", "exper", "expersq"]
+    X = sm.add_constant(d[xs]); m = sm.Logit(d.union, X).fit(disp=0, cov_type="cluster", cov_kwds={"groups": d.nr})
+    r = wage_union(estimator="pooled")
+    assert row(r, "Pooled", "black")[1] == pytest.approx(m.params["black"], abs=1e-5) and row(r, "Pooled", "black")[2] == pytest.approx(m.bse["black"], rel=1e-4)
+    # random-effects log-likelihood at the engine's estimates, integrating the unit effect with adaptive quadrature instead of Gauss-Hermite
+    r = wage_union(estimator="re")
+    b = np.array([row(r, "Random-effects", c)[1] for c in ["const"] + xs]); sg = row(r, "Random-effects", "sigma_u")[1]
+    Xn = X.values; ll = 0.0
+    for g, idx in list(d.groupby("nr").indices.items())[:60]:
+        eta = Xn[idx] @ b; yy = d.union.values[idx]
+        f = lambda u: np.prod(np.where(yy == 1, 1 / (1 + np.exp(-(eta + u))), 1 / (1 + np.exp(eta + u)))) * stats.norm.pdf(u, scale=sg)
+        ll += np.log(integrate.quad(f, -12 * sg, 12 * sg)[0])
+    from oes_engine import micro
+    q = 2 * d.union.values - 1; gi = pd.factorize(d.nr)[0]; first = np.isin(gi, np.arange(60))
+    nll = micro._pb_re_nll(np.r_[b, np.log(sg)], Xn[first], q[first], gi[first], 60, "logit")
+    assert -nll == pytest.approx(ll, abs=1e-4)
+
+
+def test_fe_logit_is_robust_to_correlated_unit_effects_in_simulation():
+    rng = np.random.default_rng(6); N, T = 800, 6
+    a = rng.normal(size=N); x = 0.8 * a[:, None] + rng.normal(size=(N, T))            # regressor correlated with the unit effect
+    yy = (0.7 * x + a[:, None] + rng.logistic(size=(N, T)) > 0).astype(int)
+    dd = pd.DataFrame(dict(y=yy.ravel(), x=x.ravel(), id=np.repeat(np.arange(N), T)))
+    fe = o.run("paneldiscrete", dd.to_csv(index=False), dict(y="y", x=["x"], id="id", estimator="fe"))
+    pl = o.run("paneldiscrete", dd.to_csv(index=False), dict(y="y", x=["x"], id="id", estimator="pooled"))
+    assert row(fe, "Fixed-effects", "x")[1] == pytest.approx(0.7, abs=0.1)
+    assert row(pl, "Pooled", "x")[1] > 0.9                                              # pooled and RE-type estimators are biased upward
+
+
+def test_panel_binary_errors():
+    for kw, msg in [(dict(y="lwage", x=["educ"]), "only 0 and 1"), (dict(estimator="fe", link="probit"), "logit link only"), (dict(x=[]), "at least one")]:
+        assert msg in wage_union(**kw)["error"]
