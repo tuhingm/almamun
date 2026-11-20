@@ -497,3 +497,40 @@ def test_zero_inflation_recovered_in_simulation():
 def test_zero_count_errors():
     for kw, msg in [(dict(y="pcnv", x=["black"], z=["hispan"]), "whole numbers"), (dict(model="zz"), "must be one of"), (dict(x=[]), "at least one")]:
         assert msg in arrests(**kw)["error"]
+
+
+# ------------------------------------------------------------------ generalised linear models
+def pension(**kw):
+    spec = dict(o.BY_ID["glm"]["example"]["spec"]); spec.update(kw)
+    return o.run("glm", open(os.path.join(ME, "pension_participation.csv")).read(), spec)
+
+
+def test_fractional_logit_matches_hand_written_quasi_likelihood():
+    d = pd.read_csv(os.path.join(ME, "pension_participation.csv")); xs = ["mrate", "ltotemp", "age", "sole"]
+    X = sm.add_constant(d[xs]).values; y = d.prate.values; b = np.zeros(5)
+    for _ in range(100):                                    # Newton-Raphson on the Bernoulli quasi-likelihood
+        p = 1 / (1 + np.exp(-X @ b)); b = b + np.linalg.solve(X.T @ (X * (p * (1 - p))[:, None]), X.T @ (y - p))
+    p = 1 / (1 + np.exp(-X @ b)); A = np.linalg.inv(X.T @ (X * (p * (1 - p))[:, None])); B = X.T @ (X * ((y - p) ** 2)[:, None]); V = A @ B @ A
+    r = pension()
+    for i, nm in enumerate(["const"] + xs):
+        assert row(r, "Coefficient", nm)[1] == pytest.approx(b[i], abs=1e-5)
+        assert row(r, "Coefficient", nm)[2] == pytest.approx(np.sqrt(V[i, i]), rel=1e-4)
+    assert row(r, "Average marginal", "mrate")[1] == pytest.approx((b[1] * p * (1 - p)).mean(), rel=1e-4)
+
+
+def test_glm_probit_cloglog_and_gamma_recover_parameters():
+    rng = np.random.default_rng(2); n = 4000; x = rng.normal(size=n)
+    mu = np.exp(1.0 + 0.3 * x); yg = rng.gamma(shape=4.0, scale=mu / 4.0)
+    r = o.run("glm", pd.DataFrame(dict(y=yg, x=x)).to_csv(index=False), dict(y="y", x=["x"], family="gamma", link="log"))
+    assert row(r, "Coefficient", "x")[1] == pytest.approx(0.3, abs=0.03)
+    p = 1 / (1 + np.exp(-(0.2 + 0.7 * x))); yb = np.clip(p + rng.normal(0, 0.05, n), 0, 1)
+    r = o.run("glm", pd.DataFrame(dict(y=yb, x=x)).to_csv(index=False), dict(y="y", x=["x"], family="binomial", link="logit"))
+    assert row(r, "Coefficient", "x")[1] == pytest.approx(0.7, abs=0.1)
+
+
+def test_glm_errors():
+    for kw, msg in [(dict(y="mrate", x=["age"], family="binomial"), "between 0 and 1"), (dict(family="gamma", link="logit"), "supports the links"),
+                    (dict(family="poisson", y="sole", x=["age"], link="log"), None), (dict(x=[]), "at least one")]:
+        r = pension(**kw)
+        if msg: assert msg in r["error"]
+        else: assert "error" not in r

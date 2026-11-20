@@ -1062,3 +1062,98 @@ def zero_count(df, spec):
     if zin:
         notes.append("Variables only in the zero equation: " + ", ".join(zin) + ".")
     return result("zero_count", f"{cmp_rows[1][0]}: {y}", n, summary, [tc, tz, tm, tcmp, tests_table(drows)], [ch], notes)
+
+
+_GLM_LINKS = {"logit": sm.families.links.Logit, "probit": sm.families.links.Probit, "cloglog": sm.families.links.CLogLog, "log": sm.families.links.Log,
+              "identity": sm.families.links.Identity, "inverse": sm.families.links.InversePower, "inverse_squared": sm.families.links.InverseSquared}
+_GLM_FAMILIES = {"gaussian": sm.families.Gaussian, "binomial": sm.families.Binomial, "poisson": sm.families.Poisson, "gamma": sm.families.Gamma,
+                 "inverse_gaussian": sm.families.InverseGaussian}
+_GLM_DEFAULT = {"gaussian": "identity", "binomial": "logit", "poisson": "log", "gamma": "log", "inverse_gaussian": "log"}
+_GLM_OK = {"gaussian": ["identity", "log"], "binomial": ["logit", "probit", "cloglog", "log"], "poisson": ["log", "identity"],
+           "gamma": ["log", "inverse", "identity"], "inverse_gaussian": ["log", "inverse_squared", "inverse"]}
+
+
+def glm(df, spec):
+    """Generalised linear model with a chosen family and link: fractional response (binomial + logit), gamma, inverse Gaussian, Poisson, Gaussian."""
+    y = need(spec, "y", "outcome variable")
+    xs = as_list(spec.get("x"))
+    if not xs:
+        raise OESError("Choose at least one explanatory variable.")
+    fam = _choice(spec, "family", list(_GLM_FAMILIES), "binomial", "The family")
+    link = spec.get("link") if spec.get("link") not in (None, "", "default") else _GLM_DEFAULT[fam]
+    if link not in _GLM_OK[fam]:
+        raise OESError(f"The {fam} family supports the links: {', '.join(_GLM_OK[fam])}.")
+    cov = _choice(spec, "cov", ["robust", "model"], "robust", "The standard errors")
+    distinct(y, xs)
+    d = numeric(df, [y] + xs).reset_index(drop=True)
+    Y = d[y].to_numpy(float)
+    if fam == "binomial" and ((Y < 0).any() or (Y > 1).any()):
+        raise OESError(f"For a fractional response {y} must lie between 0 and 1 (including 0 and 1).")
+    if fam in ("gamma", "inverse_gaussian") and (Y <= 0).any():
+        raise OESError(f"The {fam.replace('_', ' ')} family needs a strictly positive outcome.")
+    if fam == "poisson" and (Y < 0).any():
+        raise OESError("The Poisson family needs a non-negative outcome.")
+    n, k = len(d), len(xs)
+    if n < 5 * (k + 1):
+        raise OESError("Too few observations for this number of variables.")
+    X = sm.add_constant(d[xs].astype(float), has_constant="add")
+    names = list(X.columns)
+    Xn = np.asarray(X, float)
+    lk = _GLM_LINKS[link]()
+    fobj = _GLM_FAMILIES[fam](link=lk)
+    try:
+        model = sm.GLM(Y, X, family=fobj)
+        res0 = model.fit(maxiter=200)
+        res = model.fit(maxiter=200, cov_type="HC0") if cov == "robust" else res0
+    except Exception as e:
+        raise OESError(f"The GLM could not be estimated ({e}). Check the link, the scale of the variables and collinearity.")
+    if not np.all(np.isfinite(np.asarray(res.params))) or not np.all(np.isfinite(np.asarray(res.bse))):
+        raise OESError("The GLM did not converge (non-finite estimates). Try another link or rescale the variables.")
+    beta = np.asarray(res.params); V = np.asarray(res.cov_params()); se = np.asarray(res.bse)
+    mu = np.asarray(res0.mu)
+    cof = coef_table(names, beta, se, dist="z", note=f"GLM: {fam.replace('_', ' ')} family with {link} link; "
+                     + ("robust (sandwich) standard errors, valid whatever the variance function." if cov == "robust" else "model-based standard errors."))
+    tabs = [cof]
+    dummy = [bool(set(d[c].unique()) <= {0, 1}) for c in xs]
+    inv = lambda eta: lk.inverse(eta)
+
+    def ame(b):
+        out = np.zeros(k)
+        for i in range(k):
+            if dummy[i]:
+                A1, A0 = Xn.copy(), Xn.copy(); A1[:, i + 1], A0[:, i + 1] = 1, 0
+                out[i] = (inv(A1 @ b) - inv(A0 @ b)).mean()
+            else:
+                h = 1e-4 * max(Xn[:, i + 1].std(), 1e-8)
+                A1, A0 = Xn.copy(), Xn.copy(); A1[:, i + 1] += h; A0[:, i + 1] -= h
+                out[i] = ((inv(A1 @ b) - inv(A0 @ b)) / (2 * h)).mean()
+        return out
+    am = ame(beta)
+    J = _num_jac(ame, beta)
+    sa = np.sqrt(np.maximum(np.diag(J @ V @ J.T), 0))
+    tabs.append(table("Average marginal effects on the mean of the outcome", ["Variable", "dE[y]/dx", "Std. err.", "z", "p-value"],
+                      [[xs[i], f(am[i]), f(sa[i]), f(am[i] / sa[i], 4) if sa[i] > 0 else None, f(2 * stats.norm.sf(abs(am[i] / sa[i]))) if sa[i] > 0 else None] for i in range(k)],
+                      "Average of the observation-level effects on the mean; discrete change for 0/1 variables. Delta-method standard errors."))
+    # specification: link test (Pregibon), fit
+    eta = Xn @ beta
+    try:
+        aux = sm.GLM(Y, np.column_stack([Xn, eta ** 2]), family=_GLM_FAMILIES[fam](link=_GLM_LINKS[link]())).fit(cov_type="HC0")
+        lt, lp = float(aux.tvalues[-1]), float(aux.pvalues[-1])
+    except Exception:
+        lt, lp = float("nan"), float("nan")
+    pear = float(((Y - mu) ** 2 / fobj.variance(mu)).sum() / (n - k - 1))
+    r2 = float(np.corrcoef(Y, mu)[0, 1] ** 2)
+    drows = [test_row("Link test: coefficient on the squared linear predictor", lt, lp, "H0: the link and the index are correctly specified"),
+             ["Pearson chi-squared / df", f(pear), None, "the estimated dispersion; about 1 if the variance function and scale are right"],
+             ["Deviance / df", f(float(res0.deviance) / (n - k - 1)), None, ""],
+             ["Squared correlation of y and the fitted mean", f(r2), None, "a pseudo R-squared"]]
+    tabs.append(tests_table(drows))
+    q = pd.qcut(pd.Series(mu).rank(method="first"), 10, labels=False)
+    ch = chart("Observed and fitted mean by decile of the fitted mean", [str(i + 1) for i in range(10)],
+               [("Observed", [float(Y[q == g].mean()) for g in range(10)]), ("Fitted", [float(mu[q == g].mean()) for g in range(10)])], "Decile of the fitted mean", y, kind="bar")
+    summary = [stat("Observations", n), stat("Log-likelihood", float(res0.llf)), stat("AIC", float(res0.aic)), stat("Deviance", float(res0.deviance)), stat("Pseudo R-squared", r2)]
+    notes = [f"GLM of {y} on {', '.join(xs)}: {fam.replace('_', ' ')} family, {link} link, {n} observations.",
+             "A GLM models the mean through a link function and needs only the mean to be correctly specified when robust standard errors are used (quasi-likelihood). "
+             "For a fractional outcome in [0, 1] use the binomial family with a logit link (Papke-Wooldridge); for a positive skewed outcome use gamma with a log link.",
+             "The coefficient is on the link scale; use the marginal effects for the effect on the mean."]
+    return result("glm", f"Generalised linear model: {y}", n, summary, tabs, [ch], notes)

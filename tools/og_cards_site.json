@@ -252,6 +252,12 @@
   "sub": "An outcome that counts events (doctor visits, patents, arrests, accidents) and is zero or small for many observations.…"
  },
  {
+  "out": "assets/og/microeconometrics-guide/glm-fractional.jpg",
+  "kicker": "Microeconometrics Guide · Model guide",
+  "title": "Generalized Linear Models and Fractional Responses",
+  "sub": "An outcome that is a proportion between 0 and 1 (participation rate, market share, budget share) or a positive skewed amount…"
+ },
+ {
   "out": "assets/og/microeconometrics-guide/heckman.jpg",
   "kicker": "Microeconometrics Guide · Model guide",
   "title": "Heckman Sample-Selection Model",
