@@ -93,7 +93,7 @@
   function mount(root, k) {
     const P = PROV[k]; let flows = null, flow = null, dims = null, last = null;
     root.innerHTML =
-      '<details class="ds-browse"><summary><b>Browse every dataset and series from ' + esc(P.name) + '</b> <span class="sub">(advanced: all series the provider publishes)</span></summary>' +
+      '<details class="ds-browse" open style="border:2px solid #0f9d6e;border-radius:10px;padding:12px;background:#f6fdf9"><summary style="cursor:pointer;font-size:15px"><b>All ' + esc(P.name) + ' datasets and series</b> <span class="sub">(click "Load dataset list" to search everything the provider publishes)</span></summary>' +
       '<div class="ds-controls"><div class="field"><label>Find a dataset</label><input type="search" class="b-find" placeholder="e.g. inflation, GDP, bank, trade…" autocomplete="off"></div></div>' +
       '<div class="row ds-actions"><button type="button" class="btn secondary b-load">Load dataset list</button><span class="sub b-count"></span></div>' +
       '<div class="ds-catalog b-flows" style="max-height:220px"><p class="sub">Load the list to search all datasets.</p></div>' +

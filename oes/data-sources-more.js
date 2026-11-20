@@ -165,7 +165,7 @@
   function render(key) {
     const p = P[key]; current = key; last = null;
     pane.innerHTML =
-      '<div class="ds-provider"><div class="ds-provider-head"><div><b>' + esc(p.name) + '</b><small>No API key needed · data go straight from the provider to your browser</small></div></div>' +
+      '<div class="ds-provider"><div id="mpBrowse" style="margin-bottom:16px"></div><div class="ds-provider-head"><div><b>' + esc(p.name) + ' · popular indicators</b><small>Quick picks. For every series, use the green "All datasets" box above. No API key needed.</small></div></div>' +
       '<div class="ds-columns"><div><h3>1 · Indicators</h3><input id="mpSearch" type="search" placeholder="Filter indicators…" aria-label="Filter indicators" style="width:100%;margin-bottom:6px"><div class="ds-catalog" id="mpInds">' +
       p.indicators.map((x, i) => '<label class="ds-ind"><input type="checkbox" data-i="' + i + '"' + (i === 0 ? " checked" : "") + '><span><b>' + esc(x.label) + '</b><small>' + esc(x.id) + '</small></span></label>').join("") +
       '</div></div><div id="mpEntBox"><h3>2 · ' + esc(p.entityLabel) + '</h3><select id="mpEnts" multiple size="9" aria-label="' + esc(p.entityLabel) + '">' +
@@ -175,7 +175,7 @@
       '<div class="row ds-actions"><button type="button" class="btn" id="mpFetch">Fetch data</button></div><div id="mpStatus" class="status" role="status" aria-live="polite"></div>' +
       '<div id="mpResult" class="ds-result hidden"><h3>Retrieved observations</h3><p class="sub" id="mpMeta"></p><div id="mpWarn"></div><div id="mpPrev"></div>' +
       '<div class="row ds-actions"><button type="button" class="btn secondary" id="mpCsv">Download CSV</button><button type="button" class="btn secondary" id="mpXlsx">Download Excel</button><button type="button" class="btn" id="mpSend">Send to Cleaning Lab</button></div>' +
-      '<p class="sub">Source: ' + esc(p.name) + ' (<a href="' + esc(p.site) + '" target="_blank" rel="noopener">' + esc(p.site) + '</a>). ' + esc(p.licence) + ' Observations may be revised; check the provider metadata before publishing.</p></div><div id="mpBrowse" style="margin-top:14px"></div></div>';
+      '<p class="sub">Source: ' + esc(p.name) + ' (<a href="' + esc(p.site) + '" target="_blank" rel="noopener">' + esc(p.site) + '</a>). ' + esc(p.licence) + ' Observations may be revised; check the provider metadata before publishing.</p></div></div>';
     if (window.OESBrowse) window.OESBrowse.mount($("mpBrowse"), key);
     $("mpFetch").onclick = run;
     updateEnts();
