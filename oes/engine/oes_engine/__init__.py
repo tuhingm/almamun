@@ -550,6 +550,11 @@ MODELS += [
                  sel("cycle", "Add a stochastic cycle", [["yes", "Yes"], ["no", "No"]], "yes"), num("ppy", "Periods per year (4 = quarterly, 12 = monthly)", 4),
                  num("pmin", "Shortest cycle (periods)", 6), num("pmax", "Longest cycle (periods)", 40)],
          example=dict(file=OX + "us_gdp_level.csv", spec=dict(y="gdp_level", time="date", log="no", trend="smooth trend", cycle="yes", ppy=4, pmin=6, pmax=40))),
+    dict(id="forecast_eval", group="Time series", name="Forecast comparison (rolling forecasts, Diebold-Mariano tests)", guide="time-series-guide/forecast-comparison.html", fn=ts_extra.forecast_eval,
+         fields=[col("y", "Series to forecast"), TIME, num("h", "Forecast horizon", 1), num("window", "Initial estimation window", ""), num("maxp", "Maximum AR lags", 4),
+                 sel("loss", "Loss function", [["squared", "Squared error"], ["absolute", "Absolute error"]], "squared"),
+                 sel("benchmark", "Benchmark", [["random walk", "Random walk"], ["historical mean", "Historical mean"], ["AR (BIC)", "AR (BIC)"], ["exponential smoothing", "Damped exponential smoothing"]], "random walk")],
+         example=dict(file=OX + "us_macro.csv", spec=dict(y="inflation", time="date", h=1, window=100, maxp=4, loss="squared", benchmark="random walk"))),
 ]
 
 MODELS += [

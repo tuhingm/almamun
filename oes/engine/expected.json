@@ -1220,5 +1220,17 @@
    "label": "Log-likelihood",
    "value": -249.38
   }
+ },
+ "forecast_eval": {
+  "nobs": 102,
+  "table_index": 0,
+  "table": "Out-of-sample accuracy (102 1-step-ahead forecasts)",
+  "row": "random walk",
+  "row_index": 0,
+  "col": "RMSE",
+  "col_index": 1,
+  "value": 2.8793,
+  "rtol": 0.001,
+  "seconds": 1.1
  }
 }
