@@ -342,3 +342,144 @@ def bayes_binary(df, spec):
                stat("Area under the ROC curve", auc, 3)]
     return result("bayes_binary", f"Bayesian {link}: {y}", n, summary, tabs, charts,
                   [f"Independent N(0, s^2) prior on each slope per one-standard-deviation change in x with s = {s:g} (Gelman et al. 2008); N(0, 10^2) on the centred constant."])
+
+
+# ================================================================================================ Bayesian shrinkage regression
+def _ig(rng, shape, scale):
+    return scale / rng.gamma(shape, size=np.shape(scale) or None)
+
+
+def _shrink_chain(Xs, yc, prior, ndraw, burn, rng, tau_fixed, lam_fixed, init_scale=1.0):
+    """Gibbs sampler for y = X b + e on standardised regressors. prior: horseshoe (Makalic and Schmidt 2016), lasso
+    (Park and Casella 2008) or ridge (normal prior with a half-Cauchy global scale)."""
+    n, p = Xs.shape
+    XtX, Xty = Xs.T @ Xs, Xs.T @ yc
+    s2 = float(yc @ yc / n) * 0.5
+    lam2 = np.ones(p) * init_scale; nu = np.ones(p); tau2 = 1.0 if tau_fixed is None else tau_fixed ** 2; xi = 1.0
+    tau_j2 = np.ones(p)
+    lam_l = 1.0 if lam_fixed is None else lam_fixed
+    B, S2, T2, KP, LAM = (np.empty((ndraw, p)), np.empty(ndraw), np.empty(ndraw), np.empty((ndraw, p)), np.empty(ndraw))
+    for it in range(burn + ndraw):
+        if prior == "lasso":
+            dinv = 1 / tau_j2
+        else:
+            dinv = 1 / (tau2 * (lam2 if prior == "horseshoe" else 1.0))
+            dinv = np.broadcast_to(dinv, (p,)) if np.ndim(dinv) == 0 else dinv
+        A = XtX + np.diag(dinv)
+        L = np.linalg.cholesky(A)
+        mean = np.linalg.solve(A, Xty)
+        b = mean + np.sqrt(s2) * np.linalg.solve(L.T, rng.standard_normal(p))
+        e = yc - Xs @ b
+        if prior == "lasso":
+            s2 = 1 / rng.gamma((n - 1 + p) / 2, 2 / (e @ e + b @ (dinv * b)))
+            mu = np.sqrt(lam_l ** 2 * s2 / np.maximum(b ** 2, 1e-300))
+            tau_j2 = 1 / np.maximum(rng.wald(mu, lam_l ** 2), 1e-12)
+            if lam_fixed is None:
+                lam_l = np.sqrt(rng.gamma(1.0 + p, 1 / (0.1 + tau_j2.sum() / 2)))
+        else:
+            s2 = 1 / rng.gamma((n - 1 + p) / 2, 2 / (e @ e + b @ (dinv * b)))
+            if prior == "horseshoe":
+                lam2 = 1 / rng.gamma(1.0, 1 / (1 / nu + b ** 2 / (2 * tau2 * s2)))
+                nu = 1 / rng.gamma(1.0, 1 / (1 + 1 / lam2))
+            if tau_fixed is None:
+                lam_eff = lam2 if prior == "horseshoe" else np.ones(p)
+                tau2 = 1 / rng.gamma((p + 1) / 2, 1 / (1 / xi + np.sum(b ** 2 / lam_eff) / (2 * s2)))
+                xi = 1 / rng.gamma(1.0, 1 / (1 + 1 / tau2))
+        if it >= burn:
+            i = it - burn
+            B[i], S2[i], T2[i] = b, s2, tau2
+            KP[i] = 1 / (1 + n * tau2 * (lam2 if prior == "horseshoe" else 1.0)) if prior != "lasso" else np.nan
+            LAM[i] = lam_l
+    return B, S2, T2, KP, LAM
+
+
+def bayes_shrink(df, spec):
+    from .bayes import post_table, _geweke
+    from .bayes_extra import _rhat_ess
+    import statsmodels.api as sm
+    y = need(spec, "y", "dependent variable")
+    x = as_list(need(spec, "x", "regressors"))
+    distinct([y], x)
+    d = numeric(df, [y] + x)
+    Y = d[y].to_numpy(float); X = d[x].to_numpy(float)
+    n, p = X.shape
+    prior = spec.get("prior", "horseshoe")
+    if prior not in ("horseshoe", "lasso", "ridge"):
+        raise OESError("Choose the prior: horseshoe, lasso or ridge.")
+    if (X.std(0) == 0).any():
+        raise OESError("A regressor is constant: drop it (the model has a constant).")
+    if n < p + 5:
+        raise OESError(f"Too few observations ({n}) for {p} regressors.")
+    if p < 2:
+        raise OESError("Choose at least two regressors.")
+    ndraw = int_option(spec, "draws", 2000, 200, 50000, "Draws per chain")
+    burn = int_option(spec, "burn", 1000, 0, 50000, "Burn-in")
+    nch = int_option(spec, "chains", 2, 2, 8, "Chains")
+    seed = int_option(spec, "seed", 0, 0, 10 ** 9, "Random seed")
+    thr = float_option(spec, "threshold", 0.05, "Negligible effect")
+    tau_f = spec.get("tau"); lam_f = spec.get("lasso_lambda")
+    tau_f = None if tau_f in (None, "") else float_option(spec, "tau", 1.0, "Global scale")
+    lam_f = None if lam_f in (None, "") else float_option(spec, "lasso_lambda", 1.0, "Lasso penalty")
+    if thr <= 0:
+        raise OESError("The negligible-effect threshold must be positive.")
+    xm, xs = X.mean(0), X.std(0, ddof=0)
+    Xs = (X - xm) / xs
+    ym, ysd = Y.mean(), Y.std()
+    yc = (Y - ym)
+    chains = []
+    for c in range(nch):
+        rng = np.random.default_rng(seed + 1000 * c)
+        chains.append(_shrink_chain(Xs, yc, prior, ndraw, burn, rng, tau_f, lam_f, init_scale=1.0 if c == 0 else 5.0))
+    Bs = np.vstack([c[0] for c in chains]); S2 = np.concatenate([c[1] for c in chains]); KP = np.vstack([c[3] for c in chains])
+    Bo = Bs / xs                                            # coefficients in the original units
+    const = ym - Bo @ xm
+    names = ["const"] + x
+    notneg = (np.abs(Bs) > thr * ysd).mean(0)
+    q = np.percentile(Bo, [2.5, 97.5], axis=0)
+    shr = KP.mean(0) if prior != "lasso" else None
+    ols = sm.OLS(Y, sm.add_constant(X)).fit()
+    rows = []
+    for j in np.argsort(-np.abs(Bs.mean(0))):
+        v = x[j]
+        rows.append([v, f(Bo[:, j].mean()), f(Bo[:, j].std(ddof=1)), f(q[0, j]), f(q[1, j]), f((Bo[:, j] > 0).mean(), 3), f(notneg[j], 3),
+                     "yes" if (q[0, j] > 0 or q[1, j] < 0) else "no"] + ([f(shr[j], 3)] if shr is not None else []))
+    heads = ["Variable", "Mean", "Std. dev.", "2.5%", "97.5%", "P(> 0)", "P(non-negligible)", "Interval excludes 0"] + (["Shrinkage"] if shr is not None else [])
+    tabs = [table(f"Posterior of the coefficients ({prior} prior)", heads, rows,
+                  "Sorted by the size of the standardised posterior mean. P(non-negligible) = posterior probability that a one-s.d. change in the regressor moves y by more than " + f"{thr:g} of its s.d." +
+                  (" Shrinkage = posterior mean of 1/(1 + n tau^2 lambda^2) (Piironen and Vehtari 2017): near 1 means the coefficient is pulled to zero, near 0 left alone." if shr is not None else ""))]
+    tabs.append(table("Ordinary least squares for comparison", ["Variable", "OLS coef.", "OLS std. err.", "Posterior mean", "Ratio (posterior / OLS)"],
+                      [[v, f(ols.params[j + 1]), f(ols.bse[j + 1]), f(Bo[:, j].mean()), f(Bo[:, j].mean() / ols.params[j + 1] if ols.params[j + 1] != 0 else np.nan, 3)] for j, v in enumerate(x)],
+                      "The ratio is the share of the OLS coefficient that survives the shrinkage."))
+    eff = float(notneg.sum())
+    ch_o = [c[0] / xs for c in chains]
+    diag = []
+    for j, v in enumerate(x):
+        rh, ess = _rhat_ess([c[:, j] for c in ch_o]); diag.append([v, rh, ess, _geweke(ch_o[0][:, j])])
+    rh_s, ess_s = _rhat_ess([c[1] for c in chains]); diag.append(["sigma^2", rh_s, ess_s, _geweke(chains[0][1])])
+    worst = sorted(diag, key=lambda r_: r_[2])[:10]
+    rows = [[r_[0], f(r_[1], 3), f(r_[2], 0), f(r_[3], 2)] for r_ in worst]
+    tabs.append(table("MCMC convergence diagnostics", ["Parameter", "R-hat", "Effective sample size", "Geweke z (chain 1)"], rows,
+                      f"The {len(worst)} parameters with the smallest effective sample size (of {len(diag)}). R-hat above 1.05 or an effective sample size of a few dozen means the chains have not mixed; the horseshoe needs more draws than a normal prior."))
+    top = np.argsort(-np.abs(Bs.mean(0)))[:8]
+    sens = []
+    for pr_ in ("horseshoe", "lasso", "ridge"):
+        c_ = _shrink_chain(Xs, yc, pr_, 800, 400, np.random.default_rng(seed + 11), None, None)
+        sens.append([pr_] + [f(v) for v in (c_[0].mean(0) / xs)[top]])
+    sens.append(["OLS"] + [f(v) for v in ols.params[1:][top]])
+    tabs.append(table(f"Prior sensitivity: posterior means of the {len(top)} largest coefficients", ["Prior"] + [x[j] for j in top], sens,
+                      "Each row is a separate run of 800 draws with the default hyperparameters. The ridge prior shrinks all coefficients by the same factor; the horseshoe and lasso shrink small ones more."))
+    order = np.argsort(-np.abs(Bs.mean(0)))[:20]
+    charts = [chart("Standardised coefficients: posterior mean against OLS (20 largest)", [x[j] for j in order],
+                    [("Posterior mean", Bs.mean(0)[order]), ("OLS", (ols.params[1:] * xs)[order])], "", "effect of a one-s.d. change in x", kind="bar")]
+    if shr is not None:
+        charts.append(chart("Shrinkage of the 20 largest coefficients (1 = pulled to zero)", [x[j] for j in order], [("shrinkage", shr[order])], "", "shrinkage", kind="bar"))
+    else:
+        charts.append(chart("Probability that the effect is non-negligible", [x[j] for j in order], [("P(non-negligible)", notneg[order])], "", "probability", kind="bar"))
+    fit = ym + Xs @ Bs.mean(0)
+    r2 = 1 - ((Y - fit) ** 2).sum() / ((Y - ym) ** 2).sum()
+    summary = [stat("Observations", n), stat("Regressors", p), stat("Prior", prior), stat("In-sample R-squared", r2, 4),
+               stat("Posterior mean of sigma", float(np.sqrt(S2).mean())), stat("Effective number of non-negligible coefficients", eff, 2),
+               stat("Largest R-hat", max(float(r_[1]) for r_ in diag), 3), stat("Smallest effective sample size", min(float(r_[2]) for r_ in diag), 0)]
+    notes = [f"Regressors are standardised for the prior and the coefficients reported in the original units. {nch} chains of {ndraw} draws after {burn} burn-in."
+             + (f" Global scale tau fixed at {tau_f:g}." if tau_f is not None and prior != "lasso" else "") + (f" Lasso penalty fixed at {lam_f:g}." if lam_f is not None and prior == "lasso" else "")]
+    return result("bayes_shrink", f"Bayesian shrinkage regression ({prior}): {y}", n, summary, tabs, charts, notes)

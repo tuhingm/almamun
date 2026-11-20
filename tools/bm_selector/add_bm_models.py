@@ -40,6 +40,10 @@ EXTRA_BAYES = {
                                     "The outcome is binary (works or not, defaults or not). A Bayesian logit or probit reports the effect on the probability with credible intervals computed draw by draw, takes a prior, and keeps working when maximum likelihood fails, as with a rare outcome or perfect separation.",
                                     ["Choose the link and the prior", "Estimate and check the chains", "Odds ratios and marginal effects", "Posterior predictive check", "Prior and link sensitivity", "Separation and small samples"]),
                "Bayesian logit/probit", "binary outcome", "A yes/no outcome and I want probabilities and a prior"),
+    "SHRINK": ("bayes-shrinkage", model("SHRINK", "Bayesian shrinkage regression (horseshoe, lasso, ridge)", "Shrinkage regression", "Many regressors relative to the sample: interactions, polynomials, dozens of controls",
+                                        "OLS overfits when the model has almost as many parameters as observations. A shrinkage prior pulls the coefficients the data do not support towards zero and leaves the supported ones alone, and the posterior reports how sure you are about each.",
+                                        ["Choose the prior", "Estimate and find the effects", "Compare with OLS", "Check the sampler", "Prior sensitivity", "Out-of-sample prediction"]),
+               "Shrinkage regression", "many regressors", "I have more regressors than I can trust OLS with"),
 }
 MARKOV = {
     "MSTVTP": ("ms-tvtp", model("MSTVTP", "Markov switching with time-varying transition probabilities", "MS with TVTP", "Hidden regimes, and an observed variable that moves the probability of switching",

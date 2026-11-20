@@ -1640,5 +1640,21 @@
    "label": "Share of ones",
    "value": 0.568
   }
+ },
+ "bayes_shrink": {
+  "nobs": 506,
+  "table_index": 0,
+  "table": "Posterior of the coefficients (horseshoe prior)",
+  "row": "lowstat",
+  "row_index": 0,
+  "col": "Mean",
+  "col_index": 1,
+  "value": -0.216129,
+  "rtol": 0.05,
+  "seconds": 0.8,
+  "summary": {
+   "label": "In-sample R-squared",
+   "value": 0.8737
+  }
  }
 }

@@ -180,3 +180,82 @@ def test_binary_marginal_effect_dummy_and_errors():
     with pytest.raises(OESError, match="constant"): bayes_more.bayes_binary(d.assign(c=2.0), dict(y="y", x=["x", "c"]))
     with pytest.raises(OESError, match="Too few"): bayes_more.bayes_binary(d.head(8), dict(y="y", x=["x"]))
     with pytest.raises(OESError, match="between 2 and 8"): bayes_more.bayes_binary(d, dict(y="y", x=["x"], chains=1))
+
+
+# ------------------------------------------------------------------------------------------------ Bayesian shrinkage regression
+def _sparse_data(n=100, p=30, k=3, beta=1.0, sd=1.0, seed=0):
+    rng = np.random.default_rng(seed); X = rng.normal(size=(n, p)); b = np.zeros(p); b[:k] = beta
+    return pd.DataFrame(np.column_stack([X @ b + rng.normal(scale=sd, size=n), X]), columns=["y"] + [f"x{i}" for i in range(p)]), b
+
+
+def _shr_rows(r, title="Posterior of the coefficients"):
+    return {x_[0]: x_ for x_ in next(t for t in r["tables"] if t["title"].startswith(title))["rows"]}
+
+
+def test_shrink_registered():
+    m = o.BY_ID["bayes_shrink"]; assert m["group"] == "Bayesian" and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+    assert len(m["example"]["spec"]["x"]) == 44
+
+
+def test_ridge_matches_exact_conjugate_posterior():
+    """Ridge with a fixed global scale and p(sigma^2) proportional to 1/sigma^2 has an exact Student-t posterior."""
+    d, _ = _sparse_data(n=80, p=4, k=2, seed=2); x = [f"x{i}" for i in range(4)]; tau = 0.7
+    r = bayes_more.bayes_shrink(d, dict(y="y", x=x, prior="ridge", tau=tau, draws=6000, burn=500, chains=2))
+    X = d[x].to_numpy(); xs = X.std(0); Xs = (X - X.mean(0)) / xs; yc = d["y"].to_numpy() - d["y"].mean(); n = 80
+    A = Xs.T @ Xs + np.eye(4) / tau ** 2; m = np.linalg.solve(A, Xs.T @ yc); sc2 = (yc @ yc - m @ A @ m) / (n - 1) * np.linalg.inv(A).diagonal()
+    sd = np.sqrt(sc2 * (n - 1) / (n - 3))                                     # Student-t with n - 1 degrees of freedom (flat intercept integrated out)
+    rows = _shr_rows(r)
+    for j, v in enumerate(x):
+        assert rows[v][1] == pytest.approx(m[j] / xs[j], abs=0.03 * sd[j] / xs[j] * 3 + 1e-3)
+        assert rows[v][2] == pytest.approx(sd[j] / xs[j], rel=0.06)
+
+
+def test_lasso_matches_grid_posterior():
+    """Bayesian lasso with a fixed penalty (p = 2): Gibbs sampler against numerical integration over (b1, b2, sigma)."""
+    d, _ = _sparse_data(n=40, p=2, k=1, beta=0.8, seed=5); lam = 6.0; n = 40
+    r = bayes_more.bayes_shrink(d, dict(y="y", x=["x0", "x1"], prior="lasso", lasso_lambda=lam, draws=8000, burn=1000))
+    X = d[["x0", "x1"]].to_numpy(); xs = X.std(0); Xs = (X - X.mean(0)) / xs; yc = d["y"].to_numpy() - d["y"].mean()
+    g = np.linspace(-1.6, 2.0, 361); B1, B2 = np.meshgrid(g, g, indexing="ij"); sig = np.exp(np.linspace(-1.5, 1.2, 160))
+    rss = ((yc[:, None, None] - Xs[:, [0]][:, :, None] * B1[None] - Xs[:, [1]][:, :, None] * B2[None]) ** 2).sum(0)
+    l1 = np.abs(B1) + np.abs(B2); post = np.zeros_like(B1); ds = np.gradient(np.log(sig))
+    for sg, w in zip(sig, ds):
+        post += w * sg ** 2 * sg ** (-(n - 1)) * sg ** (-2) * (lam / (2 * sg)) ** 2 * np.exp(-rss / (2 * sg ** 2) - lam * l1 / sg)
+    post /= post.sum(); m1 = (post * B1).sum(); s1 = np.sqrt((post * B1 ** 2).sum() - m1 ** 2); m2 = (post * B2).sum()
+    rows = _shr_rows(r)
+    assert rows["x0"][1] * xs[0] == pytest.approx(m1, abs=0.02) and rows["x0"][2] * xs[0] == pytest.approx(s1, rel=0.08)
+    assert rows["x1"][1] * xs[1] == pytest.approx(m2, abs=0.02)
+
+
+def test_shrink_limits_ols_and_zero():
+    d, _ = _sparse_data(n=120, p=5, k=2, seed=7); x = [f"x{i}" for i in range(5)]
+    import statsmodels.api as sm
+    ols = sm.OLS(d["y"], sm.add_constant(d[x])).fit()
+    r = bayes_more.bayes_shrink(d, dict(y="y", x=x, prior="horseshoe", tau=50, draws=3000))
+    rows = _shr_rows(r)
+    assert all(rows[v][1] == pytest.approx(ols.params[v], abs=0.12 * ols.bse[v] + 0.005) for v in x)       # diffuse global scale -> OLS
+    r0 = bayes_more.bayes_shrink(d, dict(y="y", x=x, prior="lasso", lasso_lambda=4000, draws=2000))
+    assert all(abs(_shr_rows(r0)[v][1]) < 0.02 for v in x)                                               # enormous penalty -> zero
+
+
+@pytest.mark.parametrize("prior", ["horseshoe", "lasso"])
+def test_shrink_monte_carlo_sparse_recovery(prior):
+    err_s, err_o, tp, fp = [], [], [], []
+    for s in range(12):
+        d, b = _sparse_data(n=80, p=30, k=3, beta=1.0, sd=1.0, seed=50 + s)
+        r = bayes_more.bayes_shrink(d, dict(y="y", x=[f"x{i}" for i in range(30)], prior=prior, draws=700, burn=400, seed=s))
+        rows = _shr_rows(r); est = np.array([rows[f"x{i}"][1] for i in range(30)])
+        import statsmodels.api as sm
+        ols = sm.OLS(d["y"], sm.add_constant(d[[f"x{i}" for i in range(30)]])).fit().params.to_numpy()[1:]
+        err_s.append(np.sum((est - b) ** 2)); err_o.append(np.sum((ols - b) ** 2))
+        tp.append(np.mean([rows[f"x{i}"][7] == "yes" for i in range(3)])); fp.append(np.mean([rows[f"x{i}"][7] == "yes" for i in range(3, 30)]))
+    # the horseshoe is the better sparse-signal prior; the Bayesian lasso shrinks the true coefficients too (Carvalho et al. 2010)
+    assert np.mean(err_s) < {"horseshoe": 0.35, "lasso": 0.6}[prior] * np.mean(err_o) and np.mean(tp) > 0.95 and np.mean(fp) < 0.06
+
+
+def test_shrink_errors():
+    d, _ = _sparse_data(n=60, p=4)
+    for spec, msg in [(dict(y="y", x=["x0", "x1"], prior="zz"), "prior"), (dict(y="y", x=["x0"]), "at least two"), (dict(y="y", x=["x0", "x1"], threshold=-1), "positive"),
+                      (dict(y="y", x=["x0", "x1"], chains=1), "between 2 and 8")]:
+        with pytest.raises(OESError, match=msg): bayes_more.bayes_shrink(d, spec)
+    with pytest.raises(OESError, match="constant"): bayes_more.bayes_shrink(d.assign(c=1.0), dict(y="y", x=["x0", "c"]))
+    with pytest.raises(OESError, match="Too few"): bayes_more.bayes_shrink(d.head(6), dict(y="y", x=["x0", "x1", "x2", "x3"]))
