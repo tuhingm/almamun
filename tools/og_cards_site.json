@@ -1,9 +1,21 @@
 [
  {
+  "out": "assets/og/bayesian-guide/bayes-logit.jpg",
+  "kicker": "Bayesian Guide · Model guide",
+  "title": "Bayesian Logit and Probit",
+  "sub": "A yes/no outcome where you want probabilities for effects, a prior, or an estimate that survives a small or separated sample.…"
+ },
+ {
   "out": "assets/og/bayesian-guide/bayes-reg.jpg",
   "kicker": "Bayesian Guide · Model guide",
   "title": "Bayesian Linear Regression with a g-Prior",
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
+ },
+ {
+  "out": "assets/og/bayesian-guide/bayes-shrinkage.jpg",
+  "kicker": "Bayesian Guide · Model guide",
+  "title": "Bayesian Shrinkage Regression (Horseshoe, Lasso, Ridge)",
+  "sub": "Many regressors relative to the sample (interactions, polynomials, dozens of controls), and you want estimates that do not…"
  },
  {
   "out": "assets/og/bayesian-guide/blp.jpg",
@@ -12,10 +24,22 @@
   "sub": "You want impulse responses without a full VAR, with smoother, more precise estimates at long horizons and probability statements…"
  },
  {
+  "out": "assets/og/bayesian-guide/bma.jpg",
+  "kicker": "Bayesian Guide · Model guide",
+  "title": "Bayesian Model Averaging",
+  "sub": "Many candidate regressors and no theory that says which belong in the model. Step-by-step guide with Python code and real output."
+ },
+ {
   "out": "assets/og/bayesian-guide/bvar.jpg",
   "kicker": "Bayesian Guide · Model guide",
   "title": "Bayesian VAR with Minnesota and Normal-Wishart Priors",
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
+ },
+ {
+  "out": "assets/og/bayesian-guide/change-points.jpg",
+  "kicker": "Bayesian Guide · Model guide",
+  "title": "Bayesian Change Points",
+  "sub": "A series or a relationship that may have shifted at unknown dates, and you want probabilities for the number and the dates of the…"
  },
  {
   "out": "assets/og/bayesian-guide/favar.jpg",
@@ -96,6 +120,12 @@
   "sub": "You need dynamic effects around a policy, a valid test of pre-trends, and a way to judge how much a pre-trend would change the…"
  },
  {
+  "out": "assets/og/causal-inference-guide/experiments.jpg",
+  "kicker": "Causal Inference Guide · Model guide",
+  "title": "Randomised Experiments: Balance, Adjustment and Randomisation Inference",
+  "sub": "Treatment was assigned at random and you need to report the effect, check that the randomisation worked, adjust for covariates…"
+ },
+ {
   "out": "assets/og/causal-inference-guide/gsc.jpg",
   "kicker": "Causal Inference Guide · Model guide",
   "title": "Generalized Synthetic Control",
@@ -120,10 +150,28 @@
   "sub": "An instrument shifts the treatment. Step-by-step guide with Python code and real output."
  },
  {
+  "out": "assets/og/causal-inference-guide/lee-bounds.jpg",
+  "kicker": "Causal Inference Guide · Model guide",
+  "title": "Lee Bounds for Sample Selection and Attrition",
+  "sub": "An outcome is observed only for some units, treatment changes who is observed, and you want an effect without a selection model.…"
+ },
+ {
   "out": "assets/og/causal-inference-guide/matching.jpg",
   "kicker": "Causal Inference Guide · Model guide",
   "title": "Matching, inverse-probability weighting and doubly robust estimation",
   "sub": "Treatment is not randomly assigned, but you observe the covariates that drive selection into it (selection on observables).…"
+ },
+ {
+  "out": "assets/og/causal-inference-guide/mediation.jpg",
+  "kicker": "Causal Inference Guide · Model guide",
+  "title": "Causal Mediation Analysis",
+  "sub": "A treatment has an effect and you want to know how much of it works through a specific channel (the mediator) and how much does…"
+ },
+ {
+  "out": "assets/og/causal-inference-guide/quantile-effects.jpg",
+  "kicker": "Causal Inference Guide · Model guide",
+  "title": "Distributional Effects: Quantile Treatment Effects and KS Tests",
+  "sub": "You want to know who gains from a treatment, not only the average gain, and whether the whole outcome distribution shifted.…"
  },
  {
   "out": "assets/og/causal-inference-guide/rdd.jpg",
@@ -148,6 +196,12 @@
   "kicker": "Causal Inference Guide · Model guide",
   "title": "Staggered Difference-in-Differences",
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
+ },
+ {
+  "out": "assets/og/causal-inference-guide/weak-iv.jpg",
+  "kicker": "Causal Inference Guide · Model guide",
+  "title": "Weak-Instrument-Robust IV Inference",
+  "sub": "Your instruments are weak or you are not sure they are strong, and you need confidence sets that stay valid whatever the…"
  },
  {
   "out": "assets/og/dsge-guide/estimation.jpg",
@@ -246,10 +300,40 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/microeconometrics-guide/conditional-mixed-logit.jpg",
+  "kicker": "Microeconometrics Guide · Model guide",
+  "title": "Conditional and Mixed Logit (Discrete Choice)",
+  "sub": "People choose one option among several (travel mode, brand, product, site, school), and the options have attributes such as price…"
+ },
+ {
+  "out": "assets/og/microeconometrics-guide/count-models.jpg",
+  "kicker": "Microeconometrics Guide · Model guide",
+  "title": "Poisson and Negative-Binomial Regression (Counts)",
+  "sub": "An outcome that counts events (doctor visits, patents, arrests, accidents) and is zero or small for many observations.…"
+ },
+ {
+  "out": "assets/og/microeconometrics-guide/glm-fractional.jpg",
+  "kicker": "Microeconometrics Guide · Model guide",
+  "title": "Generalized Linear Models and Fractional Responses",
+  "sub": "An outcome that is a proportion between 0 and 1 (participation rate, market share, budget share) or a positive skewed amount…"
+ },
+ {
+  "out": "assets/og/microeconometrics-guide/heckman.jpg",
+  "kicker": "Microeconometrics Guide · Model guide",
+  "title": "Heckman Sample-Selection Model",
+  "sub": "An outcome you observe only for a self-selected part of the sample, such as wages for women who work, and you want the effect for…"
+ },
+ {
   "out": "assets/og/microeconometrics-guide/index.jpg",
   "kicker": "Microeconometrics Guide",
   "title": "Which microeconometric model fits your outcome?",
   "sub": "Logit, probit and the other models for binary, count, censored and choice outcomes: marginal effects, tests and the text for the paper."
+ },
+ {
+  "out": "assets/og/microeconometrics-guide/iv-probit.jpg",
+  "kicker": "Microeconometrics Guide · Model guide",
+  "title": "IV Probit and the Control Function (Endogenous Regressors in a Binary Model)",
+  "sub": "A binary outcome (employment, participation, adoption) with a regressor that is correlated with the error, and a valid instrument…"
  },
  {
   "out": "assets/og/microeconometrics-guide/logit-probit.jpg",
@@ -258,10 +342,58 @@
   "sub": "A yes/no outcome (passed, defaulted, employed, adopted) explained by one or more regressors. Step-by-step guide with Python code…"
  },
  {
+  "out": "assets/og/microeconometrics-guide/multinomial-logit.jpg",
+  "kicker": "Microeconometrics Guide · Model guide",
+  "title": "Multinomial Logit Regression",
+  "sub": "An outcome with three or more categories that have no natural order (party voted for, mode of transport, occupation, brand)…"
+ },
+ {
+  "out": "assets/og/microeconometrics-guide/ordered-logit-probit.jpg",
+  "kicker": "Microeconometrics Guide · Model guide",
+  "title": "Ordered Logit and Probit Regression",
+  "sub": "An outcome with ordered categories (low, medium, high; a rating from 1 to 5; a degree level) explained by one or more regressors.…"
+ },
+ {
+  "out": "assets/og/microeconometrics-guide/panel-logit-probit.jpg",
+  "kicker": "Microeconometrics Guide · Model guide",
+  "title": "Panel Logit and Probit (Pooled, Random and Fixed Effects)",
+  "sub": "A binary outcome observed for the same units over several periods (union membership, employment, default, adoption) and…"
+ },
+ {
+  "out": "assets/og/microeconometrics-guide/systems-sur-3sls.jpg",
+  "kicker": "Microeconometrics Guide · Model guide",
+  "title": "Systems of Equations: SUR and Three-Stage Least Squares",
+  "sub": "Several equations whose errors are correlated (time use, expenditure shares, labor supply and wages), or equations that determine…"
+ },
+ {
+  "out": "assets/og/microeconometrics-guide/tobit.jpg",
+  "kicker": "Microeconometrics Guide · Model guide",
+  "title": "Tobit Regression (Censored Outcomes)",
+  "sub": "An outcome that piles up at a limit, usually zero (hours worked, spending, number of affairs), explained by one or more…"
+ },
+ {
+  "out": "assets/og/microeconometrics-guide/zero-inflated-hurdle.jpg",
+  "kicker": "Microeconometrics Guide · Model guide",
+  "title": "Zero-Inflated and Hurdle Count Models",
+  "sub": "A count outcome with more zeros than a Poisson or negative-binomial model predicts, where the zeros may come from a separate…"
+ },
+ {
   "out": "assets/og/ml-guide/causal-forest.jpg",
   "kicker": "Machine Learning Guide · Model guide",
   "title": "Causal Forest",
   "sub": "Effects that differ across people, N ≥ 2,000. Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/ml-guide/classification.jpg",
+  "kicker": "Machine Learning Guide · Model guide",
+  "title": "Classification: Logit, Penalised Logit, Random Forest and Boosting",
+  "sub": "The outcome is a yes/no event (approval, default, participation) and you want predicted probabilities, a cut-off and an honest…"
+ },
+ {
+  "out": "assets/og/ml-guide/clustering.jpg",
+  "kicker": "Machine Learning Guide · Model guide",
+  "title": "Clustering: k-Means, Gaussian Mixtures and Ward, with a Test of Whether the Clusters Are Real",
+  "sub": "You want to group countries, firms or households by several characteristics and need to say how many groups there are and whether…"
  },
  {
   "out": "assets/og/ml-guide/dml-irm.jpg",
@@ -282,16 +414,34 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/ml-guide/double-selection.jpg",
+  "kicker": "Machine Learning Guide · Model guide",
+  "title": "Double-Selection LASSO: Inference on One Variable with Many Controls",
+  "sub": "You want the effect of one variable and have dozens of possible controls, perhaps more than observations, and need valid standard…"
+ },
+ {
   "out": "assets/og/ml-guide/enet.jpg",
   "kicker": "Machine Learning Guide · Model guide",
   "title": "Elastic Net",
   "sub": "Linear, strongly correlated predictors. Step-by-step guide with Python code and real output."
  },
  {
+  "out": "assets/og/ml-guide/heterogeneity-gates.jpg",
+  "kicker": "Machine Learning Guide · Model guide",
+  "title": "Who Gains? Heterogeneous Effects with BLP, GATES and CLAN",
+  "sub": "A randomised treatment has an average effect and you want to know whether, and for whom, it differs, without searching subgroups…"
+ },
+ {
   "out": "assets/og/ml-guide/index.jpg",
   "kicker": "Machine Learning Guide",
   "title": "Which machine-learning method fits your data?",
   "sub": "LASSO, ridge, elastic net, random forest, XGBoost or double machine learning, chosen by tests on your data."
+ },
+ {
+  "out": "assets/og/ml-guide/interpretation.jpg",
+  "kicker": "Machine Learning Guide · Model guide",
+  "title": "Interpreting a Machine-Learning Model: Importance, Partial Dependence and Interactions",
+  "sub": "A forest or boosting model predicts well and you must say which variables matter, how they matter and whether they interact.…"
  },
  {
   "out": "assets/og/ml-guide/krls.jpg",
@@ -306,6 +456,12 @@
   "sub": "Linear, few predictors matter. Step-by-step guide with Python code and real output."
  },
  {
+  "out": "assets/og/ml-guide/neural-network.jpg",
+  "kicker": "Machine Learning Guide · Model guide",
+  "title": "Neural Network Regression: Architecture, Early Stopping and Ensembles",
+  "sub": "A relationship is nonlinear in ways you cannot specify, and you want a neural network that is tuned, stopped and averaged…"
+ },
+ {
   "out": "assets/og/ml-guide/rf.jpg",
   "kicker": "Machine Learning Guide · Model guide",
   "title": "Random Forest",
@@ -316,6 +472,12 @@
   "kicker": "Machine Learning Guide · Model guide",
   "title": "Ridge Regression",
   "sub": "Linear, many small effects. Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/ml-guide/stacking.jpg",
+  "kicker": "Machine Learning Guide · Model guide",
+  "title": "Stacking: The Super Learner",
+  "sub": "Several reasonable models predict differently and you do not want to bet on one of them. Step-by-step guide with Python code and…"
  },
  {
   "out": "assets/og/ml-guide/svr.jpg",
@@ -372,10 +534,22 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/panel-data-guide/hausman-taylor.jpg",
+  "kicker": "Panel Data Guide · Model guide",
+  "title": "Hausman-Taylor Estimator",
+  "sub": "You want the return to a time-invariant variable such as schooling, but you suspect it is correlated with the unit effect, so…"
+ },
+ {
   "out": "assets/og/panel-data-guide/index.jpg",
   "kicker": "Panel Data Guide",
   "title": "Which panel model fits your data?",
   "sub": "Test your panel and follow the path to pooled OLS, FE/RE, GMM, Mean Group, PMG or CS-ARDL. Real examples and Python code."
+ },
+ {
+  "out": "assets/og/panel-data-guide/interactive-fixed-effects.jpg",
+  "kicker": "Panel Data Guide · Model guide",
+  "title": "Interactive Fixed Effects (Bai 2009)",
+  "sub": "Units respond differently to common shocks that you cannot observe, so two-way fixed effects leaves cross-sectional dependence in…"
  },
  {
   "out": "assets/og/panel-data-guide/lectures/macro-panel-econometrics.jpg",
@@ -388,6 +562,24 @@
   "kicker": "Panel Data Guide · Model guide",
   "title": "Mean Group and CCE Mean Group",
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
+ },
+ {
+  "out": "assets/og/panel-data-guide/mundlak-cre.jpg",
+  "kicker": "Panel Data Guide · Model guide",
+  "title": "Correlated Random Effects (Mundlak) and the Robust Hausman Test",
+  "sub": "You want random-effects estimates of time-invariant variables but need to guard against a unit effect that is correlated with the…"
+ },
+ {
+  "out": "assets/og/panel-data-guide/panel-granger.jpg",
+  "kicker": "Panel Data Guide · Model guide",
+  "title": "Panel Granger Causality (Dumitrescu-Hurlin)",
+  "sub": "You want to know whether one variable helps predict another in a panel where the relationship may differ across units, such as…"
+ },
+ {
+  "out": "assets/og/panel-data-guide/panel-unit-root.jpg",
+  "kicker": "Panel Data Guide · Model guide",
+  "title": "Panel Unit-Root and Stationarity Tests",
+  "sub": "You have a panel of long series, such as inflation or output across countries, and need to know whether the variable is…"
  },
  {
   "out": "assets/og/panel-data-guide/pcoint.jpg",
@@ -405,7 +597,7 @@
   "out": "assets/og/panel-data-guide/plp.jpg",
   "kicker": "Panel Data Guide · Model guide",
   "title": "Panel Local Projections",
-  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
+  "sub": "You want the dynamic response of an outcome to a shock in a panel of units, horizon by horizon, with unit fixed effects.…"
  },
  {
   "out": "assets/og/panel-data-guide/pmg.jpg",
@@ -429,7 +621,7 @@
   "out": "assets/og/panel-data-guide/pthresh.jpg",
   "kicker": "Panel Data Guide · Model guide",
   "title": "Panel Threshold Regression (Hansen)",
-  "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
+  "sub": "The effect of a regressor may differ above and below a threshold in another variable, and you want to estimate where the…"
  },
  {
   "out": "assets/og/panel-data-guide/re.jpg",

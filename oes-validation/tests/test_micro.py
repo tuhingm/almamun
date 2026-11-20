@@ -138,3 +138,607 @@ def test_errors_are_reported_not_raised():
     assert "error" in r and "separation" in r["error"]
     assert "at least one" in o.run("logit_probit", d.to_csv(index=False), dict(y="GRADE", x=[]))["error"]
     assert "too few" in o.run("logit_probit", d.head(8).to_csv(index=False), dict(y="GRADE", x=["GPA", "TUCE", "PSI"]))["error"]
+
+
+# ------------------------------------------------------------------ ordered logit and probit
+HX = ["InflMedium", "InflHigh", "TypeApartment", "TypeAtrium", "TypeTerrace", "ContHigh"]
+def housing(**kw):
+    spec = dict(y="Sat", x=HX); spec.update(kw)
+    return o.run("ordered", open(os.path.join(ME, "housing.csv")).read(), spec)
+
+
+def test_ordered_matches_published_MASS_housing_results():
+    # Venables and Ripley, MASS, polr(Sat ~ Infl + Type + Cont, weights = Freq): coefficients, standard errors, cut-points, deviance
+    r = housing()
+    pub = dict(InflMedium=(0.5664, 0.1047), InflHigh=(1.2888, 0.1272), TypeApartment=(-0.5724, 0.1192),
+               TypeAtrium=(-0.3662, 0.1552), TypeTerrace=(-1.0910, 0.1515), ContHigh=(0.3603, 0.0955))
+    for name, (b, se) in pub.items():
+        x = row(r, "Coefficient", name)
+        assert x[1] == pytest.approx(b, abs=5e-4) and x[2] == pytest.approx(se, abs=5e-4)
+    cp = table(r, "Cut-points")["rows"]
+    assert cp[0][1] == pytest.approx(-0.4961, abs=5e-4) and cp[1][1] == pytest.approx(0.6907, abs=5e-4)
+    assert -2 * summ(r, "Log-likelihood") == pytest.approx(3479.149, abs=5e-3)
+
+
+def test_ordered_logit_equals_an_independent_likelihood_maximisation():
+    from scipy.optimize import minimize
+    d = pd.read_csv(os.path.join(ME, "housing.csv")); X = d[HX].to_numpy(float); yy = d.Sat.to_numpy() - 1
+    def nll(t):
+        b, c1, g = t[:6], t[6], np.exp(t[7]); cuts = [c1, c1 + g]; xb = X @ b
+        F = lambda z: 1 / (1 + np.exp(-z))
+        cum = np.column_stack([np.zeros(len(xb)), F(cuts[0] - xb), F(cuts[1] - xb), np.ones(len(xb))])
+        return -np.log(np.diff(cum, axis=1)[np.arange(len(yy)), yy]).sum()
+    best = minimize(nll, np.zeros(8), method="BFGS", options={"gtol": 1e-8})
+    r = housing()
+    assert -best.fun == pytest.approx(summ(r, "Log-likelihood"), abs=1e-3)
+    assert best.x[:6] == pytest.approx([row(r, "Coefficient", c)[1] for c in HX], abs=2e-3)
+
+
+def test_ordered_marginal_effects_sum_to_zero_across_categories_and_match_by_hand():
+    r = housing()
+    for c in HX:
+        assert sum(x[2] for x in table(r, "Average marginal effects")["rows"] if x[0] == c) == pytest.approx(0, abs=1e-5)
+    d = pd.read_csv(os.path.join(ME, "housing.csv")); X = d[HX].to_numpy(float)
+    b = np.array([row(r, "Coefficient", c)[1] for c in HX]); cp = [x[1] for x in table(r, "Cut-points")["rows"]]
+    F = lambda z: 1 / (1 + np.exp(-z))
+    def p3(M): xb = M @ b; return 1 - F(cp[1] - xb)
+    X1, X0 = X.copy(), X.copy(); X1[:, 1], X0[:, 1] = 1, 0
+    by_hand = (p3(X1) - p3(X0)).mean()
+    got = next(x for x in table(r, "Average marginal effects")["rows"] if x[0] == "InflHigh" and x[1] == "y = 3.0")[2]
+    assert got == pytest.approx(by_hand, abs=2e-4)
+
+
+@pytest.mark.parametrize("link", ["logit", "probit"])
+def test_ordered_recovers_known_parameters_from_simulated_data(link):
+    rng = np.random.default_rng(11); n = 30000
+    x1, x2 = rng.normal(size=n), rng.binomial(1, .5, n); xb = 0.9 * x1 - 0.6 * x2
+    e = rng.logistic(size=n) if link == "logit" else rng.normal(size=n)
+    ystar = xb + e; y = 1 + (ystar > -0.7) + (ystar > 0.4) + (ystar > 1.5)
+    r = o.run("ordered", pd.DataFrame({"y": y, "x1": x1, "x2": x2}).to_csv(index=False), dict(y="y", x=["x1", "x2"], link=link))
+    for name, b in [("x1", 0.9), ("x2", -0.6)]:
+        x = row(r, "Coefficient", name); assert abs(x[1] - b) < 4 * x[2]
+    cp = [x[1] for x in table(r, "Cut-points")["rows"]]
+    assert cp == pytest.approx([-0.7, 0.4, 1.5], abs=0.08)
+
+
+def test_brant_test_accepts_parallel_lines_and_rejects_non_parallel_data():
+    rng = np.random.default_rng(5); n = 6000; x = rng.normal(size=n)
+    ystar = x + rng.logistic(size=n); good = 1 + (ystar > -.5) + (ystar > .8)
+    u = rng.logistic(size=n)
+    bad = 1 + (1.8 * x + u > -.5) + (0.2 * x + u > .8)                                  # the slope differs between the two cut-points
+    pv = lambda y: next(t for t in o.run("ordered", pd.DataFrame({"y": y, "x": x}).to_csv(index=False), dict(y="y", x=["x"]))["tables"] if t["title"].startswith("Specification"))["rows"][1][2]
+    assert pv(good) > 0.01 and pv(bad) < 0.001
+
+
+def test_ordered_errors_and_example_reference():
+    d = pd.read_csv(os.path.join(ME, "housing.csv"))
+    run = lambda df, **kw: o.run("ordered", df.to_csv(index=False), dict(y="Sat", x=["InflHigh", "ContHigh"], **kw))
+    assert "binary" in run(d.assign(Sat=(d.Sat > 1) * 1))["error"]
+    assert "3 to 10" in run(d.assign(Sat=np.arange(len(d)) % 15))["error"]
+    assert "at least 5" in run(d.assign(Sat=np.where(np.arange(len(d)) < 3, 4, d.Sat)))["error"]
+    assert "collinear" in run(d.assign(InflHigh=1))["error"]
+    e = EXPECTED["ordered"]; m = o.BY_ID["ordered"]
+    r = o.run("ordered", open(os.path.join(ROOT, m["example"]["file"])).read(), dict(m["example"]["spec"]))
+    assert r["tables"][e["table_index"]]["rows"][e["row_index"]][e["col_index"]] == pytest.approx(e["value"], rel=e["rtol"])
+
+
+# ------------------------------------------------------------------ multinomial logit
+BX = ["age", "econ_national", "econ_household", "europe", "political_knowledge", "female"]
+def beps(**kw):
+    spec = dict(y="vote", x=BX, base=0); spec.update(kw)
+    return o.run("multinomial", open(os.path.join(ME, "beps.csv")).read(), spec)
+
+
+def test_multinomial_equals_an_independent_likelihood_maximisation():
+    from scipy.optimize import minimize
+    d = pd.read_csv(os.path.join(ME, "beps.csv")); X = sm.add_constant(d[BX]).to_numpy(float); yy = d.vote.to_numpy().astype(int)
+    def nll(t):
+        B = t.reshape(7, 2); z = np.column_stack([np.zeros(len(X)), X @ B]); z -= z.max(1, keepdims=True)
+        lp = z - np.log(np.exp(z).sum(1, keepdims=True)); return -lp[np.arange(len(yy)), yy].sum()
+    best = minimize(nll, np.zeros(14), method="BFGS", options={"gtol": 1e-7, "maxiter": 2000})
+    r = beps()
+    assert -best.fun == pytest.approx(summ(r, "Log-likelihood"), abs=1e-3)
+    assert best.x.reshape(7, 2)[:, 0] == pytest.approx([x[1] for x in table(r, "Equation: vote = 1.0")["rows"]], abs=5e-3)
+
+
+def test_multinomial_changing_the_base_changes_coefficients_but_not_probabilities():
+    a, b = beps(base=0), beps(base=2)
+    assert summ(a, "Log-likelihood") == pytest.approx(summ(b, "Log-likelihood"), abs=1e-4)
+    ame = lambda r, v, c: next(x for x in table(r, "Average marginal effects")["rows"] if x[0] == v and x[1] == f"vote = {c}.0")[2]
+    for c in (0, 1, 2):
+        assert ame(a, "econ_national", c) == pytest.approx(ame(b, "econ_national", c), abs=1e-4)
+    assert row(a, "Equation: vote = 1.0", "age")[1] != row(b, "Equation: vote = 1.0", "age")[1]
+
+
+def test_multinomial_marginal_effects_sum_to_zero_and_match_by_hand():
+    r = beps()
+    for v in BX:
+        assert sum(x[2] for x in table(r, "Average marginal effects")["rows"] if x[0] == v) == pytest.approx(0, abs=1e-5)
+    d = pd.read_csv(os.path.join(ME, "beps.csv")); X = sm.add_constant(d[BX]).to_numpy(float)
+    B = np.column_stack([[x[1] for x in table(r, f"Equation: vote = {c}.0")["rows"]] for c in (1, 2)])
+    def P(M): z = np.column_stack([np.zeros(len(M)), M @ B]); e = np.exp(z); return e / e.sum(1, keepdims=True)
+    X1, X0 = X.copy(), X.copy(); X1[:, 6], X0[:, 6] = 1, 0
+    by_hand = (P(X1) - P(X0)).mean(0)
+    got = [next(x for x in table(r, "Average marginal effects")["rows"] if x[0] == "female" and x[1] == f"vote = {c}.0")[2] for c in (0, 1, 2)]
+    assert got == pytest.approx(list(by_hand), abs=2e-4)
+
+
+def test_multinomial_recovers_known_parameters_from_simulated_data():
+    rng = np.random.default_rng(3); n = 40000; x1, x2 = rng.normal(size=n), rng.binomial(1, .5, n)
+    B = np.array([[0.2, -0.4], [0.8, -0.5], [-0.6, 0.7]])           # rows: const, x1, x2; columns: categories 1 and 2
+    z = np.column_stack([np.zeros(n), np.column_stack([np.ones(n), x1, x2]) @ B]); pr = np.exp(z) / np.exp(z).sum(1, keepdims=True)
+    yy = np.array([rng.choice(3, p=p) for p in pr])
+    r = o.run("multinomial", pd.DataFrame({"y": yy, "x1": x1, "x2": x2}).to_csv(index=False), dict(y="y", x=["x1", "x2"], base=0))
+    for c, col_ in ((1, 0), (2, 1)):
+        for i, name in enumerate(["const", "x1", "x2"]):
+            x = row(r, f"Equation: y = {c}.0", name); assert abs(x[1] - B[i, col_]) < 4 * x[2]
+
+
+def test_multinomial_errors_and_example_reference():
+    d = pd.read_csv(os.path.join(ME, "beps.csv"))
+    run = lambda df, **kw: o.run("multinomial", df.to_csv(index=False), dict(y="vote", x=["age", "europe"], **kw))
+    assert "binary" in run(d.assign(vote=(d.vote > 0) * 1))["error"]
+    assert "not a value" in run(d, base=7)["error"]
+    assert "at least 10" in run(d.assign(vote=np.where(np.arange(len(d)) < 4, 3, d.vote)))["error"]
+    e = EXPECTED["multinomial"]; m = o.BY_ID["multinomial"]
+    r = o.run("multinomial", open(os.path.join(ROOT, m["example"]["file"])).read(), dict(m["example"]["spec"]))
+    assert r["tables"][e["table_index"]]["rows"][e["row_index"]][e["col_index"]] == pytest.approx(e["value"], rel=e["rtol"])
+
+
+# ------------------------------------------------------------------ Tobit
+TX = ["age", "yearsmarried", "religiousness", "occupation", "rating"]
+def affairs(**kw):
+    spec = dict(y="affairs", x=TX, lower=0); spec.update(kw)
+    return o.run("tobit", open(os.path.join(ME, "affairs.csv")).read(), spec)
+
+
+def test_tobit_matches_published_AER_affairs_results():
+    # Kleiber and Zeileis, Applied Econometrics with R: tobit(affairs ~ age + yearsmarried + religiousness + occupation + rating)
+    r = affairs()
+    pub = dict(const=(8.1742, 2.7414), age=(-0.1793, 0.0791), yearsmarried=(0.5541, 0.1345), religiousness=(-1.6862, 0.4038), occupation=(0.3261, 0.2544), rating=(-2.2850, 0.4078))
+    for name, (b, se) in pub.items():
+        x = row(r, "Coefficient", name); assert x[1] == pytest.approx(b, abs=5e-4) and x[2] == pytest.approx(se, abs=1e-3)
+    assert row(r, "Coefficient", "sigma")[1] == pytest.approx(np.exp(2.1099), abs=2e-3)
+    assert summ(r, "Log-likelihood") == pytest.approx(-705.576, abs=5e-3)
+
+
+def test_tobit_equals_independent_likelihood_and_mcdonald_moffitt_identity():
+    from scipy.optimize import minimize
+    d = pd.read_csv(os.path.join(ME, "affairs.csv")); X = np.column_stack([np.ones(len(d)), d[TX].to_numpy(float)]); y = d.affairs.to_numpy(float)
+    def nll(t):
+        xb, s = X @ t[:-1], np.exp(t[-1]); c = y <= 0
+        return -(stats.norm.logcdf(-xb[c] / s).sum() + (stats.norm.logpdf((y[~c] - xb[~c]) / s) - t[-1]).sum())
+    best = minimize(nll, np.r_[np.linalg.lstsq(X, y, rcond=None)[0], 2.0], method="BFGS", options={"gtol": 1e-8})
+    r = affairs()
+    assert -best.fun == pytest.approx(summ(r, "Log-likelihood"), abs=1e-3)
+    # observed-outcome marginal effect = latent coefficient x average probability of being uncensored (left censoring only)
+    b, s = best.x[:-1], np.exp(best.x[-1]); pu = stats.norm.cdf(X @ b / s).mean()
+    obs = next(x for x in table(r, "Average marginal effects")["rows"] if x[0] == "rating" and x[1].startswith("Observed"))[2]
+    assert obs == pytest.approx(b[5] * pu, abs=2e-3)
+
+
+def test_tobit_coefficients_are_larger_than_ols_on_censored_data():
+    for x in table(affairs(), "Comparison with OLS")["rows"]:
+        assert abs(x[1]) > abs(x[2]) and x[3] > 2
+
+
+@pytest.mark.parametrize("lower,upper", [(0.0, None), (0.0, 6.0)])
+def test_tobit_recovers_known_parameters_from_simulated_data(lower, upper):
+    rng = np.random.default_rng(2); n = 8000; x1, x2 = rng.normal(size=n), rng.binomial(1, .5, n)
+    ystar = 1.0 + 2.0 * x1 - 1.0 * x2 + rng.normal(scale=2.0, size=n); y = np.maximum(ystar, lower)
+    if upper is not None: y = np.minimum(y, upper)
+    r = o.run("tobit", pd.DataFrame({"y": y, "x1": x1, "x2": x2}).to_csv(index=False), dict(y="y", x=["x1", "x2"], lower=lower, upper=upper if upper is not None else ""))
+    for name, b in [("const", 1.0), ("x1", 2.0), ("x2", -1.0), ("sigma", 2.0)]:
+        x = row(r, "Coefficient", name); assert abs(x[1] - b) < 4 * x[2]
+
+
+def test_tobit_errors_and_example_reference():
+    d = pd.read_csv(os.path.join(ME, "affairs.csv"))
+    run = lambda df, **kw: o.run("tobit", df.to_csv(index=False), dict(y="affairs", x=["age", "rating"], **kw))
+    assert "needs censoring" in run(d, lower="", upper="")["error"]
+    assert "not censored" in run(d.assign(affairs=d.affairs + 1), lower=0)["error"]
+    assert "below the lower limit" in run(d.assign(affairs=d.affairs - 1), lower=0)["error"]
+    assert "must be below" in run(d, lower=5, upper=2)["error"]
+    e = EXPECTED["tobit"]; m = o.BY_ID["tobit"]
+    r = o.run("tobit", open(os.path.join(ROOT, m["example"]["file"])).read(), dict(m["example"]["spec"]))
+    assert r["tables"][e["table_index"]]["rows"][e["row_index"]][e["col_index"]] == pytest.approx(e["value"], rel=e["rtol"])
+
+
+# ------------------------------------------------------------------ Heckman selection
+def mroz(**kw):
+    spec = dict(o.BY_ID["heckman"]["example"]["spec"]); spec.update(kw)
+    return o.run("heckman", open(os.path.join(ME, "mroz.csv")).read(), spec)
+
+
+def test_heckman_two_step_matches_published_mroz():
+    # Wooldridge/Stata two-step on the Mroz (1987) data: educ .1091, exper .0439, lambda .0323
+    t = table(mroz(), "Two-step")
+    assert next(x for x in t["rows"] if x[0] == "educ")[1] == pytest.approx(0.109066, abs=5e-4)
+    assert next(x for x in t["rows"] if x[0] == "exper")[1] == pytest.approx(0.043887, abs=5e-4)
+    assert next(x for x in t["rows"] if x[0].startswith("lambda"))[1] == pytest.approx(0.032261, abs=5e-4)
+
+
+def test_heckman_ml_matches_independent_likelihood():
+    from scipy import optimize
+    d = pd.read_csv(os.path.join(ME, "mroz.csv")); s = d.inlf.values == 1
+    Z = sm.add_constant(d[["educ", "exper", "expersq", "age", "kidslt6", "kidsge6", "nwifeinc"]]).values
+    X = sm.add_constant(d[["educ", "exper", "expersq"]]).values; y = d.lwage.fillna(0).values
+
+    def nll(t):
+        g, b, sg, rh = t[:8], t[8:12], np.exp(t[12]), np.tanh(t[13]); zg = Z @ g; u = (y[s] - X[s] @ b) / sg
+        return -(stats.norm.logcdf(-zg[~s]).sum() + (stats.norm.logpdf(u) - np.log(sg) + stats.norm.logcdf((zg[s] + rh * u) / np.sqrt(1 - rh ** 2))).sum())
+    r0 = optimize.minimize(nll, np.r_[np.zeros(8), np.zeros(4), 0, 0], method="Nelder-Mead", options={"maxiter": 20000, "xatol": 1e-8, "fatol": 1e-10})
+    r1 = optimize.minimize(nll, r0.x, method="BFGS")
+    assert summ(mroz(), "Log-likelihood") == pytest.approx(-r1.fun, abs=1e-3)
+
+
+def test_heckman_recovers_selection_bias_in_simulation():
+    rng = np.random.default_rng(3); n = 6000
+    x, w = rng.normal(size=n), rng.normal(size=n)
+    e = rng.multivariate_normal([0, 0], [[1, .7], [.7, 1]], n)
+    sel = (0.3 + 0.8 * x + 1.0 * w + e[:, 0] > 0).astype(int)
+    y = 1.0 + 2.0 * x + e[:, 1]
+    d = pd.DataFrame(dict(y=np.where(sel == 1, y, np.nan), x=x, w=w, s=sel))
+    r = o.run("heckman", d.to_csv(index=False), dict(y="y", x=["x"], sel="s", z=["x", "w"]))
+    assert row(r, "Outcome equation", "x")[1] == pytest.approx(2.0, abs=0.1)
+    assert row(r, "Outcome equation", "rho")[1] == pytest.approx(0.7, abs=0.1)
+    ols = sm.OLS(y[sel == 1], sm.add_constant(x[sel == 1])).fit().params[0]
+    assert abs(ols - 1.0) > abs(row(r, "Outcome equation", "const")[1] - 1.0)       # OLS intercept is biased, Heckman is not
+
+
+def test_heckman_errors():
+    for kw, msg in [(dict(sel="kidsge6", z=["educ", "age"]), "0 and 1"), (dict(z=[]), "selection equation"), (dict(y="lwage", x=["lwage"]), "more than one role")]:
+        assert msg in mroz(**kw)["error"]
+
+
+# ------------------------------------------------------------------ count models
+def visits(**kw):
+    spec = dict(o.BY_ID["count"]["example"]["spec"]); spec.update(kw)
+    return o.run("count", open(os.path.join(ME, "doctor_visits.csv")).read(), spec)
+
+
+def test_poisson_matches_independent_irls():
+    d = pd.read_csv(os.path.join(ME, "doctor_visits.csv")); xs = o.BY_ID["count"]["example"]["spec"]["x"]
+    X = sm.add_constant(d[xs]).values; y = d.mdvis.values.astype(float); b = np.zeros(X.shape[1]); b[0] = np.log(y.mean())
+    for _ in range(100):                                    # Newton-Raphson for the Poisson likelihood, written out by hand
+        mu = np.exp(X @ b); b = b + np.linalg.solve(X.T @ (X * mu[:, None]), X.T @ (y - mu))
+    r = visits(family="poisson")
+    for i, nm in enumerate(["const"] + xs):
+        assert row(r, "Coefficient", nm)[1] == pytest.approx(b[i], abs=1e-5)
+    mu = np.exp(X @ b); meat = X.T @ (X * ((y - mu) ** 2)[:, None]); bread = np.linalg.inv(X.T @ (X * mu[:, None]))
+    V = bread @ meat @ bread
+    assert row(r, "Coefficient", "disea")[2] == pytest.approx(np.sqrt(V[6, 6]), rel=1e-4)
+
+
+def test_negbin_matches_scipy_likelihood():
+    from scipy import optimize
+    d = pd.read_csv(os.path.join(ME, "doctor_visits.csv")); xs = o.BY_ID["count"]["example"]["spec"]["x"]
+    X = sm.add_constant(d[xs]).values; y = d.mdvis.values.astype(float)
+
+    def nll(t):
+        mu = np.exp(X @ t[:-1]); a = np.exp(t[-1]); r = 1 / a
+        return -stats.nbinom.logpmf(y, r, r / (r + mu)).sum()
+    r0 = optimize.minimize(nll, np.r_[np.zeros(X.shape[1]), 0], method="BFGS", options={"gtol": 1e-7, "maxiter": 2000})
+    r = visits(family="negbin")
+    assert summ(r, "Log-likelihood") == pytest.approx(-r0.fun, abs=1e-2)
+    assert summ(r, "alpha") == pytest.approx(np.exp(r0.x[-1]), rel=2e-3)
+
+
+def test_count_recovers_parameters_and_detects_overdispersion():
+    rng = np.random.default_rng(5); n = 5000
+    x = rng.normal(size=n); mu = np.exp(0.5 + 0.4 * x)
+    y_nb = rng.negative_binomial(2.0, 2.0 / (2.0 + mu))
+    y_p = rng.poisson(mu)
+    for y, over in [(y_nb, True), (y_p, False)]:
+        r = o.run("count", pd.DataFrame(dict(y=y, x=x)).to_csv(index=False), dict(y="y", x=["x"], family="negbin"))
+        assert row(r, "Coefficient", "x")[1] == pytest.approx(0.4, abs=0.05)
+        p = next(t for t in table(r, "Specification")["rows"] if t[0].startswith("Cameron"))[2]
+        assert (p < 0.01) == over
+    assert summ(r, "alpha") < 0.1                          # NB collapses to Poisson when the data are Poisson
+
+
+def test_irr_and_marginal_effect_by_hand():
+    r = visits(family="poisson"); b = row(r, "Coefficient", "disea")[1]
+    assert row(r, "Incidence", "disea")[1] == pytest.approx(np.exp(b), abs=1e-5)
+    d = pd.read_csv(os.path.join(ME, "doctor_visits.csv")); xs = o.BY_ID["count"]["example"]["spec"]["x"]
+    X = sm.add_constant(d[xs]).values; bb = np.array([row(r, "Coefficient", nm)[1] for nm in ["const"] + xs])
+    assert row(r, "Average marginal", "disea")[1] == pytest.approx((bb[6] * np.exp(X @ bb)).mean(), rel=1e-4)
+
+
+def test_count_errors():
+    for kw, msg in [(dict(y="fmde", x=["disea"]), "whole numbers"), (dict(x=[]), "at least one"), (dict(family="zip"), "must be one of")]:
+        assert msg in visits(**kw)["error"]
+
+
+# ------------------------------------------------------------------ zero-inflated and hurdle models
+def arrests(**kw):
+    spec = dict(o.BY_ID["zero_count"]["example"]["spec"]); spec.update(kw)
+    return o.run("zero_count", open(os.path.join(ME, "arrests.csv")).read(), spec)
+
+
+def test_zip_matches_statsmodels_at_the_same_optimum():
+    from statsmodels.discrete.count_model import ZeroInflatedPoisson
+    d = pd.read_csv(os.path.join(ME, "arrests.csv")); xs = o.BY_ID["zero_count"]["example"]["spec"]["x"]
+    X = sm.add_constant(d[xs])
+    r = arrests(model="zip")
+    sm_fit = ZeroInflatedPoisson(d.narr86, X, exog_infl=X, inflation="logit").fit(method="bfgs", maxiter=2000, disp=0)
+    assert summ(r, "Log-likelihood") >= sm_fit.llf - 1e-3                      # engine reaches at least the statsmodels optimum
+    assert summ(r, "Log-likelihood") == pytest.approx(sm_fit.llf, abs=0.05)
+
+
+def test_zinb_and_hurdle_likelihoods_by_hand():
+    from scipy import optimize
+    d = pd.read_csv(os.path.join(ME, "arrests.csv")); xs = o.BY_ID["zero_count"]["example"]["spec"]["x"]
+    X = sm.add_constant(d[xs]).values; y = d.narr86.values.astype(float)
+    # Poisson hurdle: the logit part and the zero-truncated Poisson part separate, so the log-likelihood is the sum of the two maximised parts
+    lg = sm.Logit((y > 0).astype(float), X).fit(disp=0)
+    pos = y > 0
+
+    def nll(b):
+        mu = np.exp(X[pos] @ b); return -(stats.poisson.logpmf(y[pos], mu) - np.log1p(-np.exp(-mu))).sum()
+    t = optimize.minimize(nll, np.zeros(X.shape[1]), method="BFGS", options={"gtol": 1e-8})
+    assert summ(arrests(model="hurdle_poisson"), "Log-likelihood") == pytest.approx(lg.llf - t.fun, abs=1e-2)
+    r = arrests(model="zinb")
+    assert row(r, "Count equation", "alpha (dispersion)")[1] > 0 and summ(r, "Log-likelihood") > summ(arrests(model="zip"), "Log-likelihood")
+
+
+def test_zero_inflation_recovered_in_simulation():
+    rng = np.random.default_rng(11); n = 6000
+    x = rng.normal(size=n); w = rng.normal(size=n)
+    struct = rng.random(n) < 1 / (1 + np.exp(-(-0.5 + 1.0 * w)))
+    y = np.where(struct, 0, rng.poisson(np.exp(0.3 + 0.5 * x)))
+    dd = pd.DataFrame(dict(y=y, x=x, w=w))
+    r = o.run("zero_count", dd.to_csv(index=False), dict(y="y", x=["x"], z=["w"], model="zip"))
+    assert row(r, "Count equation", "x")[1] == pytest.approx(0.5, abs=0.06)
+    assert row(r, "Zero (inflation)", "w")[1] == pytest.approx(1.0, abs=0.2)
+    assert next(t for t in table(r, "Specification")["rows"] if t[0].startswith("Vuong"))[1] > 1.96
+
+
+def test_zero_count_errors():
+    for kw, msg in [(dict(y="pcnv", x=["black"], z=["hispan"]), "whole numbers"), (dict(model="zz"), "must be one of"), (dict(x=[]), "at least one")]:
+        assert msg in arrests(**kw)["error"]
+
+
+# ------------------------------------------------------------------ generalised linear models
+def pension(**kw):
+    spec = dict(o.BY_ID["glm"]["example"]["spec"]); spec.update(kw)
+    return o.run("glm", open(os.path.join(ME, "pension_participation.csv")).read(), spec)
+
+
+def test_fractional_logit_matches_hand_written_quasi_likelihood():
+    d = pd.read_csv(os.path.join(ME, "pension_participation.csv")); xs = ["mrate", "ltotemp", "age", "sole"]
+    X = sm.add_constant(d[xs]).values; y = d.prate.values; b = np.zeros(5)
+    for _ in range(100):                                    # Newton-Raphson on the Bernoulli quasi-likelihood
+        p = 1 / (1 + np.exp(-X @ b)); b = b + np.linalg.solve(X.T @ (X * (p * (1 - p))[:, None]), X.T @ (y - p))
+    p = 1 / (1 + np.exp(-X @ b)); A = np.linalg.inv(X.T @ (X * (p * (1 - p))[:, None])); B = X.T @ (X * ((y - p) ** 2)[:, None]); V = A @ B @ A
+    r = pension()
+    for i, nm in enumerate(["const"] + xs):
+        assert row(r, "Coefficient", nm)[1] == pytest.approx(b[i], abs=1e-5)
+        assert row(r, "Coefficient", nm)[2] == pytest.approx(np.sqrt(V[i, i]), rel=1e-4)
+    assert row(r, "Average marginal", "mrate")[1] == pytest.approx((b[1] * p * (1 - p)).mean(), rel=1e-4)
+
+
+def test_glm_probit_cloglog_and_gamma_recover_parameters():
+    rng = np.random.default_rng(2); n = 4000; x = rng.normal(size=n)
+    mu = np.exp(1.0 + 0.3 * x); yg = rng.gamma(shape=4.0, scale=mu / 4.0)
+    r = o.run("glm", pd.DataFrame(dict(y=yg, x=x)).to_csv(index=False), dict(y="y", x=["x"], family="gamma", link="log"))
+    assert row(r, "Coefficient", "x")[1] == pytest.approx(0.3, abs=0.03)
+    p = 1 / (1 + np.exp(-(0.2 + 0.7 * x))); yb = np.clip(p + rng.normal(0, 0.05, n), 0, 1)
+    r = o.run("glm", pd.DataFrame(dict(y=yb, x=x)).to_csv(index=False), dict(y="y", x=["x"], family="binomial", link="logit"))
+    assert row(r, "Coefficient", "x")[1] == pytest.approx(0.7, abs=0.1)
+
+
+def test_glm_errors():
+    for kw, msg in [(dict(y="mrate", x=["age"], family="binomial"), "between 0 and 1"), (dict(family="gamma", link="logit"), "supports the links"),
+                    (dict(family="poisson", y="sole", x=["age"], link="log"), None), (dict(x=[]), "at least one")]:
+        r = pension(**kw)
+        if msg: assert msg in r["error"]
+        else: assert "error" not in r
+
+
+# ------------------------------------------------------------------ systems of equations
+def sleepwork(**kw):
+    spec = dict(o.BY_ID["systems"]["example"]["spec"]); spec.update(kw)
+    return o.run("systems", open(os.path.join(ME, "sleep_work.csv")).read(), spec)
+
+
+def test_sur_matches_hand_written_feasible_gls():
+    d = pd.read_csv(os.path.join(ME, "sleep_work.csv")); n = len(d)
+    X1 = sm.add_constant(d[["educ", "age", "male", "yngkid", "gdhlth"]]).values; X2 = sm.add_constant(d[["educ", "age", "male", "union", "south"]]).values
+    y1, y2 = d.sleep.values.astype(float), d.totwrk.values.astype(float)
+    e = np.column_stack([y1 - X1 @ np.linalg.lstsq(X1, y1, rcond=None)[0], y2 - X2 @ np.linalg.lstsq(X2, y2, rcond=None)[0]]); S = e.T @ e / n
+    Si = np.linalg.inv(S); k = X1.shape[1]
+    A = np.block([[Si[0, 0] * X1.T @ X1, Si[0, 1] * X1.T @ X2], [Si[1, 0] * X2.T @ X1, Si[1, 1] * X2.T @ X2]])
+    rhs = np.r_[Si[0, 0] * X1.T @ y1 + Si[0, 1] * X1.T @ y2, Si[1, 0] * X2.T @ y1 + Si[1, 1] * X2.T @ y2]
+    b = np.linalg.solve(A, rhs); se = np.sqrt(np.diag(np.linalg.inv(A)))
+    r = sleepwork()
+    for i, nm in enumerate(["const", "educ", "age", "male", "yngkid", "gdhlth"]):
+        assert row(r, "Equation 1", nm)[1] == pytest.approx(b[i], abs=1e-4) and row(r, "Equation 1", nm)[2] == pytest.approx(se[i], abs=1e-4)
+    assert row(r, "Equation 2", "south")[1] == pytest.approx(b[k + 5], abs=1e-4)
+
+
+def test_sur_equals_ols_with_identical_regressors():
+    same = ["educ", "age", "male"]
+    r = sleepwork(x1=same, x2=same); o_ = sleepwork(x1=same, x2=same, estimator="ols")
+    for nm in ["const", "educ", "age", "male"]:
+        assert row(r, "Equation 1", nm)[1] == pytest.approx(row(o_, "Equation 1", nm)[1], abs=1e-6)
+
+
+def test_3sls_first_equation_matches_independent_2sls_and_recovers_simulation():
+    rng = np.random.default_rng(8); n = 5000
+    z1, z2, x = rng.normal(size=(3, n)); u = rng.multivariate_normal([0, 0], [[1, .6], [.6, 1]], n)
+    # system: y1 = 1 + 0.5 y2 + x + u1 ; y2 = 2 - 0.3 y1 + z1 + z2 + u2   -> solve the simultaneous system
+    a, b_ = 0.5, -0.3; c1 = 1 + x + u[:, 0]; c2 = 2 + z1 + z2 + u[:, 1]
+    y1 = (c1 + a * c2) / (1 - a * b_); y2 = c2 + b_ * y1
+    dd = pd.DataFrame(dict(y1=y1, y2=y2, x=x, z1=z1, z2=z2))
+    r = o.run("systems", dd.to_csv(index=False), dict(estimator="3sls", y1="y1", x1=["y2", "x"], y2="y2", x2=["y1", "z1", "z2"], endog=["y1", "y2"]))
+    assert row(r, "Equation 1", "y2")[1] == pytest.approx(0.5, abs=0.06) and row(r, "Equation 2", "y1")[1] == pytest.approx(-0.3, abs=0.06)
+    Z = sm.add_constant(dd[["x", "z1", "z2"]]).values; X = np.column_stack([np.ones(n), y2, x]); Xh = Z @ np.linalg.lstsq(Z, X, rcond=None)[0]
+    b2 = np.linalg.solve(Xh.T @ X, Xh.T @ y1)                    # 2SLS by hand
+    o2 = o.run("systems", dd.to_csv(index=False), dict(estimator="3sls", y1="y1", x1=["y2", "x"], y2="y2", x2=["y1", "z1", "z2"], endog=["y1", "y2"]))
+    assert abs(row(o2, "Equation 1", "y2")[1] - b2[1]) < 0.05    # 3SLS and 2SLS agree up to efficiency differences
+
+
+def test_systems_errors():
+    for kw, msg in [(dict(y2="", x2=[]), "at least two equations"), (dict(y2="sleep"), "own outcome"), (dict(estimator="3sls"), "endogenous regressors")]:
+        assert msg in sleepwork(**kw)["error"]
+    assert "under-identified" in o.run("systems", open(os.path.join(ME, "openness.csv")).read(),
+        dict(estimator="3sls", y1="inf", x1=["open", "lpcinc"], y2="open", x2=["inf", "lpcinc", "lland"], endog=["open", "inf"]))["error"]
+
+
+# ------------------------------------------------------------------ panel logit and probit
+def wage_union(**kw):
+    spec = dict(o.BY_ID["paneldiscrete"]["example"]["spec"]); spec.update(kw)
+    return o.run("paneldiscrete", open(os.path.join(ME, "wagepan_union.csv")).read(), spec)
+
+
+def test_fixed_effects_logit_matches_statsmodels_conditional_logit():
+    from statsmodels.discrete.conditional_models import ConditionalLogit
+    d = pd.read_csv(os.path.join(ME, "wagepan_union.csv")); xs = ["married", "exper", "expersq"]
+    m = ConditionalLogit(d.union, d[xs], groups=d.nr).fit(disp=0)
+    r = wage_union(estimator="fe")
+    for c in xs:
+        assert row(r, "Fixed-effects", c)[1] == pytest.approx(m.params[c], abs=2e-4)
+        assert row(r, "Fixed-effects", c)[2] == pytest.approx(m.bse[c], rel=2e-3)
+
+
+def test_pooled_matches_statsmodels_clustered_and_re_likelihood_by_integration():
+    from scipy import integrate
+    d = pd.read_csv(os.path.join(ME, "wagepan_union.csv")); xs = ["married", "educ", "black", "hisp", "exper", "expersq"]
+    X = sm.add_constant(d[xs]); m = sm.Logit(d.union, X).fit(disp=0, cov_type="cluster", cov_kwds={"groups": d.nr})
+    r = wage_union(estimator="pooled")
+    assert row(r, "Pooled", "black")[1] == pytest.approx(m.params["black"], abs=1e-5) and row(r, "Pooled", "black")[2] == pytest.approx(m.bse["black"], rel=1e-4)
+    # random-effects log-likelihood at the engine's estimates, integrating the unit effect with adaptive quadrature instead of Gauss-Hermite
+    r = wage_union(estimator="re")
+    b = np.array([row(r, "Random-effects", c)[1] for c in ["const"] + xs]); sg = row(r, "Random-effects", "sigma_u")[1]
+    Xn = X.values; ll = 0.0
+    for g, idx in list(d.groupby("nr").indices.items())[:60]:
+        eta = Xn[idx] @ b; yy = d.union.values[idx]
+        f = lambda u: np.prod(np.where(yy == 1, 1 / (1 + np.exp(-(eta + u))), 1 / (1 + np.exp(eta + u)))) * stats.norm.pdf(u, scale=sg)
+        ll += np.log(integrate.quad(f, -12 * sg, 12 * sg)[0])
+    from oes_engine import micro
+    q = 2 * d.union.values - 1; gi = pd.factorize(d.nr)[0]; first = np.isin(gi, np.arange(60))
+    nll = micro._pb_re_nll(np.r_[b, np.log(sg)], Xn[first], q[first], gi[first], 60, "logit")
+    assert -nll == pytest.approx(ll, abs=1e-4)
+
+
+def test_fe_logit_is_robust_to_correlated_unit_effects_in_simulation():
+    rng = np.random.default_rng(6); N, T = 800, 6
+    a = rng.normal(size=N); x = 0.8 * a[:, None] + rng.normal(size=(N, T))            # regressor correlated with the unit effect
+    yy = (0.7 * x + a[:, None] + rng.logistic(size=(N, T)) > 0).astype(int)
+    dd = pd.DataFrame(dict(y=yy.ravel(), x=x.ravel(), id=np.repeat(np.arange(N), T)))
+    fe = o.run("paneldiscrete", dd.to_csv(index=False), dict(y="y", x=["x"], id="id", estimator="fe"))
+    pl = o.run("paneldiscrete", dd.to_csv(index=False), dict(y="y", x=["x"], id="id", estimator="pooled"))
+    assert row(fe, "Fixed-effects", "x")[1] == pytest.approx(0.7, abs=0.1)
+    assert row(pl, "Pooled", "x")[1] > 0.9                                              # pooled and RE-type estimators are biased upward
+
+
+def test_panel_binary_errors():
+    for kw, msg in [(dict(y="lwage", x=["educ"]), "only 0 and 1"), (dict(estimator="fe", link="probit"), "logit link only"), (dict(x=[]), "at least one")]:
+        assert msg in wage_union(**kw)["error"]
+
+
+# ------------------------------------------------------------------ IV probit
+def ivp(**kw):
+    spec = dict(o.BY_ID["ivprobit"]["example"]["spec"]); spec.update(kw)
+    return o.run("ivprobit", open(os.path.join(ME, "mroz_iv.csv")).read(), spec)
+
+
+def test_control_function_point_estimates_match_hand_two_step():
+    d = pd.read_csv(os.path.join(ME, "mroz_iv.csv")); xs = ["exper", "expersq", "age", "kidslt6", "kidsge6", "nwifeinc"]
+    Z = sm.add_constant(d[xs + ["motheduc", "fatheduc"]]); v = sm.OLS(d.educ, Z).fit().resid
+    W = sm.add_constant(d[xs].assign(educ=d.educ, v=v)); m = sm.Probit(d.inlf, W).fit(disp=0)
+    r = ivp()
+    for c in xs + ["educ"]:
+        assert row(r, "Second stage", c)[1] == pytest.approx(m.params[c], abs=1e-5)
+    # the corrected standard error differs from the naive second-stage one (it accounts for the estimated residual)
+    assert abs(row(r, "Second stage", "educ")[2] - m.bse["educ"]) > 1e-4
+
+
+def test_mle_and_control_function_agree_and_test_exogeneity_consistently():
+    a, b = ivp(), ivp(estimator="mle")
+    assert row(a, "Second stage", "educ")[1] == pytest.approx(row(b, "Structural", "educ")[1], abs=0.01)
+    pa = next(t for t in table(a, "Specification")["rows"] if t[0].startswith("Exogeneity"))[2]
+    pb = next(t for t in table(b, "Specification")["rows"] if t[0].startswith("Wald"))[2]
+    assert abs(pa - pb) < 0.05
+
+
+def test_iv_probit_removes_endogeneity_bias_in_simulation():
+    rng = np.random.default_rng(4); n = 8000
+    z1, z2, x = rng.normal(size=(3, n)); u = rng.normal(size=n); v = 0.8 * u + 0.6 * rng.normal(size=n)
+    e = 0.7 * z1 + 0.5 * z2 + 0.3 * x + v; yy = (0.5 * e + 0.4 * x + u > 0).astype(int)
+    dd = pd.DataFrame(dict(y=yy, e=e, x=x, z1=z1, z2=z2)).to_csv(index=False)
+    r = o.run("ivprobit", dd, dict(y="y", x=["x"], endog=["e"], inst=["z1", "z2"], estimator="mle"))
+    assert row(r, "Structural", "e")[1] == pytest.approx(0.5, abs=0.08) and row(r, "Structural", "rho (corr. of the two errors)")[1] == pytest.approx(0.8, abs=0.1)
+    plain = sm.Probit(yy, sm.add_constant(pd.DataFrame(dict(x=x, e=e)))).fit(disp=0)
+    assert plain.params["e"] > 0.65                                       # ordinary probit is biased upward
+    cf = o.run("ivprobit", dd, dict(y="y", x=["x"], endog=["e"], inst=["z1", "z2"]))
+    assert next(t for t in table(cf, "Specification")["rows"] if t[0].startswith("Exogeneity"))[2] < 0.001
+
+
+def test_iv_probit_errors():
+    for kw, msg in [(dict(inst=["motheduc"], endog=["educ", "age"], x=["exper"]), "under-identified"), (dict(endog=[]), "endogenous"), (dict(inst=[]), "instrument"),
+                    (dict(y="educ", endog=["age"], x=["exper"]), "only 0 and 1"), (dict(endog=["educ", "age"], x=["exper"], estimator="mle"), "one endogenous")]:
+        assert msg in ivp(**kw)["error"]
+
+
+# ------------------------------------------------------------------ conditional and mixed logit
+def travel(**kw):
+    spec = dict(o.BY_ID["choice"]["example"]["spec"]); spec.update(kw)
+    return o.run("choice", open(os.path.join(ME, "travel_mode.csv")).read(), spec)
+
+
+def test_conditional_logit_matches_greene_travel_mode_results():
+    # Greene, Econometric Analysis, travel-mode example (210 travellers, 4 modes): the three main coefficients and the log-likelihood
+    r = travel()
+    for nm, b, se in [("ttme", -0.10365, 0.01094), ("invc", -0.08493, 0.01938), ("invt", -0.01333, 0.00252)]:
+        x = row(r, "Conditional logit", nm); assert x[1] == pytest.approx(b, abs=5e-4) and x[2] == pytest.approx(se, abs=5e-4)
+    assert summ(r, "Log-likelihood") == pytest.approx(-184.5067, abs=2e-3)
+
+
+def test_conditional_logit_matches_independent_likelihood():
+    from scipy import optimize
+    d = pd.read_csv(os.path.join(ME, "travel_mode.csv")); alts = ["air", "bus", "car", "train"]
+    XA = d[["ttme", "invc", "invt", "gc"]].values.reshape(210, 4, 4)   # rows are ordered air, train, bus, car within each id
+    order = [0, 2, 3, 1]; XA = XA[:, order, :]; ch = d.choice.values.reshape(210, 4)[:, order].argmax(1)
+
+    def nll(t):                                                        # constants for air, bus, train (car is the base)
+        U = XA @ t[:4]; U[:, 0] += t[4]; U[:, 1] += t[5]; U[:, 3] += t[6]
+        return -(U[np.arange(210), ch] - np.log(np.exp(U).sum(1))).sum()
+    r0 = optimize.minimize(nll, np.zeros(7), method="BFGS", options={"gtol": 1e-9}); r = travel()
+    assert summ(r, "Log-likelihood") == pytest.approx(-r0.fun, abs=1e-4)
+    for i, nm in enumerate(["ttme", "invc", "invt", "gc", "const: air", "const: bus", "const: train"]):
+        assert row(r, "Conditional logit", nm)[1] == pytest.approx(r0.x[i], abs=1e-3)
+
+
+def test_choice_wtp_ratio_and_probability_sums():
+    r = travel(); b = {nm: row(r, "Conditional logit", nm)[1] for nm in ["ttme", "invc", "invt"]}
+    ratio = next(x for x in table(r, "Marginal rates")["rows"] if x[0] == "invt / invc")[1]
+    assert ratio == pytest.approx(b["invt"] / b["invc"], abs=1e-5)
+    pred = r["charts"][0]["series"][1]["y"]; assert sum(pred) == pytest.approx(1.0, abs=1e-4)
+
+
+def test_mixed_logit_recovers_random_coefficient_in_simulation():
+    rng = np.random.default_rng(12); N, J = 900, 3
+    price = rng.uniform(1, 3, size=(N, J)); qual = rng.normal(size=(N, J)); bq = 1.0 + 0.8 * rng.normal(size=N)
+    U = -1.0 * price + bq[:, None] * qual + rng.gumbel(size=(N, J)); ch = U.argmax(1)
+    rows_ = [dict(id=i, alt=f"a{j}", y=int(ch[i] == j), price=price[i, j], qual=qual[i, j]) for i in range(N) for j in range(J)]
+    r = o.run("choice", pd.DataFrame(rows_).to_csv(index=False), dict(y="y", id="id", alt="alt", xalt=["price", "qual"], model="mixed", random=["qual"], draws=150, asc="yes"))
+    assert row(r, "Mixed logit", "qual")[1] == pytest.approx(1.0, abs=0.2) and row(r, "Mixed logit", "sd(qual)")[1] == pytest.approx(0.8, abs=0.25)
+
+
+def test_iia_test_flags_a_violation_and_errors_are_reported():
+    # duplicate an alternative (a "blue bus / red bus" structure): IIA fails
+    rng = np.random.default_rng(1); N = 1500; cost = rng.uniform(1, 3, size=(N, 2)); U = -1.0 * cost + rng.gumbel(size=(N, 2))
+    ch = U.argmax(1); 
+    rows_ = []
+    for i in range(N):
+        # alternative 2 is split into two perfect substitutes with a shared taste shock
+        shock = rng.normal(scale=1.5); u3 = U[i, 1] + shock
+        full = [U[i, 0], U[i, 1] + shock, u3 + rng.gumbel(scale=0.2)]
+        c = int(np.argmax(full))
+        for j in range(3): rows_.append(dict(id=i, alt=f"a{j}", y=int(c == j), cost=cost[i, min(j, 1)]))
+    r = o.run("choice", pd.DataFrame(rows_).to_csv(index=False), dict(y="y", id="id", alt="alt", xalt=["cost"], model="clogit", asc="yes", base="a0"))
+    assert "error" not in r
+    for kw, msg in [(dict(y="hinc", xalt=["ttme"]), "only 0 and 1"), (dict(base="zzz"), "not among"), (dict(xalt=[], xcase=[]), "at least one"), (dict(model="mixed", random=[]), "random coefficient")]:
+        assert msg in travel(**kw)["error"]

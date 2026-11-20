@@ -49,7 +49,18 @@ HUBS = {
         lead="Microeconometric models are for outcomes that are not continuous and unbounded: a yes/no decision, a count, a choice among options, an amount that is censored at zero. "
              "Find the type of outcome you have in the table, then follow the guide: each one takes a real dataset through the model, marginal effects, diagnostics, "
              "robustness checks and the text for the paper.",
-        table=[("A yes/no outcome (passed, defaulted, employed, adopted)", "Logit and probit", "logit-probit")],
+        table=[("A yes/no outcome (passed, defaulted, employed, adopted)", "Logit and probit", "logit-probit"),
+               ("An outcome with ordered categories (low, medium, high; a rating from 1 to 5)", "Ordered logit and probit", "ordered-logit-probit"),
+               ("A choice among three or more unordered alternatives (party, transport mode, occupation)", "Multinomial logit", "multinomial-logit"),
+               ("An outcome that piles up at zero or at another limit (hours, spending, number of events)", "Tobit", "tobit"),
+               ("An outcome observed only for a self-selected part of the sample (wages of workers)", "Heckman selection", "heckman"),
+               ("A count outcome: doctor visits, patents, accidents, arrests", "Poisson and negative binomial", "count-models"),
+               ("A count with many zeros that a Poisson or negative binomial cannot reproduce", "Zero-inflated and hurdle", "zero-inflated-hurdle"),
+               ("A proportion between 0 and 1, or a positive skewed amount, where OLS predicts impossible values", "GLM and fractional response", "glm-fractional"),
+               ("Several outcomes with correlated errors, or outcomes that determine each other (labor supply and wages)", "SUR and 3SLS", "systems-sur-3sls"),
+               ("A yes/no outcome for the same units over time (union membership, employment, default)", "Panel logit and probit", "panel-logit-probit"),
+               ("A yes/no outcome with a regressor that is correlated with the error and a valid instrument", "IV probit", "iv-probit"),
+               ("People choosing one option among several with prices and attributes (travel mode, brand, site)", "Conditional and mixed logit", "conditional-mixed-logit")],
         other=("Your outcome is a continuous variable observed over time or across units?", "Use the <a href=\"../time-series-guide/index.html\">Time-Series Guide</a> or the <a href=\"../panel-data-guide/index.html\">Panel-Data Guide</a>.")),
 }
 

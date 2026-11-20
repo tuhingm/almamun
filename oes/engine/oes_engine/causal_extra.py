@@ -5,7 +5,7 @@ import pandas as pd
 from scipy import stats
 from scipy.optimize import linprog, minimize
 
-from .core import (OESError, as_list, chart, check_columns, distinct, f, float_option, int_option, need, numeric, result, stat, table, time_order)
+from .core import (test_row, tests_table, OESError, as_list, chart, check_columns, distinct, f, float_option, int_option, need, numeric, result, stat, table, time_order)
 
 
 def _panel(df, spec, y, extra=()):
@@ -320,3 +320,365 @@ def bartik(df, spec):
     notes = ["Shift-share instrument: initial industry shares times national industry shocks. Identification rests on share exogeneity (Goldsmith-Pinkham, Sorkin and Swift 2020) or shock exogeneity (Borusyak, Hull and Jaravel 2022); the diagnostics differ.",
              "Report which assumption you rely on and use the shock-level standard error."]
     return result("bartik", f"Shift-share IV: {y} on {x}", L, summary, tabs, ch, notes)
+
+
+# ------------------------------------------------------------------------------------------------------------------
+# Weak-instrument-robust inference: Anderson-Rubin, LM and conditional likelihood ratio confidence sets, LIML
+# ------------------------------------------------------------------------------------------------------------------
+def _partial(M, C):
+    """Residuals of the columns of M after regressing on C (which includes the constant)."""
+    return M - C @ np.linalg.lstsq(C, M, rcond=None)[0]
+
+
+def _sqrtm_inv(A):
+    w, V = np.linalg.eigh(A); return V @ np.diag(1 / np.sqrt(w)) @ V.T
+
+
+def _wiv_parts(y, x, Z, b0, Om, ZZi_half, Pi_hat_num):
+    """S and T vectors of Andrews, Moreira and Stock (2006) for the null beta = b0."""
+    bv = np.array([1.0, -b0]); av = np.array([b0, 1.0]); Omi = np.linalg.inv(Om)
+    S = Pi_hat_num @ bv / np.sqrt(bv @ Om @ bv); T = Pi_hat_num @ Omi @ av / np.sqrt(av @ Omi @ av)
+    return S, T
+
+
+def _clr_p(S, T, Sd):
+    """Conditional likelihood ratio p-value of Moreira (2003): the null distribution of the statistic given T, simulated with common draws Sd of S ~ N(0, I)."""
+    qT = float(T @ T); qS = float(S @ S); qST = float(S @ T)
+    lr = lambda QS, QST: 0.5 * (QS - qT + np.sqrt(np.maximum((QS + qT) ** 2 - 4 * (QS * qT - QST ** 2), 0)))
+    obs = lr(qS, qST); QS = (Sd ** 2).sum(1); QST = Sd @ T
+    return float(np.mean(lr(QS, QST) >= obs))
+
+
+def weakiv(df, spec):
+    y = need(spec, "outcome", "outcome"); x = need(spec, "treat", "endogenous regressor"); zs = as_list(need(spec, "instruments", "instrument(s)")); cs = as_list(spec.get("controls") or [])
+    distinct([y, x], zs, cs)
+    miss = [c for c in [y, x] + zs + cs if c not in df.columns]
+    if miss:
+        raise OESError("Column(s) not found in the data: " + ", ".join(miss))
+    d = numeric(df, [y, x] + zs + cs); n = len(d); k = len(zs)
+    level = float(spec.get("level") or 0.95)
+    if not 0.5 <= level < 1:
+        raise OESError("The confidence level must be between 0.5 and 1.")
+    reps = int_option(spec, "sims", 1000, 200, 20000, "Simulation replications"); seed = int_option(spec, "seed", 0, 0, 10 ** 6, "Random seed")
+    if n < 3 * (k + len(cs) + 2):
+        raise OESError("Too few observations for this number of instruments and controls.")
+    one = np.ones((n, 1)); C = np.column_stack([one] + ([d[cs].to_numpy(float)] if cs else []))
+    Y = _partial(d[[y, x]].to_numpy(float), C); Z = _partial(d[zs].to_numpy(float), C)
+    if np.linalg.matrix_rank(Z) < k:
+        raise OESError("The instruments are collinear (after partialling out the controls).")
+    dof = n - C.shape[1] - k
+    ZZ = Z.T @ Z; Pi = np.linalg.solve(ZZ, Z.T @ Y)                       # reduced form (k x 2)
+    E = Y - Z @ Pi; Om = E.T @ E / dof
+    ZZh = _sqrtm_inv(ZZ); Num = ZZh @ Z.T @ Y                          # (Z'Z)^{-1/2} Z'Y, k x 2, for the S and T vectors
+    # 2SLS and LIML
+    PZ = Z @ np.linalg.solve(ZZ, Z.T); xh = PZ @ Y[:, 1]
+    b2 = float(xh @ Y[:, 0] / (xh @ Y[:, 1])); u2 = Y[:, 0] - b2 * Y[:, 1]; s2 = float(u2 @ u2) / (n - C.shape[1] - 1)
+    se2 = np.sqrt(s2 / float(xh @ Y[:, 1]))
+    Wm = np.column_stack([Y[:, 0], Y[:, 1]]); A = Wm.T @ Wm; B = Wm.T @ (Wm - PZ @ Wm)
+    kappa = float(np.min(np.real(np.linalg.eigvals(np.linalg.solve(B, A)))))                                    # LIML k-class
+    Mk = np.eye(n) - kappa * (np.eye(n) - PZ); bl = float(Y[:, 1] @ Mk @ Y[:, 0] / (Y[:, 1] @ Mk @ Y[:, 1])); ul = Y[:, 0] - bl * Y[:, 1]
+    sel = float(ul @ ul) / (n - C.shape[1] - 1); sel_se = float(np.sqrt(sel / (Y[:, 1] @ Mk @ Y[:, 1])))
+    # first stage
+    fs = Y[:, 1] - Z @ Pi[:, 1]; Ffs = float((Pi[:, 1] @ ZZ @ Pi[:, 1]) / k / (float(fs @ fs) / dof)); pF = float(stats.f.sf(Ffs, k, dof))
+    # grid inversion for AR, LM and CLR
+    se0 = se2 if np.isfinite(se2) and se2 > 0 else 1.0
+    half = max(40 * se0, 5 * abs(b2), 1.0); lo, hi = b2 - half, b2 + half; grid = np.linspace(lo, hi, 1201)
+    rng = np.random.default_rng(seed); Sd = rng.standard_normal((reps, k)); ar = np.empty(len(grid)); lm = np.empty(len(grid)); clr = np.empty(len(grid))
+    for i, b0 in enumerate(grid):
+        S, T = _wiv_parts(None, None, Z, b0, Om, ZZh, Num)
+        ar[i] = stats.chi2.sf(float(S @ S), k)
+        lmv = float((S @ T) ** 2 / (T @ T)); lm[i] = stats.chi2.sf(lmv, 1)
+        clr[i] = _clr_p(S, T, Sd) if k > 1 else lm[i]
+    a = 1 - level
+    def cset(p):
+        ok = p > a
+        if ok.all(): return "unbounded (the whole grid)"
+        if not ok.any(): return "empty"
+        idx = np.where(ok)[0]; segs = np.split(idx, np.where(np.diff(idx) > 1)[0] + 1)
+        out = []
+        for sg in segs:
+            l = "-inf" if sg[0] == 0 else f"{grid[sg[0]]:.3f}"; h = "inf" if sg[-1] == len(grid) - 1 else f"{grid[sg[-1]]:.3f}"; out.append(f"[{l}, {h}]")
+        return " U ".join(out)
+    z = stats.norm.ppf(0.5 + level / 2)
+    est = table(f"Effect of {x} on {y}: point estimates and weak-instrument-robust confidence sets", ["Method", "Estimate", "Std. err.", f"{int(round(level * 100))}% confidence set"],
+                [["2SLS (Wald interval)", f(b2, 4), f(se2, 4), f"[{b2 - z * se2:.3f}, {b2 + z * se2:.3f}]"], ["LIML (Wald interval)", f(bl, 4), f(sel_se, 4), f"[{bl - z * sel_se:.3f}, {bl + z * sel_se:.3f}]"],
+                 ["Anderson-Rubin", "", "", cset(ar)], ["Lagrange multiplier (Kleibergen)", "", "", cset(lm)], ["Conditional likelihood ratio (Moreira)" if k > 1 else "Conditional likelihood ratio (= LM with one instrument)", "", "", cset(clr)]],
+                "Homoskedastic errors. The AR, LM and CLR sets are valid whatever the strength of the instruments; the Wald intervals are not. The grid is wide (at least 40 standard errors either side of 2SLS); a set that reaches its edge is reported with an infinite end.")
+    fst = table("First stage", ["Statistic", "Value"], [["First-stage F (joint significance of the instruments)", f(Ffs, 2)], ["p-value", f(pF, 4)], ["Number of instruments", k], ["Partial R-squared", f(float((Pi[:, 1] @ ZZ @ Pi[:, 1]) / float(Y[:, 1] @ Y[:, 1])), 4)],
+                                                      ["Rule of thumb", "F < 10: weak (Staiger-Stock); AR, LM or CLR sets should be reported"]])
+    S0 = _wiv_parts(None, None, Z, 0.0, Om, ZZh, Num)[0]; AR0 = float(S0 @ S0)
+    rows_t = [test_row("Anderson-Rubin test of beta = 0", AR0, float(stats.chi2.sf(AR0, k)), f"chi-squared({k}); valid with weak instruments")]
+    if k > 1:
+        from scipy.optimize import minimize_scalar
+        mn = minimize_scalar(lambda b0: float((lambda S: S @ S)(_wiv_parts(None, None, Z, b0, Om, ZZh, Num)[0])), bounds=(grid[0], grid[-1]), method="bounded", options=dict(xatol=1e-9))
+        arm = min(float(mn.fun), float(np.min([stats.chi2.isf(v, k) if v > 0 else np.inf for v in ar])))
+        rows_t.append(test_row(f"Overidentification (minimum of the AR statistic, {k - 1} df)", arm, float(stats.chi2.sf(arm, k - 1)), "H0: all instruments are valid; a rejection makes the AR set narrow or empty"))
+    tests = tests_table(rows_t, title="Tests")
+    ch = [chart("p-value of the test of each value of the coefficient", list(grid), [("Anderson-Rubin", ar), ("LM", lm)] + ([("CLR", clr)] if k > 1 else []), f"Value of the coefficient on {x}", "p-value", kind="line")]
+    notes = ["The sets are for homoskedastic errors; with heteroskedasticity use a robust version (for example in Stata, weakiv or ivreg2 with robust options).",
+             "With more instruments than endogenous regressors, the AR test also has power against invalid instruments, so a rejection does not by itself show an effect."]
+    return result("weakiv", f"Weak-instrument-robust inference: effect of {x} on {y}", n, [stat("Observations", n), stat("2SLS estimate", b2, 4), stat("LIML estimate", bl, 4), stat("First-stage F", Ffs, 2), stat("Instruments", k)], [est, fst, tests], ch, notes)
+
+
+# ------------------------------------------------------------------------------------------------------------------
+# Randomised experiments: balance, Neyman and regression-adjusted effects, Lin (2013) estimator, randomisation inference, power
+# ------------------------------------------------------------------------------------------------------------------
+def _hc2(X, y):
+    n, k = X.shape; XtXi = np.linalg.inv(X.T @ X); b = XtXi @ X.T @ y; e = y - X @ b
+    h = np.einsum("ij,jk,ik->i", X, XtXi, X); h = np.minimum(h, 1 - 1e-8)
+    V = XtXi @ (X.T * (e ** 2 / (1 - h))) @ X @ XtXi
+    return b, V, e
+
+
+def experiment(df, spec):
+    y = need(spec, "outcome", "outcome"); t = need(spec, "treat", "treatment indicator"); xs = as_list(spec.get("covariates") or []); distinct([y, t], xs)
+    miss = [c for c in [y, t] + xs if c not in df.columns]
+    if miss:
+        raise OESError("Column(s) not found in the data: " + ", ".join(miss))
+    d = numeric(df, [y, t] + xs); n = len(d)
+    if not set(np.unique(d[t])) <= {0.0, 1.0} or d[t].nunique() != 2:
+        raise OESError("The treatment must be a 0/1 indicator with both values present.")
+    draws = int_option(spec, "draws", 2000, 200, 50000, "Randomisation draws"); seed = int_option(spec, "seed", 0, 0, 10 ** 6, "Random seed")
+    T = d[t].to_numpy(float); Y = d[y].to_numpy(float); n1 = int(T.sum()); n0 = n - n1
+    if min(n1, n0) < 5:
+        raise OESError("Each arm needs at least 5 units.")
+    # Neyman difference in means
+    ate = float(Y[T == 1].mean() - Y[T == 0].mean()); se_n = float(np.sqrt(Y[T == 1].var(ddof=1) / n1 + Y[T == 0].var(ddof=1) / n0))
+    # regression adjustment (additive) and Lin (2013) interacted estimator, HC2 standard errors
+    rows = [["Difference in means (Neyman)", f(ate, 4), f(se_n, 4), f(ate / se_n, 2), f(2 * stats.norm.sf(abs(ate / se_n)), 4)]]
+    est = {"diff": (ate, se_n)}
+    if xs:
+        Xc = d[xs].to_numpy(float); Xc = Xc - Xc.mean(0)
+        A = np.column_stack([np.ones(n), T, Xc]); b, V, _ = _hc2(A, Y); se = float(np.sqrt(V[1, 1])); est["adj"] = (float(b[1]), se)
+        rows.append(["Regression adjustment (covariates, HC2)", f(b[1], 4), f(se, 4), f(b[1] / se, 2), f(2 * stats.norm.sf(abs(b[1] / se)), 4)])
+        L = np.column_stack([np.ones(n), T, Xc, Xc * T[:, None]]); bl, Vl, _ = _hc2(L, Y); sel = float(np.sqrt(Vl[1, 1])); est["lin"] = (float(bl[1]), sel)
+        rows.append(["Lin (2013) interacted adjustment (HC2)", f(bl[1], 4), f(sel, 4), f(bl[1] / sel, 2), f(2 * stats.norm.sf(abs(bl[1] / sel)), 4)])
+    key = "lin" if xs else "diff"
+    # randomisation inference under the sharp null of no effect for any unit (complete randomisation)
+    rng = np.random.default_rng(seed)
+    if xs:
+        stat_fn = lambda tt: _lin_t(Y, tt, Xc)
+        tobs = _lin_t(Y, T, Xc)
+    else:
+        stat_fn = lambda tt: float(Y[tt == 1].mean() - Y[tt == 0].mean()); tobs = ate
+    sims = np.empty(draws)
+    for i in range(draws):
+        sims[i] = stat_fn(rng.permutation(T))
+    p_ri = float((np.sum(np.abs(sims) >= abs(tobs) - 1e-12) + 1) / (draws + 1))
+    lab = "Lin-adjusted effect" if xs else "difference in means"
+    tabs = [table(f"Average treatment effect of {t} on {y}", ["Estimator", "Estimate", "Std. err.", "t", "p-value"], rows,
+                  f"{n1} treated and {n0} control units. Neyman variance for the difference in means; HC2 (leverage-corrected) for the regression estimators, which are consistent for the average effect even if the effects differ across units.")]
+    tabs.append(tests_table([test_row(f"Randomisation inference: sharp null of no effect ({draws} draws, {lab})", tobs, p_ri, "p-value of the two-sided test against the permutation distribution")], title="Randomisation test"))
+    # balance
+    if xs:
+        brows = []
+        for v in xs:
+            x = d[v].to_numpy(float); m1, m0 = x[T == 1].mean(), x[T == 0].mean(); sd = np.sqrt((x[T == 1].var(ddof=1) + x[T == 0].var(ddof=1)) / 2)
+            tt = (m1 - m0) / np.sqrt(x[T == 1].var(ddof=1) / n1 + x[T == 0].var(ddof=1) / n0)
+            brows.append([v, f(m1, 3), f(m0, 3), f((m1 - m0) / sd if sd > 0 else 0.0, 3), f(2 * stats.norm.sf(abs(tt)), 4)])
+        Xa = np.column_stack([np.ones(n), d[xs].to_numpy(float)]); bt = np.linalg.lstsq(Xa, T, rcond=None)[0]; e = T - Xa @ bt
+        k = len(xs); rss = float(e @ e); tss = float(((T - T.mean()) ** 2).sum()); Fj = ((tss - rss) / k) / (rss / (n - k - 1)); pF = float(stats.f.sf(Fj, k, n - k - 1))
+        tabs.append(table("Covariate balance", ["Covariate", "Mean, treated", "Mean, control", "Standardised difference", "p-value"], brows, "A joint F test of the covariates predicting treatment: F = " + f"{Fj:.2f}, p = {pF:.3f}. Standardised differences above 0.1 deserve a look, though some imbalance is expected by chance."))
+    # power
+    sdp = float(np.sqrt(((n1 - 1) * Y[T == 1].var(ddof=1) + (n0 - 1) * Y[T == 0].var(ddof=1)) / (n - 2))); se_eq = sdp * np.sqrt(1 / n1 + 1 / n0)
+    mde = float((stats.norm.ppf(0.975) + stats.norm.ppf(0.8)) * se_eq)
+    tabs.append(table("Precision and power", ["Quantity", "Value"], [["Control-group mean of the outcome", f(float(Y[T == 0].mean()), 4)], ["Pooled standard deviation of the outcome", f(sdp, 4)], ["Minimum detectable effect (80% power, 5% test)", f(mde, 4)], ["MDE as a share of the control mean", f(mde / abs(Y[T == 0].mean()), 3) if Y[T == 0].mean() != 0 else "n/a"]],
+                      "Computed for the difference in means with equal variances; covariate adjustment lowers the standard error and the MDE when the covariates predict the outcome."))
+    ch = [chart("Randomisation distribution of the test statistic", list(range(len(sims))), [("Permutation draws (sorted)", np.sort(sims)), ("Observed", [tobs] * len(sims))], "Draw", "Statistic", kind="line")]
+    notes = ["The randomisation test assumes complete randomisation of the observed number of treated units; with stratified or clustered designs, permute within strata or clusters.", "Covariates must be measured before treatment; adjusting for post-treatment variables can bias the effect."]
+    return result("experiment", f"Randomised experiment: effect of {t} on {y}", n, [stat("Observations", n), stat("Treated", n1), stat("Effect", est[key][0], 4), stat("Std. err.", est[key][1], 4), stat("Randomisation p-value", p_ri, 4)], tabs, ch, notes)
+
+
+def _lin_t(Y, T, Xc):
+    n = len(Y); L = np.column_stack([np.ones(n), T, Xc, Xc * T[:, None]])
+    return float(np.linalg.lstsq(L, Y, rcond=None)[0][1])
+
+
+# ------------------------------------------------------------------------------------------------------------------
+# Causal mediation analysis (linear models, Imai-Keele-Tingley) with bootstrap intervals and sensitivity to sequential ignorability
+# ------------------------------------------------------------------------------------------------------------------
+def _med_fit(Y, T, M, X, interact):
+    n = len(Y); one = np.ones(n)
+    Am = np.column_stack([one, T, X]); gm = np.linalg.lstsq(Am, M, rcond=None)[0]; e1 = M - Am @ gm
+    Ay = np.column_stack([one, T, M] + ([T * M] if interact else []) + [X]); gy = np.linalg.lstsq(Ay, Y, rcond=None)[0]; e2 = Y - Ay @ gy
+    a = float(gm[1]); c = float(gy[1]); b = float(gy[2]); kap = float(gy[3]) if interact else 0.0
+    Mbar = {t: float(gm[0] + a * t + (X.mean(0) @ gm[2:] if X.shape[1] else 0.0)) for t in (0.0, 1.0)}
+    acme = {t: a * (b + kap * t) for t in (0.0, 1.0)}; ade = {t: c + kap * Mbar[t] for t in (0.0, 1.0)}
+    return dict(a=a, b=b, c=c, kap=kap, acme=acme, ade=ade, s1=float(np.sqrt(e1 @ e1 / (n - Am.shape[1]))), s2=float(np.sqrt(e2 @ e2 / (n - Ay.shape[1]))))
+
+
+def mediation(df, spec):
+    y = need(spec, "outcome", "outcome"); t = need(spec, "treat", "treatment (0/1)"); m = need(spec, "mediator", "mediator"); xs = as_list(spec.get("covariates") or []); distinct([y, t, m], xs)
+    miss = [c for c in [y, t, m] + xs if c not in df.columns]
+    if miss:
+        raise OESError("Column(s) not found in the data: " + ", ".join(miss))
+    d = numeric(df, [y, t, m] + xs); n = len(d)
+    if not set(np.unique(d[t])) <= {0.0, 1.0} or d[t].nunique() != 2:
+        raise OESError("The treatment must be a 0/1 indicator with both values present.")
+    interact = str(spec.get("interaction") or "no").lower() == "yes"; B = int_option(spec, "boot", 500, 99, 5000, "Bootstrap replications"); seed = int_option(spec, "seed", 0, 0, 10 ** 6, "Random seed")
+    if n < 5 * (len(xs) + 4):
+        raise OESError("Too few observations for this number of covariates.")
+    Y, T, M = d[y].to_numpy(float), d[t].to_numpy(float), d[m].to_numpy(float); X = d[xs].to_numpy(float) if xs else np.zeros((n, 0))
+    if d[m].nunique() < 2:
+        raise OESError("The mediator does not vary.")
+    fit = _med_fit(Y, T, M, X, interact)
+    rng = np.random.default_rng(seed); draws = []
+    for _ in range(B):
+        i = rng.integers(0, n, n); fb = _med_fit(Y[i], T[i], M[i], X[i], interact)
+        draws.append([fb["acme"][0.0], fb["acme"][1.0], fb["ade"][0.0], fb["ade"][1.0], fb["a"], fb["b"]])
+    D = np.array(draws)
+    def ci(v): return np.percentile(v, [2.5, 97.5])
+    acme_avg = 0.5 * (fit["acme"][0.0] + fit["acme"][1.0]); ade_avg = 0.5 * (fit["ade"][0.0] + fit["ade"][1.0]); tot = acme_avg + ade_avg
+    ca = 0.5 * (D[:, 0] + D[:, 1]); cd = 0.5 * (D[:, 2] + D[:, 3]); ct = ca + cd; prop = ca / ct
+    def prow(lab, est, v): lo, hi = ci(v); return [lab, f(est, 4), f(float(np.std(v, ddof=1)), 4), f(lo, 4), f(hi, 4), f(float(max(2 * min(np.mean(v <= 0), np.mean(v >= 0)), 1.0 / (B + 1))), 4)]
+    rows = []
+    if interact:
+        rows += [prow("ACME, control (t = 0)", fit["acme"][0.0], D[:, 0]), prow("ACME, treated (t = 1)", fit["acme"][1.0], D[:, 1]), prow("ADE, control (t = 0)", fit["ade"][0.0], D[:, 2]), prow("ADE, treated (t = 1)", fit["ade"][1.0], D[:, 3])]
+    rows += [prow("ACME (average mediation effect)", acme_avg, ca), prow("ADE (average direct effect)", ade_avg, cd), prow("Total effect", tot, ct)]
+    pm = float(np.median(prop)) if tot != 0 else float("nan"); plo, phi = np.percentile(prop, [2.5, 97.5])
+    rows.append(["Proportion mediated (ACME / total)", f(acme_avg / tot if tot != 0 else float("nan"), 4), f(float(np.std(prop, ddof=1)), 4), f(plo, 4), f(phi, 4), ""])
+    tabs = [table(f"Mediation of the effect of {t} on {y} through {m}", ["Effect", "Estimate", "Boot. s.e.", "95% CI low", "95% CI high", "Boot. p-value"], rows,
+                  f"Linear models for the mediator and the outcome{' with a treatment-by-mediator interaction' if interact else ''}; percentile intervals from {B} bootstrap resamples. The proportion mediated is unstable when the total effect is near zero.")]
+    ab = table("Path coefficients", ["Path", "Coefficient"], [[f"{t} -> {m} (a)", f(fit["a"], 4)], [f"{m} -> {y}, holding treatment fixed (b)", f(fit["b"], 4)], [f"{t} -> {y}, holding the mediator fixed (c')", f(fit["c"], 4)]] + ([["Treatment-by-mediator interaction", f(fit["kap"], 4)]] if interact else []))
+    tabs.append(ab)
+    # sensitivity to a violation of sequential ignorability: correlation rho between the errors of the mediator and outcome models
+    grid = np.round(np.linspace(-0.9, 0.9, 19), 2); b0 = fit["b"]; s1, s2 = fit["s1"], fit["s2"]; a = fit["a"]
+    bro = lambda r: b0 - r * s2 / (s1 * np.sqrt(1 - r ** 2))
+    acm = np.array([a * bro(r) for r in grid]); rstar = (b0 * s1 / s2) / np.sqrt(1 + (b0 * s1 / s2) ** 2)
+    srows = [[f(r, 2), f(float(a * bro(r)), 4)] for r in grid]
+    tabs.append(table("Sensitivity of the ACME to correlation between the mediator and outcome errors", ["rho", "ACME at that rho"], srows,
+                      f"At rho = 0 the estimate relies on sequential ignorability (no unmeasured confounder of the mediator-outcome relationship, given treatment and covariates). The ACME is zero at rho = {rstar:.3f}. The no-interaction ACME formula is used here."))
+    ch = [chart("ACME as a function of the error correlation rho", list(grid), [("ACME", acm), ("Zero", [0.0] * len(grid))], "rho", "ACME", kind="line")]
+    notes = ["The treatment must be randomised or ignorable given the covariates, and the mediator must be ignorable given treatment and covariates (sequential ignorability); the second assumption cannot be ensured by randomising the treatment.", "A mediator measured after treatment and affected by it can confound the mediator-outcome relationship through variables that are also affected by treatment; check the sensitivity table."]
+    return result("mediation", f"Causal mediation: {t} -> {m} -> {y}", n, [stat("Observations", n), stat("ACME", acme_avg, 4), stat("ADE", ade_avg, 4), stat("Total effect", tot, 4), stat("Proportion mediated", acme_avg / tot if tot != 0 else None, 3), stat("rho at which ACME = 0", float(rstar), 3)], tabs, ch, notes)
+
+
+# ------------------------------------------------------------------------------------------------------------------
+# Lee (2009) trimming bounds for sample selection and attrition, with Manski worst-case bounds for comparison
+# ------------------------------------------------------------------------------------------------------------------
+def _lee(Y, T, S):
+    """Lee bounds on the effect for the always-selected. Y may be NaN where S = 0."""
+    q1 = S[T == 1].mean(); q0 = S[T == 0].mean()
+    y1 = Y[(T == 1) & (S == 1)]; y0 = Y[(T == 0) & (S == 1)]
+    if q1 >= q0:
+        p = (q1 - q0) / q1 if q1 > 0 else 0.0; arm = 1; ys = np.sort(y1)
+    else:
+        p = (q0 - q1) / q0 if q0 > 0 else 0.0; arm = 0; ys = np.sort(y0)
+    k = int(np.floor(p * len(ys) + 1e-9)); frac = p * len(ys) - k
+    # trim exactly p of the selected in the arm with the higher selection rate (fractional observation at the edge)
+    def trimmed_mean(v, from_top):
+        v = np.sort(v)
+        if p <= 0: return float(v.mean())
+        w = np.ones(len(v));
+        idx = np.arange(len(v) - 1, -1, -1) if from_top else np.arange(len(v))
+        rem = p * len(v)
+        for j in idx:
+            take = min(1.0, rem); w[j] -= take; rem -= take
+            if rem <= 1e-12: break
+        return float(np.sum(w * v) / np.sum(w))
+    if arm == 1:
+        lo = trimmed_mean(y1, True) - y0.mean(); hi = trimmed_mean(y1, False) - y0.mean()
+    else:
+        lo = y1.mean() - trimmed_mean(y0, False); hi = y1.mean() - trimmed_mean(y0, True)
+    return lo, hi, p, arm, float(y1.mean() - y0.mean()), q1, q0
+
+
+def leebounds(df, spec):
+    y = need(spec, "outcome", "outcome"); t = need(spec, "treat", "treatment (0/1)"); s = need(spec, "selected", "selection indicator (1 if the outcome is observed)"); distinct([y, t, s])
+    miss = [c for c in [y, t, s] if c not in df.columns]
+    if miss:
+        raise OESError("Column(s) not found in the data: " + ", ".join(miss))
+    d = df[[y, t, s]].apply(pd.to_numeric, errors="coerce"); d = d.dropna(subset=[t, s]).reset_index(drop=True); n = len(d)
+    if not set(np.unique(d[t])) <= {0.0, 1.0} or d[t].nunique() != 2:
+        raise OESError("The treatment must be a 0/1 indicator with both values present.")
+    if not set(np.unique(d[s])) <= {0.0, 1.0} or d[s].nunique() != 2:
+        raise OESError("The selection indicator must be 0/1 with both values present.")
+    if d.loc[d[s] == 1, y].isna().any():
+        raise OESError("The outcome is missing for some units marked as selected.")
+    B = int_option(spec, "boot", 500, 99, 5000, "Bootstrap replications"); seed = int_option(spec, "seed", 0, 0, 10 ** 6, "Random seed")
+    T = d[t].to_numpy(float); S = d[s].to_numpy(float); Y = d[y].to_numpy(float)
+    if min(((T == 1) & (S == 1)).sum(), ((T == 0) & (S == 1)).sum()) < 10:
+        raise OESError("Each arm needs at least 10 units with an observed outcome.")
+    lo, hi, p, arm, naive, q1, q0 = _lee(Y, T, S)
+    rng = np.random.default_rng(seed); bl, bh = [], []
+    for _ in range(B):
+        i = rng.integers(0, n, n); Tb, Sb, Yb = T[i], S[i], Y[i]
+        if min(((Tb == 1) & (Sb == 1)).sum(), ((Tb == 0) & (Sb == 1)).sum()) < 3: continue
+        l_, h_, *_ = _lee(Yb, Tb, Sb); bl.append(l_); bh.append(h_)
+    bl, bh = np.array(bl), np.array(bh)
+    ci_lo, ci_hi = float(np.percentile(bl, 2.5)), float(np.percentile(bh, 97.5))
+    # Manski worst-case bounds for the effect on the outcome of all units, filling missing outcomes with the extremes
+    ymin = float(spec["ymin"]) if spec.get("ymin") not in (None, "") else float(np.nanmin(Y[S == 1])); ymax = float(spec["ymax"]) if spec.get("ymax") not in (None, "") else float(np.nanmax(Y[S == 1]))
+    def arm_mean(tt, fill): v = np.where(S[T == tt] == 1, Y[T == tt], fill); return float(np.mean(v))
+    m_lo = arm_mean(1, ymin) - arm_mean(0, ymax); m_hi = arm_mean(1, ymax) - arm_mean(0, ymin)
+    sel_tab = table("Selection (outcome observed) by treatment arm", ["Arm", "Units", "Share with an observed outcome", "Mean outcome among the selected"],
+                    [["Control", int((T == 0).sum()), f(q0, 4), f(float(Y[(T == 0) & (S == 1)].mean()), 4)], ["Treated", int((T == 1).sum()), f(q1, 4), f(float(Y[(T == 1) & (S == 1)].mean()), 4)]],
+                    f"The treatment changes the selection rate by {100 * (q1 - q0):.1f} percentage points. Lee bounds assume that treatment moves selection in one direction only (monotonicity).")
+    res = table(f"Effect of {t} on {y} for units that would be selected under either arm", ["Estimate", "Value", "95% CI low", "95% CI high"],
+                [["Naive difference among the selected (biased)", f(naive, 4), "", ""], ["Lee lower bound", f(lo, 4), f(ci_lo, 4), ""], ["Lee upper bound", f(hi, 4), "", f(ci_hi, 4)],
+                 ["Lee bounds: confidence interval for the effect", f"[{lo:.3f}, {hi:.3f}]", f(ci_lo, 4), f(ci_hi, 4)], [f"Share trimmed ({'treated' if arm == 1 else 'control'} arm)", f(p, 4), "", ""],
+                 ["Manski worst-case bounds (all units, outcome in [{:.2f}, {:.2f}])".format(ymin, ymax), f"[{m_lo:.3f}, {m_hi:.3f}]", "", ""]],
+                "Bootstrap percentile intervals with " + f"{len(bl)} resamples. The confidence interval for the effect takes the lower end of the lower bound and the upper end of the upper bound.")
+    ch = [chart("Bootstrap distributions of the Lee bounds", list(range(len(bl))), [("Lower bound (sorted)", np.sort(bl)), ("Upper bound (sorted)", np.sort(bh))], "Resample", "Effect", kind="line")]
+    notes = ["The bounds are for the always-selected: units that would have an observed outcome whether treated or not. They are not the effect for the whole sample.", "Monotonicity (treatment cannot push some units into selection and others out) is an assumption; covariates can tighten the bounds."]
+    return result("leebounds", f"Lee bounds: effect of {t} on {y}", n, [stat("Observations", n), stat("Share trimmed", p, 4), stat("Lee lower bound", lo, 4), stat("Lee upper bound", hi, 4), stat("Naive effect", naive, 4)], [sel_tab, res], ch, notes)
+
+
+# ------------------------------------------------------------------------------------------------------------------
+# Distributional treatment effects: quantile treatment effects and Kolmogorov-Smirnov tests of equality and dominance
+# ------------------------------------------------------------------------------------------------------------------
+def _ks_stats(y1, y0):
+    g = np.sort(np.concatenate([y1, y0])); F1 = np.searchsorted(np.sort(y1), g, side="right") / len(y1); F0 = np.searchsorted(np.sort(y0), g, side="right") / len(y0)
+    return float(np.max(np.abs(F1 - F0))), float(np.max(F0 - F1)), float(np.max(F1 - F0))  # two-sided, treated dominates (F0 above F1), control dominates
+
+
+def qte(df, spec):
+    y = need(spec, "outcome", "outcome"); t = need(spec, "treat", "treatment (0/1)"); xs = as_list(spec.get("covariates")); distinct([y, t] + xs)
+    miss = [c for c in [y, t] + xs if c not in df.columns]
+    if miss:
+        raise OESError("Column(s) not found in the data: " + ", ".join(miss))
+    d = df[[y, t] + xs].apply(pd.to_numeric, errors="coerce").dropna().reset_index(drop=True); n = len(d)
+    if d[t].nunique() != 2 or not set(np.unique(d[t])) <= {0.0, 1.0}:
+        raise OESError("The treatment must be a 0/1 indicator with both values present.")
+    try:
+        taus = [float(v) for v in str(spec.get("taus", "0.1,0.25,0.5,0.75,0.9")).replace(";", ",").split(",") if v.strip()]
+    except ValueError:
+        raise OESError("Quantiles must be numbers between 0 and 1, separated by commas.")
+    if not taus or any(not 0 < q < 1 for q in taus):
+        raise OESError("Quantiles must lie strictly between 0 and 1.")
+    B = int_option(spec, "boot", 500, 99, 5000, "Bootstrap replications"); seed = int_option(spec, "seed", 0, 0, 10 ** 6, "Random seed")
+    Y = d[y].to_numpy(float); T = d[t].to_numpy(float); n1 = int(T.sum()); n0 = n - n1
+    if min(n1, n0) < 10:
+        raise OESError("Each arm needs at least 10 units.")
+    rng = np.random.default_rng(seed)
+    def qdiff(Yv, Tv): return np.array([np.quantile(Yv[Tv == 1], q) - np.quantile(Yv[Tv == 0], q) for q in taus])
+    est = qdiff(Y, T); bs = []
+    for _ in range(B):
+        i = rng.integers(0, n, n)
+        if 0 < T[i].sum() < n: bs.append(qdiff(Y[i], T[i]))
+    bs = np.array(bs); se = bs.std(axis=0, ddof=1); lo = np.percentile(bs, 2.5, axis=0); hi = np.percentile(bs, 97.5, axis=0)
+    ate = float(Y[T == 1].mean() - Y[T == 0].mean())
+    rows = [[f(q, 2), f(float(np.quantile(Y[T == 0], q)), 3), f(float(np.quantile(Y[T == 1], q)), 3), f(float(e), 4), f(float(s), 4), f(float(a), 4), f(float(b), 4)] for q, e, s, a, b in zip(taus, est, se, lo, hi)]
+    qtab = table(f"Quantile treatment effects of {t} on {y}", ["Quantile", "Control quantile", "Treated quantile", "QTE", "Bootstrap SE", "95% CI low", "95% CI high"], rows,
+                 f"The average effect (difference in means) is {ate:.4f}. Bootstrap percentile intervals with {len(bs)} resamples; the quantiles are not simultaneous.")
+    tabs = [qtab]
+    # conditional quantile regression with covariates
+    if xs:
+        import statsmodels.api as sm
+        X = sm.add_constant(d[[t] + xs]); crow = []
+        for q in taus:
+            m = sm.QuantReg(d[y], X).fit(q=q, max_iter=5000); crow.append([f(q, 2), f(float(m.params[t]), 4), f(float(m.bse[t]), 4), f(float(m.pvalues[t]), 4)])
+        tabs.append(table("Conditional quantile regression: coefficient on the treatment", ["Quantile", "Coefficient", "Std. error", "p-value"], crow, "Adjusts for the covariates. The coefficient is a conditional quantile effect, which equals the QTE only if the covariate effect is constant across quantiles."))
+    # KS tests by permutation
+    ks, dom1, dom0 = _ks_stats(Y[T == 1], Y[T == 0]); P = 999; cnt = np.zeros(3)
+    for _ in range(P):
+        pt = rng.permutation(T); s_ = _ks_stats(Y[pt == 1], Y[pt == 0]); cnt += np.array(s_) >= np.array([ks, dom1, dom0])
+    pv = (cnt + 1) / (P + 1)
+    tabs.append(table("Tests on the whole distribution (permutation p-values, 999 draws)", ["Null hypothesis", "Statistic", "p-value"],
+                      [["Equal distributions (Kolmogorov-Smirnov)", f(ks, 4), f(float(pv[0]), 4)], ["Treated outcome is not larger in the first-order dominance sense (reject: treated stochastically larger)", f(dom1, 4), f(float(pv[1]), 4)],
+                       ["Control outcome is not larger in the first-order dominance sense (reject: control stochastically larger)", f(dom0, 4), f(float(pv[2]), 4)]],
+                      "A rejection of the first line says the distributions differ. A rejection of the dominance line says the treated (or control) distribution lies to the right at every point."))
+    grid = np.linspace(0.05, 0.95, 19); curve = [float(np.quantile(Y[T == 1], q) - np.quantile(Y[T == 0], q)) for q in grid]
+    ch = [chart("Quantile treatment effect by quantile", [float(q) for q in grid], [("QTE", curve), ("Average effect", [ate] * len(grid))], "Quantile", "Effect", kind="line")]
+    notes = ["The QTE compares the same quantile in the two outcome distributions. It is the effect on the person at that rank only if treatment leaves ranks unchanged (rank invariance).", "With a randomised treatment the unconditional QTE is identified without covariates; covariates only sharpen the conditional version."]
+    return result("qte", f"Distributional effects of {t} on {y}", n, [stat("Observations", n), stat("Average effect", ate, 4), stat("KS statistic", ks, 4), stat("KS p-value", float(pv[0]), 4), stat("QTE at median", float(np.quantile(Y[T == 1], 0.5) - np.quantile(Y[T == 0], 0.5)), 4)], tabs, ch, notes)

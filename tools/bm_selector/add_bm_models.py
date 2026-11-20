@@ -30,6 +30,25 @@ BAYES = {
                                  ["Look at the heterogeneity", "Gibbs sampler and convergence", "Partial pooling", "Out-of-sample check", "Prior and leave-one-out sensitivity", "Write up the pooling"]),
              [830, 296, 140, "Hierarchical panel"]),
 }
+# models added after the first release: key -> (slug, model, leaf label, edge label, question text); leaves are laid out automatically
+EXTRA_BAYES = {
+    "BMA": ("bma", model("BMA", "Bayesian model averaging", "Model averaging", "Many candidate regressors and no theory that says which belong",
+                         "You have more candidate regressors than you can defend one by one, and choosing a single model by testing hides how much the answer depends on the choice. Model averaging weights every combination of regressors by its posterior probability and reports the probability that each variable belongs.",
+                         ["Choose the g-prior and the model prior", "Posterior inclusion probabilities", "Best models and model size", "Compare with the full regression", "Prior sensitivity", "Check the search (MC3)"]),
+            "Model averaging", "which variables", "Many candidate regressors and I do not know which belong"),
+    "BLOGIT": ("bayes-logit", model("BLOGIT", "Bayesian logit and probit", "Bayesian logit/probit", "A yes/no outcome, with probabilities for the effects and a prior",
+                                    "The outcome is binary (works or not, defaults or not). A Bayesian logit or probit reports the effect on the probability with credible intervals computed draw by draw, takes a prior, and keeps working when maximum likelihood fails, as with a rare outcome or perfect separation.",
+                                    ["Choose the link and the prior", "Estimate and check the chains", "Odds ratios and marginal effects", "Posterior predictive check", "Prior and link sensitivity", "Separation and small samples"]),
+               "Bayesian logit/probit", "binary outcome", "A yes/no outcome and I want probabilities and a prior"),
+    "SHRINK": ("bayes-shrinkage", model("SHRINK", "Bayesian shrinkage regression (horseshoe, lasso, ridge)", "Shrinkage regression", "Many regressors relative to the sample: interactions, polynomials, dozens of controls",
+                                        "OLS overfits when the model has almost as many parameters as observations. A shrinkage prior pulls the coefficients the data do not support towards zero and leaves the supported ones alone, and the posterior reports how sure you are about each.",
+                                        ["Choose the prior", "Estimate and find the effects", "Compare with OLS", "Check the sampler", "Prior sensitivity", "Out-of-sample prediction"]),
+               "Shrinkage regression", "many regressors", "I have more regressors than I can trust OLS with"),
+    "CPT": ("change-points", model("CPT", "Bayesian change points", "Change points", "A level or a relationship that shifted at unknown dates",
+                                   "A series or a relationship may have shifted at dates you do not know. The posterior over all segmentations is computed exactly, so you get the probability of 0, 1, 2 ... breaks and the probability of a break after each date, with regime coefficients, and no sampler to check.",
+                                   ["Choose the prior on the number of breaks", "Number of breaks", "Break dates and regimes", "Compare with Bai-Perron", "Prior sensitivity", "False-alarm check"]),
+            "Change points", "unknown dates", "A level or a relationship shifted at dates I do not know"),
+}
 MARKOV = {
     "MSTVTP": ("ms-tvtp", model("MSTVTP", "Markov switching with time-varying transition probabilities", "MS with TVTP", "Hidden regimes, and an observed variable that moves the probability of switching",
                                 "The regimes are hidden, but you think an observed variable (a policy rate, a spread, a confidence index) changes the probability of moving between them. A logit lets the probabilities depend on that variable, and tests whether the dependence is real.",
@@ -66,6 +85,36 @@ def tree_bayes(path):
     path.write_text(s)
 
 
+def leaf_pos(i, label):
+    """Extra Bayesian leaves form one column under the 'More methods' node, clear of the Markov-guide node on the left."""
+    return [886, 364 + 68 * i, int(min(max(84, 8 * len(label) + 20), 150)), label]
+
+
+def extend_bayes(path):
+    s = path.read_text()
+    base = 3                                                 # BLP, SIGN, HIER have fixed positions above
+    for i, (k, (slug, mdl, label, edge, q)) in enumerate(EXTRA_BAYES.items()):
+        if f"\n {k}:{{name:" in s:
+            pass
+        else:
+            assert "}},\nN:{" in s
+            s = s.replace("}},\nN:{", f"}},\n{mdl}}},\nN:{{", 1)
+            s = re.sub(r"(GUIDE:\{[^}]*)\}", lambda m: m.group(1) + f",{k}:{js(slug)}}}", s, count=1)
+            x, y, w, lab = leaf_pos(i, label)
+            s = re.sub(r"(N:\{.*?)(\},\nE:\[)", lambda m: m.group(1) + f",\n {k}:[{x},{y},{w},{js(lab)},1]" + m.group(2), s, count=1, flags=re.S)
+            last = list(re.finditer(r"\['oth','\w+','[^']*'\]", s))[-1]
+            s = s[:last.end()] + f",['oth','{k}',{js(edge)}]" + s[last.end():]
+            m = re.search(r"qx:\{t:'What is your goal\?',o:\[.*?\]\]\}", s, flags=re.S)
+            assert m, "qx block not found"
+            s = s[:m.end() - 2] + f",[{js(q)},{js(mdl.split('name:')[1].split(',short')[0].strip(chr(39)))},{js(k)}]" + s[m.end() - 2:]
+    for i, (k, (slug, mdl, label, edge, q)) in enumerate(EXTRA_BAYES.items()):
+        x, y, w, lab = leaf_pos(i, label)
+        s = re.sub(rf" {k}:\[\d+,\d+,\d+,'[^']*',1\]", f" {k}:[{x},{y},{w},{js(lab)},1]", s)
+    need_h = max(462, 364 + 68 * (len(EXTRA_BAYES) - 1) + 40)
+    s = re.sub(r"vb:'0 0 1080 \d+'", f"vb:'0 0 1080 {need_h}'", s, count=1)
+    path.write_text(s)
+
+
 def tree_markov(path):
     s = path.read_text()
     if "['q2','MSTVTP'" in s:
@@ -88,7 +137,8 @@ def main():
             run(p, items, hub); treefn(p)
             if hub == "bayesian":
                 positions_bayes(p)
-    print("registered:", ", ".join(list(BAYES) + list(MARKOV)))
+                extend_bayes(p)
+    print("registered:", ", ".join(list(BAYES) + list(EXTRA_BAYES) + list(MARKOV)))
 
 
 if __name__ == "__main__":

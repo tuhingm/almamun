@@ -605,3 +605,671 @@ def wavelet(df, spec):
     summary = [stat("Observations", n), stat("Periods", f"{period[0]:.0f} to {period[-1]:.0f}"), stat("Share significant", float(sig.sum() / mask.sum()), 3), stat("Null share (mean)", float(fa.mean()), 3)]
     return result("wavelet", f"Wavelet coherence: {xn} and {yn}", n, summary, tabs, ch,
                   ["Morlet wavelet (w0 = 6), smoothing over time and three neighbouring scales (Torrence and Webster 1999); significance by Monte Carlo from AR(1) nulls. The coherence heat map in the guide is shown here as averages by period and by sub-period."])
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Unit-root and stationarity tests: ADF, DF-GLS, Phillips-Perron, KPSS, Zivot-Andrews
+# ---------------------------------------------------------------------------------------------------------------
+def _dfgls_stat(y, trend, k):
+    """Elliott-Rothenberg-Stock DF-GLS t statistic with k lagged differences (GLS-detrended series)."""
+    T = len(y)
+    z = np.ones((T, 1)) if trend == "c" else np.column_stack([np.ones(T), np.arange(1, T + 1)])
+    ab = 1 - (7.0 if trend == "c" else 13.5) / T
+    ya = np.r_[y[0], y[1:] - ab * y[:-1]]; za = np.vstack([z[:1], z[1:] - ab * z[:-1]])
+    beta = np.linalg.lstsq(za, ya, rcond=None)[0]; yd = y - z @ beta
+    return _adf_nodet(yd, k)
+
+
+def _adf_nodet(yd, k, return_ic=False):
+    dy = np.diff(yd); T = len(dy)
+    idx = np.arange(k, T)
+    X = [yd[idx]]                                   # y_{t-1}
+    for j in range(1, k + 1):
+        X.append(dy[idx - j])
+    X = np.column_stack(X); yy = dy[idx]
+    b = np.linalg.lstsq(X, yy, rcond=None)[0]; e = yy - X @ b
+    s2 = e @ e / (len(yy) - X.shape[1]); se = np.sqrt(s2 * np.linalg.inv(X.T @ X)[0, 0])
+    if return_ic:
+        return b[0] / se, np.log(e @ e / len(yy)), X.shape[1], len(yy)
+    return b[0] / se
+
+
+def _pp(y, regression, q):
+    """Phillips-Perron Z_t statistic (Newey-West long-run variance with q lags)."""
+    T = len(y) - 1
+    X = [y[:-1]]
+    if regression in ("c", "ct"):
+        X.append(np.ones(T))
+    if regression == "ct":
+        X.append(np.arange(1, T + 1))
+    X = np.column_stack(X); yy = y[1:]
+    b = np.linalg.lstsq(X, yy, rcond=None)[0]; u = yy - X @ b
+    k = X.shape[1]; s2 = u @ u / (T - k); se = np.sqrt(s2 * np.linalg.inv(X.T @ X)[0, 0])
+    tstat = (b[0] - 1) / se
+    g0 = u @ u / T; lam2 = g0 + 2 * sum((1 - j / (q + 1)) * (u[j:] @ u[:-j]) / T for j in range(1, q + 1))
+    z = np.sqrt(g0 / lam2) * tstat - 0.5 * (lam2 - g0) / np.sqrt(lam2) * (T * se / np.sqrt(s2))
+    return z, tstat
+
+
+def unitroot(df, spec):
+    from statsmodels.tsa.stattools import adfuller, kpss, zivot_andrews
+    from statsmodels.tsa.adfvalues import mackinnonp
+    y = need(spec, "y", "series")
+    d, labels = _series_frame(df, spec, [y])
+    x = d[y].to_numpy(float); n = len(x)
+    if n < 40:
+        raise OESError("Unit-root tests need at least 40 observations.")
+    maxlag = int_option(spec, "maxlag", 8, 0, 24, "Maximum lag"); ic = spec.get("ic") or "bic"
+    if ic not in ("aic", "bic"):
+        raise OESError("Choose AIC or BIC for the lag length.")
+    sims = int_option(spec, "sims", 200, 50, 1000, "Simulation replications (DF-GLS critical values)")
+    rng = np.random.default_rng(int(spec.get("seed") or 0))
+    forms = [("level", x), ("first difference", np.diff(x))]
+    q = int(4 * (n / 100) ** (2 / 9))
+    rows = []; dfg = []
+    for lab, z in forms:
+        for reg, rl in (("c", "constant"), ("ct", "constant + trend")):
+            a = adfuller(z, maxlag=maxlag, regression=reg, autolag=ic.upper())
+            rows.append(["ADF", lab, rl, f(a[0], 3), int(a[2]), f(a[1], 4), f(a[4]["5%"], 3), "yes" if a[1] < .05 else "no"])
+    for lab, z in forms:
+        for reg, rl in (("c", "constant"), ("ct", "constant + trend")):
+            zt, _ = _pp(z, reg, q); p = float(mackinnonp(zt, regression=reg, N=1))
+            rows.append(["Phillips-Perron", lab, rl, f(zt, 3), q, f(p, 4), None, "yes" if p < .05 else "no"])
+    # DF-GLS with simulated critical values under the unit-root null
+    for lab, z in forms:
+        T = len(z)
+        for reg, rl in (("c", "constant"), ("ct", "constant + trend")):
+            ics = []
+            T1 = T
+            zz = z
+            ab = 1 - (7.0 if reg == "c" else 13.5) / T1
+            Z = np.ones((T1, 1)) if reg == "c" else np.column_stack([np.ones(T1), np.arange(1, T1 + 1)])
+            ya = np.r_[zz[0], zz[1:] - ab * zz[:-1]]; za = np.vstack([Z[:1], Z[1:] - ab * Z[:-1]])
+            yd = zz - Z @ np.linalg.lstsq(za, ya, rcond=None)[0]
+            dy = np.diff(yd)
+            for k in range(maxlag + 1):
+                idx = np.arange(maxlag, len(dy)); Xk = [yd[idx]] + [dy[idx - j] for j in range(1, k + 1)]
+                Xk = np.column_stack(Xk); yk = dy[idx]; e = yk - Xk @ np.linalg.lstsq(Xk, yk, rcond=None)[0]
+                m = len(yk); pen = (2 if ic == "aic" else np.log(m)) * (k + 1) / m
+                ics.append(np.log(e @ e / m) + pen)
+            kopt = int(np.argmin(ics)); st = _adf_nodet(yd, kopt)
+            sim = np.array([_dfgls_stat(np.cumsum(rng.standard_normal(T1)), reg, kopt) for _ in range(sims)])
+            cv5 = float(np.percentile(sim, 5)); p = float((sim <= st).mean())
+            rows.append(["DF-GLS", lab, rl, f(st, 3), kopt, f(max(p, 1 / sims), 3), f(cv5, 3), "yes" if st < cv5 else "no"])
+    ur = table("Unit-root tests (H0: unit root)", ["Test", "Series form", "Deterministics", "Statistic", "Lags", "p-value", "5% critical value", "Rejects unit root at 5%"], rows,
+               "Reject the unit root when the statistic is more negative than the critical value. ADF lags chosen by " + ic.upper() + f"; Phillips-Perron uses {q} Newey-West lags and MacKinnon p-values; DF-GLS p-values and critical values are simulated ({sims} random walks of the same length).")
+    krows = []
+    for lab, z in forms:
+        for reg, rl in (("c", "level"), ("ct", "trend")):
+            k_ = kpss(z, regression=reg, nlags=int(4 * (len(z) / 100) ** 0.25))
+            krows.append(["KPSS", lab, f"stationary around a {rl}", f(k_[0], 3), int(k_[2]), f(k_[1], 4), f(k_[3]["5%"], 3), "yes" if k_[0] > k_[3]["5%"] else "no"])
+    kt = table("Stationarity test (H0: stationary)", ["Test", "Series form", "H0", "Statistic", "Lags", "p-value", "5% critical value", "Rejects stationarity at 5%"], krows,
+               "KPSS reverses the null. Rejecting stationarity in levels while not rejecting it in first differences points to I(1). The p-value is interpolated and truncated to the range 0.01 to 0.10.")
+    za = zivot_andrews(x, maxlag=maxlag, regression="c", autolag=ic.upper()); zt_ = zivot_andrews(x, maxlag=maxlag, regression="ct", autolag=ic.upper())
+    zrows = []
+    for lab, r in (("break in the level", za), ("break in level and trend", zt_)):
+        zrows.append([lab, f(r[0], 3), f(r[1], 4), f(r[2]["5%"], 3), labels[int(r[4])] if 0 <= int(r[4]) < n else str(r[4]), int(r[3]), "yes" if r[0] < r[2]["5%"] else "no"])
+    zat = table("Zivot-Andrews test (one structural break, H0: unit root without break)", ["Break allowed in", "Statistic", "p-value", "5% critical value", "Break date", "Lags", "Rejects unit root at 5%"], zrows,
+                "Applied to the level of the series. The break date is the one that gives the strongest evidence against the unit root.")
+    # verdict
+    def rej(rowlist, lab):
+        return [r[-1] == "yes" for r in rowlist if r[1] == lab]
+    adf_lev = rej([r for r in rows if r[0] == "ADF"], "level"); adf_dif = rej([r for r in rows if r[0] == "ADF"], "first difference")
+    kp_lev = rej(krows, "level"); kp_dif = rej(krows, "first difference")
+    n_unit_lev = sum(1 for r in rows if r[1] == "level" and r[-1] == "no") + sum(kp_lev)
+    n_stat_dif = sum(1 for r in rows if r[1] == "first difference" and r[-1] == "yes") + sum(1 for v in kp_dif if not v)
+    tot_lev = sum(1 for r in rows if r[1] == "level") + len(kp_lev); tot_dif = sum(1 for r in rows if r[1] == "first difference") + len(kp_dif)
+    if n_unit_lev >= 0.75 * tot_lev and n_stat_dif >= 0.75 * tot_dif:
+        verdict = "I(1): a unit root in levels, stationary in first differences"
+    elif n_unit_lev <= 0.25 * tot_lev:
+        verdict = "I(0): stationary in levels"
+    elif n_unit_lev >= 0.75 * tot_lev:
+        verdict = "Not stationary in first differences: check for I(2) or a break"
+    else:
+        verdict = "Mixed evidence: the tests disagree (a break or a near-unit root is likely)"
+    vt = table("Summary of the evidence", ["Statement", "Tests in favour", "Out of"],
+               [["Unit root in levels", n_unit_lev, tot_lev], ["Stationary in first differences", n_stat_dif, tot_dif]], "Counts ADF, Phillips-Perron, DF-GLS (reject = stationary) and KPSS (not reject = stationary) in both deterministic specifications.")
+    xs_ = np.arange(n)
+    ch = [chart(f"{y}: level", labels, [(y, x)]), chart(f"{y}: first difference", labels[1:], [("first difference", np.diff(x))])]
+    summary = [stat("Observations", n), stat("Conclusion", verdict), stat("ADF p-value (level, constant)", float(rows[0][5]), 3), stat("KPSS p-value (level)", float(krows[0][5]), 3)]
+    return result("unitroot", f"Unit-root and stationarity tests: {y}", n, summary, [ur, kt, zat, vt], ch,
+                  ["Run the tests on levels and first differences. A conclusion of I(1) means you should difference the series or model it with cointegration.", "Seasonal unit roots and the Lee-Strazicich LM test are not part of the OES version."])
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Unobserved-components trend-cycle decomposition, compared with the HP and Hamilton filters
+# ---------------------------------------------------------------------------------------------------------------
+_UC_TRENDS = {"smooth trend": "smooth trend", "local linear trend": "lltrend", "random walk with drift": "rwdrift"}
+
+
+def _hamilton(x, h, p=4):
+    """Hamilton (2018) regression filter: the cycle is the residual of x_{t+h} on a constant and x_t ... x_{t-p+1}."""
+    T = len(x); idx = np.arange(p - 1, T - h)
+    X = np.column_stack([np.ones(len(idx))] + [x[idx - j] for j in range(p)]); yy = x[idx + h]
+    b = np.linalg.lstsq(X, yy, rcond=None)[0]; e = np.full(T, np.nan); e[idx + h] = yy - X @ b
+    return e
+
+
+def _uc_fit(x, trend, cycle, ppy, bounds):
+    import statsmodels.api as sm
+    kw = dict(level=_UC_TRENDS[trend])
+    if cycle:
+        kw.update(cycle=True, stochastic_cycle=True, damped_cycle=True, cycle_period_bounds=bounds)
+    m = sm.tsa.UnobservedComponents(x, **kw)
+    r = m.fit(method="powell", disp=0, maxiter=3000)
+    return m, m.fit(r.params, disp=0, maxiter=300)
+
+
+def unobserved(df, spec):
+    from statsmodels.tsa.filters.hp_filter import hpfilter
+    y = need(spec, "y", "series")
+    d, labels = _series_frame(df, spec, [y])
+    x = d[y].to_numpy(float); n = len(x)
+    if (spec.get("log") or "no") == "yes":
+        if (x <= 0).any():
+            raise OESError("The log transformation needs a series that is positive in every period.")
+        x = 100 * np.log(x)
+    ppy = int_option(spec, "ppy", 4, 1, 12, "Periods per year")
+    if n < 8 * ppy or n < 40:
+        raise OESError("The decomposition needs at least 40 observations and eight years of data.")
+    trend = spec.get("trend") or "smooth trend"
+    if trend not in _UC_TRENDS:
+        raise OESError("Choose smooth trend, local linear trend or random walk with drift.")
+    cyc = (spec.get("cycle") or "yes") == "yes"
+    bounds = (int_option(spec, "pmin", 6, 2, 60, "Shortest cycle"), int_option(spec, "pmax", 40, 8, 200, "Longest cycle"))
+    if bounds[0] >= bounds[1]:
+        raise OESError("The shortest cycle must be shorter than the longest.")
+    m, r = _uc_fit(x, trend, cyc, ppy, bounds)
+    se = r.bse
+    prow = []
+    for nm, v, s_ in zip(m.param_names, r.params, se):
+        prow.append([nm, f(v, 5), f(s_, 5)])
+    tabs = [table(f"Unobserved-components model: {trend}" + (" + damped stochastic cycle" if cyc else ""), ["Parameter", "Estimate", "s.e."], prow,
+                  "Variances of the shocks to each component; a variance of zero means that component is deterministic (e.g. a smooth trend has no level shock).")]
+    summ = [stat("Observations", n), stat("Log-likelihood", float(r.llf), 2), stat("AIC", float(r.aic), 1)]
+    tr_est = r.smoothed_state[0]
+    cycle_est = np.asarray(r.cycle.smoothed) if cyc else x - tr_est
+    if cyc:
+        fr = float(r.params[m.param_names.index("frequency.cycle")]); damp = float(r.params[m.param_names.index("damping.cycle")])
+        per = 2 * np.pi / fr
+        summ += [stat("Cycle period (years)", per / ppy, 2), stat("Cycle damping", damp, 3)]
+    # comparison of specifications by information criteria
+    crow = []
+    for tn in _UC_TRENDS:
+        for cy in (True, False):
+            try:
+                m2, r2 = _uc_fit(x, tn, cy, ppy, bounds)
+                crow.append([tn, "yes" if cy else "no", f(float(r2.llf), 2), f(float(r2.aic), 1), f(float(r2.bic), 1)])
+            except Exception:
+                crow.append([tn, "yes" if cy else "no", None, None, None])
+    tabs.append(table("Model comparison", ["Trend", "Cycle", "Log-likelihood", "AIC", "BIC"], crow, "Lower AIC and BIC are better."))
+    # filters
+    lam = {1: 100, 4: 1600, 12: 129600}.get(ppy, 1600 * (ppy / 4) ** 4)
+    hp_c, hp_t = hpfilter(x, lamb=lam)
+    ham = _hamilton(x, h=2 * ppy, p=4); ok = ~np.isnan(ham)
+    cycles = {"Unobserved components": cycle_est, "Hodrick-Prescott": np.asarray(hp_c), "Hamilton": ham}
+    srows = []; names = list(cycles)
+    for nm in names:
+        c_ = cycles[nm]; srows.append([nm, f(np.nanstd(c_), 3), f(np.nanstd(c_[ok]), 3)] + [f(np.corrcoef(c_[ok], cycles[o_][ok])[0, 1], 3) for o_ in names])
+    tabs.append(table("Cycle estimates compared", ["Filter", "Std. dev. (own sample)", "Std. dev. (common sample)"] + [f"Corr. with {o_}" for o_ in names], srows,
+                      f"HP smoothing parameter {lam:g}; Hamilton regression uses h = {2 * ppy} periods and 4 lags. Correlations use the sample in which all three are defined."))
+    gr = np.diff(tr_est) * ppy
+    tabs.append(table("Trend growth (annualised, in the units of the series per year)", ["Period", "Trend growth"],
+                      [[labels[i], f(gr[i - 1], 3)] for i in sorted(set([1, n // 4, n // 2, 3 * n // 4, n - 1]))], "Slope of the estimated trend."))
+    ch = [chart(f"{y}: series and estimated trend", labels, [(y, x), ("UC trend", tr_est), ("HP trend", np.asarray(hp_t))]),
+          chart(f"{y}: estimated cycles", labels, [(k, v) for k, v in cycles.items()])]
+    return result("unobserved", f"Trend-cycle decomposition: {y}", n, summ, tabs, ch,
+                  ["The cycle is identified by the assumption that it is a stationary, damped, stochastic cycle with a period between the bounds; the estimate depends on it.",
+                   "End-of-sample trend estimates from all the filters are revised when data are added."])
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Forecast evaluation: rolling-origin forecasts and Diebold-Mariano tests
+# ---------------------------------------------------------------------------------------------------------------
+def _ar_fc(z, h, maxp):
+    """Direct-iterated AR(p) forecast with p chosen by BIC."""
+    best = None
+    for p in range(1, maxp + 1):
+        if len(z) <= p + 5:
+            break
+        Y = z[p:]; X = np.column_stack([np.ones(len(Y))] + [z[p - j:len(z) - j] for j in range(1, p + 1)])
+        b = np.linalg.lstsq(X, Y, rcond=None)[0]; e = Y - X @ b; bic = np.log(e @ e / len(Y)) + (p + 1) * np.log(len(Y)) / len(Y)
+        if best is None or bic < best[0]:
+            best = (bic, p, b)
+    _, p, b = best; hist = list(z[-p:][::-1])
+    for _ in range(h):
+        nxt = b[0] + sum(b[j + 1] * hist[j] for j in range(p)); hist.insert(0, nxt)
+    return hist[0]
+
+
+def _dm(d, h):
+    """Diebold-Mariano statistic with the Harvey-Leybourne-Newbold small-sample correction (loss differential d, horizon h)."""
+    T = len(d); dm = d.mean(); lam = ((d - dm) @ (d - dm)) / T
+    for j in range(1, h):
+        lam += 2 * ((d[j:] - dm) @ (d[:-j] - dm)) / T
+    lam = max(lam, 1e-12); stat_ = dm / np.sqrt(lam / T)
+    hln = stat_ * np.sqrt((T + 1 - 2 * h + h * (h - 1) / T) / T)
+    return hln, 2 * stats.t.sf(abs(hln), T - 1)
+
+
+def forecast_eval(df, spec):
+    from statsmodels.tsa.holtwinters import ExponentialSmoothing
+    y = need(spec, "y", "series")
+    d, labels = _series_frame(df, spec, [y])
+    x = d[y].to_numpy(float); n = len(x)
+    h = int_option(spec, "h", 1, 1, 12, "Forecast horizon"); w = int_option(spec, "window", max(40, n // 2), 30, n - 15, "Initial estimation window")
+    maxp = int_option(spec, "maxp", 4, 1, 8, "Maximum AR lags")
+    if n - w - h + 1 < 15:
+        raise OESError("Too few forecast origins: shorten the initial window or the horizon (at least 15 forecasts are needed).")
+    loss = spec.get("loss") or "squared"
+    if loss not in ("squared", "absolute"):
+        raise OESError("Choose squared or absolute loss.")
+    base = spec.get("benchmark") or "random walk"
+    names = ["random walk", "historical mean", "AR (BIC)", "exponential smoothing"]
+    if base not in names:
+        raise OESError("Choose a benchmark from: " + ", ".join(names) + ".")
+    fc = {k: [] for k in names}; act = []; per = []
+    for t in range(w, n - h + 1):
+        z = x[:t]; act.append(x[t + h - 1]); per.append(labels[t + h - 1])
+        fc["random walk"].append(z[-1]); fc["historical mean"].append(z.mean()); fc["AR (BIC)"].append(_ar_fc(z, h, maxp))
+        try:
+            fc["exponential smoothing"].append(float(ExponentialSmoothing(z, trend="add", damped_trend=True).fit().forecast(h)[-1]))
+        except Exception:
+            fc["exponential smoothing"].append(z[-1])
+    act = np.array(act); fc = {k: np.array(v) for k, v in fc.items()}; err = {k: act - v for k, v in fc.items()}
+    L = (lambda e: e ** 2) if loss == "squared" else np.abs
+    rows = []; T = len(act)
+    for k in names:
+        rmse = float(np.sqrt((err[k] ** 2).mean())); mae = float(np.abs(err[k]).mean())
+        rel = float(np.sqrt((err[k] ** 2).mean() / (err[base] ** 2).mean()))
+        if k == base:
+            rows.append([k, f(rmse, 4), f(mae, 4), 1.0, None, None, "benchmark"])
+        else:
+            st, p = _dm(L(err[base]) - L(err[k]), h)
+            rows.append([k, f(rmse, 4), f(mae, 4), f(rel, 3), f(st, 3), f(p, 4), "better than benchmark" if (p < .05 and st > 0) else ("worse than benchmark" if (p < .05 and st < 0) else "no significant difference")])
+    tabs = [table(f"Out-of-sample accuracy ({T} {h}-step-ahead forecasts)", ["Model", "RMSE", "MAE", "RMSE relative to benchmark", "DM statistic", "DM p-value", "Result"], rows,
+                  f"Forecasts are re-estimated on an expanding window starting with {w} observations. Benchmark: {base}. DM tests the equality of {loss} loss with the Harvey-Leybourne-Newbold small-sample correction; a positive statistic favours the model over the benchmark.")]
+    pair = []
+    for i, a in enumerate(names):
+        for b in names[i + 1:]:
+            st, p = _dm(L(err[a]) - L(err[b]), h); pair.append([f"{a} vs {b}", f(st, 3), f(p, 4)])
+    tabs.append(table("Pairwise Diebold-Mariano tests", ["Pair", "DM statistic", "p-value"], pair, "H0: equal expected loss. A positive statistic means the first model has the larger loss, so the second is better."))
+    best = min(names, key=lambda k: float(np.sqrt((err[k] ** 2).mean())))
+    ch = [chart(f"{y}: actual and forecasts", per, [("actual", act)] + [(k, fc[k]) for k in names]),
+          chart("Cumulative squared forecast error", per, [(k, np.cumsum(err[k] ** 2)) for k in names])]
+    return result("forecast_eval", f"Forecast comparison: {y}", T, [stat("Forecasts", T), stat("Horizon", h), stat("Lowest RMSE", best), stat("Benchmark", base)], tabs, ch,
+                  ["Forecasts use only the data available at each origin (no look-ahead), but the data are the final revised values, not real-time vintages.",
+                   "The Diebold-Mariano test is for forecasts that do not come from nested models estimated on a short window; for nested models use the Clark-West test."])
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Diebold-Yilmaz connectedness (spillover) table from a VAR with generalised forecast-error variance decompositions
+# ---------------------------------------------------------------------------------------------------------------
+def _gfevd(res, H):
+    """Row-normalised generalised FEVD (Pesaran-Shin): element [i, j] is the share of variable i's H-step forecast-error variance due to shocks to j."""
+    A = res.ma_rep(H - 1); S = np.asarray(res.sigma_u); k = S.shape[0]
+    th = np.zeros((k, k))
+    for i in range(k):
+        den = sum(A[h][i] @ S @ A[h][i] for h in range(H))
+        for j in range(k):
+            th[i, j] = sum((A[h][i] @ S[:, j]) ** 2 for h in range(H)) / (S[j, j] * den)
+    return th / th.sum(1, keepdims=True)
+
+
+def connectedness(df, spec):
+    from statsmodels.tsa.api import VAR
+    xs = as_list(need(spec, "x", "variables"))
+    if len(xs) < 2:
+        raise OESError("Connectedness needs at least two variables.")
+    d, labels = _series_frame(df, spec, xs); n = len(d)
+    if n < 60:
+        raise OESError("Connectedness analysis needs at least 60 observations.")
+    H = int_option(spec, "horizon", 10, 2, 40, "Forecast horizon"); w = int_option(spec, "window", min(120, n // 2), 30, n, "Rolling window")
+    maxlag = int_option(spec, "maxlag", 6, 1, 12, "Maximum lag")
+    data = d[xs].to_numpy(float)
+    ic = VAR(data).select_order(maxlag); p = max(1, int(ic.selected_orders["bic"])); res = VAR(data).fit(p)
+    th = _gfevd(res, H); k = len(xs)
+    rows = [[xs[i]] + [f(100 * th[i, j], 1) for j in range(k)] + [f(100 * (th[i].sum() - th[i, i]), 1)] for i in range(k)]
+    frm = 100 * (th.sum(1) - np.diag(th)); to = 100 * (th.sum(0) - np.diag(th)); net = to - frm
+    rows.append(["To others"] + [f(to[j], 1) for j in range(k)] + [f(to.sum() / k, 1)])
+    total = float(to.sum() / k)
+    tabs = [table(f"Connectedness table (VAR({p}), horizon {H}, % of forecast-error variance)", ["Variable i"] + [f"from {x}" for x in xs] + ["From others"], rows,
+                  "Row i, column j: the share of the H-step forecast-error variance of i that comes from shocks to j (generalised decomposition, rows normalised to 100). The bottom-right entry is the total connectedness.")]
+    tabs.append(table("Directional spillovers", ["Variable", "To others", "From others", "Net (to - from)", "Role"],
+                      [[xs[i], f(to[i], 1), f(frm[i], 1), f(net[i], 1), "net transmitter" if net[i] > 0 else "net receiver"] for i in range(k)]))
+    # rolling total connectedness
+    roll = []; rl = []
+    for s0 in range(0, n - w + 1, max(1, (n - w) // 80 or 1)):
+        try:
+            rr = VAR(data[s0:s0 + w]).fit(p); t_ = _gfevd(rr, H); roll.append(100 * (t_.sum() - np.trace(t_)) / k); rl.append(labels[s0 + w - 1])
+        except Exception:
+            continue
+    ch = [chart(f"Total connectedness, {w}-period rolling window", rl, [("total connectedness (%)", roll)])]
+    tabs.append(table("Total connectedness over time", ["Statistic", "Value"], [["Full sample", f(total, 1)], ["Minimum over rolling windows", f(min(roll), 1)], ["Maximum over rolling windows", f(max(roll), 1)],
+                      ["Date of maximum", rl[int(np.argmax(roll))]]]))
+    return result("connectedness", f"Connectedness (Diebold-Yilmaz): {', '.join(xs)}", n, [stat("Observations", n), stat("VAR lags (BIC)", p), stat("Total connectedness (%)", total, 1),
+                  stat("Largest net transmitter", xs[int(np.argmax(net))])], tabs, ch,
+                  ["Generalised decompositions do not depend on the ordering of the variables, but the shocks are not orthogonal, so the shares are normalised to sum to one.",
+                   "Connectedness is a statement about forecast-error variance, not about causality."])
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Toda-Yamamoto Granger non-causality test in levels (valid whether the series are I(0), I(1) or cointegrated)
+# ---------------------------------------------------------------------------------------------------------------
+def granger_ty(df, spec):
+    from statsmodels.tsa.api import VAR
+    xs = as_list(need(spec, "x", "variables"))
+    if len(xs) < 2:
+        raise OESError("The test needs at least two variables.")
+    d, labels = _series_frame(df, spec, xs); n = len(d); k = len(xs)
+    dmax = int_option(spec, "dmax", 1, 0, 3, "Maximum order of integration (dmax)"); maxlag = int_option(spec, "maxlag", 8, 1, 12, "Maximum lag")
+    if n < 8 * k + 20:
+        raise OESError("Too few observations for this number of variables.")
+    data = d[xs].to_numpy(float)
+    ic = VAR(data).select_order(maxlag); crit = spec.get("ic") or "aic"
+    if crit not in ("aic", "bic", "hqic"):
+        raise OESError("Choose AIC, BIC or HQIC.")
+    p = int(spec.get("lags") or 0) or max(1, int(ic.selected_orders[crit]))
+    rows = []
+    for i, dep in enumerate(xs):
+        for j, cause in enumerate(xs):
+            if i == j:
+                continue
+            # H0: the first p lags of `cause` do not enter the equation of `dep` (the extra dmax lags are left unrestricted)
+            idx = [1 + (l * k + j) for l in range(p)]
+            X = _ty_design(data, p + dmax); yv = data[p + dmax:, i]
+            beta = np.linalg.lstsq(X, yv, rcond=None)[0]; e = yv - X @ beta; s2 = e @ e / (len(yv) - X.shape[1])
+            Vb = s2 * np.linalg.inv(X.T @ X); R = beta[idx]; W = float(R @ np.linalg.solve(Vb[np.ix_(idx, idx)], R))
+            rows.append([f"{cause} -> {dep}", f(W, 3), p, f(stats.chi2.sf(W, p), 4), "rejects non-causality" if stats.chi2.sf(W, p) < .05 else "does not reject"])
+    tabs = [table(f"Toda-Yamamoto Granger causality (VAR({p}) plus {dmax} extra lag(s) in levels)", ["Direction", "Wald chi-squared", "df", "p-value", "5% decision"], rows,
+                  "H0: the first p lags of the causing variable are jointly zero in the equation of the dependent variable. The dmax extra lags are included but not tested, which keeps the Wald statistic chi-squared even with unit roots.")]
+    tabs.append(table("Lag selection", ["Criterion", "Selected lag"], [[c.upper(), int(ic.selected_orders[c])] for c in ("aic", "bic", "hqic", "fpe")]))
+    # robustness: p-values over alternative lag lengths
+    rob = []
+    for pp in range(1, min(maxlag, 6) + 1):
+        Xp = _ty_design(data, pp + dmax); row = [pp]
+        for i in range(k):
+            for j in range(k):
+                if i == j:
+                    continue
+                yv = data[pp + dmax:, i]; be = np.linalg.lstsq(Xp, yv, rcond=None)[0]; e = yv - Xp @ be; s2 = e @ e / (len(yv) - Xp.shape[1])
+                Vb = s2 * np.linalg.inv(Xp.T @ Xp); idx = [1 + (l * k + j) for l in range(pp)]; Rr = be[idx]
+                row.append(f(stats.chi2.sf(float(Rr @ np.linalg.solve(Vb[np.ix_(idx, idx)], Rr)), pp), 3))
+        rob.append(row)
+    cols_ = ["Lags p"] + [f"{xs[j]} -> {xs[i]}" for i in range(k) for j in range(k) if i != j]
+    tabs.append(table("p-values for other lag lengths", cols_, rob, "A causal conclusion that holds only for one lag length is fragile."))
+    sig = [r[0] for r in rows if r[-1].startswith("rejects")]
+    return result("granger_ty", f"Toda-Yamamoto Granger causality: {', '.join(xs)}", n - p - dmax, [stat("Observations used", n - p - dmax), stat("Lags tested (p)", p), stat("Extra lags (dmax)", dmax),
+                  stat("Directions rejecting non-causality", ", ".join(sig) if sig else "none")], tabs, [],
+                  ["Granger causality is predictive content, not structural causality. Set dmax to the highest order of integration among the variables (from the unit-root tests)."])
+
+
+def _ty_design(data, L):
+    T, k = data.shape
+    return np.column_stack([np.ones(T - L)] + [data[L - l:T - l, j] for l in range(1, L + 1) for j in range(k)])
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Seasonal decomposition (STL), seasonality tests and seasonal adjustment
+# ---------------------------------------------------------------------------------------------------------------
+def seasonal(df, spec):
+    import statsmodels.api as sm
+    from statsmodels.tsa.seasonal import STL
+    y = need(spec, "y", "series")
+    d, labels = _series_frame(df, spec, [y])
+    x = d[y].to_numpy(float); n = len(x)
+    m = int_option(spec, "period", 4, 2, 52, "Seasonal period")
+    if n < 3 * m + 4:
+        raise OESError(f"The series is too short for a seasonal period of {m}: at least {3 * m + 4} observations are needed.")
+    mode = spec.get("mode") or "multiplicative"
+    if mode not in ("additive", "multiplicative"):
+        raise OESError("Choose additive or multiplicative.")
+    if mode == "multiplicative" and (x <= 0).any():
+        raise OESError("A multiplicative decomposition needs a positive series; choose additive.")
+    robust = (spec.get("robust") or "yes") == "yes"
+    z = np.log(x) if mode == "multiplicative" else x
+    res = STL(z, period=m, robust=robust, seasonal=int_option(spec, "swindow", 7, 3, 101, "Seasonal window") | 1).fit()
+    S, T_, R = np.asarray(res.seasonal), np.asarray(res.trend), np.asarray(res.resid)
+    Fs = max(0.0, 1 - R.var() / (S + R).var()); Ft = max(0.0, 1 - R.var() / (T_ + R).var())
+    # test for seasonality: F test of period dummies in a regression of the detrended series
+    det = z - T_; per = np.arange(n) % m
+    D = np.column_stack([(per == j).astype(float) for j in range(m)])
+    ols = sm.OLS(det, D).fit(); Fst = ((det - det.mean()) @ (det - det.mean()) - ols.ssr) / (m - 1) / (ols.ssr / (n - m)); pF = stats.f.sf(Fst, m - 1, n - m)
+    kw = stats.kruskal(*[det[per == j] for j in range(m)])
+    adj = np.exp(z - S) if mode == "multiplicative" else z - S
+    factors = np.exp(S[:m]) if mode == "multiplicative" else S[:m]
+    # seasonal pattern by period (average over the sample) and stability of its amplitude
+    srow = []
+    thirds = np.array_split(np.arange(n), 3)
+    for j in range(m):
+        vals = [(np.exp(S[i]) if mode == "multiplicative" else S[i]) for i in range(n) if per[i] == j]
+        srow.append([f"period {j + 1}", f(np.mean(vals), 4), f(np.min(vals), 4), f(np.max(vals), 4)])
+    amp = [float(np.ptp([np.mean([S[i] for i in th if per[i] == j]) for j in range(m)])) for th in thirds]
+    tabs = [table(f"Seasonal factors ({mode})", ["Position in the cycle", "Mean factor", "Minimum", "Maximum"], srow,
+                  "Multiplicative factors are ratios to the trend (1.00 = no effect); additive factors are in the units of the series. The first observation is position 1.")]
+    tabs.append(table("Strength and tests", ["Statistic", "Value", "p-value"],
+                      [["Seasonal strength (0 to 1)", f(Fs, 3), None], ["Trend strength (0 to 1)", f(Ft, 3), None], ["F test of seasonal dummies (detrended)", f(Fst, 2), f(pF, 4)],
+                       ["Kruskal-Wallis test across periods", f(kw[0], 2), f(kw[1], 4)]],
+                      "Strength = 1 - Var(remainder) / Var(component + remainder) (Wang, Smith and Hyndman). The tests are for equal means across the positions of the cycle."))
+    tabs.append(table("Is the seasonal pattern stable?", ["Part of the sample", "Seasonal amplitude (max - min of the mean factor, log units)" if mode == "multiplicative" else "Seasonal amplitude (max - min)"],
+                      [[f"Part {i + 1} (to {labels[th[-1]]})", f(a, 4)] for i, (th, a) in enumerate(zip(thirds, amp))], "A changing amplitude means the pattern evolves; STL allows this, fixed dummies do not."))
+    ch = [chart(f"{y}: original, trend and seasonally adjusted", labels, [(y, x), ("trend", np.exp(T_) if mode == "multiplicative" else T_), ("seasonally adjusted", adj)]),
+          chart("Seasonal component", labels, [("seasonal", np.exp(S) if mode == "multiplicative" else S)])]
+    return result("seasonal", f"Seasonal decomposition (STL): {y}", n, [stat("Observations", n), stat("Seasonal strength", Fs, 3), stat("Trend strength", Ft, 3),
+                  stat("Seasonality test p-value", float(pF), 4)], tabs, ch,
+                  ["STL is a descriptive filter: it is not the X-13 ARIMA-SEATS procedure used by statistical agencies, and it does not adjust for trading days or holidays.",
+                   "Seasonally adjust before estimating only if the seasonal pattern is not part of the question; otherwise include seasonal terms in the model."])
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Long memory: GPH and local Whittle estimates of the fractional order of integration d
+# ---------------------------------------------------------------------------------------------------------------
+def _periodogram(x):
+    n = len(x); xc = x - x.mean(); fft = np.fft.fft(xc); I = (np.abs(fft) ** 2) / (2 * np.pi * n); lam = 2 * np.pi * np.arange(n) / n
+    return lam[1:(n - 1) // 2 + 1], I[1:(n - 1) // 2 + 1]
+
+
+def _gph(x, m):
+    lam, I = _periodogram(x); lam, I = lam[:m], I[:m]
+    X = -2 * np.log(2 * np.sin(lam / 2)); Xc = X - X.mean(); b = (Xc @ np.log(I)) / (Xc @ Xc)
+    return float(b), float(np.sqrt(np.pi ** 2 / 6 / (Xc @ Xc)))
+
+
+def _whittle(x, m):
+    lam, I = _periodogram(x); lam, I = lam[:m], I[:m]
+    def obj(d):
+        return np.log(np.mean(lam ** (2 * d) * I)) - 2 * d * np.mean(np.log(lam))
+    r = optimize.minimize_scalar(obj, bounds=(-0.49, 1.49), method="bounded")
+    return float(r.x), float(1 / (2 * np.sqrt(m)))
+
+
+def _fracdiff(x, d, thresh=1e-5):
+    n = len(x); w = [1.0]
+    for k in range(1, n):
+        w.append(-w[-1] * (d - k + 1) / k)
+    w = np.array(w); return np.array([w[:t + 1] @ x[t::-1][:t + 1] for t in range(n)])
+
+
+def longmemory(df, spec):
+    from statsmodels.tsa.stattools import acf
+    from statsmodels.stats.diagnostic import acorr_ljungbox
+    y = need(spec, "y", "series")
+    d_, labels = _series_frame(df, spec, [y])
+    x0 = d_[y].to_numpy(float); n = len(x0)
+    if n < 100:
+        raise OESError("Long-memory estimates need at least 100 observations.")
+    tr = spec.get("transform") or "level"
+    if tr not in ("level", "absolute", "squared", "log absolute"):
+        raise OESError("Choose level, absolute, squared or log absolute.")
+    xc = x0 - x0.mean()
+    x = {"level": x0, "absolute": np.abs(xc), "squared": xc ** 2, "log absolute": np.log(np.abs(xc) + 1e-8)}[tr]
+    pw = float_option(spec, "power", 0.65, "Bandwidth power")
+    if not 0.4 <= pw <= 0.85:
+        raise OESError("Bandwidth power must be between 0.4 and 0.85.")
+    ms = sorted(set([int(n ** p_) for p_ in (0.5, 0.6, pw, 0.75, 0.8)]))
+    rows = []
+    for m in ms:
+        g, sg = _gph(x, m); w_, sw = _whittle(x, m)
+        rows.append([m, f"n^{np.log(m) / np.log(n):.2f}", f(g, 3), f(sg, 3), f(w_, 3), f(sw, 3), f(2 * stats.norm.sf(abs(w_) / sw), 4)])
+    m0 = int(n ** pw); g0, sg0 = _gph(x, m0); w0, sw0 = _whittle(x, m0)
+    tabs = [table("Estimates of the fractional order d", ["Frequencies m", "Bandwidth", "GPH d", "s.e.", "Local Whittle d", "s.e.", "p (Whittle, d = 0)"], rows,
+                  "d = 0: short memory; 0 < d < 0.5: stationary long memory (autocorrelations decay hyperbolically); 0.5 <= d < 1: non-stationary but mean-reverting; d = 1: unit root. Standard errors are asymptotic and ignore the bandwidth choice.")]
+    ac = acf(x, nlags=60, fft=True); lags = [1, 5, 10, 20, 40, 60]
+    lb0 = acorr_ljungbox(x, lags=[20], return_df=True)
+    xf = _fracdiff(x - x.mean(), w0); lb1 = acorr_ljungbox(xf[20:], lags=[20], return_df=True)
+    tabs.append(table("Autocorrelations", ["Lag"] + [str(l) for l in lags], [["Series"] + [f(ac[l], 3) for l in lags]], "Short memory: autocorrelations decay geometrically; long memory: slowly."))
+    tabs.append(table("Does fractional differencing remove the dependence?", ["Series", "Ljung-Box (20)", "p-value"],
+                      [[f"{tr}, original", f(lb0.lb_stat.iloc[0], 2), f(lb0.lb_pvalue.iloc[0], 4)], [f"after (1 - L)^{w0:.2f}", f(lb1.lb_stat.iloc[0], 2), f(lb1.lb_pvalue.iloc[0], 4)]],
+                      "If the fractional difference is white noise the long-memory model captures the dependence."))
+    ch = [chart("Autocorrelation function", list(range(1, 61)), [("ACF", ac[1:61])]), chart("Log periodogram against log frequency", list(range(1, m0 + 1)), [("log I(lambda)", np.log(_periodogram(x)[1][:m0]))])]
+    return result("longmemory", f"Long memory: {y} ({tr})", n, [stat("Observations", n), stat("GPH d", g0, 3), stat("Local Whittle d", w0, 3), stat("Bandwidth m", m0)], tabs, ch,
+                  ["Structural breaks and regime changes produce spurious long memory: check for breaks before you conclude that d > 0.",
+                   "The estimates are semiparametric and depend on the bandwidth; report a range."])
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Approximate factor model: principal components with the Bai-Ng information criteria
+# ---------------------------------------------------------------------------------------------------------------
+def factors(df, spec):
+    xs = as_list(need(spec, "x", "variables"))
+    if len(xs) < 5:
+        raise OESError("A factor model needs at least five variables.")
+    d, labels = _series_frame(df, spec, xs); d = d[xs]; T, N = d.shape
+    if T < 30:
+        raise OESError("A factor model needs at least 30 observations.")
+    X = d.to_numpy(float); sd = X.std(0, ddof=0)
+    if (sd == 0).any():
+        raise OESError("A variable is constant; remove it.")
+    Z = (X - X.mean(0)) / sd
+    kmax = int_option(spec, "kmax", min(8, N - 1), 1, N - 1, "Maximum number of factors")
+    U, s, Vt = np.linalg.svd(Z, full_matrices=False); ev = s ** 2 / T
+    def V(k):
+        F = np.sqrt(T) * U[:, :k]; L = Z.T @ F / T; e = Z - F @ L.T; return float((e ** 2).sum() / (N * T))
+    C = (N + T) / (N * T) * np.log(N * T / (N + T)); C2 = (N + T) / (N * T) * np.log(min(N, T)); C3 = np.log(min(N, T)) / min(N, T)
+    V0 = float((Z ** 2).sum() / (N * T)); rows = []; sel_ = {1: (0, 1e9), 2: (0, 1e9), 3: (0, 1e9)}
+    for k in range(0, kmax + 1):
+        Vk = V(k) if k else V0; vals = [np.log(Vk) + k * C, np.log(Vk) + k * C2, np.log(Vk) + k * C3]
+        for i, v in enumerate(vals, 1):
+            if v < sel_[i][1]:
+                sel_[i] = (k, v)
+        rows.append([k, f(Vk, 4)] + [f(v, 4) for v in vals] + [f(float(ev[k - 1]), 3) if k else None, f(100 * float(ev[:k].sum() / ev.sum()), 1) if k else 0.0])
+    r_ = max(1, sel_[2][0]); r_user = int(spec.get("r") or 0); r = r_user if r_user else r_
+    if r > N - 1:
+        raise OESError("The number of factors must be smaller than the number of variables.")
+    tabs = [table("Number of factors (Bai-Ng criteria)", ["Factors k", "Residual variance V(k)", "IC_p1", "IC_p2", "IC_p3", "Eigenvalue of k-th factor", "Cumulative % of variance"], rows,
+                  f"Select the k that minimises each criterion. Selected: IC_p1 = {sel_[1][0]}, IC_p2 = {sel_[2][0]}, IC_p3 = {sel_[3][0]}. Kaiser rule (eigenvalue > 1): {int((ev > 1).sum())} factors. Variables are standardised.")]
+    F = np.sqrt(T) * U[:, :r]; L = Z.T @ F / T; fit = F @ L.T
+    r2 = 1 - ((Z - fit) ** 2).sum(0) / (Z ** 2).sum(0)
+    lrows = [[xs[j]] + [f(L[j, i], 3) for i in range(r)] + [f(r2[j], 3)] for j in range(N)]
+    tabs.append(table(f"Loadings of the {r} factor(s) (sign and scale are arbitrary)", ["Variable"] + [f"Factor {i + 1}" for i in range(r)] + ["R-squared"], lrows, "The factors are identified up to rotation. Read a factor by the variables that load on it most."))
+    # stability: the factors in the first and the second half of the sample
+    h = T // 2; sub = []
+    for lab, sl in (("first half", slice(0, h)), ("second half", slice(h, T))):
+        Zs = Z[sl]; ev_s = np.linalg.svd(Zs, compute_uv=False) ** 2 / len(Zs); sub.append([lab, f(float(ev_s[0] / ev_s.sum() * 100), 1), f(float(ev_s[:min(r, len(ev_s))].sum() / ev_s.sum() * 100), 1)])
+    tabs.append(table("Stability of the factor structure", ["Subsample", "Variance share of the first factor (%)", f"Variance share of the first {r} (%)"], sub, "A large change suggests that the factor structure is not stable."))
+    ch = [chart("Factors (standardised)", labels, [(f"Factor {i + 1}", F[:, i]) for i in range(r)]), chart("Eigenvalues (scree plot)", list(range(1, len(ev) + 1)), [("eigenvalue", ev)], kind="line")]
+    return result("factors", f"Factor model: {len(xs)} variables", T, [stat("Observations", T), stat("Variables", N), stat("Factors (IC_p2)", sel_[2][0]), stat("Variance explained by the factors used (%)", 100 * float(ev[:r].sum() / ev.sum()), 1)],
+                  tabs, ch, ["Principal components are consistent for the factor space when both N and T are large (Bai and Ng, 2002); with N below 20 the criteria are unreliable.",
+                             "Use stationary series. Factors from non-stationary data are dominated by trends."])
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Spectral analysis: periodogram, smoothed spectrum, dominant cycles and coherence between two series
+# ---------------------------------------------------------------------------------------------------------------
+def spectral(df, spec):
+    from scipy import signal
+    y = need(spec, "y", "series"); x2 = spec.get("x") or None
+    cols_ = [y] + ([x2] if x2 else [])
+    d, labels = _series_frame(df, spec, cols_); n = len(d)
+    if n < 60:
+        raise OESError("Spectral analysis needs at least 60 observations.")
+    ppy = int_option(spec, "ppy", 4, 1, 52, "Periods per year")
+    detr = spec.get("detrend") or "linear"
+    if detr not in ("none", "mean", "linear"):
+        raise OESError("Choose none, mean or linear detrending.")
+    seg = int_option(spec, "segment", max(32, n // 3), 16, n, "Segment length (Welch)")
+    def prep(v):
+        v = np.asarray(v, float); t = np.arange(len(v))
+        return v if detr == "none" else (v - v.mean() if detr == "mean" else v - np.polyval(np.polyfit(t, v, 1), t))
+    a = prep(d[y]); fr, P = signal.welch(a, fs=1.0, nperseg=seg, window="hann", noverlap=seg // 2, detrend=False, scaling="density")
+    fr, P = fr[1:], P[1:]; per = 1 / fr / ppy
+    order = np.argsort(P)[::-1][:5]
+    rows = [[f(per[i], 2), f(fr[i] * ppy, 3), f(P[i], 4), f(100 * P[i] / P.sum(), 1)] for i in sorted(order, key=lambda j: -P[j])]
+    tabs = [table("Largest peaks of the smoothed spectrum", ["Period (years)", "Frequency (cycles per year)", "Spectral density", "% of total power"], rows,
+                  f"Welch estimate with {seg}-period Hann segments and 50% overlap, after {detr} detrending. A peak is a cycle only if it is well above the neighbouring frequencies.")]
+    bands = [("Short (under 1.5 years)", 0, 1.5), ("Business cycle (1.5 to 8 years)", 1.5, 8), ("Long (over 8 years)", 8, 1e9)]
+    brow = []
+    for lab, lo, hi in bands:
+        m = (per >= lo) & (per < hi) if hi < 1e9 else (per >= lo)
+        brow.append([lab, f(100 * P[m].sum() / P.sum(), 1)])
+    tabs.append(table("Share of variance by cycle length", ["Band", "% of total power"], brow, "Power in the periods of the smoothed spectrum, relative to the total."))
+    ch = [chart("Smoothed spectrum", [f"{p_:.2f}" for p_ in per], [("spectral density", P)], xlabel="Period (years)")]
+    summ = [stat("Observations", n), stat("Dominant period (years)", float(per[int(np.argmax(P))]), 2), stat("Power in the business-cycle band (%)", brow[1][1], 1)]
+    if x2:
+        b = prep(d[x2]); frc, C = signal.coherence(a, b, fs=1.0, nperseg=seg, window="hann", noverlap=seg // 2); frc, C = frc[1:], C[1:]
+        fr2, Pxy = signal.csd(a, b, fs=1.0, nperseg=seg, window="hann", noverlap=seg // 2); ph = np.angle(Pxy[1:]) / np.pi
+        perc = 1 / frc / ppy; crow = []; K = (n - seg) // (seg - seg // 2) + 1
+        for lab, lo, hi in bands:
+            m = (perc >= lo) & (perc < hi) if hi < 1e9 else (perc >= lo)
+            if m.any():
+                crow.append([lab, f(float(C[m].mean()), 3), f(float(np.median(ph[m])), 2)])
+        tabs.append(table(f"Coherence between {y} and {x2}", ["Band", "Average squared coherence", "Median phase of the second series relative to the first (units of pi)"], crow,
+                          f"Squared coherence is the R-squared of the relation at that frequency (0 to 1). A phase near 0 means the series move together, near +1 or -1 they move in opposite directions. With {K} overlapping segments the 95% significance threshold is about {1 - 0.05 ** (1 / max(1, K - 1)):.2f}."))
+        ch.append(chart("Squared coherence", [f"{p_:.2f}" for p_ in perc], [("coherence", C)], xlabel="Period (years)"))
+        summ.append(stat("Average coherence in the business-cycle band", crow[1][1] if len(crow) > 1 else None, 3))
+    return result("spectral", f"Spectral analysis: {y}" + (f" and {x2}" if x2 else ""), n, summ, tabs, ch,
+                  ["Spectral estimates from short samples are noisy: the Welch segments trade resolution for lower variance.", "Detrending changes the low-frequency power; report the choice."])
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Time-varying-parameter regression (random-walk coefficients, Kalman filter, maximum likelihood)
+# ---------------------------------------------------------------------------------------------------------------
+def tvp_regression(df, spec):
+    import statsmodels.api as sm
+    from statsmodels.tsa.statespace.mlemodel import MLEModel
+    y = need(spec, "y", "dependent variable"); xs = as_list(need(spec, "x", "regressors")); distinct([y], xs)
+    d, labels = _series_frame(df, spec, [y] + xs); n = len(d); k = len(xs) + 1
+    if n < 60:
+        raise OESError("Time-varying-parameter regression needs at least 60 observations.")
+    yv = d[y].to_numpy(float); X = np.column_stack([np.ones(n), d[xs].to_numpy(float)]); names = ["const"] + xs
+    mu_sd = yv.std()
+
+    class TVP(MLEModel):
+        def __init__(self, endog, exog):
+            super().__init__(endog, k_states=k, exog=exog, initialization="diffuse")
+            self["design"] = np.zeros((1, k, n)); self["design", 0, :, :] = exog.T
+            self["transition"] = np.eye(k); self["selection"] = np.eye(k)
+        @property
+        def param_names(self):
+            return ["sigma2.obs"] + [f"sigma2.{nm}" for nm in names]
+        @property
+        def start_params(self):
+            return np.r_[yv.var() * .5, np.full(k, 1e-3 * yv.var())]
+        def transform_params(self, p): return p ** 2
+        def untransform_params(self, p): return np.sqrt(p)
+        def update(self, params, **kw):
+            params = super().update(params, **kw)
+            self["obs_cov", 0, 0] = params[0]; self["state_cov"] = np.diag(params[1:])
+
+    mod = TVP(yv, X)
+    res = mod.fit(method="powell", disp=0, maxiter=4000); res = mod.fit(res.params, method="bfgs", disp=0, maxiter=200)
+    ols = sm.OLS(yv, X).fit(cov_type="HAC", cov_kwds={"maxlags": 4})
+    # constant-coefficient model on the same likelihood basis: the same state-space model with all state variances fixed at zero
+    p_c = np.r_[float(np.mean(ols.resid ** 2)), np.zeros(k)]
+    ll_c = float(mod.loglike(p_c)); ll_t = float(res.llf); lr = 2 * (ll_t - ll_c)
+    bound = res.params[0] < 1e-3 * yv.var()
+    sm_state = np.asarray(res.smoothed_state).T; sd_state = np.sqrt(np.array([np.diag(res.smoothed_state_cov[:, :, t]) for t in range(n)]))
+    prow = [[nm, f(v, 6), f(s, 6)] for nm, v, s in zip(mod.param_names, res.params, np.sqrt(np.maximum(np.diag(res.cov_params()), 0)))]
+    tabs = [table("Variances (maximum likelihood)", ["Parameter", "Estimate", "s.e."], prow, "sigma2.obs is the variance of the regression error; sigma2.<x> is the variance of the random-walk shocks to that coefficient. A variance near zero means the coefficient is constant.")]
+    crow = []
+    for j, nm in enumerate(names):
+        crow.append([nm, f(float(ols.params[j]), 3), f(float(ols.bse[j]), 3), f(float(sm_state[0, j]), 3), f(float(sm_state[n // 2, j]), 3), f(float(sm_state[-1, j]), 3), f(float(sm_state[:, j].min()), 3), f(float(sm_state[:, j].max()), 3)])
+    tabs.append(table("Coefficients: constant model against time-varying path", ["Variable", "OLS", "OLS s.e. (HAC)", "TVP first period", "TVP middle", "TVP last period", "TVP minimum", "TVP maximum"], crow,
+                      "The time-varying coefficients are smoothed estimates (they use the whole sample)."))
+    tabs.append(table("Model comparison", ["Model", "Log-likelihood", "Variance parameters", "AIC"], [["Constant coefficients", f(ll_c, 2), 1, f(-2 * ll_c + 2, 1)], ["Time-varying coefficients", f(ll_t, 2), 1 + k, f(-2 * ll_t + 2 * (1 + k), 1)]],
+                      f"Likelihood-ratio statistic {lr:.1f}; the null (variances of zero) is on the boundary, so the usual chi-squared p-value is not valid: compare with the AIC and the paths."))
+    ch = [chart(f"Smoothed coefficient: {nm}", labels, [("TVP estimate", sm_state[:, j]), ("OLS (constant)", [float(ols.params[j])] * n)], band=(sm_state[:, j] - 1.96 * sd_state[:, j], sm_state[:, j] + 1.96 * sd_state[:, j])) for j, nm in enumerate(names)]
+    notes = ["Coefficients follow random walks; the model detects drift, not sudden breaks (use the break tests for those).", "A smoothed path uses future data, so it cannot be used to claim what agents knew at the time; use the filtered estimates for that."]
+    if bound:
+        notes.append("The variance of the regression error is at zero: the time-varying coefficients absorb all the variation in the dependent variable, so the paths are flexible enough to fit anything. Interpret them with caution.")
+    return result("tvp_regression", f"Time-varying-parameter regression: {y} on {', '.join(xs)}", n, [stat("Observations", n), stat("Log-likelihood", ll_t, 2), stat("AIC (TVP)", -2 * ll_t + 2 * (1 + k), 1), stat("AIC (constant)", -2 * ll_c + 2, 1)], tabs, ch, notes)
