@@ -15,6 +15,7 @@ import pandas as pd
 
 from . import bayes, bayes_extra, bayes_more, breaks, causal, causal_extra, lp, markov, micro, ml, panel, pthreshold, pvar, smooth, statespace_var, svar, tar, timeseries, ts_extra
 from . import panel_extra, ml_extra
+from . import finance
 from . import stat_registry
 from .core import OESError, read_csv, time_order
 from .report import frame, plot, show, summary, tables
@@ -336,6 +337,9 @@ MODELS += [
 
 # ------------------------------------------------------------------ Bayesian
 OX = "oes/examples/"
+FI = "finance-guide/examples/"
+PR = "productivity-guide/examples/"
+NP = "nonparametric-guide/examples/"
 BV_PRIOR = sel("prior", "Prior", [["minnesota", "Minnesota (Litterman)"], ["nw", "Normal-Wishart"], ["inw", "Independent Normal-Wishart"],
                                   ["nd", "Normal-diffuse"]], "minnesota")
 HYP = [num("lambda1", "Overall tightness lambda1", 0.1), num("lambda2", "Cross-variable tightness lambda2", 0.5),
@@ -729,6 +733,16 @@ MODELS += [
          fields=[col("state", "State variable (categories, or a continuous variable to be cut into states)"), col("id", "Unit (optional)", required=False), TIME,
                  num("bins", "States for a continuous variable", 4), num("prior", "Dirichlet prior weight per cell", 1), num("draws", "Posterior draws", 4000), num("seed", "Random seed", 0)],
          example=dict(file=ME + "wagepan_union.csv", spec=dict(state="union", id="nr", time="year"))),
+    dict(id="capm", group="Finance", name="Factor-pricing regressions (CAPM, multi-factor) and the GRS test", guide="finance-guide/capm.html", fn=finance.capm,
+         fields=[cols("assets", "Asset or portfolio returns"), cols("factors", "Factor(s), e.g. the market excess return"), col("rf", "Risk-free rate to subtract from the assets (optional)", required=False), TIME,
+                 num("lags", "Newey-West lags", 4)],
+         example=dict(file=FI + "capm.csv", spec=dict(assets=["rfood", "rdur", "rcon"], factors=["rmrf"], time="month"))),
+    dict(id="var_es", group="Finance", name="Value at risk and expected shortfall with backtests", guide="finance-guide/var-es.html", fn=finance.var_es,
+         fields=[col("y", "Return series"), TIME, num("alpha", "Tail probability", 0.01), num("window", "Estimation window (days)", 500), num("lambda", "EWMA decay", 0.94)],
+         example=dict(file=FI + "crspday.csv", spec=dict(y="crsp", time="date", alpha=0.01, window=500))),
+    dict(id="dcc", group="Finance", name="Dynamic conditional correlation (DCC-GARCH)", guide="finance-guide/dcc.html", fn=finance.dcc,
+         fields=[cols("y", "Return series (2 to 5)"), TIME],
+         example=dict(file=FI + "crspday.csv", spec=dict(y=["ibm", "ge", "mobil"], time="date"))),
 ]
 
 STAT_MODELS = stat_registry.build(col, cols, num, sel)       # the Statistics Division: its own page, registered like every other model

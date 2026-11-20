@@ -1,0 +1,30 @@
+{
+ "finance": {
+  "entries": [
+   {
+    "slug": "capm",
+    "situation": "Do a market factor, or several, explain the returns of stocks, funds or portfolios, and is there any alpha left?",
+    "method": "Factor-pricing regressions and the GRS test",
+    "data": [
+     "oes/examples/capm.csv"
+    ]
+   },
+   {
+    "slug": "var-es",
+    "situation": "How much can a portfolio lose on a bad day, and was the risk model right?",
+    "method": "Value at risk and expected shortfall",
+    "data": [
+     "oes/examples/crspday.csv"
+    ]
+   },
+   {
+    "slug": "dcc",
+    "situation": "Do the correlations between assets change over time, and do they rise in a crisis?",
+    "method": "DCC-GARCH",
+    "data": [
+     "oes/examples/crspday.csv"
+    ]
+   }
+  ]
+ }
+}

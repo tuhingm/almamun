@@ -1752,5 +1752,53 @@
    "label": "Shorrocks mobility",
    "value": 0.362
   }
+ },
+ "capm": {
+  "nobs": 516,
+  "table_index": 0,
+  "table": "Alpha and factor loadings (Newey-West standard errors for alpha)",
+  "row": "rfood",
+  "row_index": 0,
+  "col": "Alpha",
+  "col_index": 1,
+  "value": 0.339177,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "GRS F",
+   "value": 2.61
+  }
+ },
+ "var_es": {
+  "nobs": 2028,
+  "table_index": 0,
+  "table": "Out-of-sample value at risk at the 99% level (2028 days)",
+  "row": "Historical simulation",
+  "row_index": 0,
+  "col": "Violation rate (%)",
+  "col_index": 2,
+  "value": 1.42998,
+  "rtol": 0.001,
+  "seconds": 0.1,
+  "summary": {
+   "label": "Tail probability",
+   "value": 0.01
+  }
+ },
+ "dcc": {
+  "nobs": 2528,
+  "table_index": 0,
+  "table": "Step 1: univariate GARCH(1,1) for each series",
+  "row": "ibm",
+  "row_index": 0,
+  "col": "Mean",
+  "col_index": 1,
+  "value": 0.000765,
+  "rtol": 0.001,
+  "seconds": 0.5,
+  "summary": {
+   "label": "DCC a",
+   "value": 0.0093
+  }
  }
 }

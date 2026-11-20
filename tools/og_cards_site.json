@@ -282,6 +282,30 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Dynare code, real output and sample text."
  },
  {
+  "out": "assets/og/finance-guide/capm.jpg",
+  "kicker": "Finance Guide · Model guide",
+  "title": "Factor-Pricing Regressions and the GRS Test",
+  "sub": "You want to know whether a market factor, or several factors, explain the average returns of stocks, industries or funds, and…"
+ },
+ {
+  "out": "assets/og/finance-guide/dcc.jpg",
+  "kicker": "Finance Guide · Model guide",
+  "title": "Dynamic Conditional Correlation (DCC-GARCH)",
+  "sub": "You want to know whether the correlation between assets is constant, how it moves over time, and whether it rises when markets…"
+ },
+ {
+  "out": "assets/og/finance-guide/index.jpg",
+  "kicker": "Finance Guide",
+  "title": "Which finance model fits your question?",
+  "sub": "Factor pricing, value at risk, volatility and correlation, portfolios, bubbles and the yield curve: tests on real data and the text for the paper."
+ },
+ {
+  "out": "assets/og/finance-guide/var-es.jpg",
+  "kicker": "Finance Guide · Model guide",
+  "title": "Value at Risk and Expected Shortfall",
+  "sub": "You need to say how much a portfolio can lose on a bad day, compare risk models, and show a regulator or a reader that the model…"
+ },
+ {
   "out": "assets/og/markov-guide/bayesian-ms.jpg",
   "kicker": "Markov-Switching Guide · Model guide",
   "title": "Bayesian Markov-Switching Regression",
