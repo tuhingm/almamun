@@ -246,6 +246,12 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Python code, real output and sample text."
  },
  {
+  "out": "assets/og/microeconometrics-guide/conditional-mixed-logit.jpg",
+  "kicker": "Microeconometrics Guide · Model guide",
+  "title": "Conditional and Mixed Logit (Discrete Choice)",
+  "sub": "People choose one option among several (travel mode, brand, product, site, school), and the options have attributes such as price…"
+ },
+ {
   "out": "assets/og/microeconometrics-guide/count-models.jpg",
   "kicker": "Microeconometrics Guide · Model guide",
   "title": "Poisson and Negative-Binomial Regression (Counts)",

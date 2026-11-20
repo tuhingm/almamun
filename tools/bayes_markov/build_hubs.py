@@ -59,7 +59,8 @@ HUBS = {
                ("A proportion between 0 and 1, or a positive skewed amount, where OLS predicts impossible values", "GLM and fractional response", "glm-fractional"),
                ("Several outcomes with correlated errors, or outcomes that determine each other (labor supply and wages)", "SUR and 3SLS", "systems-sur-3sls"),
                ("A yes/no outcome for the same units over time (union membership, employment, default)", "Panel logit and probit", "panel-logit-probit"),
-               ("A yes/no outcome with a regressor that is correlated with the error and a valid instrument", "IV probit", "iv-probit")],
+               ("A yes/no outcome with a regressor that is correlated with the error and a valid instrument", "IV probit", "iv-probit"),
+               ("People choosing one option among several with prices and attributes (travel mode, brand, site)", "Conditional and mixed logit", "conditional-mixed-logit")],
         other=("Your outcome is a continuous variable observed over time or across units?", "Use the <a href=\"../time-series-guide/index.html\">Time-Series Guide</a> or the <a href=\"../panel-data-guide/index.html\">Panel-Data Guide</a>.")),
 }
 
