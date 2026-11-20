@@ -175,7 +175,8 @@
       '<div class="row ds-actions"><button type="button" class="btn" id="mpFetch">Fetch data</button></div><div id="mpStatus" class="status" role="status" aria-live="polite"></div>' +
       '<div id="mpResult" class="ds-result hidden"><h3>Retrieved observations</h3><p class="sub" id="mpMeta"></p><div id="mpWarn"></div><div id="mpPrev"></div>' +
       '<div class="row ds-actions"><button type="button" class="btn secondary" id="mpCsv">Download CSV</button><button type="button" class="btn secondary" id="mpXlsx">Download Excel</button><button type="button" class="btn" id="mpSend">Send to Cleaning Lab</button></div>' +
-      '<p class="sub">Source: ' + esc(p.name) + ' (<a href="' + esc(p.site) + '" target="_blank" rel="noopener">' + esc(p.site) + '</a>). ' + esc(p.licence) + ' Observations may be revised; check the provider metadata before publishing.</p></div></div>';
+      '<p class="sub">Source: ' + esc(p.name) + ' (<a href="' + esc(p.site) + '" target="_blank" rel="noopener">' + esc(p.site) + '</a>). ' + esc(p.licence) + ' Observations may be revised; check the provider metadata before publishing.</p></div><div id="mpBrowse" style="margin-top:14px"></div></div>';
+    if (window.OESBrowse) window.OESBrowse.mount($("mpBrowse"), key);
     $("mpFetch").onclick = run;
     updateEnts();
     $("mpInds").onchange = updateEnts;
