@@ -37,6 +37,8 @@ h2{font:800 22px/1.25 Manrope;letter-spacing:-.4px;margin:0 0 6px}h3{font:800 15
 .models{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}.models button{text-align:left;border:1px solid var(--line);background:#fff;border-radius:10px;padding:11px 13px;font-size:13px;font-weight:700;color:var(--ink);line-height:1.35;transition:border-color .15s,background .15s}.models button:hover{border-color:var(--sky2);background:#f7fbff}.models button[aria-pressed=true]{border-color:var(--navy);background:var(--tint);color:var(--navy)}.models button small{display:block;font-weight:500;font-size:11px;color:var(--muted);margin-top:2px}
 .chosen{margin-top:14px;padding:12px 14px;border-radius:10px;background:#f5f7fc;border:1px solid #e1e7f1;font-size:13px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}.chosen a{color:var(--navy);font-weight:700;text-decoration:underline}
 .btn,.btn2{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:8px;padding:10px 16px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.btn{background:var(--navy);color:#fff}.btn2{background:#e9eef8;color:var(--navy)}.btn:disabled,.btn2:disabled{opacity:.45;cursor:not-allowed}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.prep-opt{display:flex;gap:10px;align-items:flex-start;margin:12px 0 0;padding:10px 12px;border:1px solid #cfe0f5;background:#f3f8ff;border-radius:9px;font-size:13px;cursor:pointer}.prep-opt input{margin-top:3px;accent-color:var(--navy)}
+.prep{border:1px solid #cfe0f5;border-radius:10px;background:#fff;padding:14px 16px;margin-top:12px;font-size:13px}.prep h3{font-family:inherit;margin:0 0 6px;font-size:15px;color:var(--navy)}.prep h4{margin:12px 0 4px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}.prep ul{margin:0;padding-left:18px}.prep li{margin:3px 0}.prep ul.warn li{color:#7a4a00}.prep .prep-sum{margin:0}.prep details{margin-top:10px}.prep summary{cursor:pointer;font-weight:700;color:var(--navy)}.prep table{border-collapse:collapse;margin-top:6px;font-size:12px}.prep th,.prep td{border-bottom:1px solid #e1e7f1;padding:3px 10px;text-align:left}.prep .row{margin-top:12px}
 .drop{border:1.5px dashed #aebbd0;border-radius:10px;background:#f8faff;padding:18px;text-align:center;font-size:13px;color:var(--muted);margin-top:12px}.drop.over{border-color:var(--navy);background:var(--tint)}
 .hint{font-size:11.5px;color:#6b7891}.pill{display:inline-block;font-size:11px;font-weight:700;color:var(--navy);background:var(--tint);border-radius:20px;padding:2px 10px;margin-left:6px}
 .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 18px}.field{display:grid;gap:4px;margin:8px 0}.field>label,.field>span.l{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#596780}.field select,.field input:not([type=checkbox]){width:100%;min-height:38px;padding:7px 10px;border:1px solid #ccd6e5;border-radius:7px;background:#fff;color:var(--ink);font-size:13px}.field .req{color:var(--bad)}
@@ -78,9 +80,11 @@ footer{background:#00205b;color:#dce7f6;padding:25px 0;font-size:12px}footer .fo
 <div class="chosen" id="chosen" hidden></div>
 </section>
 
-<section class="step" id="s-data"><span class="stepno">02 · Data</span><h2>Load data</h2><p class="sub">Use the dataset from the model's guide, or your own CSV file with one column per variable (and unit and time columns for panel data).</p>
-<div class="row"><button class="btn" id="load-ex" type="button" disabled>Load the guide example</button><label class="btn2" for="file">Upload a CSV file</label><input type="file" id="file" accept=".csv,.txt,text/csv,text/plain" hidden><span class="hint" id="data-info">No data loaded.</span></div>
-<div class="drop" id="drop">or drop a CSV file here</div>
+<section class="step" id="s-data"><span class="stepno">02 · Data</span><h2>Load data</h2><p class="sub">Use the dataset from the model's guide, or upload your own CSV or Excel file with one column per variable (and unit and time columns for panel data). Uploaded files are checked and prepared for estimation automatically. For more control, use the <a href="data-cleaning.html" style="text-decoration:underline">Data Cleaning Lab</a>.</p>
+<div class="row"><button class="btn" id="load-ex" type="button" disabled>Load the guide example</button><label class="btn2" for="file">Upload a CSV or Excel file</label><input type="file" id="file" accept=".csv,.txt,.tsv,.xlsx,.xls,text/csv,text/plain" hidden><span class="hint" id="data-info">No data loaded.</span></div>
+<label class="prep-opt" for="auto-prep"><input type="checkbox" id="auto-prep" checked><span><b>Make my data estimation-ready</b> <span class="hint">On upload, OES fixes numbers written as text, dates, column names and sort order, finds the unit and time columns, and lists any problems. It never fills in missing values or deletes observations. Turn off to use your file exactly as it is.</span></span></label>
+<div class="drop" id="drop">or drop a CSV or Excel file here</div>
+<div class="prep" id="prep" hidden aria-live="polite"></div>
 <div class="table-wrap" id="preview" hidden></div>
 </section>
 
@@ -131,6 +135,7 @@ footer{background:#00205b;color:#dce7f6;padding:25px 0;font-size:12px}footer .fo
 <div><b>Bayesian and regime-switching models</b>The Bayesian VARs follow the ECB's BEAR toolbox (Minnesota, Normal-Wishart, Independent Normal-Wishart and Normal-diffuse priors, FAVAR, steady-state, panel, TVP, stochastic-volatility, mixed-frequency and threshold VARs). Markov-switching models are estimated by maximum likelihood; the regression and AR versions reproduce Stata's and Hamilton's published estimates.</div>
 <div><b>The same code as the guides</b>Difference GMM, the panel ARDL estimators, the causal designs and double machine learning use the helper files published with the guides. Static panel models reproduce linearmodels, including its small-sample scaling.</div>
 <div><b>What is not here</b>DSGE models are solved and estimated in Dynare; see the <a href="../dsge-guide/index.html" style="text-decoration:underline">DSGE Guide</a>. The causal forest is a doubly robust forest, not EconML's implementation, which does not run in a browser.</div>
+<div><b>Automatic data preparation</b>Uploaded CSV and Excel files are checked and prepared for estimation in your browser: numbers written as text (1,234.50, 1.234,5, $12, 12%), missing-value codes, yes/no columns, dates, column names and sort order are fixed, the unit and time columns are found, and problems such as an unbalanced panel, duplicate unit-period rows, gaps in time or codes like -999 are listed. Missing values are never filled in and no observation is deleted. You can download the prepared file or switch the option off. For manual cleaning use the <a href="data-cleaning.html" style="text-decoration:underline">Data Cleaning Lab</a>.</div>
 <div><b>Large files</b>Everything runs on your computer, so very large datasets and the forest-based methods take longer. Fewer trees or folds speed them up.</div>
 <div><b>Gemini development workspace</b>Use the <a href="ai-studio.html" style="text-decoration:underline;color:var(--navy)">OES AI Studio</a> to work directly with the OES source code through the Gemini API, review proposed improvements, and submit approved changes through GitHub pull requests.</div>
 </div>
@@ -165,6 +170,7 @@ footer{background:#00205b;color:#dce7f6;padding:25px 0;font-size:12px}footer .fo
 </section>
 \n</main>
 <footer><div class="wrap foot"><span><b>Tuhin G. M. Al Mamun, Ph.D.</b> · Open Econometric Systems</span><span><a href="https://github.com/tuhingm/open-econometric-systems" target="_blank" rel="noopener">Source code</a> · © <span id="year"></span></span></div></footer>
+<script src="auto-prepare.js"></script>
 <script>
 (() => {
 const $ = id => document.getElementById(id);
@@ -373,17 +379,77 @@ $("load-ex").onclick = async () => {
   const ex = MODEL.example;
   try {
     const r = await fetch("../" + ex.file); if (!r.ok) throw new Error("Could not download the example (" + r.status + ").");
+    PREP = null; LAST = null; renderPrep();
     setData(ex.file.split("/").pop(), await r.text());
     OPS = JSON.parse(JSON.stringify(ex.ops || [])); renderOps(); renderOpForm(); renderFields(ex.spec);
     $("s-spec").scrollIntoView({behavior: "smooth"});
   } catch (e) { showErr(e.message); }
 };
+// ----------------------------------------------------------------------------- upload and automatic preparation
+let PREP = null, LAST = null;     // PREP: the prepared copy in use; LAST: the file as uploaded (before preparation)
+function decodeBytes(buf) {       // UTF-8 first; Korean Excel exports are often EUC-KR, older Windows files windows-1252
+  try { return {text: new TextDecoder("utf-8", {fatal: true}).decode(buf), enc: "UTF-8"}; } catch (e) { /* not UTF-8 */ }
+  for (const enc of ["euc-kr", "windows-1252"]) { try { return {text: new TextDecoder(enc, {fatal: true}).decode(buf), enc}; } catch (e) { /* next */ } }
+  return {text: new TextDecoder("utf-8").decode(buf), enc: "UTF-8"};
+}
+function loadUpload(name, text, notes) {
+  LAST = {name, text, notes: notes || []};
+  hideErr();
+  if ($("auto-prep").checked) {
+    try {
+      const res = OESPrepare.prepare(text);
+      res.changes.unshift(...LAST.notes);
+      PREP = {name, res};
+      setData(name, res.csv);
+      const st = res.structure;                                   // preselect the unit and time columns the checks found
+      if (MODEL && (st.time || st.unit)) renderFields({unit: st.kind === "panel" ? st.unit : undefined, time: st.time || undefined});
+      $("data-info").innerHTML = `<b>${esc(name)}</b>: ${res.rows.toLocaleString()} rows, ${res.cols} columns (prepared)`;
+      renderPrep(); return;
+    } catch (e) { PREP = null; showErr("The file could not be prepared automatically (" + e.message + "). It is shown as uploaded."); }
+  } else PREP = null;
+  setData(name, text);
+  renderPrep();
+}
+function renderPrep() {
+  const box = $("prep");
+  if (!PREP) { box.hidden = true; box.innerHTML = ""; return; }
+  const r = PREP.res, st = r.structure, li = a => a.map(x => `<li>${esc(x)}</li>`).join("");
+  const layout = st.kind === "panel" ? `Panel data: unit <b>${esc(st.unit)}</b>, time <b>${esc(st.time)}</b> (${st.units} units, ${st.periods} periods${st.balanced ? ", balanced" : ", unbalanced"}).`
+    : st.kind === "time series" ? `Time series: time column <b>${esc(st.time)}</b> (${st.periods} periods).`
+    : st.kind === "unclear" ? "Time column found, but no unit column: choose the unit yourself if this is a panel."
+    : "No time column found: treated as a cross-section.";
+  box.hidden = false;
+  box.innerHTML = `<h3>Estimation-ready check</h3>
+<p class="prep-sum"><b>${r.rows.toLocaleString()}</b> rows, <b>${r.cols}</b> columns, <b>${r.ready.numericVars}</b> numeric variables; <b>${r.ready.completeRows.toLocaleString()}</b> rows have no missing numeric value. ${layout} Each model uses only the columns you choose and skips rows that are incomplete in those columns.</p>
+${r.changes.length ? `<h4>What was fixed</h4><ul>${li(r.changes)}</ul>` : `<p class="hint" style="margin:8px 0 0">Nothing needed fixing: the file was already estimation-ready.</p>`}
+${r.warnings.length ? `<h4>Please check</h4><ul class="warn">${li(r.warnings)}</ul>` : ""}
+<details><summary>Columns (${r.cols})</summary><table><thead><tr><th>Column</th><th>Type</th><th>Missing</th></tr></thead><tbody>${r.columns.map(c => `<tr><td>${esc(c.name)}</td><td>${c.type}</td><td>${c.missing ? c.missing.toLocaleString() + " (" + (100 * c.pctMissing).toFixed(1) + "%)" : "0"}</td></tr>`).join("")}</tbody></table></details>
+<div class="row"><button class="btn2" id="prep-dl" type="button">Download the prepared CSV</button><button class="btn2" id="prep-undo" type="button">Use my original file instead</button></div>`;
+  $("prep-dl").onclick = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([r.csv], {type: "text/csv"})); a.download = PREP.name.replace(/\.[^.]+$/, "") + "_prepared.csv"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); };
+  $("prep-undo").onclick = () => { $("auto-prep").checked = false; if (LAST) loadUpload(LAST.name, LAST.text, LAST.notes); };
+}
+$("auto-prep").onchange = () => { if (LAST) loadUpload(LAST.name, LAST.text, LAST.notes); };
+function loadSheetJS() {
+  return window.XLSX ? Promise.resolve() : new Promise((ok, bad) => {
+    const sc = document.createElement("script"); sc.src = "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"; sc.onload = ok;
+    sc.onerror = () => bad(new Error("The Excel reader could not be loaded. Save the sheet as CSV and upload that instead."));
+    document.head.appendChild(sc);
+  });
+}
+async function readExcel(f) {
+  await loadSheetJS();
+  const wb = XLSX.read(await f.arrayBuffer(), {type: "array"});
+  const sheet = wb.SheetNames[0];
+  loadUpload(f.name.replace(/\.xlsx?$/i, "") + ".csv", XLSX.utils.sheet_to_csv(wb.Sheets[sheet]),
+    [`Read the first sheet, "${sheet}"` + (wb.SheetNames.length > 1 ? ` (the workbook has ${wb.SheetNames.length} sheets; to use another, move it first or save it as CSV).` : ".")]);
+}
 function readFile(f) {
   if (!f) return;
   if (f.size > 60e6) return showErr("The file is larger than 60 MB; please use a smaller extract.");
+  if (/\.xlsx?$/i.test(f.name)) { readExcel(f).catch(e => showErr(e.message)); return; }
   const rd = new FileReader();
-  rd.onload = () => { try { setData(f.name, String(rd.result)); hideErr(); } catch (e) { showErr(e.message); } };
-  rd.readAsText(f);
+  rd.onload = () => { try { const d = decodeBytes(rd.result); loadUpload(f.name, d.text, d.enc === "UTF-8" ? [] : [`The file was not UTF-8; read it as ${d.enc} text.`]); } catch (e) { showErr(e.message); } };
+  rd.readAsArrayBuffer(f);
 }
 $("file").onchange = e => readFile(e.target.files[0]);
 const drop = $("drop");
