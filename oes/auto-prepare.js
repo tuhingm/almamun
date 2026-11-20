@@ -272,6 +272,8 @@ function prepare(text, opts) {
     if (/^(t|time|obs)$/i.test(c.name)) return new Set(v).size === v.length;      // a bare "time" can be survival time: accept only a running index
     return true;
   });
+  const pick = n => n ? names.indexOf(n) : -1;
+  if (opts.time !== undefined) { time = pick(opts.time); if (time >= 0 && info[time].type === "text") warn(`"${names[time]}" was chosen as the time column but its values are not dates or numbers, so rows cannot be ordered by it.`); }
   if (time >= 0 && new Set(colVals(time)).size < 2) time = -1;       // one period only: nothing to order
   let unit = -1, best = -1;
   const tvAll = time >= 0 ? colVals(time) : null, nPer = tvAll ? new Set(tvAll).size : 0;
@@ -293,6 +295,8 @@ function prepare(text, opts) {
     }
     if (score > best) { best = score; unit = j; }
   });
+  if (opts.unit !== undefined) unit = pick(opts.unit);
+  if (unit >= 0 && unit === time) unit = -1;
   const structure = {unit: unit >= 0 ? names[unit] : null, time: time >= 0 ? names[time] : null, kind: "cross-section"};
   const tk = time >= 0 ? colVals(time).map(timeKey) : [];
   if (time >= 0 && tk.some(Number.isNaN)) { structure.time = null; time = -1; }

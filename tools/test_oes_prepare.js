@@ -87,4 +87,11 @@ t("advanced: fill (median, ffill/interp within unit, flag), outliers, drop", () 
   assert.throws(() => P.advanced(csv, {outlier: {method: "winsor", lo: 50, hi: 10, cols: ["x"]}}, st));
   assert.strictEqual(P.advanced("a,b\n1,2\n1,2\n", {duplicates: true}, {}).rows, 1);
 });
+t("unit and time can be corrected by the user", () => {
+  const csv = "g,yr,v\nA,2000,1\nA,2001,2\nB,2000,3\nB,2001,4\nC,2000,5\nC,2001,6\n";
+  assert.strictEqual(P.prepare(csv).structure.unit, "g");
+  const none = P.prepare(csv, {unit: ""}); assert.strictEqual(none.structure.unit, null); assert.strictEqual(none.structure.kind, "unclear");
+  assert.strictEqual(P.prepare(csv, {unit: "g", time: "yr"}).structure.kind, "panel");
+  assert.strictEqual(P.prepare(csv, {time: ""}).structure.time, null);
+});
 t("errors", () => { assert.throws(() => P.prepare("")); assert.throws(() => P.prepare("a,b\n")); });

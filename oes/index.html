@@ -39,7 +39,7 @@ h2{font:800 22px/1.25 Manrope;letter-spacing:-.4px;margin:0 0 6px}h3{font:800 15
 .btn,.btn2{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:8px;padding:10px 16px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.btn{background:var(--navy);color:#fff}.btn2{background:#e9eef8;color:var(--navy)}.btn:disabled,.btn2:disabled{opacity:.45;cursor:not-allowed}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .prep-opt{display:flex;gap:10px;align-items:flex-start;margin:12px 0 0;padding:10px 12px;border:1px solid #cfe0f5;background:#f3f8ff;border-radius:9px;font-size:13px;cursor:pointer}.prep-opt input{margin-top:3px;accent-color:var(--navy)}
 .prep{border:1px solid #cfe0f5;border-radius:10px;background:#fff;padding:14px 16px;margin-top:12px;font-size:13px}.prep h3{font-family:inherit;margin:0 0 6px;font-size:15px;color:var(--navy)}.prep h4{margin:12px 0 4px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}.prep ul{margin:0;padding-left:18px}.prep li{margin:3px 0}.prep ul.warn{margin:8px 0}.prep ul.warn li{color:#7a4a00}.prep .prep-sum{margin:0}.prep details{margin-top:10px}.prep summary{cursor:pointer;font-weight:700;color:var(--navy)}.prep table{border-collapse:collapse;margin-top:6px;font-size:12px}.prep th,.prep td{border-bottom:1px solid #e1e7f1;padding:3px 10px;text-align:left}.prep .row{margin-top:12px}
-.prep-adv,.prep-fixed{margin-top:10px}.prep-adv>summary,.prep-fixed>summary{cursor:pointer;font-weight:700;color:var(--navy)}.adv-q{display:grid;grid-template-columns:minmax(150px,.5fr) 1fr;gap:10px;align-items:center;margin:10px 0}.adv-q select{font:inherit;font-size:13px;padding:6px 8px;border:1px solid #c9d3e3;border-radius:6px;background:#fff}.prep-links{margin:12px 0 0;font-size:12px;color:var(--muted)}.prep-links button{background:none;border:0;padding:0;font:inherit;color:var(--navy);text-decoration:underline;cursor:pointer}@media(max-width:700px){.adv-q{grid-template-columns:1fr}}
+.prep-adv,.prep-fixed{margin-top:10px}.prep-adv>summary,.prep-fixed>summary{cursor:pointer;font-weight:700;color:var(--navy)}.adv-q{display:grid;grid-template-columns:minmax(150px,.5fr) 1fr;gap:10px;align-items:center;margin:10px 0}.adv-q select{font:inherit;font-size:13px;padding:6px 8px;border:1px solid #c9d3e3;border-radius:6px;background:#fff}.prep-links{margin:12px 0 0;font-size:12px;color:var(--muted)}.linkbtn,.prep-links button{background:none;border:0;padding:0;font:inherit;color:var(--navy);text-decoration:underline;cursor:pointer}.linkbtn{font-size:12px;margin-left:6px}@media(max-width:700px){.adv-q{grid-template-columns:1fr}}
 .drop{border:1.5px dashed #aebbd0;border-radius:10px;background:#f8faff;padding:18px;text-align:center;font-size:13px;color:var(--muted);margin-top:12px}.drop.over{border-color:var(--navy);background:var(--tint)}
 .hint{font-size:11.5px;color:#6b7891}.pill{display:inline-block;font-size:11px;font-weight:700;color:var(--navy);background:var(--tint);border-radius:20px;padding:2px 10px;margin-left:6px}
 .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 18px}.field{display:grid;gap:4px;margin:8px 0}.field>label,.field>span.l{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#596780}.field select,.field input:not([type=checkbox]){width:100%;min-height:38px;padding:7px 10px;border:1px solid #ccd6e5;border-radius:7px;background:#fff;color:var(--ink);font-size:13px}.field .req{color:var(--bad)}
@@ -393,14 +393,14 @@ function decodeBytes(buf) {       // UTF-8 first; Korean Excel exports are often
   for (const enc of ["euc-kr", "windows-1252"]) { try { return {text: new TextDecoder(enc, {fatal: true}).decode(buf), enc}; } catch (e) { /* next */ } }
   return {text: new TextDecoder("utf-8").decode(buf), enc: "UTF-8"};
 }
-function loadUpload(name, text, notes) {
+function loadUpload(name, text, notes, ov) {
   LAST = {name, text, notes: notes || []};
   hideErr();
   if ($("auto-prep").checked) {
     try {
-      const res = OESPrepare.prepare(text);
+      const res = OESPrepare.prepare(text, ov || {});
       res.changes.unshift(...LAST.notes);
-      PREP = {name, res, adv: null, opts: null};
+      PREP = {name, res, adv: null, opts: null, ov: ov || null};
       setData(name, res.csv);
       const st = res.structure;                                   // preselect the unit and time columns the checks found
       if (MODEL && (st.time || st.unit)) renderFields({unit: st.kind === "panel" ? st.unit : undefined, time: st.time || undefined});
@@ -464,7 +464,8 @@ function renderPrep() {
     : "Cross-section";
   box.hidden = false;
   box.innerHTML = `<h3>${warnings.length ? "Your data is ready: please check " + warnings.length + (warnings.length > 1 ? " things" : " thing") : "Your data is ready"}</h3>
-<p class="prep-sum">${r.rows.toLocaleString()} rows · ${r.cols} columns · ${layout}</p>
+<p class="prep-sum">${r.rows.toLocaleString()} rows · ${r.cols} columns · ${layout} <button class="linkbtn" id="lay-toggle" type="button">Not right? Change</button></p>
+<div class="adv-q" id="lay-box" hidden><label>Unit (country, firm, id …)</label><select id="lay-unit">${layoutOpts(base, st.unit)}</select><label>Time (year, date …)</label><select id="lay-time">${layoutOpts(base, st.time)}</select></div>
 ${warnings.length ? `<ul class="warn">${li(warnings)}</ul>` : ""}
 ${base.changes.length || (A && A.log.length) ? `<details class="prep-fixed"><summary>What was fixed (${base.changes.length + (A ? A.log.length : 0)})</summary><ul>${li(base.changes.concat(A ? A.log : []))}</ul></details>` : ""}
 ${advHTML(base, PREP.opts)}
@@ -474,6 +475,17 @@ ${advHTML(base, PREP.opts)}
   $("prep-log").onclick = () => download(stem + "_cleaning_log.txt", cleaningLog(), "text/plain");
   $("prep-undo").onclick = () => { $("auto-prep").checked = false; if (LAST) loadUpload(LAST.name, LAST.text, LAST.notes); };
   $("adv-apply").onclick = applyAdvanced; $("adv-reset").onclick = resetAdvanced;
+  $("lay-toggle").onclick = () => { $("lay-box").hidden = !$("lay-box").hidden; };
+  $("lay-unit").onchange = $("lay-time").onchange = relayout;
+}
+function layoutOpts(res, cur) {
+  return `<option value="">(none)</option>` + res.columns.filter(c => c.type !== "empty").map(c => `<option value="${esc(c.name)}" ${c.name === cur ? "selected" : ""}>${esc(c.name)}</option>`).join("");
+}
+function relayout() {         // the user corrected the unit or time column: prepare the original file again with that choice
+  const keep = PREP.opts, ov = {unit: $("lay-unit").value, time: $("lay-time").value};
+  loadUpload(LAST.name, LAST.text, LAST.notes, ov);
+  if (PREP && keep) { try { PREP.adv = OESPrepare.advanced(PREP.res.csv, keep, PREP.res.structure); PREP.opts = keep; useCleaned(PREP.adv.csv, PREP.adv.rows, PREP.adv.cols); } catch (e) { showErr(e.message); } }
+  renderPrep(); if (PREP) $("lay-box").hidden = false;
 }
 $("auto-prep").onchange = () => { if (LAST) loadUpload(LAST.name, LAST.text, LAST.notes); };
 function loadSheetJS() {
