@@ -288,6 +288,12 @@
   "sub": "An outcome with ordered categories (low, medium, high; a rating from 1 to 5; a degree level) explained by one or more regressors.…"
  },
  {
+  "out": "assets/og/microeconometrics-guide/systems-sur-3sls.jpg",
+  "kicker": "Microeconometrics Guide · Model guide",
+  "title": "Systems of Equations: SUR and Three-Stage Least Squares",
+  "sub": "Several equations whose errors are correlated (time use, expenditure shares, labor supply and wages), or equations that determine…"
+ },
+ {
   "out": "assets/og/microeconometrics-guide/tobit.jpg",
   "kicker": "Microeconometrics Guide · Model guide",
   "title": "Tobit Regression (Censored Outcomes)",

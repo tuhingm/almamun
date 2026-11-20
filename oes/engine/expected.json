@@ -1124,5 +1124,21 @@
    "label": "Log-likelihood",
    "value": -423.7189
   }
+ },
+ "systems": {
+  "nobs": 706,
+  "table_index": 0,
+  "table": "Equation 1: sleep",
+  "row": "educ",
+  "row_index": 1,
+  "col": "Coef.",
+  "col_index": 1,
+  "value": -9.983294,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "Breusch-Pagan LM",
+   "value": 75.9871
+  }
  }
 }

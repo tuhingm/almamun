@@ -534,3 +534,53 @@ def test_glm_errors():
         r = pension(**kw)
         if msg: assert msg in r["error"]
         else: assert "error" not in r
+
+
+# ------------------------------------------------------------------ systems of equations
+def sleepwork(**kw):
+    spec = dict(o.BY_ID["systems"]["example"]["spec"]); spec.update(kw)
+    return o.run("systems", open(os.path.join(ME, "sleep_work.csv")).read(), spec)
+
+
+def test_sur_matches_hand_written_feasible_gls():
+    d = pd.read_csv(os.path.join(ME, "sleep_work.csv")); n = len(d)
+    X1 = sm.add_constant(d[["educ", "age", "male", "yngkid", "gdhlth"]]).values; X2 = sm.add_constant(d[["educ", "age", "male", "union", "south"]]).values
+    y1, y2 = d.sleep.values.astype(float), d.totwrk.values.astype(float)
+    e = np.column_stack([y1 - X1 @ np.linalg.lstsq(X1, y1, rcond=None)[0], y2 - X2 @ np.linalg.lstsq(X2, y2, rcond=None)[0]]); S = e.T @ e / n
+    Si = np.linalg.inv(S); k = X1.shape[1]
+    A = np.block([[Si[0, 0] * X1.T @ X1, Si[0, 1] * X1.T @ X2], [Si[1, 0] * X2.T @ X1, Si[1, 1] * X2.T @ X2]])
+    rhs = np.r_[Si[0, 0] * X1.T @ y1 + Si[0, 1] * X1.T @ y2, Si[1, 0] * X2.T @ y1 + Si[1, 1] * X2.T @ y2]
+    b = np.linalg.solve(A, rhs); se = np.sqrt(np.diag(np.linalg.inv(A)))
+    r = sleepwork()
+    for i, nm in enumerate(["const", "educ", "age", "male", "yngkid", "gdhlth"]):
+        assert row(r, "Equation 1", nm)[1] == pytest.approx(b[i], abs=1e-4) and row(r, "Equation 1", nm)[2] == pytest.approx(se[i], abs=1e-4)
+    assert row(r, "Equation 2", "south")[1] == pytest.approx(b[k + 5], abs=1e-4)
+
+
+def test_sur_equals_ols_with_identical_regressors():
+    same = ["educ", "age", "male"]
+    r = sleepwork(x1=same, x2=same); o_ = sleepwork(x1=same, x2=same, estimator="ols")
+    for nm in ["const", "educ", "age", "male"]:
+        assert row(r, "Equation 1", nm)[1] == pytest.approx(row(o_, "Equation 1", nm)[1], abs=1e-6)
+
+
+def test_3sls_first_equation_matches_independent_2sls_and_recovers_simulation():
+    rng = np.random.default_rng(8); n = 5000
+    z1, z2, x = rng.normal(size=(3, n)); u = rng.multivariate_normal([0, 0], [[1, .6], [.6, 1]], n)
+    # system: y1 = 1 + 0.5 y2 + x + u1 ; y2 = 2 - 0.3 y1 + z1 + z2 + u2   -> solve the simultaneous system
+    a, b_ = 0.5, -0.3; c1 = 1 + x + u[:, 0]; c2 = 2 + z1 + z2 + u[:, 1]
+    y1 = (c1 + a * c2) / (1 - a * b_); y2 = c2 + b_ * y1
+    dd = pd.DataFrame(dict(y1=y1, y2=y2, x=x, z1=z1, z2=z2))
+    r = o.run("systems", dd.to_csv(index=False), dict(estimator="3sls", y1="y1", x1=["y2", "x"], y2="y2", x2=["y1", "z1", "z2"], endog=["y1", "y2"]))
+    assert row(r, "Equation 1", "y2")[1] == pytest.approx(0.5, abs=0.06) and row(r, "Equation 2", "y1")[1] == pytest.approx(-0.3, abs=0.06)
+    Z = sm.add_constant(dd[["x", "z1", "z2"]]).values; X = np.column_stack([np.ones(n), y2, x]); Xh = Z @ np.linalg.lstsq(Z, X, rcond=None)[0]
+    b2 = np.linalg.solve(Xh.T @ X, Xh.T @ y1)                    # 2SLS by hand
+    o2 = o.run("systems", dd.to_csv(index=False), dict(estimator="3sls", y1="y1", x1=["y2", "x"], y2="y2", x2=["y1", "z1", "z2"], endog=["y1", "y2"]))
+    assert abs(row(o2, "Equation 1", "y2")[1] - b2[1]) < 0.05    # 3SLS and 2SLS agree up to efficiency differences
+
+
+def test_systems_errors():
+    for kw, msg in [(dict(y2="", x2=[]), "at least two equations"), (dict(y2="sleep"), "own outcome"), (dict(estimator="3sls"), "endogenous regressors")]:
+        assert msg in sleepwork(**kw)["error"]
+    assert "under-identified" in o.run("systems", open(os.path.join(ME, "openness.csv")).read(),
+        dict(estimator="3sls", y1="inf", x1=["open", "lpcinc"], y2="open", x2=["inf", "lpcinc", "lland"], endog=["open", "inf"]))["error"]

@@ -56,7 +56,8 @@ HUBS = {
                ("An outcome observed only for a self-selected part of the sample (wages of workers)", "Heckman selection", "heckman"),
                ("A count outcome: doctor visits, patents, accidents, arrests", "Poisson and negative binomial", "count-models"),
                ("A count with many zeros that a Poisson or negative binomial cannot reproduce", "Zero-inflated and hurdle", "zero-inflated-hurdle"),
-               ("A proportion between 0 and 1, or a positive skewed amount, where OLS predicts impossible values", "GLM and fractional response", "glm-fractional")],
+               ("A proportion between 0 and 1, or a positive skewed amount, where OLS predicts impossible values", "GLM and fractional response", "glm-fractional"),
+               ("Several outcomes with correlated errors, or outcomes that determine each other (labor supply and wages)", "SUR and 3SLS", "systems-sur-3sls")],
         other=("Your outcome is a continuous variable observed over time or across units?", "Use the <a href=\"../time-series-guide/index.html\">Time-Series Guide</a> or the <a href=\"../panel-data-guide/index.html\">Panel-Data Guide</a>.")),
 }
 
