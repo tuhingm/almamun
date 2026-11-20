@@ -951,3 +951,59 @@ def connectedness(df, spec):
                   stat("Largest net transmitter", xs[int(np.argmax(net))])], tabs, ch,
                   ["Generalised decompositions do not depend on the ordering of the variables, but the shocks are not orthogonal, so the shares are normalised to sum to one.",
                    "Connectedness is a statement about forecast-error variance, not about causality."])
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Toda-Yamamoto Granger non-causality test in levels (valid whether the series are I(0), I(1) or cointegrated)
+# ---------------------------------------------------------------------------------------------------------------
+def granger_ty(df, spec):
+    from statsmodels.tsa.api import VAR
+    xs = as_list(need(spec, "x", "variables"))
+    if len(xs) < 2:
+        raise OESError("The test needs at least two variables.")
+    d, labels = _series_frame(df, spec, xs); n = len(d); k = len(xs)
+    dmax = int_option(spec, "dmax", 1, 0, 3, "Maximum order of integration (dmax)"); maxlag = int_option(spec, "maxlag", 8, 1, 12, "Maximum lag")
+    if n < 8 * k + 20:
+        raise OESError("Too few observations for this number of variables.")
+    data = d[xs].to_numpy(float)
+    ic = VAR(data).select_order(maxlag); crit = spec.get("ic") or "aic"
+    if crit not in ("aic", "bic", "hqic"):
+        raise OESError("Choose AIC, BIC or HQIC.")
+    p = int(spec.get("lags") or 0) or max(1, int(ic.selected_orders[crit]))
+    rows = []
+    for i, dep in enumerate(xs):
+        for j, cause in enumerate(xs):
+            if i == j:
+                continue
+            # H0: the first p lags of `cause` do not enter the equation of `dep` (the extra dmax lags are left unrestricted)
+            idx = [1 + (l * k + j) for l in range(p)]
+            X = _ty_design(data, p + dmax); yv = data[p + dmax:, i]
+            beta = np.linalg.lstsq(X, yv, rcond=None)[0]; e = yv - X @ beta; s2 = e @ e / (len(yv) - X.shape[1])
+            Vb = s2 * np.linalg.inv(X.T @ X); R = beta[idx]; W = float(R @ np.linalg.solve(Vb[np.ix_(idx, idx)], R))
+            rows.append([f"{cause} -> {dep}", f(W, 3), p, f(stats.chi2.sf(W, p), 4), "rejects non-causality" if stats.chi2.sf(W, p) < .05 else "does not reject"])
+    tabs = [table(f"Toda-Yamamoto Granger causality (VAR({p}) plus {dmax} extra lag(s) in levels)", ["Direction", "Wald chi-squared", "df", "p-value", "5% decision"], rows,
+                  "H0: the first p lags of the causing variable are jointly zero in the equation of the dependent variable. The dmax extra lags are included but not tested, which keeps the Wald statistic chi-squared even with unit roots.")]
+    tabs.append(table("Lag selection", ["Criterion", "Selected lag"], [[c.upper(), int(ic.selected_orders[c])] for c in ("aic", "bic", "hqic", "fpe")]))
+    # robustness: p-values over alternative lag lengths
+    rob = []
+    for pp in range(1, min(maxlag, 6) + 1):
+        Xp = _ty_design(data, pp + dmax); row = [pp]
+        for i in range(k):
+            for j in range(k):
+                if i == j:
+                    continue
+                yv = data[pp + dmax:, i]; be = np.linalg.lstsq(Xp, yv, rcond=None)[0]; e = yv - Xp @ be; s2 = e @ e / (len(yv) - Xp.shape[1])
+                Vb = s2 * np.linalg.inv(Xp.T @ Xp); idx = [1 + (l * k + j) for l in range(pp)]; Rr = be[idx]
+                row.append(f(stats.chi2.sf(float(Rr @ np.linalg.solve(Vb[np.ix_(idx, idx)], Rr)), pp), 3))
+        rob.append(row)
+    cols_ = ["Lags p"] + [f"{xs[j]} -> {xs[i]}" for i in range(k) for j in range(k) if i != j]
+    tabs.append(table("p-values for other lag lengths", cols_, rob, "A causal conclusion that holds only for one lag length is fragile."))
+    sig = [r[0] for r in rows if r[-1].startswith("rejects")]
+    return result("granger_ty", f"Toda-Yamamoto Granger causality: {', '.join(xs)}", n - p - dmax, [stat("Observations used", n - p - dmax), stat("Lags tested (p)", p), stat("Extra lags (dmax)", dmax),
+                  stat("Directions rejecting non-causality", ", ".join(sig) if sig else "none")], tabs, [],
+                  ["Granger causality is predictive content, not structural causality. Set dmax to the highest order of integration among the variables (from the unit-root tests)."])
+
+
+def _ty_design(data, L):
+    T, k = data.shape
+    return np.column_stack([np.ones(T - L)] + [data[L - l:T - l, j] for l in range(1, L + 1) for j in range(k)])

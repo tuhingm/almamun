@@ -558,6 +558,10 @@ MODELS += [
     dict(id="connectedness", group="Time series", name="Connectedness and spillovers (Diebold-Yilmaz)", guide="time-series-guide/spillovers.html", fn=ts_extra.connectedness,
          fields=[cols("x", "Variables (two or more)"), TIME, num("horizon", "Forecast horizon", 10), num("maxlag", "Maximum VAR lag (BIC)", 6), num("window", "Rolling window", 120)],
          example=dict(file="time-series-guide/examples/returns.csv", spec=dict(x=["sp500_return", "ip_growth", "d_fedfunds", "d_credit_spread"], time="date", horizon=10, maxlag=6, window=120))),
+    dict(id="granger_ty", group="Time series", name="Granger causality in levels (Toda-Yamamoto)", guide="time-series-guide/granger-causality.html", fn=ts_extra.granger_ty,
+         fields=[cols("x", "Variables (two or more, in levels)"), TIME, num("dmax", "Extra lags dmax (highest order of integration)", 1), sel("ic", "Lag criterion", [["aic", "AIC"], ["bic", "BIC"], ["hqic", "HQIC"]], "aic"),
+                 num("lags", "Lags p (blank = criterion)", ""), num("maxlag", "Maximum lag", 8)],
+         example=dict(file="time-series-guide/examples/money.csv", spec=dict(x=["log_price", "log_m2", "log_gdp"], time="date", dmax=1, ic="aic", maxlag=8))),
 ]
 
 MODELS += [

@@ -1248,5 +1248,17 @@
    "label": "Total connectedness (%)",
    "value": 19.3
   }
+ },
+ "granger_ty": {
+  "nobs": 235,
+  "table_index": 0,
+  "table": "Toda-Yamamoto Granger causality (VAR(4) plus 1 extra lag(s) in levels)",
+  "row": "log_m2 -> log_price",
+  "row_index": 0,
+  "col": "Wald chi-squared",
+  "col_index": 1,
+  "value": 5.222,
+  "rtol": 0.001,
+  "seconds": 0.0
  }
 }
