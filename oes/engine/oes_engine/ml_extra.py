@@ -425,3 +425,54 @@ def cluster(df, spec):
     summary = [stat("Observations", n), stat("Variables", len(x)), stat("Method", {"kmeans": "k-means", "gmm": "Gaussian mixture", "ward": "Ward hierarchical"}[method]), stat("Clusters", kk), stat("Average silhouette", sil[kk], 4), stat("Mean adjusted Rand index (stability)", float(ari.mean()), 4)]
     return result("cluster", f"Clustering of {n} observations into {kk} groups", n, summary, [sel_tab, ptab, stab], ch,
                   ["Variables are standardised before clustering, so every variable counts equally; change the variable list, not the scale, to change what the clusters mean.", "Clusters are a description of the sample. A partition exists for any data, so check stability and silhouette before interpreting."])
+
+
+# ------------------------------------------------------------------------------------------------------------------
+# Neural network regression: a multilayer perceptron with cross-validated architecture and penalty, early stopping and a seed ensemble
+# ------------------------------------------------------------------------------------------------------------------
+def _mlp(hidden, alpha, seed):
+    from sklearn.compose import TransformedTargetRegressor
+    from sklearn.neural_network import MLPRegressor
+    from sklearn.pipeline import make_pipeline
+    from sklearn.preprocessing import StandardScaler
+    net = MLPRegressor(hidden_layer_sizes=hidden, alpha=alpha, activation="relu", solver="adam", learning_rate_init=0.003, max_iter=400, early_stopping=True, validation_fraction=0.15, n_iter_no_change=25, random_state=seed)
+    return TransformedTargetRegressor(regressor=make_pipeline(StandardScaler(), net), transformer=StandardScaler())
+
+
+def nnet(df, spec):
+    d, y, x, ts = _xy(df, spec)
+    share = float_option(spec, "test_share", 0.25, "Test share")
+    if not 0.05 <= share <= 0.5:
+        raise OESError("The test share must be between 0.05 and 0.5.")
+    S = int_option(spec, "seeds", 5, 1, 20, "Number of networks in the ensemble")
+    from sklearn.base import clone
+    from sklearn.ensemble import RandomForestRegressor
+    from sklearn.linear_model import LinearRegression
+    from sklearn.model_selection import KFold
+    from sklearn.pipeline import make_pipeline
+    from sklearn.preprocessing import StandardScaler
+    X, Y = d[x].astype(float).to_numpy(), d[y].astype(float).to_numpy(); tr, te = _split(len(d), ts, share)
+    if len(tr) < 60:
+        raise OESError("A neural network needs at least 60 training observations.")
+    grid = [((16,), 0.01), ((16,), 1.0), ((32, 16), 0.01), ((32, 16), 1.0)]; cv = []
+    folds = KFold(3, shuffle=not ts, random_state=None if ts else 0).split(tr)
+    for a_, b_ in folds:
+        for g, (h, al) in enumerate(grid):
+            p = clone(_mlp(h, al, 0)).fit(X[tr][a_], Y[tr][a_]).predict(X[tr][b_]); cv.append((g, float(np.sqrt(np.mean((Y[tr][b_] - p) ** 2)))))
+    cvr = [float(np.mean([v for g, v in cv if g == j])) for j in range(len(grid))]; best = int(np.argmin(cvr)); h, al = grid[best]
+    nets = [clone(_mlp(h, al, s_)).fit(X[tr], Y[tr]) for s_ in range(S)]; P = np.column_stack([n_.predict(X[te]) for n_ in nets]); ens = P.mean(1)
+    den = float(((Y[te] - Y[tr].mean()) ** 2).sum()); rm = lambda p: float(np.sqrt(np.mean((Y[te] - p) ** 2))); r2 = lambda p: 1 - float(((Y[te] - p) ** 2).sum()) / den
+    ols = make_pipeline(StandardScaler(), LinearRegression()).fit(X[tr], Y[tr]).predict(X[te]); rf = RandomForestRegressor(n_estimators=150, min_samples_leaf=5, max_features=0.5, random_state=0, n_jobs=1).fit(X[tr], Y[tr]).predict(X[te])
+    single = [rm(P[:, j]) for j in range(S)]
+    arch = lambda hh: "(" + ", ".join(str(v) for v in hh) + ")"
+    ctab = table("Architecture and penalty chosen by 3-fold cross-validation (training sample)", ["Hidden layers", "L2 penalty (alpha)", "CV RMSE", "Chosen"], [[arch(g[0]), f(g[1], 3), f(cvr[j], 4), "yes" if j == best else ""] for j, g in enumerate(grid)],
+                 "ReLU units, Adam optimiser, 15% of each training sample held back for early stopping (patience 25 epochs). Inputs and the outcome are standardised.")
+    etab = table("Out-of-sample accuracy", ["Model", "Test RMSE", "Test R-squared"], [[f"Neural network, ensemble of {S}", f(rm(ens), 4), f(r2(ens), 4)], ["Neural network, single (mean over the seeds)", f(float(np.mean(single)), 4), f(float(np.mean([r2(P[:, j]) for j in range(S)])), 4)],
+                 ["Neural network, single (worst and best seed)", f"{max(single):.4f} / {min(single):.4f}", ""], ["OLS", f(rm(ols), 4), f(r2(ols), 4)], ["Random forest", f(rm(rf), 4), f(r2(rf), 4)]],
+                 f"Test set: {'the last' if ts else 'a random'} {int(round(share * 100))}% ({len(te)} observations). The spread across seeds is the instability of a single network; the ensemble averages it away.")
+    curve = nets[0].regressor_[-1].loss_curve_; vc = getattr(nets[0].regressor_[-1], "validation_scores_", None)
+    ch = [chart("Training loss of the first network", list(range(1, len(curve) + 1)), [("Training loss", [float(v) for v in curve])], "Epoch", "Squared-error loss", kind="line")]
+    if vc is not None:
+        ch.append(chart("Validation R-squared (early stopping) of the first network", list(range(1, len(vc) + 1)), [("Validation R-squared", [float(v) for v in vc])], "Epoch", "R-squared", kind="line"))
+    summary = [stat("Observations", len(d)), stat("Predictors", len(x)), stat("Architecture", arch(h)), stat("Penalty alpha", al, 3), stat("Epochs (first network)", int(nets[0].regressor_[-1].n_iter_)), stat("Test RMSE, ensemble", rm(ens), 4), stat("Test R-squared, ensemble", r2(ens), 4), stat("Test RMSE, OLS", rm(ols), 4)]
+    return result("nnet", f"Neural network regression for {y}", len(d), summary, [ctab, etab], ch, ["A neural network has no coefficients to report; use the interpretation tools (permutation importance, partial dependence) to describe it.", "Single networks depend on the random initial weights; an ensemble over seeds is the reportable estimate."])

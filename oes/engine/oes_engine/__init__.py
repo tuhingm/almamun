@@ -327,6 +327,9 @@ MODELS += [
     dict(id="cluster", group="Machine learning", name="Clustering: k-means, Gaussian mixture and Ward (number of clusters, stability)", guide="ml-guide/clustering.html", fn=ml_extra.cluster,
          fields=[cols("x", "Variables to cluster on"), sel("method", "Method", [["kmeans", "k-means"], ["gmm", "Gaussian mixture"], ["ward", "Ward hierarchical"]], "kmeans"), num("k", "Number of clusters (auto = chosen by the data)", "auto"), num("kmax", "Largest number of clusters to try", 8), num("boot", "Stability resamples", 50)],
          example=dict(file=MLD + "growth.csv", spec=dict(x=["gdpsh465", "human65", "lifee065", "fert65", "invsh41", "govwb1", "freeop", "pop65"], method="kmeans", k="auto"))),
+    dict(id="nnet", group="Machine learning", name="Neural network regression (multilayer perceptron, early stopping, ensemble)", guide="ml-guide/neural-network.html", fn=ml_extra.nnet,
+         fields=[col("y", "Outcome to predict"), cols("x", "Predictors"), col("time", "Time column (time-ordered validation)", required=False), num("test_share", "Test share", 0.25), num("seeds", "Networks in the ensemble", 5)],
+         example=dict(file=MLD + "hprice2.csv", spec=dict(y="lprice", x="__all__"))),
 ]
 
 # ------------------------------------------------------------------ Bayesian

@@ -1592,5 +1592,21 @@
    "label": "Average silhouette",
    "value": 0.3907
   }
+ },
+ "nnet": {
+  "nobs": 506,
+  "table_index": 0,
+  "table": "Architecture and penalty chosen by 3-fold cross-validation (training sample)",
+  "row": "(16)",
+  "row_index": 0,
+  "col": "L2 penalty (alpha)",
+  "col_index": 1,
+  "value": 0.01,
+  "rtol": 0.05,
+  "seconds": 1.9,
+  "summary": {
+   "label": "Penalty alpha",
+   "value": 0.01
+  }
  }
 }

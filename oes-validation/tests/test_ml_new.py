@@ -302,3 +302,42 @@ def test_cluster_reproducible_and_errors():
     with pytest.raises(OESError, match="at least two"): ml_extra.cluster(d, dict(x=["a"]))
     with pytest.raises(OESError, match="constant"): ml_extra.cluster(d.assign(c=1.0), dict(x=["a", "b", "c"]))
     with pytest.raises(OESError, match="at least"): ml_extra.cluster(d.iloc[:20], dict(x=["a", "b", "c"]))
+
+
+# ------------------------------------------------------------------ neural network
+def _nn_data(kind, n=900, seed=0):
+    rng = np.random.default_rng(seed); X = rng.normal(size=(n, 3)); e = rng.normal(size=n) * 0.2
+    y = {"nonlinear": np.sin(2.5 * X[:, 0]) + X[:, 1] ** 2 + e, "linear": 1 + X @ np.array([1.0, -0.7, 0.4]) + e}[kind]
+    return pd.DataFrame(dict(y=y, a=X[:, 0], b=X[:, 1], c=X[:, 2]))
+
+
+def _nrun(d, **kw): return ml_extra.nnet(d, dict(y="y", x=["a", "b", "c"], **kw))
+def nrow(r, name): return next(x for x in r["tables"][1]["rows"] if x[0].startswith(name))
+
+
+def test_nnet_registered():
+    m = o.BY_ID["nnet"]; assert m["group"] == "Machine learning" and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+def test_nnet_learns_nonlinear_function_and_matches_ols_on_linear():
+    r = _nrun(_nn_data("nonlinear"), seeds=3); assert float(nrow(r, "Neural network, ensemble")[2]) > float(nrow(r, "OLS")[2]) + 0.4 and float(nrow(r, "Neural network, ensemble")[2]) > 0.8
+    r = _nrun(_nn_data("linear", seed=1), seeds=3); assert float(nrow(r, "Neural network, ensemble")[2]) > float(nrow(r, "OLS")[2]) - 0.03
+
+
+def test_nnet_ensemble_never_worse_than_average_single_network():
+    r = _nrun(_nn_data("nonlinear", seed=2), seeds=4); assert float(nrow(r, "Neural network, ensemble")[1]) <= float(nrow(r, "Neural network, single (mean")[1]) + 1e-9
+    worst, best = [float(v) for v in nrow(r, "Neural network, single (worst")[1].split(" / ")]; assert best <= worst
+
+
+def test_nnet_selects_lowest_cv_architecture_and_is_reproducible():
+    d = _nn_data("nonlinear", n=500, seed=3); r = _nrun(d, seeds=2); rows = r["tables"][0]["rows"]; chosen = [x for x in rows if x[3] == "yes"]
+    assert len(chosen) == 1 and float(chosen[0][2]) == min(float(x[2]) for x in rows) and r["tables"] == _nrun(d, seeds=2)["tables"]
+    assert S(r)["Architecture"].startswith("(")
+
+
+def test_nnet_time_split_and_errors():
+    d = _nn_data("linear", n=400); d["t"] = np.arange(len(d)); assert "last" in _nrun(d, time="t", seeds=1)["tables"][1]["note"]
+    with pytest.raises(OESError, match="at least 60"): _nrun(d.iloc[:70], seeds=1)
+    with pytest.raises(OESError, match="whole number"): _nrun(d, seeds="x")
+    with pytest.raises(OESError, match="between 1 and 20"): _nrun(d, seeds=50)
+    with pytest.raises(OESError, match="more than one role"): ml_extra.nnet(d, dict(y="y", x=["y", "a"]))
