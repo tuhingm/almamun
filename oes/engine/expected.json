@@ -1576,5 +1576,21 @@
    "label": "Double-selection estimate",
    "value": -0.05001
   }
+ },
+ "cluster": {
+  "nobs": 90,
+  "table_index": 0,
+  "table": "Number of clusters",
+  "row": "2",
+  "row_index": 0,
+  "col": "Within-cluster sum of squares",
+  "col_index": 1,
+  "value": 427.7,
+  "rtol": 0.05,
+  "seconds": 0.4,
+  "summary": {
+   "label": "Average silhouette",
+   "value": 0.3907
+  }
  }
 }

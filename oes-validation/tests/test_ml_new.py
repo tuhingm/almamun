@@ -255,3 +255,50 @@ def test_dsel_p_larger_than_n_has_no_full_ols_and_errors():
     with pytest.raises(OESError, match="penalty constant"): ml_extra.dsel(df, dict(y="y", treat="d", x=["x0"], c=9))
     with pytest.raises(OESError, match="not found"): ml_extra.dsel(df, dict(y="y", treat="d", x=["nope"]))
     with pytest.raises(OESError, match="at least 30"): ml_extra.dsel(df.iloc[:20], dict(y="y", treat="d", x=["x0", "x1"]))
+
+
+# ------------------------------------------------------------------ clustering
+def _blobs(n=300, k=3, sep=6.0, seed=0, noise=1.0):
+    rng = np.random.default_rng(seed); cent = (np.eye(k, 3) * sep if k <= 3 else rng.normal(size=(k, 3)) * sep); lab = rng.integers(0, k, n)
+    X = cent[lab] + rng.normal(size=(n, 3)) * noise; d = pd.DataFrame(X, columns=["a", "b", "c"]); return d, lab
+
+
+def _crun(d, **kw): return ml_extra.cluster(d, dict(x=["a", "b", "c"], boot=20, **kw))
+def crow(r, i): return r["tables"][i]["rows"]
+
+
+def test_cluster_registered():
+    m = o.BY_ID["cluster"]; assert m["group"] == "Machine learning" and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+@pytest.mark.parametrize("method", ["kmeans", "gmm", "ward"])
+def test_cluster_recovers_known_clusters(method):
+    from sklearn.metrics import adjusted_rand_score
+    d, lab = _blobs(); r = _crun(d, method=method); s = S(r)
+    assert s["Clusters"] == 3 and float(s["Average silhouette"]) > 0.6 and float(s["Mean adjusted Rand index (stability)"]) > 0.9
+    sizes = [x[1] for x in crow(r, 1)[:-1]]; assert sizes == sorted(sizes, reverse=True) and sum(sizes) == 300
+    assert sorted(sizes) == sorted(np.bincount(lab).tolist())
+
+
+def test_cluster_statistics_match_sklearn():
+    from sklearn.cluster import KMeans
+    from sklearn.metrics import silhouette_score, calinski_harabasz_score
+    d, _ = _blobs(seed=2, sep=3.0); r = _crun(d, method="kmeans", k=4); Z = ((d - d.mean()) / d.std(ddof=0)).to_numpy(); km = KMeans(4, n_init=10, random_state=0).fit(Z)
+    row = next(x for x in crow(r, 0) if x[0] == 4)
+    assert abs(float(row[1]) - km.inertia_) < 0.02 and abs(float(row[2]) - silhouette_score(Z, km.labels_)) < 1e-4 and abs(float(row[3]) - calinski_harabasz_score(Z, km.labels_)) < 0.02
+    assert S(r)["Clusters"] == 4
+
+
+def test_cluster_weak_structure_is_flagged_by_silhouette_and_stability():
+    rng = np.random.default_rng(3); d = pd.DataFrame(rng.uniform(size=(300, 3)), columns=["a", "b", "c"]); r = _crun(d, method="kmeans"); good = _crun(_blobs()[0], method="kmeans")
+    assert float(S(r)["Average silhouette"]) < 0.4 and float(S(good)["Average silhouette"]) > 0.6 and float(S(r)["Mean adjusted Rand index (stability)"]) < float(S(good)["Mean adjusted Rand index (stability)"])
+
+
+def test_cluster_reproducible_and_errors():
+    d, _ = _blobs(seed=5); assert _crun(d)["tables"] == _crun(d)["tables"]
+    with pytest.raises(OESError, match="method"): _crun(d, method="dbscan")
+    with pytest.raises(OESError, match="between 2"): _crun(d, k=50)
+    with pytest.raises(OESError, match="whole number"): _crun(d, k="many")
+    with pytest.raises(OESError, match="at least two"): ml_extra.cluster(d, dict(x=["a"]))
+    with pytest.raises(OESError, match="constant"): ml_extra.cluster(d.assign(c=1.0), dict(x=["a", "b", "c"]))
+    with pytest.raises(OESError, match="at least"): ml_extra.cluster(d.iloc[:20], dict(x=["a", "b", "c"]))

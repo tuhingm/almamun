@@ -351,3 +351,77 @@ def dsel(df, spec):
     ch = [chart("Estimates and 95% intervals", [r[0].split(" (")[0][:28] for r in rows if r[1] != "n/a"], [("Estimate", [float(r[1]) for r in rows if r[1] != "n/a"])], "Estimator", "Estimate", kind="bar")]
     return result("dsel", f"Double-selection LASSO: effect of {t} on {y}", n, summary, [tab, stab], ch,
                   ["Selecting controls for the outcome alone omits controls that matter for the treatment and biases the estimate; the union of the two selections protects against this (Belloni, Chernozhukov and Hansen 2014).", "The theory needs approximately sparse effects of the controls on both the outcome and the treatment, and a treatment that is not too well predicted by the controls."])
+
+
+# ------------------------------------------------------------------------------------------------------------------
+# Clustering: k-means, Gaussian mixtures and Ward hierarchical clustering with the number of clusters chosen by the data
+# ------------------------------------------------------------------------------------------------------------------
+def _fit_cluster(method, Z, k, seed=0):
+    from sklearn.cluster import AgglomerativeClustering, KMeans
+    from sklearn.mixture import GaussianMixture
+    if method == "kmeans":
+        m = KMeans(n_clusters=k, n_init=10, random_state=seed).fit(Z); return m.labels_, m.cluster_centers_
+    if method == "gmm":
+        m = GaussianMixture(n_components=k, covariance_type="full", n_init=3, random_state=seed, reg_covar=1e-4).fit(Z); lab = m.predict(Z); return lab, m.means_
+    lab = AgglomerativeClustering(n_clusters=k, linkage="ward").fit_predict(Z); return lab, np.array([Z[lab == c].mean(0) for c in range(k)])
+
+
+def cluster(df, spec):
+    x = as_list(need(spec, "x", "variables to cluster on")); distinct(x)
+    miss = [c for c in x if c not in df.columns]
+    if miss:
+        raise OESError("Column(s) not found in the data: " + ", ".join(miss))
+    d = df[x].apply(pd.to_numeric, errors="coerce").dropna().reset_index(drop=True); n = len(d)
+    method = str(spec.get("method") or "kmeans")
+    if method not in ("kmeans", "gmm", "ward"):
+        raise OESError("The method must be kmeans, gmm or ward.")
+    if len(x) < 2:
+        raise OESError("Choose at least two variables.")
+    kmax = int_option(spec, "kmax", 8, 3, 15, "Largest number of clusters"); kspec = spec.get("k", "auto"); B = int_option(spec, "boot", 50, 10, 300, "Stability resamples")
+    if n < 5 * kmax:
+        raise OESError(f"With up to {kmax} clusters the data need at least {5 * kmax} observations; {n} were found.")
+    if (d.std() == 0).any():
+        raise OESError("A clustering variable is constant: " + ", ".join(d.columns[d.std() == 0]) + ".")
+    from sklearn.decomposition import PCA
+    from sklearn.metrics import adjusted_rand_score, calinski_harabasz_score, davies_bouldin_score, silhouette_score
+    from sklearn.mixture import GaussianMixture
+    Z = ((d - d.mean()) / d.std(ddof=0)).to_numpy(float); rows = []; sil = {}; bic = {}
+    for k in range(2, kmax + 1):
+        lab, cen = _fit_cluster(method, Z, k)
+        if len(set(lab)) < 2:
+            continue
+        inertia = float(sum(((Z[lab == c] - Z[lab == c].mean(0)) ** 2).sum() for c in set(lab))); sil[k] = float(silhouette_score(Z, lab))
+        b = float(GaussianMixture(n_components=k, covariance_type="diag", n_init=2, random_state=0, reg_covar=1e-4).fit(Z).bic(Z)) if method == "gmm" else float("nan"); bic[k] = b
+        rows.append([k, f(inertia, 2), f(sil[k], 4), f(float(calinski_harabasz_score(Z, lab)), 2), f(float(davies_bouldin_score(Z, lab)), 4)] + ([f(b, 1)] if method == "gmm" else []))
+    if kspec in ("auto", "", None):
+        kk = max(sil, key=sil.get) if method != "gmm" else min((k for k in bic if np.isfinite(bic[k])), key=lambda k: bic[k]); how = "silhouette" if method != "gmm" else "BIC"
+    else:
+        try:
+            kk = int(kspec)
+        except (TypeError, ValueError):
+            raise OESError("The number of clusters must be 'auto' or a whole number.")
+        if not 2 <= kk <= kmax:
+            raise OESError(f"The number of clusters must be between 2 and {kmax}."); 
+        how = "your choice"
+    sel_tab = table("Number of clusters", ["k", "Within-cluster sum of squares", "Average silhouette", "Calinski-Harabasz", "Davies-Bouldin"] + (["BIC (diagonal mixture)"] if method == "gmm" else []), rows,
+                    f"Silhouette near 1 means well-separated clusters, near 0 means overlapping ones. Higher Calinski-Harabasz and lower Davies-Bouldin are better. k = {kk} was chosen by {how}.")
+    lab, cen = _fit_cluster(method, Z, kk); order = np.argsort(-np.bincount(lab, minlength=kk)); remap = {int(o): i + 1 for i, o in enumerate(order)}; lab = np.array([remap[int(v)] for v in lab])
+    prof = []
+    for c in range(1, kk + 1):
+        m = lab == c; prof.append([f"Cluster {c}", int(m.sum()), f(100 * m.mean(), 1)] + [f(float(d[x[j]][m].mean()), 4) for j in range(len(x))])
+    prof.append(["All", n, "100.0"] + [f(float(d[v].mean()), 4) for v in x])
+    ptab = table(f"Cluster profiles (means in the original units), {kk} clusters", ["Cluster", "Size", "Share (%)"] + x, prof, "Clusters are numbered by size. Compare each column with the 'All' row to see what defines a cluster.")
+    # stability: refit on bootstrap samples and compare the assignment of the original observations with the full-sample partition
+    rng = np.random.default_rng(0); ari = []
+    from sklearn.cluster import KMeans
+    for _ in range(B):
+        i = rng.integers(0, n, n); lb, cb = _fit_cluster(method, Z[i], kk, seed=int(rng.integers(1 << 20)))
+        cent = np.array([Z[i][lb == c].mean(0) if (lb == c).any() else np.full(Z.shape[1], 1e6) for c in range(kk)]); pr = np.argmin(((Z[:, None, :] - cent[None]) ** 2).sum(2), axis=1); ari.append(adjusted_rand_score(lab, pr))
+    ari = np.array(ari); stab = table("Stability of the partition (bootstrap)", ["Statistic", "Value"], [["Mean adjusted Rand index against the full-sample partition", f(float(ari.mean()), 4)], ["10th percentile", f(float(np.percentile(ari, 10)), 4)], ["Resamples", B]],
+                                       "1 means the same partition in every resample; values below about 0.6 mean that the clusters are not reproducible and should not be interpreted.")
+    pc = PCA(n_components=2).fit(Z); P = pc.transform(Z); ev = pc.explained_variance_ratio_
+    ch = [chart("Average silhouette by number of clusters", [int(k) for k in sil], [("Silhouette", [sil[k] for k in sil])], "Number of clusters", "Silhouette", kind="line"),
+          chart(f"Observations on the first two principal components ({100 * ev.sum():.0f}% of the variance)", [float(v) for v in P[:, 0]], [("Second component", [float(v) for v in P[:, 1]])], "First principal component", "Second principal component", kind="scatter")]
+    summary = [stat("Observations", n), stat("Variables", len(x)), stat("Method", {"kmeans": "k-means", "gmm": "Gaussian mixture", "ward": "Ward hierarchical"}[method]), stat("Clusters", kk), stat("Average silhouette", sil[kk], 4), stat("Mean adjusted Rand index (stability)", float(ari.mean()), 4)]
+    return result("cluster", f"Clustering of {n} observations into {kk} groups", n, summary, [sel_tab, ptab, stab], ch,
+                  ["Variables are standardised before clustering, so every variable counts equally; change the variable list, not the scale, to change what the clusters mean.", "Clusters are a description of the sample. A partition exists for any data, so check stability and silhouette before interpreting."])

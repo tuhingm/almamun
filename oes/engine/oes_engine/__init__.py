@@ -324,6 +324,9 @@ MODELS += [
     dict(id="dsel", group="Machine learning", name="Double-selection LASSO (post-double-selection inference)", guide="ml-guide/double-selection.html", fn=ml_extra.dsel,
          fields=[col("y", "Outcome"), col("treat", "Treatment or target variable"), cols("x", "Potential controls"), num("c", "Penalty constant c", 1.1)],
          example=dict(file=MLD + "growth.csv", spec=dict(y="growth", treat="gdpsh465", x="__all__"))),
+    dict(id="cluster", group="Machine learning", name="Clustering: k-means, Gaussian mixture and Ward (number of clusters, stability)", guide="ml-guide/clustering.html", fn=ml_extra.cluster,
+         fields=[cols("x", "Variables to cluster on"), sel("method", "Method", [["kmeans", "k-means"], ["gmm", "Gaussian mixture"], ["ward", "Ward hierarchical"]], "kmeans"), num("k", "Number of clusters (auto = chosen by the data)", "auto"), num("kmax", "Largest number of clusters to try", 8), num("boot", "Stability resamples", 50)],
+         example=dict(file=MLD + "growth.csv", spec=dict(x=["gdpsh465", "human65", "lifee065", "fert65", "invsh41", "govwb1", "freeop", "pop65"], method="kmeans", k="auto"))),
 ]
 
 # ------------------------------------------------------------------ Bayesian
