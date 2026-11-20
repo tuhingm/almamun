@@ -35,7 +35,11 @@
         { id: "ECB_POLICY_RATE", label: "Euro area main refinancing rate (daily, %)", freq: "D", fixed: { code: "U2", name: "Euro area" }, url: (e, s) => ECB + "FM/B.U2.EUR.4F.KR.MRR_FR.LEV?startPeriod=" + s + "&format=csvdata", ent: "REF_AREA" },
         { id: "ECB_HICP_INFL", label: "Euro area inflation, HICP (monthly, % y/y)", freq: "M", fixed: { code: "U2", name: "Euro area" }, url: (e, s) => ECB + "ICP/M.U2.N.000000.4.ANR?startPeriod=" + s + "&format=csvdata", ent: "REF_AREA" },
         { id: "ECB_UNEMP", label: "Euro area unemployment rate (monthly, %)", freq: "M", fixed: { code: "I9", name: "Euro area" }, url: (e, s) => ECB + "LFSI/M.I9.S.UNEHRT.TOTAL0.15_74.T?startPeriod=" + s + "&format=csvdata", ent: "REF_AREA" },
-        { id: "ECB_GDP_GROWTH", label: "Euro area real GDP growth (quarterly, % y/y)", freq: "Q", fixed: { code: "I9", name: "Euro area" }, url: (e, s) => ECB + "MNA/Q.Y.I9.W2.S1.S1.B.B1GQ._Z._Z._Z.EUR.LR.GY?startPeriod=" + s + "&format=csvdata", ent: "REF_AREA" }
+        { id: "ECB_GDP_GROWTH", label: "Euro area real GDP growth (quarterly, % y/y)", freq: "Q", fixed: { code: "I9", name: "Euro area" }, url: (e, s) => ECB + "MNA/Q.Y.I9.W2.S1.S1.B.B1GQ._Z._Z._Z.EUR.LR.GY?startPeriod=" + s + "&format=csvdata", ent: "REF_AREA" },
+        { id: "ECB_CORE_INFL", label: "Euro area core inflation, HICP excl. energy and food (monthly, % y/y)", freq: "M", fixed: { code: "U2", name: "Euro area" }, url: (e, s) => ECB + "ICP/M.U2.N.XEF000.4.ANR?startPeriod=" + s + "&format=csvdata", ent: "REF_AREA" },
+        { id: "ECB_EURIBOR_3M", label: "3-month Euribor (monthly, %)", freq: "M", fixed: { code: "U2", name: "Euro area" }, url: (e, s) => ECB + "FM/M.U2.EUR.RT.MM.EURIBOR3MD_.HSTA?startPeriod=" + s + "&format=csvdata", ent: "REF_AREA" },
+        { id: "ECB_M3_GROWTH", label: "Euro area M3 money supply growth (monthly, % y/y)", freq: "M", fixed: { code: "U2", name: "Euro area" }, url: (e, s) => ECB + "BSI/M.U2.Y.V.M30.X.I.U2.2300.Z01.A?startPeriod=" + s + "&format=csvdata", ent: "REF_AREA" },
+        { id: "ECB_LOANS_NFC", label: "Euro area bank loans to non-financial corporations (monthly, % y/y)", freq: "M", fixed: { code: "U2", name: "Euro area" }, url: (e, s) => ECB + "BSI/M.U2.Y.U.A20T.A.I.U2.2240.Z01.A?startPeriod=" + s + "&format=csvdata", ent: "REF_AREA" },
       ]
     },
     eurostat: {
@@ -44,7 +48,13 @@
       indicators: [
         { id: "ES_REAL_GDP", label: "Real GDP (annual, chain-linked 2010 million euro)", freq: "A", needs: true, url: (e, s) => EUS + "nama_10_gdp/A.CLV10_MEUR.B1GQ." + e.join("+") + "?startPeriod=" + s + "&format=SDMX-CSV", ent: "geo" },
         { id: "ES_UNEMP", label: "Unemployment rate (annual, % of active population, 15–74)", freq: "A", needs: true, url: (e, s) => EUS + "une_rt_a/A.Y15-74.PC_ACT.T." + e.join("+") + "?startPeriod=" + s + "&format=SDMX-CSV", ent: "geo" },
-        { id: "ES_HICP_INFL", label: "Inflation, HICP all items (monthly, % y/y)", freq: "M", needs: true, url: (e, s) => EUS + "prc_hicp_manr/M.RCH_A.CP00." + e.join("+") + "?startPeriod=" + s + "&format=SDMX-CSV", ent: "geo" }
+        { id: "ES_HICP_INFL", label: "Inflation, HICP all items (monthly, % y/y)", freq: "M", needs: true, url: (e, s) => EUS + "prc_hicp_manr/M.RCH_A.CP00." + e.join("+") + "?startPeriod=" + s + "&format=SDMX-CSV", ent: "geo" },
+        { id: "ES_GDP_CURRENT", label: "GDP at current prices (annual, million euro)", freq: "A", needs: true, url: (e, s) => EUS + "nama_10_gdp/A.CP_MEUR.B1GQ." + e.join("+") + "?startPeriod=" + s + "&format=SDMX-CSV", ent: "geo" },
+        { id: "ES_GDP_GROWTH", label: "Real GDP growth (annual, % change on previous year)", freq: "A", needs: true, url: (e, s) => EUS + "nama_10_gdp/A.CLV_PCH_PRE.B1GQ." + e.join("+") + "?startPeriod=" + s + "&format=SDMX-CSV", ent: "geo" },
+        { id: "ES_GDP_PC", label: "Real GDP per capita (annual, chain-linked 2010 euro)", freq: "A", needs: true, url: (e, s) => EUS + "nama_10_pc/A.CLV10_EUR_HAB.B1GQ." + e.join("+") + "?startPeriod=" + s + "&format=SDMX-CSV", ent: "geo" },
+        { id: "ES_GOV_DEBT", label: "Government gross debt (annual, % of GDP)", freq: "A", needs: true, url: (e, s) => EUS + "gov_10dd_edpt1/A.PC_GDP.S13.GD." + e.join("+") + "?startPeriod=" + s + "&format=SDMX-CSV", ent: "geo" },
+        { id: "ES_GOV_BALANCE", label: "Government deficit/surplus (annual, % of GDP)", freq: "A", needs: true, url: (e, s) => EUS + "gov_10dd_edpt1/A.PC_GDP.S13.B9." + e.join("+") + "?startPeriod=" + s + "&format=SDMX-CSV", ent: "geo" },
+        { id: "ES_IND_PROD", label: "Industrial production index (monthly, 2021=100, calendar adjusted)", freq: "M", needs: true, url: (e, s) => EUS + "sts_inpr_m/M.PRD.B-D.CA.I21." + e.join("+") + "?startPeriod=" + s + "&format=SDMX-CSV", ent: "geo" },
       ]
     },
     oecd: {
@@ -62,7 +72,12 @@
       indicators: [
         { id: "BIS_POLICY_RATE", label: "Central bank policy rate (monthly, %)", freq: "M", needs: true, url: (e, s) => BIS + "WS_CBPOL/1.0/M." + e.join("+") + "?startPeriod=" + s + "&format=csv", ent: "REF_AREA" },
         { id: "BIS_REER", label: "Real effective exchange rate, broad basket (monthly, index)", freq: "M", needs: true, url: (e, s) => BIS + "WS_EER/1.0/M.R.B." + e.join("+") + "?startPeriod=" + s + "&format=csv", ent: "REF_AREA" },
-        { id: "BIS_CPI", label: "Consumer prices (monthly, index)", freq: "M", needs: true, url: (e, s) => BIS + "WS_LONG_CPI/1.0/M." + e.join("+") + ".628?startPeriod=" + s + "&format=csv", ent: "REF_AREA" }
+        { id: "BIS_CPI", label: "Consumer prices (monthly, index)", freq: "M", needs: true, url: (e, s) => BIS + "WS_LONG_CPI/1.0/M." + e.join("+") + ".628?startPeriod=" + s + "&format=csv", ent: "REF_AREA" },
+        { id: "BIS_NEER", label: "Nominal effective exchange rate, broad basket (monthly, index)", freq: "M", needs: true, url: (e, s) => BIS + "WS_EER/1.0/M.N.B." + e.join("+") + "?startPeriod=" + s + "&format=csv", ent: "REF_AREA" },
+        { id: "BIS_PROP_PRICES", label: "Residential property prices (quarterly, index)", freq: "Q", needs: true, url: (e, s) => BIS + "WS_SPP/1.0/Q." + e.join("+") + ".N.628?startPeriod=" + s + "&format=csv", ent: "REF_AREA" },
+        { id: "BIS_USD_RATE", label: "Exchange rate against the US dollar (monthly average, local currency per USD)", freq: "M", needs: true, url: (e, s) => BIS + "WS_XRU/1.0/M." + e.join("+") + "..A?startPeriod=" + s + "&format=csv", ent: "REF_AREA" },
+        { id: "BIS_DEBT_SERVICE", label: "Private non-financial debt service ratio (quarterly, %)", freq: "Q", needs: true, url: (e, s) => BIS + "WS_DSR/1.0/Q." + e.join("+") + ".P?startPeriod=" + s + "&format=csv", ent: "BORROWERS_CTY" },
+        { id: "BIS_CREDIT_GAP", label: "Credit-to-GDP gap (quarterly, percentage points)", freq: "Q", needs: true, url: (e, s) => BIS + "WS_CREDIT_GAP/1.0/Q." + e.join("+") + ".P.A.C?startPeriod=" + s + "&format=csv", ent: "BORROWERS_CTY" },
       ]
     }
   };
@@ -151,7 +166,7 @@
     const p = P[key]; current = key; last = null;
     pane.innerHTML =
       '<div class="ds-provider"><div class="ds-provider-head"><div><b>' + esc(p.name) + '</b><small>No API key needed · data go straight from the provider to your browser</small></div></div>' +
-      '<div class="ds-columns"><div><h3>1 · Indicators</h3><div class="ds-catalog" id="mpInds">' +
+      '<div class="ds-columns"><div><h3>1 · Indicators</h3><input id="mpSearch" type="search" placeholder="Filter indicators…" aria-label="Filter indicators" style="width:100%;margin-bottom:6px"><div class="ds-catalog" id="mpInds">' +
       p.indicators.map((x, i) => '<label class="ds-ind"><input type="checkbox" data-i="' + i + '"' + (i === 0 ? " checked" : "") + '><span><b>' + esc(x.label) + '</b><small>' + esc(x.id) + '</small></span></label>').join("") +
       '</div></div><div id="mpEntBox"><h3>2 · ' + esc(p.entityLabel) + '</h3><select id="mpEnts" multiple size="9" aria-label="' + esc(p.entityLabel) + '">' +
       p.entities.map((e, i) => '<option value="' + esc(e.code) + '"' + (i < 2 ? " selected" : "") + '>' + esc(e.name) + ' (' + esc(e.code) + ')</option>').join("") +
@@ -160,10 +175,12 @@
       '<div class="row ds-actions"><button type="button" class="btn" id="mpFetch">Fetch data</button></div><div id="mpStatus" class="status" role="status" aria-live="polite"></div>' +
       '<div id="mpResult" class="ds-result hidden"><h3>Retrieved observations</h3><p class="sub" id="mpMeta"></p><div id="mpWarn"></div><div id="mpPrev"></div>' +
       '<div class="row ds-actions"><button type="button" class="btn secondary" id="mpCsv">Download CSV</button><button type="button" class="btn secondary" id="mpXlsx">Download Excel</button><button type="button" class="btn" id="mpSend">Send to Cleaning Lab</button></div>' +
-      '<p class="sub">Source: ' + esc(p.name) + ' (<a href="' + esc(p.site) + '" target="_blank" rel="noopener">' + esc(p.site) + '</a>). ' + esc(p.licence) + ' Observations may be revised; check the provider metadata before publishing.</p></div></div>';
+      '<p class="sub">Source: ' + esc(p.name) + ' (<a href="' + esc(p.site) + '" target="_blank" rel="noopener">' + esc(p.site) + '</a>). ' + esc(p.licence) + ' Observations may be revised; check the provider metadata before publishing.</p></div><div id="mpBrowse" style="margin-top:14px"></div></div>';
+    if (window.OESBrowse) window.OESBrowse.mount($("mpBrowse"), key);
     $("mpFetch").onclick = run;
     updateEnts();
     $("mpInds").onchange = updateEnts;
+    $("mpSearch").oninput = e => { const q = e.target.value.trim().toLowerCase(); pane.querySelectorAll("#mpInds .ds-ind").forEach(l => { l.style.display = !q || l.textContent.toLowerCase().includes(q) ? "" : "none"; }); };
     $("mpCsv").onclick = () => last && save("oes_" + key + "_data.csv", "﻿" + csvText(last.s.headers, last.s.rows), "text/csv;charset=utf-8");
     $("mpXlsx").onclick = () => { if (!last) return; if (!window.XLSX) { status("Excel export library is unavailable. Use CSV.", true); return; } const ws = XLSX.utils.aoa_to_sheet([last.s.headers, ...last.s.rows]), b = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(b, ws, p.name.slice(0, 28)); XLSX.writeFile(b, "oes_" + key + "_data.xlsx"); };
     $("mpSend").onclick = () => {
