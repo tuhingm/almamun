@@ -622,3 +622,63 @@ def leebounds(df, spec):
     ch = [chart("Bootstrap distributions of the Lee bounds", list(range(len(bl))), [("Lower bound (sorted)", np.sort(bl)), ("Upper bound (sorted)", np.sort(bh))], "Resample", "Effect", kind="line")]
     notes = ["The bounds are for the always-selected: units that would have an observed outcome whether treated or not. They are not the effect for the whole sample.", "Monotonicity (treatment cannot push some units into selection and others out) is an assumption; covariates can tighten the bounds."]
     return result("leebounds", f"Lee bounds: effect of {t} on {y}", n, [stat("Observations", n), stat("Share trimmed", p, 4), stat("Lee lower bound", lo, 4), stat("Lee upper bound", hi, 4), stat("Naive effect", naive, 4)], [sel_tab, res], ch, notes)
+
+
+# ------------------------------------------------------------------------------------------------------------------
+# Distributional treatment effects: quantile treatment effects and Kolmogorov-Smirnov tests of equality and dominance
+# ------------------------------------------------------------------------------------------------------------------
+def _ks_stats(y1, y0):
+    g = np.sort(np.concatenate([y1, y0])); F1 = np.searchsorted(np.sort(y1), g, side="right") / len(y1); F0 = np.searchsorted(np.sort(y0), g, side="right") / len(y0)
+    return float(np.max(np.abs(F1 - F0))), float(np.max(F0 - F1)), float(np.max(F1 - F0))  # two-sided, treated dominates (F0 above F1), control dominates
+
+
+def qte(df, spec):
+    y = need(spec, "outcome", "outcome"); t = need(spec, "treat", "treatment (0/1)"); xs = as_list(spec.get("covariates")); distinct([y, t] + xs)
+    miss = [c for c in [y, t] + xs if c not in df.columns]
+    if miss:
+        raise OESError("Column(s) not found in the data: " + ", ".join(miss))
+    d = df[[y, t] + xs].apply(pd.to_numeric, errors="coerce").dropna().reset_index(drop=True); n = len(d)
+    if d[t].nunique() != 2 or not set(np.unique(d[t])) <= {0.0, 1.0}:
+        raise OESError("The treatment must be a 0/1 indicator with both values present.")
+    try:
+        taus = [float(v) for v in str(spec.get("taus", "0.1,0.25,0.5,0.75,0.9")).replace(";", ",").split(",") if v.strip()]
+    except ValueError:
+        raise OESError("Quantiles must be numbers between 0 and 1, separated by commas.")
+    if not taus or any(not 0 < q < 1 for q in taus):
+        raise OESError("Quantiles must lie strictly between 0 and 1.")
+    B = int_option(spec, "boot", 500, 99, 5000, "Bootstrap replications"); seed = int_option(spec, "seed", 0, 0, 10 ** 6, "Random seed")
+    Y = d[y].to_numpy(float); T = d[t].to_numpy(float); n1 = int(T.sum()); n0 = n - n1
+    if min(n1, n0) < 10:
+        raise OESError("Each arm needs at least 10 units.")
+    rng = np.random.default_rng(seed)
+    def qdiff(Yv, Tv): return np.array([np.quantile(Yv[Tv == 1], q) - np.quantile(Yv[Tv == 0], q) for q in taus])
+    est = qdiff(Y, T); bs = []
+    for _ in range(B):
+        i = rng.integers(0, n, n)
+        if 0 < T[i].sum() < n: bs.append(qdiff(Y[i], T[i]))
+    bs = np.array(bs); se = bs.std(axis=0, ddof=1); lo = np.percentile(bs, 2.5, axis=0); hi = np.percentile(bs, 97.5, axis=0)
+    ate = float(Y[T == 1].mean() - Y[T == 0].mean())
+    rows = [[f(q, 2), f(float(np.quantile(Y[T == 0], q)), 3), f(float(np.quantile(Y[T == 1], q)), 3), f(float(e), 4), f(float(s), 4), f(float(a), 4), f(float(b), 4)] for q, e, s, a, b in zip(taus, est, se, lo, hi)]
+    qtab = table(f"Quantile treatment effects of {t} on {y}", ["Quantile", "Control quantile", "Treated quantile", "QTE", "Bootstrap SE", "95% CI low", "95% CI high"], rows,
+                 f"The average effect (difference in means) is {ate:.4f}. Bootstrap percentile intervals with {len(bs)} resamples; the quantiles are not simultaneous.")
+    tabs = [qtab]
+    # conditional quantile regression with covariates
+    if xs:
+        import statsmodels.api as sm
+        X = sm.add_constant(d[[t] + xs]); crow = []
+        for q in taus:
+            m = sm.QuantReg(d[y], X).fit(q=q, max_iter=5000); crow.append([f(q, 2), f(float(m.params[t]), 4), f(float(m.bse[t]), 4), f(float(m.pvalues[t]), 4)])
+        tabs.append(table("Conditional quantile regression: coefficient on the treatment", ["Quantile", "Coefficient", "Std. error", "p-value"], crow, "Adjusts for the covariates. The coefficient is a conditional quantile effect, which equals the QTE only if the covariate effect is constant across quantiles."))
+    # KS tests by permutation
+    ks, dom1, dom0 = _ks_stats(Y[T == 1], Y[T == 0]); P = 999; cnt = np.zeros(3)
+    for _ in range(P):
+        pt = rng.permutation(T); s_ = _ks_stats(Y[pt == 1], Y[pt == 0]); cnt += np.array(s_) >= np.array([ks, dom1, dom0])
+    pv = (cnt + 1) / (P + 1)
+    tabs.append(table("Tests on the whole distribution (permutation p-values, 999 draws)", ["Null hypothesis", "Statistic", "p-value"],
+                      [["Equal distributions (Kolmogorov-Smirnov)", f(ks, 4), f(float(pv[0]), 4)], ["Treated outcome is not larger in the first-order dominance sense (reject: treated stochastically larger)", f(dom1, 4), f(float(pv[1]), 4)],
+                       ["Control outcome is not larger in the first-order dominance sense (reject: control stochastically larger)", f(dom0, 4), f(float(pv[2]), 4)]],
+                      "A rejection of the first line says the distributions differ. A rejection of the dominance line says the treated (or control) distribution lies to the right at every point."))
+    grid = np.linspace(0.05, 0.95, 19); curve = [float(np.quantile(Y[T == 1], q) - np.quantile(Y[T == 0], q)) for q in grid]
+    ch = [chart("Quantile treatment effect by quantile", [float(q) for q in grid], [("QTE", curve), ("Average effect", [ate] * len(grid))], "Quantile", "Effect", kind="line")]
+    notes = ["The QTE compares the same quantile in the two outcome distributions. It is the effect on the person at that rank only if treatment leaves ranks unchanged (rank invariance).", "With a randomised treatment the unconditional QTE is identified without covariates; covariates only sharpen the conditional version."]
+    return result("qte", f"Distributional effects of {t} on {y}", n, [stat("Observations", n), stat("Average effect", ate, 4), stat("KS statistic", ks, 4), stat("KS p-value", float(pv[0]), 4), stat("QTE at median", float(np.quantile(Y[T == 1], 0.5) - np.quantile(Y[T == 0], 0.5)), 4)], tabs, ch, notes)

@@ -144,6 +144,12 @@
   "sub": "A treatment has an effect and you want to know how much of it works through a specific channel (the mediator) and how much does…"
  },
  {
+  "out": "assets/og/causal-inference-guide/quantile-effects.jpg",
+  "kicker": "Causal Inference Guide · Model guide",
+  "title": "Distributional Effects: Quantile Treatment Effects and KS Tests",
+  "sub": "You want to know who gains from a treatment, not only the average gain, and whether the whole outcome distribution shifted.…"
+ },
+ {
   "out": "assets/og/causal-inference-guide/rdd.jpg",
   "kicker": "Causal Inference Guide · Model guide",
   "title": "Regression Discontinuity",

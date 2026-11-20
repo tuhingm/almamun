@@ -1480,5 +1480,21 @@
    "label": "Share trimmed",
    "value": 0.1462
   }
+ },
+ "qte": {
+  "nobs": 445,
+  "table_index": 0,
+  "table": "Quantile treatment effects of train on re78",
+  "row": "0.1",
+  "row_index": 0,
+  "col": "Control quantile",
+  "col_index": 1,
+  "value": 0.0,
+  "rtol": 0.001,
+  "seconds": 0.3,
+  "summary": {
+   "label": "Average effect",
+   "value": 1.7943
+  }
  }
 }
