@@ -24,6 +24,38 @@
     "data": [
      "oes/examples/crspday.csv"
     ]
+   },
+   {
+    "slug": "portfolio",
+    "situation": "How should I split money across assets, and does the optimised portfolio really beat equal weights out of sample?",
+    "method": "Portfolio optimisation",
+    "data": [
+     "oes/examples/eustock.csv"
+    ]
+   },
+   {
+    "slug": "volatility-forecasts",
+    "situation": "Which volatility model forecasts best, and is the difference statistically meaningful?",
+    "method": "Volatility forecast evaluation",
+    "data": [
+     "oes/examples/crspday.csv"
+    ]
+   },
+   {
+    "slug": "bubbles",
+    "situation": "Are prices growing faster than a random walk, and when did the explosive episodes start and end?",
+    "method": "Bubble tests (SADF and GSADF)",
+    "data": [
+     "oes/examples/shiller.csv"
+    ]
+   },
+   {
+    "slug": "yield-curve",
+    "situation": "How do I summarise the yield curve with a few factors and forecast it?",
+    "method": "Nelson-Siegel yield curve",
+    "data": [
+     "oes/examples/irates.csv"
+    ]
    }
   ]
  }

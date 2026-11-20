@@ -282,6 +282,12 @@
   "sub": "A step-by-step guide to writing the empirical paper, with Dynare code, real output and sample text."
  },
  {
+  "out": "assets/og/finance-guide/bubbles.jpg",
+  "kicker": "Finance Guide · Model guide",
+  "title": "Explosive Bubble Tests (SADF and GSADF)",
+  "sub": "You want to test whether a price or a price ratio has episodes of explosive growth faster than a random walk, and date the start…"
+ },
+ {
   "out": "assets/og/finance-guide/capm.jpg",
   "kicker": "Finance Guide · Model guide",
   "title": "Factor-Pricing Regressions and the GRS Test",
@@ -300,10 +306,28 @@
   "sub": "Factor pricing, value at risk, volatility and correlation, portfolios, bubbles and the yield curve: tests on real data and the text for the paper."
  },
  {
+  "out": "assets/og/finance-guide/portfolio.jpg",
+  "kicker": "Finance Guide · Model guide",
+  "title": "Portfolio Optimisation and Out-of-Sample Comparison",
+  "sub": "You must decide how to split money across assets, and want to know whether an optimised portfolio beats equal weights once…"
+ },
+ {
   "out": "assets/og/finance-guide/var-es.jpg",
   "kicker": "Finance Guide · Model guide",
   "title": "Value at Risk and Expected Shortfall",
   "sub": "You need to say how much a portfolio can lose on a bad day, compare risk models, and show a regulator or a reader that the model…"
+ },
+ {
+  "out": "assets/og/finance-guide/volatility-forecasts.jpg",
+  "kicker": "Finance Guide · Model guide",
+  "title": "Volatility Forecast Evaluation",
+  "sub": "You have several volatility models (GARCH, EWMA, rolling windows) and want to know which forecasts best, and whether the…"
+ },
+ {
+  "out": "assets/og/finance-guide/yield-curve.jpg",
+  "kicker": "Finance Guide · Model guide",
+  "title": "Nelson-Siegel Yield Curve",
+  "sub": "You have yields at several maturities and want to summarise the curve with a few interpretable factors (level, slope, curvature)…"
  },
  {
   "out": "assets/og/markov-guide/bayesian-ms.jpg",

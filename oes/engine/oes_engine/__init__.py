@@ -743,6 +743,23 @@ MODELS += [
     dict(id="dcc", group="Finance", name="Dynamic conditional correlation (DCC-GARCH)", guide="finance-guide/dcc.html", fn=finance.dcc,
          fields=[cols("y", "Return series (2 to 5)"), TIME],
          example=dict(file=FI + "crspday.csv", spec=dict(y=["ibm", "ge", "mobil"], time="date"))),
+    dict(id="portfolio", group="Finance", name="Portfolio optimisation: minimum variance, maximum Sharpe, risk parity", guide="finance-guide/portfolio.html", fn=finance.portfolio,
+         fields=[cols("assets", "Asset returns (at least 3)"), TIME,
+                 sel("objective", "Strategy whose weights get a bootstrap interval", [["maxsharpe", "Maximum Sharpe ratio"], ["minvar", "Minimum variance"], ["riskparity", "Risk parity"], ["equal", "Equal weights"]], "maxsharpe"),
+                 sel("long_only", "Positions", [["yes", "Long only"], ["no", "Short positions allowed"]], "yes"), sel("shrink", "Covariance matrix", [["ledoit", "Ledoit-Wolf shrinkage"], ["none", "Sample covariance"]], "ledoit"),
+                 num("periods", "Periods per year", 252), num("window", "Window for the out-of-sample test", 250), num("rebalance", "Rebalance every (periods)", 21), num("rf", "Risk-free rate per period", 0), num("boot", "Bootstrap replications", 300), num("seed", "Random seed", 0)],
+         example=dict(file=FI + "eustock.csv", spec=dict(assets=["r_dax", "r_smi", "r_cac", "r_ftse"], time="t", boot=100))),
+    dict(id="vol_eval", group="Finance", name="Volatility forecast evaluation (QLIKE, Mincer-Zarnowitz, Diebold-Mariano)", guide="finance-guide/volatility-forecasts.html", fn=finance.vol_eval,
+         fields=[col("y", "Return series"), TIME, num("window", "Estimation window", 500), num("lambda", "EWMA decay", 0.94),
+                 sel("benchmark", "Benchmark for the Diebold-Mariano tests", [["EWMA", "EWMA"], ["GARCH(1,1)", "GARCH(1,1)"]], "EWMA")],
+         example=dict(file=FI + "crspday.csv", spec=dict(y="crsp", time="date", window=500))),
+    dict(id="bubble", group="Finance", name="Explosive bubble tests (SADF, GSADF) and date-stamping", guide="finance-guide/bubbles.html", fn=finance.bubble,
+         fields=[col("y", "Price or price ratio"), TIME, sel("log", "Transform", [["no", "Use the series as it is"], ["yes", "Take logs"]], "no"), num("min_window", "Minimum window (blank = Phillips-Shi-Yu rule)", ""), num("reps", "Monte Carlo replications", 200), num("seed", "Random seed", 0)],
+         example=dict(file=FI + "shiller.csv", spec=dict(y="pd_ratio", time="date", reps=60))),
+    dict(id="nelson_siegel", group="Finance", name="Nelson-Siegel yield curve: level, slope and curvature factors", guide="finance-guide/yield-curve.html", fn=finance.nelson_siegel,
+         fields=[cols("yields", "Yield columns (one per maturity)"), num("maturities", "Maturities in months, in the same order (comma-separated)", "1,3,6,12,36,60,120"), TIME,
+                 num("lambda", "lambda per month (blank = estimate)", ""), num("horizon", "Forecast horizon (months)", 12)],
+         example=dict(file=FI + "irates.csv", spec=dict(yields=["r1", "r3", "r6", "r12", "r36", "r60", "r120"], maturities="1,3,6,12,36,60,120", time="month"))),
 ]
 
 STAT_MODELS = stat_registry.build(col, cols, num, sel)       # the Statistics Division: its own page, registered like every other model

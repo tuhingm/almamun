@@ -1800,5 +1800,65 @@
    "label": "DCC a",
    "value": 0.0093
   }
+ },
+ "portfolio": {
+  "nobs": 1859,
+  "table_index": 0,
+  "table": "Portfolio weights and in-sample performance (annualised)",
+  "row": "Equal weights",
+  "row_index": 0,
+  "col": "r_dax",
+  "col_index": 1,
+  "value": 0.25,
+  "rtol": 0.001,
+  "seconds": 1.0,
+  "summary": {
+   "label": "Max-Sharpe in-sample Sharpe",
+   "value": 1.405
+  }
+ },
+ "vol_eval": {
+  "nobs": 2028,
+  "table_index": 0,
+  "table": "Out-of-sample loss (2028 days, squared return as the volatility proxy)",
+  "row": "GARCH(1,1)",
+  "row_index": 0,
+  "col": "MSE x 1e8",
+  "col_index": 1,
+  "value": 3.315174,
+  "rtol": 0.001,
+  "seconds": 0.1
+ },
+ "bubble": {
+  "nobs": 1830,
+  "table_index": 0,
+  "table": "Tests for explosive behaviour",
+  "row": "SADF (right-tailed ADF, expanding window)",
+  "row_index": 0,
+  "col": "Statistic",
+  "col_index": 1,
+  "value": 3.461887,
+  "rtol": 0.001,
+  "seconds": 3.2,
+  "summary": {
+   "label": "SADF",
+   "value": 3.462
+  }
+ },
+ "nelson_siegel": {
+  "nobs": 531,
+  "table_index": 0,
+  "table": "Factors (estimated date by date)",
+  "row": "Level (beta 0)",
+  "row_index": 0,
+  "col": "Mean",
+  "col_index": 1,
+  "value": 6.139914,
+  "rtol": 0.001,
+  "seconds": 0.1,
+  "summary": {
+   "label": "lambda",
+   "value": 0.1384
+  }
  }
 }

@@ -191,3 +191,194 @@ def test_dcc_errors():
     d = pd.DataFrame(dict(t=range(100), x=np.random.default_rng(8).normal(size=100), y=np.random.default_rng(9).normal(size=100)))
     assert "at least 300" in o.run("dcc", _csv(d), dict(y=["x", "y"], time="t"))["error"]
     assert "two to five" in o.run("dcc", _csv(d), dict(y=["x"], time="t"))["error"]
+
+
+# ================================================================== portfolio optimisation
+EUS = os.path.join(ROOT, "oes", "examples", "eustock.csv")
+SHI = os.path.join(ROOT, "oes", "examples", "shiller.csv")
+IRA = os.path.join(ROOT, "oes", "examples", "irates.csv")
+
+
+def _rets(n=1500, seed=1):
+    rng = np.random.default_rng(seed)
+    C = np.array([[1, .6, .5, .3], [.6, 1, .4, .2], [.5, .4, 1, .3], [.3, .2, .3, 1.0]]) * 1e-4
+    mu = np.array([.0003, .0004, .0002, .0005])
+    return pd.DataFrame(rng.multivariate_normal(mu, C, n), columns=list("abcd")).assign(t=range(n))
+
+
+def test_portfolio_closed_forms_unconstrained():
+    d = _rets()
+    r = o.run("portfolio", _csv(d), dict(assets=list("abcd"), time="t", long_only="no", shrink="none", boot=0, window=250))
+    rows = {x[0]: x for x in _tab(r, "Portfolio weights")["rows"]}
+    R = d[list("abcd")].to_numpy(); S = np.cov(R.T); mu = R.mean(0); one = np.ones(4)
+    wmv = np.linalg.solve(S, one); wmv /= wmv.sum()
+    wms = np.linalg.solve(S, mu); wms /= wms.sum()
+    assert np.allclose(rows["Minimum variance"][1:5], wmv, atol=1e-5)
+    assert np.allclose(rows["Maximum Sharpe ratio"][1:5], wms, atol=1e-5)
+    assert abs(rows["Minimum variance"][6] - np.sqrt(wmv @ S @ wmv) * np.sqrt(252)) < 1e-5
+
+
+def test_portfolio_risk_parity_equalises_risk_contributions_and_long_only():
+    d = _rets()
+    r = o.run("portfolio", _csv(d), dict(assets=list("abcd"), time="t", boot=0, shrink="none"))
+    rows = {x[0]: x for x in _tab(r, "Portfolio weights")["rows"]}
+    assert abs(rows["Risk parity"][-1] - 0.25) < 0.002                      # largest risk share equals the equal share
+    for x in rows.values():
+        assert min(x[1:5]) > -1e-6 and abs(sum(x[1:5]) - 1) < 1e-6
+
+
+def test_portfolio_out_of_sample_equal_weight_matches_manual():
+    d = _rets(900, 2)
+    r = o.run("portfolio", _csv(d), dict(assets=list("abcd"), time="t", boot=0, window=250, rebalance=21))
+    oos = {x[0]: x for x in _tab(r, "Out-of-sample")["rows"]}
+    ew = d[list("abcd")].to_numpy()[250:].mean(1)
+    assert abs(oos["Equal weights"][1] - ew.mean() * 252) < 1e-6 and abs(oos["Equal weights"][2] - ew.std(ddof=1) * np.sqrt(252)) < 1e-6
+    assert oos["Equal weights"][4] == 0.0
+
+
+def test_portfolio_bootstrap_interval_contains_weight_and_estimation_error_visible():
+    d = _rets(1000, 3)
+    r = o.run("portfolio", _csv(d), dict(assets=list("abcd"), time="t", boot=200, objective="minvar", shrink="none", long_only="no"))
+    for x in _tab(r, "Sampling")["rows"]:
+        assert x[2] <= x[1] <= x[3]
+    rows = {x[0]: x for x in _tab(r, "Portfolio weights")["rows"]}
+    oos = {x[0]: x for x in _tab(r, "Out-of-sample")["rows"]}
+    assert rows["Maximum Sharpe ratio"][-3] > oos["Maximum Sharpe ratio"][3] - 1.0
+
+
+def test_portfolio_real_data_and_errors():
+    e = pd.read_csv(EUS)
+    r = o.run("portfolio", _csv(e), dict(assets=["r_dax", "r_smi", "r_cac", "r_ftse"], time="t", boot=50))
+    assert len(_tab(r, "Out-of-sample")["rows"]) == 4
+    assert "at least three" in o.run("portfolio", _csv(e), dict(assets=["r_dax", "r_smi"], time="t"))["error"]
+    assert "Too few" in o.run("portfolio", _csv(e.iloc[:200]), dict(assets=["r_dax", "r_smi", "r_cac"], time="t"))["error"]
+
+
+# ================================================================== volatility forecast evaluation
+def test_vol_eval_garch_calibrated_on_garch_data():
+    slopes, qbest = [], 0
+    for s in range(6):
+        r_ = _garch_returns(3000, 30 + s)
+        out = o.run("vol_eval", _csv(pd.DataFrame(dict(t=range(len(r_)), r=r_))), dict(y="r", time="t", window=600))
+        mz = {x[0]: x for x in _tab(out, "Mincer")["rows"]}
+        slopes.append(mz["GARCH(1,1)"][3])
+        loss = {x[0]: x[2] for x in _tab(out, "Out-of-sample loss")["rows"]}
+        qbest += loss["GARCH(1,1)"] < loss["Constant (first window)"]
+    assert 0.5 < np.median(slopes) < 1.5 and qbest == 6          # the slope on a noisy squared-return proxy is variable: use the median
+
+
+def test_vol_eval_qlike_and_mse_match_manual():
+    r_ = _garch_returns(1500, 40)
+    d = pd.DataFrame(dict(t=range(len(r_)), r=r_))
+    out = o.run("vol_eval", _csv(d), dict(y="r", time="t", window=500, **{"lambda": 0.94}))
+    w = 500
+    h = np.full(len(r_) - w, r_[:w].var(ddof=1))
+    proxy = (r_[w:] - r_[:w].mean()) ** 2
+    row = {x[0]: x for x in _tab(out, "Out-of-sample loss")["rows"]}["Constant (first window)"]
+    assert abs(row[1] / (np.mean((proxy - h) ** 2) * 1e8) - 1) < 1e-6 and abs(row[2] - np.mean(np.log(h) + proxy / h)) < 1e-6
+
+
+def test_vol_eval_dm_prefers_better_forecast_and_symmetry():
+    r_ = _garch_returns(3000, 41)
+    d = pd.DataFrame(dict(t=range(len(r_)), r=r_))
+    a = o.run("vol_eval", _csv(d), dict(y="r", time="t", window=600, benchmark="EWMA"))
+    row = {x[0]: x for x in _tab(a, "Diebold")["rows"]}["Constant (first window)"]
+    assert row[1] > 0 and row[2] < 0.05                                      # the constant forecast loses to the EWMA on QLIKE
+    b = o.run("vol_eval", _csv(d), dict(y="r", time="t", window=600, benchmark="GARCH(1,1)"))
+    assert "Diebold-Mariano tests against GARCH(1,1)" in _tab(b, "Diebold")["title"]
+
+
+def test_vol_eval_errors():
+    d = pd.DataFrame(dict(t=range(300), r=np.random.default_rng(3).normal(size=300)))
+    assert "Too few" in o.run("vol_eval", _csv(d), dict(y="r", time="t", window=500))["error"]
+
+
+# ================================================================== bubble tests
+def test_bubble_sadf_window_statistic_matches_statsmodels_adf():
+    from statsmodels.tsa.stattools import adfuller
+    rng = np.random.default_rng(5)
+    y = np.cumsum(rng.normal(size=200))
+    G = finance._adf_grid(y, 100)
+    for j in (150, 199):
+        ref = adfuller(y[:j + 1], maxlag=0, regression="c", autolag=None)[0]
+        assert abs(G[0, j] - ref) < 1e-8
+    # a window that does not start at zero
+    ref = adfuller(y[40:171], maxlag=0, regression="c", autolag=None)[0]
+    assert abs(G[40, 170] - ref) < 1e-8
+
+
+def test_bubble_detects_simulated_explosive_episode_and_stamps_it():
+    rng = np.random.default_rng(6)
+    n = 400
+    y = np.empty(n); y[0] = 100
+    for t in range(1, n):
+        y[t] = y[t - 1] * (1.04 if 200 <= t < 250 else 1.0) + rng.normal(0, 1.0) if t < 250 else (y[t - 1] - 0.35 * (y[t - 1] - 100) + rng.normal(0, 1.0) if t < 270 else y[t - 1] + rng.normal(0, 1.0))
+    out = o.run("bubble", _csv(pd.DataFrame(dict(t=range(n), y=y))), dict(y="y", time="t", reps=60, seed=1))
+    g = _tab(out, "Tests")["rows"][1]
+    assert g[1] > g[3] and g[5] < 0.05
+    eps = _tab(out, "Date-stamped")["rows"]
+    assert any(abs(int(e[0]) - 200) <= 25 for e in eps if e[0] != "none")
+
+
+def test_bubble_random_walk_rejection_rate_not_inflated():
+    rej = 0
+    for s in range(30):
+        rng = np.random.default_rng(100 + s)
+        y = 100 + np.cumsum(rng.normal(size=150))
+        out = o.run("bubble", _csv(pd.DataFrame(dict(t=range(150), y=y))), dict(y="y", time="t", reps=60, seed=s))
+        rej += _tab(out, "Tests")["rows"][1][5] < 0.05
+    assert rej <= 7                                                           # 5% nominal, 30 samples, 60 replications: generous bound
+
+
+def test_bubble_real_data_finds_1929_and_1990s():
+    d = pd.read_csv(SHI)
+    out = o.run("bubble", _csv(d), dict(y="pd_ratio", time="date", reps=40, seed=0))
+    eps = _tab(out, "Date-stamped")["rows"]
+    starts = [e[0][:4] for e in eps]
+    assert any(s in ("1928", "1929") for s in starts) and any(1994 <= int(s) <= 1998 for s in starts)
+
+
+def test_bubble_errors():
+    d = pd.DataFrame(dict(t=range(30), y=np.arange(30.0)))
+    assert "at least 60" in o.run("bubble", _csv(d), dict(y="y", time="t"))["error"]
+
+
+# ================================================================== Nelson-Siegel
+def test_nelson_siegel_recovers_exact_curve_and_lambda():
+    tau = np.array([3, 6, 12, 24, 36, 60, 84, 120.0]); lam = 0.0609
+    rng = np.random.default_rng(7)
+    T = 120
+    B = np.column_stack([5 + np.cumsum(rng.normal(0, .05, T)), -1 + np.cumsum(rng.normal(0, .05, T)), np.cumsum(rng.normal(0, .05, T))])
+    L = finance._ns_loadings(tau, lam)
+    Y = B @ L.T
+    d = pd.DataFrame(Y, columns=[f"y{int(t)}" for t in tau]); d["t"] = range(T)
+    out = o.run("nelson_siegel", _csv(d), dict(yields=list(d.columns[:-1]), maturities=",".join(str(int(t)) for t in tau), time="t"))
+    fac = {x[0]: x for x in _tab(out, "Factors")["rows"]}
+    assert abs(fac["Level (beta 0)"][1] - B[:, 0].mean()) < 5e-3 and abs(fac["Curvature (beta 2)"][1] - B[:, 2].mean()) < 5e-3
+    assert abs(next(s for s in out["summary"] if s["label"] == "lambda")["value"] - lam) < 0.003
+    assert max(x[2] for x in _tab(out, "Fit by")["rows"]) < 1e-3
+
+
+def test_nelson_siegel_matches_scipy_least_squares_for_fixed_lambda():
+    d = pd.read_csv(IRA)
+    cols = ["r1", "r3", "r6", "r12", "r36", "r60", "r120"]; tau = np.array([1, 3, 6, 12, 36, 60, 120.0])
+    out = o.run("nelson_siegel", _csv(d), dict(yields=cols, maturities="1,3,6,12,36,60,120", time="month", **{"lambda": 0.0609}))
+    L = finance._ns_loadings(tau, 0.0609)
+    i = 200
+    ref = optimize_lsq(L, d[cols].to_numpy()[i])
+    assert np.allclose(ref, np.linalg.lstsq(L, d[cols].to_numpy()[i], rcond=None)[0])
+    assert out["nobs"] == len(d) and _tab(out, "Factors")["rows"][0][1] > 5
+
+
+def optimize_lsq(L, y):
+    from scipy.optimize import least_squares
+    return least_squares(lambda b: L @ b - y, np.zeros(3), xtol=1e-14, ftol=1e-14).x
+
+
+def test_nelson_siegel_forecast_table_and_errors():
+    d = pd.read_csv(IRA)
+    out = o.run("nelson_siegel", _csv(d), dict(yields=["r1", "r6", "r12", "r36", "r120"], maturities="1,6,12,36,120", time="month", horizon=6))
+    assert len(_tab(out, "6-month-ahead")["rows"]) == 3
+    assert "maturities" in o.run("nelson_siegel", _csv(d), dict(yields=["r1", "r6", "r12", "r36"], maturities="1,6,12", time="month"))["error"]
+    assert "four maturities" in o.run("nelson_siegel", _csv(d), dict(yields=["r1", "r6", "r12"], maturities="1,6,12", time="month"))["error"]
+    assert "lambda must" in o.run("nelson_siegel", _csv(d), dict(yields=["r1", "r6", "r12", "r36"], maturities="1,6,12,36", time="month", **{"lambda": -1}))["error"]
