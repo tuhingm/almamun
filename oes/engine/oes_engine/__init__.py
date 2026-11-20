@@ -591,6 +591,10 @@ MODELS += [
          fields=[col("y", "Variable to test"), UNIT, PTIME, sel("trend", "Deterministic terms", [["c", "Constant"], ["ct", "Constant and trend"]], "c"), sel("ic", "Lag criterion", [["aic", "AIC"], ["bic", "BIC"]], "aic"),
                  num("maxlag", "Maximum lags", 2), sel("demean", "Remove cross-sectional means", [["no", "No"], ["yes", "Yes"]], "no"), num("sims", "Simulation replications", 200), num("seed", "Random seed", 0)],
          example=dict(file=PD + "inflation_panel.csv", spec=dict(y="inflation", unit="country", time="year", sims=100))),
+    dict(id="dh_causality", group="Panel data", name="Panel Granger causality (Dumitrescu-Hurlin)", guide="panel-data-guide/panel-granger.html", fn=panel_extra.dh_causality,
+         fields=[col("y", "Variable that may be caused"), col("x", "Variable that may cause it"), UNIT, PTIME, num("lags", "Lags", 1), sel("diff_y", "First-difference the caused variable", [["no", "No"], ["yes", "Yes"]], "no"),
+                 sel("diff_x", "First-difference the causing variable", [["no", "No"], ["yes", "Yes"]], "no")],
+         example=dict(file=PD + "garrett.csv", spec=dict(y="gdp_growth", x="unem", unit="country", time="year", lags=1, diff_x="yes"))),
 ]
 
 MODELS += [

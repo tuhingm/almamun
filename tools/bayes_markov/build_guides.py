@@ -35,7 +35,7 @@ SECTIONS = {
                order=["ols", "ardl", "nardl", "var", "vecm", "gmm", "lp", "svar", "bp", "tar", "str", "arima", "garch", "quantile", "cointegration", "wavelet", "unit-root", "trend-cycle", "forecast-comparison", "spillovers", "granger-causality", "seasonality", "long-memory", "factor-models", "spectral-analysis", "time-varying-parameters"], static=dict(ols="OLS", ardl="ARDL", nardl="NARDL", var="VAR", vecm="VECM", gmm="2SLS / GMM"),
                data=["oes/examples/us_macro.csv", "oes/examples/us_gdp_level.csv", "oes/examples/uk_gas.csv", "oes/examples/inflation_countries.csv", "oes/examples/phillips.csv"]),
     "plp": dict(folder="panel-data-guide", name="Panel Data Research Guide", short="Panel-Data Guide",
-                order=["pols", "re", "fe", "gmm", "fedk", "mg", "diff", "pmg", "csardl", "plp", "pthresh", "hausman-taylor", "panel-unit-root"],
+                order=["pols", "re", "fe", "gmm", "fedk", "mg", "diff", "pmg", "csardl", "plp", "pthresh", "hausman-taylor", "panel-unit-root", "panel-granger"],
                 static=dict(pols="Pooled OLS", re="Random effects", fe="Fixed effects", gmm="GMM", fedk="FE-DK", mg="MG / CCE", diff="Δ model", pmg="PMG", csardl="CS-ARDL"),
                 data=[]),
 }

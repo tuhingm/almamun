@@ -143,3 +143,56 @@ def test_punitroot_errors():
     assert "at least" in o.run("punitroot", d.to_csv(index=False), PS)["error"]
     assert "at least 4 units" in o.run("punitroot", panel_sim("rw", N=3).to_csv(index=False), PS)["error"]
     assert "Deterministic terms" in o.run("punitroot", panel_sim("rw").to_csv(index=False), dict(PS, trend="x"))["error"]
+
+
+# ---- Dumitrescu-Hurlin panel Granger causality -----------------------------------------------------------------
+def garrett(): return pd.read_csv(os.path.join(PD, "garrett.csv"))
+GS = dict(y="gdp_growth", x="unem", unit="country", time="year", lags=1, diff_x="yes")
+def dh_panel(N=10, T=30, seed=0, beta=0.0, share=1.0):
+    rng = np.random.default_rng(seed); rows = []
+    for i in range(N):
+        e = rng.standard_normal((T + 20, 2)); y = np.zeros(T + 20); x = np.zeros(T + 20); b = beta if i < share * N else 0.0
+        for t in range(1, T + 20): x[t] = 0.5 * x[t - 1] + e[t, 1]; y[t] = 0.4 * y[t - 1] + b * x[t - 1] + e[t, 0]
+        rows += [(i, t, y[t + 20], x[t + 20]) for t in range(T)]
+    return pd.DataFrame(rows, columns=["u", "t", "y", "x"])
+
+
+def test_dh_registered():
+    m = o.BY_ID["dh_causality"]; assert m["group"] == "Panel data" and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+def test_dh_unit_tests_match_statsmodels():
+    from statsmodels.tsa.stattools import grangercausalitytests
+    d = garrett(); r = panel_extra.dh_causality(d, dict(GS, lags=2)); row = r["tables"][1]["rows"][2]
+    g = d[d.country == row[0]].sort_values("year"); x = np.diff(g.unem.to_numpy(float)); y = g.gdp_growth.to_numpy(float)[1:]
+    F = grangercausalitytests(np.column_stack([y, x]), maxlag=2, verbose=False)[2][0]["ssr_ftest"]
+    assert float(row[2]) == pytest.approx(F[0], abs=2e-3) and float(row[3]) == pytest.approx(F[1], abs=2e-3)
+
+
+def test_dh_statistics_match_formulas():
+    K = 2; r = panel_extra.dh_causality(garrett(), dict(GS, lags=K)); W = np.array([float(x[1]) for x in r["tables"][1]["rows"]]); N, T = len(W), 24
+    Wb = W.mean(); zb = np.sqrt(N / (2 * K)) * (Wb - K)
+    zt = np.sqrt(N / (2 * K) * (T - 3 * K - 5) / (T - 2 * K - 3)) * ((T - 3 * K - 3) / (T - 3 * K - 1) * Wb - K)
+    row = r["tables"][0]["rows"][0]
+    assert float(row[1]) == pytest.approx(Wb, abs=2e-3) and float(row[2]) == pytest.approx(zb, abs=2e-3) and float(row[4]) == pytest.approx(zt, abs=2e-3)
+
+
+def test_dh_size_small_sample_statistic_better_than_large_t():
+    rz, rt, R = 0, 0, 150
+    for s in range(R):
+        row = panel_extra.dh_causality(dh_panel(seed=s, T=20), dict(y="y", x="x", unit="u", time="t", lags=1))["tables"][0]["rows"][0]
+        rz += float(row[3]) < 0.05; rt += float(row[5]) < 0.05
+    assert rt / R <= 0.13 and rz > rt
+
+
+def test_dh_power_and_direction():
+    r = panel_extra.dh_causality(dh_panel(beta=0.6, share=0.6, T=40), dict(y="y", x="x", unit="u", time="t", lags=1)); rows = r["tables"][0]["rows"]
+    assert float(rows[0][5]) < 1e-6 and float(rows[1][5]) > 0.001 and float(rows[1][5]) > 1000 * float(rows[0][5])
+
+
+def test_dh_errors():
+    d = dh_panel(); sp = dict(y="y", x="x", unit="u", time="t")
+    assert "balanced" in o.run("dh_causality", d.iloc[1:].to_csv(index=False), sp)["error"]
+    assert "periods" in o.run("dh_causality", dh_panel(T=10).to_csv(index=False), dict(sp, lags=3))["error"]
+    assert "at least 3 units" in o.run("dh_causality", dh_panel(N=2).to_csv(index=False), sp)["error"]
+    assert "Lags" in o.run("dh_causality", d.to_csv(index=False), dict(sp, lags=9))["error"]
