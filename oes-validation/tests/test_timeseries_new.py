@@ -288,3 +288,34 @@ def test_seasonal_errors():
     assert "positive" in o.run("seasonal", d.assign(gas=d.gas - 200).to_csv(index=False), dict(y="gas"))["error"]
     assert "short" in o.run("seasonal", d.head(10).to_csv(index=False), dict(y="gas", period=4))["error"]
     assert "Choose" in o.run("seasonal", d.to_csv(index=False), dict(y="gas", mode="mixed"))["error"]
+
+
+# ------------------------------------------------------------------ long memory
+def test_longmemory_registered():
+    m = o.BY_ID["longmemory"]
+    assert os.path.exists(os.path.join(ROOT, m["guide"])) and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+def test_fracdiff_special_cases():
+    x = np.random.default_rng(1).standard_normal(50)
+    assert np.allclose(ts_extra._fracdiff(x, 0.0), x)
+    assert np.allclose(ts_extra._fracdiff(x, 1.0)[1:], np.diff(x))                       # d = 1 is the first difference
+    assert np.allclose(ts_extra._fracdiff(ts_extra._fracdiff(x, .3), -.3), x, atol=1e-10)  # the filters are inverses
+
+
+def test_gph_and_whittle_recover_fractional_noise():
+    rng = np.random.default_rng(21); n = 3000
+    for d0 in (0.0, 0.3):
+        e = rng.standard_normal(n); x = ts_extra._fracdiff(e, -d0)          # ARFIMA(0, d0, 0): apply (1 - L)^(-d0)
+        m = int(n ** .65); g, sg = ts_extra._gph(x, m); w, sw = ts_extra._whittle(x, m)
+        assert abs(g - d0) < 3.5 * sg and abs(w - d0) < 3.5 * sw
+    assert abs(ts_extra._whittle(np.cumsum(rng.standard_normal(n)), int(n ** .65))[0] - 1) < .2   # random walk: d near one
+
+
+def test_longmemory_errors_and_summary():
+    d = pd.read_csv(os.path.join(OX, "us_macro.csv"))
+    r = ts_extra.longmemory(d, dict(y="inflation", time="date"))
+    assert 0.4 < next(s["value"] for s in r["summary"] if s["label"] == "Local Whittle d") < 0.9
+    assert "100" in o.run("longmemory", d.head(50).to_csv(index=False), dict(y="inflation"))["error"]
+    assert "Choose" in o.run("longmemory", d.to_csv(index=False), dict(y="inflation", transform="cube"))["error"]
+    assert "between" in o.run("longmemory", d.to_csv(index=False), dict(y="inflation", power=0.95))["error"]

@@ -566,6 +566,10 @@ MODELS += [
          fields=[col("y", "Series"), TIME, num("period", "Seasonal period (4 quarterly, 12 monthly)", 4), sel("mode", "Decomposition", [["multiplicative", "Multiplicative (log)"], ["additive", "Additive"]], "multiplicative"),
                  sel("robust", "Robust to outliers", [["yes", "Yes"], ["no", "No"]], "yes"), num("swindow", "Seasonal window (odd; larger = more stable pattern)", 7)],
          example=dict(file=OX + "uk_gas.csv", spec=dict(y="gas", time="date", period=4, mode="multiplicative", robust="yes", swindow=7))),
+    dict(id="longmemory", group="Time series", name="Long memory (GPH and local Whittle fractional integration)", guide="time-series-guide/long-memory.html", fn=ts_extra.longmemory,
+         fields=[col("y", "Series"), TIME, sel("transform", "Transform", [["level", "Level"], ["absolute", "Absolute deviation"], ["squared", "Squared deviation"], ["log absolute", "Log absolute deviation"]], "level"),
+                 num("power", "Bandwidth power (m = n^power)", 0.65)],
+         example=dict(file=OX + "us_macro.csv", spec=dict(y="inflation", time="date", transform="level", power=0.65))),
 ]
 
 MODELS += [

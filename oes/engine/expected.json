@@ -1276,5 +1276,21 @@
    "label": "Seasonal strength",
    "value": 0.973
   }
+ },
+ "longmemory": {
+  "nobs": 202,
+  "table_index": 0,
+  "table": "Estimates of the fractional order d",
+  "row": "14",
+  "row_index": 0,
+  "col": "GPH d",
+  "col_index": 2,
+  "value": 0.68,
+  "rtol": 0.001,
+  "seconds": 0.0,
+  "summary": {
+   "label": "GPH d",
+   "value": 0.758
+  }
  }
 }
