@@ -75,7 +75,7 @@
         { id: "BIS_CPI", label: "Consumer prices (monthly, index)", freq: "M", needs: true, url: (e, s) => BIS + "WS_LONG_CPI/1.0/M." + e.join("+") + ".628?startPeriod=" + s + "&format=csv", ent: "REF_AREA" },
         { id: "BIS_NEER", label: "Nominal effective exchange rate, broad basket (monthly, index)", freq: "M", needs: true, url: (e, s) => BIS + "WS_EER/1.0/M.N.B." + e.join("+") + "?startPeriod=" + s + "&format=csv", ent: "REF_AREA" },
         { id: "BIS_PROP_PRICES", label: "Residential property prices (quarterly, index)", freq: "Q", needs: true, url: (e, s) => BIS + "WS_SPP/1.0/Q." + e.join("+") + ".N.628?startPeriod=" + s + "&format=csv", ent: "REF_AREA" },
-        { id: "BIS_USD_RATE", label: "Exchange rate against the US dollar (monthly average, local currency per USD)", freq: "M", needs: true, url: (e, s) => BIS + "WS_XRU/1.0/M." + e.join("+") + "?startPeriod=" + s + "&format=csv", ent: "REF_AREA" },
+        { id: "BIS_USD_RATE", label: "Exchange rate against the US dollar (monthly average, local currency per USD)", freq: "M", needs: true, url: (e, s) => BIS + "WS_XRU/1.0/M." + e.join("+") + "..A?startPeriod=" + s + "&format=csv", ent: "REF_AREA" },
         { id: "BIS_DEBT_SERVICE", label: "Private non-financial debt service ratio (quarterly, %)", freq: "Q", needs: true, url: (e, s) => BIS + "WS_DSR/1.0/Q." + e.join("+") + ".P?startPeriod=" + s + "&format=csv", ent: "BORROWERS_CTY" },
         { id: "BIS_CREDIT_GAP", label: "Credit-to-GDP gap (quarterly, percentage points)", freq: "Q", needs: true, url: (e, s) => BIS + "WS_CREDIT_GAP/1.0/Q." + e.join("+") + ".P.A.C?startPeriod=" + s + "&format=csv", ent: "BORROWERS_CTY" },
       ]
