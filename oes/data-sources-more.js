@@ -163,6 +163,12 @@
   const status = (m, err) => { const el = $("mpStatus"); if (el) { el.textContent = m; el.className = "status show" + (err ? " error" : ""); } };
 
   function render(key) {
+    if (key === "imf") {
+      current = key; last = null;
+      pane.innerHTML = '<div class="ds-provider"><div id="mpBrowse"></div><p class="ds-more-note">IMF data come from the IMF SDMX service. Source: <a href="https://data.imf.org/" target="_blank" rel="noopener">data.imf.org</a>. Check the IMF terms of use before redistributing.</p></div>';
+      if (window.OESBrowse) window.OESBrowse.mount($("mpBrowse"), "imf");
+      return;
+    }
     const p = P[key]; current = key; last = null;
     pane.innerHTML =
       '<div class="ds-provider"><div id="mpBrowse" style="margin-bottom:16px"></div><div class="ds-provider-head"><div><b>' + esc(p.name) + ' · popular indicators</b><small>Quick picks. For every series, use the green "All datasets" box above. No API key needed.</small></div></div>' +
