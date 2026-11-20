@@ -104,3 +104,79 @@ def test_bma_errors():
     with pytest.raises(OESError, match="constant"): bayes_more.bma(d2, dict(y="y", x=["x0", "c"]))
     with pytest.raises(OESError, match="collinear"): bayes_more.bma(d.assign(z=d["x0"] * 2), dict(y="y", x=["x0", "z"]))
     with pytest.raises(OESError, match="Too few"): bayes_more.bma(d.head(8), dict(y="y", x=["x0", "x1", "x2", "x3"]))
+
+
+# ------------------------------------------------------------------------------------------------ Bayesian logit and probit
+MX = os.path.join(ROOT, "microeconometrics-guide", "examples")
+
+
+def _bin_data(n=400, beta=(-0.3, 0.9), link="logit", seed=0):
+    rng = np.random.default_rng(seed); x = rng.normal(size=n)
+    eta = beta[0] + beta[1] * x
+    p = 1 / (1 + np.exp(-eta)) if link == "logit" else stats.norm.cdf(eta)
+    return pd.DataFrame(dict(y=(rng.random(n) < p).astype(float), x=x))
+
+
+def test_binary_registered():
+    m = o.BY_ID["bayes_binary"]; assert m["group"] == "Bayesian" and os.path.exists(os.path.join(ROOT, m["example"]["file"]))
+
+
+@pytest.mark.parametrize("link", ["logit", "probit"])
+def test_binary_matches_grid_posterior(link):
+    """Sampler against brute-force numerical integration of the exact posterior over (constant, slope) on a grid."""
+    d = _bin_data(n=150, seed=4, link=link); Y = d["y"].to_numpy(); x = d["x"].to_numpy(); xs = x.std(); xc = x - x.mean()
+    s = 2.5
+    r = bayes_more.bayes_binary(d, dict(y="y", x=["x"], link=link, prior_sd=s, draws=6000, burn=1000, chains=2))
+    a = np.linspace(-2.5, 2.5, 400); b = np.linspace(-1, 3.5, 400); A, B = np.meshgrid(a, b, indexing="ij")
+    eta = A[..., None] + B[..., None] * xc
+    ll = (Y * (-np.logaddexp(0, -eta)) + (1 - Y) * (-np.logaddexp(0, eta))).sum(-1) if link == "logit" else \
+         (Y * stats.norm.logcdf(eta) + (1 - Y) * stats.norm.logcdf(-eta)).sum(-1)
+    lp = ll - A ** 2 / (2 * 10 ** 2) - B ** 2 / (2 * (s / xs) ** 2)
+    w = np.exp(lp - lp.max()); w /= w.sum()
+    mb = (w * B).sum(); sb = np.sqrt((w * B ** 2).sum() - mb ** 2)
+    row = next(x_ for x_ in next(t for t in r["tables"] if t["title"].startswith("Posterior of the coefficients"))["rows"] if x_[0] == "x")
+    assert row[1] == pytest.approx(mb, abs=0.02) and row[2] == pytest.approx(sb, rel=0.06)
+
+
+def test_binary_close_to_ml_with_diffuse_prior_and_large_sample():
+    d = pd.read_csv(os.path.join(MX, "mroz.csv")); x = ["nwifeinc", "educ", "exper", "age", "kidslt6", "kidsge6"]
+    import statsmodels.api as sm
+    for link, M in (("logit", sm.Logit), ("probit", sm.Probit)):
+        ml = M(d["inlf"], sm.add_constant(d[x])).fit(disp=0)
+        r = bayes_more.bayes_binary(d, dict(y="inlf", x=x, link=link, prior_sd=100, draws=4000))
+        rows = {x_[0]: x_ for x_ in next(t for t in r["tables"] if t["title"].startswith("Posterior of the coefficients"))["rows"]}
+        for v in x:
+            assert rows[v][1] == pytest.approx(ml.params[v], abs=0.1 * ml.bse[v] + 0.003)
+            assert rows[v][2] == pytest.approx(ml.bse[v], rel=0.08)
+        assert float(S(r)["Largest R-hat"]) < 1.02
+
+
+def test_binary_probit_logit_scale_ratio():
+    d = pd.read_csv(os.path.join(MX, "mroz.csv")); x = ["educ", "exper", "age", "kidslt6"]
+    g = lambda link: {r_[0]: r_[1] for r_ in next(t for t in bayes_more.bayes_binary(d, dict(y="inlf", x=x, link=link, draws=2000))["tables"]
+                                                   if t["title"].startswith("Posterior of the coefficients"))["rows"]}
+    gl, gp = g("logit"), g("probit")
+    assert all(1.5 < gl[v] / gp[v] < 1.9 for v in x)
+
+
+def test_binary_monte_carlo_coverage():
+    hit = 0; R = 80
+    for s in range(R):
+        d = _bin_data(n=250, beta=(-0.2, 0.8), link="logit", seed=300 + s)
+        r = bayes_more.bayes_binary(d, dict(y="y", x=["x"], draws=500, burn=300, chains=2, seed=s))
+        row = next(x_ for x_ in next(t for t in r["tables"] if t["title"].startswith("Posterior of the coefficients"))["rows"] if x_[0] == "x")
+        hit += row[3] <= 0.8 <= row[5]
+    assert hit / R >= 0.88
+
+
+def test_binary_marginal_effect_dummy_and_errors():
+    d = _bin_data(n=300, seed=8); d["z"] = (np.random.default_rng(1).random(300) < 0.4).astype(float)
+    r = bayes_more.bayes_binary(d, dict(y="y", x=["x", "z"], draws=300, burn=200))
+    ame = {x_[0]: x_ for x_ in next(t for t in r["tables"] if t["title"].startswith("Posterior of the average marginal"))["rows"]}
+    assert ame["z"][6] == "0 to 1" and ame["x"][6] == "per unit"
+    for spec, msg in [(dict(y="x", x=["z"]), "0/1"), (dict(y="y", x=["x"], link="zz"), "link"), (dict(y="y", x=["x"], prior_sd=-1), "positive"),
+                      (dict(y="y", x=["x", "y"]), "")]:
+        with pytest.raises(OESError, match=msg or None): bayes_more.bayes_binary(d, spec)
+    with pytest.raises(OESError, match="constant"): bayes_more.bayes_binary(d.assign(c=2.0), dict(y="y", x=["x", "c"]))
+    with pytest.raises(OESError, match="Too few"): bayes_more.bayes_binary(d.head(8), dict(y="y", x=["x"]))
+    with pytest.raises(OESError, match="between 2 and 8"): bayes_more.bayes_binary(d, dict(y="y", x=["x"], chains=1))

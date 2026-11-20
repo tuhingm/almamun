@@ -177,3 +177,168 @@ def bma(df, spec):
     notes = [f"g-prior with g = {g:g} ({gk.upper()}); model prior: {mp}" + (f" with expected size {msize:g}" if mp == "binomial" else " (the inclusion probability has a uniform prior)") + ".",
              "Marginal likelihoods are exact under the g-prior (Zellner 1986; Liang et al. 2008)." + ("" if exact else f" With {k} regressors the 2^{k} models are sampled by MC3 ({ndraw} iterations after {burn} burn-in; acceptance {acc / ndraw:.2f}).")]
     return result("bma", "Bayesian model averaging", n, summary, tabs, charts, notes)
+
+
+# ================================================================================================ Bayesian logit and probit
+def _binary_setup(df, spec):
+    y = need(spec, "y", "binary outcome")
+    x = as_list(need(spec, "x", "explanatory variables"))
+    distinct([y], x)
+    d = numeric(df, [y] + x)
+    Y = d[y].to_numpy(float)
+    if not set(np.unique(Y)) <= {0.0, 1.0} or len(np.unique(Y)) < 2:
+        raise OESError(f"{y} must be a 0/1 variable with both values present.")
+    X = d[x].to_numpy(float)
+    if (X.std(0) == 0).any():
+        raise OESError("An explanatory variable is constant: drop it (the model has a constant).")
+    if len(d) < 5 * (len(x) + 1):
+        raise OESError(f"Too few observations ({len(d)}) for {len(x)} explanatory variables.")
+    return y, x, Y, X
+
+
+def _sample_binary(Y, Xc, link, s_slope, s_const, ndraw, burn, rng, init=None):
+    """Posterior draws of (alpha_c, beta) for centred regressors. Probit: Albert-Chib Gibbs sampler. Logit: independence
+    Metropolis-Hastings with a Student-t proposal centred at the posterior mode (Laplace)."""
+    from scipy.special import ndtr, ndtri, expit
+    n, k = Xc.shape
+    Z = np.column_stack([np.ones(n), Xc])
+    V0i = np.diag([1 / s_const ** 2] + list(1 / s_slope ** 2))
+    out = np.empty((ndraw, k + 1))
+    if link == "probit":
+        P = V0i + Z.T @ Z
+        L = np.linalg.cholesky(P); Pinv = np.linalg.inv(P)
+        b = np.zeros(k + 1) if init is None else init.copy()
+        for it in range(burn + ndraw):
+            mu = Z @ b
+            lo = ndtr(-mu); u = rng.random(n)
+            q = np.where(Y == 1, lo + u * (1 - lo), u * lo)
+            zz = mu + ndtri(np.clip(q, 1e-300, 1 - 1e-16))
+            m = Pinv @ (Z.T @ zz)
+            b = m + np.linalg.solve(L.T, rng.standard_normal(k + 1))
+            if it >= burn:
+                out[it - burn] = b
+        return out, 1.0
+    def lpost(b):
+        e = Z @ b
+        return float(Y @ e - np.logaddexp(0, e).sum() - 0.5 * b @ V0i @ b)
+    b = np.zeros(k + 1)
+    for _ in range(50):                                      # Newton iterations to the posterior mode
+        p = expit(Z @ b); g = Z.T @ (Y - p) - V0i @ b; H = Z.T @ (Z * (p * (1 - p))[:, None]) + V0i
+        step = np.linalg.solve(H, g); b = b + step
+        if np.abs(step).max() < 1e-9:
+            break
+    p = expit(Z @ b); H = Z.T @ (Z * (p * (1 - p))[:, None]) + V0i
+    Sig = np.linalg.inv(H); Lc = np.linalg.cholesky(Sig); nu = 6.0
+    def lprop(b_):
+        r = np.linalg.solve(Lc, b_ - b)
+        return -(nu + k + 1) / 2 * np.log1p(r @ r / nu)
+    cur = b.copy() if init is None else init.copy(); lcur = lpost(cur) - lprop(cur); acc = 0
+    for it in range(burn + ndraw):
+        w = rng.chisquare(nu) / nu
+        prop = b + Lc @ rng.standard_normal(k + 1) / np.sqrt(w)
+        lp = lpost(prop) - lprop(prop)
+        if np.log(rng.random()) < lp - lcur:
+            cur, lcur = prop, lp; acc += it >= burn
+        if it >= burn:
+            out[it - burn] = cur
+    return out, acc / ndraw
+
+
+def bayes_binary(df, spec):
+    from scipy.special import ndtr, expit
+    from scipy.stats import rankdata
+    import statsmodels.api as sm
+    from .bayes_extra import _rhat_ess
+    from .bayes import _geweke
+    y, x, Y, X = _binary_setup(df, spec)
+    n, k = X.shape
+    link = spec.get("link", "logit")
+    if link not in ("logit", "probit"):
+        raise OESError("Choose the link: logit or probit.")
+    s = float_option(spec, "prior_sd", 2.5, "Prior standard deviation")
+    if s <= 0:
+        raise OESError("The prior standard deviation must be positive.")
+    ndraw = int_option(spec, "draws", 2000, 200, 50000, "Draws per chain")
+    burn = int_option(spec, "burn", 1000, 0, 50000, "Burn-in")
+    nch = int_option(spec, "chains", 2, 2, 8, "Chains")
+    seed = int_option(spec, "seed", 0, 0, 10 ** 9, "Random seed")
+    xm, xs = X.mean(0), X.std(0)
+    Xc = X - xm
+    s_slope, s_const = s / xs, 10.0                          # the prior is N(0, s^2) per one-standard-deviation change in x
+    F = ndtr if link == "probit" else expit
+    chains, accs = [], []
+    for c in range(nch):
+        rng = np.random.default_rng(seed + 1000 * c)
+        init = rng.normal(scale=0.5, size=k + 1) / np.r_[1.0, xs] if c else None
+        dr, a = _sample_binary(Y, Xc, link, s_slope, s_const, ndraw, burn, rng, init)
+        chains.append(dr); accs.append(a)
+    allc = np.vstack(chains)
+    draws = allc.copy(); draws[:, 0] = allc[:, 0] - allc[:, 1:] @ xm     # back to the original (uncentred) constant
+    names = ["const"] + x
+    from .bayes import post_table
+    tabs = [post_table(f"Posterior of the coefficients ({link}, normal prior with s.d. {s:g} per one-s.d. change in x)", names, draws,
+                       f"{nch} chains of {ndraw} draws after {burn} burn-in.")]
+    ml = (sm.Logit if link == "logit" else sm.Probit)(Y, sm.add_constant(X)).fit(disp=0)
+    pm = draws.mean(0)
+    tabs.append(table("Maximum likelihood for comparison", ["Parameter", "Coef.", "Std. err.", "Posterior mean", "Posterior s.d."],
+                      [[v, f(ml.params[j]), f(ml.bse[j]), f(pm[j]), f(draws[:, j].std(ddof=1))] for j, v in enumerate(names)]))
+    if link == "logit":
+        OR = np.exp(draws[:, 1:])
+        q = np.percentile(OR, [2.5, 50, 97.5], axis=0)
+        tabs.append(table("Posterior of the odds ratios (per unit change)", ["Variable", "Mean", "2.5%", "Median", "97.5%", "P(> 1)"],
+                          [[v, f(OR[:, j].mean()), f(q[0, j]), f(q[1, j]), f(q[2, j]), f((OR[:, j] > 1).mean(), 3)] for j, v in enumerate(x)]))
+    sub = draws[np.linspace(0, len(draws) - 1, min(400, len(draws))).astype(int)]
+    isbin = [set(np.unique(X[:, j])) <= {0.0, 1.0} for j in range(k)]
+    AME = np.empty((len(sub), k))
+    for i, b in enumerate(sub):
+        eta = b[0] + X @ b[1:]
+        for j in range(k):
+            if isbin[j]:
+                e1, e0 = eta + (1 - X[:, j]) * b[j + 1], eta - X[:, j] * b[j + 1]
+                AME[i, j] = (F(e1) - F(e0)).mean()
+            else:
+                dens = F(eta) * (1 - F(eta)) if link == "logit" else np.exp(-eta ** 2 / 2) / np.sqrt(2 * np.pi)
+                AME[i, j] = dens.mean() * b[j + 1]
+    qa = np.percentile(AME, [2.5, 97.5], axis=0)
+    tabs.append(table("Posterior of the average marginal effects (change in the probability)", ["Variable", "Mean", "Std. dev.", "2.5%", "97.5%", "P(> 0)", "Type"],
+                      [[v, f(AME[:, j].mean()), f(AME[:, j].std(ddof=1)), f(qa[0, j]), f(qa[1, j]), f((AME[:, j] > 0).mean(), 3), "0 to 1" if isbin[j] else "per unit"] for j, v in enumerate(x)],
+                      "Computed draw by draw; a dummy variable's effect is the change from 0 to 1."))
+    # R-hat and ESS are computed in the original parametrisation (the constant is not centred)
+    chains_o = [np.column_stack([c[:, 0] - c[:, 1:] @ xm, c[:, 1:]]) for c in chains]
+    rows = []
+    for j, v in enumerate(names):
+        rh, ess = _rhat_ess([c[:, j] for c in chains_o]); z = _geweke(chains_o[0][:, j])
+        rows.append([v, f(rh, 3), f(ess, 0), f(z, 2)])
+    tabs.append(table("MCMC convergence diagnostics", ["Parameter", "R-hat", "Effective sample size", "Geweke z (chain 1)"], rows,
+                      "R-hat above 1.05 or an effective sample size below a few hundred means the chains have not mixed. " + (
+                          f"Metropolis-Hastings acceptance rate {np.mean(accs):.2f}." if link == "logit" else "The probit Gibbs sampler draws from exact conditional distributions.")))
+    pr = F(sub[:, [0]] + sub[:, 1:] @ X.T)
+    ph = pr.mean(0)
+    base = max(Y.mean(), 1 - Y.mean())
+    acc50 = ((ph > 0.5) == (Y == 1)).mean()
+    r_ = rankdata(ph); n1 = Y.sum(); auc = (r_[Y == 1].sum() - n1 * (n1 + 1) / 2) / (n1 * (n - n1))
+    brier = float(((ph - Y) ** 2).mean())
+    ppc = (pr > np.random.default_rng(seed).random(pr.shape)).mean(1)
+    tabs.append(table("Fit and posterior predictive check", ["Measure", "Value"],
+                      [["Share of ones in the data", f(Y.mean(), 3)], ["Posterior predictive share of ones: mean", f(ppc.mean(), 3)],
+                       ["Posterior predictive share of ones: 2.5% to 97.5%", f"{np.percentile(ppc, 2.5):.3f} to {np.percentile(ppc, 97.5):.3f}"],
+                       ["Accuracy at 0.5", f(acc50, 3)], ["Accuracy of always predicting the majority", f(base, 3)], ["Area under the ROC curve", f(auc, 3)], ["Brier score", f(brier, 4)]],
+                      "In-sample measures at the posterior mean probabilities."))
+    sens = []
+    for sd_ in (0.5, 1.0, 2.5, 10.0, 100.0):
+        rg = np.random.default_rng(seed + 7)
+        dr, _ = _sample_binary(Y, Xc, link, np.full(k, sd_) / xs, s_const, 800, 300, rg)
+        sens.append([f"s.d. {sd_:g}"] + [f(v) for v in dr[:, 1:].mean(0)])
+    sens.append(["Maximum likelihood"] + [f(v) for v in ml.params[1:]])
+    tabs.append(table("Prior sensitivity: posterior means of the slopes", ["Prior"] + x, sens,
+                      "Each row is a separate run of 800 draws. A prior that is tight (s.d. 0.5 per one-s.d. change in x) pulls the slopes towards zero; the ML row is the limit of a very diffuse prior."))
+    j0 = int(np.argmax(np.abs(pm[1:] / draws[:, 1:].std(0)))) + 1
+    ds = max(1, len(allc) // 500)
+    charts = [chart(f"Trace of {names[j0]} (all chains)", list(range(1, len(draws) + 1, ds)), [(names[j0], draws[::ds, j0])], "draw", names[j0])]
+    hist, edges = np.histogram(draws[:, j0], bins=30)
+    charts.append(chart(f"Posterior density of {names[j0]}", [f((a + b) / 2, 4) for a, b in zip(edges[:-1], edges[1:])], [("draws", hist)], names[j0], "count", kind="bar"))
+    summary = [stat("Observations", n), stat("Link", link), stat("Share of ones", Y.mean(), 3), stat("Chains x draws", f"{nch} x {ndraw}"),
+               stat("Largest R-hat", max(float(r_[1]) for r_ in rows), 3), stat("Smallest effective sample size", min(float(r_[2]) for r_ in rows), 0),
+               stat("Area under the ROC curve", auc, 3)]
+    return result("bayes_binary", f"Bayesian {link}: {y}", n, summary, tabs, charts,
+                  [f"Independent N(0, s^2) prior on each slope per one-standard-deviation change in x with s = {s:g} (Gelman et al. 2008); N(0, 10^2) on the centred constant."])

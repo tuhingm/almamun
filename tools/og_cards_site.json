@@ -1,5 +1,11 @@
 [
  {
+  "out": "assets/og/bayesian-guide/bayes-logit.jpg",
+  "kicker": "Bayesian Guide · Model guide",
+  "title": "Bayesian Logit and Probit",
+  "sub": "A yes/no outcome where you want probabilities for effects, a prior, or an estimate that survives a small or separated sample.…"
+ },
+ {
   "out": "assets/og/bayesian-guide/bayes-reg.jpg",
   "kicker": "Bayesian Guide · Model guide",
   "title": "Bayesian Linear Regression with a g-Prior",
