@@ -46,11 +46,59 @@
       background: #94a3b8;
     }
   </style>
-<link rel="stylesheet" href="../assets/css/site-header.css">
 </head>
 <body class="min-h-screen flex flex-col antialiased selection:bg-blue-100 selection:text-blue-900">
 
-  <header class="site-header"><div class="wrap nav"><a class="brand" href="/almamun/index.html" aria-label="Tuhin G. M. Al Mamun — home">TGM <span>AL MAMUN</span></a><button id="menu" type="button" aria-expanded="false" aria-controls="nav">Menu</button><nav id="nav" aria-label="Main navigation"><a href="/almamun/index.html">Home</a><a href="/almamun/teaching/index.html">Teaching Courses</a><a href="/almamun/working-papers/index.html">Working Papers</a><a href="/almamun/time-series-guide/index.html">Time Series</a><a href="/almamun/panel-data-guide/index.html">Panel Data</a><a href="/almamun/causal-inference-guide/index.html">Causal Inference</a><a href="/almamun/dsge-guide/index.html">DSGE</a><a href="/almamun/ml-guide/index.html">Machine Learning</a><div class="dd"><button type="button" class="dd-btn" aria-expanded="false" aria-haspopup="true">More Guides</button><div class="dd-menu"><a href="/almamun/bayesian-guide/index.html">Bayesian</a><a href="/almamun/markov-guide/index.html">Markov Switching</a><a href="/almamun/microeconometrics-guide/index.html">Microeconometrics</a><a href="/almamun/finance-guide/index.html">Finance</a><a href="/almamun/productivity-guide/index.html">Productivity</a><a href="/almamun/nonparametric-guide/index.html">Nonparametric</a></div></div><a href="/almamun/oes/index.html">Open Econometric Systems</a></nav></div></header>
+  <!-- Top Navigation Bar -->
+  <header class="nav-bar text-white sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-4">
+      <a href="#" class="text-sm sm:text-base tracking-wide whitespace-nowrap flex items-center gap-1.5 hover:opacity-90 transition">
+        <span class="font-bold tracking-wider">TGM</span>
+        <span class="font-normal text-blue-100">AL MAMUN</span>
+      </a>
+
+      <!-- Desktop Navigation Links -->
+      <nav class="hidden xl:flex items-center space-x-5 text-[11px] font-semibold tracking-wider text-blue-100">
+        <a href="#top" class="hover:text-white transition">HOME</a>
+        <a href="#top" class="hover:text-white transition">TEACHING COURSES</a>
+        <a href="#top" class="hover:text-white transition">WORKING PAPERS</a>
+        <a href="#top" class="hover:text-white transition">TIME SERIES</a>
+        <a href="#top" class="hover:text-white transition">PANEL DATA</a>
+        <a href="#top" class="hover:text-white transition">CAUSAL INFERENCE</a>
+        <a href="#top" class="hover:text-white transition">DSGE</a>
+        <a href="#top" class="hover:text-white transition">MACHINE LEARNING</a>
+        <div class="relative group">
+          <button type="button" class="hover:text-white transition flex items-center gap-1 uppercase">
+            MORE GUIDES <span>▾</span>
+          </button>
+        </div>
+        <a href="#top" class="hover:text-white transition">OPEN ECONOMETRIC SYSTEMS</a>
+      </nav>
+
+      <!-- Mobile menu button -->
+      <button id="mobile-menu-btn" type="button" class="xl:hidden p-2 rounded-md text-blue-100 hover:text-white hover:bg-blue-900/50 focus:outline-none" aria-label="Toggle Menu">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobile-nav" class="hidden xl:hidden bg-[#00266e] px-4 pt-2 pb-4 border-t border-blue-800/60">
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-medium text-blue-100">
+        <a href="#top" class="py-1.5 hover:text-white">HOME</a>
+        <a href="#top" class="py-1.5 hover:text-white">TEACHING COURSES</a>
+        <a href="#top" class="py-1.5 hover:text-white">WORKING PAPERS</a>
+        <a href="#top" class="py-1.5 hover:text-white">TIME SERIES</a>
+        <a href="#top" class="py-1.5 hover:text-white">PANEL DATA</a>
+        <a href="#top" class="py-1.5 hover:text-white">CAUSAL INFERENCE</a>
+        <a href="#top" class="py-1.5 hover:text-white">DSGE</a>
+        <a href="#top" class="py-1.5 hover:text-white">MACHINE LEARNING</a>
+        <a href="#top" class="py-1.5 hover:text-white">MORE GUIDES ▾</a>
+        <a href="#top" class="py-1.5 hover:text-white col-span-2 sm:col-span-1">OPEN ECONOMETRIC SYSTEMS</a>
+      </div>
+    </div>
+  </header>
 
   <!-- Hero Banner -->
   <section id="top" class="hero-gradient text-white py-11 sm:py-14 px-4 sm:px-6 lg:px-8 shadow-inner">
@@ -286,6 +334,11 @@
         statusBadge.classList.add('hidden');
       }
     }
+
+    // Mobile nav toggle
+    $('mobile-menu-btn').onclick = () => {
+      $('mobile-nav').classList.toggle('hidden');
+    };
 
     // =========================================================================
     // 2. FILE SELECTION, DRAG-AND-DROP & MAMMOTH.JS DOCX EXTRACTION
@@ -1279,24 +1332,5 @@
       a.click();
     };
   </script>
-<script>
-(function(){
-  var menu=document.getElementById('menu');
-  var nav=document.getElementById('nav');
-  if(menu&&nav){
-    menu.addEventListener('click',function(){
-      var open=nav.classList.toggle('show');
-      menu.setAttribute('aria-expanded',String(open));
-    });
-    nav.querySelectorAll('a').forEach(function(a){
-      a.addEventListener('click',function(){
-        nav.classList.remove('show');
-        menu.setAttribute('aria-expanded','false');
-      });
-    });
-  }
-})();
-</script>
-<script src="../assets/js/nav-dropdown.js" defer></script>
 </body>
 </html>
