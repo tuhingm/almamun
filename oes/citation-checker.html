@@ -1,58 +1,42 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>In-text Citation Checker</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/css/mobile-nav.css"><link rel="stylesheet" href="../assets/css/site-header.css"><style>
-:root{--navy:#0033a0;--navy2:#00205b;--ink:#1b2437;--muted:#55617a;--paper:#f3f5fa;--white:#fff;--line:#d5dcea;--sky:#9fd3f0;--sky2:#6ec1e4;--tint:#e3eaf7;--ok:#0f7a4f;--warn:#a05a00;--bad:#a12a2a}
-*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.7 "DM Sans",sans-serif}a{color:inherit;text-decoration:none}button,input,select{font:inherit}button{cursor:pointer}.wrap{width:min(1160px,calc(100% - 44px));margin:auto}
-.hero{background:radial-gradient(circle at 85% 12%,#6ec1e445,transparent 29%),linear-gradient(120deg,#0033a0,#00205b);color:white;padding:56px 0 50px}.kicker{font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--sky)}h1{font:800 clamp(34px,5vw,52px)/1.1 Manrope;letter-spacing:-1.7px;margin:12px 0 14px}.lead{max-width:820px;color:#d0dcf0;margin:0;font-size:16px}.meta{display:flex;gap:22px;flex-wrap:wrap;margin-top:22px;color:#c5d4ea;font-size:12px}.meta strong{color:white}
-main{padding:34px 0 80px}
-section.step{background:#fff;border:1px solid var(--line);border-radius:14px;padding:24px 26px;margin:0 0 20px;box-shadow:0 5px 18px rgba(0,32,91,.05)}
-.stepno{display:block;font:800 10px "DM Sans";letter-spacing:.16em;text-transform:uppercase;color:var(--navy);margin-bottom:4px}
-h2{font:800 22px/1.25 Manrope;letter-spacing:-.4px;margin:0 0 6px}h3{font:800 15px Manrope;margin:18px 0 8px}.sub{color:var(--muted);font-size:13px;margin:0 0 14px}
-.btn,.btn2{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:8px;padding:10px 16px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.btn{background:var(--navy);color:#fff}.btn2{background:#fff;color:var(--navy);border:2px solid var(--navy)!important;padding:8px 16px;cursor:pointer;box-shadow:0 1px 3px rgba(0,51,160,.18)}.btn2:hover{background:var(--navy);color:#fff}.btn2:active,.btn:active{transform:translateY(1px) scale(.98)}.btn2:focus-visible,.btn:focus-visible{outline:3px solid var(--sky2);outline-offset:2px}.btn{cursor:pointer}.btn:disabled,.btn2:disabled{opacity:.45;cursor:not-allowed}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-footer{background:#00205b;color:#dce7f6;padding:25px 0;font-size:12px}footer .foot{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}footer a{color:#9fd3f0}
-@media(max-width:700px){section.step{padding:18px 16px}.grid2{grid-template-columns:1fr}.opform{grid-template-columns:1fr}.hero{padding:40px 0 36px}.charts{grid-template-columns:1fr}}
-body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.7 "DM Sans",sans-serif}
-a{color:inherit;text-decoration:none}
-button,input,select{font:inherit}
-button{cursor:pointer}
-.hero{background:radial-gradient(circle at 85% 12%,#6ec1e445,transparent 29%),linear-gradient(120deg,#0033a0,#00205b);color:white;padding:56px 0 50px}
-.kicker{font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--sky)}
-h1{font:800 clamp(34px,5vw,52px)/1.1 Manrope;letter-spacing:-1.7px;margin:12px 0 14px}
-.lead{max-width:820px;color:#d0dcf0;margin:0;font-size:16px}
-.meta{display:flex;gap:22px;flex-wrap:wrap;margin-top:22px;color:#c5d4ea;font-size:12px}
-.meta strong{color:white}
-main{padding:34px 0 80px}
-.wrap{width:min(1160px,calc(100% - 44px));margin:auto}
-section.step{background:#fff;border:1px solid var(--line);border-radius:14px;padding:24px 26px;margin:0 0 20px;box-shadow:0 5px 18px rgba(0,32,91,.05)}
-h2{font:800 22px/1.25 Manrope;letter-spacing:-.4px;margin:0 0 6px}
-.sub,.s{color:var(--muted);font-size:13px;margin:0 0 14px}
-.g{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-@media(max-width:760px){.g{grid-template-columns:1fr}}
-label{display:block;font-size:12px;font-weight:800;letter-spacing:.04em;color:#34425c;margin-bottom:6px}
-textarea{width:100%;height:260px;background:#fff;color:var(--ink);border:1px solid #ccd6e5;border-radius:8px;padding:12px;font:13px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;resize:vertical}
-textarea:focus{outline:2px solid var(--sky2);outline-offset:1px}
-.bar{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 0;align-items:center}
-button,.f{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:8px;padding:10px 14px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:var(--navy);color:#fff;cursor:pointer}
-button.o,.f{background:#fff;color:var(--navy);border:1.5px solid var(--navy)}
-button:disabled{opacity:.45;cursor:not-allowed}
-button:focus-visible,textarea:focus-visible{outline:3px solid var(--sky2);outline-offset:2px}
-.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:16px 0}
-.sum div{background:#f5f7fc;border:1px solid #e1e7f1;border-radius:8px;padding:10px 13px;color:#41506a;font-size:12px}
-.sum b{font:800 22px Manrope;display:block;color:var(--navy)}
-.step h2{margin-bottom:6px}
-.step h2:not(:first-child){margin-top:24px}
-.w{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
-table{border-collapse:collapse;width:100%;font-size:12px;background:#fff}
-th,td{text-align:left;padding:8px 10px;border-bottom:1px solid #e9edf4;vertical-align:top;white-space:normal}
-th{background:#f2f5fb;color:#5d6a82;font-size:10px;letter-spacing:.06em;text-transform:uppercase;font-weight:800}
-td{color:#34425c}
-.ok{color:var(--ok)}.wn{color:var(--warn)}.bd{color:var(--bad)}.m,.ctx{color:#6b7891}.ctx{font-size:11px}
-.sg{margin-bottom:10px}
-footer{background:#00205b;color:#dce7f6;padding:25px 0;font-size:12px}
-footer .foot{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}
-footer a{color:#9fd3f0}
-@media(max-width:700px){section.step{padding:18px 16px}.hero{padding:40px 0 36px}}
-@media print{header.site-header,.hero,footer,.bar{display:none!important}body{background:#fff}section.step{box-shadow:none;break-inside:avoid}}
+:root{color-scheme:light;--bg:#f3f5fa;--panel:#fff;--line:#d5dcea;--tx:#1b2437;--mut:#60708d;--blue:#0033a0;--navy:#00205b;--ok:#0f8a5f;--wn:#a05a00;--bd:#b42332}
+*{box-sizing:border-box}
+html{min-height:100%;background:#f3f5fa}
+body{margin:0;min-height:100vh;background:#f3f5fa;color:var(--tx);font:14px/1.55 "DM Sans",Arial,sans-serif}
+.top-line{height:14px;background:linear-gradient(90deg,#0033a0,#173c79);margin:4px 8px 0}
+.app{width:min(1100px,calc(100% - 48px));margin:28px auto 50px}
+h1{font:800 30px/1.2 Manrope,"DM Sans",sans-serif;color:#0033a0;letter-spacing:-.7px;margin:0 0 6px}
+.intro{font-size:13px;line-height:1.6;color:#60708d;max-width:670px;margin:0 0 22px}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:895px}
+label{display:block;font-size:12px;font-weight:700;color:#344767;margin:0 0 6px}
+textarea{display:block;width:100%;height:210px;background:#fff;color:#1b2437;border:1px solid #d5dcea;border-radius:7px;padding:10px;font:11.5px/1.55 Consolas,Monaco,monospace;resize:vertical;box-shadow:inset 0 1px 2px rgba(0,32,91,.03)}
+textarea:focus{outline:2px solid #9fd3f0;outline-offset:1px;border-color:#6ea8d8}
+.bar{display:flex;gap:7px;flex-wrap:wrap;align-items:center;max-width:895px;margin:18px 0 16px}
+button,.f{display:inline-flex;align-items:center;justify-content:center;background:#fff;color:#0033a0;border:1px solid #0033a0;border-radius:7px;padding:8px 12px;font:700 10.5px/1.25 "DM Sans",Arial,sans-serif;cursor:pointer;white-space:nowrap}
+button#go{background:#0033a0;color:#fff}
+button#fm,button#ap{background:#0033a0;color:#fff}
+button.o,.f{background:#fff;color:#0033a0;border:1px solid #5278c5}
+button:hover,.f:hover{background:#edf3ff}
+button#go:hover,button#fm:hover,button#ap:hover{background:#002879}
+button:disabled{opacity:.42;cursor:default}
+button:focus-visible,textarea:focus-visible{outline:2px solid #6ea8e4;outline-offset:2px}
+.sum{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0 20px}
+.sum div{background:#fff;border:1px solid #d5dcea;border-radius:8px;padding:9px 13px;min-width:112px;box-shadow:0 3px 9px rgba(0,32,91,.035);font-size:12px;color:#344767}
+.sum b{font:800 22px/1.2 Manrope,Arial,sans-serif;display:block;color:#17253e;margin-bottom:4px}
+.sum div:nth-child(2) b{color:#0f8a5f}.sum div:nth-child(3) b{color:#a05a00}.sum div:nth-child(4) b{color:#b42332}
+h2{font:800 17px/1.3 Manrope,"DM Sans",sans-serif;color:#172b4d;margin:20px 0 7px}
+.w{overflow-x:auto;border:1px solid #d5dcea;border-radius:8px;background:#fff;max-width:895px}
+table{border-collapse:collapse;width:100%;font-size:10.5px;background:#fff}
+th,td{text-align:left;padding:8px 9px;border-bottom:1px solid #e5eaf3;vertical-align:top;white-space:normal;line-height:1.5}
+th{background:#f0f3f9;color:#536580;font-size:10px;font-weight:700}
+td{color:#344767}
+.ok{color:#0f8a5f}.wn{color:#a05a00}.bd{color:#b42332}.m,.ctx{color:#72819a}.ctx{font-size:10px}
+.sg{margin-bottom:8px}
+.sm{padding:3px 7px;font-size:10px}
+@media(max-width:700px){.app{width:calc(100% - 28px);margin-top:22px}.g{grid-template-columns:1fr}textarea{height:190px}.bar{gap:6px}.sum div{min-width:calc(50% - 6px)}}
+@media print{.top-line,.bar{display:none!important}body{background:#fff}.app{width:100%;margin:0}}
 </style><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/css/mobile-nav.css"><link rel="stylesheet" href="../assets/css/site-header.css"><style>
 :root{color-scheme:light;--bg:#f3f5fa;--panel:#f5f7fc;--line:#d5dcea;--tx:#1b2437;--mut:#55617a;--ac:#0033a0;--ok:#0f7a4f;--wn:#a05a00;--bd:#a12a2a}
 body{padding:0;background:var(--bg);color:var(--tx);font:15px/1.7 "DM Sans",sans-serif}
@@ -103,11 +87,11 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--ac);outline-
 .w{overflow-x:auto;border:1px solid var(--line);border-radius:6px}table{border-collapse:collapse;width:100%;font-size:13px}
 th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}th{background:var(--panel);color:var(--mut);font-weight:600}
 .ok{color:var(--ok)}.wn{color:var(--wn)}.bd{color:var(--bd)}.m{color:var(--mut)}.ctx{color:var(--mut);font-size:12px}.sm{padding:4px 10px;font-size:12px;margin-top:4px}.sg{margin-bottom:10px}
-</style></head><body><header class="site-header"><div class="wrap nav"><a class="brand" href="../index.html" aria-label="Tuhin G. M. Al Mamun — home">TGM <span>AL MAMUN</span></a><button id="menu" type="button" aria-expanded="false" aria-controls="nav">Menu</button><nav id="nav" aria-label="Main navigation"><a href="../index.html">Home</a><a href="../teaching/index.html">Teaching Courses</a><a href="../working-papers/index.html">Working Papers</a><a href="../time-series-guide/index.html">Time Series</a><a href="../panel-data-guide/index.html">Panel Data</a><a href="../causal-inference-guide/index.html">Causal Inference</a><a href="../dsge-guide/index.html">DSGE</a><a href="../ml-guide/index.html">Machine Learning</a><div class="dd"><button type="button" class="dd-btn" aria-expanded="false" aria-haspopup="true">More Guides</button><div class="dd-menu"><a href="../bayesian-guide/index.html">Bayesian</a><a href="../markov-guide/index.html">Markov Switching</a><a href="../microeconometrics-guide/index.html">Microeconometrics</a><a href="../finance-guide/index.html">Finance</a><a href="../productivity-guide/index.html">Productivity</a><a href="../nonparametric-guide/index.html">Nonparametric</a></div></div><a href="index.html">Open Econometric Systems</a></nav></div></header><section class="hero"><div class="wrap"><div class="kicker">Research tools · Open Econometric Systems</div><h1>In-text Citation Checker</h1><p class="lead">Check author–year citations against your reference list, validate DOIs with Crossref, and identify missing references. All manuscript processing runs in your browser.</p><div class="meta"><span><strong>OES Research Utility</strong></span><span>Browser-based · No manuscript upload</span></div></div></section><main class="wrap">
-<section class="step">
-<span class="stepno">OES Research Utility</span>
-<h2>Check manuscript and references</h2>
-<p class="sub">Paste the manuscript and reference list below. The checker compares detected author–year citations and identifies references that are not cited. Your manuscript stays in this browser.</p>
+</style></head><body>
+<div class="top-line"></div>
+<main class="app">
+<h1>In-text citation checker</h1>
+<p class="intro">Paste your manuscript text and reference list. Every author–year citation is matched to the list, and every reference is checked for being cited. Matching runs entirely in your browser.</p>
 <div class="g">
 <div><label for="ms">Manuscript text</label><textarea id="ms" placeholder="Paste text with citations like (Smith, 2020) or Jones and Lee (2021)"></textarea></div>
 <div><label for="rf">Reference list</label><textarea id="rf" placeholder="One reference per paragraph or per line"></textarea></div>
@@ -121,12 +105,7 @@ th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);verti
 <button id="ap" disabled>Apply ticked fixes to text</button><button class="o" id="un" disabled>Undo last apply</button>
 <button class="o" id="sr">Save reference list</button><button class="o" id="st">Save revised text</button><button class="o" id="cl">Clear all</button>
 </div>
-</section>
-<section class="step">
-<span class="stepno">Analysis results</span>
-<h2>Matching and reference diagnostics</h2>
 <div id="out"></div>
-</section>
 </main>
 <script>
 const $=id=>document.getElementById(id);
@@ -386,4 +365,5 @@ $('csv').onclick=()=>{
   const rows=[['citation','year','result','details']].concat(cits.map(c=>[c.raw,c.year,c.res.t,c.res.n]));
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='citation-check.csv';a.click();
 };
-</script></section></main></section></main><footer><div class="wrap foot"><span><b>Tuhin G. M. Al Mamun, Ph.D.</b> · Open Econometric Systems</span><span><a href="index.html">OES home</a> · Citation Checker</span></div></footer><script src="../assets/js/mobile-nav.js" defer></script><script src="../assets/js/nav-dropdown.js" defer></script></body></html>
+</script>
+</body></html></html>
