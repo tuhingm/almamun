@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Browser-based in-text citation and reference-list checker with Crossref DOI verification and reference lookup."><meta name="theme-color" content="#0033A0"><link rel="canonical" href="https://tuhingm.github.io/almamun/oes/citation-checker.html"><title>In-text Citation Checker | Open Econometric Systems</title>
+<style>
+:root{color-scheme:dark;--bg:#0c1628;--panel:#122039;--line:#27395a;--tx:#e6edf8;--mut:#8fa3c4;--ac:#6ea8ff;--ok:#4cd6a0;--wn:#f2b84b;--bd:#ff7b86}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 "Segoe UI",system-ui,sans-serif;padding:32px 20px 64px}
+main{max-width:1100px;margin:0 auto}h1{font-size:2rem;margin:0 0 4px;letter-spacing:-.02em}p.s{color:var(--mut);margin:0 0 24px;max-width:70ch}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:760px){.g{grid-template-columns:1fr}}
+label{display:block;font-weight:600;margin-bottom:6px}
+textarea{width:100%;height:260px;background:var(--panel);color:var(--tx);border:1px solid var(--line);border-radius:6px;padding:12px;font:13px/1.5 Consolas,monospace;resize:vertical}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0;align-items:center}
+button,.f{background:var(--ac);color:#06142b;border:0;border-radius:6px;padding:9px 16px;font:600 14px inherit;cursor:pointer}
+button.o,.f{background:transparent;color:var(--tx);border:1px solid var(--line)}button:disabled{opacity:.4;cursor:default}
+button:focus-visible,textarea:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.sum{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0}.sum div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 16px;min-width:130px}
+.sum b{font-size:1.6rem;display:block}h2{font-size:1.15rem;margin:28px 0 8px}
+.w{overflow-x:auto;border:1px solid var(--line);border-radius:6px}table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}th{background:var(--panel);color:var(--mut);font-weight:600}
+.ok{color:var(--ok)}.wn{color:var(--wn)}.bd{color:var(--bd)}.m{color:var(--mut)}.ctx{color:var(--mut);font-size:12px}.sm{padding:4px 10px;font-size:12px;margin-top:4px}.sg{margin-bottom:10px}
+
+<link rel="stylesheet" href="../assets/css/mobile-nav.css"><link rel="stylesheet" href="../assets/css/site-header.css"><link rel="stylesheet" href="../assets/css/share.css">
+<style>
+:root{color-scheme:light;--bg:#f3f5fa;--panel:#fff;--line:#d5dcea;--tx:#1b2437;--mut:#55617a;--ac:#0033a0;--ok:#0f7a4f;--wn:#a05a00;--bd:#a12a2a;--navy:#0033a0;--navy2:#00205b;--sky:#6ec1e4}
+body{padding:0;background:var(--bg);color:var(--tx);font:15px/1.7 'DM Sans',sans-serif}
+main{width:min(1100px,calc(100% - 44px));max-width:1100px;margin:0 auto;padding:34px 0 76px}
+h1{font:800 clamp(28px,4vw,38px)/1.2 Manrope,sans-serif;color:var(--navy);letter-spacing:-.035em;margin:0 0 6px}
+p.s{color:var(--mut);margin:0 0 24px;max-width:78ch}
+label{color:#34425c}
+textarea{background:#f8faff;color:var(--tx);border:1px solid #ccd6e5;border-radius:8px;font:13px/1.55 Consolas,monospace}
+textarea:focus-visible{outline:2px solid var(--sky);outline-offset:2px}
+button,.f{background:var(--navy);color:#fff;border:1px solid var(--navy);border-radius:8px;padding:10px 16px;font:700 12px 'DM Sans',sans-serif;letter-spacing:.025em}
+button.o,.f{background:#fff;color:var(--navy);border:1px solid var(--navy)}
+button:hover:not(:disabled){filter:brightness(1.08)}
+button:focus-visible,textarea:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+.sum div{background:#fff;border:1px solid var(--line);border-radius:9px;box-shadow:0 5px 18px rgba(0,32,91,.045)}
+.w{border:1px solid var(--line);border-radius:9px;background:#fff}
+th{background:#f2f5fb;color:#5d6a82}th,td{border-bottom:1px solid #e9edf4}
+.ok{color:#0f7a4f}.wn{color:#a05a00}.bd{color:#a12a2a}.m,.ctx{color:#6b7891}
+.site-hero{background:radial-gradient(circle at 85% 12%,#6ec1e445,transparent 29%),linear-gradient(120deg,#0033a0,#00205b);color:#fff;padding:35px 0 32px}
+.site-hero .wrap,.site-footer .wrap{width:min(1160px,calc(100% - 44px));margin:auto}
+.site-hero .kicker{font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#9fd3f0}
+.site-hero h2{font:800 clamp(25px,3.4vw,34px)/1.15 Manrope,sans-serif;letter-spacing:-.04em;margin:8px 0 7px}
+.site-hero p{margin:0;color:#d0dcf0;font-size:13px}
+.site-footer{background:#00205b;color:#dce7f6;padding:22px 0;font-size:11px}
+.site-footer .wrap{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}
+.site-footer a{color:#9fd3f0}
+@media(max-width:700px){main{width:calc(100% - 34px);padding:26px 0 55px}.site-hero{padding:29px 0}.site-hero .wrap,.site-footer .wrap{width:calc(100% - 34px)}}
+</style></head><body>
+<header class="site-header"><div class="wrap nav"><a class="brand" href="../index.html" aria-label="Tuhin G. M. Al Mamun — home">TGM <span>AL MAMUN</span></a><button id="menu" type="button" aria-expanded="false" aria-controls="nav">Menu</button><nav id="nav" aria-label="Main navigation"><a href="../index.html">Home</a><a href="../teaching/index.html">Teaching Courses</a><a href="../working-papers/index.html">Working Papers</a><a href="../time-series-guide/index.html">Time Series</a><a href="../panel-data-guide/index.html">Panel Data</a><a href="../causal-inference-guide/index.html">Causal Inference</a><a href="../dsge-guide/index.html">DSGE</a><a href="../ml-guide/index.html">Machine Learning</a><a href="index.html" class="current" aria-current="page">Open Econometric Systems</a></nav></div></header>
+<section class="site-hero"><div class="wrap"><div class="kicker">Open Econometric Systems · Research tools</div><h2>In-text Citation Checker</h2><p>Check author–year citations, reference-list coverage, DOI metadata and missing references.</p></div></section>
+<main>
+<h1>In-text citation checker</h1>
+<p class="s">Paste your manuscript text and reference list. Every author–year citation is matched to the list, and every reference is checked for being cited. Matching runs entirely in your browser.</p>
+<div class="g">
+<div><label for="ms">Manuscript text</label><textarea id="ms" placeholder="Paste text with citations like (Smith, 2020) or Jones and Lee (2021)"></textarea></div>
+<div><label for="rf">Reference list</label><textarea id="rf" placeholder="One reference per paragraph or per line"></textarea></div>
+</div>
+<div class="bar">
+<button id="go">Check citations</button>
+<label class="f" style="margin:0">Load .txt file<input id="file" type="file" accept=".txt,.bib,.ris" hidden></label>
+<button class="o" id="ex">Load example</button><button class="o" id="csv" disabled>Export CSV</button>
+<button class="o" id="cr" disabled>Check DOIs with Crossref</button>
+<button id="fm" disabled>Find missing references online</button>
+<button id="ap" disabled>Apply ticked fixes to text</button><button class="o" id="un" disabled>Undo last apply</button>
+</div>
+<div id="out"></div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const N=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z]/g,'');
+const SN="(?:(?:van|von|de|der|den|di|da|la|le|al|bin)\\s+)*\\p{Lu}[\\p{L}'’\\-]+";
+const YR="(?:19|20)\\d{2}[a-z]?";
+const STOP=/^(table|figure|fig|section|chapter|appendix|eq|equation|see|cf)$/i;
+let refs=[],cits=[];
+
+function parseRefs(t){
+  const parts=/\n\s*\n/.test(t)?t.split(/\n\s*\n/):t.split('\n');
+  return parts.map(s=>s.replace(/\s+/g,' ').trim().replace(/^(\[\d+\]|\d+[.)])\s*/,'')).filter(s=>s.length>15).map(raw=>{
+    const ym=raw.match(new RegExp('\\b('+YR+')\\b')),ap=raw.slice(0,ym?ym.index:raw.length);
+    let names=[...ap.matchAll(new RegExp('('+SN+'),\\s*(?:\\p{Lu}\\.?[\\s\\-]*)+','gu'))].map(m=>m[1]);
+    if(!names.length)names=[...ap.matchAll(new RegExp('('+SN+')\\s+\\p{Lu}{1,3}\\b','gu'))].map(m=>m[1]);
+    if(!names.length){const f=ap.match(new RegExp(SN,'u'));if(f)names=[f[0]];}
+    const doi=(raw.match(/10\.\d{4,9}\/[^\s"<>]+/)||[''])[0].replace(/[.,;)\]]+$/,'');
+    return{raw,year:ym?ym[1].toLowerCase():'',names,sn:names[0]?N(names[0]):'',doi,cited:false,cr:''};
+  });
+}
+
+function parseCits(t){
+  const out=[];
+  const add=(kind,aS,aE,ys,pos,raw)=>{
+    const as=t.slice(aS,aE);
+    const names=[...as.matchAll(new RegExp(SN,'gu'))].map(m=>m[0]).filter(n=>!STOP.test(n));
+    if(!names.length)return;
+    const etal=/et\s+al/i.test(as);
+    ys.forEach(y=>out.push({kind,raw:raw.trim(),sn:N(names[0]),first:names[0],names,n:names.length,etal,year:y.y.toLowerCase(),pos,aS,aE,aText:as,yS:y.s,yE:y.e,
+      ctx:t.slice(Math.max(0,pos-35),pos+raw.length+35).replace(/\s+/g,' ')}));
+  };
+  for(const m of t.matchAll(/\(([^()]*)\)/g)){
+    let off=0;
+    for(const seg of m[1].split(';')){
+      const st=m.index+1+off;off+=seg.length+1;
+      const ys=[...seg.matchAll(new RegExp('\\b'+YR+'\\b','g'))];
+      if(!ys.length)continue;
+      if(!/\p{Lu}/u.test(seg.slice(0,ys[0].index)))continue;
+      add('p',st,st+ys[0].index,ys.map(y=>({y:y[0],s:st+y.index,e:st+y.index+y[0].length})),m.index,'('+seg.trim()+')');
+    }
+  }
+  const NR=new RegExp('('+SN+'(?:(?:,\\s*'+SN+')*,?\\s+(?:and|&)\\s+'+SN+'|\\s+et\\s+al\\.?)?)\\s*\\(('+YR+'(?:\\s*[,;]\\s*'+YR+')*)\\)','gu');
+  for(const m of t.matchAll(NR)){
+    const base=m.index+m[0].length-1-m[2].length;
+    add('n',m.index,m.index+m[1].length,[...m[2].matchAll(new RegExp(YR,'g'))].map(y=>({y:y[0],s:base+y.index,e:base+y.index+y[0].length})),m.index,m[0]);
+  }
+  return out.sort((a,b)=>a.pos-b.pos);
+}
+
+function match(c){
+  const cand=refs.filter(r=>r.sn===c.sn);
+  if(!cand.length){
+    const alt=refs.find(r=>r.names.some(n=>N(n)===c.sn));
+    const near=!alt&&c.sn.length>3?refs.filter(r=>r.sn&&lev(r.sn,c.sn)<=2).sort((p,q)=>lev(p.sn,c.sn)-lev(q.sn,c.sn))[0]:null;
+    if(near){near.cited=true;return{s:'wn',t:'Possible typo',n:'Closest in your list: '+near.raw.slice(0,90)+'… Check the spelling of “'+c.first+'”',fix:{ref:near,safe:false,setYear:near.year!==c.year}};}
+    return alt?{s:'bd',t:'Not first author',n:'“'+c.first+'” appears only as a later author in: '+alt.raw.slice(0,70)+'…'}:{s:'bd',t:'Not in list',n:'No reference with first author “'+c.first+'”'};
+  }
+  const exact=cand.filter(r=>r.year===c.year);
+  const loose=/[a-z]$/.test(c.year)?[]:cand.filter(r=>r.year.replace(/[a-z]$/,'')===c.year&&/[a-z]$/.test(r.year));
+  const hit=exact.length?exact:loose;
+  if(!hit.length)return{s:'bd',t:'Year mismatch',n:'List has '+cand.map(r=>r.year||'n.d.').join(', ')+' for '+c.first,fix:cand.length===1&&cand[0].year?{ref:cand[0],safe:false,setYear:true}:null};
+  hit.forEach(r=>r.cited=true);
+  const notes=[];let s='ok',t='Matched',fix=null;
+  if(!exact.length){s='wn';t='Add a/b suffix';notes.push('Several same-year works: '+hit.map(r=>r.year).join(', '));}
+  const r=hit[0],cnt=r.names.length;
+  if(!c.etal&&r.names.length&&c.n!==cnt&&cnt<=5){s='wn';t='Author count';notes.push('Cites '+c.n+' author(s); reference lists '+cnt);fix={ref:r,safe:true,setYear:false};}
+  if(c.etal&&cnt&&cnt<=2){s='wn';t='Check et al.';notes.push('“et al.” used but reference has '+cnt+' author(s)');fix={ref:r,safe:true,setYear:false};}
+  return{s,t,n:notes.join('; '),fix};
+}
+
+let analysed='',backup=null;
+function names2(r,c,orig){
+  const n=r.names,conn=/&/.test(orig)?'&':/\band\b/.test(orig)?'and':(c.kind==='n'?'and':'&');
+  return n.length===1?n[0]:n.length===2?n[0]+' '+conn+' '+n[1]:n[0]+' et al.';
+}
+function buildEdits(c){
+  const f=c.res.fix;if(!f||!f.ref.names.length)return[];
+  const r=f.ref,ed=[];
+  const lead=(c.aText.match(/^\s*(?:(?:e\.g\.|i\.e\.|see|cf\.|also|for example)[,.]?\s+)*/i)||[''])[0];
+  const trail=(c.aText.match(/[\s,]*$/)||[''])[0];
+  const core=c.aText.slice(lead.length,c.aText.length-trail.length),nc=names2(r,c,core);
+  if(nc!==core.replace(/\s+/g,' '))ed.push({s:c.aS+lead.length,e:c.aE-trail.length,t:nc});
+  if(f.setYear&&r.year&&r.year!==c.year)ed.push({s:c.yS,e:c.yE,t:r.year});
+  return ed;
+}
+function frag(c){
+  const s0=Math.min(...c.edits.map(e=>e.s)),e0=Math.max(...c.edits.map(e=>e.e));let f=analysed.slice(s0,e0);
+  [...c.edits].sort((a,b)=>b.s-a.s).forEach(e=>{f=f.slice(0,e.s-s0)+e.t+f.slice(e.e-s0);});
+  return[analysed.slice(s0,e0),f];
+}
+function fixCell(c,i){
+  if(!c.edits.length)return'<td class="m">–</td>';
+  const[o,n]=frag(c);
+  return'<td><label style="font-weight:400;display:flex;gap:8px;cursor:pointer"><input type="checkbox" id="fx'+i+'" '+(c.res.fix.safe?'checked':'')+'><span><span class="'+(c.res.fix.safe?'ok':'wn')+'">'+(c.res.fix.safe?'Safe fix':'Review first')+'</span><br>'+esc(o)+' → <b>'+esc(n)+'</b></span></label></td>';
+}
+function applyFixes(){
+  if($('ms').value!==analysed){alert('The text changed since the last check. Click “Check citations” first.');return;}
+  const ed={};cits.forEach((c,i)=>{const cb=$('fx'+i);if(cb&&cb.checked)c.edits.forEach(e=>{if(!ed[e.s])ed[e.s]=e;});});
+  const list=Object.values(ed).sort((a,b)=>b.s-a.s);
+  if(!list.length){alert('Tick at least one suggested fix first.');return;}
+  backup=analysed;let t=analysed;list.forEach(e=>{t=t.slice(0,e.s)+e.t+t.slice(e.e);});
+  $('ms').value=t;$('un').disabled=false;run();
+}
+function undoFixes(){if(backup===null)return;$('ms').value=backup;backup=null;$('un').disabled=true;run();}
+function run(){analysed=$('ms').value;
+  refs=parseRefs($('rf').value);cits=parseCits($('ms').value);
+  refs.forEach(r=>r.cited=false);cits.forEach(c=>{c.res=match(c);});cits.forEach(c=>{c.edits=buildEdits(c);});
+  const cnt=k=>cits.filter(c=>c.res.s===k).length,unc=refs.filter(r=>!r.cited);
+  let h='<div class="sum"><div><b>'+cits.length+'</b>citations found</div><div><b class="ok">'+cnt('ok')+'</b>matched</div><div><b class="wn">'+cnt('wn')+'</b>need a look</div><div><b class="bd">'+cnt('bd')+'</b>problems</div><div><b>'+unc.length+'</b>uncited references</div></div>';
+  if(!refs.length||!cits.length)h+='<p class="wn">'+(!cits.length?'No citations found in the manuscript text.':'No reference list pasted. Use “Find missing references online” to look each citation up.')+'</p>';
+  h+='<h2>In-text citations</h2><div class="w"><table><tr><th>Citation</th><th>Result</th><th>Details</th><th>Suggested text fix</th><th>Context</th><th>Suggested references</th></tr>'+
+    cits.map((c,i)=>'<tr><td>'+esc(c.raw)+'<div class="ctx">checking '+esc(c.year)+'</div></td><td class="'+c.res.s+'">'+c.res.t+'</td><td>'+esc(c.res.n)+'</td>'+fixCell(c,i)+'<td class="ctx">…'+esc(c.ctx)+'…</td><td id="s'+i+'" class="m">'+(['Not in list','Year mismatch','Not first author'].includes(c.res.t)?'Click “Find missing references online”':'')+'</td></tr>').join('')+'</table></div>';
+  h+='<h2>Reference list ('+refs.length+')</h2><div class="w"><table><tr><th>Reference</th><th>Parsed</th><th>Cited in text</th><th>DOI</th></tr>'+
+    refs.map((r,i)=>'<tr><td>'+esc(r.raw)+'</td><td class="m">'+esc(r.names.join('; ')||'?')+' · '+(r.year||'no year')+'</td><td class="'+(r.cited?'ok':'bd')+'">'+(r.cited?'Yes':'Never cited')+'</td><td id="d'+i+'" class="m">'+(r.doi?esc(r.doi)+(r.cr?'<br>'+r.cr:''):'none')+'</td></tr>').join('')+'</table></div>';
+  $('out').innerHTML=h;$('csv').disabled=!cits.length;$('cr').disabled=!refs.some(r=>r.doi);$('fm').disabled=!cits.some(c=>c.res.s==='bd');$('ap').disabled=!cits.some(c=>c.edits.length);
+}
+
+async function crossref(){
+  $('cr').disabled=true;
+  for(const r of refs){
+    if(!r.doi)continue;
+    try{
+      const res=await fetch('https://api.crossref.org/works/'+encodeURIComponent(r.doi));
+      if(!res.ok){r.cr='<span class="bd">DOI not found in Crossref</span>';continue;}
+      const m=(await res.json()).message,yr=String((m.issued&&m.issued['date-parts']&&m.issued['date-parts'][0]||[])[0]||''),fam=N((m.author&&m.author[0]&&m.author[0].family)||'');
+      const bad=[];if(yr&&r.year&&yr!==r.year.replace(/[a-z]$/,''))bad.push('year '+yr);if(fam&&r.sn&&fam!==r.sn)bad.push('author '+fam);
+      r.cr=bad.length?'<span class="wn">Differs: '+esc(bad.join(', '))+'</span>':'<span class="ok">Matches Crossref</span>';
+    }catch(e){r.cr='<span class="bd">Could not reach Crossref. Open this file from your computer with internet access.</span>';break;}
+  }
+  run2();
+}
+function run2(){const keep=cits.map(c=>c.res);run();}
+
+let sugs=[];
+const fmtRef=m=>{
+  const au=(m.author||[]).map(a=>(a.family||a.name||'')+(a.given?', '+a.given.split(/[\s-]+/).map(x=>x[0]+'.').join(' '):'')).join(', ');
+  const y=((m.issued&&m.issued['date-parts']&&m.issued['date-parts'][0])||[''])[0];
+  return au+' ('+y+'). '+((m.title||[''])[0])+'. '+((m['container-title']||[''])[0])+(m.volume?', '+m.volume:'')+(m.issue?'('+m.issue+')':'')+(m.page?', '+m.page:'')+'. https://doi.org/'+m.DOI;
+};
+const lev=(a,b)=>{const d=[...Array(b.length+1).keys()];for(let i=1;i<=a.length;i++){let p=d[0];d[0]=i;for(let j=1;j<=b.length;j++){const t=d[j];d[j]=Math.min(d[j]+1,d[j-1]+1,p+(a[i-1]===b[j-1]?0:1));p=t;}}return d[b.length];};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function getJSON(u){let err;for(let t=0;t<3;t++){try{const r=await fetch(u);if(r.ok)return await r.json();err=new Error('Crossref answered with status '+r.status);}catch(e){err=e;}await sleep(900*(t+1));}throw err;}
+const yearOf=m=>Number(((m.issued&&m.issued['date-parts']&&m.issued['date-parts'][0])||[0])[0]);
+function score(m,c,y){
+  const au=(m.author||[]).map(a=>N(a.family||a.name||''));if(!au.length)return 0;
+  let s=0;const d=lev(au[0],c.sn);
+  if(d===0)s+=4;else if(d<=2&&c.sn.length>3)s+=3;else if(au.includes(c.sn))s+=1.5;else return 0;
+  c.names.slice(1).forEach(n=>{if(au.some(a=>lev(a,N(n))<=1))s+=1;});
+  const my=yearOf(m);s+=my===y?1.5:Math.abs(my-y)===1?0.5:0;return s;
+}
+async function findMissing(){
+  $('fm').disabled=true;const done={};
+  cits.forEach((c,i)=>{if($('s'+i)&&['Not in list','Year mismatch','Not first author'].includes(c.res.t))$('s'+i).textContent='Waiting…';});
+  for(let i=0;i<cits.length;i++){
+    const c=cits[i];
+    if(!['Not in list','Year mismatch','Not first author'].includes(c.res.t))continue;
+    const y=Number(c.year.replace(/[a-z]$/,'')),k=c.names.map(N).join('')+y,cell=$('s'+i);
+    if(!done[k]){
+      cell.textContent='Searching Crossref…';
+      try{
+        const u='https://api.crossref.org/works?rows=60&query.author='+encodeURIComponent(c.names.join(' '))+'&filter=from-pub-date:'+(y-1)+',until-pub-date:'+(y+1);
+        const items=(await getJSON(u)).message.items.filter(m=>m.title).map(m=>({m,sc:score(m,c,y)})).filter(o=>o.sc>=3)
+          .sort((p,q)=>q.sc-p.sc||q.m['is-referenced-by-count']-p.m['is-referenced-by-count']).slice(0,3);
+        done[k]=items.length?items.map(o=>{sugs.push(fmtRef(o.m));return '<div class="sg"><b class="'+(o.sc>=6?'ok':'wn')+'">'+(o.sc>=6?'Best match':'Possible match')+'</b><br>'+esc(fmtRef(o.m))+'<br><button class="o sm" onclick="addRef('+(sugs.length-1)+')">Add to reference list</button></div>';}).join(''):'No close match on Crossref for “'+esc(c.first)+'” around '+y+'. It may be a book, report or non-DOI source.';
+      }catch(e){done[k]='<span class="bd">Lookup failed ('+esc(e&&e.message||e)+'). If it says “Failed to fetch”, wait a minute and click the button again, or open this file from your computer.</span>';}
+      await sleep(300);
+    }
+    cell.innerHTML=done[k];
+  }
+  $('fm').disabled=false;
+}
+function addRef(i){$('rf').value=($('rf').value.trim()+'\n\n'+sugs[i]).trim();sugs=[];run();}
+$('fm').onclick=findMissing;$('ap').onclick=applyFixes;$('un').onclick=undoFixes;
+$('go').onclick=run;$('cr').onclick=crossref;
+$('file').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{(/\([^)]*\d{4}[^)]*\)/.test(t)&&t.length>2000?$('ms'):$('rf')).value=t;});};
+$('ex').onclick=()=>{
+  $('ms').value="Exchange rate pass-through has been widely studied (Taylor, 2000; Campa & Goldberg, 2005). Burstein and Gopinath (2014) argue that it is lower in stable regimes, while Smith et al. (2019) find the opposite. Earlier work (Taylor, 2001) disagrees, and Jones (2018) is rarely cited.";
+  $('rf').value="Burstein, A., & Gopinath, G. (2014). International prices and exchange rates. Handbook of International Economics, 4, 391-451.\n\nCampa, J. M., & Goldberg, L. S. (2005). Exchange rate pass-through into import prices. Review of Economics and Statistics, 87(4), 679-690. https://doi.org/10.1162/003465305775098170\n\nSmith, A., Lee, C., & Park, D. (2019). A made-up example. Journal of Examples, 1(1), 1-10.\n\nTaylor, J. B. (2000). Low inflation, pass-through, and the pricing power of firms. European Economic Review, 44(7), 1389-1408.";
+};
+$('csv').onclick=()=>{
+  const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+  const rows=[['citation','year','result','details']].concat(cits.map(c=>[c.raw,c.year,c.res.t,c.res.n]));
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='citation-check.csv';a.click();
+};
+</script></main>
+<footer class="site-footer"><div class="wrap"><span><b>Tuhin G. M. Al Mamun, Ph.D.</b> · Open Econometric Systems</span><span><a href="index.html">OES workspace</a> · <a href="../index.html">Personal website</a> · © <span id="year"></span></span></div></footer>
+<script>document.getElementById('year').textContent=new Date().getFullYear();const menu=document.getElementById('menu'),nav=document.getElementById('nav');if(menu&&nav){menu.addEventListener('click',()=>{const open=nav.classList.toggle('show');menu.setAttribute('aria-expanded',String(open));});nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('show');menu.setAttribute('aria-expanded','false');}));}</script>
+</body></html>
