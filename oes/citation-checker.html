@@ -1,6 +1,39 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>In-text Citation Checker</title>
+<title>In-text Citation Checker</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/css/mobile-nav.css"><link rel="stylesheet" href="../assets/css/site-header.css"><style>
+:root{color-scheme:light;--bg:#f3f5fa;--panel:#f5f7fc;--line:#d5dcea;--tx:#1b2437;--mut:#55617a;--ac:#0033a0;--ok:#0f7a4f;--wn:#a05a00;--bd:#a12a2a}
+body{padding:0;background:var(--bg);color:var(--tx);font:15px/1.7 "DM Sans",sans-serif}
+.wrap{width:min(1160px,calc(100% - 44px));margin:auto}
+.hero{background:radial-gradient(circle at 85% 12%,#6ec1e445,transparent 29%),linear-gradient(120deg,#0033a0,#00205b);color:#fff;padding:48px 0 42px}
+.kicker{font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#9fd3f0}
+.hero h1{font:800 clamp(32px,5vw,48px)/1.1 Manrope;margin:12px 0 12px;letter-spacing:-1.5px}
+.lead{max-width:820px;color:#d0dcf0;margin:0;font-size:15px}
+.meta{display:flex;gap:22px;flex-wrap:wrap;margin-top:18px;color:#c5d4ea;font-size:12px}
+.meta strong{color:#fff}
+.app-main{padding:30px 0 76px}
+.app-panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:24px 26px;box-shadow:0 5px 18px rgba(0,32,91,.05)}
+.app-panel h2{font:800 22px/1.25 Manrope;letter-spacing:-.4px;color:var(--tx);margin:28px 0 8px}
+.app-panel p.s{color:var(--mut);margin:0 0 20px;max-width:80ch}
+.g{gap:16px}
+label{font-weight:700;color:#34425c}
+textarea{height:260px;background:#fbfcff;color:var(--tx);border:1px solid #ccd6e5;border-radius:8px;padding:12px;font:13px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}
+textarea:focus{border-color:#0033a0}
+button,.f{background:#0033a0;color:#fff;border:1px solid #0033a0;border-radius:8px;padding:10px 15px;font:800 11px "DM Sans",sans-serif;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+button.o,.f{background:#fff;color:#0033a0;border:1.5px solid #0033a0}
+button:hover,.f:hover{filter:brightness(.94)}
+button:disabled{opacity:.42}
+.sum div{background:#f5f7fc;border:1px solid #e1e7f1;border-radius:8px}
+.w{border:1px solid var(--line);border-radius:8px}
+table{background:#fff}
+th{background:#f2f5fb;color:#5d6a82}
+th,td{border-bottom:1px solid #e9edf4;padding:9px 11px}
+td{color:#34425c}
+.ok{color:#0f7a4f}.wn{color:#a05a00}.bd{color:#a12a2a}.m,.ctx{color:#6b7891}
+footer{background:#00205b;color:#dce7f6;padding:24px 0;font-size:12px}
+footer .foot{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}
+@media(max-width:760px){.app-panel{padding:18px 15px}.hero{padding:38px 0 34px}}
+@media print{.site-header,.hero,footer,.bar{display:none!important}body{background:#fff}.app-panel{border:0;box-shadow:none;padding:0}}
+</style>
 <style>
 :root{color-scheme:dark;--bg:#0c1628;--panel:#122039;--line:#27395a;--tx:#e6edf8;--mut:#8fa3c4;--ac:#6ea8ff;--ok:#4cd6a0;--wn:#f2b84b;--bd:#ff7b86}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 "Segoe UI",system-ui,sans-serif;padding:32px 20px 64px}
@@ -17,9 +50,8 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--ac);outline-
 .w{overflow-x:auto;border:1px solid var(--line);border-radius:6px}table{border-collapse:collapse;width:100%;font-size:13px}
 th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}th{background:var(--panel);color:var(--mut);font-weight:600}
 .ok{color:var(--ok)}.wn{color:var(--wn)}.bd{color:var(--bd)}.m{color:var(--mut)}.ctx{color:var(--mut);font-size:12px}.sm{padding:4px 10px;font-size:12px;margin-top:4px}.sg{margin-bottom:10px}
-</style></head><body><main>
-<h1>In-text citation checker</h1>
-<p class="s">Paste your manuscript text and reference list. Every author–year citation is matched to the list, and every reference is checked for being cited. Matching runs entirely in your browser.</p>
+</style></head><body><header class="site-header"><div class="wrap nav"><a class="brand" href="../index.html" aria-label="Tuhin G. M. Al Mamun — home">TGM <span>AL MAMUN</span></a><button id="menu" type="button" aria-expanded="false" aria-controls="nav">Menu</button><nav id="nav" aria-label="Main navigation"><a href="../index.html">Home</a><a href="../teaching/index.html">Teaching Courses</a><a href="../working-papers/index.html">Working Papers</a><a href="../time-series-guide/index.html">Time Series</a><a href="../panel-data-guide/index.html">Panel Data</a><a href="../causal-inference-guide/index.html">Causal Inference</a><a href="../dsge-guide/index.html">DSGE</a><a href="../ml-guide/index.html">Machine Learning</a><div class="dd"><button type="button" class="dd-btn" aria-expanded="false" aria-haspopup="true">More Guides</button><div class="dd-menu"><a href="../bayesian-guide/index.html">Bayesian</a><a href="../markov-guide/index.html">Markov Switching</a><a href="../microeconometrics-guide/index.html">Microeconometrics</a><a href="../finance-guide/index.html">Finance</a><a href="../productivity-guide/index.html">Productivity</a><a href="../nonparametric-guide/index.html">Nonparametric</a></div></div><a href="index.html">Open Econometric Systems</a></nav></div></header><section class="hero"><div class="wrap"><div class="kicker">Research tools · Open Econometric Systems</div><h1>In-text Citation Checker</h1><p class="lead">Check author–year citations against your reference list, validate DOIs with Crossref, and identify missing references. All manuscript processing runs in your browser.</p><div class="meta"><span><strong>OES Research Utility</strong></span><span>Browser-based · No manuscript upload</span></div></div></section><main class="wrap app-main"><section class="app-panel">
+<h2 style="margin-top:0">Check manuscript and references</h2><p class="s">Paste the manuscript and reference list below. The checker compares every detected author–year citation and identifies references that are not cited.</p>
 <div class="g">
 <div><label for="ms">Manuscript text</label><textarea id="ms" placeholder="Paste text with citations like (Smith, 2020) or Jones and Lee (2021)"></textarea></div>
 <div><label for="rf">Reference list</label><textarea id="rf" placeholder="One reference per paragraph or per line"></textarea></div>
@@ -292,4 +324,4 @@ $('csv').onclick=()=>{
   const rows=[['citation','year','result','details']].concat(cits.map(c=>[c.raw,c.year,c.res.t,c.res.n]));
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='citation-check.csv';a.click();
 };
-</script></main></body></html>
+</script></section></main><footer><div class="wrap foot"><strong>Tuhin G. M. Al Mamun · Open Econometric Systems</strong><span>Research tools · Browser-based citation analysis</span><a href="index.html" style="color:#9fd3f0">OES home</a></div></footer><script>const menuButton=document.getElementById("menu");const mainNav=document.getElementById("nav");if(menuButton&&mainNav){menuButton.addEventListener("click",()=>{const open=mainNav.classList.toggle("show");menuButton.setAttribute("aria-expanded",String(open));});}document.querySelectorAll(".dd-btn").forEach(b=>b.addEventListener("click",()=>{const d=b.closest(".dd");const open=d.classList.toggle("open");b.setAttribute("aria-expanded",String(open));}));</script></body></html>
