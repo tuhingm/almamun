@@ -140,10 +140,10 @@ function match(c){
 }
 
 function extractReferenceBlock(text){
- const lines=text.split(/\\r?\\n/);let start=-1;
- for(let i=0;i<lines.length;i++)if(/^\\s*(references|bibliography|works cited|literature cited)\\s*$/i.test(lines[i].trim())){start=i+1;break;}
+ const lines=text.split(/\r?\n/);let start=-1;
+ for(let i=0;i<lines.length;i++)if(/^\s*(references|bibliography|works cited|literature cited)\s*$/i.test(lines[i].trim())){start=i+1;break;}
  if(start<0)return{body:text,refText:''};
- return{body:lines.slice(0,start-1).join('\\n'),refText:lines.slice(start).filter(x=>x.trim()).join('\\n\\n')};
+ return{body:lines.slice(0,start-1).join('\n'),refText:lines.slice(start).filter(x=>x.trim()).join('\n\n')};
 }
 function analyse(text){
  docText=text;const parts=extractReferenceBlock(text);
