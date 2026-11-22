@@ -366,4 +366,4 @@ $('csv').onclick=()=>{
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='citation-check.csv';a.click();
 };
 </script>
-</body></html></html>
+</body></html>
