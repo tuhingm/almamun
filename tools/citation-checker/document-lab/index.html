@@ -77,7 +77,7 @@ let refs=[],cits=[];
 
 
 const lev=(a,b)=>{const d=[...Array(b.length+1).keys()];for(let i=1;i<=a.length;i++){let prev=d[0];d[0]=i;for(let j=1;j<=b.length;j++){const old=d[j];d[j]=Math.min(d[j]+1,d[j-1]+1,prev+(a[i-1]===b[j-1]?0:1));prev=old;}}return d[b.length];};
-let refs=[],cits=[];
+
 function parseRefs(t){
   const parts=/\n\s*\n/.test(t)?t.split(/\n\s*\n/):t.split('\n');
   return parts.map(s=>s.replace(/\s+/g,' ').trim().replace(/^(\[\d+\]|\d+[.)])\s*/,'')).filter(s=>s.length>15).map(raw=>{
