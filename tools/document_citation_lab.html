@@ -1188,64 +1188,90 @@
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(xmlStr, 'application/xml');
         const W_NS = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+        const XML_NS = 'http://www.w3.org/XML/1998/namespace';
+        const RED_HEX = 'CC0000';
 
-        // 1. Apply in-text citation edits paragraph-by-paragraph across <w:t> runs
+        // Helper to build a Word run (<w:r>) preserving base font/size, optionally colored red
+        function createRun(text, baseRPr, isRed) {
+          const r = xmlDoc.createElementNS(W_NS, 'w:r');
+          let rPr = baseRPr ? baseRPr.cloneNode(true) : null;
+          if (isRed) {
+            if (!rPr) rPr = xmlDoc.createElementNS(W_NS, 'w:rPr');
+            Array.from(rPr.getElementsByTagNameNS(W_NS, 'color')).forEach(c => c.parentNode.removeChild(c));
+            const colorEl = xmlDoc.createElementNS(W_NS, 'w:color');
+            colorEl.setAttributeNS(W_NS, 'w:val', RED_HEX);
+            rPr.appendChild(colorEl);
+          }
+          if (rPr) r.appendChild(rPr);
+          const t = xmlDoc.createElementNS(W_NS, 'w:t');
+          t.setAttributeNS(XML_NS, 'xml:space', 'preserve');
+          t.textContent = text;
+          r.appendChild(t);
+          return r;
+        }
+
+        // 1. Apply in-text citation & updated reference edits, coloring only the revised spans red
         const paragraphs = Array.from(xmlDoc.getElementsByTagNameNS(W_NS, 'p'));
         if (docxTextOps.length) {
           paragraphs.forEach(p => {
             const tNodes = Array.from(p.getElementsByTagNameNS(W_NS, 't'));
             if (!tNodes.length) return;
-            let combined = tNodes.map(t => t.textContent).join('');
+            const combined = tNodes.map(t => t.textContent).join('');
+            let segments = [{ text: combined, isRed: false }];
             let changed = false;
 
             docxTextOps.forEach(op => {
-              if (op.oldText && combined.includes(op.oldText)) {
-                combined = combined.split(op.oldText).join(op.newText);
+              if (!op.oldText) return;
+              const nextSegments = [];
+              segments.forEach(seg => {
+                if (!seg.text.includes(op.oldText)) {
+                  nextSegments.push(seg);
+                  return;
+                }
                 changed = true;
-              }
+                const parts = seg.text.split(op.oldText);
+                parts.forEach((part, idx) => {
+                  if (part) nextSegments.push({ text: part, isRed: seg.isRed });
+                  if (idx < parts.length - 1 && op.newText) {
+                    nextSegments.push({ text: op.newText, isRed: true });
+                  }
+                });
+              });
+              segments = nextSegments;
             });
 
             if (changed) {
-              tNodes[0].textContent = combined;
-              tNodes[0].setAttribute('xml:space', 'preserve');
-              for (let k = 1; k < tNodes.length; k++) {
-                tNodes[k].textContent = '';
-              }
+              const firstRun = p.getElementsByTagNameNS(W_NS, 'r')[0];
+              const baseRPr = firstRun ? firstRun.getElementsByTagNameNS(W_NS, 'rPr')[0] : null;
+              // Preserve <w:pPr> (paragraph style/indentation) and rebuild runs
+              Array.from(p.childNodes).forEach(child => {
+                if (!(child.namespaceURI === W_NS && child.localName === 'pPr')) {
+                  p.removeChild(child);
+                }
+              });
+              segments.forEach(seg => {
+                if (seg.text) p.appendChild(createRun(seg.text, baseRPr, seg.isRed));
+              });
             }
           });
         }
 
-        // 2. Append newly added references to the end of the document body
+        // 2. Append newly added references to the end of the document body in red text
         if (docxAddedRefs.length) {
           const body = xmlDoc.getElementsByTagNameNS(W_NS, 'body')[0];
           const sectPr = body ? body.getElementsByTagNameNS(W_NS, 'sectPr')[0] : null;
-          // Clone formatting from the last non-empty paragraph if available
+          // Clone paragraph properties from the last non-empty paragraph if available
           const templateP = [...paragraphs].reverse().find(p => p.textContent.trim().length > 20);
+          const templateRun = templateP ? templateP.getElementsByTagNameNS(W_NS, 'r')[0] : null;
+          const templateRPr = templateRun ? templateRun.getElementsByTagNameNS(W_NS, 'rPr')[0] : null;
 
           docxAddedRefs.forEach(refStr => {
-            let newP;
+            const newP = xmlDoc.createElementNS(W_NS, 'w:p');
             if (templateP) {
-              newP = templateP.cloneNode(true);
-              const tNodes = Array.from(newP.getElementsByTagNameNS(W_NS, 't'));
-              if (tNodes.length) {
-                tNodes[0].textContent = refStr;
-                tNodes[0].setAttribute('xml:space', 'preserve');
-                for (let k = 1; k < tNodes.length; k++) tNodes[k].textContent = '';
-              } else {
-                const r = xmlDoc.createElementNS(W_NS, 'w:r');
-                const t = xmlDoc.createElementNS(W_NS, 'w:t');
-                t.textContent = refStr;
-                r.appendChild(t);
-                newP.appendChild(r);
-              }
-            } else {
-              newP = xmlDoc.createElementNS(W_NS, 'w:p');
-              const r = xmlDoc.createElementNS(W_NS, 'w:r');
-              const t = xmlDoc.createElementNS(W_NS, 'w:t');
-              t.textContent = refStr;
-              r.appendChild(t);
-              newP.appendChild(r);
+              const pPr = templateP.getElementsByTagNameNS(W_NS, 'pPr')[0];
+              if (pPr) newP.appendChild(pPr.cloneNode(true));
             }
+            newP.appendChild(createRun(refStr, templateRPr, true));
 
             if (sectPr) body.insertBefore(newP, sectPr);
             else if (body) body.appendChild(newP);
