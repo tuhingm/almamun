@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0033A0">
+<meta name="description" content="Research software and browser-based tools developed by Tuhin G. M. Al Mamun for academic writing, econometric analysis and quantitative research.">
+<meta name="author" content="Tuhin G. M. Al Mamun">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://tuhingm.github.io/almamun/tools/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Research Tools | Tuhin Al Mamun">
+<meta property="og:description" content="Browser-based research software and quantitative tools for academic writing and empirical research.">
+<meta property="og:url" content="https://tuhingm.github.io/almamun/tools/">
+<title>Research Tools | Tuhin Al Mamun</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/almamun/assets/css/site-header.css">
+<style>
+:root{--blue:#0033A0;--deep:#00205B;--sky:#6EC1E4;--ink:#17233b;--muted:#596780;--paper:#f3f6fb;--line:#dbe3ef}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.7 'DM Sans',sans-serif}a{color:inherit;text-decoration:none}
+main{min-height:calc(100vh - 72px);padding-bottom:70px}
+.hero{background:radial-gradient(circle at 84% 12%,#6ec1e444,transparent 28%),linear-gradient(125deg,var(--blue),var(--deep));color:#fff;padding:58px 0 62px}
+.wrap{width:min(1160px,calc(100% - 44px));margin:auto}
+.kicker{font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#9fdaf2}
+h1,h2,h3{font-family:Manrope,sans-serif;line-height:1.25}
+h1{font-size:clamp(34px,5vw,54px);letter-spacing:-.05em;margin:10px 0 12px}
+.intro{max-width:720px;color:#d9e5f7;font-size:15px;margin:0}
+.content{padding:48px 0 72px}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:24px}
+.section-head h2{font-size:25px;letter-spacing:-.035em;margin:5px 0 0}
+.section-head p{font-size:12px;color:var(--muted);margin:0;max-width:440px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.tool-card{display:flex;flex-direction:column;min-height:250px;padding:24px;background:#fff;border:1px solid var(--line);border-radius:13px;box-shadow:0 8px 24px rgba(0,32,91,.055);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.tool-card:hover{transform:translateY(-4px);border-color:#b9c9e6;box-shadow:0 16px 34px rgba(0,32,91,.11)}
+.icon{width:44px;height:44px;display:grid;place-items:center;border-radius:10px;background:#eaf0fb;color:var(--blue);font-size:22px;font-weight:800}
+.tool-card h3{font-size:18px;margin:18px 0 8px}
+.tool-card p{font-size:12px;line-height:1.75;color:var(--muted);margin:0 0 22px}
+.tool-link{margin-top:auto;display:inline-flex;align-items:center;gap:8px;color:var(--blue);font-size:11px;font-weight:800;letter-spacing:.04em}
+.tool-link span{transition:transform .2s}.tool-card:hover .tool-link span{transform:translateX(4px)}
+.status{display:inline-block;width:max-content;border-radius:30px;padding:4px 9px;background:#e8effb;color:var(--blue);font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.coming{border-style:dashed;background:#fbfcff;box-shadow:none}
+.coming .icon{background:#f0f3f8;color:#8794a9}
+footer{background:var(--deep);color:#c5d2e7;padding:24px 0 16px}
+footer .foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:10px}
+footer a{color:#fff;font-weight:700}
+@media(max-width:850px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.wrap{width:calc(100% - 34px)}.hero{padding:42px 0 46px}.content{padding:36px 0 52px}.grid{grid-template-columns:1fr}.section-head{display:block}.section-head p{margin-top:8px}.tool-card{min-height:220px}}
+</style>
+</head>
+<body>
+<header class="site-header"><div class="wrap nav">
+<a class="brand" href="/almamun/index.html" aria-label="Tuhin G. M. Al Mamun — home">TGM <span>AL MAMUN</span></a>
+<button id="menu" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
+<nav id="nav" aria-label="Main navigation">
+<a href="/almamun/index.html">Home</a><a href="/almamun/teaching/index.html">Teaching Courses</a><a href="/almamun/working-papers/index.html">Working Papers</a><a href="/almamun/time-series-guide/index.html">Time Series</a><a href="/almamun/panel-data-guide/index.html">Panel Data</a><a href="/almamun/causal-inference-guide/index.html">Causal Inference</a><a href="/almamun/dsge-guide/index.html">DSGE</a><a href="/almamun/ml-guide/index.html">Machine Learning</a>
+<div class="dd"><button type="button" class="dd-btn" aria-expanded="false" aria-haspopup="true">More Guides</button><div class="dd-menu"><a href="/almamun/bayesian-guide/index.html">Bayesian</a><a href="/almamun/markov-guide/index.html">Markov Switching</a><a href="/almamun/microeconometrics-guide/index.html">Microeconometrics</a><a href="/almamun/finance-guide/index.html">Finance</a><a href="/almamun/productivity-guide/index.html">Productivity</a><a href="/almamun/nonparametric-guide/index.html">Nonparametric</a></div></div>
+<a href="/almamun/oes/index.html">Open Econometric Systems</a>
+</nav></div></header>
+<main>
+<section class="hero"><div class="wrap"><div class="kicker">Research software and applications</div><h1>Research Tools</h1><p class="intro">A collection of browser-based software and practical tools developed to support academic writing, reference management and quantitative research. New tools will be added to this directory as they become available.</p></div></section>
+<section class="content"><div class="wrap">
+<div class="section-head"><div><div class="kicker" style="color:#0033A0">Available software</div><h2>Research applications</h2></div><p>Open a tool to work directly in your browser. Each application has its own dedicated page.</p></div>
+<div class="grid">
+<a class="tool-card" href="/almamun/tools/citation-checker/">
+<div class="icon" aria-hidden="true">↗</div><span class="status">Available</span><h3>In-text Citation Checker</h3><p>Compare author–year citations with the reference list, identify unmatched or uncited references, validate DOIs through Crossref and review suggested corrections.</p><span class="tool-link">Open Citation Checker <span>→</span></span>
+</a>
+<div class="tool-card coming"><div class="icon" aria-hidden="true">＋</div><span class="status">Future release</span><h3>More research software</h3><p>Additional applications for research workflows, data preparation and empirical analysis will be listed here as they are released.</p><span class="tool-link">Coming soon</span></div>
+</div>
+</div></section>
+</main>
+<footer><div class="wrap foot"><span>© Tuhin G. M. Al Mamun</span><a href="/almamun/index.html">Back to Home →</a></div></footer>
+<script src="/almamun/assets/js/nav-dropdown.js" defer></script>
+<script src="/almamun/assets/js/mobile-nav.js" defer></script>
+</body></html>
