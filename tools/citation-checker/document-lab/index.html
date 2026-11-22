@@ -69,50 +69,76 @@ const $=id=>document.getElementById(id);
 let docText='',citations=[],references=[],findings=[],doiRows=[],fileName='';
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function status(s){$('status').textContent=s}
-const N=s=>(s||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^a-z]/g,'');
-const SN="(?:(?:van|von|de|der|den|di|da|la|le|al|bin)\\\\s+)*\\\\p{Lu}[\\\\p{L}'’\\\\-]+";
-const YR="(?:19|20)\\\\d{2}[a-z]?";
+const N=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z]/g,'');
+const SN="(?:(?:van|von|de|der|den|di|da|la|le|al|bin)\\s+)*\\p{Lu}[\\p{L}'’\\-]+";
+const YR="(?:19|20)\\d{2}[a-z]?";
 const STOP=/^(table|figure|fig|section|chapter|appendix|eq|equation|see|cf)$/i;
+let refs=[],cits=[];
+
+
 const lev=(a,b)=>{const d=[...Array(b.length+1).keys()];for(let i=1;i<=a.length;i++){let prev=d[0];d[0]=i;for(let j=1;j<=b.length;j++){const old=d[j];d[j]=Math.min(d[j]+1,d[j-1]+1,prev+(a[i-1]===b[j-1]?0:1));prev=old;}}return d[b.length];};
+let refs=[],cits=[];
 function parseRefs(t){
- const parts=/\\n\\s*\\n/.test(t)?t.split(/\\n\\s*\\n/):t.split('\\n');
- return parts.map(x=>x.replace(/\\s+/g,' ').trim().replace(/^(\\[\\d+\\]|\\d+[.)])\\s*/,'' )).filter(x=>x.length>15).map(raw=>{
-  const ym=raw.match(new RegExp('\\\\b('+YR+')\\\\b')),ap=raw.slice(0,ym?ym.index:raw.length);
-  let names=[...ap.matchAll(new RegExp('('+SN+'),\\\\s*(?:\\\\p{Lu}\\\\.?[\\\\s\\\\-]*)+','gu'))].map(m=>m[1]);
-  if(!names.length)names=[...ap.matchAll(new RegExp('('+SN+')\\\\s+\\\\p{Lu}{1,3}\\\\b','gu'))].map(m=>m[1]);
-  if(!names.length){const f=ap.match(new RegExp(SN,'u'));if(f)names=[f[0]];}
-  const doi=(raw.match(/10\\.\\d{4,9}\\/[^\\s"<>]+/)||[''])[0].replace(/[.,;)\\]]+$/,'');
-  return{raw,year:ym?ym[1].toLowerCase():'',names,sn:names[0]?N(names[0]):'',doi,cited:false,cr:''};
- });
-}
-function parseCits(t){
- const out=[];
- const add=(kind,aS,aE,ys,pos,raw,meta)=>{const as=t.slice(aS,aE),names=[...as.matchAll(new RegExp(SN,'gu'))].map(m=>m[0]).filter(n=>!STOP.test(n));if(!names.length)return;
- const etal=/et\\s+al/i.test(as);
- ys.forEach((y,yi)=>out.push({...meta,ysp:ys,yi,kind,raw:raw.trim(),sn:N(names[0]),first:names[0],names,n:names.length,etal,year:y.y.toLowerCase(),pos,aS,aE,aText:as,yS:y.s,yE:y.e,ctx:t.slice(Math.max(0,pos-35),pos+raw.length+35).replace(/\\s+/g,' ')}));};
- for(const m of t.matchAll(/\\(([^()]*)\\)/g)){let o=0;const segs=m[1].split(';').map(sg=>{const st=m.index+1+o;o+=sg.length+1;return{s:st,e:st+sg.length,ts:st+(sg.length-sg.trimStart().length),te:st+sg.trimEnd().length,text:sg};});
-  segs.forEach(sg=>{const ys=[...sg.text.matchAll(new RegExp('\\\\b'+YR+'\\\\b','g'))];if(!ys.length||!/\\p{Lu}/u.test(sg.text.slice(0,ys[0].index)))return;
-   add('p',sg.s,sg.s+ys[0].index,ys.map(y=>({y:y[0],s:sg.s+y.index,e:sg.s+y.index+y[0].length})),m.index,'('+sg.text.trim()+')',{gS:m.index,gE:m.index+m[0].length,gSegs:segs,si:segs.indexOf(sg)});
+  const parts=/\n\s*\n/.test(t)?t.split(/\n\s*\n/):t.split('\n');
+  return parts.map(s=>s.replace(/\s+/g,' ').trim().replace(/^(\[\d+\]|\d+[.)])\s*/,'')).filter(s=>s.length>15).map(raw=>{
+    const ym=raw.match(new RegExp('\\b('+YR+')\\b')),ap=raw.slice(0,ym?ym.index:raw.length);
+    let names=[...ap.matchAll(new RegExp('('+SN+'),\\s*(?:\\p{Lu}\\.?[\\s\\-]*)+','gu'))].map(m=>m[1]);
+    if(!names.length)names=[...ap.matchAll(new RegExp('('+SN+')\\s+\\p{Lu}{1,3}\\b','gu'))].map(m=>m[1]);
+    if(!names.length){const f=ap.match(new RegExp(SN,'u'));if(f)names=[f[0]];}
+    const doi=(raw.match(/10\.\d{4,9}\/[^\s"<>]+/)||[''])[0].replace(/[.,;)\]]+$/,'');
+    return{raw,year:ym?ym[1].toLowerCase():'',names,sn:names[0]?N(names[0]):'',doi,cited:false,cr:''};
   });
- }
- const NR=new RegExp('('+SN+'(?:(?:,\\\\s*'+SN+')*,?\\\\s+(?:and|&)\\\\s+'+SN+'|\\\\s+et\\\\s+al\\\\.?)?)\\\\s*\\\\(('+YR+'(?:\\\\s*[,;]\\\\s*'+YR+')*)\\\\)','gu');
- for(const m of t.matchAll(NR)){const base=m.index+m[0].length-1-m[2].length;add('n',m.index,m.index+m[1].length,[...m[2].matchAll(new RegExp(YR,'g'))].map(y=>({y:y[0],s:base+y.index,e:base+y.index+y[0].length})),m.index,m[0],{mS:m.index,mE:m.index+m[0].length});}
- return out.sort((a,b)=>a.pos-b.pos);
 }
-function matchCitation(c){
- const cand=references.filter(r=>r.sn===c.sn);
- if(!cand.length){const alt=references.find(r=>r.names.some(n=>N(n)===c.sn));const near=!alt&&c.sn.length>3?references.filter(r=>r.sn&&lev(r.sn,c.sn)<=(c.sn.length>5?2:1)&&Math.abs(parseInt(r.year)-parseInt(c.year))<=1).sort((a,b)=>lev(a.sn,c.sn)-lev(b.sn,c.sn))[0]:null;
-  if(near){near.cited=true;return{status:'Review',type:'Possible author typo',detail:'Closest reference: '+near.raw};}
-  return{status:'Problem',type:alt?'Not first author':'Not in reference list',detail:alt?'Surname appears as a later author, not first author.':'No reference with first author '+c.first+'.'};
- }
- const exact=cand.filter(r=>r.year===c.year),loose=/[a-z]$/.test(c.year)?[]:cand.filter(r=>r.year.replace(/[a-z]$/,'')===c.year&&/[a-z]$/.test(r.year)),hit=exact.length?exact:loose;
- if(!hit.length)return{status:'Problem',type:'Year mismatch',detail:'Reference list year(s): '+cand.map(r=>r.year||'n.d.').join(', ')};
- hit.forEach(r=>r.cited=true);const ref=hit[0],notes=[];
- if(!exact.length)notes.push('Check year suffix (a/b).');
- if(ref.names.length&&c.n!==ref.names.length&&ref.names.length<=5)notes.push('Citation author count differs from reference.');
- if(c.etal&&ref.names.length<=2)notes.push('Check use of et al.');
- return{status:notes.length?'Review':'Matched',type:notes.length?'Needs review':'Matched',detail:notes.join(' ')||'First author and publication year match.',reference:ref};
+
+function parseCits(t){
+  const out=[];
+  const add=(kind,aS,aE,ys,pos,raw,meta)=>{
+    const as=t.slice(aS,aE);
+    const names=[...as.matchAll(new RegExp(SN,'gu'))].map(m=>m[0]).filter(n=>!STOP.test(n));
+    if(!names.length)return;
+    const etal=/et\s+al/i.test(as);
+    ys.forEach((y,yi)=>out.push({...meta,ysp:ys,yi,kind,raw:raw.trim(),sn:N(names[0]),first:names[0],names,n:names.length,etal,year:y.y.toLowerCase(),pos,aS,aE,aText:as,yS:y.s,yE:y.e,
+      ctx:t.slice(Math.max(0,pos-35),pos+raw.length+35).replace(/\s+/g,' ')}));
+  };
+  for(const m of t.matchAll(/\(([^()]*)\)/g)){
+    let o=0;
+    const segs=m[1].split(';').map(sg=>{const st=m.index+1+o;o+=sg.length+1;return{s:st,e:st+sg.length,ts:st+(sg.length-sg.trimStart().length),te:st+sg.trimEnd().length,text:sg};});
+    segs.forEach((sg,si)=>{
+      const ys=[...sg.text.matchAll(new RegExp('\\b'+YR+'\\b','g'))];
+      if(!ys.length)return;
+      if(!/\p{Lu}/u.test(sg.text.slice(0,ys[0].index)))return;
+      add('p',sg.s,sg.s+ys[0].index,ys.map(y=>({y:y[0],s:sg.s+y.index,e:sg.s+y.index+y[0].length})),m.index,'('+sg.text.trim()+')',{gS:m.index,gE:m.index+m[0].length,gSegs:segs,si});
+    });
+  }
+  const NR=new RegExp('('+SN+'(?:(?:,\\s*'+SN+')*,?\\s+(?:and|&)\\s+'+SN+'|\\s+et\\s+al\\.?)?)\\s*\\(('+YR+'(?:\\s*[,;]\\s*'+YR+')*)\\)','gu');
+  for(const m of t.matchAll(NR)){
+    const base=m.index+m[0].length-1-m[2].length;
+    add('n',m.index,m.index+m[1].length,[...m[2].matchAll(new RegExp(YR,'g'))].map(y=>({y:y[0],s:base+y.index,e:base+y.index+y[0].length})),m.index,m[0],{mS:m.index,mE:m.index+m[0].length});
+  }
+  return out.sort((a,b)=>a.pos-b.pos);
 }
+
+function match(c){
+  const cand=refs.filter(r=>r.sn===c.sn);
+  if(!cand.length){
+    const alt=refs.find(r=>r.names.some(n=>N(n)===c.sn));
+    const near=!alt&&c.sn.length>3?refs.filter(r=>r.sn&&lev(r.sn,c.sn)<=(c.sn.length>5?2:1)&&Math.abs(parseInt(r.year)-parseInt(c.year))<=1).sort((p,q)=>lev(p.sn,c.sn)-lev(q.sn,c.sn))[0]:null;
+    if(near){near.cited=true;return{s:'wn',t:'Possible typo',n:'Closest in your list: '+near.raw.slice(0,90)+'… Check the spelling of “'+c.first+'”',fix:{ref:near,safe:false,setYear:near.year!==c.year}};}
+    return alt?{s:'bd',t:'Not first author',n:'“'+c.first+'” appears only as a later author in: '+alt.raw.slice(0,70)+'…'}:{s:'bd',t:'Not in list',n:'No reference with first author “'+c.first+'”'};
+  }
+  const exact=cand.filter(r=>r.year===c.year);
+  const loose=/[a-z]$/.test(c.year)?[]:cand.filter(r=>r.year.replace(/[a-z]$/,'')===c.year&&/[a-z]$/.test(r.year));
+  const hit=exact.length?exact:loose;
+  if(!hit.length)return{s:'bd',t:'Year mismatch',n:'List has '+cand.map(r=>r.year||'n.d.').join(', ')+' for '+c.first,fix:cand.length===1&&cand[0].year?{ref:cand[0],safe:false,setYear:true}:null};
+  hit.forEach(r=>r.cited=true);
+  const notes=[];let s='ok',t='Matched',fix=null;
+  if(!exact.length){s='wn';t='Add a/b suffix';notes.push('Several same-year works: '+hit.map(r=>r.year).join(', '));}
+  const r=hit[0],cnt=r.names.length;
+  if(!c.etal&&r.names.length&&c.n!==cnt&&cnt<=5){s='wn';t='Author count';notes.push('Cites '+c.n+' author(s); reference lists '+cnt);fix={ref:r,safe:true,setYear:false};}
+  if(c.etal&&cnt&&cnt<=2){s='wn';t='Check et al.';notes.push('“et al.” used but reference has '+cnt+' author(s)');fix={ref:r,safe:true,setYear:false};}
+  return{s,t,n:notes.join('; '),fix};
+}
+
 function extractReferenceBlock(text){
  const lines=text.split(/\\r?\\n/);let start=-1;
  for(let i=0;i<lines.length;i++)if(/^\\s*(references|bibliography|works cited|literature cited)\\s*$/i.test(lines[i].trim())){start=i+1;break;}
@@ -121,9 +147,9 @@ function extractReferenceBlock(text){
 }
 function analyse(text){
  docText=text;const parts=extractReferenceBlock(text);
- references=parseRefs(parts.refText);citations=parseCits(parts.body);
+ refs=parseRefs(parts.refText);cits=parseCits(parts.body);references=refs;citations=cits;
  references.forEach(r=>r.cited=false);
- citations.forEach(c=>{c.result=matchCitation(c);});
+ citations.forEach(c=>{c.res=match(c);c.result={status:c.res.s==='ok'?'Matched':c.res.s==='wn'?'Review':'Problem',type:c.res.t,detail:c.res.n||'First-author and year match.'};});
  findings=[];
  citations.forEach(c=>{if(c.result.status!=='Matched')findings.push({type:c.result.type,text:c.raw+' — '+c.result.detail});});
  references.forEach(r=>{if(!r.cited)findings.push({type:'Potential uncited reference',text:r.raw});});
