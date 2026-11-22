@@ -310,13 +310,14 @@ $('fm').onclick=findMissing;$('ap').onclick=applyFixes;$('un').onclick=undoFixes
 $('go').onclick=run;$('cr').onclick=crossref;
 $('file').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{(/\([^)]*\d{4}[^)]*\)/.test(t)&&t.length>2000?$('ms'):$('rf')).value=t;});};
 $('ex').onclick=()=>{
-  $('ms').value="Exchange rate pass-through has been widely studied (Taylor, 2000; Campa & Goldberg, 2005). Burstein and Gopinath (2014) argue that it is lower in stable regimes, while Smith et al. (2019) find the opposite. Earlier work (Taylor, 2001) disagrees, and Jones (2018) is rarely cited.";
-  $('rf').value="Burstein, A., & Gopinath, G. (2014). International prices and exchange rates. Handbook of International Economics, 4, 391-451.\n\nCampa, J. M., & Goldberg, L. S. (2005). Exchange rate pass-through into import prices. Review of Economics and Statistics, 87(4), 679-690. https://doi.org/10.1162/003465305775098170\n\nSmith, A., Lee, C., & Park, D. (2019). A made-up example. Journal of Examples, 1(1), 1-10.\n\nTaylor, J. B. (2000). Low inflation, pass-through, and the pricing power of firms. European Economic Review, 44(7), 1389-1408.";
+  $('ms').value="Estimating those costs is hard for reasons that are specific to this region. War onset is rare and lumpy, so identification rests on a handful of episodes. Almost every economy in a small regional panel is exposed to war at some point, which leaves few clean comparison units, and the comparison units that remain are mostly Gulf economies whose output may be driven by regional common shocks to which treated and untreated economies are exposed differently. Moreover, wars tend to start in countries whose economies are already under stress, so reverse causality is a first-order concern (Elbadawi and Sambanis, 2002; Østby et al., 2009; Oneal and Tir, 2006).";
+  $('rf').value="ELBADAWI, I., SAMBANIS, N. (2002). How Much War Will we see? Journal of Conflict Resolution, 46(3), 307-334. https://doi.org/10.1177/0022002702046003001\n\nØstby, Y., Tammen, C. K., Fjell, A. M., Westlye, L. T., Due-Tønnessen, P., Walhovd, K. B. (2009). Heterogeneity in Subcortical Brain Development: A Structural Magnetic Resonance Imaging Study of Brain Maturation from 8 to 30 Years. The Journal of Neuroscience, 29(38), 11772-11782. https://doi.org/10.1523/jneurosci.1242-09.2009\n\nONEAL, J. R., TIR, J. (2006). Does the Diversionary Use of Force Threaten the Democratic Peace? Assessing the Effect of Economic Growth on Interstate Conflict, 1921-2001. International Studies Quarterly, 50(4), 755-779. https://doi.org/10.1111/j.1468-2478.2006.00424.x";
 };
 $('csv').onclick=()=>{
   const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
   const rows=[['citation','year','result','details']].concat(cits.map(c=>[c.raw,c.year,c.res.t,c.res.n]));
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='citation-check.csv';a.click();
 };
+$('ex').click();run();
 </script>
 </body></html>
