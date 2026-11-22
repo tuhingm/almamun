@@ -259,8 +259,8 @@ function replaceCitation(citationIndex,suggestionIndex){
   if(!authors.length){alert('Crossref did not return usable author metadata for this result.');return;}
   const year=String(yearOf(suggestion.metadata)||'');
   if(!year){alert('Crossref did not return a publication year for this result.');return;}
-  const lead=(c.aText.match(/^\\s*(?:(?:e\\.g\\.|i\\.e\\.|see|cf\\.|also|for example)[,.]?\\s+)*/i)||[''])[0];
-  const trail=(c.aText.match(/[\\s,]*$/)||[''])[0];
+  const lead=(c.aText.match(/^\s*(?:(?:e\.g\.|i\.e\.|see|cf\.|also|for example)[,.]?\s+)*/i)||[''])[0];
+  const trail=(c.aText.match(/[\s,]*$/)||[''])[0];
   const authorText=authors.length===1?authors[0]:authors.length===2?
     authors[0]+(c.kind==='n'?' and ':' & ')+authors[1]:authors[0]+' et al.';
   const edits=[
