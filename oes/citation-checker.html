@@ -228,21 +228,53 @@ async function findMissing(){
     const c=cits[i];
     if(!['Not in list','Year mismatch','Not first author'].includes(c.res.t))continue;
     const y=Number(c.year.replace(/[a-z]$/,'')),k=c.names.map(N).join('')+y,cell=$('s'+i);
-    if(!done[k]){
+    if(!Object.prototype.hasOwnProperty.call(done,k)){
       cell.textContent='Searching Crossref…';
       try{
         const u='https://api.crossref.org/works?rows=60&query.author='+encodeURIComponent(c.names.join(' '))+'&filter=from-pub-date:'+(y-1)+',until-pub-date:'+(y+1);
-        const items=(await getJSON(u)).message.items.filter(m=>m.title).map(m=>({m,sc:score(m,c,y)})).filter(o=>o.sc>=3)
+        done[k]=(await getJSON(u)).message.items.filter(m=>m.title).map(m=>({m,sc:score(m,c,y)})).filter(o=>o.sc>=3)
           .sort((p,q)=>q.sc-p.sc||q.m['is-referenced-by-count']-p.m['is-referenced-by-count']).slice(0,3);
-        done[k]=items.length?items.map(o=>{sugs.push(fmtRef(o.m));return '<div class="sg"><b class="'+(o.sc>=6?'ok':'wn')+'">'+(o.sc>=6?'Best match':'Possible match')+'</b><br>'+esc(fmtRef(o.m))+'<br><button class="o sm" onclick="addRef('+(sugs.length-1)+')">Add to reference list</button></div>';}).join(''):'No close match on Crossref for “'+esc(c.first)+'” around '+y+'. It may be a book, report or non-DOI source.';
-      }catch(e){done[k]='<span class="bd">Lookup failed ('+esc(e&&e.message||e)+'). If it says “Failed to fetch”, wait a minute and click the button again, or open this file from your computer.</span>';}
+      }catch(e){done[k]={error:'Lookup failed ('+(e&&e.message||e)+'). If it says “Failed to fetch”, wait a minute and click the button again.'};}
       await sleep(300);
     }
-    cell.innerHTML=done[k];
+    if(done[k]&&done[k].error){
+      cell.innerHTML='<span class="bd">'+esc(done[k].error)+'</span>';
+    }else if(done[k]&&done[k].length){
+      cell.innerHTML=done[k].map((o,j)=>{
+        const refText=fmtRef(o.m),suggestionIndex=sugs.push({reference:refText,metadata:o.m})-1;
+        return '<div class="sg"><b class="'+(o.sc>=6?'ok':'wn')+'">'+(o.sc>=6?'Best match':'Possible match')+'</b><br>'+esc(refText)+
+          '<br><button class="o sm" onclick="addRef('+suggestionIndex+')">Add to reference list</button> '+
+          '<button class="sm" onclick="replaceCitation('+i+','+suggestionIndex+')">Replace in-text citation</button></div>';
+      }).join('');
+    }else{
+      cell.textContent='No close match on Crossref for “'+c.first+'” around '+y+'. It may be a book, report or non-DOI source.';
+    }
   }
   $('fm').disabled=false;
 }
-function addRef(i){$('rf').value=($('rf').value.trim()+'\n\n'+sugs[i]).trim();sugs=[];run();}
+function replaceCitation(citationIndex,suggestionIndex){
+  const c=cits[citationIndex],suggestion=sugs[suggestionIndex];
+  if(!c||!suggestion||!suggestion.metadata)return;
+  const authors=(suggestion.metadata.author||[]).map(a=>a.family||a.name||'').filter(Boolean);
+  if(!authors.length){alert('Crossref did not return usable author metadata for this result.');return;}
+  const year=String(yearOf(suggestion.metadata)||'');
+  if(!year){alert('Crossref did not return a publication year for this result.');return;}
+  const lead=(c.aText.match(/^\\s*(?:(?:e\\.g\\.|i\\.e\\.|see|cf\\.|also|for example)[,.]?\\s+)*/i)||[''])[0];
+  const trail=(c.aText.match(/[\\s,]*$/)||[''])[0];
+  const authorText=authors.length===1?authors[0]:authors.length===2?
+    authors[0]+(c.kind==='n'?' and ':' & ')+authors[1]:authors[0]+' et al.';
+  const edits=[
+    {s:c.aS+lead.length,e:c.aE-trail.length,t:authorText},
+    {s:c.yS,e:c.yE,t:year}
+  ].sort((a,b)=>b.s-a.s);
+  let text=$('ms').value;
+  edits.forEach(e=>{text=text.slice(0,e.s)+e.t+text.slice(e.e);});
+  backup=$('ms').value;
+  $('ms').value=text;
+  $('un').disabled=false;
+  run();
+}
+
 $('fm').onclick=findMissing;$('ap').onclick=applyFixes;$('un').onclick=undoFixes;
 $('go').onclick=run;$('cr').onclick=crossref;
 $('file').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{(/\([^)]*\d{4}[^)]*\)/.test(t)&&t.length>2000?$('ms'):$('rf')).value=t;});};
