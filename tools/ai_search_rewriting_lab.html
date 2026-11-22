@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Search & Rewriting Lab — TGM AL MAMUN</title>
+  <!-- Tailwind CSS for responsive academic UI -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- JSZip for direct .docx XML reading, in-place paragraph replacement & export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,400&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f3f6fb;
+      color: #1e293b;
+    }
+    .hero-gradient {
+      background: linear-gradient(135deg, #003896 0%, #052b73 55%, #031f57 100%);
+    }
+    .nav-bar {
+      background-color: #002e82;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .doc-paper {
+      font-family: 'Newsreader', 'Times New Roman', Georgia, serif;
+    }
+    .doc-para {
+      cursor: pointer;
+      transition: background-color 0.14s ease, border-color 0.14s ease;
+      border-left: 3px solid transparent;
+    }
+    .doc-para:hover {
+      background-color: #f1f5f9;
+    }
+    .doc-para-selected {
+      background-color: #cbd5e1 !important;
+      color: #0f172a !important;
+      border-left-color: #1d4ed8 !important;
+    }
+    .doc-para-partial {
+      background-color: #f8fafc !important;
+      border-left-color: #1d4ed8 !important;
+    }
+    .doc-sel-mark {
+      background-color: #bfdbfe;
+      color: #0f172a;
+      border-radius: 3px;
+      padding: 0 2px;
+      box-shadow: 0 0 0 1px #60a5fa;
+    }
+    .doc-para-replaced {
+      border-left-color: #dc2626;
+    }
+    .dropzone-active {
+      border-color: #2563eb !important;
+      background-color: #eff6ff !important;
+    }
+    .mode-card-active {
+      border-color: #1d4ed8 !important;
+      background-color: #eff6ff !important;
+      box-shadow: 0 0 0 1px #1d4ed8;
+    }
+    /* Custom scrollbars */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+</head>
+<body class="min-h-screen sm:h-screen sm:overflow-hidden flex flex-col antialiased selection:bg-slate-300 selection:text-slate-900">
+
+  <!-- Top Navigation Bar -->
+  <header class="nav-bar text-white shrink-0 z-30 shadow-sm">
+    <div class="max-w-[1600px] mx-auto px-4 sm:px-6 h-12 flex items-center justify-between gap-4">
+      <a href="#top" class="text-sm sm:text-base tracking-wide whitespace-nowrap flex items-center gap-1.5 hover:opacity-90 transition">
+        <span class="font-bold tracking-wider">TGM</span>
+        <span class="font-normal text-blue-100">AL MAMUN</span>
+      </a>
+
+      <!-- Desktop Navigation Links -->
+      <nav class="hidden xl:flex items-center space-x-5 text-[11px] font-semibold tracking-wider text-blue-100">
+        <a href="#top" class="hover:text-white transition">HOME</a>
+        <a href="#top" class="hover:text-white transition">TEACHING COURSES</a>
+        <a href="#top" class="hover:text-white transition">WORKING PAPERS</a>
+        <a href="#top" class="hover:text-white transition">TIME SERIES</a>
+        <a href="#top" class="hover:text-white transition">PANEL DATA</a>
+        <a href="#top" class="hover:text-white transition">CAUSAL INFERENCE</a>
+        <a href="#top" class="hover:text-white transition">DSGE</a>
+        <a href="#top" class="hover:text-white transition">MACHINE LEARNING</a>
+        <a href="#top" class="hover:text-white transition">OPEN ECONOMETRIC SYSTEMS</a>
+      </nav>
+
+      <!-- Mobile Menu Button -->
+      <button id="mobile-menu-btn" type="button" class="xl:hidden p-2 rounded-md text-blue-100 hover:text-white hover:bg-blue-900/50 focus:outline-none" aria-label="Toggle Menu">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobile-nav" class="hidden xl:hidden bg-[#00266e] px-4 pt-2 pb-4 border-t border-blue-800/60">
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-medium text-blue-100">
+        <a href="#top" class="py-1.5 hover:text-white">HOME</a>
+        <a href="#top" class="py-1.5 hover:text-white">TEACHING COURSES</a>
+        <a href="#top" class="py-1.5 hover:text-white">WORKING PAPERS</a>
+        <a href="#top" class="py-1.5 hover:text-white">TIME SERIES</a>
+        <a href="#top" class="py-1.5 hover:text-white">PANEL DATA</a>
+        <a href="#top" class="py-1.5 hover:text-white">CAUSAL INFERENCE</a>
+        <a href="#top" class="py-1.5 hover:text-white">DSGE</a>
+        <a href="#top" class="py-1.5 hover:text-white">MACHINE LEARNING</a>
+        <a href="#top" class="py-1.5 hover:text-white col-span-2 sm:col-span-1">OPEN ECONOMETRIC SYSTEMS</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Compact Hero Banner -->
+  <section id="top" class="hero-gradient text-white shrink-0 py-3.5 px-4 sm:px-6 shadow-inner">
+    <div class="max-w-[1600px] mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div>
+        <p class="text-[10px] font-semibold tracking-[0.14em] text-blue-200 uppercase">
+          EXPERIMENTAL WORKSPACE &bull; SPLIT-SCREEN DOCX REWRITER
+        </p>
+        <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-white leading-tight">
+          AI Search &amp; Rewriting Lab
+        </h1>
+      </div>
+
+      <!-- Top Action Controls -->
+      <div class="flex flex-wrap items-center gap-2">
+        <label for="file-input" class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-blue-50 text-[#003896] text-xs font-semibold rounded-md shadow-xs transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+          </svg>
+          Upload .docx / .txt
+        </label>
+        <input id="file-input" type="file" accept=".docx,.txt,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" class="hidden">
+
+        <button id="btn-sample" type="button" class="px-3 py-1.5 rounded-md text-xs font-semibold text-white bg-white/15 hover:bg-white/25 border border-white/25 transition">
+          Load sample paper
+        </button>
+
+        <button id="btn-download-docx" type="button" disabled
+          class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 disabled:bg-white/15 disabled:text-blue-200/60 disabled:cursor-not-allowed transition shadow-xs">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+          </svg>
+          Download revised .docx
+        </button>
+
+        <button id="btn-clear" type="button" class="px-3 py-1.5 rounded-md text-xs font-medium text-blue-100 hover:text-white hover:bg-white/10 border border-white/20 transition">
+          Clear
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Locked Side-by-Side Split-Screen Workspace -->
+  <main class="flex-1 min-h-0 max-w-[1600px] w-full mx-auto px-3 sm:px-5 py-3 flex flex-col">
+    <div class="flex-1 min-h-0 grid grid-cols-1 sm:grid-cols-12 gap-4 items-stretch">
+
+      <!-- =============================================================== -->
+      <!-- LEFT SIDE: INTERACTIVE DOCUMENT READER (Independent Scroll)     -->
+      <!-- =============================================================== -->
+      <section class="sm:col-span-6 lg:col-span-7 bg-white rounded-xl border border-[#dce3ee] shadow-sm flex flex-col min-h-0 overflow-hidden">
+        <!-- Document Toolbar -->
+        <div class="px-4 py-2.5 shrink-0 border-b border-slate-200 bg-slate-50/80 flex flex-wrap items-center justify-between gap-2">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-xs font-bold text-slate-800" id="doc-title-label">Manuscript Document</span>
+            <span id="para-count-badge" class="px-2 py-0.5 rounded-full bg-blue-100 text-[#1d4ed8] text-[10px] font-semibold">0 paragraphs</span>
+            <span id="replaced-count-badge" class="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-semibold">0 replaced</span>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <input id="para-filter" type="text" placeholder="Search in document..."
+              class="w-32 sm:w-40 rounded-md border border-slate-300 bg-white px-2.5 py-1 text-[11px] text-slate-700 focus:border-blue-500 outline-none">
+            <div class="inline-flex rounded-md border border-slate-300 bg-white overflow-hidden">
+              <button id="btn-prev-para" type="button" disabled class="px-2 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40 border-r border-slate-200 transition">← Prev</button>
+              <button id="btn-next-para" type="button" disabled class="px-2 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40 transition">Next →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dropzone / Document Page Area (Scrolls independently) -->
+        <div id="dropzone" class="flex-1 min-h-0 relative bg-[#eef2f7] p-3 sm:p-5 overflow-y-auto transition-colors">
+          <!-- Empty State (shown before file or sample is loaded) -->
+          <div id="doc-empty-state" class="bg-white rounded-lg border-2 border-dashed border-slate-300 p-8 text-center max-w-md mx-auto my-10">
+            <svg class="w-10 h-10 text-blue-600/70 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <h2 class="text-sm font-bold text-slate-800 mb-1">Drop your Word (.docx) or .txt manuscript here</h2>
+            <p class="text-xs text-slate-500 leading-relaxed mb-5">
+              Your document will open on this page. Simply click or highlight any paragraph to send it to the AI Rewriter on the right.
+            </p>
+            <div class="flex flex-wrap justify-center gap-2.5">
+              <label for="file-input" class="cursor-pointer px-4 py-2 rounded-md text-xs font-semibold text-white bg-[#1d4ed8] hover:bg-[#1e40af] transition">
+                Choose .docx File
+              </label>
+              <button id="btn-empty-sample" type="button" class="px-4 py-2 rounded-md text-xs font-semibold text-[#1d4ed8] bg-blue-50 hover:bg-blue-100 border border-blue-200 transition">
+                Try sample manuscript
+              </button>
+            </div>
+          </div>
+
+          <!-- Paper Sheet Container (Rendered Paragraphs) -->
+          <article id="doc-paper" class="hidden doc-paper bg-white shadow-md border border-slate-200/90 rounded-sm max-w-[780px] mx-auto px-5 sm:px-9 py-6 sm:py-8 space-y-3 text-[15px] sm:text-[16px] leading-[1.75] text-slate-900">
+            <!-- Paragraphs injected dynamically -->
+          </article>
+        </div>
+
+        <!-- Bottom Hint Bar -->
+        <div class="px-4 py-2 shrink-0 border-t border-slate-200 bg-white flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
+          <span id="left-hint">Drag-highlight any words or lines to revise a specific part, or single-click for the full paragraph.</span>
+          <label class="inline-flex items-center gap-1.5 cursor-pointer select-none font-medium text-slate-600">
+            <input id="toggle-red-docx" type="checkbox" checked class="w-3.5 h-3.5 rounded text-red-600 focus:ring-red-500 border-slate-300">
+            <span>Red text for revisions (.docx &amp; preview)</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- =============================================================== -->
+      <!-- RIGHT SIDE: GOOGLE SEARCH REWRITER & REPLACE (Independent Scroll) -->
+      <!-- =============================================================== -->
+      <section class="sm:col-span-6 lg:col-span-5 flex flex-col min-h-0 overflow-y-auto space-y-3 pr-0.5">
+
+        <!-- Panel 1: Selected Text & Rewrite Controls -->
+        <div class="bg-white rounded-xl border border-[#dce3ee] shadow-sm p-4 shrink-0">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div class="flex flex-wrap items-center gap-2">
+              <h2 class="text-sm font-bold text-slate-800">Selected Text to Rewrite</h2>
+              <span id="active-para-pill" class="hidden px-2 py-0.5 rounded bg-blue-50 border border-blue-200 text-[#1d4ed8] text-[10px] font-bold"></span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button id="btn-select-full-para" type="button" class="hidden px-2 py-0.5 rounded border border-blue-200 bg-blue-50 hover:bg-blue-100 text-[11px] font-medium text-[#1d4ed8] transition">
+                Select full ¶
+              </button>
+              <button id="btn-revert-active" type="button" class="hidden px-2 py-0.5 rounded border border-slate-200 bg-slate-50 hover:bg-red-50 hover:text-red-700 hover:border-red-200 text-[11px] font-medium text-slate-600 transition">
+                Revert ¶
+              </button>
+            </div>
+          </div>
+
+          <!-- Selected / Editable Source Textarea -->
+          <textarea id="input-text" rows="4"
+            placeholder="Highlight any words/lines or click a paragraph on the left document page..."
+            class="w-full rounded-lg border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 p-2.5 text-xs sm:text-[13px] text-slate-800 leading-relaxed outline-none transition resize-y"></textarea>
+
+          <div class="flex items-center justify-between mt-1.5 mb-3 text-[11px] text-slate-400">
+            <span id="word-count">0 words</span>
+            <!-- Live Google Search Grounding Toggle -->
+            <label class="inline-flex items-center gap-1.5 cursor-pointer select-none text-[#003896] font-semibold">
+              <input id="toggle-search" type="checkbox" checked class="w-3.5 h-3.5 rounded text-[#1d4ed8] focus:ring-blue-500 border-slate-300">
+              <span>Live Google Search Grounding</span>
+            </label>
+          </div>
+
+          <!-- Compact Mode Selector -->
+          <div class="grid grid-cols-2 gap-2 mb-3">
+            <button type="button" data-mode="academic_factcheck" class="mode-btn mode-card-active text-left p-2.5 rounded-lg border border-slate-200 bg-white hover:border-blue-300 transition">
+              <div class="text-[11px] font-bold text-slate-800">Academic Polish &amp; Fact-Check</div>
+              <div class="text-[10px] text-slate-500 mt-0.5">Scholarly tone + Search verification</div>
+            </button>
+            <button type="button" data-mode="enrich_research" class="mode-btn text-left p-2.5 rounded-lg border border-slate-200 bg-white hover:border-blue-300 transition">
+              <div class="text-[11px] font-bold text-slate-800">Enrich with Latest Research</div>
+              <div class="text-[10px] text-slate-500 mt-0.5">Add recent findings via Search</div>
+            </button>
+            <button type="button" data-mode="paraphrase" class="mode-btn text-left p-2.5 rounded-lg border border-slate-200 bg-white hover:border-blue-300 transition">
+              <div class="text-[11px] font-bold text-slate-800">Clear Academic Paraphrase</div>
+              <div class="text-[10px] text-slate-500 mt-0.5">Smooth, original wording</div>
+            </button>
+            <button type="button" data-mode="concise" class="mode-btn text-left p-2.5 rounded-lg border border-slate-200 bg-white hover:border-blue-300 transition">
+              <div class="text-[11px] font-bold text-slate-800">Concise / Journal Style</div>
+              <div class="text-[10px] text-slate-500 mt-0.5">Tighter, high-impact prose</div>
+            </button>
+          </div>
+
+          <!-- Optional Instruction -->
+          <input id="custom-instruction" type="text"
+            placeholder="Optional instruction (e.g., keep exact numbers, make more formal, verify OECD stats)..."
+            class="w-full rounded-lg border border-slate-200 bg-slate-50/60 focus:bg-white focus:border-blue-500 px-3 py-2 text-xs text-slate-800 outline-none transition mb-3">
+
+          <!-- Rewrite Trigger -->
+          <button id="btn-rewrite" type="button"
+            class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs sm:text-sm font-semibold text-white bg-[#1d4ed8] hover:bg-[#1e40af] disabled:bg-[#8fa8d8] disabled:cursor-not-allowed transition shadow-xs">
+            <svg id="spinner" class="hidden animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+            </svg>
+            <span id="btn-rewrite-label">Search &amp; Rewrite Selected Text</span>
+          </button>
+
+          <!-- Status Banner -->
+          <div id="status-banner" class="mt-3 px-3 py-2 rounded-md bg-[#e8eef7] border border-[#d6e0f0] text-[11px] text-slate-700 flex items-center justify-between gap-2">
+            <span id="status-text">Upload a document or click "Load sample paper" to start.</span>
+            <span id="status-badge" class="hidden px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 whitespace-nowrap"></span>
+          </div>
+        </div>
+
+        <!-- Panel 2: New Rewritten Output & Direct Replace -->
+        <div class="bg-white rounded-xl border border-[#dce3ee] shadow-sm p-4 shrink-0">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+            <h2 class="text-sm font-bold text-slate-800">Rewritten Version</h2>
+            <div class="inline-flex rounded-md border border-slate-200 bg-slate-50 p-0.5">
+              <button id="tab-clean" type="button" class="px-2.5 py-1 rounded text-[11px] font-semibold bg-white text-[#1d4ed8] shadow-xs transition">
+                Clean
+              </button>
+              <button id="tab-diff" type="button" class="px-2.5 py-1 rounded text-[11px] font-medium text-slate-600 hover:text-slate-900 transition">
+                Compare
+              </button>
+            </div>
+          </div>
+
+          <!-- Editable Rewritten Text -->
+          <div id="view-clean">
+            <textarea id="output-text" rows="5"
+              placeholder="Your rewritten text will appear here. Review or tweak it, then click 'Replace in Document' to update the left page and .docx."
+              class="w-full rounded-lg border border-slate-200 bg-slate-50/40 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 p-2.5 text-xs sm:text-[13px] text-slate-800 leading-relaxed outline-none transition resize-y"></textarea>
+          </div>
+
+          <!-- Diff View -->
+          <div id="view-diff" class="hidden rounded-lg border border-slate-200 bg-slate-50/40 p-3 text-xs sm:text-[13px] leading-relaxed text-slate-800 max-h-56 overflow-y-auto whitespace-pre-wrap"></div>
+
+          <!-- Replace & Export Action Buttons -->
+          <div class="flex flex-wrap items-center gap-2 mt-3">
+            <button id="btn-replace" type="button" disabled
+              class="flex-1 inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed transition shadow-xs">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span id="btn-replace-label">Replace in Document</span>
+            </button>
+            <button id="btn-replace-next" type="button" disabled
+              class="px-3 py-2 rounded-lg text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 disabled:opacity-40 disabled:cursor-not-allowed transition">
+              Replace &amp; Next →
+            </button>
+            <button id="btn-copy" type="button"
+              class="px-3 py-2 rounded-lg text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 transition">
+              Copy
+            </button>
+          </div>
+
+          <!-- Grounding Sources Drawer -->
+          <div id="sources-wrapper" class="hidden mt-4 pt-3.5 border-t border-slate-100">
+            <div class="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5 text-[#1d4ed8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+              Google Search Sources
+            </div>
+            <div id="sources-list" class="space-y-1.5 max-h-40 overflow-y-auto pr-1"></div>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden px-4 py-2.5 rounded-lg bg-slate-900 text-white text-xs font-medium shadow-lg transition"></div>
+
+  <script>
+    // =========================================================================
+    // 1. STATE & CONSTANTS
+    // =========================================================================
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+    let activeMode = 'academic_factcheck';
+    let lastOriginalText = '';
+
+    // Document & DOCX XML state
+    let originalDocxBuffer = null;
+    let uploadedFileName = '';
+    let docParagraphs = [];          // [{ xmlIndex, text, isHeading }]
+    let selectedXmlIndex = null;
+    let selectionRange = null;       // null = full paragraph, or { start, end, text } for partial word/line selection
+    let paraStates = new Map();      // xmlIndex -> { originalText, segments: [{ text, revised }] }
+
+    const MODE_PROMPTS = {
+      academic_factcheck: `You are an expert academic editor and fact-checker. Rewrite ONLY the user's selected text to improve clarity, precision, and scholarly flow. Use Google Search to verify factual claims, dates, and empirical context. If surrounding paragraph context is given, match its tense, grammar, and flow seamlessly. Return ONLY the rewritten replacement text without extra commentary, markdown headers, or quotation marks.`,
+      enrich_research: `You are a senior academic researcher. Rewrite and enrich ONLY the user's selected text using Google Search to integrate relevant, accurate empirical context or recent policy insights. If surrounding paragraph context is given, ensure smooth grammatical continuity. Return ONLY the cohesive rewritten replacement text without extra preamble or bullet points.`,
+      paraphrase: `You are a skilled academic writing coach. Paraphrase ONLY the user's selected text so it reads smoothly, clearly, and originally while strictly preserving every analytical claim, statistic, and technical term. If surrounding paragraph context is given, ensure seamless grammar and flow. Return ONLY the rewritten replacement text.`,
+      concise: `You are a senior economics journal editor. Rewrite ONLY the user's selected text to be tighter, clearer, and more direct while preserving all core findings and numbers. If surrounding paragraph context is given, ensure seamless grammar and flow. Return ONLY the rewritten replacement text.`
+    };
+
+    function showToast(msg) {
+      const t = $('toast');
+      t.textContent = msg;
+      t.classList.remove('hidden');
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => t.classList.add('hidden'), 2600);
+    }
+
+    function setStatus(text, badge = '', isError = false) {
+      const banner = $('status-banner');
+      $('status-text').textContent = text;
+      banner.className = isError
+        ? 'mt-3 px-3 py-2 rounded-md bg-red-50 border border-red-200 text-[11px] text-red-700 flex items-center justify-between gap-2'
+        : 'mt-3 px-3 py-2 rounded-md bg-[#e8eef7] border border-[#d6e0f0] text-[11px] text-slate-700 flex items-center justify-between gap-2';
+
+      const b = $('status-badge');
+      if (badge) {
+        b.textContent = badge;
+        b.classList.remove('hidden');
+      } else {
+        b.classList.add('hidden');
+      }
+    }
+
+    function updateWordCount() {
+      const text = $('input-text').value.trim();
+      const words = text ? text.split(/\s+/).length : 0;
+      $('word-count').textContent = `${words} word${words === 1 ? '' : 's'}`;
+    }
+
+    $('mobile-menu-btn').onclick = () => $('mobile-nav').classList.toggle('hidden');
+
+    // =========================================================================
+    // 2. SEGMENT HELPERS & LEFT-SIDE DOCUMENT RENDERING
+    // =========================================================================
+    function getParaSegments(xmlIndex) {
+      if (paraStates.has(xmlIndex)) return paraStates.get(xmlIndex).segments;
+      const p = docParagraphs.find(x => x.xmlIndex === xmlIndex);
+      return p ? [{ text: p.text, revised: false }] : [];
+    }
+
+    function getParaText(xmlIndex) {
+      return getParaSegments(xmlIndex).map(s => s.text).join('');
+    }
+
+    function applySegmentEdit(xmlIndex, start, end, newText) {
+      const p = docParagraphs.find(x => x.xmlIndex === xmlIndex);
+      if (!p) return;
+      const state = paraStates.get(xmlIndex) || {
+        originalText: p.text,
+        segments: [{ text: p.text, revised: false }]
+      };
+
+      const nextSegs = [];
+      let pos = 0;
+      let inserted = false;
+
+      for (const seg of state.segments) {
+        const segStart = pos;
+        const segEnd = pos + seg.text.length;
+
+        if (segEnd <= start) {
+          nextSegs.push({ ...seg });
+        } else if (segStart >= end) {
+          if (!inserted) {
+            nextSegs.push({ text: newText, revised: true });
+            inserted = true;
+          }
+          nextSegs.push({ ...seg });
+        } else {
+          // Overlapping segment
+          if (start > segStart) {
+            nextSegs.push({ text: seg.text.slice(0, start - segStart), revised: seg.revised });
+          }
+          if (!inserted) {
+            nextSegs.push({ text: newText, revised: true });
+            inserted = true;
+          }
+          if (end < segEnd) {
+            nextSegs.push({ text: seg.text.slice(end - segStart), revised: seg.revised });
+          }
+        }
+        pos = segEnd;
+      }
+
+      if (!inserted) {
+        nextSegs.push({ text: newText, revised: true });
+      }
+
+      // Merge adjacent segments with identical revised status
+      const merged = [];
+      for (const seg of nextSegs) {
+        if (!seg.text) continue;
+        if (merged.length && merged[merged.length - 1].revised === seg.revised) {
+          merged[merged.length - 1].text += seg.text;
+        } else {
+          merged.push(seg);
+        }
+      }
+
+      paraStates.set(xmlIndex, {
+        originalText: state.originalText,
+        segments: merged.length ? merged : [{ text: '', revised: true }]
+      });
+    }
+
+    function renderSegmentedHtml(segments, selRange, useRed, isFullSelected) {
+      let pos = 0;
+      let html = '';
+
+      for (const seg of segments) {
+        const segStart = pos;
+        const segEnd = pos + seg.text.length;
+        const colorCls = (seg.revised && useRed && !isFullSelected) ? 'text-[#b91c1c]' : '';
+
+        if (!selRange || segEnd <= selRange.start || segStart >= selRange.end) {
+          html += colorCls ? `<span class="${colorCls}">${esc(seg.text)}</span>` : esc(seg.text);
+        } else {
+          const before = selRange.start > segStart ? seg.text.slice(0, selRange.start - segStart) : '';
+          const midStart = Math.max(0, selRange.start - segStart);
+          const midEnd = Math.min(seg.text.length, selRange.end - segStart);
+          const mid = seg.text.slice(midStart, midEnd);
+          const after = selRange.end < segEnd ? seg.text.slice(selRange.end - segStart) : '';
+
+          if (before) html += colorCls ? `<span class="${colorCls}">${esc(before)}</span>` : esc(before);
+          if (mid) html += `<mark class="doc-sel-mark">${esc(mid)}</mark>`;
+          if (after) html += colorCls ? `<span class="${colorCls}">${esc(after)}</span>` : esc(after);
+        }
+        pos = segEnd;
+      }
+      return html;
+    }
+
+    function renderDocumentPage() {
+      const dropzone = $('dropzone');
+      const prevScrollTop = dropzone ? dropzone.scrollTop : 0;
+      const paper = $('doc-paper');
+      const empty = $('doc-empty-state');
+      const query = ($('para-filter').value || '').trim().toLowerCase();
+
+      $('para-count-badge').textContent = `${docParagraphs.length} paragraph${docParagraphs.length === 1 ? '' : 's'}`;
+      $('replaced-count-badge').textContent = `${paraStates.size} revised`;
+
+      const currentIdx = docParagraphs.findIndex(p => p.xmlIndex === selectedXmlIndex);
+      $('btn-prev-para').disabled = currentIdx <= 0;
+      $('btn-next-para').disabled = currentIdx < 0 || currentIdx >= docParagraphs.length - 1;
+
+      if (!docParagraphs.length) {
+        paper.classList.add('hidden');
+        empty.classList.remove('hidden');
+        return;
+      }
+
+      empty.classList.add('hidden');
+      paper.classList.remove('hidden');
+
+      const useRed = $('toggle-red-docx').checked;
+      const visible = docParagraphs
+        .map((p, idx) => ({ p, idx }))
+        .filter(({ p }) => {
+          if (!query) return true;
+          const activeTxt = getParaText(p.xmlIndex);
+          return activeTxt.toLowerCase().includes(query) || p.text.toLowerCase().includes(query);
+        });
+
+      if (!visible.length) {
+        paper.innerHTML = '<p class="text-sm text-slate-400 font-sans text-center py-8">No paragraphs match your search.</p>';
+        return;
+      }
+
+      paper.innerHTML = visible.map(({ p, idx }) => {
+        const isSelected = p.xmlIndex === selectedXmlIndex;
+        const isPartial = isSelected && selectionRange !== null;
+        const isFullSelected = isSelected && selectionRange === null;
+        const isReplaced = paraStates.has(p.xmlIndex);
+        const segments = getParaSegments(p.xmlIndex);
+
+        const headingClasses = p.isHeading
+          ? 'text-[19px] font-bold text-slate-950 pt-3 pb-0.5'
+          : 'text-[16px] text-slate-900';
+
+        const stateClasses = isFullSelected
+          ? 'doc-para-selected'
+          : (isPartial ? 'doc-para-partial' : (isReplaced ? 'doc-para-replaced bg-red-50/35' : ''));
+
+        const contentHtml = renderSegmentedHtml(segments, isPartial ? selectionRange : null, useRed, isFullSelected);
+
+        return `
+          <div data-xml-index="${p.xmlIndex}"
+            class="doc-para group relative rounded px-3 py-1.5 ${headingClasses} ${stateClasses}">
+            <span class="font-sans text-[10px] font-semibold text-slate-400 opacity-0 group-hover:opacity-100 absolute -left-8 top-2 select-none transition">¶${idx + 1}</span>
+            ${isReplaced ? `<span class="font-sans inline-block align-middle mr-1.5 px-1.5 py-0.5 rounded bg-red-100 text-red-700 text-[9px] font-bold uppercase tracking-wide select-none">Revised</span>` : ''}
+            <span class="para-text" data-xml-index="${p.xmlIndex}">${contentHtml}</span>
+          </div>
+        `;
+      }).join('');
+
+      // Preserve exact scroll position on the left document pane so focus is never lost
+      if (dropzone) dropzone.scrollTop = prevScrollTop;
+    }
+
+    function selectParagraph(xmlIndex, scrollIntoView = false, partialRange = null) {
+      const para = docParagraphs.find(p => p.xmlIndex === xmlIndex);
+      if (!para) return;
+      selectedXmlIndex = xmlIndex;
+      selectionRange = partialRange;
+
+      const isReplaced = paraStates.has(xmlIndex);
+      const fullText = getParaText(xmlIndex);
+      const activeText = partialRange ? fullText.slice(partialRange.start, partialRange.end) : fullText;
+      const idx = docParagraphs.findIndex(p => p.xmlIndex === xmlIndex);
+
+      $('input-text').value = activeText;
+      lastOriginalText = activeText;
+      updateWordCount();
+
+      if (partialRange) {
+        const wCount = activeText.trim() ? activeText.trim().split(/\s+/).length : 0;
+        $('active-para-pill').textContent = `¶${idx + 1} · Selection (${wCount} word${wCount === 1 ? '' : 's'})`;
+        $('btn-select-full-para').classList.remove('hidden');
+        $('btn-replace-label').textContent = 'Replace Selection';
+      } else {
+        $('active-para-pill').textContent = `¶${idx + 1} of ${docParagraphs.length} (Full ¶)`;
+        $('btn-select-full-para').classList.add('hidden');
+        $('btn-replace-label').textContent = 'Replace Paragraph';
+      }
+
+      $('active-para-pill').classList.remove('hidden');
+      $('btn-revert-active').classList.toggle('hidden', !isReplaced);
+
+      updateReplaceButtons();
+      renderDocumentPage();
+
+      if (scrollIntoView) {
+        const el = $('doc-paper').querySelector(`div[data-xml-index="${xmlIndex}"]`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      setStatus(
+        partialRange
+          ? `Selected exact excerpt inside ¶${idx + 1}. Click "Search & Rewrite Selected Text" to revise just this part.`
+          : `Selected full ¶${idx + 1}. Drag-highlight words to narrow selection, or rewrite the whole paragraph.`,
+        partialRange ? 'PARTIAL' : `¶${idx + 1} FULL`
+      );
+    }
+    window.selectParagraph = selectParagraph;
+
+    // Unified left-pane selection handler: drag/double-click = word/line selection, single click = full paragraph
+    $('doc-paper').addEventListener('mouseup', e => {
+      const sel = window.getSelection();
+      const paraDiv = e.target.closest('div[data-xml-index]');
+      if (!paraDiv) return;
+
+      if (sel && !sel.isCollapsed && sel.rangeCount > 0) {
+        const range = sel.getRangeAt(0);
+        const startTextEl = (range.startContainer.nodeType === 1 ? range.startContainer : range.startContainer.parentElement)?.closest('.para-text');
+        const endTextEl = (range.endContainer.nodeType === 1 ? range.endContainer : range.endContainer.parentElement)?.closest('.para-text');
+
+        if (startTextEl && endTextEl && startTextEl === endTextEl) {
+          const xmlIndex = Number(startTextEl.dataset.xmlIndex);
+          const preStart = document.createRange();
+          preStart.selectNodeContents(startTextEl);
+          preStart.setEnd(range.startContainer, range.startOffset);
+          const start = preStart.toString().length;
+
+          const preEnd = document.createRange();
+          preEnd.selectNodeContents(startTextEl);
+          preEnd.setEnd(range.endContainer, range.endOffset);
+          const end = preEnd.toString().length;
+
+          const fullText = getParaText(xmlIndex);
+          let s = Math.min(start, end);
+          let en = Math.max(start, end);
+          // Trim leading/trailing whitespace from highlight
+          while (s < en && /\s/.test(fullText[s])) s++;
+          while (en > s && /\s/.test(fullText[en - 1])) en--;
+
+          if (en > s) {
+            sel.removeAllRanges();
+            const isWholePara = (s === 0 && en === fullText.length);
+            selectParagraph(xmlIndex, false, isWholePara ? null : { start: s, end: en, text: fullText.slice(s, en) });
+            return;
+          }
+        } else if (startTextEl || endTextEl) {
+          showToast('Highlight words or lines within a single paragraph to revise a specific part.');
+          return;
+        }
+      }
+
+      // Single click (no text highlighted) -> select full paragraph
+      const xmlIndex = Number(paraDiv.dataset.xmlIndex);
+      selectParagraph(xmlIndex, false, null);
+    });
+
+    $('btn-select-full-para').onclick = () => {
+      if (selectedXmlIndex !== null) selectParagraph(selectedXmlIndex, false, null);
+    };
+
+    function stepParagraph(delta) {
+      const idx = docParagraphs.findIndex(p => p.xmlIndex === selectedXmlIndex);
+      if (idx < 0) return;
+      const next = idx + delta;
+      if (next >= 0 && next < docParagraphs.length) {
+        selectParagraph(docParagraphs[next].xmlIndex, true, null);
+      }
+    }
+
+    $('btn-prev-para').onclick = () => stepParagraph(-1);
+    $('btn-next-para').onclick = () => stepParagraph(1);
+    $('para-filter').addEventListener('input', renderDocumentPage);
+    $('toggle-red-docx').addEventListener('change', renderDocumentPage);
+
+    $('btn-revert-active').onclick = () => {
+      if (selectedXmlIndex === null || !paraStates.has(selectedXmlIndex)) return;
+      paraStates.delete(selectedXmlIndex);
+      selectParagraph(selectedXmlIndex, false, null);
+      showToast('Reverted paragraph to original text.');
+    };
+
+    function updateReplaceButtons() {
+      const hasOutput = $('output-text').value.trim().length > 0;
+      const hasTarget = selectedXmlIndex !== null;
+      $('btn-replace').disabled = !(hasOutput && hasTarget);
+      const currentIdx = docParagraphs.findIndex(p => p.xmlIndex === selectedXmlIndex);
+      $('btn-replace-next').disabled = !(hasOutput && hasTarget && currentIdx < docParagraphs.length - 1);
+    }
+
+    // =========================================================================
+    // 3. FILE LOADING (.docx XML & .txt) + SAMPLE MANUSCRIPT
+    // =========================================================================
+    async function loadFile(file) {
+      if (!file) return;
+      setStatus(`Opening "${file.name}"...`, 'LOADING');
+      try {
+        uploadedFileName = file.name;
+        paraStates = new Map();
+        docParagraphs = [];
+        selectedXmlIndex = null;
+        selectionRange = null;
+        $('para-filter').value = '';
+        $('output-text').value = '';
+        $('sources-wrapper').classList.add('hidden');
+
+        if (file.name.toLowerCase().endsWith('.docx')) {
+          if (typeof JSZip === 'undefined') throw new Error('JSZip failed to load.');
+          const buf = await file.arrayBuffer();
+          originalDocxBuffer = buf;
+
+          const zip = await JSZip.loadAsync(buf);
+          const docXmlFile = zip.file('word/document.xml');
+          if (!docXmlFile) throw new Error('Invalid .docx file: missing word/document.xml');
+          const xmlStr = await docXmlFile.async('string');
+          const xmlDoc = new DOMParser().parseFromString(xmlStr, 'application/xml');
+          const W_NS = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+          const allPs = Array.from(xmlDoc.getElementsByTagNameNS(W_NS, 'p'));
+
+          allPs.forEach((p, xmlIndex) => {
+            const tNodes = Array.from(p.getElementsByTagNameNS(W_NS, 't'));
+            const combined = tNodes.map(t => t.textContent).join('').trim();
+            if (!combined) return;
+
+            // Detect Word heading styles or short numbered headings (e.g., "8. Conclusion")
+            const pStyle = p.getElementsByTagNameNS(W_NS, 'pStyle')[0];
+            const styleVal = pStyle ? (pStyle.getAttributeNS(W_NS, 'val') || pStyle.getAttribute('w:val') || '') : '';
+            const isHeading = /heading|title|subtitle/i.test(styleVal) || (/^\d+(\.\d+)*\.?\s+[A-Z]/.test(combined) && combined.length < 90);
+            docParagraphs.push({ xmlIndex, text: combined, isHeading });
+          });
+
+          $('btn-download-docx').disabled = false;
+        } else {
+          originalDocxBuffer = null;
+          const raw = (await file.text()).trim();
+          const parts = raw.split(/\r?\n\s*\r?\n/).map(s => s.trim()).filter(Boolean);
+          docParagraphs = parts.map((text, idx) => ({
+            xmlIndex: idx,
+            text,
+            isHeading: /^\d+(\.\d+)*\.?\s+[A-Z]/.test(text) && text.length < 90
+          }));
+          $('btn-download-docx').disabled = true;
+        }
+
+        $('doc-title-label').textContent = file.name;
+        const firstBody = docParagraphs.find(p => !p.isHeading && p.text.length > 50) || docParagraphs[0];
+        if (firstBody) {
+          selectParagraph(firstBody.xmlIndex);
+        } else {
+          renderDocumentPage();
+        }
+        showToast(`Loaded "${file.name}" (${docParagraphs.length} paragraphs).`);
+      } catch (err) {
+        setStatus('Could not read file: ' + (err.message || err), 'ERROR', true);
+      }
+    }
+
+    function loadSampleManuscript() {
+      originalDocxBuffer = null;
+      uploadedFileName = 'OECD_Ageing_Growth_Draft.txt';
+      paraStates = new Map();
+      selectionRange = null;
+      $('para-filter').value = '';
+      $('output-text').value = '';
+      $('sources-wrapper').classList.add('hidden');
+      $('btn-download-docx').disabled = true;
+      $('doc-title-label').textContent = 'Sample Manuscript (Preview)';
+
+      docParagraphs = [
+        { xmlIndex: 0, text: '1. Introduction', isHeading: true },
+        { xmlIndex: 1, text: 'Population ageing is widely viewed as a structural drag on macroeconomic performance across advanced economies. As fertility rates decline and life expectancy rises, shrinking working-age cohorts and rising old-age dependency ratios create mounting fiscal pressures on public pension and healthcare systems.', isHeading: false },
+        { xmlIndex: 2, text: '8. Conclusion', isHeading: true },
+        { xmlIndex: 3, text: 'Using a balanced panel of 37 OECD economies and a battery of econometric methods, I find that faster population ageing is not associated with slower growth of GDP per capita within countries, once period effects are included. The raw cross-country correlation exists but reflects global timing rather than a within-country effect. Participation growth is the margin most strongly associated with growth, and the aggregate employment ratio, but not working-age participation, falls with ageing. The estimates are imprecise: effects larger than about 0.45 percentage points of annual growth per standard deviation of ageing speed are excluded, but smaller ones are not. Richer economies may bear higher costs, but the evidence does not survive multiplicity correction. The natural next steps are to merge this panel with OECD data on effective retirement ages, employment of workers aged 55–64, hours worked, pension replacement rates and sector-level productivity, and to exploit pension-reform episodes and historical birth-cohort variation as sources of identifying variation.', isHeading: false }
+      ];
+
+      selectParagraph(3, true);
+      showToast('Sample manuscript loaded. Click "Search & Rewrite Selected Text" to test.');
+    }
+
+    $('file-input').addEventListener('change', e => {
+      if (e.target.files && e.target.files[0]) {
+        loadFile(e.target.files[0]);
+        e.target.value = '';
+      }
+    });
+
+    ['dragenter', 'dragover'].forEach(ev => {
+      $('dropzone').addEventListener(ev, e => {
+        e.preventDefault();
+        $('dropzone').classList.add('dropzone-active');
+      });
+    });
+    ['dragleave', 'drop'].forEach(ev => {
+      $('dropzone').addEventListener(ev, e => {
+        e.preventDefault();
+        $('dropzone').classList.remove('dropzone-active');
+      });
+    });
+    $('dropzone').addEventListener('drop', e => {
+      const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (f) loadFile(f);
+    });
+
+    $('btn-sample').onclick = loadSampleManuscript;
+    $('btn-empty-sample').onclick = loadSampleManuscript;
+
+    $('btn-clear').onclick = () => {
+      originalDocxBuffer = null;
+      uploadedFileName = '';
+      docParagraphs = [];
+      selectedXmlIndex = null;
+      selectionRange = null;
+      paraStates = new Map();
+      $('para-filter').value = '';
+      $('doc-title-label').textContent = 'Manuscript Document';
+      $('input-text').value = '';
+      $('output-text').value = '';
+      $('custom-instruction').value = '';
+      $('active-para-pill').classList.add('hidden');
+      $('btn-select-full-para').classList.add('hidden');
+      $('btn-revert-active').classList.add('hidden');
+      $('sources-wrapper').classList.add('hidden');
+      $('btn-download-docx').disabled = true;
+      updateWordCount();
+      updateReplaceButtons();
+      renderDocumentPage();
+      setStatus('Workspace cleared. Upload a .docx or load the sample paper.');
+    };
+
+    $('input-text').addEventListener('input', updateWordCount);
+    $('output-text').addEventListener('input', updateReplaceButtons);
+
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('mode-card-active'));
+        btn.classList.add('mode-card-active');
+        activeMode = btn.dataset.mode;
+      });
+    });
+
+    // =========================================================================
+    // 4. GEMINI API WITH LIVE GOOGLE SEARCH GROUNDING
+    // =========================================================================
+    async function fetchWithBackoff(url, options, maxRetries = 4) {
+      let delay = 1000;
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        const res = await fetch(url, options);
+        if (res.ok) return res.json();
+        if ((res.status === 429 || res.status >= 500) && attempt < maxRetries) {
+          await new Promise(r => setTimeout(r, delay));
+          delay *= 2;
+          continue;
+        }
+        const errBody = await res.text().catch(() => '');
+        throw new Error(`API error (${res.status}): ${errBody.slice(0, 160) || res.statusText}`);
+      }
+    }
+
+    async function runRewrite() {
+      const draft = $('input-text').value.trim();
+      if (!draft) {
+        setStatus('Select a paragraph on the left or paste text first.', 'INPUT NEEDED', true);
+        return;
+      }
+
+      const useSearch = $('toggle-search').checked;
+      const extra = $('custom-instruction').value.trim();
+      const systemPrompt = MODE_PROMPTS[activeMode] || MODE_PROMPTS.academic_factcheck;
+      const fullContext = (selectionRange && selectedXmlIndex !== null) ? getParaText(selectedXmlIndex) : '';
+
+      let userPrompt = '';
+      if (extra) userPrompt += `Additional instruction: ${extra}\n\n`;
+      if (fullContext) {
+        userPrompt += `Surrounding paragraph context (DO NOT return this; use only so the rewritten excerpt fits grammatically):\n${fullContext}\n\nSelected excerpt to rewrite (return ONLY the replacement for this exact excerpt):\n${draft}`;
+      } else {
+        userPrompt += `Paragraph to rewrite:\n${draft}`;
+      }
+
+      lastOriginalText = draft;
+      $('btn-rewrite').disabled = true;
+      $('spinner').classList.remove('hidden');
+      $('btn-rewrite-label').textContent = useSearch ? 'Searching Google & Rewriting...' : 'Rewriting...';
+      setStatus(useSearch ? 'Querying Google Search & drafting revision...' : 'Drafting revision...', 'WORKING');
+
+      try {
+        const apiKey = ""; // Provided automatically at runtime
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+        const payload = {
+          contents: [{ parts: [{ text: userPrompt }] }],
+          systemInstruction: { parts: [{ text: systemPrompt }] }
+        };
+        if (useSearch) payload.tools = [{ google_search: {} }];
+
+        const result = await fetchWithBackoff(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const candidate = result.candidates && result.candidates[0];
+        const generatedText = candidate?.content?.parts?.map(p => p.text || '').join('').trim();
+        if (!generatedText) throw new Error('Empty response returned. Please try again.');
+
+        // Extract Google Search grounding sources
+        let sources = [];
+        const gm = candidate.groundingMetadata;
+        if (gm && Array.isArray(gm.groundingChunks)) {
+          sources = gm.groundingChunks.map(c => ({ uri: c.web?.uri, title: c.web?.title })).filter(s => s.uri && s.title);
+        } else if (gm && Array.isArray(gm.groundingAttributions)) {
+          sources = gm.groundingAttributions.map(a => ({ uri: a.web?.uri, title: a.web?.title })).filter(s => s.uri && s.title);
+        }
+        const seen = new Set();
+        sources = sources.filter(s => !seen.has(s.uri) && seen.add(s.uri));
+
+        $('output-text').value = generatedText;
+        renderDiff(lastOriginalText, generatedText);
+        renderSources(sources, useSearch);
+        updateReplaceButtons();
+
+        setStatus(
+          useSearch
+            ? `Rewrite ready (${sources.length} Google Search source${sources.length === 1 ? '' : 's'}). Click "Replace in Document".`
+            : 'Rewrite ready. Click "Replace in Document".',
+          'READY'
+        );
+      } catch (err) {
+        setStatus('Rewrite failed: ' + (err.message || err), 'ERROR', true);
+      } finally {
+        $('btn-rewrite').disabled = false;
+        $('spinner').classList.add('hidden');
+        $('btn-rewrite-label').textContent = 'Search & Rewrite Selected Text';
+      }
+    }
+
+    $('btn-rewrite').onclick = runRewrite;
+
+    // =========================================================================
+    // 5. DIFF VIEW, SOURCES, IN-PLACE REPLACEMENT & DOCX EXPORT
+    // =========================================================================
+    function renderDiff(oldStr, newStr) {
+      const a = oldStr.split(/(\s+)/);
+      const b = newStr.split(/(\s+)/);
+      if (a.length * b.length > 250000) {
+        $('view-diff').textContent = newStr;
+        return;
+      }
+      const m = a.length, n = b.length;
+      const dp = Array.from({ length: m + 1 }, () => new Uint16Array(n + 1));
+      for (let i = m - 1; i >= 0; i--) {
+        for (let j = n - 1; j >= 0; j--) {
+          dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+        }
+      }
+      let i = 0, j = 0, html = '';
+      while (i < m && j < n) {
+        if (a[i] === b[j]) { html += esc(a[i]); i++; j++; }
+        else if (dp[i + 1][j] >= dp[i][j + 1]) { html += `<span class="bg-red-100 text-red-700 line-through rounded px-0.5">${esc(a[i++])}</span>`; }
+        else { html += `<span class="bg-emerald-100 text-emerald-800 rounded px-0.5">${esc(b[j++])}</span>`; }
+      }
+      while (i < m) html += `<span class="bg-red-100 text-red-700 line-through rounded px-0.5">${esc(a[i++])}</span>`;
+      while (j < n) html += `<span class="bg-emerald-100 text-emerald-800 rounded px-0.5">${esc(b[j++])}</span>`;
+      $('view-diff').innerHTML = html;
+    }
+
+    function renderSources(sources, searchEnabled) {
+      const wrap = $('sources-wrapper');
+      const box = $('sources-list');
+      if (!searchEnabled || !sources.length) {
+        wrap.classList.add('hidden');
+        return;
+      }
+      wrap.classList.remove('hidden');
+      box.innerHTML = sources.map((s, idx) => {
+        let host = '';
+        try { host = new URL(s.uri).hostname.replace(/^www\./, ''); } catch (e) { host = s.uri; }
+        return `
+          <a href="${esc(s.uri)}" target="_blank" rel="noopener noreferrer"
+            class="block p-2 rounded-md border border-slate-200 bg-slate-50/70 hover:bg-blue-50/70 hover:border-blue-300 transition group">
+            <div class="text-[11px] font-semibold text-slate-800 group-hover:text-[#1d4ed8] leading-snug">${idx + 1}. ${esc(s.title)}</div>
+            <div class="text-[10px] text-slate-400 truncate">${esc(host)}</div>
+          </a>
+        `;
+      }).join('');
+    }
+
+    $('tab-clean').onclick = () => {
+      $('view-clean').classList.remove('hidden');
+      $('view-diff').classList.add('hidden');
+      $('tab-clean').className = 'px-2.5 py-1 rounded text-[11px] font-semibold bg-white text-[#1d4ed8] shadow-xs transition';
+      $('tab-diff').className = 'px-2.5 py-1 rounded text-[11px] font-medium text-slate-600 hover:text-slate-900 transition';
+    };
+
+    $('tab-diff').onclick = () => {
+      renderDiff(lastOriginalText, $('output-text').value);
+      $('view-clean').classList.add('hidden');
+      $('view-diff').classList.remove('hidden');
+      $('tab-diff').className = 'px-2.5 py-1 rounded text-[11px] font-semibold bg-white text-[#1d4ed8] shadow-xs transition';
+      $('tab-clean').className = 'px-2.5 py-1 rounded text-[11px] font-medium text-slate-600 hover:text-slate-900 transition';
+    };
+
+    function applyReplacement(advanceNext = false) {
+      const newText = $('output-text').value.trim();
+      if (!newText || selectedXmlIndex === null) return;
+
+      const currentFull = getParaText(selectedXmlIndex);
+      const start = selectionRange ? selectionRange.start : 0;
+      const end = selectionRange ? selectionRange.end : currentFull.length;
+      const wasPartial = selectionRange !== null;
+
+      applySegmentEdit(selectedXmlIndex, start, end, newText);
+
+      if (advanceNext) {
+        $('output-text').value = '';
+        stepParagraph(1);
+        showToast('Replaced and moved to next paragraph.');
+      } else {
+        const nextRange = wasPartial ? { start, end: start + newText.length, text: newText } : null;
+        selectParagraph(selectedXmlIndex, false, nextRange);
+        showToast(wasPartial ? 'Replaced selected words in document!' : 'Replaced paragraph in document!');
+        setStatus(`Updated! ${paraStates.size} paragraph${paraStates.size === 1 ? '' : 's'} have revisions queued for .docx export.`, 'REPLACED');
+      }
+    }
+
+    $('btn-replace').onclick = () => applyReplacement(false);
+    $('btn-replace-next').onclick = () => applyReplacement(true);
+
+    // Copy rewritten text using execCommand fallback for iFrame compatibility
+    $('btn-copy').onclick = () => {
+      const el = $('output-text');
+      if (!el.value.trim()) return;
+      el.select();
+      try {
+        document.execCommand('copy');
+        showToast('Copied rewritten text.');
+      } catch (e) {
+        showToast('Could not copy automatically.');
+      }
+    };
+
+    // Export revised .docx preserving original Word paragraph & run formatting
+    $('btn-download-docx').onclick = async () => {
+      if (!originalDocxBuffer) {
+        showToast('Upload a .docx file first to export a revised Word document.');
+        return;
+      }
+      if (!paraStates.size) {
+        showToast('Replace at least one selection or paragraph first before downloading.');
+        return;
+      }
+
+      try {
+        setStatus('Generating revised .docx file...', 'EXPORTING');
+        const zip = await JSZip.loadAsync(originalDocxBuffer);
+        const docXmlFile = zip.file('word/document.xml');
+        if (!docXmlFile) throw new Error('Missing word/document.xml inside archive.');
+
+        const xmlStr = await docXmlFile.async('string');
+        const xmlDoc = new DOMParser().parseFromString(xmlStr, 'application/xml');
+        const W_NS = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+        const XML_NS = 'http://www.w3.org/XML/1998/namespace';
+        const useRed = $('toggle-red-docx').checked;
+        const RED_HEX = 'CC0000';
+
+        const allPs = Array.from(xmlDoc.getElementsByTagNameNS(W_NS, 'p'));
+        paraStates.forEach((state, xmlIndex) => {
+          const p = allPs[xmlIndex];
+          if (!p) return;
+
+          // Preserve first run's font/size styling (<w:rPr>) and paragraph properties (<w:pPr>)
+          const firstRun = p.getElementsByTagNameNS(W_NS, 'r')[0];
+          const baseRPr = firstRun ? firstRun.getElementsByTagNameNS(W_NS, 'rPr')[0] : null;
+
+          Array.from(p.childNodes).forEach(child => {
+            if (!(child.namespaceURI === W_NS && child.localName === 'pPr')) {
+              p.removeChild(child);
+            }
+          });
+
+          // Write each segment as its own run so ONLY revised words/lines are colored red
+          state.segments.forEach(seg => {
+            if (!seg.text) return;
+            const newRun = xmlDoc.createElementNS(W_NS, 'w:r');
+            let rPr = baseRPr ? baseRPr.cloneNode(true) : null;
+            if (useRed && seg.revised) {
+              if (!rPr) rPr = xmlDoc.createElementNS(W_NS, 'w:rPr');
+              Array.from(rPr.getElementsByTagNameNS(W_NS, 'color')).forEach(c => c.parentNode.removeChild(c));
+              const colorEl = xmlDoc.createElementNS(W_NS, 'w:color');
+              colorEl.setAttributeNS(W_NS, 'w:val', RED_HEX);
+              rPr.appendChild(colorEl);
+            }
+            if (rPr) newRun.appendChild(rPr);
+
+            const t = xmlDoc.createElementNS(W_NS, 'w:t');
+            t.setAttributeNS(XML_NS, 'xml:space', 'preserve');
+            t.textContent = seg.text;
+            newRun.appendChild(t);
+            p.appendChild(newRun);
+          });
+        });
+
+        const serializer = new XMLSerializer();
+        zip.file('word/document.xml', serializer.serializeToString(xmlDoc));
+        const blob = await zip.generateAsync({ type: 'blob' });
+
+        const outName = uploadedFileName.replace(/\.docx$/i, '') + '_rewritten.docx';
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = outName;
+        a.click();
+
+        setStatus(`Exported "${outName}" (${paraStates.size} revised paragraph${paraStates.size === 1 ? '' : 's'}).`, 'EXPORTED');
+        showToast(`Downloaded "${outName}"!`);
+      } catch (err) {
+        setStatus('DOCX export failed: ' + (err.message || err), 'ERROR', true);
+      }
+    };
+  </script>
+</body>
+</html>
