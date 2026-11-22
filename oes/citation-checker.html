@@ -243,8 +243,8 @@ async function findMissing(){
       cell.innerHTML=done[k].map((o,j)=>{
         const refText=fmtRef(o.m),suggestionIndex=sugs.push({reference:refText,metadata:o.m})-1;
         return '<div class="sg"><b class="'+(o.sc>=6?'ok':'wn')+'">'+(o.sc>=6?'Best match':'Possible match')+'</b><br>'+esc(refText)+
-          '<br><button class="o sm" onclick="addRef('+suggestionIndex+',this)">Add to reference list</button> '+
-          '<button class="sm" onclick="replaceCitation('+i+','+suggestionIndex+')">Replace in-text citation</button></div>';
+          '<br><button type="button" class="o sm" onclick="addRef('+suggestionIndex+',this)">Add to reference list</button> '+
+          '<button type="button" class="sm" onclick="replaceCitation('+i+','+suggestionIndex+')">Replace in-text citation</button></div>';
       }).join('');
     }else{
       cell.textContent='No close match on Crossref for “'+c.first+'” around '+y+'. It may be a book, report or non-DOI source.';
@@ -266,29 +266,44 @@ function replaceCitation(citationIndex,suggestionIndex){
   const edits=[
     {s:c.aS+lead.length,e:c.aE-trail.length,t:authorText},
     {s:c.yS,e:c.yE,t:year}
-  ].sort((a,b)=>a.s-b.s);
+  ];
   let text=$('ms').value;
   if(text!==analysed){alert('The manuscript text has changed. Click “Check citations” before replacing more citations.');return;}
   const deltaAt=pos=>edits.reduce((total,e)=>total+(pos>=e.e?e.t.length-(e.e-e.s):0),0);
-  edits.slice().sort((a,b)=>b.s-a.s).forEach(e=>{text=text.slice(0,e.s)+e.t+text.slice(e.e);});
+  edits.slice().sort((x,y)=>y.s-x.s).forEach(e=>{text=text.slice(0,e.s)+e.t+text.slice(e.e);});
   cits.forEach((item,index)=>{
-    if(index===citationIndex)return;
-    ['pos','aS','aE','yS','yE'].forEach(key=>{item[key]+=deltaAt(item[key]);});
+    if(index!==citationIndex)['pos','aS','aE','yS','yE'].forEach(key=>{item[key]+=deltaAt(item[key]);});
   });
-  analysed=text;
-  backup=null;
-  $('ms').value=text;
-  $('un').disabled=true;
-  c.res={s:'ok',t:'Replaced',n:'In-text citation updated from the selected Crossref record.'};
-  const row=$('s'+citationIndex);
-  if(row)row.innerHTML='<span class="ok">Citation replaced ✓</span>';
-  const tr=row&&row.closest('tr');
-  if(tr){
-    const status=tr.children[1];
-    const details=tr.children[2];
-    if(status){status.className='ok';status.textContent='Replaced';}
-    if(details)details.textContent='Updated using the selected Crossref record.';
+  const currentRefs=$('rf').value.trim();
+  if(!currentRefs.toLowerCase().includes(suggestion.reference.trim().toLowerCase())){
+    $('rf').value=(currentRefs+'\n\n'+suggestion.reference).trim();
   }
+  analysed=text;
+  $('ms').value=text;
+  c.res={s:'ok',t:'Replaced',n:'Citation replaced and selected reference added to the reference list.'};
+  const resultCell=$('s'+citationIndex);
+  if(resultCell){
+    resultCell.innerHTML='<span class="ok">Citation replaced ✓</span>';
+    const row=resultCell.closest('tr');
+    if(row){
+      if(row.children[1]){row.children[1].className='ok';row.children[1].textContent='Replaced';}
+      if(row.children[2])row.children[2].textContent='Citation replaced; reference added to list.';
+    }
+  }
+  const refTable=$('out').querySelectorAll('h2');
+  const refHeading=[...refTable].find(h=>h.textContent.startsWith('Reference list'));
+  if(refHeading){
+    const table=refHeading.nextElementSibling&&refHeading.nextElementSibling.querySelector('tbody');
+    if(table){
+      const tr=document.createElement('tr');
+      tr.innerHTML='<td>'+esc(suggestion.reference)+'</td><td class="m">'+esc(authors.join('; '))+' · '+year+'</td><td class="ok">Yes</td><td class="m">Crossref result</td>';
+      table.appendChild(tr);
+      const count=refs.length+1;
+      refHeading.textContent='Reference list ('+count+')';
+    }
+  }
+  const replaceButtons=resultCell&&resultCell.closest('tr')?resultCell.closest('tr').querySelectorAll('button'): [];
+  replaceButtons.forEach(button=>{if(button.textContent.includes('Replace in-text citation')){button.textContent='Replaced ✓';button.disabled=true;}});
 }
 
 function addRef(i,button){
