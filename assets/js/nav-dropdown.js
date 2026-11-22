@@ -7,7 +7,7 @@
   if (!nav.querySelector('.tools-dd')) {
     var group = document.createElement('div');
     group.className = 'dd tools-dd';
-    group.innerHTML = '<button type="button" class="dd-btn" aria-expanded="false" aria-haspopup="true"'>Tools</button>' +
+    group.innerHTML = '<button type="button" class="dd-btn" aria-expanded="false" aria-haspopup="true">Tools</button>' +
       '<div class="dd-menu"><a href="/almamun/tools/index.html">All Tools</a>' +
       '<a href="/almamun/tools/citation-checker/">Citation Checker</a></div>';
     var oes = Array.from(nav.querySelectorAll('a')).find(function (a) {
