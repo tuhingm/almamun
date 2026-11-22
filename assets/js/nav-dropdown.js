@@ -1,14 +1,14 @@
-// Shared navigation dropdowns. Research Tools is injected into every page using the shared menu.
+// Shared navigation dropdowns. Tools is injected into every page using the shared menu.
 (function () {
   var nav = document.querySelector('header.site-header nav#nav');
   if (!nav) return;
 
-  // Add the Research Tools menu beside More Guides, without changing each page separately.
-  if (!nav.querySelector('.research-tools-dd')) {
+  // Add a clearly labelled Tools menu beside More Guides on every page.
+  if (!nav.querySelector('.tools-dd')) {
     var group = document.createElement('div');
-    group.className = 'dd research-tools-dd';
-    group.innerHTML = '<button type="button" class="dd-btn" aria-expanded="false" aria-haspopup="true">Research Tools</button>' +
-      '<div class="dd-menu"><a href="/almamun/tools/index.html">All Research Tools</a>' +
+    group.className = 'dd tools-dd';
+    group.innerHTML = '<button type="button" class="dd-btn" aria-expanded="false" aria-haspopup="true"'>Tools</button>' +
+      '<div class="dd-menu"><a href="/almamun/tools/index.html">All Tools</a>' +
       '<a href="/almamun/tools/citation-checker/">Citation Checker</a></div>';
     var oes = Array.from(nav.querySelectorAll('a')).find(function (a) {
       return /open econometric systems/i.test(a.textContent);
