@@ -278,6 +278,7 @@ function replaceCitation(citationIndex,suggestionIndex){
   if(!currentRefs.toLowerCase().includes(suggestion.reference.trim().toLowerCase())){
     $('rf').value=(currentRefs+'\n\n'+suggestion.reference).trim();
   }
+  refs=parseRefs($('rf').value);
   analysed=text;
   $('ms').value=text;
   c.res={s:'ok',t:'Replaced',n:'Citation replaced and selected reference added to the reference list.'};
@@ -298,7 +299,7 @@ function replaceCitation(citationIndex,suggestionIndex){
       const tr=document.createElement('tr');
       tr.innerHTML='<td>'+esc(suggestion.reference)+'</td><td class="m">'+esc(authors.join('; '))+' · '+year+'</td><td class="ok">Yes</td><td class="m">Crossref result</td>';
       table.appendChild(tr);
-      const count=refs.length+1;
+      const count=refs.length;
       refHeading.textContent='Reference list ('+count+')';
     }
   }
