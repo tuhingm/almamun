@@ -17,7 +17,44 @@ button:focus-visible,textarea:focus-visible{outline:2px solid var(--ac);outline-
 .w{overflow-x:auto;border:1px solid var(--line);border-radius:6px}table{border-collapse:collapse;width:100%;font-size:13px}
 th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}th{background:var(--panel);color:var(--mut);font-weight:600}
 .ok{color:var(--ok)}.wn{color:var(--wn)}.bd{color:var(--bd)}.m{color:var(--mut)}.ctx{color:var(--mut);font-size:12px}.sm{padding:4px 10px;font-size:12px;margin-top:4px}.sg{margin-bottom:10px}
-</style></head><body><main>
+</style><link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/mobile-nav.css">
+<link rel="stylesheet" href="../assets/css/site-header.css">
+<style>
+:root{color-scheme:light;--bg:#f3f5fa;--panel:#fff;--line:#d5dcea;--tx:#1b2437;--mut:#55617a;--ac:#0033a0;--ok:#0f7a4f;--wn:#a05a00;--bd:#a12a2a}
+*{box-sizing:border-box}
+body{padding:0;background:var(--bg);color:var(--tx);font:15px/1.7 "DM Sans",sans-serif}
+main{width:min(1160px,calc(100% - 44px));max-width:1160px;margin:0 auto;padding:34px 0 80px}
+h1{font:800 clamp(30px,4vw,42px)/1.15 Manrope,sans-serif;letter-spacing:-1px;margin:0 0 6px}
+p.s{color:#d0dcf0;margin:0;max-width:820px;font-size:15px}
+.g{gap:18px}
+label{color:var(--tx)}
+textarea{height:260px;background:#fff;color:var(--tx);border:1px solid #ccd6e5;border-radius:9px;padding:12px;font:13px/1.55 Consolas,monospace;box-shadow:0 2px 8px rgba(0,32,91,.04)}
+textarea:focus{border-color:#0033a0}
+.bar{gap:9px;margin:18px 0;align-items:center}
+button,.f{background:#0033a0;color:#fff;border:1px solid #0033a0;border-radius:8px;padding:9px 15px;font:800 11px/1.4 "DM Sans",sans-serif;letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
+button.o,.f{background:#fff;color:#0033a0;border:1px solid #0033a0}
+button:hover:not(:disabled){filter:brightness(.96)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,textarea:focus-visible{outline:3px solid #6ec1e4;outline-offset:2px}
+.sum{gap:12px;margin:20px 0}
+.sum div{background:#fff;border:1px solid #d5dcea;border-radius:10px;padding:12px 16px;min-width:130px;box-shadow:0 4px 14px rgba(0,32,91,.04)}
+.sum b{font:800 25px/1.2 Manrope,sans-serif;display:block}
+h2{font:800 21px/1.25 Manrope,sans-serif;color:#1b2437;margin:28px 0 9px}
+.w{overflow-x:auto;border:1px solid #d5dcea;border-radius:10px;background:#fff;box-shadow:0 4px 14px rgba(0,32,91,.04)}
+table{border-collapse:collapse;width:100%;font-size:13px;background:#fff}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid #e9edf4;vertical-align:top;color:#34425c}
+th{background:#f2f5fb;color:#5d6a82;font-size:10px;letter-spacing:.06em;text-transform:uppercase;font-weight:800}
+.ok{color:#0f7a4f}.wn{color:#a05a00}.bd{color:#a12a2a}.m,.ctx{color:#64718a}
+.ctx{font-size:12px}.sm{padding:5px 10px;font-size:10px;margin-top:5px}.sg{margin-bottom:12px}
+footer{background:#00205b;color:#d0dcf0;padding:20px 0;font-size:12px}
+footer .wrap{width:min(1160px,calc(100% - 44px));margin:auto;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+footer a{color:#9fd3f0;text-decoration:underline}
+@media(max-width:760px){main{width:calc(100% - 32px);padding:24px 0 55px}.g{grid-template-columns:1fr}.sum div{min-width:calc(50% - 8px);flex:1}footer .wrap{width:calc(100% - 32px)}}
+</style></head><body><header class="site-header"><div class="wrap nav"><a class="brand" href="../index.html" aria-label="Tuhin G. M. Al Mamun — home">TGM <span>AL MAMUN</span></a><button id="menu" type="button" aria-expanded="false" aria-controls="nav">Menu</button><nav id="nav" aria-label="Main navigation"><a href="../index.html">Home</a><a href="../teaching/index.html">Teaching Courses</a><a href="../working-papers/index.html">Working Papers</a><a href="../time-series-guide/index.html">Time Series</a><a href="../panel-data-guide/index.html">Panel Data</a><a href="../causal-inference-guide/index.html">Causal Inference</a><a href="../dsge-guide/index.html">DSGE</a><a href="../ml-guide/index.html">Machine Learning</a><a href="index.html" class="current" aria-current="page">Open Econometric Systems</a></nav></div></header>
+<section class="hero"><div class="wrap"><div class="kicker">Open Econometric Systems · Research tools</div><h1>In-text Citation Checker</h1><p class="lead">Check author–year citations against your reference list and identify missing, mismatched and uncited references. Matching runs entirely in your browser.</p></div></section><main>
 <h1>In-text citation checker</h1>
 <p class="s">Paste your manuscript text and reference list. Every author–year citation is matched to the list, and every reference is checked for being cited. Matching runs entirely in your browser.</p>
 <div class="g">
@@ -217,4 +254,4 @@ $('csv').onclick=()=>{
   const rows=[['citation','year','result','details']].concat(cits.map(c=>[c.raw,c.year,c.res.t,c.res.n]));
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='citation-check.csv';a.click();
 };
-</script></main></body></html>
+</script></main><footer><div class="wrap"><span><b>Tuhin G. M. Al Mamun, Ph.D.</b> · Open Econometric Systems</span><span><a href="index.html">OES</a> · © <span id="year"></span></span></div></footer><script>document.getElementById("year").textContent=new Date().getFullYear();</script><script src="../assets/js/mobile-nav.js" defer></script></body></html>
