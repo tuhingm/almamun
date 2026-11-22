@@ -273,6 +273,7 @@ function replaceCitation(citationIndex,suggestionIndex){
   $('ms').value=text;
   $('un').disabled=false;
   run();
+  if(cits.some(item=>item.res.s==='bd'))findMissing();
 }
 
 function addRef(i,button){
