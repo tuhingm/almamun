@@ -116,4 +116,262 @@ th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);verti
 <button id="fm" disabled>Find missing references online</button>
 <button id="ap" disabled>Apply ticked fixes to text</button><button class="o" id="un" disabled>Undo last apply</button>
 <button class="o" id="sr">Save reference list</button><button class="o" id="st">Save revised text</button><button class="o" id="cl">Clear all</button>
-</div></section><section class="step"><span class="stepno">Analysis results</span><h2>Matching and reference diagnostics</h2><div id="out"></div></section></main></section></main><footer><div class="wrap foot"><span><b>Tuhin G. M. Al Mamun, Ph.D.</b> · Open Econometric Systems</span><span><a href="index.html">OES home</a> · Citation Checker</span></div></footer><script src="../assets/js/mobile-nav.js" defer></script><script src="../assets/js/nav-dropdown.js" defer></script></body></html>
+</div></section><section class="step"><span class="stepno">Analysis results</span><h2>Matching and reference diagnostics</h2><div id="out"></div><script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const N=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z]/g,'');
+const SN="(?:(?:van|von|de|der|den|di|da|la|le|al|bin)\\s+)*\\p{Lu}[\\p{L}'’\\-]+";
+const YR="(?:19|20)\\d{2}[a-z]?";
+const STOP=/^(table|figure|fig|section|chapter|appendix|eq|equation|see|cf)$/i;
+let refs=[],cits=[];
+
+function parseRefs(t){
+  const parts=/\n\s*\n/.test(t)?t.split(/\n\s*\n/):t.split('\n');
+  return parts.map(s=>s.replace(/\s+/g,' ').trim().replace(/^(\[\d+\]|\d+[.)])\s*/,'')).filter(s=>s.length>15).map(raw=>{
+    const ym=raw.match(new RegExp('\\b('+YR+')\\b')),ap=raw.slice(0,ym?ym.index:raw.length);
+    let names=[...ap.matchAll(new RegExp('('+SN+'),\\s*(?:\\p{Lu}\\.?[\\s\\-]*)+','gu'))].map(m=>m[1]);
+    if(!names.length)names=[...ap.matchAll(new RegExp('('+SN+')\\s+\\p{Lu}{1,3}\\b','gu'))].map(m=>m[1]);
+    if(!names.length){const f=ap.match(new RegExp(SN,'u'));if(f)names=[f[0]];}
+    const doi=(raw.match(/10\.\d{4,9}\/[^\s"<>]+/)||[''])[0].replace(/[.,;)\]]+$/,'');
+    return{raw,year:ym?ym[1].toLowerCase():'',names,sn:names[0]?N(names[0]):'',doi,cited:false,cr:''};
+  });
+}
+
+function parseCits(t){
+  const out=[];
+  const add=(kind,aS,aE,ys,pos,raw,meta)=>{
+    const as=t.slice(aS,aE);
+    const names=[...as.matchAll(new RegExp(SN,'gu'))].map(m=>m[0]).filter(n=>!STOP.test(n));
+    if(!names.length)return;
+    const etal=/et\s+al/i.test(as);
+    ys.forEach((y,yi)=>out.push({...meta,ysp:ys,yi,kind,raw:raw.trim(),sn:N(names[0]),first:names[0],names,n:names.length,etal,year:y.y.toLowerCase(),pos,aS,aE,aText:as,yS:y.s,yE:y.e,
+      ctx:t.slice(Math.max(0,pos-35),pos+raw.length+35).replace(/\s+/g,' ')}));
+  };
+  for(const m of t.matchAll(/\(([^()]*)\)/g)){
+    let o=0;
+    const segs=m[1].split(';').map(sg=>{const st=m.index+1+o;o+=sg.length+1;return{s:st,e:st+sg.length,ts:st+(sg.length-sg.trimStart().length),te:st+sg.trimEnd().length,text:sg};});
+    segs.forEach((sg,si)=>{
+      const ys=[...sg.text.matchAll(new RegExp('\\b'+YR+'\\b','g'))];
+      if(!ys.length)return;
+      if(!/\p{Lu}/u.test(sg.text.slice(0,ys[0].index)))return;
+      add('p',sg.s,sg.s+ys[0].index,ys.map(y=>({y:y[0],s:sg.s+y.index,e:sg.s+y.index+y[0].length})),m.index,'('+sg.text.trim()+')',{gS:m.index,gE:m.index+m[0].length,gSegs:segs,si});
+    });
+  }
+  const NR=new RegExp('('+SN+'(?:(?:,\\s*'+SN+')*,?\\s+(?:and|&)\\s+'+SN+'|\\s+et\\s+al\\.?)?)\\s*\\(('+YR+'(?:\\s*[,;]\\s*'+YR+')*)\\)','gu');
+  for(const m of t.matchAll(NR)){
+    const base=m.index+m[0].length-1-m[2].length;
+    add('n',m.index,m.index+m[1].length,[...m[2].matchAll(new RegExp(YR,'g'))].map(y=>({y:y[0],s:base+y.index,e:base+y.index+y[0].length})),m.index,m[0],{mS:m.index,mE:m.index+m[0].length});
+  }
+  return out.sort((a,b)=>a.pos-b.pos);
+}
+
+function match(c){
+  const cand=refs.filter(r=>r.sn===c.sn);
+  if(!cand.length){
+    const alt=refs.find(r=>r.names.some(n=>N(n)===c.sn));
+    const near=!alt&&c.sn.length>3?refs.filter(r=>r.sn&&lev(r.sn,c.sn)<=(c.sn.length>5?2:1)&&Math.abs(parseInt(r.year)-parseInt(c.year))<=1).sort((p,q)=>lev(p.sn,c.sn)-lev(q.sn,c.sn))[0]:null;
+    if(near){near.cited=true;return{s:'wn',t:'Possible typo',n:'Closest in your list: '+near.raw.slice(0,90)+'… Check the spelling of “'+c.first+'”',fix:{ref:near,safe:false,setYear:near.year!==c.year}};}
+    return alt?{s:'bd',t:'Not first author',n:'“'+c.first+'” appears only as a later author in: '+alt.raw.slice(0,70)+'…'}:{s:'bd',t:'Not in list',n:'No reference with first author “'+c.first+'”'};
+  }
+  const exact=cand.filter(r=>r.year===c.year);
+  const loose=/[a-z]$/.test(c.year)?[]:cand.filter(r=>r.year.replace(/[a-z]$/,'')===c.year&&/[a-z]$/.test(r.year));
+  const hit=exact.length?exact:loose;
+  if(!hit.length)return{s:'bd',t:'Year mismatch',n:'List has '+cand.map(r=>r.year||'n.d.').join(', ')+' for '+c.first,fix:cand.length===1&&cand[0].year?{ref:cand[0],safe:false,setYear:true}:null};
+  hit.forEach(r=>r.cited=true);
+  const notes=[];let s='ok',t='Matched',fix=null;
+  if(!exact.length){s='wn';t='Add a/b suffix';notes.push('Several same-year works: '+hit.map(r=>r.year).join(', '));}
+  const r=hit[0],cnt=r.names.length;
+  if(!c.etal&&r.names.length&&c.n!==cnt&&cnt<=5){s='wn';t='Author count';notes.push('Cites '+c.n+' author(s); reference lists '+cnt);fix={ref:r,safe:true,setYear:false};}
+  if(c.etal&&cnt&&cnt<=2){s='wn';t='Check et al.';notes.push('“et al.” used but reference has '+cnt+' author(s)');fix={ref:r,safe:true,setYear:false};}
+  return{s,t,n:notes.join('; '),fix};
+}
+
+const LOOK=['Not in list','Year mismatch','Not first author','Possible typo'];
+let analysed='',backup=null;
+function names2(r,c,orig){
+  const n=r.names,conn=/&/.test(orig)?'&':/\band\b/.test(orig)?'and':(c.kind==='n'?'and':'&');
+  return n.length===1?n[0]:n.length===2?n[0]+' '+conn+' '+n[1]:n[0]+' et al.';
+}
+function buildEdits(c){
+  const f=c.res.fix;if(!f||!f.ref.names.length)return[];
+  const r=f.ref,ed=[];
+  const lead=(c.aText.match(/^\s*(?:(?:e\.g\.|i\.e\.|see|cf\.|also|for example)[,.]?\s+)*/i)||[''])[0];
+  const trail=(c.aText.match(/[\s,]*$/)||[''])[0];
+  const core=c.aText.slice(lead.length,c.aText.length-trail.length),nc=names2(r,c,core);
+  if(nc!==core.replace(/\s+/g,' '))ed.push({s:c.aS+lead.length,e:c.aE-trail.length,t:nc});
+  if(f.setYear&&r.year&&r.year!==c.year)ed.push({s:c.yS,e:c.yE,t:r.year});
+  return ed;
+}
+function frag(c){
+  const s0=Math.min(...c.edits.map(e=>e.s)),e0=Math.max(...c.edits.map(e=>e.e));let f=analysed.slice(s0,e0);
+  [...c.edits].sort((a,b)=>b.s-a.s).forEach(e=>{f=f.slice(0,e.s-s0)+e.t+f.slice(e.e-s0);});
+  return[analysed.slice(s0,e0),f];
+}
+function fixCell(c,i){
+  if(!c.edits.length)return'<td class="m">–</td>';
+  const[o,n]=frag(c);
+  return'<td><label style="font-weight:400;display:flex;gap:8px;cursor:pointer"><input type="checkbox" id="fx'+i+'" '+(c.res.fix.safe?'checked':'')+'><span><span class="'+(c.res.fix.safe?'ok':'wn')+'">'+(c.res.fix.safe?'Safe fix':'Review first')+'</span><br>'+esc(o)+' → <b>'+esc(n)+'</b></span></label></td>';
+}
+function applyFixes(){
+  if(norm($('ms').value)!==analysed){alert('The text changed since the last check. Click “Check citations” first.');return;}
+  const ed={};cits.forEach((c,i)=>{const cb=$('fx'+i);if(cb&&cb.checked)c.edits.forEach(e=>{if(!ed[e.s])ed[e.s]=e;});});
+  const list=Object.values(ed).sort((a,b)=>b.s-a.s);
+  if(!list.length){alert('Tick at least one suggested fix first.');return;}
+  backup=analysed;let t=analysed;list.forEach(e=>{t=t.slice(0,e.s)+e.t+t.slice(e.e);});
+  $('ms').value=t;$('un').disabled=false;run();
+}
+function undoFixes(){if(backup===null)return;$('ms').value=backup;backup=null;$('un').disabled=true;run();}
+const norm=t=>t.replace(/[\u00A0\u2007\u202F]/g,' ').replace(/[\u200B-\u200D\uFEFF\u00AD]/g,'').replace(/[\u2010-\u2012\u2212]/g,'-');
+const SK='citchk1';
+function save(){try{localStorage.setItem(SK,JSON.stringify({ms:$('ms').value,rf:$('rf').value}));}catch(e){}}
+function dl(name,text){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/plain'}));a.download=name;a.click();}
+function run(){analysed=norm($('ms').value);save();
+  refs=parseRefs(norm($('rf').value));cits=parseCits(analysed);
+  refs.forEach(r=>r.cited=false);cits.forEach(c=>{c.res=match(c);});cits.forEach(c=>{c.edits=buildEdits(c);});
+  const cnt=k=>cits.filter(c=>c.res.s===k).length,unc=refs.filter(r=>!r.cited);
+  let h='<div class="sum"><div><b>'+cits.length+'</b>citations found</div><div><b class="ok">'+cnt('ok')+'</b>matched</div><div><b class="wn">'+cnt('wn')+'</b>need a look</div><div><b class="bd">'+cnt('bd')+'</b>problems</div><div><b>'+unc.length+'</b>uncited references</div></div>';
+  if(!refs.length||!cits.length)h+='<p class="wn">'+(!cits.length?'No citations found in the manuscript text.':'No reference list pasted. Use “Find missing references online” to look each citation up.')+'</p>';
+  h+='<h2>In-text citations</h2><div class="w"><table><tr><th>Citation</th><th>Result</th><th>Details</th><th>Suggested text fix</th><th>Context</th><th>Suggested references</th></tr>'+
+    cits.map((c,i)=>'<tr><td>'+esc(c.raw)+'<div class="ctx">checking '+esc(c.year)+'</div>'+(LOOK.includes(c.res.t)?'<button class="o sm" onclick="delCit('+i+')">Delete from text</button>':'')+'</td><td class="'+c.res.s+'">'+c.res.t+'</td><td>'+esc(c.res.n)+'</td>'+fixCell(c,i)+'<td class="ctx">…'+esc(c.ctx)+'…</td><td id="s'+i+'" class="m">'+(LOOK.includes(c.res.t)?'Click “Find missing references online”':'')+'</td></tr>').join('')+'</table></div>';
+  h+='<h2>Reference list ('+refs.length+')</h2><div class="w"><table><tr><th>Reference</th><th>Parsed</th><th>Cited in text</th><th>DOI</th></tr>'+
+    refs.map((r,i)=>'<tr><td>'+esc(r.raw)+'</td><td class="m">'+esc(r.names.join('; ')||'?')+' · '+(r.year||'no year')+'</td><td class="'+(r.cited?'ok':'bd')+'">'+(r.cited?'Yes':'Never cited')+'</td><td id="d'+i+'" class="m">'+(r.doi?esc(r.doi)+(r.cr?'<br>'+r.cr:''):'none')+'</td></tr>').join('')+'</table></div>';
+  $('out').innerHTML=h;showSugs();$('csv').disabled=!cits.length;$('cr').disabled=!refs.some(r=>r.doi);$('fm').disabled=!cits.some(c=>LOOK.includes(c.res.t));$('ap').disabled=!cits.some(c=>c.edits.length);
+}
+
+async function crossref(){
+  $('cr').disabled=true;
+  for(const r of refs){
+    if(!r.doi)continue;
+    try{
+      const res=await fetch('https://api.crossref.org/works/'+encodeURIComponent(r.doi));
+      if(!res.ok){r.cr='<span class="bd">DOI not found in Crossref</span>';continue;}
+      const m=(await res.json()).message,yr=String((m.issued&&m.issued['date-parts']&&m.issued['date-parts'][0]||[])[0]||''),fam=N((m.author&&m.author[0]&&m.author[0].family)||'');
+      const bad=[];if(yr&&r.year&&yr!==r.year.replace(/[a-z]$/,''))bad.push('year '+yr);if(fam&&r.sn&&fam!==r.sn)bad.push('author '+fam);
+      r.cr=bad.length?'<span class="wn">Differs: '+esc(bad.join(', '))+'</span>':'<span class="ok">Matches Crossref</span>';
+    }catch(e){r.cr='<span class="bd">Could not reach Crossref. Open this file from your computer with internet access.</span>';break;}
+  }
+  run2();
+}
+function run2(){const keep=cits.map(c=>c.res);run();}
+
+
+const fmtRef=m=>{
+  const au=(m.author||[]).map(a=>(a.family||a.name||'')+(a.given?', '+a.given.split(/[\s-]+/).map(x=>x[0]+'.').join(' '):'')).join(', ');
+  const y=((m.issued&&m.issued['date-parts']&&m.issued['date-parts'][0])||[''])[0];
+  return au+' ('+y+'). '+((m.title||[''])[0])+'. '+((m['container-title']||[''])[0])+(m.volume?', '+m.volume:'')+(m.issue?'('+m.issue+')':'')+(m.page?', '+m.page:'')+'. https://doi.org/'+m.DOI;
+};
+const lev=(a,b)=>{const d=[...Array(b.length+1).keys()];for(let i=1;i<=a.length;i++){let p=d[0];d[0]=i;for(let j=1;j<=b.length;j++){const t=d[j];d[j]=Math.min(d[j]+1,d[j-1]+1,p+(a[i-1]===b[j-1]?0:1));p=t;}}return d[b.length];};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function getJSON(u){let err;for(let t=0;t<3;t++){try{const r=await fetch(u);if(r.ok)return await r.json();err=new Error('Crossref answered with status '+r.status);}catch(e){err=e;}await sleep(900*(t+1));}throw err;}
+const yearOf=m=>Number(((m.issued&&m.issued['date-parts']&&m.issued['date-parts'][0])||[0])[0]);
+function score(m,c,y){
+  const au=(m.author||[]).map(a=>N(a.family||a.name||''));if(!au.length)return 0;
+  let s=0;const d=lev(au[0],c.sn);
+  if(d===0)s+=4;else if(d<=2&&c.sn.length>3)s+=3;else if(au.includes(c.sn))s+=1.5;else return 0;
+  c.names.slice(1).forEach(n=>{if(au.some(a=>lev(a,N(n))<=1))s+=1;});
+  const my=yearOf(m);s+=my===y?1.5:Math.abs(my-y)===1?0.5:0;return s;
+}
+const rank=(it,c,y)=>it.filter(m=>m.title&&m.author).map(m=>({m,sc:score(m,c,y)})).filter(o=>o.sc>=3).sort((p,q)=>q.sc-p.sc||(q.m['is-referenced-by-count']||0)-(p.m['is-referenced-by-count']||0)).slice(0,3);
+async function searchRefs(c,y){
+  const base='https://api.crossref.org/works?rows=50&',nm=encodeURIComponent(c.names.join(' '));
+  const urls=[base+'query.author='+nm+'&filter=from-pub-date:'+(y-1)+',until-pub-date:'+(y+1),base+'query.bibliographic='+nm+'%20'+y];
+  let err=null,got=false;
+  for(const u of urls){try{const r=rank((await getJSON(u)).message.items,c,y);got=true;if(r.length)return r;}catch(e){err=e;}}
+  if(!got)throw err;return[];
+}
+const keyOf=c=>c.names.map(N).join('')+Number(c.year.replace(/[a-z]$/,''));
+let sugCache={};
+function renderSug(k){
+  const e=sugCache[k];if(!e)return'';
+  if(!e.items.length)return e.msg;
+  return e.items.map((o,n)=>'<div class="sg"><b class="'+(o.sc>=6?'ok':'wn')+'">'+(o.sc>=6?'Best match':'Possible match')+'</b><br>'+esc(o.txt)+'<br><button class="sm" onclick="useRef(\''+k+'\','+n+')">Replace in text and add to list</button> <button class="o sm" onclick="addRef(\''+k+'\','+n+')">Add to list only</button></div>').join('');
+}
+function showSugs(){cits.forEach((c,i)=>{const cell=$('s'+i);if(cell&&LOOK.includes(c.res.t)&&sugCache[keyOf(c)])cell.innerHTML=renderSug(keyOf(c));});}
+async function findMissing(){
+  $('fm').disabled=true;const failed={};
+  cits.forEach((c,i)=>{if($('s'+i)&&LOOK.includes(c.res.t)&&!sugCache[keyOf(c)])$('s'+i).textContent='Waiting…';});
+  for(let i=0;i<cits.length;i++){
+    const c=cits[i];
+    if(!LOOK.includes(c.res.t))continue;
+    const k=keyOf(c),y=Number(c.year.replace(/[a-z]$/,'')),cell=$('s'+i);
+    if(!sugCache[k]&&!failed[k]){
+      cell.textContent='Searching Crossref…';
+      try{
+        const items=await searchRefs(c,y);
+        sugCache[k]={items:items.map(o=>({txt:fmtRef(o.m),m:o.m,sc:o.sc})),msg:'No close match on Crossref for “'+esc(c.first)+'” around '+y+'. It may be a book, report or non-DOI source.'};
+      }catch(e){failed[k]='<span class="bd">Lookup failed ('+esc(e&&e.message||e)+'). If it says “Failed to fetch”, wait a minute and click the button again, or open this file from your computer.</span>';}
+      await sleep(300);
+    }
+    cell.innerHTML=sugCache[k]?renderSug(k):failed[k];
+  }
+  $('fm').disabled=false;
+}
+const expand=(s,e)=>{const pv=analysed[s-1],nx=analysed[e];return{s:(pv===' '&&(nx===undefined||/[\s.,;:!?)\]]/.test(nx)))?s-1:s,e,t:''};};
+function delEdits(idx){
+  const units={},ed=[],gd={};
+  idx.forEach(i=>{const c=cits[i],k=c.kind==='p'?'p'+c.gS+'|'+c.si:'n'+c.mS;(units[k]=units[k]||{c,y:new Set()}).y.add(c.yi);});
+  Object.values(units).forEach(u=>{
+    const c=u.c;
+    if(u.y.size<c.ysp.length){
+      const kept=c.ysp.map((y,j)=>j).filter(j=>!u.y.has(j)).map(j=>analysed.slice(c.ysp[j].s,c.ysp[j].e));
+      ed.push({s:c.ysp[0].s,e:c.ysp[c.ysp.length-1].e,t:kept.join(', ')});
+    }else if(c.kind==='n')ed.push(expand(c.mS,c.mE));
+    else(gd[c.gS]=gd[c.gS]||{c,set:new Set()}).set.add(c.si);
+  });
+  Object.values(gd).forEach(g=>{
+    const sg=g.c.gSegs,n=sg.length;
+    if(g.set.size===n){ed.push(expand(g.c.gS,g.c.gE));return;}
+    let lk=-1;for(let j=n-1;j>=0;j--)if(!g.set.has(j)){lk=j;break;}
+    for(let j=0;j<lk;j++)if(g.set.has(j))ed.push({s:sg[j].ts,e:sg[j+1].ts,t:''});
+    if(lk<n-1)ed.push({s:sg[lk].te,e:sg[n-1].te,t:''});
+  });
+  return ed;
+}
+function applyEdits(ed){
+  backup=analysed;let t=analysed;
+  ed.sort((a,b)=>b.s-a.s).forEach(e=>{t=t.slice(0,e.s)+e.t+t.slice(e.e);});
+  $('ms').value=t;$('un').disabled=false;run();
+}
+function delCit(i){
+  if(norm($('ms').value)!==analysed){alert('The text changed since the last check. Click “Check citations” first.');return;}
+  const c=cits[i];
+  if(!confirm('Delete the '+analysed.slice(c.yS,c.yE)+' citation of “'+c.first+'” from your text? You can undo it with “Undo last apply”.'))return;
+  applyEdits(delEdits([i]));
+}
+function addRef(k,n){$('rf').value=($('rf').value.trim()+'\n\n'+sugCache[k].items[n].txt).trim();run();}
+function useRef(k,n){
+  if(norm($('ms').value)!==analysed){alert('The text changed since the last check. Click “Check citations” first.');return;}
+  const sg=sugCache[k].items[n];
+  const fam=(sg.m.author||[]).map(a=>a.family||a.name||'').filter(Boolean).map(f=>f===f.toUpperCase()&&f.length>3?f[0]+f.slice(1).toLowerCase():f);
+  if(!fam.length)return;
+  const y=String(yearOf(sg.m)),ed={};
+  cits.forEach(c=>{
+    if(!LOOK.includes(c.res.t)||keyOf(c)!==k)return;
+    const lead=(c.aText.match(/^\s*(?:(?:e\.g\.|i\.e\.|see|cf\.|also|for example)[,.]?\s+)*/i)||[''])[0];
+    const trail=(c.aText.match(/[\s,]*$/)||[''])[0];
+    const core=c.aText.slice(lead.length,c.aText.length-trail.length),nc=names2({names:fam},c,core);
+    if(nc!==core.replace(/\s+/g,' '))ed[c.aS+lead.length]={s:c.aS+lead.length,e:c.aE-trail.length,t:nc};
+    const oy=analysed.slice(c.yS,c.yE),ny=oy.slice(0,4)===y?oy:y;
+    if(ny!==oy)ed[c.yS]={s:c.yS,e:c.yE,t:ny};
+  });
+  backup=analysed;let t=analysed;
+  Object.values(ed).sort((a,b)=>b.s-a.s).forEach(e=>{t=t.slice(0,e.s)+e.t+t.slice(e.e);});
+  $('ms').value=t;$('rf').value=($('rf').value.trim()+'\n\n'+sg.txt).trim();$('un').disabled=false;run();
+}
+$('sr').onclick=()=>dl('references.txt',$('rf').value);$('st').onclick=()=>dl('manuscript.txt',$('ms').value);
+$('cl').onclick=()=>{if(confirm('Clear the manuscript, the reference list and the saved copy?')){$('ms').value='';$('rf').value='';try{localStorage.removeItem(SK);}catch(e){}run();}};
+try{localStorage.removeItem(SK);}catch(e){}
+$('ms').addEventListener('input',save);$('rf').addEventListener('input',save);
+$('fm').onclick=findMissing;$('ap').onclick=applyFixes;$('un').onclick=undoFixes;
+$('go').onclick=run;$('cr').onclick=crossref;
+$('file').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{(/\([^)]*\d{4}[^)]*\)/.test(t)&&t.length>2000?$('ms'):$('rf')).value=t;});};
+$('ex').onclick=()=>{
+  $('ms').value="Exchange rate pass-through has been widely studied (Taylor, 2000; Campa & Goldberg, 2005). Burstein and Gopinath (2014) argue that it is lower in stable regimes, while Smith et al. (2019) find the opposite. Earlier work (Taylor, 2001) disagrees, and Jones (2018) is rarely cited.";
+  $('rf').value="Burstein, A., & Gopinath, G. (2014). International prices and exchange rates. Handbook of International Economics, 4, 391-451.\n\nCampa, J. M., & Goldberg, L. S. (2005). Exchange rate pass-through into import prices. Review of Economics and Statistics, 87(4), 679-690. https://doi.org/10.1162/003465305775098170\n\nSmith, A., Lee, C., & Park, D. (2019). A made-up example. Journal of Examples, 1(1), 1-10.\n\nTaylor, J. B. (2000). Low inflation, pass-through, and the pricing power of firms. European Economic Review, 44(7), 1389-1408.";
+};
+$('csv').onclick=()=>{
+  const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+  const rows=[['citation','year','result','details']].concat(cits.map(c=>[c.raw,c.year,c.res.t,c.res.n]));
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='citation-check.csv';a.click();
+};
+</script></section></main></section></main><footer><div class="wrap foot"><span><b>Tuhin G. M. Al Mamun, Ph.D.</b> · Open Econometric Systems</span><span><a href="index.html">OES home</a> · Citation Checker</span></div></footer><script src="../assets/js/mobile-nav.js" defer></script><script src="../assets/js/nav-dropdown.js" defer></script></body></html>
