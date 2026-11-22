@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document Citation Lab — TGM AL MAMUN</title>
+  <!-- Tailwind CSS for clean, responsive academic styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Mammoth.js for client-side .docx text extraction -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
+  <!-- JSZip for direct .docx XML editing and export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f3f6fb;
+      color: #1e293b;
+    }
+    .hero-gradient {
+      background: linear-gradient(135deg, #003896 0%, #052b73 55%, #031f57 100%);
+    }
+    .nav-bar {
+      background-color: #002e82;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .dropzone-active {
+      border-color: #2563eb !important;
+      background-color: #eff6ff !important;
+    }
+    /* Custom scrollbar for tables and textareas */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-blue-100 selection:text-blue-900">
+
+  <!-- Top Navigation Bar -->
+  <header class="nav-bar text-white sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-4">
+      <a href="#" class="text-sm sm:text-base tracking-wide whitespace-nowrap flex items-center gap-1.5 hover:opacity-90 transition">
+        <span class="font-bold tracking-wider">TGM</span>
+        <span class="font-normal text-blue-100">AL MAMUN</span>
+      </a>
+
+      <!-- Desktop Navigation Links -->
+      <nav class="hidden xl:flex items-center space-x-5 text-[11px] font-semibold tracking-wider text-blue-100">
+        <a href="#top" class="hover:text-white transition">HOME</a>
+        <a href="#top" class="hover:text-white transition">TEACHING COURSES</a>
+        <a href="#top" class="hover:text-white transition">WORKING PAPERS</a>
+        <a href="#top" class="hover:text-white transition">TIME SERIES</a>
+        <a href="#top" class="hover:text-white transition">PANEL DATA</a>
+        <a href="#top" class="hover:text-white transition">CAUSAL INFERENCE</a>
+        <a href="#top" class="hover:text-white transition">DSGE</a>
+        <a href="#top" class="hover:text-white transition">MACHINE LEARNING</a>
+        <div class="relative group">
+          <button type="button" class="hover:text-white transition flex items-center gap-1 uppercase">
+            MORE GUIDES <span>▾</span>
+          </button>
+        </div>
+        <a href="#top" class="hover:text-white transition">OPEN ECONOMETRIC SYSTEMS</a>
+      </nav>
+
+      <!-- Mobile menu button -->
+      <button id="mobile-menu-btn" type="button" class="xl:hidden p-2 rounded-md text-blue-100 hover:text-white hover:bg-blue-900/50 focus:outline-none" aria-label="Toggle Menu">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobile-nav" class="hidden xl:hidden bg-[#00266e] px-4 pt-2 pb-4 border-t border-blue-800/60">
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-medium text-blue-100">
+        <a href="#top" class="py-1.5 hover:text-white">HOME</a>
+        <a href="#top" class="py-1.5 hover:text-white">TEACHING COURSES</a>
+        <a href="#top" class="py-1.5 hover:text-white">WORKING PAPERS</a>
+        <a href="#top" class="py-1.5 hover:text-white">TIME SERIES</a>
+        <a href="#top" class="py-1.5 hover:text-white">PANEL DATA</a>
+        <a href="#top" class="py-1.5 hover:text-white">CAUSAL INFERENCE</a>
+        <a href="#top" class="py-1.5 hover:text-white">DSGE</a>
+        <a href="#top" class="py-1.5 hover:text-white">MACHINE LEARNING</a>
+        <a href="#top" class="py-1.5 hover:text-white">MORE GUIDES ▾</a>
+        <a href="#top" class="py-1.5 hover:text-white col-span-2 sm:col-span-1">OPEN ECONOMETRIC SYSTEMS</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Banner -->
+  <section id="top" class="hero-gradient text-white py-11 sm:py-14 px-4 sm:px-6 lg:px-8 shadow-inner">
+    <div class="max-w-5xl mx-auto">
+      <p class="text-[11px] sm:text-xs font-semibold tracking-[0.14em] text-blue-200 uppercase mb-2.5">
+        EXPERIMENTAL WORKSPACE &bull; DOCX UPLOAD
+      </p>
+      <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-white mb-3">
+        Document Citation Lab
+      </h1>
+      <p class="text-sm sm:text-[15px] text-blue-100/90 max-w-2xl leading-relaxed">
+        Upload a Word manuscript to test citation extraction, reference-list detection, citation matching and Crossref DOI resolution. This is a testing workspace; it does not modify your original file.
+      </p>
+    </div>
+  </section>
+
+  <!-- Main Workspace -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+    <!-- Card 1: Upload your manuscript -->
+    <section class="bg-white rounded-xl border border-[#dce3ee] shadow-sm p-6 sm:p-7">
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <h2 class="text-lg font-bold text-slate-800">1. Upload your manuscript</h2>
+        <span class="text-xs text-slate-400">Supports .docx, .txt, .bib, .ris</span>
+      </div>
+
+      <!-- Dashed Dropzone -->
+      <div id="dropzone" class="border-2 border-dashed border-[#cbd5e1] rounded-lg bg-[#fafcff] hover:border-blue-400 transition-colors p-7 sm:p-9 text-center cursor-pointer">
+        <p class="text-sm font-bold text-slate-800 mb-1.5">Choose a Word document (.docx)</p>
+        <p class="text-xs text-slate-500 mb-4">Your file is read locally in this browser. The document is not uploaded to a server.</p>
+
+        <div class="inline-flex flex-wrap items-center justify-center gap-2.5">
+          <label for="docx-input" class="cursor-pointer inline-flex items-center px-3.5 py-1.5 bg-white hover:bg-slate-50 text-slate-800 text-xs font-medium border border-slate-300 rounded shadow-xs transition">
+            Choose File
+          </label>
+          <input id="docx-input" type="file" accept=".docx,.txt,.bib,.ris,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" class="hidden">
+          <span id="file-label" class="text-xs font-medium text-slate-600">No file chosen</span>
+        </div>
+
+        <p id="file-substatus" class="text-[11px] text-slate-400 mt-2.5">No document selected</p>
+      </div>
+
+      <!-- Action Buttons Row -->
+      <div class="flex flex-wrap items-center gap-2.5 mt-4">
+        <button id="btn-extract" type="button" disabled
+          class="px-4 py-2 rounded-md text-xs sm:text-sm font-semibold text-white bg-[#1d4ed8] hover:bg-[#1e40af] disabled:bg-[#8fa8d8] disabled:cursor-not-allowed transition shadow-xs">
+          Extract and analyse document
+        </button>
+
+        <button id="btn-clear" type="button"
+          class="px-4 py-2 rounded-md text-xs sm:text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 transition">
+          Clear
+        </button>
+
+        <button id="btn-toggle-standalone" type="button"
+          class="px-4 py-2 rounded-md text-xs sm:text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 transition">
+          Open standalone text checker
+        </button>
+      </div>
+
+      <!-- Status Bar Banner -->
+      <div id="status-banner" class="mt-4 px-4 py-2.5 rounded-md bg-[#e8eef7] border border-[#d6e0f0] text-xs text-slate-700 flex items-center justify-between gap-2">
+        <span id="status-text">Waiting for a .docx file.</span>
+        <span id="status-badge" class="hidden px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-100 text-blue-800"></span>
+      </div>
+    </section>
+
+    <!-- Standalone Text Checker Drawer (Hidden by default, toggled by button or populated on extraction) -->
+    <section id="standalone-panel" class="hidden bg-white rounded-xl border border-[#dce3ee] shadow-sm p-6 sm:p-7">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <div>
+          <h2 class="text-lg font-bold text-slate-800">Standalone Text &amp; Reference Editor</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Inspect extracted text, paste manuscript &amp; reference lists directly, or load a sample dataset.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button id="btn-load-example" type="button"
+            class="px-3 py-1.5 rounded-md text-xs font-semibold text-[#1d4ed8] bg-blue-50 hover:bg-blue-100 border border-blue-200 transition">
+            Load example
+          </button>
+          <button id="btn-run-text" type="button"
+            class="px-3.5 py-1.5 rounded-md text-xs font-semibold text-white bg-[#1d4ed8] hover:bg-[#1e40af] transition">
+            Check citations
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label for="ms" class="block text-xs font-semibold text-slate-700 mb-1.5">Manuscript body text</label>
+          <textarea id="ms" rows="10" placeholder="Paste text with citations like (Smith, 2020) or Jones and Lee (2021)..."
+            class="w-full rounded-lg border border-slate-300 bg-slate-50/70 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 p-3 text-xs font-mono text-slate-800 leading-relaxed outline-none transition"></textarea>
+        </div>
+        <div>
+          <label for="rf" class="block text-xs font-semibold text-slate-700 mb-1.5">Reference list (one per paragraph or line)</label>
+          <textarea id="rf" rows="10" placeholder="Paste bibliography entries here..."
+            class="w-full rounded-lg border border-slate-300 bg-slate-50/70 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 p-3 text-xs font-mono text-slate-800 leading-relaxed outline-none transition"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <!-- Analysis Results Dashboard (Populated dynamically) -->
+    <section id="results-section" class="hidden space-y-6">
+      <!-- Toolbar Card -->
+      <div class="bg-white rounded-xl border border-[#dce3ee] shadow-sm p-5 sm:p-6">
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100">
+          <div>
+            <h2 class="text-lg font-bold text-slate-800">2. Citation &amp; Reference Analysis</h2>
+            <p class="text-xs text-slate-500">Tick your chosen fixes manually, verify DOIs via Crossref, or search for missing references.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="btn-recheck" type="button"
+              class="px-3 py-1.5 rounded-md text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 transition">
+              Check citations
+            </button>
+            <button id="ap" type="button" disabled
+              class="px-3 py-1.5 rounded-md text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 disabled:opacity-40 disabled:cursor-not-allowed transition">
+              Apply ticked fixes to text
+            </button>
+            <button id="un" type="button" disabled
+              class="px-3 py-1.5 rounded-md text-xs font-medium text-slate-600 bg-white hover:bg-slate-50 border border-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition">
+              Undo last apply
+            </button>
+            <button id="fm" type="button" disabled
+              class="px-3 py-1.5 rounded-md text-xs font-semibold text-white bg-[#1d4ed8] hover:bg-[#1e40af] disabled:opacity-40 disabled:cursor-not-allowed transition">
+              Find missing references online
+            </button>
+            <button id="cr" type="button" disabled
+              class="px-3 py-1.5 rounded-md text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition">
+              Check DOIs with Crossref
+            </button>
+          </div>
+        </div>
+
+        <!-- Summary Metrics & Export Row -->
+        <div id="summary-container"></div>
+
+        <div class="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-slate-100">
+          <button id="csv" type="button" disabled
+            class="px-3 py-1.5 rounded-md text-xs font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 disabled:opacity-40 transition">
+            Export CSV
+          </button>
+          <button id="st" type="button"
+            class="px-3 py-1.5 rounded-md text-xs font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition">
+            Save revised text
+          </button>
+          <button id="sr" type="button"
+            class="px-3 py-1.5 rounded-md text-xs font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition">
+            Save reference list
+          </button>
+          <button id="btn-dl-docx" type="button" disabled
+            class="px-3.5 py-1.5 rounded-md text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition shadow-xs">
+            Download revised .docx
+          </button>
+        </div>
+      </div>
+
+      <!-- Detailed Tables Output -->
+      <div id="out" class="space-y-6"></div>
+    </section>
+
+    <!-- Card 2: Testing scope -->
+    <section class="bg-white rounded-xl border border-[#dce3ee] shadow-sm p-6 sm:p-7">
+      <h2 class="text-base sm:text-lg font-bold text-slate-800 mb-3">Testing scope</h2>
+      <div class="space-y-3 text-xs sm:text-[13px] text-slate-600 leading-relaxed">
+        <p>
+          Current workspace build: DOCX text extraction with Mammoth.js; heuristic author–year citation detection; reference-section parsing; surname/year matching; manual review checkboxes and candidate selection; and DOI resolution against Crossref. Tables, footnotes, text boxes, unusual citation styles and complex multi-part references may not be extracted or matched perfectly.
+        </p>
+        <p>
+          All suggested text fixes remain unchecked by default so you maintain manual control over every edit before applying changes or exporting revised plain text.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Custom Non-Blocking Modal Dialog (replaces alert/confirm) -->
+  <div id="modal-overlay" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-[1px] flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl border border-slate-200 shadow-xl max-w-md w-full p-6">
+      <h3 id="modal-title" class="text-base font-bold text-slate-900 mb-2">Notice</h3>
+      <p id="modal-message" class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-5"></p>
+      <div id="modal-actions" class="flex justify-end gap-2"></div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. UI HELPERS & NON-BLOCKING DIALOGS
+    // =========================================================================
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+    function showDialog(title, message, isConfirm = false) {
+      return new Promise(resolve => {
+        $('modal-title').textContent = title;
+        $('modal-message').textContent = message;
+        const actions = $('modal-actions');
+        actions.innerHTML = '';
+
+        if (isConfirm) {
+          const cancelBtn = document.createElement('button');
+          cancelBtn.className = 'px-3.5 py-1.5 rounded-md text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-300';
+          cancelBtn.textContent = 'Cancel';
+          cancelBtn.onclick = () => { $('modal-overlay').classList.add('hidden'); resolve(false); };
+          actions.appendChild(cancelBtn);
+        }
+
+        const okBtn = document.createElement('button');
+        okBtn.className = 'px-4 py-1.5 rounded-md text-xs font-semibold text-white bg-[#1d4ed8] hover:bg-[#1e40af]';
+        okBtn.textContent = isConfirm ? 'Confirm' : 'OK';
+        okBtn.onclick = () => { $('modal-overlay').classList.add('hidden'); resolve(true); };
+        actions.appendChild(okBtn);
+
+        $('modal-overlay').classList.remove('hidden');
+      });
+    }
+
+    function setStatus(text, badge = '', isError = false) {
+      const banner = $('status-banner');
+      const statusText = $('status-text');
+      const statusBadge = $('status-badge');
+
+      statusText.textContent = text;
+      if (isError) {
+        banner.className = 'mt-4 px-4 py-2.5 rounded-md bg-red-50 border border-red-200 text-xs text-red-700 flex items-center justify-between gap-2';
+      } else {
+        banner.className = 'mt-4 px-4 py-2.5 rounded-md bg-[#e8eef7] border border-[#d6e0f0] text-xs text-slate-700 flex items-center justify-between gap-2';
+      }
+
+      if (badge) {
+        statusBadge.textContent = badge;
+        statusBadge.classList.remove('hidden');
+      } else {
+        statusBadge.classList.add('hidden');
+      }
+    }
+
+    // Mobile nav toggle
+    $('mobile-menu-btn').onclick = () => {
+      $('mobile-nav').classList.toggle('hidden');
+    };
+
+    // =========================================================================
+    // 2. FILE SELECTION, DRAG-AND-DROP & MAMMOTH.JS DOCX EXTRACTION
+    // =========================================================================
+    let selectedFile = null;
+    let originalDocxBuffer = null;
+    let docxTextOps = []; // Tracks { oldText, newText } edits for .docx XML patching
+    let docxAddedRefs = []; // Tracks newly added reference strings for .docx XML insertion
+
+    function formatBytes(bytes) {
+      if (!bytes) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+
+    function handleFileSelected(file) {
+      if (!file) return;
+      selectedFile = file;
+      $('file-label').textContent = file.name;
+      $('file-substatus').textContent = `${file.name} (${formatBytes(file.size)}) — Ready for extraction`;
+      $('file-substatus').className = 'text-[11px] font-medium text-blue-700 mt-2.5';
+
+      // Reliably enable the Extract button
+      const btnExtract = $('btn-extract');
+      btnExtract.disabled = false;
+      btnExtract.removeAttribute('disabled');
+
+      setStatus(`File loaded: ${file.name}. Click "Extract and analyse document" to begin.`, 'READY');
+    }
+
+    // Input change listener
+    $('docx-input').addEventListener('change', e => {
+      if (e.target.files && e.target.files[0]) {
+        handleFileSelected(e.target.files[0]);
+      }
+    });
+
+    // Click anywhere on dropzone (except label/input itself) triggers file dialog
+    $('dropzone').addEventListener('click', e => {
+      if (e.target.tagName !== 'LABEL' && e.target.tagName !== 'INPUT') {
+        $('docx-input').click();
+      }
+    });
+
+    // Drag and drop events
+    ['dragenter', 'dragover'].forEach(evtName => {
+      $('dropzone').addEventListener(evtName, e => {
+        e.preventDefault();
+        e.stopPropagation();
+        $('dropzone').classList.add('dropzone-active');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(evtName => {
+      $('dropzone').addEventListener(evtName, e => {
+        e.preventDefault();
+        e.stopPropagation();
+        $('dropzone').classList.remove('dropzone-active');
+      });
+    });
+
+    $('dropzone').addEventListener('drop', e => {
+      const files = e.dataTransfer && e.dataTransfer.files;
+      if (files && files[0]) {
+        handleFileSelected(files[0]);
+      }
+    });
+
+    // Split extracted text into Manuscript Body and Reference List
+    function splitDocumentSections(fullText) {
+      const cleaned = fullText.replace(/\r\n/g, '\n');
+      // Match common standalone reference section headings
+      const headingRegex = /\n\s*(?:[0-9.]+\s*)?(?:References|Bibliography|Works\s+Cited|Literature\s+Cited|Reference\s+List)\s*\n/gi;
+      let lastMatch = null;
+      let m;
+      while ((m = headingRegex.exec(cleaned)) !== null) {
+        // Ensure the heading appears in the latter half of the document (or after at least 300 chars)
+        if (m.index > 250) {
+          lastMatch = m;
+        }
+      }
+
+      if (lastMatch) {
+        return {
+          manuscript: cleaned.slice(0, lastMatch.index).trim(),
+          references: cleaned.slice(lastMatch.index + lastMatch[0].length).trim()
+        };
+      }
+
+      // Fallback: if no explicit heading is found, put entire text in manuscript
+      return {
+        manuscript: cleaned.trim(),
+        references: ''
+      };
+    }
+
+    // Extract and analyse button handler
+    $('btn-extract').addEventListener('click', async () => {
+      if (!selectedFile) {
+        showDialog('No file selected', 'Please choose a .docx or .txt manuscript file first.');
+        return;
+      }
+
+      const btn = $('btn-extract');
+      btn.disabled = true;
+      btn.textContent = 'Extracting...';
+      setStatus(`Extracting text from "${selectedFile.name}" using Mammoth.js...`, 'PROCESSING');
+
+      try {
+        let rawText = '';
+        const nameLower = selectedFile.name.toLowerCase();
+
+        if (nameLower.endsWith('.docx')) {
+          if (typeof mammoth === 'undefined') {
+            throw new Error('Mammoth.js library failed to load. Please check your internet connection.');
+          }
+          const arrayBuffer = await selectedFile.arrayBuffer();
+          originalDocxBuffer = arrayBuffer;
+          docxTextOps = [];
+          docxAddedRefs = [];
+          $('btn-dl-docx').disabled = false;
+          const result = await mammoth.extractRawText({ arrayBuffer });
+          rawText = result.value || '';
+        } else {
+          // .txt, .bib, .ris fallback
+          originalDocxBuffer = null;
+          docxTextOps = [];
+          docxAddedRefs = [];
+          $('btn-dl-docx').disabled = true;
+          rawText = await selectedFile.text();
+        }
+
+        const { manuscript, references } = splitDocumentSections(rawText);
+        $('ms').value = manuscript;
+        $('rf').value = references;
+        $('standalone-panel').classList.remove('hidden');
+        $('results-section').classList.remove('hidden');
+
+        const fileName = selectedFile ? selectedFile.name : 'document';
+        run();
+        setStatus(`Extracted and analysed ${cits.length} citation(s) and ${refs.length} reference(s) from "${fileName}".`, 'COMPLETE');
+      } catch (err) {
+        console.error(err);
+        setStatus('Extraction failed: ' + (err.message || err), 'ERROR', true);
+        showDialog('Extraction Error', err.message || String(err));
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Extract and analyse document';
+      }
+    });
+
+    // Toggle standalone editor drawer
+    $('btn-toggle-standalone').addEventListener('click', () => {
+      const panel = $('standalone-panel');
+      panel.classList.toggle('hidden');
+      $('btn-toggle-standalone').textContent = panel.classList.contains('hidden')
+        ? 'Open standalone text checker'
+        : 'Hide standalone text checker';
+    });
+
+    // Clear button handler
+    $('btn-clear').addEventListener('click', () => {
+      selectedFile = null;
+      originalDocxBuffer = null;
+      docxTextOps = [];
+      docxAddedRefs = [];
+      $('docx-input').value = '';
+      $('file-label').textContent = 'No file chosen';
+      $('file-substatus').textContent = 'No document selected';
+      $('file-substatus').className = 'text-[11px] text-slate-400 mt-2.5';
+
+      $('btn-extract').disabled = true;
+      $('btn-dl-docx').disabled = true;
+      $('ms').value = '';
+      $('rf').value = '';
+      $('out').innerHTML = '';
+      $('summary-container').innerHTML = '';
+      $('results-section').classList.add('hidden');
+      setStatus('Waiting for a .docx file.');
+    });
+
+    // =========================================================================
+    // 3. CITATION PARSING, MATCHING & CROSSREF ENGINE
+    // =========================================================================
+    const N = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z]/g, '');
+    const SN = "(?:(?:van|von|de|der|den|di|da|la|le|al|bin)\\s+)*\\p{Lu}[\\p{L}'’\\-]+";
+    const YR = "(?:19|20)\\d{2}[a-z]?";
+    const STOP = /^(table|figure|fig|section|chapter|appendix|eq|equation|see|cf)$/i;
+    let refs = [], cits = [];
+
+    function parseRefs(t) {
+      const parts = /\n\s*\n/.test(t) ? t.split(/\n\s*\n/) : t.split('\n');
+      return parts.map(s => s.replace(/\s+/g, ' ').trim().replace(/^(\[\d+\]|\d+[.)])\s*/, '')).filter(s => s.length > 15).map(raw => {
+        const ym = raw.match(new RegExp('\\b(' + YR + ')\\b')), ap = raw.slice(0, ym ? ym.index : raw.length);
+        let names = [...ap.matchAll(new RegExp('(' + SN + '),\\s*(?:\\p{Lu}\\.?[\\s\\-]*)+', 'gu'))].map(m => m[1]);
+        const initFirst = [...ap.matchAll(new RegExp('(?:\\b\\p{Lu}\\.\\s*)+(' + SN + ')', 'gu'))].map(m => m[1]);
+        if (initFirst.length) {
+          initFirst.forEach(n => { if (!names.includes(n)) names.push(n); });
+        }
+        if (!names.length) names = [...ap.matchAll(new RegExp('(' + SN + ')\\s+\\p{Lu}{1,3}\\b', 'gu'))].map(m => m[1]);
+        if (!names.length) { const f = ap.match(new RegExp(SN, 'u')); if (f) names = [f[0]]; }
+        const doi = (raw.match(/10\.\d{4,9}\/[^\s"<>]+/) || [''])[0].replace(/[.,;)\]]+$/, '');
+        return { raw, year: ym ? ym[1].toLowerCase() : '', names, sn: names[0] ? N(names[0]) : '', doi, cited: false, cr: '' };
+      });
+    }
+
+    function parseCits(t) {
+      const out = [];
+      const add = (kind, aS, aE, ys, pos, raw, meta) => {
+        const as = t.slice(aS, aE);
+        const names = [...as.matchAll(new RegExp(SN, 'gu'))].map(m => m[0]).filter(n => !STOP.test(n));
+        if (!names.length) return;
+        const etal = /et\s+al/i.test(as);
+        ys.forEach((y, yi) => out.push({
+          ...meta, ysp: ys, yi, kind, raw: raw.trim(), sn: N(names[0]), first: names[0], names, n: names.length, etal, year: y.y.toLowerCase(), pos, aS, aE, aText: as, yS: y.s, yE: y.e,
+          ctx: t.slice(Math.max(0, pos - 35), pos + raw.length + 35).replace(/\s+/g, ' ')
+        }));
+      };
+      for (const m of t.matchAll(/\(([^()]*)\)/g)) {
+        let o = 0;
+        const segs = m[1].split(';').map(sg => { const st = m.index + 1 + o; o += sg.length + 1; return { s: st, e: st + sg.length, ts: st + (sg.length - sg.trimStart().length), te: st + sg.trimEnd().length, text: sg }; });
+        segs.forEach((sg, si) => {
+          const ys = [...sg.text.matchAll(new RegExp('\\b' + YR + '\\b', 'g'))];
+          if (!ys.length) return;
+          if (!/\p{Lu}/u.test(sg.text.slice(0, ys[0].index))) return;
+          add('p', sg.s, sg.s + ys[0].index, ys.map(y => ({ y: y[0], s: sg.s + y.index, e: sg.s + y.index + y[0].length })), m.index, '(' + sg.text.trim() + ')', { gS: m.index, gE: m.index + m[0].length, gSegs: segs, si });
+        });
+      }
+      const NR = new RegExp('(' + SN + '(?:(?:,\\s*' + SN + ')*,?\\s+(?:and|&)\\s+' + SN + '|\\s+et\\s+al\\.?)?)\\s*\\((' + YR + '(?:\\s*[,;]\\s*' + YR + ')*)\\)', 'gu');
+      for (const m of t.matchAll(NR)) {
+        const base = m.index + m[0].length - 1 - m[2].length;
+        add('n', m.index, m.index + m[1].length, [...m[2].matchAll(new RegExp(YR, 'g'))].map(y => ({ y: y[0], s: base + y.index, e: base + y.index + y[0].length })), m.index, m[0], { mS: m.index, mE: m.index + m[0].length });
+      }
+      return out.sort((a, b) => a.pos - b.pos);
+    }
+
+    function match(c) {
+      const cand = refs.filter(r => r.sn === c.sn);
+      if (!cand.length) {
+        const alt = refs.find(r => r.names.some(n => N(n) === c.sn));
+        const near = !alt && c.sn.length > 3 ? refs.filter(r => r.sn && lev(r.sn, c.sn) <= (c.sn.length > 5 ? 2 : 1) && Math.abs(parseInt(r.year) - parseInt(c.year)) <= 1).sort((p, q) => lev(p.sn, c.sn) - lev(q.sn, c.sn))[0] : null;
+        if (near) { near.cited = true; return { s: 'wn', t: 'Possible typo', n: 'Closest in your list: ' + near.raw.slice(0, 90) + '… Check the spelling of “' + c.first + '”', fix: { ref: near, safe: false, setYear: near.year !== c.year } }; }
+        return alt ? { s: 'bd', t: 'Not first author', n: '“' + c.first + '” appears only as a later author in: ' + alt.raw.slice(0, 70) + '…' } : { s: 'bd', t: 'Not in list', n: 'No reference with first author “' + c.first + '”' };
+      }
+      const exact = cand.filter(r => r.year === c.year);
+      const loose = /[a-z]$/.test(c.year) ? [] : cand.filter(r => r.year.replace(/[a-z]$/, '') === c.year && /[a-z]$/.test(r.year));
+      const hit = exact.length ? exact : loose;
+      if (!hit.length) {
+        const fixOpts = cand.filter(r => r.year).map(r => ({ ref: r, safe: false, setYear: true }));
+        return { s: 'bd', t: 'Year mismatch', n: 'List has ' + cand.map(r => r.year || 'n.d.').join(', ') + ' for ' + c.first, fix: fixOpts[0] || null, fixOpts };
+      }
+      hit.forEach(r => r.cited = true);
+      const notes = []; let s = 'ok', t = 'Matched', fix = null, fixOpts = [];
+      if (!exact.length) {
+        s = 'wn'; t = 'Add a/b suffix';
+        notes.push('Several same-year works: ' + hit.map(r => r.year).join(', '));
+        fixOpts = hit.map(r => ({ ref: r, safe: false, setYear: true }));
+        fix = fixOpts[0];
+      }
+      const r = hit.find(x => (!c.etal && x.names.length === c.n) || (c.etal && x.names.length >= 3)) || hit[0];
+      const cnt = r.names.length;
+      if (!c.etal && r.names.length && c.n !== cnt && cnt <= 5) { s = 'wn'; t = 'Author count'; notes.push('Cites ' + c.n + ' author(s); reference lists ' + cnt); fix = { ref: r, safe: true, setYear: false }; }
+      if (c.etal && cnt && cnt <= 2) { s = 'wn'; t = 'Check et al.'; notes.push('“et al.” used but reference has ' + cnt + ' author(s)'); fix = { ref: r, safe: true, setYear: false }; }
+      return { s, t, n: notes.join('; '), fix, fixOpts };
+    }
+
+    const LOOK = ['Not in list', 'Year mismatch', 'Not first author', 'Possible typo'];
+    let analysed = '', backup = null;
+
+    function names2(r, c, orig) {
+      const n = r.names, conn = /&/.test(orig) ? '&' : /\band\b/.test(orig) ? 'and' : (c.kind === 'n' ? 'and' : '&');
+      return n.length === 1 ? n[0] : n.length === 2 ? n[0] + ' ' + conn + ' ' + n[1] : n[0] + ' et al.';
+    }
+
+    function buildEditsForFix(c, f) {
+      if (!f || !f.ref.names.length) return [];
+      const r = f.ref, ed = [];
+      const lead = (c.aText.match(/^\s*(?:(?:e\.g\.|i\.e\.|see|cf\.|also|for example)[,.]?\s+)*/i) || [''])[0];
+      const trail = (c.aText.match(/[\s,]*$/) || [''])[0];
+      const core = c.aText.slice(lead.length, c.aText.length - trail.length), nc = names2(r, c, core);
+      if (nc !== core.replace(/\s+/g, ' ')) ed.push({ s: c.aS + lead.length, e: c.aE - trail.length, t: nc });
+      if (f.setYear && r.year && r.year !== c.year) ed.push({ s: c.yS, e: c.yE, t: r.year });
+      return ed;
+    }
+
+    function buildEdits(c) {
+      return buildEditsForFix(c, c.res.fix);
+    }
+
+    function fragFromEdits(edits) {
+      const s0 = Math.min(...edits.map(e => e.s)), e0 = Math.max(...edits.map(e => e.e));
+      let f = analysed.slice(s0, e0);
+      [...edits].sort((a, b) => b.s - a.s).forEach(e => { f = f.slice(0, e.s - s0) + e.t + f.slice(e.e - s0); });
+      return [analysed.slice(s0, e0), f];
+    }
+
+    function selectFixOption(i, optIdx) {
+      const c = cits[i];
+      if (!c || !c.res.fixOpts || !c.res.fixOpts[optIdx]) return;
+      c.res.fix = c.res.fixOpts[optIdx];
+      c.edits = buildEdits(c);
+      const prev = $('prev' + i);
+      if (prev && c.edits.length) {
+        const [o, n] = fragFromEdits(c.edits);
+        prev.innerHTML = `<span class="line-through text-slate-400">${esc(o)}</span> → <b class="text-slate-900">${esc(n)}</b>`;
+      }
+      const cb = $('fx' + i);
+      if (cb) cb.checked = true;
+    }
+    window.selectFixOption = selectFixOption;
+
+    function fixCell(c, i) {
+      const hasCrossref = Boolean(c.res.fix && c.res.fix.crossrefRef);
+      if (!c.edits.length && !hasCrossref) return `<td id="fc${i}" class="px-4 py-3 text-slate-400">–</td>`;
+      const isSafe = c.res.fix && c.res.fix.safe;
+      let previewHtml = '';
+      if (c.edits.length) {
+        const [o, n] = fragFromEdits(c.edits);
+        previewHtml = `<span class="line-through text-slate-400">${esc(o)}</span> → <b class="text-slate-900">${esc(n)}</b>`;
+      } else if (hasCrossref) {
+        previewHtml = `<b class="text-slate-900">Keep “${esc(c.aText.trim())}”</b> <span class="text-slate-500">+ update reference</span>`;
+      }
+      let dropdown = '';
+      if (!hasCrossref && c.res.fixOpts && c.res.fixOpts.length > 1) {
+        dropdown = `<select onchange="selectFixOption(${i}, Number(this.value))" class="mt-1.5 block w-full max-w-[220px] rounded border border-slate-300 bg-white px-2 py-1 text-[11px] text-slate-700 focus:border-blue-500 outline-none">
+          ${c.res.fixOpts.map((opt, idx) => `<option value="${idx}">${esc(opt.ref.names[0] || '')} (${esc(opt.ref.year)})</option>`).join('')}
+        </select>`;
+      }
+      const badgeLabel = hasCrossref ? 'Selected Crossref fix' : (isSafe ? 'Safe fix' : 'Review first');
+      return `<td id="fc${i}" class="px-4 py-3">
+        <label class="inline-flex items-start gap-2 cursor-pointer select-none">
+          <input type="checkbox" id="fx${i}" ${hasCrossref ? 'checked' : ''} class="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+          <span class="text-xs leading-snug">
+            <span class="font-semibold ${hasCrossref || isSafe ? 'text-emerald-600' : 'text-amber-600'}">${badgeLabel}</span>
+            <span id="prev${i}" class="block mt-0.5">${previewHtml}</span>
+          </span>
+        </label>
+        ${dropdown}
+      </td>`;
+    }
+
+    function selectCrossrefFix(i, k, n) {
+      const c = cits[i];
+      if (!c || !sugCache[k] || !sugCache[k].items[n]) return;
+      const sg = sugCache[k].items[n];
+      const fam = (sg.m.author || []).map(a => a.family || a.name || '').filter(Boolean).map(f => f === f.toUpperCase() && f.length > 3 ? f[0] + f.slice(1).toLowerCase() : f);
+      if (!fam.length) return;
+      const y = String(yearOf(sg.m));
+      c.res.fix = {
+        ref: { names: fam, year: y, raw: sg.txt },
+        safe: true,
+        setYear: c.year.slice(0, 4) !== y,
+        crossrefRef: sg.txt
+      };
+      c.edits = buildEdits(c);
+      const cell = $('fc' + i);
+      if (cell) cell.outerHTML = fixCell(c, i);
+      $('ap').disabled = false;
+      setStatus(`Staged Crossref match under Suggested text fix for ${c.raw}. Click "Apply ticked fixes to text" to apply.`, 'STAGED');
+    }
+    window.selectCrossrefFix = selectCrossrefFix;
+
+    function upsertReferenceText(refText, firstAuthorSn, yearStr) {
+      const existing = refs.find(r => r.sn === firstAuthorSn && r.year.slice(0, 4) === String(yearStr).slice(0, 4));
+      if (existing && $('rf').value.includes(existing.raw)) {
+        $('rf').value = $('rf').value.replace(existing.raw, refText);
+        docxTextOps.push({ oldText: existing.raw, newText: refText });
+      } else {
+        $('rf').value = ($('rf').value.trim() + '\n\n' + refText).trim();
+        docxAddedRefs.push(refText);
+      }
+    }
+
+    const norm = t => t.replace(/[\u00A0\u2007\u202F]/g, ' ').replace(/[\u200B-\u200D\uFEFF\u00AD]/g, '').replace(/[\u2010-\u2012\u2212]/g, '-');
+    const SK = 'citchk_lab_v1';
+    function save() { try { localStorage.setItem(SK, JSON.stringify({ ms: $('ms').value, rf: $('rf').value })); } catch (e) { } }
+    function dl(name, text) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain' })); a.download = name; a.click(); }
+
+    function applyFixes() {
+      if (norm($('ms').value) !== analysed) {
+        showDialog('Text Changed', 'The text changed since the last check. Click "Check citations" first.');
+        return;
+      }
+      const ed = {};
+      const refsToUpsert = [];
+      let tickedCount = 0;
+      cits.forEach((c, i) => {
+        const cb = $('fx' + i);
+        if (cb && cb.checked) {
+          tickedCount++;
+          c.edits.forEach(e => { if (!ed[e.s]) ed[e.s] = e; });
+          if (c.res.fix && c.res.fix.crossrefRef) {
+            refsToUpsert.push({ txt: c.res.fix.crossrefRef, sn: c.sn, yr: c.res.fix.ref.year || c.year });
+          }
+        }
+      });
+      const list = Object.values(ed).sort((a, b) => b.s - a.s);
+      if (!tickedCount) {
+        showDialog('No Fixes Ticked', 'Tick at least one suggested fix checkbox first.');
+        return;
+      }
+      backup = analysed;
+      let t = analysed;
+      list.forEach(e => {
+        const oldStr = analysed.slice(e.s, e.e);
+        if (oldStr !== e.t) docxTextOps.push({ oldText: oldStr, newText: e.t });
+        t = t.slice(0, e.s) + e.t + t.slice(e.e);
+      });
+      $('ms').value = t;
+      const seenRefs = new Set();
+      refsToUpsert.forEach(item => {
+        if (!seenRefs.has(item.txt)) {
+          seenRefs.add(item.txt);
+          upsertReferenceText(item.txt, item.sn, item.yr);
+        }
+      });
+      $('un').disabled = false;
+      run();
+      setStatus(`Applied ${tickedCount} ticked fix(es) to text & reference list (queued for .docx export).`, 'APPLIED');
+    }
+
+    const lev = (a, b) => {
+      const d = [...Array(b.length + 1).keys()];
+      for (let i = 1; i <= a.length; i++) {
+        let p = d[0]; d[0] = i;
+        for (let j = 1; j <= b.length; j++) {
+          const t = d[j];
+          d[j] = Math.min(d[j] + 1, d[j - 1] + 1, p + (a[i - 1] === b[j - 1] ? 0 : 1));
+          p = t;
+        }
+      }
+      return d[b.length];
+    };
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    async function getJSON(u) {
+      let err;
+      for (let t = 0; t < 3; t++) {
+        try {
+          const r = await fetch(u);
+          if (r.ok) return await r.json();
+          err = new Error('Crossref answered with status ' + r.status);
+        } catch (e) { err = e; }
+        await sleep(800 * (t + 1));
+      }
+      throw err;
+    }
+
+    const fmtRef = m => {
+      const au = (m.author || []).map(a => (a.family || a.name || '') + (a.given ? ', ' + a.given.split(/[\s-]+/).map(x => x[0] + '.').join(' ') : '')).join(', ');
+      const y = ((m.issued && m.issued['date-parts'] && m.issued['date-parts'][0]) || [''])[0];
+      return au + ' (' + y + '). ' + ((m.title || [''])[0]) + '. ' + ((m['container-title'] || [''])[0]) + (m.volume ? ', ' + m.volume : '') + (m.issue ? '(' + m.issue + ')' : '') + (m.page ? ', ' + m.page : '') + '. https://doi.org/' + m.DOI;
+    };
+    const yearOf = m => Number(((m.issued && m.issued['date-parts'] && m.issued['date-parts'][0]) || [0])[0]);
+    function score(m, c, y) {
+      const au = (m.author || []).map(a => N(a.family || a.name || ''));
+      if (!au.length) return 0;
+      let s = 0;
+      const d = lev(au[0], c.sn);
+      if (d === 0) s += 4;
+      else if (d <= 2 && c.sn.length > 3) s += 3;
+      else if (au.includes(c.sn)) s += 1.5;
+      else return 0;
+      c.names.slice(1).forEach(n => { if (au.some(a => lev(a, N(n)) <= 1)) s += 1; });
+      const my = yearOf(m);
+      s += my === y ? 1.5 : Math.abs(my - y) === 1 ? 0.5 : 0;
+      return s;
+    }
+    const rank = (it, c, y) => it.filter(m => m.title && m.author).map(m => ({ m, sc: score(m, c, y) })).filter(o => o.sc >= 3).sort((p, q) => q.sc - p.sc || (q.m['is-referenced-by-count'] || 0) - (p.m['is-referenced-by-count'] || 0)).slice(0, 3);
+
+    async function searchRefs(c, y) {
+      const base = 'https://api.crossref.org/works?rows=40&', nm = encodeURIComponent(c.names.join(' '));
+      const urls = [base + 'query.author=' + nm + '&filter=from-pub-date:' + (y - 1) + ',until-pub-date:' + (y + 1), base + 'query.bibliographic=' + nm + '%20' + y];
+      let err = null, got = false;
+      for (const u of urls) {
+        try {
+          const r = rank((await getJSON(u)).message.items, c, y);
+          got = true;
+          if (r.length) return r;
+        } catch (e) { err = e; }
+      }
+      if (!got) throw err;
+      return [];
+    }
+
+    const keyOf = c => c.names.map(N).join('') + Number(c.year.replace(/[a-z]$/, ''));
+    let sugCache = {};
+
+    function renderSug(k, ci) {
+      const e = sugCache[k];
+      if (!e) return '';
+      if (!e.items.length) return `<span class="text-xs text-slate-500 whitespace-normal break-words">${e.msg}</span>`;
+      return e.items.map((o, n) => `
+        <div class="mb-2.5 last:mb-0 p-3 rounded-lg border border-slate-200 bg-slate-50/70 whitespace-normal break-words">
+          <div class="text-[11px] font-bold ${o.sc >= 6 ? 'text-emerald-600' : 'text-amber-600'} mb-1">${o.sc >= 6 ? 'Best match' : 'Possible match'}</div>
+          <div class="text-xs text-slate-700 leading-relaxed mb-2.5 break-words">${esc(o.txt)}</div>
+          <div class="flex flex-wrap gap-1.5">
+            <button type="button" onclick="selectCrossrefFix(${ci},'${k}',${n})" class="px-2.5 py-1 rounded text-[11px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition">Select for fix</button>
+            <button type="button" onclick="useRef('${k}',${n})" class="px-2.5 py-1 rounded text-[11px] font-semibold text-white bg-[#1d4ed8] hover:bg-[#1e40af] transition">Replace in text and add to list</button>
+            <button type="button" onclick="addRef('${k}',${n})" class="px-2.5 py-1 rounded text-[11px] font-medium text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 transition">Add to list only</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function showSugs() {
+      cits.forEach((c, i) => {
+        const cell = $('s' + i);
+        if (cell && c.res.s !== 'ok' && sugCache[keyOf(c)]) {
+          cell.innerHTML = renderSug(keyOf(c), i);
+        }
+      });
+    }
+
+    async function findMissing() {
+      $('fm').disabled = true;
+      const failed = {};
+      cits.forEach((c, i) => {
+        if ($('s' + i) && c.res.s !== 'ok' && !sugCache[keyOf(c)]) {
+          $('s' + i).innerHTML = '<span class="text-xs text-slate-400">Queued for Crossref…</span>';
+        }
+      });
+      for (let i = 0; i < cits.length; i++) {
+        const c = cits[i];
+        if (c.res.s === 'ok') continue;
+        const k = keyOf(c), y = Number(c.year.replace(/[a-z]$/, '')), cell = $('s' + i);
+        if (!sugCache[k] && !failed[k]) {
+          if (cell) cell.innerHTML = '<span class="text-xs text-blue-600">Searching Crossref…</span>';
+          try {
+            const items = await searchRefs(c, y);
+            sugCache[k] = {
+              items: items.map(o => ({ txt: fmtRef(o.m), m: o.m, sc: o.sc })),
+              msg: 'No close match on Crossref for “' + esc(c.first) + '” around ' + y + '.'
+            };
+          } catch (e) {
+            failed[k] = '<span class="text-xs text-red-600">Lookup failed (' + esc(e && e.message || e) + ').</span>';
+          }
+          await sleep(250);
+        }
+        if (cell) cell.innerHTML = sugCache[k] ? renderSug(k, i) : failed[k];
+      }
+      $('fm').disabled = false;
+    }
+
+    const expand = (s, e) => {
+      const pv = analysed[s - 1], nx = analysed[e];
+      return { s: (pv === ' ' && (nx === undefined || /[\s.,;:!?)\]]/.test(nx))) ? s - 1 : s, e, t: '' };
+    };
+
+    function delEdits(idx) {
+      const units = {}, ed = [], gd = {};
+      idx.forEach(i => {
+        const c = cits[i], k = c.kind === 'p' ? 'p' + c.gS + '|' + c.si : 'n' + c.mS;
+        (units[k] = units[k] || { c, y: new Set() }).y.add(c.yi);
+      });
+      Object.values(units).forEach(u => {
+        const c = u.c;
+        if (u.y.size < c.ysp.length) {
+          const kept = c.ysp.map((y, j) => j).filter(j => !u.y.has(j)).map(j => analysed.slice(c.ysp[j].s, c.ysp[j].e));
+          ed.push({ s: c.ysp[0].s, e: c.ysp[c.ysp.length - 1].e, t: kept.join(', ') });
+        } else if (c.kind === 'n') ed.push(expand(c.mS, c.mE));
+        else (gd[c.gS] = gd[c.gS] || { c, set: new Set() }).set.add(c.si);
+      });
+      Object.values(gd).forEach(g => {
+        const sg = g.c.gSegs, n = sg.length;
+        if (g.set.size === n) { ed.push(expand(g.c.gS, g.c.gE)); return; }
+        let lk = -1;
+        for (let j = n - 1; j >= 0; j--) if (!g.set.has(j)) { lk = j; break; }
+        for (let j = 0; j < lk; j++) if (g.set.has(j)) ed.push({ s: sg[j].ts, e: sg[j + 1].ts, t: '' });
+        if (lk < n - 1) ed.push({ s: sg[lk].te, e: sg[n - 1].te, t: '' });
+      });
+      return ed;
+    }
+
+    function applyEdits(ed) {
+      backup = analysed;
+      let t = analysed;
+      ed.sort((a, b) => b.s - a.s).forEach(e => {
+        const oldStr = analysed.slice(e.s, e.e);
+        if (oldStr !== e.t) docxTextOps.push({ oldText: oldStr, newText: e.t });
+        t = t.slice(0, e.s) + e.t + t.slice(e.e);
+      });
+      $('ms').value = t;
+      $('un').disabled = false;
+      run();
+    }
+
+    async function delCit(i) {
+      if (norm($('ms').value) !== analysed) {
+        showDialog('Text Changed', 'The text changed since the last check. Click "Check citations" first.');
+        return;
+      }
+      const c = cits[i];
+      const ok = await showDialog(
+        'Delete Citation',
+        `Delete the ${analysed.slice(c.yS, c.yE)} citation of “${c.first}” from your text? You can undo it with “Undo last apply”.`,
+        true
+      );
+      if (ok) applyEdits(delEdits([i]));
+    }
+    window.delCit = delCit;
+
+    function undoFixes() {
+      if (backup === null) return;
+      $('ms').value = backup;
+      backup = null;
+      docxTextOps = [];
+      docxAddedRefs = [];
+      $('un').disabled = true;
+      run();
+    }
+
+    function addRef(k, n) {
+      if (!sugCache[k] || !sugCache[k].items[n]) return;
+      const refText = sugCache[k].items[n].txt;
+      $('rf').value = ($('rf').value.trim() + '\n\n' + refText).trim();
+      docxAddedRefs.push(refText);
+      run();
+      setStatus('Added reference to list & queued for .docx bibliography.', 'REF ADDED');
+    }
+    window.addRef = addRef;
+
+    function useRef(k, n) {
+      if (norm($('ms').value) !== analysed) {
+        showDialog('Text Changed', 'The text changed since the last check. Click "Check citations" first.');
+        return;
+      }
+      if (!sugCache[k] || !sugCache[k].items[n]) return;
+      const sg = sugCache[k].items[n];
+      const fam = (sg.m.author || []).map(a => a.family || a.name || '').filter(Boolean).map(f => f === f.toUpperCase() && f.length > 3 ? f[0] + f.slice(1).toLowerCase() : f);
+      if (!fam.length) return;
+      const y = String(yearOf(sg.m)), ed = {};
+      cits.forEach(c => {
+        if (c.res.s === 'ok' || keyOf(c) !== k) return;
+        const lead = (c.aText.match(/^\s*(?:(?:e\.g\.|i\.e\.|see|cf\.|also|for example)[,.]?\s+)*/i) || [''])[0];
+        const trail = (c.aText.match(/[\s,]*$/) || [''])[0];
+        const core = c.aText.slice(lead.length, c.aText.length - trail.length), nc = names2({ names: fam }, c, core);
+        if (nc !== core.replace(/\s+/g, ' ')) ed[c.aS + lead.length] = { s: c.aS + lead.length, e: c.aE - trail.length, t: nc };
+        const oy = analysed.slice(c.yS, c.yE), ny = oy.slice(0, 4) === y ? oy : y;
+        if (ny !== oy) ed[c.yS] = { s: c.yS, e: c.yE, t: ny };
+      });
+      backup = analysed;
+      let t = analysed;
+      Object.values(ed).sort((a, b) => b.s - a.s).forEach(e => {
+        const oldStr = analysed.slice(e.s, e.e);
+        if (oldStr !== e.t) docxTextOps.push({ oldText: oldStr, newText: e.t });
+        t = t.slice(0, e.s) + e.t + t.slice(e.e);
+      });
+      $('ms').value = t;
+      upsertReferenceText(sg.txt, N(fam[0]), y);
+      $('un').disabled = false;
+      run();
+      setStatus('Updated in-text citation and reference list (queued for .docx export).', 'UPDATED');
+    }
+    window.useRef = useRef;
+
+    // =========================================================================
+    // 4. MAIN ANALYSIS RENDERER, CROSSREF DOI CHECK & DOCX XML EXPORTER
+    // =========================================================================
+    function statusBadgeHtml(c) {
+      const base = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ';
+      if (c.res.s === 'ok') return `<span class="${base}bg-emerald-50 text-emerald-700 border-emerald-200">${esc(c.res.t)}</span>`;
+      if (c.res.s === 'wn') return `<span class="${base}bg-amber-50 text-amber-700 border-amber-200">${esc(c.res.t)}</span>`;
+      return `<span class="${base}bg-red-50 text-red-700 border-red-200">${esc(c.res.t)}</span>`;
+    }
+
+    function run(autoLookup = true) {
+      analysed = norm($('ms').value);
+      save();
+      refs = parseRefs(norm($('rf').value));
+      cits = parseCits(analysed);
+      refs.forEach(r => r.cited = false);
+      cits.forEach(c => { c.res = match(c); });
+      cits.forEach(c => { c.edits = buildEdits(c); });
+
+      const cnt = k => cits.filter(c => c.res.s === k).length;
+      const unc = refs.filter(r => !r.cited);
+
+      $('summary-container').innerHTML = `
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+          <div class="p-3.5 rounded-lg bg-slate-50 border border-slate-200">
+            <div class="text-2xl font-bold text-slate-900">${cits.length}</div>
+            <div class="text-xs text-slate-500 mt-0.5">Citations found</div>
+          </div>
+          <div class="p-3.5 rounded-lg bg-emerald-50/60 border border-emerald-200">
+            <div class="text-2xl font-bold text-emerald-700">${cnt('ok')}</div>
+            <div class="text-xs text-emerald-700 mt-0.5">Matched</div>
+          </div>
+          <div class="p-3.5 rounded-lg bg-amber-50/60 border border-amber-200">
+            <div class="text-2xl font-bold text-amber-700">${cnt('wn')}</div>
+            <div class="text-xs text-amber-700 mt-0.5">Need a look</div>
+          </div>
+          <div class="p-3.5 rounded-lg bg-red-50/60 border border-red-200">
+            <div class="text-2xl font-bold text-red-700">${cnt('bd')}</div>
+            <div class="text-xs text-red-700 mt-0.5">Problems</div>
+          </div>
+          <div class="p-3.5 rounded-lg bg-slate-50 border border-slate-200 col-span-2 sm:col-span-1">
+            <div class="text-2xl font-bold text-slate-800">${unc.length}</div>
+            <div class="text-xs text-slate-500 mt-0.5">Uncited references</div>
+          </div>
+        </div>
+      `;
+
+      let html = '';
+      if (!refs.length || !cits.length) {
+        html += `<div class="p-4 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800">
+          ${!cits.length ? 'No author–year citations were detected in the manuscript body.' : 'No reference list detected. Crossref suggestions will load automatically for missing citations.'}
+        </div>`;
+      }
+
+      // In-text citations table
+      html += `
+        <div class="bg-white rounded-xl border border-[#dce3ee] shadow-sm overflow-hidden">
+          <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="text-base font-bold text-slate-800">In-text citations (${cits.length})</h3>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs table-auto">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold">
+                  <th class="px-3.5 py-3 w-[14%]">Citation</th>
+                  <th class="px-3.5 py-3 w-[10%]">Result</th>
+                  <th class="px-3.5 py-3 w-[14%]">Details</th>
+                  <th class="px-3.5 py-3 w-[15%]">Suggested text fix</th>
+                  <th class="px-3.5 py-3 w-[17%]">Context</th>
+                  <th class="px-3.5 py-3 w-[30%] min-w-[320px]">Suggested references</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                ${cits.length ? cits.map((c, i) => `
+                  <tr class="hover:bg-slate-50/60 align-top">
+                    <td class="px-3.5 py-3 break-words">
+                      <div class="font-semibold text-slate-800">${esc(c.raw)}</div>
+                      <div class="text-[11px] text-slate-400 mt-0.5">checking ${esc(c.year)}</div>
+                      ${LOOK.includes(c.res.t) ? `<button type="button" onclick="delCit(${i})" class="mt-2 px-2 py-1 rounded text-[11px] font-medium text-slate-600 bg-white hover:bg-red-50 hover:text-red-700 hover:border-red-200 border border-slate-300 transition">Delete from text</button>` : ''}
+                    </td>
+                    <td class="px-3.5 py-3 whitespace-nowrap">${statusBadgeHtml(c)}</td>
+                    <td class="px-3.5 py-3 text-slate-600 break-words">${esc(c.res.n || '—')}</td>
+                    ${fixCell(c, i)}
+                    <td class="px-3.5 py-3 text-slate-500 leading-relaxed break-words">…${esc(c.ctx)}…</td>
+                    <td id="s${i}" class="px-3.5 py-3 text-slate-400 whitespace-normal break-words">${c.res.s !== 'ok' ? 'Loading Crossref…' : '–'}</td>
+                  </tr>
+                `).join('') : `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-400">No citations found.</td></tr>`}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+
+      // Reference list table
+      html += `
+        <div class="bg-white rounded-xl border border-[#dce3ee] shadow-sm overflow-hidden">
+          <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="text-base font-bold text-slate-800">Reference list (${refs.length})</h3>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold">
+                  <th class="px-4 py-3">Reference</th>
+                  <th class="px-4 py-3">Parsed</th>
+                  <th class="px-4 py-3">Cited in text</th>
+                  <th class="px-4 py-3">DOI</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                ${refs.length ? refs.map((r, i) => `
+                  <tr class="hover:bg-slate-50/60 align-top">
+                    <td class="px-4 py-3 text-slate-700 leading-relaxed">${esc(r.raw)}</td>
+                    <td class="px-4 py-3 text-slate-500 whitespace-nowrap">${esc(r.names.join('; ') || '?')} · ${esc(r.year || 'no year')}</td>
+                    <td class="px-4 py-3 whitespace-nowrap">
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${r.cited ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}">
+                        ${r.cited ? 'Yes' : 'Never cited'}
+                      </span>
+                    </td>
+                    <td id="d${i}" class="px-4 py-3 text-slate-500">${r.doi ? esc(r.doi) + (r.cr ? '<br>' + r.cr : '') : 'none'}</td>
+                  </tr>
+                `).join('') : `<tr><td colspan="4" class="px-4 py-6 text-center text-slate-400">No references parsed.</td></tr>`}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+
+      $('out').innerHTML = html;
+      showSugs();
+
+      $('csv').disabled = !cits.length;
+      $('cr').disabled = !refs.some(r => r.doi);
+      $('fm').disabled = !cits.some(c => c.res.s !== 'ok');
+      $('ap').disabled = !cits.some(c => c.edits.length);
+
+      if (autoLookup && cits.some(c => c.res.s !== 'ok')) {
+        findMissing();
+      }
+    }
+    window.run = run;
+
+    async function crossref() {
+      $('cr').disabled = true;
+      setStatus('Verifying DOIs against Crossref API...', 'CHECKING DOIs');
+      for (const r of refs) {
+        if (!r.doi) continue;
+        try {
+          const res = await fetch('https://api.crossref.org/works/' + encodeURIComponent(r.doi));
+          if (!res.ok) {
+            r.cr = '<span class="text-red-600 font-semibold">DOI not found in Crossref</span>';
+            continue;
+          }
+          const m = (await res.json()).message;
+          const yr = String((m.issued && m.issued['date-parts'] && m.issued['date-parts'][0] || [])[0] || '');
+          const fam = N((m.author && m.author[0] && m.author[0].family) || '');
+          const bad = [];
+          if (yr && r.year && yr !== r.year.replace(/[a-z]$/, '')) bad.push('year ' + yr);
+          if (fam && r.sn && fam !== r.sn) bad.push('author ' + fam);
+          r.cr = bad.length
+            ? '<span class="text-amber-600 font-semibold">Differs: ' + esc(bad.join(', ')) + '</span>'
+            : '<span class="text-emerald-600 font-semibold">Matches Crossref</span>';
+        } catch (e) {
+          r.cr = '<span class="text-red-600">Could not reach Crossref.</span>';
+          break;
+        }
+      }
+      run(false);
+      setStatus('Crossref DOI verification complete.', 'DONE');
+    }
+
+    // Patch word/document.xml inside the original .docx archive and trigger download
+    async function downloadRevisedDocx() {
+      if (!originalDocxBuffer) {
+        showDialog('No .docx Loaded', 'Upload a .docx file first to export a revised Word document.');
+        return;
+      }
+      if (typeof JSZip === 'undefined') {
+        showDialog('Library Missing', 'JSZip failed to load. Please check your internet connection.');
+        return;
+      }
+
+      try {
+        setStatus('Building revised .docx package...', 'EXPORTING');
+        const zip = await JSZip.loadAsync(originalDocxBuffer);
+        const docXmlFile = zip.file('word/document.xml');
+        if (!docXmlFile) throw new Error('Invalid .docx structure: missing word/document.xml');
+
+        const xmlStr = await docXmlFile.async('string');
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlStr, 'application/xml');
+        const W_NS = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+
+        // 1. Apply in-text citation edits paragraph-by-paragraph across <w:t> runs
+        const paragraphs = Array.from(xmlDoc.getElementsByTagNameNS(W_NS, 'p'));
+        if (docxTextOps.length) {
+          paragraphs.forEach(p => {
+            const tNodes = Array.from(p.getElementsByTagNameNS(W_NS, 't'));
+            if (!tNodes.length) return;
+            let combined = tNodes.map(t => t.textContent).join('');
+            let changed = false;
+
+            docxTextOps.forEach(op => {
+              if (op.oldText && combined.includes(op.oldText)) {
+                combined = combined.split(op.oldText).join(op.newText);
+                changed = true;
+              }
+            });
+
+            if (changed) {
+              tNodes[0].textContent = combined;
+              tNodes[0].setAttribute('xml:space', 'preserve');
+              for (let k = 1; k < tNodes.length; k++) {
+                tNodes[k].textContent = '';
+              }
+            }
+          });
+        }
+
+        // 2. Append newly added references to the end of the document body
+        if (docxAddedRefs.length) {
+          const body = xmlDoc.getElementsByTagNameNS(W_NS, 'body')[0];
+          const sectPr = body ? body.getElementsByTagNameNS(W_NS, 'sectPr')[0] : null;
+          // Clone formatting from the last non-empty paragraph if available
+          const templateP = [...paragraphs].reverse().find(p => p.textContent.trim().length > 20);
+
+          docxAddedRefs.forEach(refStr => {
+            let newP;
+            if (templateP) {
+              newP = templateP.cloneNode(true);
+              const tNodes = Array.from(newP.getElementsByTagNameNS(W_NS, 't'));
+              if (tNodes.length) {
+                tNodes[0].textContent = refStr;
+                tNodes[0].setAttribute('xml:space', 'preserve');
+                for (let k = 1; k < tNodes.length; k++) tNodes[k].textContent = '';
+              } else {
+                const r = xmlDoc.createElementNS(W_NS, 'w:r');
+                const t = xmlDoc.createElementNS(W_NS, 'w:t');
+                t.textContent = refStr;
+                r.appendChild(t);
+                newP.appendChild(r);
+              }
+            } else {
+              newP = xmlDoc.createElementNS(W_NS, 'w:p');
+              const r = xmlDoc.createElementNS(W_NS, 'w:r');
+              const t = xmlDoc.createElementNS(W_NS, 'w:t');
+              t.textContent = refStr;
+              r.appendChild(t);
+              newP.appendChild(r);
+            }
+
+            if (sectPr) body.insertBefore(newP, sectPr);
+            else if (body) body.appendChild(newP);
+          });
+        }
+
+        const serializer = new XMLSerializer();
+        zip.file('word/document.xml', serializer.serializeToString(xmlDoc));
+        const blob = await zip.generateAsync({ type: 'blob' });
+
+        const outName = (selectedFile ? selectedFile.name.replace(/\.docx$/i, '') : 'manuscript') + '_revised.docx';
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = outName;
+        a.click();
+
+        setStatus(`Downloaded "${outName}" with ${docxTextOps.length} text edit(s) and ${docxAddedRefs.length} added reference(s).`, 'EXPORTED');
+      } catch (err) {
+        console.error(err);
+        setStatus('DOCX export failed: ' + (err.message || err), 'ERROR', true);
+        showDialog('DOCX Export Error', err.message || String(err));
+      }
+    }
+
+    // =========================================================================
+    // 5. WIRE UP TOOLBAR & STANDALONE CONTROLS
+    // =========================================================================
+    $('btn-run-text').onclick = () => {
+      $('results-section').classList.remove('hidden');
+      run();
+    };
+    $('btn-recheck').onclick = () => run();
+    $('ap').onclick = applyFixes;
+    $('un').onclick = undoFixes;
+    $('fm').onclick = findMissing;
+    $('cr').onclick = crossref;
+    $('btn-dl-docx').onclick = downloadRevisedDocx;
+
+    $('sr').onclick = () => dl('references.txt', $('rf').value);
+    $('st').onclick = () => dl('manuscript.txt', $('ms').value);
+
+    $('ms').addEventListener('input', save);
+    $('rf').addEventListener('input', save);
+
+    $('btn-load-example').onclick = () => {
+      $('ms').value = "Exchange rate pass-through has been widely studied (Taylor, 2000; Campa & Goldberg, 2005). Burstein and Gopinath (2014) argue that it is lower in stable regimes, while Smith et al. (2019) find the opposite. Earlier work (Taylor, 2001) disagrees, and Jones (2018) is rarely cited.";
+      $('rf').value = "Burstein, A., & Gopinath, G. (2014). International prices and exchange rates. Handbook of International Economics, 4, 391-451.\n\nCampa, J. M., & Goldberg, L. S. (2005). Exchange rate pass-through into import prices. Review of Economics and Statistics, 87(4), 679-690. https://doi.org/10.1162/003465305775098170\n\nSmith, A., Lee, C., & Park, D. (2019). A made-up example. Journal of Examples, 1(1), 1-10.\n\nTaylor, J. B. (2000). Low inflation, pass-through, and the pricing power of firms. European Economic Review, 44(7), 1389-1408.";
+      $('results-section').classList.remove('hidden');
+      run();
+    };
+
+    $('csv').onclick = () => {
+      const q = v => '"' + String(v).replace(/"/g, '""') + '"';
+      const rows = [['citation', 'year', 'result', 'details']].concat(cits.map(c => [c.raw, c.year, c.res.t, c.res.n]));
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([rows.map(r => r.map(q).join(',')).join('\n')], { type: 'text/csv' }));
+      a.download = 'citation-check.csv';
+      a.click();
+    };
+  </script>
+</body>
+</html>
