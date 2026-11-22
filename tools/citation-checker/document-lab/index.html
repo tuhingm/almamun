@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Document Citation Lab | Tuhin Al Mamun</title>
+<meta name="description" content="Upload a Word manuscript to test citation extraction, reference matching and DOI validation in the Citation Checker Document Lab.">
+<meta name="author" content="Tuhin G. M. Al Mamun"><meta name="robots" content="index,follow">
+<link rel="canonical" href="https://tuhingm.github.io/almamun/tools/citation-checker/document-lab/">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Tuhin Al Mamun">
+<meta property="og:title" content="Document Citation Lab | Tuhin Al Mamun">
+<meta property="og:description" content="Upload a Word manuscript to test citation extraction, reference matching and DOI validation.">
+<meta property="og:url" content="https://tuhingm.github.io/almamun/tools/citation-checker/document-lab/">
+<meta property="og:image" content="https://tuhingm.github.io/almamun/assets/og-image.jpg?v=4">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Document Citation Lab | Tuhin Al Mamun">
+<meta name="twitter:description" content="Test citation extraction and reference matching from Word manuscripts."><meta name="twitter:image" content="https://tuhingm.github.io/almamun/assets/og-image.jpg?v=4">
+<meta name="theme-color" content="#0033A0">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/almamun/assets/css/site-header.css">
+<script src="https://unpkg.com/mammoth@1.8.0/mammoth.browser.min.js"></script>
+<style>
+:root{--blue:#0033A0;--deep:#00205B;--ink:#17233b;--muted:#596780;--paper:#f3f6fb;--line:#dbe3ef;--green:#087b55;--amber:#946000;--red:#bd3445}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.65 'DM Sans',sans-serif}a{color:inherit;text-decoration:none}
+.wrap{width:min(1160px,calc(100% - 44px));margin:auto}main{min-height:70vh;padding-bottom:70px}
+.hero{background:radial-gradient(circle at 82% 15%,#6ec1e444,transparent 28%),linear-gradient(125deg,var(--blue),var(--deep));color:white;padding:40px 0 44px}
+.kicker{font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#9fdaf2}
+h1,h2,h3{font-family:Manrope,sans-serif;line-height:1.25}h1{font-size:clamp(30px,4vw,44px);letter-spacing:-.045em;margin:9px 0}
+.hero p{max-width:780px;color:#d9e5f7;margin:0}
+.content{padding:30px 0}.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;box-shadow:0 8px 24px #00205b0d;margin-bottom:16px}
+.panel h2{font-size:17px;margin:0 0 10px}.muted{color:var(--muted);font-size:12px}
+.upload{border:2px dashed #b9c9e6;background:#f8faff;border-radius:10px;padding:28px;text-align:center}
+.upload.drag{background:#edf3fc;border-color:var(--blue)}input[type=file]{max-width:100%}
+button,.btn{border:1px solid #c8d5e8;background:#fff;color:var(--blue);border-radius:7px;padding:10px 14px;font:700 11px 'DM Sans',sans-serif;cursor:pointer;display:inline-block}
+button.primary,.btn.primary{background:var(--blue);border-color:var(--blue);color:white}
+button:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.status{background:#edf3fc;border-radius:7px;padding:10px 12px;color:var(--deep);font-size:12px;margin-top:14px}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+.metric{border:1px solid var(--line);border-radius:8px;padding:12px;background:#fbfcff;color:var(--muted);font-size:11px}.metric b{display:block;font:800 24px Manrope;color:var(--blue)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.list{max-height:380px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+.item{padding:10px 12px;border-bottom:1px solid #e7edf5;font-size:12px}.item:last-child{border:0}.item strong{display:block;color:var(--ink);margin-bottom:3px}
+.tag{font-size:9px;text-transform:uppercase;letter-spacing:.06em;font-weight:800;color:var(--amber)}
+table{border-collapse:collapse;width:100%;font-size:12px}td,th{text-align:left;padding:9px;border-bottom:1px solid #e7edf5;vertical-align:top}th{background:#edf3fc;color:#43536e;font-size:10px;text-transform:uppercase}
+.notice{border-left:3px solid #d39a28;background:#fff9e9;padding:12px 14px;font-size:12px;color:#694c13;border-radius:0 7px 7px 0}
+footer{background:var(--deep);color:#c5d2e7;padding:24px 0;font-size:10px}
+@media(max-width:700px){.grid{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}.wrap{width:calc(100% - 32px)}.panel{padding:15px}}
+</style></head><body>
+<header class="site-header"><div class="wrap nav">
+<a class="brand" href="/almamun/index.html">TGM <span>AL MAMUN</span></a><button id="menu" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
+<nav id="nav" aria-label="Main navigation">
+<a href="/almamun/index.html">Home</a><a href="/almamun/teaching/index.html">Teaching Courses</a><a href="/almamun/working-papers/index.html">Working Papers</a><a href="/almamun/time-series-guide/index.html">Time Series</a><a href="/almamun/panel-data-guide/index.html">Panel Data</a><a href="/almamun/causal-inference-guide/index.html">Causal Inference</a><a href="/almamun/dsge-guide/index.html">DSGE</a><a href="/almamun/ml-guide/index.html">Machine Learning</a>
+<div class="dd"><button type="button" class="dd-btn" aria-expanded="false">More Guides</button><div class="dd-menu"><a href="/almamun/bayesian-guide/index.html">Bayesian</a><a href="/almamun/markov-guide/index.html">Markov Switching</a><a href="/almamun/microeconometrics-guide/index.html">Microeconometrics</a><a href="/almamun/finance-guide/index.html">Finance</a><a href="/almamun/productivity-guide/index.html">Productivity</a><a href="/almamun/nonparametric-guide/index.html">Nonparametric</a></div></div><a href="/almamun/oes/index.html">Open Econometric Systems</a>
+</nav></div></header>
+<section class="hero"><div class="wrap"><div class="kicker">Experimental workspace · DOCX upload</div><h1>Document Citation Lab</h1><p>Upload a Word manuscript to test citation extraction, reference-list detection, citation matching and Crossref DOI resolution. This is a testing workspace; it does not modify your original file.</p></div></section>
+<main class="wrap content">
+<section class="panel"><h2>1. Upload your manuscript</h2>
+<div class="upload" id="drop"><p><strong>Choose a Word document (.docx)</strong></p><p class="muted">Your file is read locally in this browser. The document is not uploaded to a server.</p><input id="file" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+<div id="filename" class="muted" style="margin-top:8px">No document selected</div></div>
+<div class="row"><button class="primary" id="analyse" disabled>Extract and analyse document</button><button id="clear">Clear</button><a class="btn" href="/almamun/tools/citation-checker/">Open standalone text checker</a></div>
+<div id="status" class="status" role="status">Waiting for a .docx file.</div>
+<div class="metrics" id="metrics" hidden></div></section>
+<section class="panel" id="results" hidden><h2>2. Extraction and matching results</h2><div class="notice">Experimental parser: author–year detection is heuristic. Review every finding before changing a manuscript. This version does not rewrite or export a corrected Word document.</div>
+<div class="grid" style="margin-top:16px"><div><h3>Detected in-text citations</h3><div class="list" id="citations"></div></div><div><h3>Detected reference entries</h3><div class="list" id="references"></div></div></div>
+<h2>3. Matching diagnostics</h2><div class="list" id="findings"></div>
+<div class="row"><button id="doi" class="primary">Validate detected DOIs with Crossref</button><button id="report">Download analysis report (CSV)</button></div><div id="doiresults" class="list" style="margin-top:12px"></div></section>
+<section class="panel"><h2>Testing scope</h2><p class="muted">Current test build: DOCX text extraction with Mammoth.js; heuristic author–year citation detection; reference-section parsing; surname/year matching; DOI resolution against Crossref. Tables, footnotes, text boxes, unusual citation styles and complex multi-part references may not be extracted or matched perfectly.</p><p class="muted">No automatic citation replacement, reference insertion, reformatting or corrected DOCX export is enabled in this test build. Those operations require a document-preserving editing engine and explicit review controls.</p></section>
+</main><footer><div class="wrap">© Tuhin G. M. Al Mamun · Research Software</div></footer>
+<script>
+const $=id=>document.getElementById(id);let docText='',citations=[],references=[],findings=[],doiRows=[],fileName='';
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function status(s){$('status').textContent=s}
+$('file').addEventListener('change',()=>{const f=$('file').files[0];if(!f)return;if(!/\.docx$/i.test(f.name)){status('Please select a .docx Word document.');$('analyse').disabled=true;return;}fileName=f.name;$('filename').textContent=f.name+' · '+(f.size/1024/1024).toFixed(2)+' MB';$('analyse').disabled=false;status('Ready to extract document text.');});
+const drop=$('drop');['dragenter','dragover'].forEach(e=>drop.addEventListener(e,x=>{x.preventDefault();drop.classList.add('drag')}));['dragleave','drop'].forEach(e=>drop.addEventListener(e,x=>{x.preventDefault();drop.classList.remove('drag')}));drop.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f){$('file').files=e.dataTransfer.files;$('file').dispatchEvent(new Event('change'));}});
+function findReferences(text){const lines=text.split(/\r?\n/);let at=-1;for(let i=0;i<lines.length;i++)if(/^\s*(references|bibliography|works cited|literature cited)\s*$/i.test(lines[i].trim())){at=i+1;break;}if(at<0)return{body:text,refs:[]};let body=lines.slice(0,at-1).join('\n'),tail=lines.slice(at).join('\n');let entries=tail.split(/\n\s*\n/).map(x=>x.replace(/\s+/g,' ').trim()).filter(x=>x.length>20);if(entries.length<2)entries=tail.split(/\n(?=[A-ZÀ-ÖØ-Þ][^\n]{15,})/).map(x=>x.trim()).filter(x=>x.length>20);return{body,refs:entries};}
+function detectCitations(t){const out=[],seen=new Set();const re=/\(([A-ZÀ-ÖØ-Þ][A-Za-zÀ-ÿ'’.-]+(?:\s+(?:&|and)\s+[A-ZÀ-ÖØ-Þ][A-Za-zÀ-ÿ'’.-]+|\s+et\s+al\.?)?)\s*,?\s*((?:19|20)\d{2}[a-z]?)\b/gi;let m;while((m=re.exec(t))){const k=m[0].toLowerCase();if(!seen.has(k)){seen.add(k);out.push({raw:m[0],author:m[1].replace(/\s+et\s+al\.?/i,''),year:m[2],pos:m.index});}}const narrative=/\b([A-ZÀ-ÖØ-Þ][A-Za-zÀ-ÿ'’.-]+)\s+\(((?:19|20)\d{2}[a-z]?)\)/g;while((m=narrative.exec(t))){out.push({raw:m[0],author:m[1],year:m[2],pos:m.index});}return out.sort((a,b)=>a.pos-b.pos);}
+function refMeta(r){const y=(r.match(/\b(?:19|20)\d{2}[a-z]?\b/)||[''])[0];const pre=y?r.slice(0,r.indexOf(y)):r;const surname=(pre.match(/[A-ZÀ-ÖØ-Þ][A-Za-zÀ-ÿ'’.-]+/)||[''])[0].toLowerCase().replace(/[^a-z]/g,'');const doi=(r.match(/10\.\d{4,9}\/[A-Z0-9._;()/:+-]+/i)||[''])[0].replace(/[.,;:)]+$/,'');return{raw:r,year:y.toLowerCase(),surname,doi};}
+function analyse(text){const split=findReferences(text);docText=text;citations=detectCitations(split.body);references=split.refs.map(refMeta);findings=[];citations.forEach(c=>{const hit=references.find(r=>r.surname===c.author.toLowerCase().replace(/[^a-z]/g,'')&&r.year===c.year.toLowerCase());if(!hit)findings.push({type:'Potential unmatched citation',text:c.raw+' — no exact first-author/year match detected.'});});references.forEach(r=>{if(!citations.some(c=>c.author.toLowerCase().replace(/[^a-z]/g,'')===r.surname&&c.year.toLowerCase()===r.year))findings.push({type:'Potential uncited reference',text:r.raw});});}
+function render(){const metric=[['Citations',citations.length],['References',references.length],['Potential findings',findings.length],['DOIs',references.filter(r=>r.doi).length]];$('metrics').innerHTML=metric.map(x=>'<div class="metric"><b>'+x[1]+'</b>'+x[0]+'</div>').join('');$('metrics').hidden=false;$('results').hidden=false;
+$('citations').innerHTML=citations.length?citations.map(c=>'<div class="item"><strong>'+esc(c.raw)+'</strong><span class="muted">Author: '+esc(c.author)+' · Year: '+esc(c.year)+'</span></div>').join(''):'<div class="item">No supported author–year citations detected.</div>';
+$('references').innerHTML=references.length?references.map(r=>'<div class="item"><strong>'+esc(r.surname||'Author not parsed')+' ('+esc(r.year||'Year not parsed')+')</strong>'+esc(r.raw)+'</div>').join(''):'<div class="item">No reference entries detected. Check that the document has a standalone References or Bibliography heading.</div>';
+$('findings').innerHTML=findings.length?findings.map(f=>'<div class="item"><span class="tag">'+esc(f.type)+'</span><div>'+esc(f.text)+'</div></div>').join(''):'<div class="item">No unmatched items detected by this preliminary parser.</div>';
+}
+$('analyse').onclick=async()=>{const f=$('file').files[0];if(!f)return;try{status('Reading DOCX locally…');const buf=await f.arrayBuffer();const result=await mammoth.extractRawText({arrayBuffer:buf});if(!result.value.trim())throw new Error('No readable body text found.');analyse(result.value);render();status('Extraction complete. '+result.value.length.toLocaleString()+' characters read. '+(result.messages.length?'Parser notices: '+result.messages.length:'No Mammoth extraction notices.'));}catch(e){status('Could not analyse this file: '+e.message);}};
+$('doi').onclick=async()=>{const ds=[...new Set(references.map(r=>r.doi).filter(Boolean))];if(!ds.length){$('doiresults').innerHTML='<div class="item">No DOI strings were detected in the extracted reference list.</div>';return;}$('doiresults').innerHTML='<div class="item">Checking '+ds.length+' DOI records with Crossref…</div>';doiRows=[];for(const doi of ds){try{const r=await fetch('https://api.crossref.org/works/'+encodeURIComponent(doi));if(!r.ok)throw new Error('Not found');const m=(await r.json()).message;doiRows.push({doi,ok:true,title:(m.title||[''])[0],year:m.published?.['date-parts']?.[0]?.[0]||''});}catch(e){doiRows.push({doi,ok:false,title:'Not found in Crossref'});}}$('doiresults').innerHTML=doiRows.map(d=>'<div class="item"><strong class="'+(d.ok?'':'tag')+'">'+(d.ok?'Resolved':'Not resolved')+' · '+esc(d.doi)+'</strong>'+esc(d.title)+(d.year?' ('+d.year+')':'')+'</div>').join('');};
+$('report').onclick=()=>{const rows=[['Type','Details'],...findings.map(f=>[f.type,f.text]),...doiRows.map(d=>['DOI '+(d.ok?'resolved':'not resolved'),d.doi+' '+d.title])];const csv=rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=(fileName.replace(/\.docx$/i,'')||'manuscript')+'-citation-analysis.csv';a.click();URL.revokeObjectURL(a.href);};
+$('clear').onclick=()=>{if(!confirm('Clear the selected document and all extracted results?'))return;$('file').value='';$('filename').textContent='No document selected';$('analyse').disabled=true;$('results').hidden=true;$('metrics').hidden=true;docText='';citations=[];references=[];findings=[];doiRows=[];fileName='';status('Waiting for a .docx file.');};
+(()=>{const menu=document.getElementById('menu'),nav=document.getElementById('nav');if(menu&&nav)menu.addEventListener('click',()=>{const o=nav.classList.toggle('show');menu.setAttribute('aria-expanded',String(o));});document.querySelectorAll('.dd-btn').forEach(b=>b.addEventListener('click',()=>{const d=b.closest('.dd'),o=d.classList.toggle('open');b.setAttribute('aria-expanded',String(o));}));})();
+</script></body></html>
