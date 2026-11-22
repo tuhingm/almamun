@@ -266,14 +266,29 @@ function replaceCitation(citationIndex,suggestionIndex){
   const edits=[
     {s:c.aS+lead.length,e:c.aE-trail.length,t:authorText},
     {s:c.yS,e:c.yE,t:year}
-  ].sort((a,b)=>b.s-a.s);
+  ].sort((a,b)=>a.s-b.s);
   let text=$('ms').value;
-  edits.forEach(e=>{text=text.slice(0,e.s)+e.t+text.slice(e.e);});
-  backup=$('ms').value;
+  if(text!==analysed){alert('The manuscript text has changed. Click “Check citations” before replacing more citations.');return;}
+  const deltaAt=pos=>edits.reduce((total,e)=>total+(pos>=e.e?e.t.length-(e.e-e.s):0),0);
+  edits.slice().sort((a,b)=>b.s-a.s).forEach(e=>{text=text.slice(0,e.s)+e.t+text.slice(e.e);});
+  cits.forEach((item,index)=>{
+    if(index===citationIndex)return;
+    ['pos','aS','aE','yS','yE'].forEach(key=>{item[key]+=deltaAt(item[key]);});
+  });
+  analysed=text;
+  backup=null;
   $('ms').value=text;
-  $('un').disabled=false;
-  run();
-  if(cits.some(item=>item.res.s==='bd'))findMissing();
+  $('un').disabled=true;
+  c.res={s:'ok',t:'Replaced',n:'In-text citation updated from the selected Crossref record.'};
+  const row=$('s'+citationIndex);
+  if(row)row.innerHTML='<span class="ok">Citation replaced ✓</span>';
+  const tr=row&&row.closest('tr');
+  if(tr){
+    const status=tr.children[1];
+    const details=tr.children[2];
+    if(status){status.className='ok';status.textContent='Replaced';}
+    if(details)details.textContent='Updated using the selected Crossref record.';
+  }
 }
 
 function addRef(i,button){
