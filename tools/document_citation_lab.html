@@ -299,6 +299,7 @@
 
         if (isConfirm) {
           const cancelBtn = document.createElement('button');
+          cancelBtn.type = 'button';
           cancelBtn.className = 'px-3.5 py-1.5 rounded-md text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-300';
           cancelBtn.textContent = 'Cancel';
           cancelBtn.onclick = () => { $('modal-overlay').classList.add('hidden'); resolve(false); };
@@ -306,6 +307,7 @@
         }
 
         const okBtn = document.createElement('button');
+        okBtn.type = 'button';
         okBtn.className = 'px-4 py-1.5 rounded-md text-xs font-semibold text-white bg-[#1d4ed8] hover:bg-[#1e40af]';
         okBtn.textContent = isConfirm ? 'Confirm' : 'OK';
         okBtn.onclick = () => { $('modal-overlay').classList.add('hidden'); resolve(true); };
@@ -347,6 +349,7 @@
     let originalDocxBuffer = null;
     let docxTextOps = []; // Tracks { oldText, newText } edits for .docx XML patching
     let docxAddedRefs = []; // Tracks newly added reference strings for .docx XML insertion
+    let docxRemovedRefs = []; // Tracks removed uncited reference strings for .docx XML deletion
 
     function formatBytes(bytes) {
       if (!bytes) return '0 B';
@@ -461,6 +464,10 @@
           originalDocxBuffer = arrayBuffer;
           docxTextOps = [];
           docxAddedRefs = [];
+          docxRemovedRefs = [];
+          ignoredKeys.clear();
+          undoStack = [];
+          $('un').disabled = true;
           $('btn-dl-docx').disabled = false;
           const result = await mammoth.extractRawText({ arrayBuffer });
           rawText = result.value || '';
@@ -469,6 +476,10 @@
           originalDocxBuffer = null;
           docxTextOps = [];
           docxAddedRefs = [];
+          docxRemovedRefs = [];
+          ignoredKeys.clear();
+          undoStack = [];
+          $('un').disabled = true;
           $('btn-dl-docx').disabled = true;
           rawText = await selectedFile.text();
         }
@@ -507,6 +518,10 @@
       originalDocxBuffer = null;
       docxTextOps = [];
       docxAddedRefs = [];
+      docxRemovedRefs = [];
+      ignoredKeys.clear();
+      undoStack = [];
+      $('un').disabled = true;
       $('docx-input').value = '';
       $('file-label').textContent = 'No file chosen';
       $('file-substatus').textContent = 'No document selected';
@@ -526,11 +541,14 @@
     // 3. CITATION PARSING, MATCHING & CROSSREF ENGINE
     // =========================================================================
     const N = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z]/g, '');
-    const SN = "(?:(?:van|von|de|der|den|di|da|la|le|al|bin)\\s+)*\\p{Lu}[\\p{L}'’\\-]+";
+    const SN = "(?:(?:[Vv]an|[Vv]on|[Dd]e|[Dd]er|[Dd]en|[Dd]el|[Dd]ella|[Dd]i|[Dd]a|[Dd]as|[Dd]os|[Dd]u|[Ll]a|[Ll]e|[Aa]l|[Ee]l|[Bb]in)\\s+)*\\p{Lu}(?:[\\p{L}\\-]|['’](?!s\\b)\\p{L})+";
+    const INIT_SN = "(?:\\p{Lu}\\.\\s*)*" + SN;
     const YR = "(?:19|20)\\d{2}[a-z]?";
-    const STOP = /^(table|figure|fig|section|chapter|appendix|eq|equation|see|cf)$/i;
+    const STOP = /^(however|moreover|furthermore|similarly|additionally|meanwhile|nevertheless|nonetheless|consequently|therefore|thus|hence|accordingly|specifically|notably|importantly|interestingly|overall|finally|firstly|secondly|thirdly|first|second|third|also|instead|otherwise|still|yet|though|although|while|whereas|since|because|for|in|on|at|by|as|from|with|to|of|the|a|an|this|that|these|those|following|see|cf|compare|table|figure|fig|section|chapter|appendix|eq|equation)$/i;
+    // Also strip leading academic adverbs (e.g. "Methodologically,", "Empirically,", "Theoretically,") without affecting surnames like Kelly/Reilly/Daly
+    const isLeadStop = w => STOP.test(w) || /(?:ically|ingly|edly|tively|ously|ably|ibly|arily|ually|ently|antly|sively|fully|lessly)$/i.test(w);
     let refs = [], cits = [];
-
+    const ignoredKeys = new Set();
     function parseRefs(t) {
       const parts = /\n\s*\n/.test(t) ? t.split(/\n\s*\n/) : t.split('\n');
       return parts.map(s => s.replace(/\s+/g, ' ').trim().replace(/^(\[\d+\]|\d+[.)])\s*/, '')).filter(s => s.length > 15).map(raw => {
@@ -547,11 +565,28 @@
       });
     }
 
+    // Extract full years (e.g. 2000a, 2000b) and shorthand suffixes (e.g. 2000a, b) while ignoring page numbers
+    function parseYears(str, baseOffset) {
+      const out = [];
+      let last4 = '';
+      const rx = new RegExp('(\\b' + YR + '\\b)|(?:[,;]\\s*([a-z])(?=\\s*(?:[,;)]|$)))', 'gi');
+      for (const m of str.matchAll(rx)) {
+        if (m[1]) {
+          last4 = m[1].slice(0, 4);
+          out.push({ y: m[1].toLowerCase(), s: baseOffset + m.index, e: baseOffset + m.index + m[1].length });
+        } else if (m[2] && last4) {
+          const idx = m[0].lastIndexOf(m[2]);
+          out.push({ y: (last4 + m[2]).toLowerCase(), s: baseOffset + m.index + idx, e: baseOffset + m.index + idx + m[2].length });
+        }
+      }
+      return out;
+    }
+
     function parseCits(t) {
       const out = [];
       const add = (kind, aS, aE, ys, pos, raw, meta) => {
         const as = t.slice(aS, aE);
-        const names = [...as.matchAll(new RegExp(SN, 'gu'))].map(m => m[0]).filter(n => !STOP.test(n));
+        const names = [...as.matchAll(new RegExp(SN, 'gu'))].map(m => m[0]).filter(n => !isLeadStop(n));
         if (!names.length) return;
         const etal = /et\s+al/i.test(as);
         ys.forEach((y, yi) => out.push({
@@ -559,25 +594,64 @@
           ctx: t.slice(Math.max(0, pos - 35), pos + raw.length + 35).replace(/\s+/g, ' ')
         }));
       };
+
+      // 1. Parenthetical citations: (Smith, 2020; Le Quéré et al., 2019; Taylor, 2000a, b)
       for (const m of t.matchAll(/\(([^()]*)\)/g)) {
         let o = 0;
-        const segs = m[1].split(';').map(sg => { const st = m.index + 1 + o; o += sg.length + 1; return { s: st, e: st + sg.length, ts: st + (sg.length - sg.trimStart().length), te: st + sg.trimEnd().length, text: sg }; });
+        const segs = m[1].split(';').map(sg => {
+          const st = m.index + 1 + o;
+          o += sg.length + 1;
+          return { s: st, e: st + sg.length, ts: st + (sg.length - sg.trimStart().length), te: st + sg.trimEnd().length, text: sg };
+        });
         segs.forEach((sg, si) => {
-          const ys = [...sg.text.matchAll(new RegExp('\\b' + YR + '\\b', 'g'))];
+          const ys = parseYears(sg.text, sg.s);
           if (!ys.length) return;
-          if (!/\p{Lu}/u.test(sg.text.slice(0, ys[0].index))) return;
-          add('p', sg.s, sg.s + ys[0].index, ys.map(y => ({ y: y[0], s: sg.s + y.index, e: sg.s + y.index + y[0].length })), m.index, '(' + sg.text.trim() + ')', { gS: m.index, gE: m.index + m[0].length, gSegs: segs, si });
+          const firstYearRel = ys[0].s - sg.s;
+          if (!/\p{Lu}/u.test(sg.text.slice(0, firstYearRel))) return;
+          add('p', sg.s, ys[0].s, ys, m.index, '(' + sg.text.trim() + ')', { gS: m.index, gE: m.index + m[0].length, gSegs: segs, si });
         });
       }
-      const NR = new RegExp('(' + SN + '(?:(?:,\\s*' + SN + ')*,?\\s+(?:and|&)\\s+' + SN + '|\\s+et\\s+al\\.?)?)\\s*\\((' + YR + '(?:\\s*[,;]\\s*' + YR + ')*)\\)', 'gu');
+
+      // 2. Narrative citations: supports particles, possessives ('s / '), initials, page locators, shorthand suffixes, stray commas
+      const NR = new RegExp(
+        '(' + INIT_SN + '(?:(?:,\\s*' + INIT_SN + ')*,?\\s+(?:and|&)\\s+' + INIT_SN + '|\\s+et\\s+al\\.?)?)' +
+        "(?:['’]s|['’])?,?\\s*\\((" +
+        YR + "(?:\\s*[,;]\\s*(?:" + YR + "|[a-z](?=\\s*[,;)])))*(?:\\s*[,;:]\\s*(?:pp?\\.?\\s*\\d+[\\-–]?\\d*|ch\\.?\\s*\\d+|sec\\.?\\s*\\d+|fig\\.?\\s*\\d+|table\\s*\\d+))?)\\)",
+        'gu'
+      );
+      const leadStopRx = new RegExp('^(' + INIT_SN + '),\\s+', 'u');
+
       for (const m of t.matchAll(NR)) {
+        let mS = m.index;
+        let aS = m.index;
+        const aE = m.index + m[1].length;
+        let raw = m[0];
+
+        // Strip leading transition words/adverbs like "However, " or "Methodologically, "
+        while (true) {
+          const lm = t.slice(aS, aE).match(leadStopRx);
+          if (lm && isLeadStop(lm[1])) {
+            const shift = lm[0].length;
+            aS += shift;
+            mS += shift;
+            raw = raw.slice(shift);
+          } else {
+            break;
+          }
+        }
+
         const base = m.index + m[0].length - 1 - m[2].length;
-        add('n', m.index, m.index + m[1].length, [...m[2].matchAll(new RegExp(YR, 'g'))].map(y => ({ y: y[0], s: base + y.index, e: base + y.index + y[0].length })), m.index, m[0], { mS: m.index, mE: m.index + m[0].length });
+        const ys = parseYears(m[2], base);
+        if (!ys.length) continue;
+        add('n', aS, aE, ys, mS, raw, { mS, mE: m.index + m[0].length });
       }
       return out.sort((a, b) => a.pos - b.pos);
     }
 
     function match(c) {
+      if (ignoredKeys.has(keyOf(c))) {
+        return { s: 'ig', t: 'Ignored', n: 'Marked as not needing a reference' };
+      }
       const cand = refs.filter(r => r.sn === c.sn);
       if (!cand.length) {
         const alt = refs.find(r => r.names.some(n => N(n) === c.sn));
@@ -604,14 +678,61 @@
       const cnt = r.names.length;
       if (!c.etal && r.names.length && c.n !== cnt && cnt <= 5) { s = 'wn'; t = 'Author count'; notes.push('Cites ' + c.n + ' author(s); reference lists ' + cnt); fix = { ref: r, safe: true, setYear: false }; }
       if (c.etal && cnt && cnt <= 2) { s = 'wn'; t = 'Check et al.'; notes.push('“et al.” used but reference has ' + cnt + ' author(s)'); fix = { ref: r, safe: true, setYear: false }; }
+      if (c.kind === 'n' && /&/.test(c.aText)) {
+        if (s === 'ok') { s = 'wn'; t = 'Narrative style'; }
+        notes.push('Use “and” instead of “&” in narrative citations');
+        if (!fix) fix = { ref: r, safe: true, setYear: false };
+      }
       return { s, t, n: notes.join('; '), fix, fixOpts };
     }
 
     const LOOK = ['Not in list', 'Year mismatch', 'Not first author', 'Possible typo'];
-    let analysed = '', backup = null;
+    let analysed = '', undoStack = [];
+
+    function pushUndo() {
+      undoStack.push({
+        ms: $('ms').value,
+        rf: $('rf').value,
+        docxTextOps: docxTextOps.map(op => ({ ...op })),
+        docxAddedRefs: [...docxAddedRefs],
+        docxRemovedRefs: [...docxRemovedRefs]
+      });
+      $('un').disabled = false;
+    }
+
+    // Snapshot ticked checkboxes, staged Crossref fixes, and dropdown choices mapped to new positions after edits
+    function captureStagedState(edits = []) {
+      const stateByNewYS = new Map();
+      cits.forEach((c, i) => {
+        const cb = $('fx' + i);
+        const checked = cb ? cb.checked : false;
+        const hasCrossref = Boolean(c.res && c.res.fix && c.res.fix.crossrefRef);
+        const selEl = $('sel' + i);
+        const selectedOptIdx = selEl ? Number(selEl.value) : null;
+
+        if (!checked && !hasCrossref && (!selectedOptIdx || selectedOptIdx === 0)) return;
+
+        // If this citation's year span was directly modified or deleted, don't carry over old UI state
+        const touched = edits.some(e => !(e.e <= c.yS || e.s >= c.yE));
+        if (touched) return;
+
+        let shift = 0;
+        edits.forEach(e => {
+          if (e.e <= c.yS) shift += e.t.length - (e.e - e.s);
+        });
+        stateByNewYS.set(c.yS + shift, {
+          checked,
+          crossrefFix: hasCrossref ? c.res.fix : null,
+          selectedOptIdx
+        });
+      });
+      return stateByNewYS;
+    }
 
     function names2(r, c, orig) {
-      const n = r.names, conn = /&/.test(orig) ? '&' : /\band\b/.test(orig) ? 'and' : (c.kind === 'n' ? 'and' : '&');
+      const n = r.names;
+      // Standardize narrative citations to "and"; preserve connector style in parenthetical citations
+      const conn = c.kind === 'n' ? 'and' : (/&/.test(orig) ? '&' : /\band\b/.test(orig) ? 'and' : '&');
       return n.length === 1 ? n[0] : n.length === 2 ? n[0] + ' ' + conn + ' ' + n[1] : n[0] + ' et al.';
     }
 
@@ -665,14 +786,16 @@
       }
       let dropdown = '';
       if (!hasCrossref && c.res.fixOpts && c.res.fixOpts.length > 1) {
-        dropdown = `<select onchange="selectFixOption(${i}, Number(this.value))" class="mt-1.5 block w-full max-w-[220px] rounded border border-slate-300 bg-white px-2 py-1 text-[11px] text-slate-700 focus:border-blue-500 outline-none">
-          ${c.res.fixOpts.map((opt, idx) => `<option value="${idx}">${esc(opt.ref.names[0] || '')} (${esc(opt.ref.year)})</option>`).join('')}
+        const activeIdx = typeof c._selectedOptIdx === 'number' ? c._selectedOptIdx : 0;
+        dropdown = `<select id="sel${i}" onchange="selectFixOption(${i}, Number(this.value))" class="mt-1.5 block w-full max-w-[220px] rounded border border-slate-300 bg-white px-2 py-1 text-[11px] text-slate-700 focus:border-blue-500 outline-none">
+          ${c.res.fixOpts.map((opt, idx) => `<option value="${idx}" ${idx === activeIdx ? 'selected' : ''}>${esc(opt.ref.names[0] || '')} (${esc(opt.ref.year)})</option>`).join('')}
         </select>`;
       }
       const badgeLabel = hasCrossref ? 'Selected Crossref fix' : (isSafe ? 'Safe fix' : 'Review first');
+      const isChecked = typeof c._checked === 'boolean' ? c._checked : hasCrossref;
       return `<td id="fc${i}" class="px-4 py-3">
         <label class="inline-flex items-start gap-2 cursor-pointer select-none">
-          <input type="checkbox" id="fx${i}" ${hasCrossref ? 'checked' : ''} class="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+          <input type="checkbox" id="fx${i}" ${isChecked ? 'checked' : ''} class="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
           <span class="text-xs leading-snug">
             <span class="font-semibold ${hasCrossref || isSafe ? 'text-emerald-600' : 'text-amber-600'}">${badgeLabel}</span>
             <span id="prev${i}" class="block mt-0.5">${previewHtml}</span>
@@ -742,7 +865,8 @@
         showDialog('No Fixes Ticked', 'Tick at least one suggested fix checkbox first.');
         return;
       }
-      backup = analysed;
+      const preserved = captureStagedState(list);
+      pushUndo();
       let t = analysed;
       list.forEach(e => {
         const oldStr = analysed.slice(e.s, e.e);
@@ -757,8 +881,7 @@
           upsertReferenceText(item.txt, item.sn, item.yr);
         }
       });
-      $('un').disabled = false;
-      run();
+      run(false, preserved);
       setStatus(`Applied ${tickedCount} ticked fix(es) to text & reference list (queued for .docx export).`, 'APPLIED');
     }
 
@@ -848,40 +971,76 @@
     function showSugs() {
       cits.forEach((c, i) => {
         const cell = $('s' + i);
-        if (cell && c.res.s !== 'ok' && sugCache[keyOf(c)]) {
+        if (cell && c.res.s !== 'ok' && c.res.s !== 'ig' && sugCache[keyOf(c)]) {
           cell.innerHTML = renderSug(keyOf(c), i);
         }
       });
     }
 
+    let findMissingRunId = 0;
+
     async function findMissing() {
-      $('fm').disabled = true;
-      const failed = {};
-      cits.forEach((c, i) => {
-        if ($('s' + i) && c.res.s !== 'ok' && !sugCache[keyOf(c)]) {
-          $('s' + i).innerHTML = '<span class="text-xs text-slate-400">Queued for Crossref…</span>';
-        }
-      });
-      for (let i = 0; i < cits.length; i++) {
-        const c = cits[i];
-        if (c.res.s === 'ok') continue;
-        const k = keyOf(c), y = Number(c.year.replace(/[a-z]$/, '')), cell = $('s' + i);
-        if (!sugCache[k] && !failed[k]) {
-          if (cell) cell.innerHTML = '<span class="text-xs text-blue-600">Searching Crossref…</span>';
-          try {
-            const items = await searchRefs(c, y);
-            sugCache[k] = {
-              items: items.map(o => ({ txt: fmtRef(o.m), m: o.m, sc: o.sc })),
-              msg: 'No close match on Crossref for “' + esc(c.first) + '” around ' + y + '.'
-            };
-          } catch (e) {
-            failed[k] = '<span class="text-xs text-red-600">Lookup failed (' + esc(e && e.message || e) + ').</span>';
-          }
-          await sleep(250);
-        }
-        if (cell) cell.innerHTML = sugCache[k] ? renderSug(k, i) : failed[k];
+      const runId = ++findMissingRunId;
+      const fmBtn = $('fm');
+      const unmatched = cits.map((c, i) => ({ c, i })).filter(({ c }) => c.res.s !== 'ok' && c.res.s !== 'ig');
+
+      if (!unmatched.length) {
+        fmBtn.disabled = true;
+        fmBtn.textContent = 'Find missing references online';
+        fmBtn.title = 'All citations are already matched.';
+        return;
       }
-      $('fm').disabled = false;
+
+      const uniqueToFetch = new Set(
+        unmatched.map(({ c }) => keyOf(c)).filter(k => !sugCache[k])
+      );
+      const totalToFetch = uniqueToFetch.size;
+      let fetched = 0;
+
+      fmBtn.disabled = true;
+      fmBtn.title = 'Searching Crossref for missing references…';
+      fmBtn.textContent = totalToFetch
+        ? `Searching Crossref (0/${totalToFetch})…`
+        : 'Refreshing suggestions…';
+
+      const failed = {};
+      try {
+        unmatched.forEach(({ c, i }) => {
+          if ($('s' + i) && !sugCache[keyOf(c)]) {
+            $('s' + i).innerHTML = '<span class="text-xs text-slate-400">Queued for Crossref…</span>';
+          }
+        });
+
+        for (const { c, i } of unmatched) {
+          if (runId !== findMissingRunId) return;
+          const k = keyOf(c), y = Number(c.year.replace(/[a-z]$/, '')), cell = $('s' + i);
+          if (!sugCache[k] && !failed[k]) {
+            fetched++;
+            fmBtn.textContent = `Searching Crossref (${fetched}/${totalToFetch})…`;
+            if (cell) cell.innerHTML = '<span class="text-xs text-blue-600">Searching Crossref…</span>';
+            try {
+              const items = await searchRefs(c, y);
+              if (runId !== findMissingRunId) return;
+              sugCache[k] = {
+                items: items.map(o => ({ txt: fmtRef(o.m), m: o.m, sc: o.sc })),
+                msg: 'No close match on Crossref for “' + esc(c.first) + '” around ' + y + '.'
+              };
+            } catch (e) {
+              failed[k] = '<span class="text-xs text-red-600">Lookup failed (' + esc(e && e.message || e) + ').</span>';
+            }
+            await sleep(250);
+          }
+          if (runId !== findMissingRunId) return;
+          if (cell) cell.innerHTML = sugCache[k] ? renderSug(k, i) : failed[k];
+        }
+      } finally {
+        if (runId === findMissingRunId) {
+          const hasUnmatched = cits.some(c => c.res.s !== 'ok' && c.res.s !== 'ig');
+          fmBtn.textContent = 'Find missing references online';
+          fmBtn.disabled = !hasUnmatched;
+          fmBtn.title = hasUnmatched ? '' : 'All citations are already matched.';
+        }
+      }
     }
 
     const expand = (s, e) => {
@@ -915,7 +1074,8 @@
     }
 
     function applyEdits(ed) {
-      backup = analysed;
+      const preserved = captureStagedState(ed);
+      pushUndo();
       let t = analysed;
       ed.sort((a, b) => b.s - a.s).forEach(e => {
         const oldStr = analysed.slice(e.s, e.e);
@@ -923,8 +1083,8 @@
         t = t.slice(0, e.s) + e.t + t.slice(e.e);
       });
       $('ms').value = t;
-      $('un').disabled = false;
-      run();
+      run(false, preserved);
+      setStatus('Deleted citation from text. Your other ticked fixes and scroll position were preserved.', 'DELETED');
     }
 
     async function delCit(i) {
@@ -942,22 +1102,212 @@
     }
     window.delCit = delCit;
 
-    function undoFixes() {
-      if (backup === null) return;
-      $('ms').value = backup;
-      backup = null;
-      docxTextOps = [];
-      docxAddedRefs = [];
-      $('un').disabled = true;
-      run();
+    function toggleEditCit(i) {
+      const box = $('ed' + i);
+      if (box) box.classList.toggle('hidden');
     }
+    window.toggleEditCit = toggleEditCit;
+
+    // Manually override parsed author(s)/year for a single row, re-match locally, and query Crossref if still unmatched
+    async function manualEditAndSearch(i) {
+      const c = cits[i];
+      if (!c) return;
+      const auInput = ($('ed-au-' + i)?.value || '').trim();
+      const yrInput = ($('ed-yr-' + i)?.value || '').trim();
+
+      const newNames = auInput
+        .split(/\s*(?:,|&|\band\b)\s*/i)
+        .map(s => s.replace(/\bet\s+al\.?/gi, '').trim())
+        .filter(Boolean);
+      if (!newNames.length) {
+        showDialog('Invalid Author', 'Please enter at least one author surname.');
+        return;
+      }
+      if (!new RegExp('^' + YR + '$', 'i').test(yrInput)) {
+        showDialog('Invalid Year', 'Please enter a valid 4-digit year (e.g., 2004 or 2004a).');
+        return;
+      }
+      const newYear = yrInput.toLowerCase();
+
+      // If the corrected first author appears later in c.aText (e.g. removing a leading adverb), shift offsets so edits preserve the leading word
+      const firstIdx = c.aText.toLowerCase().indexOf(newNames[0].toLowerCase());
+      if (firstIdx > 0) {
+        c.aS += firstIdx;
+        c.aText = c.aText.slice(firstIdx);
+        if (typeof c.mS === 'number') c.mS += firstIdx;
+        const rawIdx = c.raw.toLowerCase().indexOf(newNames[0].toLowerCase());
+        if (rawIdx > 0) c.raw = c.raw.slice(rawIdx);
+      }
+
+      c.names = newNames;
+      c.first = newNames[0];
+      c.sn = N(newNames[0]);
+      c.n = newNames.length;
+      c.etal = /et\s+al/i.test(auInput);
+      c.year = newYear;
+
+      c.res = match(c);
+      c.edits = buildEdits(c);
+
+      const labelEl = $('cl' + i);
+      if (labelEl) labelEl.textContent = c.raw;
+      const yrEl = $('cy' + i);
+      if (yrEl) yrEl.textContent = 'checking ' + c.year;
+      const resCell = $('rc' + i);
+      if (resCell) resCell.innerHTML = statusBadgeHtml(c);
+      const detCell = $('dc' + i);
+      if (detCell) detCell.textContent = c.res.n || '—';
+      const fixTd = $('fc' + i);
+      if (fixTd) fixTd.outerHTML = fixCell(c, i);
+      const box = $('ed' + i);
+      if (box) box.classList.add('hidden');
+
+      renderSummary();
+      const hasUnmatched = cits.some(x => x.res.s !== 'ok' && x.res.s !== 'ig');
+      $('fm').disabled = !hasUnmatched;
+      $('ap').disabled = !cits.some(x => x.edits.length || (x.res.fix && x.res.fix.crossrefRef));
+
+      const sugCell = $('s' + i);
+      if (c.res.s === 'ok') {
+        if (sugCell) sugCell.innerHTML = '<span class="text-xs text-emerald-600 font-medium">Matched in your reference list</span>';
+        setStatus(`Updated citation to “${c.names.join(', ')} (${c.year})” — matched in your reference list.`, 'MATCHED');
+        return;
+      }
+
+      const k = keyOf(c);
+      const y = Number(c.year.replace(/[a-z]$/, ''));
+      if (sugCell) sugCell.innerHTML = '<span class="text-xs text-blue-600">Searching Crossref…</span>';
+      setStatus(`Searching Crossref for “${c.names.join(', ')}” (${y})…`, 'SEARCHING');
+      try {
+        const items = await searchRefs(c, y);
+        sugCache[k] = {
+          items: items.map(o => ({ txt: fmtRef(o.m), m: o.m, sc: o.sc })),
+          msg: 'No close match on Crossref for “' + esc(c.first) + '” around ' + y + '.'
+        };
+        if (sugCell) sugCell.innerHTML = renderSug(k, i);
+        setStatus(
+          items.length
+            ? `Found ${items.length} Crossref match(es) for “${c.names.join(', ')}” (${y}).`
+            : `No close Crossref match for “${c.names.join(', ')}” (${y}).`,
+          items.length ? 'FOUND' : 'NO MATCH'
+        );
+      } catch (e) {
+        if (sugCell) sugCell.innerHTML = '<span class="text-xs text-red-600">Lookup failed (' + esc(e && e.message || e) + ').</span>';
+        setStatus('Crossref lookup failed: ' + (e && e.message || e), 'ERROR', true);
+      }
+    }
+    window.manualEditAndSearch = manualEditAndSearch;
+
+    // Mark a false-positive citation (e.g. historical event or dataset) as not needing a reference, without modifying text
+    function toggleIgnoreCit(i) {
+      const target = cits[i];
+      if (!target) return;
+      const k = keyOf(target);
+      const nowIgnored = !ignoredKeys.has(k);
+      if (nowIgnored) ignoredKeys.add(k);
+      else ignoredKeys.delete(k);
+
+      // Update all rows sharing this citation key in-place without reloading the table
+      cits.forEach((c, idx) => {
+        if (keyOf(c) !== k) return;
+        c.res = match(c);
+        c.edits = buildEdits(c);
+        c._checked = false;
+
+        const resCell = $('rc' + idx);
+        if (resCell) resCell.innerHTML = statusBadgeHtml(c);
+        const detCell = $('dc' + idx);
+        if (detCell) detCell.textContent = c.res.n || '—';
+        const fixTd = $('fc' + idx);
+        if (fixTd) fixTd.outerHTML = fixCell(c, idx);
+        const sugCell = $('s' + idx);
+        if (sugCell) {
+          if (c.res.s === 'ig' || c.res.s === 'ok') sugCell.innerHTML = '–';
+          else if (sugCache[k]) sugCell.innerHTML = renderSug(k, idx);
+          else sugCell.innerHTML = '<span class="text-xs text-slate-400">Click "Find missing references online" to search.</span>';
+        }
+        const igBtn = $('ig' + idx);
+        if (igBtn) {
+          igBtn.textContent = nowIgnored ? 'Unignore' : 'Ignore';
+          igBtn.className = nowIgnored
+            ? 'px-2 py-1 rounded text-[11px] font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition'
+            : 'px-2 py-1 rounded text-[11px] font-medium text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-300 transition';
+        }
+      });
+
+      renderSummary();
+      const hasUnmatched = cits.some(x => x.res.s !== 'ok' && x.res.s !== 'ig');
+      $('fm').disabled = !hasUnmatched;
+      $('fm').title = hasUnmatched ? '' : 'All citations are already matched or ignored.';
+      $('ap').disabled = !cits.some(x => x.edits.length || (x.res.fix && x.res.fix.crossrefRef));
+      setStatus(
+        nowIgnored
+          ? `Ignored “${target.raw}” — marked as no reference needed (text unchanged).`
+          : `Restored “${target.raw}” to active citation checks.`,
+        nowIgnored ? 'IGNORED' : 'RESTORED'
+      );
+    }
+    window.toggleIgnoreCit = toggleIgnoreCit;
+
+    function undoFixes() {
+      if (!undoStack.length) return;
+      const prev = undoStack.pop();
+      $('ms').value = prev.ms;
+      $('rf').value = prev.rf;
+      docxTextOps = prev.docxTextOps;
+      docxAddedRefs = prev.docxAddedRefs;
+      docxRemovedRefs = prev.docxRemovedRefs || [];
+      $('un').disabled = undoStack.length === 0;
+      run(false);
+      setStatus('Undid the last change. Earlier fixes remain intact.', 'UNDONE');
+    }
+
+    async function delRef(i) {
+      const r = refs[i];
+      if (!r) return;
+      const preview = r.raw.length > 100 ? r.raw.slice(0, 100) + '…' : r.raw;
+      const ok = await showDialog(
+        'Remove Uncited Reference',
+        `Remove this uncited reference from your reference list? You can undo it with “Undo last apply”.\n\n${preview}`,
+        true
+      );
+      if (!ok) return;
+
+      const preserved = captureStagedState([]);
+      pushUndo();
+
+      const rawRf = $('rf').value;
+      const useDouble = /\n\s*\n/.test(rawRf);
+      const parts = useDouble ? rawRf.split(/\n\s*\n/) : rawRf.split('\n');
+      const normPart = s => norm(s).replace(/\s+/g, ' ').trim().replace(/^(\[\d+\]|\d+[.)])\s*/, '');
+      const idx = parts.findIndex(p => normPart(p) === r.raw);
+      if (idx !== -1) {
+        parts.splice(idx, 1);
+        $('rf').value = parts.join(useDouble ? '\n\n' : '\n').trim();
+      } else {
+        $('rf').value = rawRf.replace(r.raw, '').replace(/\n{3,}/g, '\n\n').trim();
+      }
+
+      const addedIdx = docxAddedRefs.indexOf(r.raw);
+      if (addedIdx !== -1) {
+        docxAddedRefs.splice(addedIdx, 1);
+      } else {
+        docxRemovedRefs.push(r.raw);
+      }
+
+      run(false, preserved);
+      setStatus('Removed uncited reference from list (queued for .docx export).', 'REF REMOVED');
+    }
+    window.delRef = delRef;
 
     function addRef(k, n) {
       if (!sugCache[k] || !sugCache[k].items[n]) return;
+      const preserved = captureStagedState([]);
+      pushUndo();
       const refText = sugCache[k].items[n].txt;
       $('rf').value = ($('rf').value.trim() + '\n\n' + refText).trim();
       docxAddedRefs.push(refText);
-      run();
+      run(false, preserved);
       setStatus('Added reference to list & queued for .docx bibliography.', 'REF ADDED');
     }
     window.addRef = addRef;
@@ -973,7 +1323,7 @@
       if (!fam.length) return;
       const y = String(yearOf(sg.m)), ed = {};
       cits.forEach(c => {
-        if (c.res.s === 'ok' || keyOf(c) !== k) return;
+        if (c.res.s === 'ok' || c.res.s === 'ig' || keyOf(c) !== k) return;
         const lead = (c.aText.match(/^\s*(?:(?:e\.g\.|i\.e\.|see|cf\.|also|for example)[,.]?\s+)*/i) || [''])[0];
         const trail = (c.aText.match(/[\s,]*$/) || [''])[0];
         const core = c.aText.slice(lead.length, c.aText.length - trail.length), nc = names2({ names: fam }, c, core);
@@ -981,17 +1331,18 @@
         const oy = analysed.slice(c.yS, c.yE), ny = oy.slice(0, 4) === y ? oy : y;
         if (ny !== oy) ed[c.yS] = { s: c.yS, e: c.yE, t: ny };
       });
-      backup = analysed;
+      const edList = Object.values(ed);
+      const preserved = captureStagedState(edList);
+      pushUndo();
       let t = analysed;
-      Object.values(ed).sort((a, b) => b.s - a.s).forEach(e => {
+      edList.sort((a, b) => b.s - a.s).forEach(e => {
         const oldStr = analysed.slice(e.s, e.e);
         if (oldStr !== e.t) docxTextOps.push({ oldText: oldStr, newText: e.t });
         t = t.slice(0, e.s) + e.t + t.slice(e.e);
       });
       $('ms').value = t;
       upsertReferenceText(sg.txt, N(fam[0]), y);
-      $('un').disabled = false;
-      run();
+      run(false, preserved);
       setStatus('Updated in-text citation and reference list (queued for .docx export).', 'UPDATED');
     }
     window.useRef = useRef;
@@ -1002,27 +1353,20 @@
     function statusBadgeHtml(c) {
       const base = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ';
       if (c.res.s === 'ok') return `<span class="${base}bg-emerald-50 text-emerald-700 border-emerald-200">${esc(c.res.t)}</span>`;
+      if (c.res.s === 'ig') return `<span class="${base}bg-slate-100 text-slate-600 border-slate-300">${esc(c.res.t)}</span>`;
       if (c.res.s === 'wn') return `<span class="${base}bg-amber-50 text-amber-700 border-amber-200">${esc(c.res.t)}</span>`;
       return `<span class="${base}bg-red-50 text-red-700 border-red-200">${esc(c.res.t)}</span>`;
     }
 
-    function run(autoLookup = true) {
-      analysed = norm($('ms').value);
-      save();
-      refs = parseRefs(norm($('rf').value));
-      cits = parseCits(analysed);
-      refs.forEach(r => r.cited = false);
-      cits.forEach(c => { c.res = match(c); });
-      cits.forEach(c => { c.edits = buildEdits(c); });
-
+    function renderSummary() {
       const cnt = k => cits.filter(c => c.res.s === k).length;
       const unc = refs.filter(r => !r.cited);
-
+      const igCount = cnt('ig');
       $('summary-container').innerHTML = `
         <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
           <div class="p-3.5 rounded-lg bg-slate-50 border border-slate-200">
             <div class="text-2xl font-bold text-slate-900">${cits.length}</div>
-            <div class="text-xs text-slate-500 mt-0.5">Citations found</div>
+            <div class="text-xs text-slate-500 mt-0.5">Citations found${igCount ? ` (${igCount} ignored)` : ''}</div>
           </div>
           <div class="p-3.5 rounded-lg bg-emerald-50/60 border border-emerald-200">
             <div class="text-2xl font-bold text-emerald-700">${cnt('ok')}</div>
@@ -1042,6 +1386,34 @@
           </div>
         </div>
       `;
+    }
+
+    function run(autoLookup = true, preservedState = null) {
+      const prevScrollX = window.scrollX;
+      const prevScrollY = window.scrollY;
+      analysed = norm($('ms').value);
+      save();
+      refs = parseRefs(norm($('rf').value));
+      cits = parseCits(analysed);
+      refs.forEach(r => r.cited = false);
+      cits.forEach(c => { c.res = match(c); });
+      cits.forEach(c => {
+        c.edits = buildEdits(c);
+        if (preservedState && preservedState.has(c.yS)) {
+          const st = preservedState.get(c.yS);
+          if (st.crossrefFix && c.res.s !== 'ok' && c.res.s !== 'ig') {
+            c.res.fix = st.crossrefFix;
+            c.edits = buildEdits(c);
+          } else if (st.selectedOptIdx !== null && c.res.fixOpts && c.res.fixOpts[st.selectedOptIdx]) {
+            c.res.fix = c.res.fixOpts[st.selectedOptIdx];
+            c.edits = buildEdits(c);
+            c._selectedOptIdx = st.selectedOptIdx;
+          }
+          c._checked = st.checked;
+        }
+      });
+
+      renderSummary();
 
       let html = '';
       if (!refs.length || !cits.length) {
@@ -1050,7 +1422,7 @@
         </div>`;
       }
 
-      // In-text citations table
+      // In-text citations table (Delete from text available unconditionally for every row)
       html += `
         <div class="bg-white rounded-xl border border-[#dce3ee] shadow-sm overflow-hidden">
           <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
@@ -1072,15 +1444,29 @@
                 ${cits.length ? cits.map((c, i) => `
                   <tr class="hover:bg-slate-50/60 align-top">
                     <td class="px-3.5 py-3 break-words">
-                      <div class="font-semibold text-slate-800">${esc(c.raw)}</div>
-                      <div class="text-[11px] text-slate-400 mt-0.5">checking ${esc(c.year)}</div>
-                      ${LOOK.includes(c.res.t) ? `<button type="button" onclick="delCit(${i})" class="mt-2 px-2 py-1 rounded text-[11px] font-medium text-slate-600 bg-white hover:bg-red-50 hover:text-red-700 hover:border-red-200 border border-slate-300 transition">Delete from text</button>` : ''}
+                      <div id="cl${i}" class="font-semibold text-slate-800">${esc(c.raw)}</div>
+                      <div id="cy${i}" class="text-[11px] text-slate-400 mt-0.5">checking ${esc(c.year)}</div>
+                      <div class="mt-2 flex flex-wrap gap-1.5">
+                        <button type="button" onclick="toggleEditCit(${i})" class="px-2 py-1 rounded text-[11px] font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition">Edit &amp; search</button>
+                        ${c.res.s !== 'ok' ? `<button id="ig${i}" type="button" onclick="toggleIgnoreCit(${i})" class="px-2 py-1 rounded text-[11px] font-medium ${c.res.s === 'ig' ? 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-emerald-200' : 'text-slate-600 bg-slate-50 hover:bg-slate-100 border-slate-300'} border transition">${c.res.s === 'ig' ? 'Unignore' : 'Ignore'}</button>` : ''}
+                        <button type="button" onclick="delCit(${i})" class="px-2 py-1 rounded text-[11px] font-medium text-slate-600 bg-white hover:bg-red-50 hover:text-red-700 hover:border-red-200 border border-slate-300 transition">Delete from text</button>
+                      </div>
+                      <div id="ed${i}" class="hidden mt-2 p-2.5 rounded-lg border border-blue-200 bg-blue-50/60 space-y-1.5">
+                        <label class="block text-[10px] font-semibold text-slate-600">Author(s)</label>
+                        <input id="ed-au-${i}" type="text" value="${esc(c.names.join(', ') + (c.etal ? ' et al.' : ''))}" class="w-full rounded border border-slate-300 bg-white px-2 py-1 text-[11px] text-slate-800 focus:border-blue-500 outline-none" placeholder="e.g. Canova, Ciccarelli">
+                        <label class="block text-[10px] font-semibold text-slate-600">Year</label>
+                        <input id="ed-yr-${i}" type="text" value="${esc(c.year)}" class="w-full rounded border border-slate-300 bg-white px-2 py-1 text-[11px] text-slate-800 focus:border-blue-500 outline-none" placeholder="e.g. 2004">
+                        <div class="flex flex-wrap gap-1.5 pt-1">
+                          <button type="button" onclick="manualEditAndSearch(${i})" class="px-2 py-1 rounded text-[11px] font-semibold text-white bg-[#1d4ed8] hover:bg-[#1e40af] transition">Re-match &amp; search</button>
+                          <button type="button" onclick="toggleEditCit(${i})" class="px-2 py-1 rounded text-[11px] font-medium text-slate-600 bg-white hover:bg-slate-100 border border-slate-300 transition">Cancel</button>
+                        </div>
+                      </div>
                     </td>
-                    <td class="px-3.5 py-3 whitespace-nowrap">${statusBadgeHtml(c)}</td>
-                    <td class="px-3.5 py-3 text-slate-600 break-words">${esc(c.res.n || '—')}</td>
+                    <td id="rc${i}" class="px-3.5 py-3 whitespace-nowrap">${statusBadgeHtml(c)}</td>
+                    <td id="dc${i}" class="px-3.5 py-3 text-slate-600 break-words">${esc(c.res.n || '—')}</td>
                     ${fixCell(c, i)}
                     <td class="px-3.5 py-3 text-slate-500 leading-relaxed break-words">…${esc(c.ctx)}…</td>
-                    <td id="s${i}" class="px-3.5 py-3 text-slate-400 whitespace-normal break-words">${c.res.s !== 'ok' ? 'Loading Crossref…' : '–'}</td>
+                    <td id="s${i}" class="px-3.5 py-3 text-slate-400 whitespace-normal break-words">${c.res.s !== 'ok' && c.res.s !== 'ig' ? 'Loading Crossref…' : '–'}</td>
                   </tr>
                 `).join('') : `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-400">No citations found.</td></tr>`}
               </tbody>
@@ -1114,6 +1500,7 @@
                       <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${r.cited ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}">
                         ${r.cited ? 'Yes' : 'Never cited'}
                       </span>
+                      ${!r.cited ? `<button type="button" onclick="delRef(${i})" class="ml-2 px-2 py-0.5 rounded text-[11px] font-medium text-slate-600 bg-white hover:bg-red-50 hover:text-red-700 hover:border-red-200 border border-slate-300 transition">Remove</button>` : ''}
                     </td>
                     <td id="d${i}" class="px-4 py-3 text-slate-500">${r.doi ? esc(r.doi) + (r.cr ? '<br>' + r.cr : '') : 'none'}</td>
                   </tr>
@@ -1129,10 +1516,18 @@
 
       $('csv').disabled = !cits.length;
       $('cr').disabled = !refs.some(r => r.doi);
-      $('fm').disabled = !cits.some(c => c.res.s !== 'ok');
-      $('ap').disabled = !cits.some(c => c.edits.length);
+      const hasUnmatched = cits.some(c => c.res.s !== 'ok' && c.res.s !== 'ig');
+      $('fm').disabled = !hasUnmatched;
+      $('fm').textContent = 'Find missing references online';
+      $('fm').title = hasUnmatched ? '' : 'All citations are already matched or ignored.';
+      $('ap').disabled = !cits.some(c => c.edits.length || (c.res.fix && c.res.fix.crossrefRef));
 
-      if (autoLookup && cits.some(c => c.res.s !== 'ok')) {
+      if (preservedState !== null || !autoLookup) {
+        window.scrollTo(prevScrollX, prevScrollY);
+        requestAnimationFrame(() => window.scrollTo(prevScrollX, prevScrollY));
+      }
+
+      if (autoLookup && hasUnmatched) {
         findMissing();
       }
     }
@@ -1163,7 +1558,8 @@
           break;
         }
       }
-      run(false);
+      const preserved = captureStagedState([]);
+      run(false, preserved);
       setStatus('Crossref DOI verification complete.', 'DONE');
     }
 
@@ -1278,6 +1674,18 @@
           });
         }
 
+        // 3. Remove deleted uncited reference paragraphs cleanly from the document body
+        if (docxRemovedRefs.length) {
+          const normRef = s => norm(s).replace(/\s+/g, ' ').trim().replace(/^(\[\d+\]|\d+[.)])\s*/, '');
+          const removedSet = new Set(docxRemovedRefs.map(normRef));
+          Array.from(xmlDoc.getElementsByTagNameNS(W_NS, 'p')).forEach(p => {
+            const pText = normRef(p.textContent || '');
+            if (pText && removedSet.has(pText) && p.parentNode) {
+              p.parentNode.removeChild(p);
+            }
+          });
+        }
+
         const serializer = new XMLSerializer();
         zip.file('word/document.xml', serializer.serializeToString(xmlDoc));
         const blob = await zip.generateAsync({ type: 'blob' });
@@ -1288,7 +1696,7 @@
         a.download = outName;
         a.click();
 
-        setStatus(`Downloaded "${outName}" with ${docxTextOps.length} text edit(s) and ${docxAddedRefs.length} added reference(s).`, 'EXPORTED');
+        setStatus(`Downloaded "${outName}" with ${docxTextOps.length} text edit(s), ${docxAddedRefs.length} added and ${docxRemovedRefs.length} removed reference(s).`, 'EXPORTED');
       } catch (err) {
         console.error(err);
         setStatus('DOCX export failed: ' + (err.message || err), 'ERROR', true);
@@ -1317,7 +1725,7 @@
     $('rf').addEventListener('input', save);
 
     $('btn-load-example').onclick = () => {
-      $('ms').value = "Exchange rate pass-through has been widely studied (Taylor, 2000; Campa & Goldberg, 2005). Burstein and Gopinath (2014) argue that it is lower in stable regimes, while Smith et al. (2019) find the opposite. Earlier work (Taylor, 2001) disagrees, and Jones (2018) is rarely cited.";
+      $('ms').value = "Exchange rate pass-through has been widely studied (Taylor, 2000; Campa & Goldberg, 2005). However, Burstein and Gopinath (2014) argue that it is lower in stable regimes, while Smith et al.'s (2019) results find the opposite. Earlier work (Taylor, 2001) disagrees, and Jones (2018, p. 45) is rarely cited.";
       $('rf').value = "Burstein, A., & Gopinath, G. (2014). International prices and exchange rates. Handbook of International Economics, 4, 391-451.\n\nCampa, J. M., & Goldberg, L. S. (2005). Exchange rate pass-through into import prices. Review of Economics and Statistics, 87(4), 679-690. https://doi.org/10.1162/003465305775098170\n\nSmith, A., Lee, C., & Park, D. (2019). A made-up example. Journal of Examples, 1(1), 1-10.\n\nTaylor, J. B. (2000). Low inflation, pass-through, and the pricing power of firms. European Economic Review, 44(7), 1389-1408.";
       $('results-section').classList.remove('hidden');
       run();
