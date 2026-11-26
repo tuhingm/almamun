@@ -107,16 +107,16 @@ courses:
       - [12, 13, "Part IV · Heterogeneity and estimation"]
       - [14, 15, "Part V · Evidence and practice"]
 
-  us-stock-analysis:
+  stock-market-analysis:
     code: Training Course · Analysis
     kind: Training course
-    title: US Stock Market Analysis
-    subtitle: A 15-week training course in price action analysis of US stocks, from reading the daily chart to a written trading plan.
+    title: Stock Market Analysis
+    subtitle: A 15-week training course in price action analysis of stocks, from reading the daily chart to a written trading plan.
     level: Practitioner level
     format: weekly chart labs, trading plan, trading journal
     prerequisites: None. A broker demo account is useful from Week 1.
     software: Any charting platform that shows daily candlestick charts
-    summary: A 15-week training course in price action analysis of US stocks. Trend, key levels, pin bars, inside bars, fakeys, confluence, stop loss, risk reward, position sizing, trade management and a written trading plan.
+    summary: A 15-week training course in price action analysis of stocks. Trend, key levels, pin bars, inside bars, fakeys, confluence, stop loss, risk reward, position sizing, trade management and a written trading plan.
     topics: [Price action, Trend, Key levels, Pin bar, Inside bar, Fakey, Confluence, 21 EMA, Risk reward, Position sizing, Trading plan]
     unit_word: Week
     notes_label: Weekly sessions

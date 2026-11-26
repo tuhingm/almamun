@@ -55,4 +55,4 @@ Price later reaches the target.
 
 ## Lab
 
-Find two retracements on daily charts of US stocks in a clear uptrend. For each, write the plan above before you look at what happened next. Then check and record the result in your journal.
+Find two retracements on daily charts of stocks in a clear uptrend. For each, write the plan above before you look at what happened next. Then check and record the result in your journal.

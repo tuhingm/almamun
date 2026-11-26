@@ -46,4 +46,4 @@ A simulated stock makes these swing points: low $100, high $108, low $103, high 
 
 ## Lab
 
-Pick five US stocks. On the weekly chart mark the swing highs and swing lows and write uptrend, downtrend or sideways for each. Then check the daily chart: does it agree?
+Pick five stocks. On the weekly chart mark the swing highs and swing lows and write uptrend, downtrend or sideways for each. Then check the daily chart: does it agree?
