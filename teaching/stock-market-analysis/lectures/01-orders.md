@@ -27,7 +27,7 @@ An order is an instruction to your broker. Three kinds cover almost every trade 
 
 ![The orders used on every trade: a market order, a limit order to buy and sell, a stop order to buy, and a stop loss.](../figs/w01_orders.png)
 
-<p class="figcap">Figure 1.1. Four orders around a stock trading at $50.00. All prices are simulated.</p>
+<p class="figcap">Figure 1.1. Four orders around a stock trading at $50.00.</p>
 
 ### Every trade has three prices
 

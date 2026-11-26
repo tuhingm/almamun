@@ -28,7 +28,7 @@ A **time frame** is the length of time one bar covers. In this course you use tw
 
 Always look at the weekly chart first, then the daily chart. A signal on the daily chart that fights the weekly trend is weaker than one that agrees with it.
 
-![The same simulated prices on a daily chart with 120 bars and a weekly chart with 24 bars.](../figs/w02_timeframes.png)
+![The same prices on a daily chart with 120 bars and a weekly chart with 24 bars.](../figs/w02_timeframes.png)
 
 <p class="figcap">Figure 2.2. The same prices on two time frames. The weekly chart removes the noise and shows the trend.</p>
 

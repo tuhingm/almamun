@@ -20,7 +20,7 @@
 
 A setup with one factor is a bar. A setup with two is worth watching. A setup with three or four is a trade to plan.
 
-![A simulated stock: an uptrend, a retracement to a key level that was resistance, and a bullish pin bar at the 21 EMA.](../figs/w11_confluence.png)
+![A stock: an uptrend, a retracement to a key level that was resistance, and a bullish pin bar at the 21 EMA.](../figs/w11_confluence.png)
 
 <p class="figcap">Figure 11.1. Four factors in one place: the trend, the old resistance turned support, the 21 EMA and the pin bar.</p>
 

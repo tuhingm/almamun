@@ -23,7 +23,7 @@ Each time price reaches a level and turns, the level is **rejected**. Three clea
 
 When price breaks above a resistance level and then falls back to it, the old resistance often acts as support. The same is true in reverse: a broken support often becomes resistance. This is the reason you keep old levels on your chart after they break.
 
-![A simulated stock is rejected three times at a key level, breaks out, and then finds support at the same level.](../figs/w04_levels.png)
+![A stock is rejected three times at a key level, breaks out, and then finds support at the same level.](../figs/w04_levels.png)
 
 <p class="figcap">Figure 4.1. Price remembers key levels. The same line is resistance on the left and support on the right.</p>
 

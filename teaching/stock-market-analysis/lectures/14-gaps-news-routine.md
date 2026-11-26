@@ -13,7 +13,7 @@
 
 A **gap** appears when a stock opens well above or below the previous close and no trading takes place in between. Gaps usually follow news, which arrives after the close or before the open. A gap can take price straight through your stop loss. A stop order becomes a market order once it is reached, so you can be filled well beyond your stop price, and the loss can be larger than you planned.
 
-![Two simulated gaps after news: one holds and the trend continues, the other closes and the move reverses.](../figs/w14_gaps.png)
+![Two gaps after news: one holds and the trend continues, the other closes and the move reverses.](../figs/w14_gaps.png)
 
 <p class="figcap">Figure 14.1. The first bars after a gap decide whether it holds or fails.</p>
 

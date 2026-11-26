@@ -13,7 +13,7 @@
 
 When price moves between a support level and a resistance level without making progress, the market is sideways. The key levels are the boundaries. A simple plan is to buy near support with a bullish signal and to sell near resistance with a bearish signal, with the stop loss just beyond the level. The plan stops when a breakout arrives.
 
-![A simulated sideways market with four rejections at resistance and three at support, followed by a breakout.](../figs/w10_range.png)
+![A sideways market with four rejections at resistance and three at support, followed by a breakout.](../figs/w10_range.png)
 
 <p class="figcap">Figure 10.1. Buy near support and sell near resistance while the levels hold. After the close above resistance, stop selling.</p>
 

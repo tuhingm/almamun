@@ -19,9 +19,9 @@ A **swing high** is a high that has lower highs on both sides. A **swing low** i
 - **Downtrend:** each swing high is lower (a lower high, LH) and each swing low is lower (a lower low, LL).
 - **Sideways:** the swing highs and swing lows stay in a band and do not rise or fall.
 
-![A simulated uptrend with higher highs and higher lows, followed by a lower high and lower lows.](../figs/w03_structure.png)
+![A uptrend with higher highs and higher lows, followed by a lower high and lower lows.](../figs/w03_structure.png)
 
-<p class="figcap">Figure 3.1. The trend ends in stages: first a lower high, then a lower low that breaks the last higher low. All prices are simulated.</p>
+<p class="figcap">Figure 3.1. The trend ends in stages: first a lower high, then a lower low that breaks the last higher low.</p>
 
 ### When the trend breaks
 
@@ -33,7 +33,7 @@ Most of the time the easiest trade is the one with the trend. Momentum is on you
 
 ## Worked example
 
-A simulated stock makes these swing points: low $100, high $108, low $103, high $118, low $111, high $130.
+A stock makes these swing points: low $100, high $108, low $103, high $118, low $111, high $130.
 
 - The swing lows are $100, $103 and $111. Each is higher than the last (HL, HL).
 - The swing highs are $108, $118 and $130. Each is higher than the last (HH, HH).

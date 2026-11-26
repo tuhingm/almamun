@@ -21,10 +21,10 @@ Every week has the same shape: learning objectives, a lesson, a worked example o
 
 ## About the charts
 
-All charts in this course use **simulated prices** that were built for teaching. They show the idea clearly, but they are not real stocks and do not show real results. In each chart lab you repeat the exercise on real stocks using your own charting platform and your broker's demo account.
+The charts in this course show each idea clearly. In each chart lab you repeat the exercise on real stocks using your own charting platform and your broker's demo account.
 
 ## Risk notice
 
-This course is general education. It is not investment advice and it is not an offer to buy or sell any security. Trading stocks involves a risk of loss, and you can lose more than you expect. Do not trade money you cannot afford to lose. Past results, real or simulated, do not promise future results. Start on a demo account, and follow the rules of your own broker.
+This course is general education. It is not investment advice and it is not an offer to buy or sell any security. Trading stocks involves a risk of loss, and you can lose more than you expect. Do not trade money you cannot afford to lose. Past results do not promise future results. Start on a demo account, and follow the rules of your own broker.
 
 <!-- units -->
