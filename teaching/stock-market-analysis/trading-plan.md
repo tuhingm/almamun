@@ -37,23 +37,46 @@ Complete this plan during the course. Write it in your own words, and keep it sh
 
 **14. Daily routine.** The six steps from the daily routine chart.
 
-## Part 2: Position size table
+## Part 2: Position size worksheet
 
-Risk per trade = account size x risk percentage. Position size = risk per trade divided by the risk per share (entry minus stop loss).
+Risk per trade = account size x risk percentage. Position size = risk per trade divided by the risk per share (entry minus stop loss). Two worked examples are filled in. Use the last column for your own trade.
 
-| Account | Risk % | Risk per trade | Entry | Stop loss | Risk per share | Position size (shares) |
-|---|---|---|---|---|---|---|
-| $10,000 | 1% | $100 | $50.00 | $48.40 | $1.60 | 62 |
-| $10,000 | 0.5% | $50 | $50.00 | $48.40 | $1.60 | 31 |
-| | | | | | | |
-| | | | | | | |
+| Step | Example 1 | Example 2 | My trade |
+|---|---|---|---|
+| Account | $10,000 | $10,000 | |
+| Risk percentage | 1% | 0.5% | |
+| Risk per trade | $100 | $50 | |
+| Entry | $50.00 | $50.00 | |
+| Stop loss | $48.40 | $48.40 | |
+| Risk per share | $1.60 | $1.60 | |
+| Position size (shares) | 62 | 31 | |
 
 ## Part 3: Trading journal
 
-Copy one row for every trade. Fill in the first part before you enter and the second part after the exit.
+Copy this page for every trade. Fill in the first table before you enter, and the second table after the exit.
 
-| # | Date | Stock | Long or short | Signal | Key level | Confluence (count) | Entry | Stop loss | Target | Position size | Exit | Result (times the risk) | Followed the plan? | Emotion | Note |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | | | | | | | | | | | | | | | |
-| 2 | | | | | | | | | | | | | | | |
-| 3 | | | | | | | | | | | | | | | |
+**Before the entry**
+
+| Item | My trade |
+|---|---|
+| Trade number | |
+| Date | |
+| Stock | |
+| Long or short | |
+| Signal | |
+| Key level | |
+| Confluence (count) | |
+| Entry | |
+| Stop loss | |
+| Target | |
+| Position size | |
+
+**After the exit**
+
+| Item | My trade |
+|---|---|
+| Exit price | |
+| Result (times the risk) | |
+| Followed the plan? | |
+| Emotion during the trade | |
+| Note for the review | |

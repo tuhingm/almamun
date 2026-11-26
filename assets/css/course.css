@@ -198,3 +198,30 @@ footer{background:var(--deep);color:#c5d2e7;padding:27px 0 15px}
 /* figures inside course pages */
 .notes img{display:block;max-width:100%;height:auto;margin:18px auto 6px;border:1px solid var(--line);border-radius:6px;background:#fff}
 .notes .figcap{font-size:13px;color:var(--muted,#566074);text-align:center;margin:0 0 22px;line-height:1.5}
+
+/* training course: phone layout */
+.is-training .notes table th,.is-training .notes table td{vertical-align:top}
+@media(max-width:650px){
+  .is-training .hero{padding:16px 0 28px}
+  .is-training .crumbs{margin-bottom:14px;font-size:11px}
+  .is-training .hero h1,.is-training .hero h1.lec-title,.is-training .hero h1.page-h1{font-size:27px;line-height:1.12;margin:10px 0 8px}
+  .is-training .hero .subtitle{font-size:14px;margin:0 0 12px}
+  .is-training .hero .focus{display:none}
+  .is-training .hero .actions{gap:8px}
+  .is-training .hero .actions .btn{padding:9px 14px;font-size:13px}
+  .is-training.is-lecture .hero .actions button{display:none}
+  .is-training .hero .profile-panel{display:none}
+  .is-training .hero-grid{gap:16px}
+  .is-training .profile-panel{padding:16px 18px}
+  .is-training .author-note{margin-top:14px;padding:12px 14px;font-size:12.5px;line-height:1.5}
+  .is-training .course-body{padding:20px 0 40px}
+  .is-training .notes{font-size:16px;line-height:1.65}
+  .is-training .notes h2{font-size:22px}
+  .is-training .notes h3{font-size:18px}
+  .is-training .notes table{display:table;table-layout:auto;font-size:13px;line-height:1.45;width:100%}
+  .is-training .notes th,.is-training .notes td{padding:8px 9px;word-break:normal;overflow-wrap:anywhere}
+  .is-training .notes th{font-size:11px;letter-spacing:.03em}
+  .is-training .notes img{width:100%;margin:12px 0 4px;border-radius:4px}
+  .is-training .notes .figcap{font-size:12.5px;margin:0 0 18px}
+  .is-training .box{padding:2px 14px 6px}
+}
