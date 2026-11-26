@@ -1,0 +1,536 @@
+[
+ {
+  "out": "assets/og/oes/ai-studio.jpg",
+  "kicker": "Tuhin Al Mamun",
+  "title": "OES AI Studio",
+  "sub": "work directly with Gemini on Open Econometric Systems source code."
+ },
+ {
+  "out": "assets/og/oes/consultation/index.jpg",
+  "kicker": "OES",
+  "title": "Statistical & Econometric Consulting",
+  "sub": "Step-by-step guide with code, tests and real output."
+ },
+ {
+  "out": "assets/og/oes/consultation.jpg",
+  "kicker": "OES",
+  "title": "Statistical & Econometric Consulting",
+  "sub": "Step-by-step guide with code, tests and real output."
+ },
+ {
+  "out": "assets/og/oes/reference-manual-v1.4.jpg",
+  "kicker": "Research Guide · Tuhin Al Mamun",
+  "title": "OES Reference Manual, Version 1.4",
+  "sub": "Official reference manual for Open Econometric Systems (OES), Version 1.4, by Tuhin G."
+ },
+ {
+  "out": "assets/og/research-guide/ardl.jpg",
+  "kicker": "Research Guide · Tuhin Al Mamun",
+  "title": "Time-Series Research Guide",
+  "sub": "Step-by-step model guides, tests and Python code."
+ },
+ {
+  "out": "assets/og/research-guide/gmm.jpg",
+  "kicker": "Research Guide · Tuhin Al Mamun",
+  "title": "Time-Series Research Guide",
+  "sub": "Step-by-step model guides, tests and Python code."
+ },
+ {
+  "out": "assets/og/research-guide/index.jpg",
+  "kicker": "Research Guide · Tuhin Al Mamun",
+  "title": "Time-Series Research Guide",
+  "sub": "Step-by-step model guides, tests and Python code."
+ },
+ {
+  "out": "assets/og/research-guide/nardl.jpg",
+  "kicker": "Research Guide · Tuhin Al Mamun",
+  "title": "Time-Series Research Guide",
+  "sub": "Step-by-step model guides, tests and Python code."
+ },
+ {
+  "out": "assets/og/research-guide/ols.jpg",
+  "kicker": "Research Guide · Tuhin Al Mamun",
+  "title": "Time-Series Research Guide",
+  "sub": "Step-by-step model guides, tests and Python code."
+ },
+ {
+  "out": "assets/og/research-guide/var.jpg",
+  "kicker": "Research Guide · Tuhin Al Mamun",
+  "title": "Time-Series Research Guide",
+  "sub": "Step-by-step model guides, tests and Python code."
+ },
+ {
+  "out": "assets/og/research-guide/vecm.jpg",
+  "kicker": "Research Guide · Tuhin Al Mamun",
+  "title": "Time-Series Research Guide",
+  "sub": "Step-by-step model guides, tests and Python code."
+ },
+ {
+  "out": "assets/og/stat-guide/aft.jpg",
+  "kicker": "OES Statistics Division",
+  "title": "Accelerated failure time model",
+  "sub": "s relate covariates to the logarithm of survival time:"
+ },
+ {
+  "out": "assets/og/stat-guide/ancova.jpg",
+  "kicker": "OES Statistics Division",
+  "title": "Analysis of covariance (ANCOVA)",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/anova-one-way.jpg",
+  "kicker": "OES Statistics Division",
+  "title": "One-way ANOVA",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/anova-repeated-measures.jpg",
+  "kicker": "OES Statistics Division",
+  "title": "Repeated-measures ANOVA",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/anova-two-way.jpg",
+  "kicker": "OES Statistics Division",
+  "title": "Two-way ANOVA",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/bootstrap.jpg",
+  "kicker": "OES Statistics Division",
+  "title": "Bootstrap confidence intervals",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/cca.jpg",
+  "kicker": "Tuhin Al Mamun",
+  "title": "Canonical correlation analysis (CCA)",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/cfa.jpg",
+  "kicker": "OES Statistics Division",
+  "title": "Confirmatory factor analysis (CFA)",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/correspondence-analysis.jpg",
+  "kicker": "OES Statistics Division",
+  "title": "Correspondence analysis (CA)",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/cox-ph.jpg",
+  "kicker": "OES Statistics Division",
+  "title": "Cox proportional hazards model",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/efa.jpg",
+  "kicker": "OES Statistics Division",
+  "title": "Exploratory factor analysis (EFA)",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/fine-gray.jpg",
+  "kicker": "Tuhin Al Mamun",
+  "title": "Fine-Gray competing-risks regression",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/friedman.jpg",
+  "kicker": "OES Statistics Division",
+  "title": "Friedman test",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/gee.jpg",
+  "kicker": "Tuhin Al Mamun",
+  "title": "Generalised estimating equations (GEE)",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/glmm.jpg",
+  "kicker": "Tuhin Al Mamun",
+  "title": "Generalised linear mixed model (GLMM)",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/icc.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Intraclass correlation (ICC) and reliability",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/index.jpg",
+  "kicker": "OES Statistics Division",
+  "title": "Statistics Division: method guides",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/kaplan-meier.jpg",
+  "kicker": "Tuhin Al Mamun",
+  "title": "Kaplan-Meier estimator and log-rank test",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/kendall-tau.jpg",
+  "kicker": "OES Statistics Division",
+  "title": "Kendall's tau correlation",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/kruskal-wallis.jpg",
+  "kicker": "OES Statistics Division",
+  "title": "Kruskal-Wallis test",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/lda.jpg",
+  "kicker": "OES Statistics Division",
+  "title": "Linear discriminant analysis (LDA)",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/lmm.jpg",
+  "kicker": "OES Statistics Division",
+  "title": "Linear mixed-effects model (LMM)",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/mancova.jpg",
+  "kicker": "OES Statistics Division",
+  "title": "Multivariate ANCOVA (MANCOVA)",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/mann-whitney.jpg",
+  "kicker": "OES Statistics Division",
+  "title": "Mann-Whitney U test",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/manova.jpg",
+  "kicker": "OES Statistics Division",
+  "title": "Multivariate ANOVA (MANOVA)",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/meta-fixed.jpg",
+  "kicker": "OES Statistics Division",
+  "title": "Fixed-effect meta-analysis",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/meta-random.jpg",
+  "kicker": "OES Statistics Division",
+  "title": "Random-effects meta-analysis",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/parametric-survival.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Parametric survival (Weibull, exponential, log-normal)",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/pca.jpg",
+  "kicker": "OES Statistics Division",
+  "title": "Principal component analysis (PCA)",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/permutation.jpg",
+  "kicker": "OES Statistics Division",
+  "title": "Permutation tests",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/power.jpg",
+  "kicker": "OES Statistics Division",
+  "title": "Power and sample-size analysis",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/aft.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Accelerated failure time model: technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/ancova.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Analysis of covariance (ANCOVA): technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/anova-one-way.jpg",
+  "kicker": "Tuhin Al Mamun",
+  "title": "One-way ANOVA: technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/anova-repeated-measures.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Repeated-measures ANOVA: technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/anova-two-way.jpg",
+  "kicker": "Tuhin Al Mamun",
+  "title": "Two-way ANOVA: technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/bootstrap.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Bootstrap confidence intervals: technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/cca.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Canonical correlation analysis (CCA): technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/cfa.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Confirmatory factor analysis (CFA): technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/correspondence-analysis.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Correspondence analysis (CA): technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/cox-ph.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Cox proportional hazards model: technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/efa.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Exploratory factor analysis (EFA): technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/fine-gray.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Fine-Gray competing-risks regression: technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/friedman.jpg",
+  "kicker": "Tuhin Al Mamun",
+  "title": "Friedman test: technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/gee.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Generalised estimating equations (GEE): technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/glmm.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Generalised linear mixed model (GLMM): technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/icc.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Intraclass correlation (ICC) and reliability: technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/kaplan-meier.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Kaplan-Meier estimator and log-rank test: technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/kendall-tau.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Kendall's tau correlation: technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/kruskal-wallis.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Kruskal-Wallis test: technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/lda.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Linear discriminant analysis (LDA): technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/lmm.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Linear mixed-effects model (LMM): technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/mancova.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Multivariate ANCOVA (MANCOVA): technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/mann-whitney.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Mann-Whitney U test: technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/manova.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Multivariate ANOVA (MANOVA): technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/meta-fixed.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Fixed-effect meta-analysis: technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/meta-random.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Random-effects meta-analysis: technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/parametric-survival.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Parametric survival (Weibull, exponential, log-normal): technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/pca.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Principal component analysis (PCA): technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/permutation.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Permutation tests: technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/power.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Power and sample-size analysis: technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/reports/wilcoxon.jpg",
+  "kicker": "Tuhin Al Mamun, Ph.D.",
+  "title": "Wilcoxon signed-rank test: technical validation report",
+  "sub": "Technical validation report with simulation, benchmark and real-data results."
+ },
+ {
+  "out": "assets/og/stat-guide/wilcoxon.jpg",
+  "kicker": "OES Statistics Division",
+  "title": "Wilcoxon signed-rank test",
+  "sub": "Step-by-step guide with Python code and real output."
+ },
+ {
+  "out": "assets/og/time-series-guide/arima.jpg",
+  "kicker": "Time-Series Research Guide · Tuhin Al Mamun",
+  "title": "ARIMA and Seasonal ARIMA (SARIMA)",
+  "sub": "Step-by-step guide with code, tests and real output."
+ },
+ {
+  "out": "assets/og/time-series-guide/cointegration.jpg",
+  "kicker": "Time-Series Research Guide · Tuhin Al Mamun",
+  "title": "Cointegration Tests",
+  "sub": "Step-by-step guide with code, tests and real output."
+ },
+ {
+  "out": "assets/og/time-series-guide/factor-models.jpg",
+  "kicker": "Time-Series Research Guide · Tuhin Al Mamun",
+  "title": "Factor Models: Principal Components and the Number of Factors",
+  "sub": "a step-by-step guide to writing the empirical paper, with Python code and mor"
+ },
+ {
+  "out": "assets/og/time-series-guide/forecast-comparison.jpg",
+  "kicker": "Time-Series Research Guide · Tuhin Al Mamun",
+  "title": "Forecast Comparison and the Diebold-Mariano Test",
+  "sub": "a step-by-step guide to writing the empirical paper, with Python code, real output and sam"
+ },
+ {
+  "out": "assets/og/time-series-guide/garch.jpg",
+  "kicker": "Time-Series Research Guide · Tuhin Al Mamun",
+  "title": "GARCH, EGARCH, GJR-GARCH and DCC",
+  "sub": "Step-by-step guide with code, tests and real output."
+ },
+ {
+  "out": "assets/og/time-series-guide/granger-causality.jpg",
+  "kicker": "Time-Series Research Guide · Tuhin Al Mamun",
+  "title": "Granger Causality in Levels (Toda-Yamamoto)",
+  "sub": "a step-by-step guide to writing the empirical paper, with Python code, real output and sample t"
+ },
+ {
+  "out": "assets/og/time-series-guide/long-memory.jpg",
+  "kicker": "Time-Series Research Guide · Tuhin Al Mamun",
+  "title": "Long Memory and Fractional Integration (GPH and Local Whittle)",
+  "sub": "a step-by-step guide to writing the empirical paper, with Python code and mo"
+ },
+ {
+  "out": "assets/og/time-series-guide/quantile.jpg",
+  "kicker": "Time-Series Research Guide · Tuhin Al Mamun",
+  "title": "Quantile Regression",
+  "sub": "Step-by-step guide with code, tests and real output."
+ },
+ {
+  "out": "assets/og/time-series-guide/seasonality.jpg",
+  "kicker": "Time-Series Research Guide · Tuhin Al Mamun",
+  "title": "Seasonality: STL Decomposition and Seasonal Adjustment",
+  "sub": "a step-by-step guide to writing the empirical paper, with Python code, real output a"
+ },
+ {
+  "out": "assets/og/time-series-guide/spectral-analysis.jpg",
+  "kicker": "Time-Series Research Guide · Tuhin Al Mamun",
+  "title": "Spectral Analysis: Cycles and Coherence",
+  "sub": "Step-by-step guide with code, tests and real output."
+ },
+ {
+  "out": "assets/og/time-series-guide/spillovers.jpg",
+  "kicker": "Time-Series Research Guide · Tuhin Al Mamun",
+  "title": "Connectedness and Spillovers (Diebold-Yilmaz)",
+  "sub": "a step-by-step guide to writing the empirical paper, with Python code, real output and sample"
+ },
+ {
+  "out": "assets/og/time-series-guide/time-varying-parameters.jpg",
+  "kicker": "Time-Series Research Guide · Tuhin Al Mamun",
+  "title": "Time-Varying-Parameter Regression (Kalman Filter)",
+  "sub": "a step-by-step guide to writing the empirical paper, with Python code, real output and sa"
+ },
+ {
+  "out": "assets/og/time-series-guide/trend-cycle.jpg",
+  "kicker": "Time-Series Research Guide · Tuhin Al Mamun",
+  "title": "Trend-Cycle Decomposition: Unobserved Components, HP and Hamilton Filters",
+  "sub": "a step-by-step guide to writing the empirical paper, with Python"
+ },
+ {
+  "out": "assets/og/time-series-guide/unit-root.jpg",
+  "kicker": "Time-Series Research Guide · Tuhin Al Mamun",
+  "title": "Unit-Root and Stationarity Tests",
+  "sub": "Step-by-step guide with code, tests and real output."
+ },
+ {
+  "out": "assets/og/time-series-guide/wavelet.jpg",
+  "kicker": "Time-Series Research Guide · Tuhin Al Mamun",
+  "title": "Wavelet Coherence",
+  "sub": "Step-by-step guide with code, tests and real output."
+ }
+]

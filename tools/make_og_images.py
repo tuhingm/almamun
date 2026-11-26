@@ -28,11 +28,13 @@ cards += [
          sub="Six full course sites with lecture notes, coding exercises, problem sets and exams.",
          tags=["Econometrics", "Statistics", "Calculus", "Macroeconomics", "Finance", "Monetary"]),
 ]
-for _g in (ROOT / "tools" / "model_selector" / "guide_cards.json", ROOT / "tools" / "og_cards_site.json"):
+for _g in (ROOT / "tools" / "model_selector" / "guide_cards.json", ROOT / "tools" / "og_cards_site.json", ROOT / "tools" / "og_cards_extra.json"):
     if _g.exists():
         cards += json.loads(_g.read_text())
 if os.environ.get("OG_ONLY"):  # comma-separated path prefixes, e.g. OG_ONLY=assets/og/dsge-guide
     cards = [c for c in cards if c["out"].startswith(tuple(os.environ["OG_ONLY"].split(",")))]
+if os.environ.get("OG_MISSING"):  # render only images that do not exist yet
+    cards = [c for c in cards if not (ROOT / c["out"]).exists()]
 FONTS = os.environ.get("OG_FONT_CSS")
 HTML = """<html><head>{HEAD}<style>
 /* Designed for centre-cropping: phone apps often show only the middle 630x630 square, so all text lives there. */
@@ -54,8 +56,8 @@ p{font-size:25px;line-height:1.35;color:#d9e5f7;margin:0;max-width:560px}
 
 
 async def main():
-    head = f'<link rel="stylesheet" href="{FONTS}">' if FONTS else (
-        '<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700;800&family=Manrope:wght@800&display=swap" rel="stylesheet">')
+    head = f'<style>{pathlib.Path(FONTS).read_text()}</style>' if FONTS and os.path.exists(FONTS) else (f'<link rel="stylesheet" href="{FONTS}">' if FONTS else (
+        '<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700;800&family=Manrope:wght@800&display=swap" rel="stylesheet">'))
     async with async_playwright() as p:
         b = await p.chromium.launch(executable_path=os.environ.get("CHROME"), args=["--no-sandbox"])
         pg = await b.new_page(viewport={"width": 1200, "height": 630})
