@@ -133,7 +133,7 @@ def h2_section(text: str, pred) -> str:
 
 
 def lecture_title(raw_title: str) -> tuple[str, str]:
-    m = re.match(r"Lecture\s+(\d+)\s*[—–:-]\s*(.+)", raw_title)
+    m = re.match(r"(?:Lecture|Week)\s+(\d+)\s*[—–:-]\s*(.+)", raw_title)
     return (str(int(m.group(1))), m.group(2).strip()) if m else ("", raw_title)
 
 
@@ -175,6 +175,13 @@ def build() -> int:
             continue
         c = dict(meta)
         c["instructor"] = meta.get("instructor", cfg["instructor"])
+        c.setdefault("unit_word", "Lecture")
+        c.setdefault("notes_label", "Lecture notes")
+        c.setdefault("this_word", "THIS LECTURE")
+        c.setdefault("session_word", "lecture sessions")
+        c.setdefault("format_line", "Notes, worked example, problem set, lab and readings")
+        c.setdefault("kind", "")
+        UW = c["unit_word"]
         units = meta.get("units", [])
 
         # ---- lectures
@@ -196,7 +203,7 @@ def build() -> int:
         c["lectures"] = lectures
 
         sections = []
-        for s in cfg["sections"]:
+        for s in (meta.get("sections") or cfg["sections"]):
             if s.get("optional") and not (d / s["file"]).exists():
                 continue
             sections.append(s)
@@ -206,18 +213,20 @@ def build() -> int:
             depth = len(out_path.relative_to(ROOT).parts) - 1
             root = "../" * depth
             base = "../" * (depth - 2) if depth > 2 else ""
-            doc_title = f"Lecture {lec['num']}: {lec['title']}" if lec else page_title
+            doc_title = f"{UW} {lec['num']}: {lec['title']}" if lec else page_title
             url = SITE + out_path.relative_to(ROOT).as_posix()
             if url.endswith("/index.html"):
                 url = url[:-len("index.html")]
-            desc = (f"Lecture {lec['num']} of {c['title']} ({lec['unit']}): full notes, problem set and coding exercises."
-                    if lec else c["summary"])
+            desc = (c.get("lecture_desc", "{uw} {n} of {t} ({u}): full notes, problem set and coding exercises.")
+                    .format(uw=UW, n=lec["num"], t=c["title"], u=lec["unit"]) if lec else c["summary"])
             rel = out_path.relative_to(ROOT / "teaching").with_suffix(".jpg").as_posix()
             og_image = f"assets/og/{rel}"
+            if not (ROOT / og_image).exists():
+                og_image = "assets/og/teaching.jpg"
             if lec:
-                card = dict(kicker=f"{c['title']} · Lecture {lec['num']} of {len(c['lectures'])}", title=lec["title"],
+                card = dict(kicker=f"{c['title']} · {UW} {lec['num']} of {len(c['lectures'])}", title=lec["title"],
                             sub=(lec["unit"] or "").replace("·", "—", 1) if lec["unit"] else c["subtitle"],
-                            tags=["Lecture notes", "Problem set", "Coding exercises"])
+                            tags=c.get("lecture_tags", ["Lecture notes", "Problem set", "Coding exercises"]))
             elif section == "home":
                 card = dict(kicker=f"{c['code']} · {c['level']}", title=c["title"], sub=c["subtitle"], tags=c["topics"][:4])
             else:
@@ -233,7 +242,7 @@ def build() -> int:
                     "teaches": c["topics"],
                     "provider": {"@type": "Person", "name": "Tuhin G. M. Al Mamun", "url": SITE},
                     "author": {"@type": "Person", "name": "Tuhin G. M. Al Mamun", "url": SITE},
-                    "hasPart": [{"@type": "LearningResource", "name": f"Lecture {l['num']}: {l['title']}",
+                    "hasPart": [{"@type": "LearningResource", "name": f"{UW} {l['num']}: {l['title']}",
                                  "url": url + "lectures/" + l["html"]} for l in c["lectures"]],
                 }, ensure_ascii=False, indent=1)
             page = tpl.render(c=c, sections=sections, section=section, body=body, page_title=esc(page_title),
@@ -248,7 +257,7 @@ def build() -> int:
                 ls = [l for l in lectures if u[0] <= int(l["num"]) <= u[1]]
                 if not ls:
                     continue
-                span = f"Lecture {u[0]}" if u[0] == u[1] else f"Lectures {u[0]}–{u[1]}"
+                span = f"{UW} {u[0]}" if u[0] == u[1] else f"{UW}s {u[0]}–{u[1]}"
                 items = "".join(f'<li><a href="lectures/{l["html"]}">{esc(l["title"])}</a></li>' for l in ls)
                 rows.append(f'<div class="unit"><h3>{esc(u[2])} <small>{span}</small></h3><ol start="{u[0]}">{items}</ol></div>')
             return '<div class="units">' + "".join(rows) + "</div>"
@@ -282,6 +291,7 @@ def build() -> int:
             render(d / "lectures" / l["html"], section="lecture-notes", body=body, page_title=l["title"],
                    lec=l, prev=prev, nxt=nxt)
 
+        keys = {x["key"] for x in sections}
         # ---- lecture notes index
         rows, cur = [], None
         for l in lectures:
@@ -291,12 +301,13 @@ def build() -> int:
             summ = f'<div class="sum">{inline_md(l["summary"])}</div>' if l["summary"] else ""
             rows.append(f'<tr><td class="num">{l["num"]}</td><td><a href="lectures/{l["html"]}">{esc(l["title"])}</a>{summ}</td>'
                         f'<td class="fmt">{l["minutes"]} min read</td></tr>')
-        body = ('<p>Complete written notes for each session. Every set of notes opens with learning objectives and '
+        intro = c.get("notes_intro") or ('<p>Complete written notes for each session. Every set of notes opens with learning objectives and '
                 'closes with a problem set, a computational lab and readings. Use <em>Print / save as PDF</em> on any '
-                'lecture page for an offline copy.</p>'
-                '<table class="sessions"><thead><tr><th>Lec #</th><th>Topic and objectives</th><th>Length</th></tr></thead><tbody>'
+                'lecture page for an offline copy.</p>')
+        body = (intro + f'<table class="sessions"><thead><tr><th>{UW[:3] if UW == "Lecture" else UW} #</th><th>Topic and objectives</th><th>Length</th></tr></thead><tbody>'
                 + "".join(rows) + "</tbody></table>")
-        render(d / "lecture-notes.html", section="lecture-notes", body=body, page_title="Lecture Notes")
+        if "lecture-notes" in keys:
+            render(d / "lecture-notes.html", section="lecture-notes", body=body, page_title=c["notes_label"].title() if c["kind"] else "Lecture Notes")
 
         # ---- calendar (from the first table in the syllabus)
         syl = (d / "syllabus.md").read_text() if (d / "syllabus.md").exists() else ""
@@ -315,11 +326,13 @@ def build() -> int:
                 rows.append(f'<tr class="unit-row"><td colspan="3">{esc(cur)}</td></tr>')
             rows.append(f'<tr><td class="num">{l["num"]}</td><td><a href="lectures/{l["html"]}">{esc(l["title"])}</a></td>'
                         f'<td>{inline_md(acts.get(l["num"], ""))}</td></tr>')
-        body = ('<p>One lecture session per week. Problem sets are due one week after the sessions they cover; see '
-                '<a href="problem-sets-solutions.html">Assignments</a> and <a href="examinations.html">Exams</a>.</p>'
+        body = (c.get("calendar_intro") or '<p>One lecture session per week. Problem sets are due one week after the sessions they cover; see '
+                '<a href="problem-sets-solutions.html">Assignments</a> and <a href="examinations.html">Exams</a>.</p>')
+        body = (body +
                 f'<table class="sessions"><thead><tr><th>Ses #</th><th>Topic</th><th>{esc(act_head)}</th></tr></thead><tbody>'
                 + "".join(rows) + "</tbody></table>")
-        render(d / "calendar.html", section="calendar", body=body, page_title="Calendar")
+        if "calendar" in keys:
+            render(d / "calendar.html", section="calendar", body=body, page_title="Calendar")
 
         # ---- readings
         parts = ['<p>Readings are listed by session. Core textbooks for the whole course are listed at the end.</p>']
@@ -334,7 +347,8 @@ def build() -> int:
             parts.append('<h2 id="core">Core textbooks</h2>' + md_to_html(core))
         if papers:
             parts.append('<h2 id="papers">Recommended research papers</h2>' + md_to_html(papers))
-        render(d / "readings.html", section="readings", body="".join(parts), page_title="Readings")
+        if "readings" in keys:
+            render(d / "readings.html", section="readings", body="".join(parts), page_title="Readings")
         print(f"{key}: {len(lectures)} lectures")
 
     (TOOLS / "og_cards.json").write_text(json.dumps(og_cards, ensure_ascii=False, indent=0))
