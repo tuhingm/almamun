@@ -56,8 +56,8 @@ p{font-size:25px;line-height:1.35;color:#d9e5f7;margin:0;max-width:560px}
 
 
 async def main():
-    head = f'<link rel="stylesheet" href="{FONTS}">' if FONTS else (
-        '<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700;800&family=Manrope:wght@800&display=swap" rel="stylesheet">')
+    head = f'<style>{pathlib.Path(FONTS).read_text()}</style>' if FONTS and os.path.exists(FONTS) else (f'<link rel="stylesheet" href="{FONTS}">' if FONTS else (
+        '<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700;800&family=Manrope:wght@800&display=swap" rel="stylesheet">'))
     async with async_playwright() as p:
         b = await p.chromium.launch(executable_path=os.environ.get("CHROME"), args=["--no-sandbox"])
         pg = await b.new_page(viewport={"width": 1200, "height": 630})
