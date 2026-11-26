@@ -297,4 +297,6 @@ requestAnimationFrame(draw);
 <script src="assets/js/share.js" defer></script>
 <script defer src="assets/ai/ask.js" data-site-ask></script>
 <script src="assets/js/lang.js" defer></script><script src="assets/js/nav-dropdown.js" defer></script>
-</body></html>
+<script>(function(){var el=document.getElementById("pb-cards");if(!el||!window.fetch)return;function e(t){return String(t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+fetch("https://bcqp.github.io/center/feed.json",{cache:"no-cache"}).then(function(r){return r.ok?r.json():null}).then(function(d){if(!d||!d.briefs||!d.briefs.length)return;
+el.innerHTML=d.briefs.slice(0,3).map(function(b){return '<a class="card" href="'+e(b.url)+'" style="display:block;text-decoration:none;color:inherit;padding:0;overflow:hidden"><img src="'+e(b.image)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'" style="width:100%;height:200px;object-fit:cover;object-position:top;display:block;border-bottom:1px solid var(--line)"><div style="padding:18px 22px 20px"><h3 style="margin:0 0 6px;font-size:1.05rem">'+e(b.title)+'</h3><p style="margin:0;font-size:.92rem">'+e(b.summary)+'</p></div></a>'}).join("")}).catch(function(){})})();</script></body></html>
