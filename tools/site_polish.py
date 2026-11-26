@@ -35,7 +35,8 @@ NAV = [("Home", "index.html", ""), ("Teaching Courses", "teaching/index.html", "
        ("Microeconometrics", "microeconometrics-guide/index.html", "microeconometrics-guide"),
        ("Finance", "finance-guide/index.html", "finance-guide"), ("Productivity", "productivity-guide/index.html", "productivity-guide"),
        ("Nonparametric", "nonparametric-guide/index.html", "nonparametric-guide"),
-       ("Open Econometric Systems", "oes/index.html", "oes")]
+       ("Open Econometric Systems", "oes/index.html", "oes"),
+       ("BCQP", "https://bcqp.github.io/center/", None)]
 SECTION = {"teaching": "Teaching Courses", "working-papers": "Working Papers",
            "time-series-guide": "Time-Series Research Guide", "panel-data-guide": "Panel Data Research Guide",
            "causal-inference-guide": "Causal Inference Research Guide", "dsge-guide": "DSGE Research Guide",
@@ -107,7 +108,9 @@ def header(root, section):
     for label, target, sec in NAV:
         cur = sec is not None and sec == section
         attrs = ' class="current" aria-current="page"' if cur else ""
-        a = f'<a href="{root}{target}"{attrs}>{label}</a>'
+        href = target if target.startswith("http") else root + target
+        ext = ' target="_blank" rel="noopener"' if target.startswith("http") else ""
+        a = f'<a href="{href}"{attrs}{ext}>{label}</a>'
         if sec in GROUPED:
             group.append(a)
             if not placed:
