@@ -57,4 +57,4 @@ The bearish pin bar on the right is the mirror image around a resistance level a
 
 ## Lab
 
-Find ten pin bars on daily charts of US stocks. Mark them all. Then keep only those that rejected a key level, and write down what price did in the next ten bars for each. How many of the ten did you reject?
+Find ten pin bars on daily charts of stocks. Mark them all. Then keep only those that rejected a key level, and write down what price did in the next ten bars for each. How many of the ten did you reject?

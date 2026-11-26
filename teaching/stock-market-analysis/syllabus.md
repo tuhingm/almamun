@@ -1,8 +1,8 @@
-# US Stock Market Analysis — Syllabus
+# Stock Market Analysis — Syllabus
 
 ## Description and aims
 
-A 15-week training course in price action analysis of US stocks. It is written for people who can already open a chart and want a clear, rule-based way to read it. The course is a training programme, not a degree course, and the aim is a written trading plan that you can follow with discipline.
+A 15-week training course in price action analysis of stocks. It is written for people who can already open a chart and want a clear, rule-based way to read it. The course is a training programme, not a degree course, and the aim is a written trading plan that you can follow with discipline.
 
 ## Who it is for
 
@@ -12,7 +12,7 @@ A 15-week training course in price action analysis of US stocks. It is written f
 
 ## What you need
 
-- A charting platform that shows daily and weekly candlestick charts of US stocks.
+- A charting platform that shows daily and weekly candlestick charts of stocks.
 - A broker demo account. Use it for the first weeks of practice.
 - A notebook or spreadsheet for the trading journal.
 
@@ -20,7 +20,7 @@ A 15-week training course in price action analysis of US stocks. It is written f
 
 | Week | Topic | Chart lab |
 |---|---|---|
-| 1 | How US stocks are traded: brokers and orders | Open a demo account and place one order of each type |
+| 1 | How stocks are traded: brokers and orders | Open a demo account and place one order of each type |
 | 2 | Reading price bars and time frames | Label every part of ten bars on a daily chart |
 | 3 | Trend and swing points | Mark the swing points and classify the trend on five stocks |
 | 4 | Key levels: support and resistance | Draw the key levels on three daily charts |
@@ -42,4 +42,4 @@ There are no grades. The course is complete when you have a finished trading pla
 
 ## Risk notice
 
-This course is general education and not investment advice. Trading US stocks carries a risk of loss. All charts in the course use simulated prices made for teaching. Results shown, real or simulated, are no promise of future results.
+This course is general education and not investment advice. Trading stocks carries a risk of loss. All charts in the course use simulated prices made for teaching. Results shown, real or simulated, are no promise of future results.

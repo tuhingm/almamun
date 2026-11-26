@@ -42,4 +42,4 @@ On the chart above, price tops at about $100 on days 10, 24 and 38, each time fa
 
 ## Lab
 
-Draw the key levels on three daily charts of US stocks. Use only levels that a friend could find without your help. Mark each as support or resistance, and write the date of each rejection.
+Draw the key levels on three daily charts of stocks. Use only levels that a friend could find without your help. Mark each as support or resistance, and write the date of each rejection.

@@ -1,4 +1,4 @@
-# Week 01 — How US Stocks Are Traded: Brokers and Orders
+# Week 01 — How Stocks Are Traded: Brokers and Orders
 
 ## Learning objectives
 
@@ -11,7 +11,7 @@
 
 ### The broker and the account
 
-You buy and sell US stocks through a broker. The broker holds your account, sends your order to the market and shows your open positions. For this course the broker also gives you a **demo account**: practice money that behaves like a live account, with no risk to your own savings. Use it until your trading journal says you are ready (Week 15).
+You buy and sell stocks through a broker. The broker holds your account, sends your order to the market and shows your open positions. For this course the broker also gives you a **demo account**: practice money that behaves like a live account, with no risk to your own savings. Use it until your trading journal says you are ready (Week 15).
 
 A stock is quoted in dollars per share. The regular trading session is 9:30 a.m. to 4:00 p.m. Eastern time. The course uses the **daily chart**, so one bar shows one full day, and you do not need to watch the screen all day.
 
@@ -53,4 +53,4 @@ If price never falls to $49.20, the limit order is not filled and you have no tr
 
 ## Lab
 
-Open a demo account with a broker. Place one market order, one limit order and one stop order on three different US stocks, then cancel the two that are not filled. Write in your journal what each order did.
+Open a demo account with a broker. Place one market order, one limit order and one stop order on three different stocks, then cancel the two that are not filled. Write in your journal what each order did.

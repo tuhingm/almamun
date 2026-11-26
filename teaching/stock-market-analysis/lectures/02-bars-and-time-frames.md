@@ -52,4 +52,4 @@ Take a daily bar with these prices: open $40.00, high $41.60, low $39.90, close 
 
 ## Lab
 
-On a daily chart of any US stock, label the open, high, low, close, body and tails on ten consecutive bars. Then switch to the weekly chart and write one sentence about the trend you see there.
+On a daily chart of any stock, label the open, high, low, close, body and tails on ten consecutive bars. Then switch to the weekly chart and write one sentence about the trend you see there.

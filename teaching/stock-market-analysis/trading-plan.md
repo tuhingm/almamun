@@ -10,7 +10,7 @@ Complete this plan during the course. Write it in your own words, and keep it sh
 
 **3. The time frames.** The weekly chart for the trend, the daily chart for the key levels and signals.
 
-**4. What I trade.** The kind of US stocks I will choose, and how many I will follow at one time.
+**4. What I trade.** The kind of stocks I will choose, and how many I will follow at one time.
 
 **5. The setups.** The signals I trade, and where each must appear.
 
