@@ -25,7 +25,7 @@ In a trend, price makes new swing lows above the old ones. A **trailing** stop l
 
 A fixed target at twice the risk is simple, and it is the default. Trailing can pay more in a strong trend, and it can pay less in a choppy one. Choose one way in your trading plan before the trade and do not change it because of how you feel.
 
-![A simulated trade with the stop loss at $96, then breakeven at $100, then trailed under the swing lows.](../figs/w13_management.png)
+![A trade with the stop loss at $96, then breakeven at $100, then trailed under the swing lows.](../figs/w13_management.png)
 
 <p class="figcap">Figure 13.1. Entry $100, risk $4. The stop loss moves to breakeven after price reaches $104, then trails below each swing low.</p>
 

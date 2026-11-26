@@ -42,4 +42,4 @@ There are no grades. The course is complete when you have a finished trading pla
 
 ## Risk notice
 
-This course is general education and not investment advice. Trading stocks carries a risk of loss. All charts in the course use simulated prices made for teaching. Results shown, real or simulated, are no promise of future results.
+This course is general education and not investment advice. Trading stocks carries a risk of loss. Results shown are no promise of future results.

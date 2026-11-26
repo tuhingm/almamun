@@ -30,7 +30,7 @@ The best retracements stop where two of them meet. That is confluence, and Week 
 3. Wait for a signal: a pin bar, an inside bar or a fakey.
 4. Enter above the signal bar. Put the stop loss beyond the swing low and the target at twice the risk or more.
 
-![A simulated uptrend with a retracement that ends near the 21 EMA, and a trade with entry, stop loss and target.](../figs/w09_retracement.png)
+![A uptrend with a retracement that ends near the 21 EMA, and a trade with entry, stop loss and target.](../figs/w09_retracement.png)
 
 <p class="figcap">Figure 9.1. A higher low near the 21 EMA, then an entry above the prior bar's high.</p>
 

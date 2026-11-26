@@ -17,7 +17,7 @@ A moving average smooths price. The **21 EMA** is an exponential moving average 
 
 The levels in Week 4 are flat. The 21 EMA is a **dynamic** level: it rises in an uptrend and falls in a downtrend. In a healthy uptrend, retracements often stop near the 21 EMA and the trend resumes. In a downtrend, rallies often fail near it.
 
-![A simulated stock whose retracements end at the rising 21 EMA, and which later falls below a falling 21 EMA.](../figs/w05_ema.png)
+![A stock whose retracements end at the rising 21 EMA, and which later falls below a falling 21 EMA.](../figs/w05_ema.png)
 
 <p class="figcap">Figure 5.1. The 21 EMA holds twice in the uptrend. Once price is below a falling 21 EMA, the buying stops.</p>
 
