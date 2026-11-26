@@ -35,8 +35,7 @@ NAV = [("Home", "index.html", ""), ("Teaching Courses", "teaching/index.html", "
        ("Microeconometrics", "microeconometrics-guide/index.html", "microeconometrics-guide"),
        ("Finance", "finance-guide/index.html", "finance-guide"), ("Productivity", "productivity-guide/index.html", "productivity-guide"),
        ("Nonparametric", "nonparametric-guide/index.html", "nonparametric-guide"),
-       ("Open Econometric Systems", "oes/index.html", "oes"),
-       ("BCQP", "https://bcqp.github.io/center/", None)]
+       ("Open Econometric Systems", "oes/index.html", "oes")]
 SECTION = {"teaching": "Teaching Courses", "working-papers": "Working Papers",
            "time-series-guide": "Time-Series Research Guide", "panel-data-guide": "Panel Data Research Guide",
            "causal-inference-guide": "Causal Inference Research Guide", "dsge-guide": "DSGE Research Guide",
