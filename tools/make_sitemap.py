@@ -28,10 +28,14 @@ def priority(rel):
 
 pages = sorted(p for p in ROOT.rglob("*.html")
                if not p.name.startswith("google") and not any(part.startswith((".", "tools", "node_modules")) for part in p.relative_to(ROOT).parts))
+import re
 rows = []
 for p in pages:
     rel = p.relative_to(ROOT).as_posix()
     url = SITE + (rel[:-len("index.html")] if rel.endswith("index.html") else rel)
+    m = re.search(r'rel="canonical" href="([^"]*)"', p.read_text(encoding="utf-8", errors="ignore"))
+    if m and m.group(1).rstrip("/") != url.rstrip("/") and m.group(1).rstrip("/") + "/index.html" != url.rstrip("/"):
+        continue  # redirect stub or duplicate: its canonical is another URL, so list only that one
     rows.append(f"  <url><loc>{url}</loc><lastmod>{lastmod(p)}</lastmod><priority>{priority(rel)}</priority></url>")
 # The CV linked from every page: a PDF titled with the full name, useful for name searches.
 cv = ROOT / "Tuhin Al Mamun_CV.pdf"
