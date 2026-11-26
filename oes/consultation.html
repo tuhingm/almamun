@@ -71,13 +71,13 @@ footer{background:var(--navy2);color:#dce7f6;padding:24px 0;font-size:12px}foote
 <div class="fld"><label for="f-name">Name</label><input id="f-name" name="name" type="text" required autocomplete="name"></div>
 <div class="fld"><label for="f-email">Email</label><input id="f-email" name="email" type="email" required autocomplete="email"></div>
 <div class="fld"><label for="f-org">Organisation (optional)</label><input id="f-org" name="organisation" type="text" autocomplete="organization"></div>
-<div class="fld"><label for="f-type">Type of support</label><select id="f-type" name="support_type" required><option value="" disabled selected>Select one</option><option>Statistical analysis and research design</option><option>Econometric modelling</option><option>Bayesian and computational methods</option><option>Independent empirical review</option><option>Policy analysis and reports</option><option>Training or workshop</option><option>Other</option></select></div>
+<div class="fld"><label for="f-type">Type of support</label><select id="f-type" name="support_type" required><option value="" disabled selected>Select one</option><option>Statistical analysis and research design</option><option>Econometric modelling</option><option>Bayesian and computational methods</option><option>Independent empirical review</option><option>Policy analysis and reports</option><option>Training or workshop</option><option>Tool access (licensed software)</option><option>Other</option></select></div>
 <div class="fld full"><label for="f-msg">Project description</label><textarea id="f-msg" name="message" required placeholder="Your question, the data you have, the methods or software involved, and your timeline."></textarea></div>
 </div>
 <p style="margin:16px 0 0"><button class="fbtn" type="submit">Send enquiry</button></p>
 <p class="fnote">Please do not include confidential datasets in this form; they can be shared securely after we agree on the scope. You can also write directly to <a class="textlink" href="mailto:tuhin.hnu@gmail.com?subject=Consulting%20Enquiry">tuhin.hnu@gmail.com</a>.</p>
 </form></section>
-<script>if(/[?&]sent=1/.test(location.search)){var t=document.getElementById('thanks');if(t)t.style.display='block'}</script>
+<script>if(/[?&]topic=tools/.test(location.search)){var s=document.getElementById('f-type');if(s)s.value='Tool access (licensed software)'}if(/[?&]sent=1/.test(location.search)){var t=document.getElementById('thanks');if(t)t.style.display='block'}</script>
 </main>
 
 <footer><div class="wrap foot"><span>© 2026 Open Econometric Systems · Tuhin Al Mamun Ph.D.</span><span><a href="index.html">Return to OES</a> · <a href="../index.html">Academic website</a></span></div></footer>
