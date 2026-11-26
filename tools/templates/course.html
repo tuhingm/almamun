@@ -30,20 +30,20 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
 <header><div class="wrap nav"><a class="brand" href="{{ root }}index.html">TGM <span>AL MAMUN</span></a><button id="menu" aria-expanded="false" aria-controls="nav">Menu</button><nav id="nav"><a class="current" href="{{ root }}teaching/index.html">Teaching Courses</a><a href="{{ root }}working-papers/index.html">Working Papers</a><a href="{{ root }}time-series-guide/index.html">Research Guide</a></nav></div></header>
 
 <section class="hero{{ ' hero-compact' if section != 'home' else '' }}"><div class="wrap">
-  <div class="crumbs"><a href="{{ root }}teaching/index.html">Teaching</a><span>/</span><a href="{{ base }}index.html">{{ c.title }}</a>{% if section != 'home' %}<span>/</span>{% if lec %}<a href="{{ base }}lecture-notes.html">Lecture Notes</a><span>/</span>Lecture {{ lec.num }}{% else %}{{ page_title }}{% endif %}{% endif %}</div>
+  <div class="crumbs"><a href="{{ root }}teaching/index.html">Teaching</a><span>/</span><a href="{{ base }}index.html">{{ c.title }}</a>{% if section != 'home' %}<span>/</span>{% if lec %}<a href="{{ base }}lecture-notes.html">{{ c.notes_label|title }}</a><span>/</span>{{ c.unit_word }} {{ lec.num }}{% else %}{{ page_title }}{% endif %}{% endif %}</div>
   <div class="hero-grid">
     <div>
       {% if lec %}
-      <div class="eyebrow">{{ c.title }} · Lecture {{ lec.num }} of {{ c.lectures|length }}</div>
+      <div class="eyebrow">{{ c.title }} · {{ c.unit_word }} {{ lec.num }} of {{ c.lectures|length }}</div>
       <h1 class="lec-title">{{ lec.title }}</h1>
       <p class="subtitle">{{ lec.unit }}</p>
-      <div class="actions"><a class="btn btn-light" href="{{ base }}lecture-notes.html">All lecture notes</a>{% if next %}<a class="btn btn-outline" href="{{ next.html }}">Next: Lecture {{ next.num }} →</a>{% endif %}<button class="btn btn-outline" type="button" onclick="window.print()">Print / PDF</button></div>
+      <div class="actions"><a class="btn btn-light" href="{{ base }}lecture-notes.html">All {{ c.notes_label|lower }}</a>{% if next %}<a class="btn btn-outline" href="{{ next.html }}">Next: {{ c.unit_word }} {{ next.num }} →</a>{% endif %}<button class="btn btn-outline" type="button" onclick="window.print()">Print / PDF</button></div>
       {% elif section == 'home' %}
       <div class="eyebrow">{{ c.code }} · {{ c.level }}</div>
       <h1>{{ c.title }}</h1>
       <p class="subtitle">{{ c.subtitle }}</p>
       <p class="focus">{{ c.topics[:5]|join(' · ')|upper }}</p>
-      <div class="actions"><a class="btn btn-light" href="{{ base }}lecture-notes.html">Lecture notes</a><a class="btn btn-outline" href="{{ base }}syllabus.html">Syllabus</a></div>
+      <div class="actions"><a class="btn btn-light" href="{{ base }}lecture-notes.html">{{ c.notes_label }}</a><a class="btn btn-outline" href="{{ base }}syllabus.html">Syllabus</a></div>
       {% else %}
       <div class="eyebrow">{{ c.title }} · {{ c.code }}</div>
       <h1 class="page-h1">{{ page_title }}</h1>
@@ -52,14 +52,14 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
     </div>
     <aside class="profile-panel">
       {% if lec %}
-      <small>THIS LECTURE</small>
-      <h3>{{ c.title }} · Lecture {{ lec.num }}</h3>
+      <small>{{ c.this_word }}</small>
+      <h3>{{ c.title }} · {{ c.unit_word }} {{ lec.num }}</h3>
       <div class="profile-item"><strong>Part</strong><span>{{ lec.unit or c.title }}</span></div>
-      <div class="profile-item"><strong>Format</strong><span>Notes, worked example, problem set, lab and readings · {{ lec.minutes }} min read</span></div>
-      {% if prev %}<div class="profile-item"><strong>Previous</strong><span><a href="{{ prev.html }}">Lecture {{ prev.num }}: {{ prev.title }}</a></span></div>{% endif %}
+      <div class="profile-item"><strong>Format</strong><span>{{ c.format_line }} · {{ lec.minutes }} min read</span></div>
+      {% if prev %}<div class="profile-item"><strong>Previous</strong><span><a href="{{ prev.html }}">{{ c.unit_word }} {{ prev.num }}: {{ prev.title }}</a></span></div>{% endif %}
       {% else %}
       <small>COURSE INFO</small>
-      <h3>{{ c.lectures|length }} lecture sessions · {{ c.level }}</h3>
+      <h3>{{ c.lectures|length }} {{ c.session_word }} · {{ c.level }}</h3>
       <div class="profile-item"><strong>Instructor</strong><span>{{ c.instructor }}</span></div>
       <div class="profile-item"><strong>Prerequisites</strong><span>{{ c.prerequisites }}</span></div>
       <div class="profile-item"><strong>Software</strong><span>{{ c.software }}</span></div>
@@ -88,8 +88,8 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
   {% if lec %}
     <article class="notes">{{ body }}</article>
     <nav class="pager">
-      {% if prev %}<a class="card prev" href="{{ prev.html }}"><small>← Lecture {{ prev.num }}</small>{{ prev.title }}</a>{% else %}<span></span>{% endif %}
-      {% if next %}<a class="card next" href="{{ next.html }}"><small>Lecture {{ next.num }} →</small>{{ next.title }}</a>{% endif %}
+      {% if prev %}<a class="card prev" href="{{ prev.html }}"><small>← {{ c.unit_word }} {{ prev.num }}</small>{{ prev.title }}</a>{% else %}<span></span>{% endif %}
+      {% if next %}<a class="card next" href="{{ next.html }}"><small>{{ c.unit_word }} {{ next.num }} →</small>{{ next.title }}</a>{% endif %}
     </nav>
   {% elif section == 'home' %}
     <div class="section-head"><div><div class="kicker">01 / OVERVIEW</div><h2>About this course</h2></div></div>
@@ -108,7 +108,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],tags
 
 <footer><div class="wrap footer-grid">
   <div><strong>Tuhin Al Mamun, Ph.D.</strong><p>{{ c.title }} · {{ c.level }} course materials</p></div>
-  <div><strong>This course</strong><a href="{{ base }}index.html">Course home</a><a href="{{ base }}syllabus.html">Syllabus</a><a href="{{ base }}lecture-notes.html">Lecture notes</a></div>
+  <div><strong>This course</strong><a href="{{ base }}index.html">Course home</a><a href="{{ base }}syllabus.html">Syllabus</a><a href="{{ base }}lecture-notes.html">{{ c.notes_label }}</a></div>
   <div><strong>Portfolio</strong><a href="{{ root }}index.html">Home</a><a href="{{ root }}teaching/index.html">Teaching courses</a><a href="{{ root }}working-papers/index.html">Working papers</a></div>
   <div class="copyright">© {{ year }} Tuhin G. M. Al Mamun · Teaching portfolio</div>
 </div></footer>

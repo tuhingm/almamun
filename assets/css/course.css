@@ -194,3 +194,7 @@ footer{background:var(--deep);color:#c5d2e7;padding:27px 0 15px}
 .copy-btn{position:absolute;top:8px;right:8px;font:800 9px 'DM Sans';letter-spacing:.12em;text-transform:uppercase;background:#ffffff1a;color:#cfe0ff;border:1px solid #ffffff33;border-radius:6px;padding:5px 9px;cursor:pointer;opacity:.75}
 .copy-btn:hover{opacity:1;background:#ffffff2e}
 @media print{.copy-btn{display:none}}
+
+/* figures inside course pages */
+.notes img{display:block;max-width:100%;height:auto;margin:18px auto 6px;border:1px solid var(--line);border-radius:6px;background:#fff}
+.notes .figcap{font-size:13px;color:var(--muted,#566074);text-align:center;margin:0 0 22px;line-height:1.5}

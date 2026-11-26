@@ -107,6 +107,40 @@ courses:
       - [12, 13, "Part IV · Heterogeneity and estimation"]
       - [14, 15, "Part V · Evidence and practice"]
 
+  us-stock-analysis:
+    code: Training Course · Analysis
+    kind: Training course
+    title: US Stock Market Analysis
+    subtitle: A 15-week training course in price action analysis of US stocks, from reading the daily chart to a written trading plan.
+    level: Practitioner level
+    format: weekly chart labs, trading plan, trading journal
+    prerequisites: None. A broker demo account is useful from Week 1.
+    software: Any charting platform that shows daily candlestick charts
+    summary: A 15-week training course in price action analysis of US stocks. Trend, key levels, pin bars, inside bars, fakeys, confluence, stop loss, risk reward, position sizing, trade management and a written trading plan.
+    topics: [Price action, Trend, Key levels, Pin bar, Inside bar, Fakey, Confluence, 21 EMA, Risk reward, Position sizing, Trading plan]
+    unit_word: Week
+    notes_label: Weekly sessions
+    this_word: THIS WEEK
+    session_word: weekly sessions
+    format_line: Lesson, worked example, exercises and chart lab
+    lecture_desc: "{uw} {n} of {t} ({u}): lesson, worked example, exercises and a chart lab."
+    lecture_tags: [Training course, Analysis, Chart lab]
+    calendar_intro: "<p>One session per week for 15 weeks. Each week ends with a chart lab to do on your own charts before the next session.</p>"
+    notes_intro: "<p>Every weekly session opens with learning objectives, then a lesson, a worked example on a simulated chart, exercises and a chart lab. Use <em>Print / PDF</em> on any page for an offline copy.</p>"
+    units:
+      - [1, 3, "Part I · Reading the market"]
+      - [4, 5, "Part II · Key levels and the 21 EMA"]
+      - [6, 8, "Part III · The three signals"]
+      - [9, 11, "Part IV · Putting the trade together"]
+      - [12, 13, "Part V · Risk and trade management"]
+      - [14, 15, "Part VI · Plan, routine and going live"]
+    sections:
+      - {key: home, href: index.html, label: Course Home, file: index.md}
+      - {key: syllabus, href: syllabus.html, label: Syllabus, file: syllabus.md, blurb: "Aims, who it is for, weekly outline, assessment and risk notice."}
+      - {key: calendar, href: calendar.html, label: Calendar, generated: true, blurb: "Week-by-week schedule with the chart lab for each week."}
+      - {key: lecture-notes, href: lecture-notes.html, label: Weekly Sessions, generated: true, blurb: "The full lesson for each of the 15 weeks, with charts."}
+      - {key: plan, href: trading-plan.html, label: Trading Plan and Journal, file: trading-plan.md, blurb: "A blank trading plan and trading journal to complete during the course."}
+
 sections:
   - {key: home, href: index.html, label: Course Home, file: index.md}
   - {key: syllabus, href: syllabus.html, label: Syllabus, file: syllabus.md, blurb: "Description, prerequisites, outcomes, assessment and policies."}
